@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
@@ -43,6 +43,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 export const Create = React.memo(() => {
   const [{ data, isLoading, newCase }, setFormData] = usePostCase();
+  const [isCancel, setIsCancel] = useState(false);
   const { form } = useForm({
     defaultValue: data,
     options: { stripEmptyFields: false },
@@ -50,14 +51,20 @@ export const Create = React.memo(() => {
   });
 
   const onSubmit = useCallback(async () => {
+    // @XavierM this is weird, why is it isValid when returning w missing keys from schema??
     const { isValid, data: newData } = await form.submit();
-    if (isValid) {
+    if (isValid && newData.description) {
       setFormData({ ...newData, isNew: true } as NewCase);
+    } else if (isValid && data.description) {
+      setFormData({ ...data, ...newData, isNew: true } as NewCase);
     }
   }, [form]);
 
   if (newCase && newCase.caseId) {
     return <Redirect to={`/${SiemPageName.case}/${newCase.caseId}`} />;
+  }
+  if (isCancel) {
+    return <Redirect to={`/${SiemPageName.case}`} />;
   }
   return (
     <EuiPanel>
@@ -97,8 +104,7 @@ export const Create = React.memo(() => {
           />
         </ContainerBig>
       </Form>
-      <>
-        <EuiHorizontalRule margin="m" />
+      <Container>
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexEnd"
@@ -106,12 +112,23 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-              {i18n.SUBMIT}
+            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onClick={onSubmit}
+            >
+              {i18n.CREATE_CASE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </Container>
     </EuiPanel>
   );
 });

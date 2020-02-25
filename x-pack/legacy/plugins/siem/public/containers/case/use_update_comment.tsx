@@ -13,10 +13,11 @@ import { Comment } from './types';
 import { updateComment } from './api';
 import { getTypedPayload } from './utils';
 
-interface NewCaseState {
+interface CommetUpdateState {
   data: Comment[];
   isLoading: boolean;
   isError: boolean;
+  isLoadingCommentId: string | null;
 }
 
 interface CommentUpdate {
@@ -26,16 +27,17 @@ interface CommentUpdate {
 
 interface Action {
   type: string;
-  payload?: CommentUpdate;
+  payload?: CommentUpdate | string;
 }
 
-const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
+const dataFetchReducer = (state: CommetUpdateState, action: Action): CommetUpdateState => {
   switch (action.type) {
     case FETCH_INIT:
       return {
         ...state,
         isLoading: true,
         isError: false,
+        isLoadingCommentId: getTypedPayload<string>(action.payload),
       };
 
     case FETCH_SUCCESS:
@@ -47,6 +49,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
       return {
         ...state,
         isLoading: false,
+        isLoadingCommentId: null,
         isError: false,
         data: [...state.data],
       };
@@ -54,6 +57,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
       return {
         ...state,
         isLoading: false,
+        isLoadingCommentId: null,
         isError: true,
       };
     default:
@@ -63,16 +67,17 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 
 export const useUpdateComment = (
   comments: Comment[]
-): [{ comments: Comment[] }, (commentId: string, commentUpdate: string) => void] => {
+): [CommetUpdateState, (commentId: string, commentUpdate: string) => void] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
+    isLoadingCommentId: null,
     isError: false,
     data: comments,
   });
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateComment = async (commentId: string, commentUpdate: string) => {
-    dispatch({ type: FETCH_INIT });
+    dispatch({ type: FETCH_INIT, payload: commentId });
     try {
       const currentComment = state.data.find(comment => comment.commentId === commentId) ?? {
         version: '',
@@ -85,5 +90,5 @@ export const useUpdateComment = (
     }
   };
 
-  return [{ comments: state.data }, dispatchUpdateComment];
+  return [state, dispatchUpdateComment];
 };

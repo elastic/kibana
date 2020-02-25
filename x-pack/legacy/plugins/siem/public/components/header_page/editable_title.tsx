@@ -14,26 +14,32 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import * as i18n from './translations';
 
 import { Title } from './title';
 
-const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
     margin-left: ${theme.eui.euiSize};
   `}
 `;
 
-StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
+const MySpinner = styled(EuiLoadingSpinner)`
+  ${({ theme }) => css`
+    margin-left: ${theme.eui.euiSize};
+  `}
+`;
 
 interface Props {
+  isLoading: boolean;
   title: string | React.ReactNode;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({ onSubmit, title }) => {
+const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState(title);
 
@@ -64,7 +70,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, title }) => {
             onClick={() => onClickSubmit(changedTitle as string)}
             data-test-subj="editable-title-submit-btn"
           >
-            {i18n.SUBMIT}
+            {i18n.SAVE}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -81,12 +87,15 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, title }) => {
         <Title title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <StyledEuiButtonIcon
-          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-          iconType="pencil"
-          onClick={onClickEditIcon}
-          data-test-subj="editable-title-edit-icon"
-        />
+        {isLoading && <MySpinner />}
+        {!isLoading && (
+          <MyEuiButtonIcon
+            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+            iconType="pencil"
+            onClick={onClickEditIcon}
+            data-test-subj="editable-title-edit-icon"
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

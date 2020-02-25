@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +37,7 @@ export interface UserActionItem {
 
 export interface UserActionTreeProps {
   data: Case;
+  isLoadingDescription: boolean;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
 
@@ -74,6 +76,11 @@ const UserAction = styled(EuiFlexGroup)`
     }
   `}
 `;
+const MySpinner = styled(EuiLoadingSpinner)`
+  .euiLoadingSpinner {
+    margin-top: 1px; // yes it matters!
+  }
+`;
 
 const ContentWrapper = styled.div`
   ${({ theme }) => css`
@@ -81,193 +88,203 @@ const ContentWrapper = styled.div`
   `}
 `;
 
-export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTreeProps) => {
-  const [{ comments }, dispatchUpdateComment] = useUpdateComment(data.comments);
-  const [editCommentId, setEditCommentId] = useState('');
-  const [description, setDescription] = useState(data.description);
-  const [commentUpdate, setCommentUpdate] = useState('');
-  const [isEditDescription, setIsEditDescription] = useState(false);
-
-  const renderButtons = useCallback(({ cancelAction, saveAction }) => {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={cancelAction} iconType="cross">
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
-            {i18n.SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, []);
-  const renderUserActions = useMemo(() => {
-    const userActions: UserActionItem[] = comments.reduce(
-      (acc, comment, key) => {
-        return [
-          ...acc,
+export const UserActionTree = React.memo(
+  ({ data, onUpdateField, isLoadingDescription }: UserActionTreeProps) => {
+    const [
+      { data: comments, isLoading: isLoadingComment, isLoadingCommentId },
+      dispatchUpdateComment,
+    ] = useUpdateComment(data.comments);
+    const [commentUpdate, setCommentUpdate] = useState('');
+    const [description, setDescription] = useState(data.description);
+    const [editCommentId, setEditCommentId] = useState('');
+    const [isEditDescription, setIsEditDescription] = useState(false);
+    const renderButtons = useCallback(({ cancelAction, saveAction }) => {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" onClick={cancelAction} iconType="cross">
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, []);
+    const renderUserActions = useMemo(() => {
+      const userActions: UserActionItem[] = comments.reduce(
+        (acc, comment, key) => {
+          return [
+            ...acc,
+            {
+              avatarName: comment.createdBy.fullName
+                ? comment.createdBy.fullName
+                : comment.createdBy.username,
+              title: (
+                <EuiFlexGroup
+                  alignItems="baseline"
+                  gutterSize="none"
+                  justifyContent="spaceBetween"
+                  key={`${comment.commentId}.${key}`}
+                >
+                  <EuiFlexItem grow={false}>
+                    <p>
+                      <strong>{`${comment.createdBy.username}`}</strong>
+                      {` ${i18n.ADDED_COMMENT} `}{' '}
+                      <FormattedRelativePreferenceLabel
+                        value={comment.createdAt}
+                        preferenceLabel={`${i18n.ON} `}
+                      />
+                      <FormattedRelativePreferenceDate value={comment.createdAt} />
+                    </p>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {isLoadingCommentId === comment.commentId && <MySpinner />}
+                    {(!isLoadingComment || isLoadingCommentId !== comment.commentId) && (
+                      <PropertyActions
+                        propertyActions={[
+                          {
+                            iconType: 'documentEdit',
+                            label: i18n.EDIT_COMMENT,
+                            onClick: () => setEditCommentId(comment.commentId),
+                          },
+                        ]}
+                      />
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              children:
+                comment.commentId === editCommentId ? (
+                  <MarkdownEditor
+                    fieldName="comment"
+                    footerContentRight={renderButtons({
+                      cancelAction: () => setEditCommentId(''),
+                      saveAction: () => {
+                        // TO DO
+                        if (commentUpdate !== comment.comment) {
+                          dispatchUpdateComment(comment.commentId, commentUpdate);
+                        }
+                        setEditCommentId('');
+                      },
+                    })}
+                    initialContent={comment.comment}
+                    onChange={updatedComment => {
+                      setCommentUpdate(updatedComment);
+                    }}
+                  />
+                ) : (
+                  <ContentWrapper key={`${comment.commentId}.${key}`}>
+                    <Markdown raw={comment.comment} data-test-subj="case-view-comment" />
+                  </ContentWrapper>
+                ),
+              skipPanel: comment.commentId === editCommentId,
+            },
+          ];
+        },
+        [
           {
-            avatarName: comment.createdBy.fullName
-              ? comment.createdBy.fullName
-              : comment.createdBy.username,
+            avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
             title: (
-              <EuiFlexGroup
-                alignItems="baseline"
-                gutterSize="none"
-                justifyContent="spaceBetween"
-                key={`${comment.commentId}.${key}`}
-              >
+              <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <p>
-                    <strong>{`${comment.createdBy.username}`}</strong>
-                    {` ${i18n.ADDED_COMMENT} `}{' '}
+                    <strong>{`${data.createdBy.username}`}</strong>
+                    {` ${i18n.ADDED_DESCRIPTION} `}{' '}
                     <FormattedRelativePreferenceLabel
-                      value={comment.createdAt}
+                      value={data.createdAt}
                       preferenceLabel={`${i18n.ON} `}
                     />
-                    <FormattedRelativePreferenceDate value={comment.createdAt} />
+                    <FormattedRelativePreferenceDate value={data.createdAt} />
                   </p>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <PropertyActions
-                    propertyActions={[
-                      {
-                        iconType: 'documentEdit',
-                        label: i18n.EDIT_COMMENT,
-                        onClick: () => setEditCommentId(comment.commentId),
-                      },
-                    ]}
-                  />
+                  {isLoadingDescription && <EuiLoadingSpinner />}
+                  {!isLoadingDescription && (
+                    <PropertyActions
+                      propertyActions={[
+                        {
+                          iconType: 'documentEdit',
+                          label: i18n.EDIT_DESCRIPTION,
+                          onClick: () => setIsEditDescription(true),
+                        },
+                      ]}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
-            children:
-              comment.commentId === editCommentId ? (
-                <MarkdownEditor
-                  fieldName="comment"
-                  footerContentRight={renderButtons({
-                    cancelAction: () => setEditCommentId(''),
-                    saveAction: () => {
-                      // TO DO
-                      if (commentUpdate !== comment.comment) {
-                        dispatchUpdateComment(comment.commentId, commentUpdate);
-                      }
-                      setEditCommentId('');
-                    },
-                  })}
-                  initialContent={comment.comment}
-                  onChange={updatedComment => {
-                    setCommentUpdate(updatedComment);
-                  }}
-                />
-              ) : (
-                <ContentWrapper key={`${comment.commentId}.${key}`}>
-                  <Markdown raw={comment.comment} data-test-subj="case-view-comment" />
-                </ContentWrapper>
-              ),
-            skipPanel: comment.commentId === editCommentId,
-          },
-        ];
-      },
-      [
-        {
-          avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
-          title: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <p>
-                  <strong>{`${data.createdBy.username}`}</strong>
-                  {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-                  <FormattedRelativePreferenceLabel
-                    value={data.createdAt}
-                    preferenceLabel={`${i18n.ON} `}
-                  />
-                  <FormattedRelativePreferenceDate value={data.createdAt} />
-                </p>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <PropertyActions
-                  propertyActions={[
-                    {
-                      iconType: 'documentEdit',
-                      label: i18n.EDIT_DESCRIPTION,
-                      onClick: () => setIsEditDescription(true),
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          children: isEditDescription ? (
-            <MarkdownEditor
-              fieldName="description"
-              footerContentRight={renderButtons({
-                cancelAction: () => setIsEditDescription(false),
-                saveAction: () => {
-                  if (description !== data.description) {
-                    onUpdateField('description', description);
-                  }
-                  setIsEditDescription(false);
-                },
-              })}
-              initialContent={data.description}
-              onChange={updatedDescription => setDescription(updatedDescription)}
-            />
-          ) : (
-            <ContentWrapper>
-              <Markdown raw={data.description} data-test-subj="case-view-description" />
-            </ContentWrapper>
-          ),
-          skipPanel: isEditDescription,
-        },
-      ]
-    );
-    return [
-      ...userActions,
-      {
-        avatarName: 'getcurrentuser todo',
-        children: <AddComment caseId={data.caseId} />,
-        skipPanel: true,
-      },
-    ];
-  }, [data.version, isEditDescription, editCommentId, description, commentUpdate, comments]);
-
-  return (
-    <>
-      {renderUserActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
-        <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
-          <EuiFlexItem grow={false}>
-            <EuiAvatar
-              data-test-subj={`user-action-avatar`}
-              className="userAction__circle"
-              name={avatarName}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {skipPanel ? (
-              <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
+            children: isEditDescription ? (
+              <MarkdownEditor
+                fieldName="description"
+                footerContentRight={renderButtons({
+                  cancelAction: () => setIsEditDescription(false),
+                  saveAction: () => {
+                    if (description !== data.description) {
+                      onUpdateField('description', description);
+                    }
+                    setIsEditDescription(false);
+                  },
+                })}
+                initialContent={data.description}
+                onChange={updatedDescription => setDescription(updatedDescription)}
+              />
             ) : (
-              <EuiPanel className="userAction__panel" paddingSize="none">
-                {title && (
-                  <EuiText
-                    size="s"
-                    className="userAction__title"
-                    data-test-subj={`user-action-title`}
-                  >
-                    {title}
-                  </EuiText>
-                )}
-                {children && <div data-test-subj={`user-action-content`}>{children}</div>}
-              </EuiPanel>
-            )}
-          </EuiFlexItem>
-        </UserAction>
-      ))}
-    </>
-  );
-});
+              <ContentWrapper>
+                <Markdown raw={data.description} data-test-subj="case-view-description" />
+              </ContentWrapper>
+            ),
+            skipPanel: isEditDescription,
+          },
+        ]
+      );
+      return [
+        ...userActions,
+        {
+          avatarName: 'getcurrentuser todo',
+          children: <AddComment caseId={data.caseId} />,
+          skipPanel: true,
+        },
+      ];
+    }, [data.version, isEditDescription, editCommentId, description, commentUpdate, comments]);
+
+    return (
+      <>
+        {renderUserActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
+          <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
+            <EuiFlexItem grow={false}>
+              <EuiAvatar
+                data-test-subj={`user-action-avatar`}
+                className="userAction__circle"
+                name={avatarName}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {skipPanel ? (
+                <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
+              ) : (
+                <EuiPanel className="userAction__panel" paddingSize="none">
+                  {title && (
+                    <EuiText
+                      size="s"
+                      className="userAction__title"
+                      data-test-subj={`user-action-title`}
+                    >
+                      {title}
+                    </EuiText>
+                  )}
+                  {children && <div data-test-subj={`user-action-content`}>{children}</div>}
+                </EuiPanel>
+              )}
+            </EuiFlexItem>
+          </UserAction>
+        ))}
+      </>
+    );
+  }
+);
 
 UserActionTree.displayName = 'UserActionTree';

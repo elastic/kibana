@@ -97,6 +97,10 @@ export const SUBMIT = i18n.translate('xpack.siem.case.caseView.submit', {
   defaultMessage: 'Submit',
 });
 
+export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
+  defaultMessage: 'Create case',
+});
+
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
 });

@@ -19,6 +19,7 @@ interface NewCaseState {
   data: Case;
   isLoading: boolean;
   isError: boolean;
+  updateKey: UpdateKey | null;
 }
 
 interface UpdateByKey {
@@ -28,7 +29,7 @@ interface UpdateByKey {
 
 interface Action {
   type: string;
-  payload?: Partial<Case>;
+  payload?: Partial<Case> | UpdateKey;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -38,6 +39,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: true,
         isError: false,
+        updateKey: getTypedPayload<UpdateKey>(action.payload),
       };
 
     case FETCH_SUCCESS:
@@ -49,12 +51,14 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
           ...state.data,
           ...getTypedPayload<Case>(action.payload),
         },
+        updateKey: null,
       };
     case FETCH_FAILURE:
       return {
         ...state,
         isLoading: false,
         isError: true,
+        updateKey: null,
       };
     default:
       throw new Error();
@@ -64,16 +68,17 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 export const useUpdateCase = (
   caseId: string,
   initialData: Case
-): [{ data: Case }, (updates: UpdateByKey) => void] => {
+): [NewCaseState, (updates: UpdateByKey) => void] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
     data: initialData,
+    updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateCaseProperty = async ({ updateKey, updateValue }: UpdateByKey) => {
-    dispatch({ type: FETCH_INIT });
+    dispatch({ type: FETCH_INIT, payload: updateKey });
     try {
       const response = await updateCaseProperty(
         caseId,
@@ -87,5 +92,5 @@ export const useUpdateCase = (
     }
   };
 
-  return [{ data: state.data }, dispatchUpdateCaseProperty];
+  return [state, dispatchUpdateCaseProperty];
 };

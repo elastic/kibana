@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { Form, useForm } from '../../../shared_imports';
@@ -30,24 +30,15 @@ export const AddComment = React.memo<{
   });
 
   const onSubmit = useCallback(async () => {
+    // @XavierM this is weird, why is it isValid when returning an {} w my schema??
     const { isValid, data: newData } = await form.submit();
-    if (isValid) {
+    if (isValid && newData.comment) {
       setFormData({ ...newData, isNew: true } as NewComment);
+    } else if (isValid && data.comment) {
+      setFormData({ ...data, ...newData, isNew: true } as NewComment);
     }
   }, [form]);
-  const renderCommentButton = useMemo(() => {
-    return (
-      <EuiButton
-        iconType="plusInCircle"
-        isDisabled={isLoading}
-        isLoading={isLoading}
-        onClick={onSubmit}
-        size="s"
-      >
-        {i18n.ADD_COMMENT}
-      </EuiButton>
-    );
-  }, [form]);
+
   return (
     <>
       {isLoading && <MySpinner size="xl" />}
@@ -55,7 +46,17 @@ export const AddComment = React.memo<{
         <MarkdownEditor
           fieldName="comment"
           placeholder={i18n.ADD_COMMENT_HELP_TEXT}
-          footerContentRight={renderCommentButton}
+          footerContentRight={
+            <EuiButton
+              iconType="plusInCircle"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onClick={onSubmit}
+              size="s"
+            >
+              {i18n.ADD_COMMENT}
+            </EuiButton>
+          }
           formHook={true}
           initialContent={data.comment}
           onChange={comment => setFormData({ ...data, comment })}

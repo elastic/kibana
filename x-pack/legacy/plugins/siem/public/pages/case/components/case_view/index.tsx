@@ -62,14 +62,18 @@ export interface CaseProps {
 }
 
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
-  const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
-  const [isEditTags, setIsEditTags] = useState(false);
+  const [{ data, isLoading, updateKey }, dispatchUpdateCaseProperty] = useUpdateCase(
+    caseId,
+    initialData
+  );
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
-  const [title, setTitle] = useState(data.title);
+  const [isEditTags, setIsEditTags] = useState(false);
   const [tags, setTags] = useState(data.tags);
+  const [title, setTitle] = useState(data.title);
+
   const onUpdateField = useCallback(
-    (updateKey: keyof Case, updateValue: string | string[]) => {
-      switch (updateKey) {
+    (newUpdateKey: keyof Case, updateValue: string | string[]) => {
+      switch (newUpdateKey) {
         case 'title':
           if (updateValue.length > 0) {
             dispatchUpdateCaseProperty({
@@ -155,7 +159,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     [title]
   );
 
-  const titleNode = <EditableTitle title={title} onSubmit={onSubmit} />;
+  const titleNode = (
+    <EditableTitle
+      isLoading={isLoading && updateKey === 'title'}
+      title={title}
+      onSubmit={onSubmit}
+    />
+  );
 
   return (
     <>
@@ -219,7 +229,11 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree data={data} onUpdateField={onUpdateField} />
+              <UserActionTree
+                data={data}
+                isLoadingDescription={isLoading && updateKey === 'description'}
+                onUpdateField={onUpdateField}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList
@@ -237,6 +251,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                   onClick: isEdit => setIsEditTags(isEdit),
                 }}
                 isEditTags={isEditTags}
+                isLoading={isLoading && updateKey === 'tags'}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -16,7 +16,12 @@ describe('CaseView ', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue([{ data }, dispatchUpdateCaseProperty]);
+    jest
+      .spyOn(apiHook, 'useUpdateCase')
+      .mockReturnValue([
+        { data, isLoading: false, isError: false, updateKey: null },
+        dispatchUpdateCaseProperty,
+      ]);
   });
 
   it('should render CaseComponent', () => {

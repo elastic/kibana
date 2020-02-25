@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../../../../components/markdown';
@@ -34,6 +34,9 @@ const Container = styled(EuiPanel)`
     .euiFormRow__labelWrapper {
       position: absolute;
       top: -${theme.eui.euiSizeL};
+    }
+    .euiFormErrorText {
+      padding: 0 ${theme.eui.euiSizeM};
     }
   `}
 `;
@@ -67,6 +70,9 @@ export const MarkdownEditor = React.memo<{
   onChange: (description: string) => void;
 }>(({ fieldName, placeholder, footerContentRight, formHook = false, initialContent, onChange }) => {
   const [content, setContent] = useState(initialContent);
+  useEffect(() => {
+    onChange(content);
+  }, [content]);
   const tabs = [
     {
       id: fieldName,
@@ -76,7 +82,6 @@ export const MarkdownEditor = React.memo<{
           path={fieldName}
           onChange={e => {
             setContent(e as string);
-            onChange(e as string);
           }}
           componentProps={{
             idAria: `case${fieldName}`,
@@ -89,7 +94,6 @@ export const MarkdownEditor = React.memo<{
         <TextArea
           onChange={e => {
             setContent(e.target.value);
-            onChange(e.target.value);
           }}
           aria-label={`case${fieldName}`}
           fullWidth={true}

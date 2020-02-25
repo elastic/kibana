@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import * as i18n from '../../translations';
@@ -32,6 +33,7 @@ interface TagListProps {
   tags: string[];
   iconAction?: IconAction;
   isEditTags?: boolean;
+  isLoading: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -43,7 +45,7 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProps) => {
+export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: TagListProps) => {
   const { form } = useForm({
     defaultValue: { tags },
     options: { stripEmptyFields: false },
@@ -68,7 +70,8 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
         <EuiFlexItem grow={false}>
           <h4>{i18n.TAGS}</h4>
         </EuiFlexItem>
-        {iconAction && (
+        {isLoading && <EuiLoadingSpinner />}
+        {iconAction && !isLoading && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               aria-label={iconAction['aria-label']}
