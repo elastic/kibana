@@ -20,7 +20,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
-import { configureAppAngularModule, addAppRedirectMessageToUrl } from './legacy_imports';
+import { configureAppAngularModule } from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
 import {
@@ -36,6 +36,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../src/plugins/kibana_legacy/public';
+import { addAppRedirectMessageToUrl } from '../../../../../src/plugins/kibana_legacy/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

@@ -6,6 +6,4 @@
 
 import 'ace';
 
-// @ts-ignore
-export { addAppRedirectMessageToUrl } from 'ui/notify';
 export { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
