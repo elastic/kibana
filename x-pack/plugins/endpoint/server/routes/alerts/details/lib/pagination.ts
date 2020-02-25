@@ -6,7 +6,7 @@
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertData, AlertHits, Direction, Maybe } from '../../../../../common/types';
+import { AlertData, AlertHits, Direction } from '../../../../../common/types';
 import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
@@ -51,13 +51,14 @@ export class AlertDetailsPagination extends Pagination<
     return response;
   }
 
-  protected getUrlFromHits(hits: AlertHits): Maybe<string> {
+  protected getUrlFromHits(hits: AlertHits): string | null {
     if (hits.length > 0) {
       return `${BASE_ALERTS_ROUTE}/${hits[0]._id}`;
     }
+    return null;
   }
 
-  async getNextUrl(): Promise<Maybe<string>> {
+  async getNextUrl(): Promise<string | null> {
     const response = await this.doSearch(Direction.asc, [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,
@@ -65,7 +66,7 @@ export class AlertDetailsPagination extends Pagination<
     return this.getUrlFromHits(response.hits.hits);
   }
 
-  async getPrevUrl(): Promise<Maybe<string>> {
+  async getPrevUrl(): Promise<string | null> {
     const response = await this.doSearch(Direction.desc, [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,

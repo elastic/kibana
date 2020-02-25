@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { RisonValue, encode } from 'rison-node';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertHits, Maybe } from '../../../../../common/types';
+import { AlertHits } from '../../../../../common/types';
 import { EndpointConfigType } from '../../../../config';
 import { AlertSearchQuery } from '../../types';
 import { Pagination } from '../../lib';
@@ -55,8 +55,8 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
     return pageParams.slice(0, -1); // strip trailing `&`
   }
 
-  async getNextUrl(): Promise<Maybe<string>> {
-    let url: Maybe<string>;
+  async getNextUrl(): Promise<string | null> {
+    let url = null;
     if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
       const lastCustomSortValue: string = get(
         this.data[this.hitLen - 1]._source,
@@ -68,8 +68,8 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
     return url;
   }
 
-  async getPrevUrl(): Promise<Maybe<string>> {
-    let url: Maybe<string>;
+  async getPrevUrl(): Promise<string | null> {
+    let url = null;
     if (this.hitLen > 0) {
       const firstCustomSortValue: string = get(this.data[0]._source, this.state.sort) as string;
       const firstEventId: string = this.data[0]._source.event.id;

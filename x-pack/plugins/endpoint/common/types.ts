@@ -24,8 +24,6 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export type Maybe<T> = T | undefined;
-
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ALERT_INDEX_NAME = 'my-index';
@@ -67,12 +65,12 @@ export interface AlertResultList {
   /**
    * A cursor-based URL for the next page.
    */
-  next?: string;
+  next: string | null;
 
   /**
    * A cursor-based URL for the previous page.
    */
-  prev?: string;
+  prev: string | null;
 }
 
 export interface EndpointResultList {
@@ -115,8 +113,8 @@ export interface AlertData {
   thread: {};
 
   // Alert Details Pagination
-  next?: string;
-  prev?: string;
+  next: string | null;
+  prev: string | null;
 }
 
 export interface EndpointMetadata {
