@@ -8,7 +8,7 @@ import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -25,6 +25,7 @@ import {
   SectionLink,
 } from '../../../../observability/public';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
+import { AlertFlyout } from '../alerting/alert_flyout';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -63,6 +64,8 @@ export const NodeContextMenu: React.FC<Props> = ({
     inventoryModel.crosslinkSupport.apm && uiCapabilities?.apm && uiCapabilities?.apm.show;
   const showUptimeLink =
     inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
+
+  const [flyoutVisible, setFlyoutVisible] = useState(false);
 
   const inventoryId = useMemo(() => {
     if (nodeType === 'host') {
@@ -134,6 +137,15 @@ export const NodeContextMenu: React.FC<Props> = ({
     isDisabled: !showUptimeLink,
   };
 
+  const alertMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.alerts.createAlertButton', {
+      defaultMessage: 'Create alert',
+    }),
+    onClick() {
+      setFlyoutVisible(true);
+    },
+  };
+
   return (
     <ActionMenu
       closePopover={closePopover}
@@ -185,6 +197,8 @@ export const NodeContextMenu: React.FC<Props> = ({
               href={uptimeMenuItem.href}
               isDisabled={uptimeMenuItem.isDisabled}
             />
+            <SectionLink {...alertMenuItem} />
+            <AlertFlyout visible={flyoutVisible} setVisible={setFlyoutVisible} />
           </SectionLinks>
         </Section>
       </div>

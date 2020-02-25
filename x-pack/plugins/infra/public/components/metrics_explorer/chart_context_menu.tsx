@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,12 +19,14 @@ import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
+  MetricsExplorerOptionsContainer,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
+import { AlertFlyout } from '../alerting/alert_flyout';
 
 export interface Props {
   options: MetricsExplorerOptions;
@@ -82,6 +84,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
 }: Props) => {
   const urlPrefixer = usePrefixPathWithBasepath();
   const [isPopoverOpen, setPopoverState] = useState(false);
+  const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {
     // onFilter needs check for Typescript even though it's
@@ -140,7 +143,19 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail];
+  const itemPanels = [
+    ...filterByItem,
+    ...openInVisualize,
+    ...viewNodeDetail,
+    {
+      name: i18n.translate('xpack.infra.alerts.createAlertButton', {
+        defaultMessage: 'Create alert',
+      }),
+      onClick() {
+        setFlyoutVisible(true);
+      },
+    },
+  ];
 
   // If there are no itemPanels then there is no reason to show the actions button.
   if (itemPanels.length === 0) return null;
@@ -173,15 +188,20 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       {actionLabel}
     </EuiButtonEmpty>
   );
+
+  // options.
   return (
-    <EuiPopover
-      closePopover={handleClose}
-      id={`${series.id}-popover`}
-      button={button}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        closePopover={handleClose}
+        id={`${series.id}-popover`}
+        button={button}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+      <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
+    </>
   );
 };
