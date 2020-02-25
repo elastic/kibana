@@ -30,6 +30,9 @@ export const getRequestData = async (
     pageSize: request.query.page_size || config.alertResultListDefaultPageSize,
     sort: request.query.sort || config.alertResultListDefaultSort,
     order: request.query.order || (config.alertResultListDefaultOrder as Direction),
+    dateRange: ((request.query.date_range !== undefined
+      ? decode(request.query.date_range)
+      : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
 
     // Filtering
     query: request.query.query,
@@ -37,9 +40,6 @@ export const getRequestData = async (
       request.query.filters !== undefined
         ? ((decode(request.query.filters) as unknown) as Filter[])
         : ([] as Filter[]),
-    dateRange: (decode(
-      request.query.date_range || JSON.stringify(config.alertResultListDefaultDateRange)
-    ) as unknown) as TimeRange,
 
     // Paging
     pageIndex: request.query.page_index,

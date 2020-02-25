@@ -68,16 +68,17 @@ export const alertListReqSchema = schema.object(
     ),
 
     // rison-encoded string
-    date_range: schema.string({
-      defaultValue: encode({ from: 'now-2y', to: 'now' }),
-      validate(value) {
-        try {
-          decode(value);
-        } catch (err) {
-          return 'must be a valid rison-encoded string';
-        }
-      },
-    }),
+    date_range: schema.maybe(
+      schema.string({
+        validate(value) {
+          try {
+            decode(value);
+          } catch (err) {
+            return 'must be a valid rison-encoded string';
+          }
+        },
+      })
+    ),
   },
   {
     validate(value) {

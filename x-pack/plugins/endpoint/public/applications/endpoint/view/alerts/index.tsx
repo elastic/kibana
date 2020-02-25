@@ -157,7 +157,7 @@ export const AlertIndex = memo(() => {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
         const date = datesForRows.get(row as AlertData)!;
-        if (date && isFinite(date.getTime())) {
+        if (date && isFinite(date)) {
           return (
             <FormattedDate
               value={date}
