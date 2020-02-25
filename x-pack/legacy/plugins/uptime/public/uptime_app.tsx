@@ -85,6 +85,7 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
+  // @ts-ignore
   store.dispatch(setBasePath(basePath));
 
   return (

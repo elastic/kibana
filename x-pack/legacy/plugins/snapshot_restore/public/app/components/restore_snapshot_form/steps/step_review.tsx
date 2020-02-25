@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCodeEditor,
   EuiFlexGrid,
@@ -23,6 +23,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
+import { CollapsibleIndicesList } from '../../collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -43,15 +44,6 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
 
   const serializedRestoreSettings = serializeRestoreSettings(restoreSettings);
   const { index_settings: serializedIndexSettings } = serializedRestoreSettings;
-
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = restoreIndices
-    ? typeof restoreIndices === 'string'
-      ? restoreIndices.split(',')
-      : restoreIndices
-    : undefined;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const renderSummaryTab = () => (
     <Fragment>
@@ -88,52 +80,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {displayIndices ? (
-                <EuiText>
-                  <ul>
-                    {(isShowingFullIndicesList
-                      ? displayIndices
-                      : [...displayIndices].splice(0, 10)
-                    ).map(index => (
-                      <li key={index}>
-                        <EuiTitle size="xs">
-                          <span>{index}</span>
-                        </EuiTitle>
-                      </li>
-                    ))}
-                    {hiddenIndicesCount ? (
-                      <li key="hiddenIndicesCount">
-                        <EuiTitle size="xs">
-                          {isShowingFullIndicesList ? (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesCollapseAllLink"
-                                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowUp" />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesShowAllLink"
-                                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowDown" />
-                            </EuiLink>
-                          )}
-                        </EuiTitle>
-                      </li>
-                    ) : null}
-                  </ul>
-                </EuiText>
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.allIndicesValue"
-                  defaultMessage="All indices"
-                />
-              )}
+              <CollapsibleIndicesList indices={restoreIndices} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

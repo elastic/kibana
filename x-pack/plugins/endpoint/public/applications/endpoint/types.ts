@@ -8,8 +8,9 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
-import { AlertResultList } from '../../../common/types';
+import { AlertResultList, Immutable } from '../../../common/types';
 
+export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
 ) => (
@@ -63,8 +64,9 @@ export interface GlobalState {
   readonly policyList: PolicyListState;
 }
 
-export type AlertListData = AlertResultList;
-export type AlertListState = AlertResultList;
+/**
+ * A better type for createStructuredSelector. This doesn't support the options object.
+ */
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
@@ -74,3 +76,47 @@ export type CreateStructuredSelector = <
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };
+
+export interface EndpointAppLocation {
+  pathname: string;
+  search: string;
+  hash: string;
+  key?: string;
+}
+
+export type AlertListData = AlertResultList;
+export type AlertListState = Immutable<AlertResultList> & {
+  readonly location?: Immutable<EndpointAppLocation>;
+};
+
+/**
+ * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
+ */
+export interface AlertingIndexUIQueryParams {
+  /**
+   * How many items to show in list.
+   */
+  page_size?: string;
+  /**
+   * Which page to show. If `page_index` is 1, show page 2.
+   */
+  page_index?: string;
+  /**
+   * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
+   */
+  selected_alert?: string;
+}
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export interface AlertsAPIQueryParams {
+  /**
+   * Number of results to return.
+   */
+  page_size?: string;
+  /**
+   * 0-based index of 'page' to return.
+   */
+  page_index?: string;
+}

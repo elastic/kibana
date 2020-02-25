@@ -13,7 +13,7 @@ import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
 type Func = () => void;
-type Return = [boolean, FetchRulesResponse, Func | null];
+export type ReturnRules = [boolean, FetchRulesResponse, Func | null];
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
@@ -21,7 +21,10 @@ type Return = [boolean, FetchRulesResponse, Func | null];
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  */
-export const useRules = (pagination: PaginationOptions, filterOptions: FilterOptions): Return => {
+export const useRules = (
+  pagination: PaginationOptions,
+  filterOptions: FilterOptions
+): ReturnRules => {
   const [rules, setRules] = useState<FetchRulesResponse>({
     page: 1,
     perPage: 20,
