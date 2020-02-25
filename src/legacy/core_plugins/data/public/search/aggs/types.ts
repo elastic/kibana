@@ -26,4 +26,3 @@ export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/date_range';
 export { IpRangeKey } from './buckets/ip_range';
 export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
-export { ISchemas } from './schemas';

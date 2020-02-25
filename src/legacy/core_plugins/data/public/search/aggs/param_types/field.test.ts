@@ -23,7 +23,6 @@ import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { IAggConfig } from '../agg_config';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
-import { Schema } from '../schemas';
 
 describe('Field', () => {
   const indexPattern = {
@@ -130,14 +129,6 @@ describe('Field', () => {
             ? '*'
             : KBN_FIELD_TYPES.NUMBER,
       });
-
-      agg.schema = {
-        aggSettings: {
-          top_hits: {
-            allowStrings: true,
-          },
-        },
-      } as Schema;
 
       const fields = aggParam.getAvailableFields(agg);
 

@@ -22,8 +22,8 @@ import _ from 'lodash';
 import { Optional } from '@kbn/utility-types';
 
 import { IndexedArray } from 'ui/indexed_array';
-import { AggGroupNames } from './agg_groups';
-import { AggParam } from './agg_params';
+import { AggGroupNames } from '../../data/public/search/aggs/agg_groups';
+import { AggParam } from '../../data/public/search/aggs/agg_params';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
