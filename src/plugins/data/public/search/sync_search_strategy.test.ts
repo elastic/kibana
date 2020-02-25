@@ -55,4 +55,47 @@ describe('Sync search strategy', () => {
       signal: undefined,
     });
   });
+
+  it('increments and decrements loading count on success', async () => {
+    const expectedLoadingCountValues = [0, 1, 0];
+    const receivedLoadingCountValues: number[] = [];
+
+    mockCoreStart.http.fetch.mockResolvedValueOnce('response');
+
+    const syncSearch = syncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn(),
+    });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+
+    const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
+    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
+
+    await syncSearch.search(request, {}).toPromise();
+
+    expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
+  });
+
+  it('increments and decrements loading count on failure', async () => {
+    expect.assertions(1);
+    const expectedLoadingCountValues = [0, 1, 0];
+    const receivedLoadingCountValues: number[] = [];
+
+    mockCoreStart.http.fetch.mockRejectedValueOnce('error');
+
+    const syncSearch = syncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn(),
+    });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+
+    const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
+    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
+
+    try {
+      await syncSearch.search(request, {}).toPromise();
+    } catch (e) {
+      expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
+    }
+  });
 });
