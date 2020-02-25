@@ -33,6 +33,9 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { duration } from 'moment';
 
+const delay = async (durationMs: number) =>
+  await new Promise(resolve => setTimeout(resolve, durationMs));
+
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const deps = {
@@ -224,7 +227,7 @@ describe('#setup', () => {
     mockAdminClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
 
     const setupContract = await elasticsearchService.setup(deps);
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await delay(10);
 
     expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
     setupContract.esNodesCompatibility$.subscribe(() => {
@@ -247,7 +250,7 @@ describe('#setup', () => {
     expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
     const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
       sub.unsubscribe();
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await delay(100);
       expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
       done();
     });
@@ -270,10 +273,9 @@ describe('#stop', () => {
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
-    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    // @ts-ignore
-    mockDataClusterClientInstance.close = mockAdminClusterClientInstance.close = jest.fn();
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+
     MockClusterClient.mockImplementationOnce(
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
@@ -283,11 +285,11 @@ describe('#stop', () => {
     const setupContract = await elasticsearchService.setup(deps);
 
     setupContract.esNodesCompatibility$.subscribe(() => {});
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await delay(10);
     expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
 
     await elasticsearchService.stop();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await delay(100);
     expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
   });
 });
