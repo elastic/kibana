@@ -11,7 +11,6 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
@@ -20,6 +19,7 @@ import {
   useRules,
   CreatePreBuiltRules,
   FilterOptions,
+  Rule,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -36,7 +36,7 @@ import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_em
 import { RuleDownloader } from '../components/rule_downloader';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
-import { EuiBasicTableOnChange, TableData } from '../types';
+import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
 import { getColumns } from './columns';
 import { showRulesTable } from './helpers';
@@ -44,27 +44,26 @@ import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
 const initialState: State = {
-  isLoading: true,
-  rules: [],
-  tableData: [],
-  selectedItems: [],
-  refreshToggle: true,
-  pagination: {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
+  exportRuleIds: [],
   filterOptions: {
     filter: '',
     sortField: 'enabled',
     sortOrder: 'desc',
   },
+  loadingRuleIds: [],
+  loadingRulesAction: null,
+  pagination: {
+    page: 1,
+    perPage: 20,
+    total: 0,
+  },
+  rules: null,
+  selectedRuleIds: [],
 };
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasNoPermissions: boolean;
-  importCompleteToggle: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: () => void;
@@ -87,7 +86,6 @@ export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
     hasNoPermissions,
-    importCompleteToggle,
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
@@ -97,24 +95,35 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesNotUpdated,
     setRefreshRulesData,
   }) => {
+    const [initLoading, setInitLoading] = useState(true);
     const [
       {
-        exportPayload,
+        exportRuleIds,
         filterOptions,
-        isLoading,
-        refreshToggle,
-        selectedItems,
-        tableData,
+        loadingRuleIds,
+        loadingRulesAction,
         pagination,
+        rules,
+        selectedRuleIds,
       },
       dispatch,
     ] = useReducer(allRulesReducer, initialState);
     const history = useHistory();
-    const [oldRefreshToggle, setOldRefreshToggle] = useState(refreshToggle);
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [isGlobalLoading, setIsGlobalLoad] = useState(false);
     const [, dispatchToaster] = useStateToaster();
-    const [isLoadingRules, rulesData, reFetchRulesData] = useRules(pagination, filterOptions);
+
+    const setRules = useCallback((newRules: Rule[]) => {
+      dispatch({
+        type: 'setRules',
+        rules: newRules,
+      });
+    }, []);
+
+    const [isLoadingRules, , reFetchRulesData] = useRules({
+      pagination,
+      filterOptions,
+      refetchPrePackagedRulesStatus,
+      dispatchRulesInReducer: setRules,
+    });
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
@@ -125,10 +134,18 @@ export const AllRules = React.memo<AllRulesProps>(
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
         <EuiContextMenuPanel
-          items={getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)}
+          items={getBatchItems({
+            closePopover,
+            dispatch,
+            dispatchToaster,
+            loadingRuleIds,
+            selectedRuleIds,
+            reFetchRules: reFetchRulesData,
+            rules: rules ?? [],
+          })}
         />
       ),
-      [selectedItems, dispatch, dispatchToaster, history]
+      [dispatch, dispatchToaster, loadingRuleIds, reFetchRulesData, rules, selectedRuleIds]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -146,46 +163,17 @@ export const AllRules = React.memo<AllRulesProps>(
     );
 
     const columns = useMemo(() => {
-      return getColumns(dispatch, dispatchToaster, history, hasNoPermissions);
-    }, [dispatch, dispatchToaster, history]);
-
-    useEffect(() => {
-      dispatch({ type: 'loading', isLoading: isLoadingRules });
-    }, [isLoadingRules]);
-
-    useEffect(() => {
-      if (!isLoadingRules && !loading && isInitialLoad) {
-        setIsInitialLoad(false);
-      }
-    }, [isInitialLoad, isLoadingRules, loading]);
-
-    useEffect(() => {
-      if (!isGlobalLoading && (isLoadingRules || isLoading)) {
-        setIsGlobalLoad(true);
-      } else if (isGlobalLoading && !isLoadingRules && !isLoading) {
-        setIsGlobalLoad(false);
-      }
-    }, [setIsGlobalLoad, isGlobalLoading, isLoadingRules, isLoading]);
-
-    useEffect(() => {
-      if (!isInitialLoad) {
-        dispatch({ type: 'refresh' });
-      }
-    }, [importCompleteToggle]);
-
-    useEffect(() => {
-      if (!isInitialLoad && reFetchRulesData != null && oldRefreshToggle !== refreshToggle) {
-        setOldRefreshToggle(refreshToggle);
-        reFetchRulesData();
-        refetchPrePackagedRulesStatus();
-      }
-    }, [
-      isInitialLoad,
-      refreshToggle,
-      oldRefreshToggle,
-      reFetchRulesData,
-      refetchPrePackagedRulesStatus,
-    ]);
+      return getColumns(
+        dispatch,
+        dispatchToaster,
+        history,
+        hasNoPermissions,
+        loadingRulesAction != null &&
+          (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
+          ? loadingRuleIds
+          : []
+      );
+    }, [dispatch, dispatchToaster, history, loadingRuleIds, loadingRulesAction]);
 
     useEffect(() => {
       if (reFetchRulesData != null) {
@@ -194,29 +182,23 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [reFetchRulesData, setRefreshRulesData]);
 
     useEffect(() => {
-      dispatch({
-        type: 'updateRules',
-        rules: rulesData.data,
-        pagination: {
-          page: rulesData.page,
-          perPage: rulesData.perPage,
-          total: rulesData.total,
-        },
-      });
-    }, [rulesData]);
+      if (initLoading && !loading && !isLoadingRules) {
+        setInitLoading(false);
+      }
+    }, [initLoading, loading, isLoadingRules]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
-      if (createPrePackagedRules != null) {
+      if (createPrePackagedRules != null && reFetchRulesData != null) {
         await createPrePackagedRules();
-        dispatch({ type: 'refresh' });
+        reFetchRulesData(true);
       }
-    }, [createPrePackagedRules]);
+    }, [createPrePackagedRules, reFetchRulesData]);
 
     const euiBasicTableSelectionProps = useMemo(
       () => ({
-        selectable: (item: TableData) => !item.isLoading,
-        onSelectionChange: (selected: TableData[]) =>
-          dispatch({ type: 'setSelected', selectedItems: selected }),
+        selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
+        onSelectionChange: (selected: Rule[]) =>
+          dispatch({ type: 'seletedRuleIds', ids: selected.map(r => r.id) }),
       }),
       []
     );
@@ -241,7 +223,7 @@ export const AllRules = React.memo<AllRulesProps>(
       <>
         <RuleDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          rules={exportPayload}
+          ruleIds={exportRuleIds}
           onExportComplete={exportCount => {
             dispatchToaster({
               type: 'addToaster',
@@ -256,7 +238,7 @@ export const AllRules = React.memo<AllRulesProps>(
         />
         <EuiSpacer />
 
-        <Panel loading={isGlobalLoading}>
+        <Panel loading={loading || isLoadingRules}>
           <>
             {((rulesCustomInstalled && rulesCustomInstalled > 0) ||
               (rulesInstalled != null && rulesInstalled > 0)) && (
@@ -268,10 +250,10 @@ export const AllRules = React.memo<AllRulesProps>(
                 />
               </HeaderSection>
             )}
-            {isInitialLoad && (
+            {initLoading && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
-            {isGlobalLoading && !isEmpty(tableData) && !isInitialLoad && (
+            {(loading || isLoadingRules) && !initLoading && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
             {rulesCustomInstalled != null &&
@@ -283,7 +265,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   userHasNoPermissions={hasNoPermissions}
                 />
               )}
-            {showRulesTable({ isInitialLoad, rulesCustomInstalled, rulesInstalled }) && (
+            {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && (
               <>
                 <UtilityBar border>
                   <UtilityBarSection>
@@ -292,7 +274,7 @@ export const AllRules = React.memo<AllRulesProps>(
                     </UtilityBarGroup>
 
                     <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
+                      <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
                       {!hasNoPermissions && (
                         <UtilityBarAction
                           iconSide="right"
@@ -305,7 +287,7 @@ export const AllRules = React.memo<AllRulesProps>(
                       <UtilityBarAction
                         iconSide="right"
                         iconType="refresh"
-                        onClick={() => dispatch({ type: 'refresh' })}
+                        onClick={() => reFetchRulesData(true)}
                       >
                         {i18n.REFRESH}
                       </UtilityBarAction>
@@ -317,7 +299,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   columns={columns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"
-                  items={tableData}
+                  items={rules ?? []}
                   noItemsMessage={emptyPrompt}
                   onChange={tableOnChangeCallback}
                   pagination={{
@@ -326,7 +308,7 @@ export const AllRules = React.memo<AllRulesProps>(
                     totalItemCount: pagination.total,
                     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
                   }}
-                  sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+                  sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
                   selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
                 />
               </>
