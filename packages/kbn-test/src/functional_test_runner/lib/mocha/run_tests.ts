@@ -37,7 +37,7 @@ const setSuccessStatus = (suite: any) => {
   }
 };
 
-const BASE_PATH = resolve(__dirname, '..', '..', '..', '..', '..', '..');
+const BASE_PATH = resolve(__dirname, '..', '..', '..', '..', '..', '..'); // TODO use REPO_ROOT
 
 const getTestMetadataPath = () => {
   return process.env.TEST_METADATA_PATH || resolve(BASE_PATH, 'target', 'test_metadata.json');
@@ -66,8 +66,10 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     if (!runComplete) runner.abort();
   });
 
+  // TODO move all of the start/end time tracking and such to a separate file, but add the hooks here
+  // and gate behind a CI env var or something
+
   lifecycle.beforeTestSuite.add(s => {
-    // console.log('before', s.title + '\n' + s.file);
     s.startTime = new Date();
     s.success = true;
   });
@@ -83,10 +85,8 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     const config = suite.ftrConfig.path.replace(BASE_PATH + sep, '');
     const file = suite.file.replace(BASE_PATH + sep, '');
 
+    // TODO should non-leaf suite (e.g. index files) still be included here? is it confusing?
     allSuites[config] = allSuites[config] || {};
-
-    // highest level suite in lowest level files?
-
     allSuites[config][file] = {
       config,
       file,
@@ -103,12 +103,17 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     };
   });
 
+  // TODO
+  interface SuiteWithDuration {
+    duration: number;
+  }
+
   lifecycle.cleanup.add(() => {
-    const flattened: object[] = [];
+    const flattened: SuiteWithDuration[] = [];
     Object.values(allSuites).forEach((x: any) =>
       Object.values(x).forEach((y: any) => flattened.push(y))
     );
-    flattened.sort((a: object, b: object) => b.duration - a.duration);
+    flattened.sort((a: SuiteWithDuration, b: SuiteWithDuration) => b.duration - a.duration);
     fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
   });
 

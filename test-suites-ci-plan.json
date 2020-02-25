@@ -23,27 +23,6 @@
         "test/functional/apps/context/_size.js",
         "test/functional/apps/discover/_date_nanos_mixed.js"
       ],
-      "tags": [
-        "functional.apps.visualize._data_table",
-        "functional.apps.home._add_data",
-        "functional.apps.status_page",
-        "functional.apps.visualize._chart_types",
-        "functional.apps.visualize._shared_item",
-        "functional.apps.home._newsfeed",
-        "functional.apps.home._home",
-        "functional.apps.console._console",
-        "functional.apps.visualize._markdown_vis",
-        "functional.apps.visualize._vega_chart",
-        "functional.apps.discover._large_string",
-        "functional.apps.management._create_index_pattern_wizard",
-        "functional.apps.dashboard.dashboard_grid",
-        "functional.apps.dashboard.panel_expand_toggle",
-        "functional.apps.context._date_nanos",
-        "functional.apps.discover._date_nanos",
-        "functional.apps.management._mgmt_import_saved_objects",
-        "functional.apps.context._size",
-        "functional.apps.discover._date_nanos_mixed"
-      ],
       "estimatedDuration": 729
     },
     {
@@ -62,20 +41,6 @@
         "test/functional/apps/timelion/_expression_typeahead.js",
         "test/functional/apps/context/_filters.js"
       ],
-      "tags": [
-        "functional.apps.management._import_objects",
-        "functional.apps.discover._source_filters",
-        "functional.apps.context._discover_navigation",
-        "functional.apps.visualize.input_control_vis.chained_controls",
-        "functional.apps.dashboard.embed_mode",
-        "functional.apps.visualize._vertical_bar_chart",
-        "functional.apps.discover._errors",
-        "functional.apps.home._navigation",
-        "functional.apps.dashboard.dashboard_options",
-        "functional.apps.management._scripted_fields_filter",
-        "functional.apps.timelion._expression_typeahead",
-        "functional.apps.context._filters"
-      ],
       "estimatedDuration": 728
     },
     {
@@ -92,18 +57,6 @@
         "test/functional/apps/dashboard/dashboard_query_bar.js",
         "test/functional/apps/dashboard/full_screen_mode.js"
       ],
-      "tags": [
-        "functional.apps.dashboard.view_edit",
-        "functional.apps.discover._doc_navigation",
-        "functional.apps.visualize._histogram_request_start",
-        "functional.apps.management._test_huge_fields",
-        "functional.apps.visualize._lab_mode",
-        "functional.apps.dashboard.bwc_shared_urls",
-        "functional.apps.discover._sidebar",
-        "functional.apps.management._handle_version_conflict",
-        "functional.apps.dashboard.dashboard_query_bar",
-        "functional.apps.dashboard.full_screen_mode"
-      ],
       "estimatedDuration": 732
     },
     {
@@ -112,11 +65,6 @@
         "test/functional/apps/visualize/_pie_chart.js",
         "test/functional/apps/management/_scripted_fields.js",
         "test/functional/apps/discover/_inspector.js"
-      ],
-      "tags": [
-        "functional.apps.visualize._pie_chart",
-        "functional.apps.management._scripted_fields",
-        "functional.apps.discover._inspector"
       ],
       "estimatedDuration": 743
     },
@@ -129,13 +77,6 @@
         "test/functional/apps/visualize/_experimental_vis.js",
         "test/functional/apps/dashboard/empty_dashboard.js"
       ],
-      "tags": [
-        "functional.apps.dashboard.panel_controls",
-        "functional.apps.dashboard.dashboard_filtering",
-        "functional.apps.visualize._region_map",
-        "functional.apps.visualize._experimental_vis",
-        "functional.apps.dashboard.empty_dashboard"
-      ],
       "estimatedDuration": 736
     },
     {
@@ -145,12 +86,6 @@
         "test/functional/apps/visualize/_tile_map.js",
         "test/functional/apps/visualize/_tsvb_chart.ts",
         "test/functional/apps/visualize/input_control_vis/dynamic_options.js"
-      ],
-      "tags": [
-        "functional.apps.dashboard.dashboard_state",
-        "functional.apps.visualize._tile_map",
-        "functional.apps.visualize._tsvb_chart",
-        "functional.apps.visualize.input_control_vis.dynamic_options"
       ],
       "estimatedDuration": 767
     },
@@ -162,13 +97,6 @@
         "test/functional/apps/visualize/_area_chart.js",
         "test/functional/apps/management/_index_pattern_filter.js",
         "test/functional/apps/visualize/input_control_vis/input_control_range.ts"
-      ],
-      "tags": [
-        "functional.apps.discover._saved_queries",
-        "functional.apps.visualize._point_series_options",
-        "functional.apps.visualize._area_chart",
-        "functional.apps.management._index_pattern_filter",
-        "functional.apps.visualize.input_control_vis.input_control_range"
       ],
       "estimatedDuration": 734
     },
@@ -182,14 +110,6 @@
         "test/functional/apps/discover/_filter_editor.js",
         "test/functional/apps/management/_index_pattern_create_delete.js"
       ],
-      "tags": [
-        "functional.apps.dashboard.dashboard_time_picker",
-        "functional.apps.visualize._tsvb_time_series",
-        "functional.apps.dashboard.dashboard_listing",
-        "functional.apps.discover._field_data",
-        "functional.apps.discover._filter_editor",
-        "functional.apps.management._index_pattern_create_delete"
-      ],
       "estimatedDuration": 762
     },
     {
@@ -199,12 +119,6 @@
         "test/functional/apps/dashboard/embeddable_rendering.js",
         "test/functional/apps/visualize/_vertical_bar_chart_nontimeindex.js",
         "test/functional/apps/context/_date_nanos_custom_timestamp.js"
-      ],
-      "tags": [
-        "functional.apps.visualize._data_table_nontimeindex",
-        "functional.apps.dashboard.embeddable_rendering",
-        "functional.apps.visualize._vertical_bar_chart_nontimeindex",
-        "functional.apps.context._date_nanos_custom_timestamp"
       ],
       "estimatedDuration": 720
     },
@@ -216,13 +130,6 @@
         "test/functional/apps/home/_sample_data.ts",
         "test/functional/apps/dashboard/dashboard_clone.js",
         "test/functional/apps/visualize/_heatmap_chart.js"
-      ],
-      "tags": [
-        "functional.apps.visualize._visualize_listing",
-        "functional.apps.dashboard.dashboard_filter_bar",
-        "functional.apps.home._sample_data",
-        "functional.apps.dashboard.dashboard_clone",
-        "functional.apps.visualize._heatmap_chart"
       ],
       "estimatedDuration": 749
     },
@@ -236,14 +143,6 @@
         "test/functional/apps/getting_started/_shakespeare.js",
         "test/functional/apps/visualize/_data_table_notimeindex_filters.ts"
       ],
-      "tags": [
-        "functional.apps.discover._discover",
-        "functional.apps.visualize._metric_chart",
-        "functional.apps.dashboard.dashboard_time",
-        "functional.apps.visualize._tag_cloud",
-        "functional.apps.getting_started._shakespeare",
-        "functional.apps.visualize._data_table_notimeindex_filters"
-      ],
       "estimatedDuration": 749
     },
     {
@@ -256,15 +155,6 @@
         "test/functional/apps/management/_index_pattern_popularity.js",
         "test/functional/apps/discover/_shared_links.js",
         "test/functional/apps/visualize/_embedding_chart.js"
-      ],
-      "tags": [
-        "functional.apps.management._kibana_settings",
-        "functional.apps.visualize._inspector",
-        "functional.apps.dashboard.create_and_add_embeddables",
-        "functional.apps.discover._discover_histogram",
-        "functional.apps.management._index_pattern_popularity",
-        "functional.apps.discover._shared_links",
-        "functional.apps.visualize._embedding_chart"
       ],
       "estimatedDuration": 775
     },
@@ -280,16 +170,6 @@
         "test/functional/apps/management/_scripted_fields_preview.js",
         "test/functional/apps/visualize/_tsvb_markdown.ts"
       ],
-      "tags": [
-        "functional.apps.management._index_pattern_results_sort",
-        "functional.apps.visualize._linked_saved_searches",
-        "functional.apps.dashboard.dashboard_save",
-        "functional.apps.visualize._tsvb_table",
-        "functional.apps.visualize._line_chart",
-        "functional.apps.visualize.input_control_vis.input_control_options",
-        "functional.apps.management._scripted_fields_preview",
-        "functional.apps.visualize._tsvb_markdown"
-      ],
       "estimatedDuration": 791
     },
     {
@@ -301,22 +181,12 @@
         "test/functional/apps/dashboard/time_zones.js",
         "test/functional/apps/visualize/_gauge_chart.js"
       ],
-      "tags": [
-        "functional.apps.dashboard.dashboard_snapshots",
-        "functional.apps.management._handle_alias",
-        "functional.apps.dashboard.data_shared_attributes",
-        "functional.apps.dashboard.time_zones",
-        "functional.apps.visualize._gauge_chart"
-      ],
       "estimatedDuration": 414
     },
     {
       "config": "test/ui_capabilities/newsfeed_err/config.ts",
       "files": [
         "test/ui_capabilities/newsfeed_err/test.ts"
-      ],
-      "tags": [
-        "ui_capabilities.newsfeed_err.test"
       ],
       "estimatedDuration": 21
     }
@@ -327,18 +197,12 @@
       "files": [
         "test/functional/apps/maps/es_geo_grid_source.js"
       ],
-      "tags": [
-        "functional.apps.maps.es_geo_grid_source"
-      ],
       "estimatedDuration": 776
     },
     {
       "config": "test/reporting/configs/chromium_functional.js",
       "files": [
         "test/reporting/functional/reporting.js"
-      ],
-      "tags": [
-        "reporting.functional.reporting"
       ],
       "estimatedDuration": 684
     },
@@ -350,12 +214,6 @@
         "test/spaces_api_integration/security_and_spaces/apis/delete.ts",
         "test/spaces_api_integration/security_and_spaces/apis/update.ts"
       ],
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
-        "spaces_api_integration.security_and_spaces.apis.create",
-        "spaces_api_integration.security_and_spaces.apis.delete",
-        "spaces_api_integration.security_and_spaces.apis.update"
-      ],
       "estimatedDuration": 741
     },
     {
@@ -365,12 +223,6 @@
         "test/spaces_api_integration/security_and_spaces/apis/create.ts",
         "test/spaces_api_integration/security_and_spaces/apis/delete.ts",
         "test/spaces_api_integration/security_and_spaces/apis/update.ts"
-      ],
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
-        "spaces_api_integration.security_and_spaces.apis.create",
-        "spaces_api_integration.security_and_spaces.apis.delete",
-        "spaces_api_integration.security_and_spaces.apis.update"
       ],
       "estimatedDuration": 743
     },
@@ -383,36 +235,17 @@
         "test/functional/apps/infra/log_entry_categories_tab.ts",
         "test/functional/apps/endpoint/landing_page.ts",
         "test/functional/apps/remote_clusters/home_page.ts",
-        "test/functional/apps/index_lifecycle_management/home_page.ts",
         "test/functional/apps/cross_cluster_replication/home_page.ts",
+        "test/functional/apps/index_lifecycle_management/home_page.ts",
         "test/functional/apps/index_management/home_page.ts",
         "test/functional/apps/license_management/home_page.ts",
-        "test/functional/apps/uptime/monitor.ts",
         "test/functional/apps/status_page/status_page.ts",
+        "test/functional/apps/uptime/monitor.ts",
         "test/functional/apps/maps/embeddable/tooltip_filter_actions.js",
         "test/functional/apps/maps/full_screen_mode.js",
         "test/functional/apps/uptime/locations.ts",
         "test/functional/apps/dev_tools/searchprofiler_editor.ts",
-        "test/functional/apps/machine_learning/pages.ts"
-      ],
-      "tags": [
-        "functional.apps.machine_learning.anomaly_detection.advanced_job",
-        "functional.apps.infra.log_entry_rate_tab",
-        "functional.apps.infra.link_to",
-        "functional.apps.infra.log_entry_categories_tab",
-        "functional.apps.endpoint.landing_page",
-        "functional.apps.remote_clusters.home_page",
-        "functional.apps.index_lifecycle_management.home_page",
-        "functional.apps.cross_cluster_replication.home_page",
-        "functional.apps.index_management.home_page",
-        "functional.apps.license_management.home_page",
-        "functional.apps.uptime.monitor",
-        "functional.apps.status_page.status_page",
-        "functional.apps.maps.embeddable.tooltip_filter_actions",
-        "functional.apps.maps.full_screen_mode",
-        "functional.apps.uptime.locations",
-        "functional.apps.dev_tools.searchprofiler_editor",
-        "functional.apps.machine_learning.pages"
+        "test/functional/apps/rollup_job/rollup_jobs.js"
       ],
       "estimatedDuration": 751
     },
@@ -420,21 +253,12 @@
       "config": "test/functional/config.js",
       "files": [
         "test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
-        "test/functional/apps/rollup_job/rollup_jobs.js",
+        "test/functional/apps/machine_learning/pages.ts",
         "test/functional/apps/monitoring/enable_monitoring/index.js",
         "test/functional/apps/endpoint/feature_controls/endpoint_spaces.ts",
         "test/functional/apps/security/role_mappings.ts",
         "test/functional/apps/lens/lens_reporting.ts",
-        "test/functional/apps/visualize/hybrid_visualization.ts"
-      ],
-      "tags": [
-        "functional.apps.machine_learning.anomaly_detection.saved_search_job",
-        "functional.apps.rollup_job.rollup_jobs",
-        "functional.apps.monitoring.enable_monitoring",
-        "functional.apps.endpoint.feature_controls.endpoint_spaces",
-        "functional.apps.security.role_mappings",
-        "functional.apps.lens.lens_reporting",
-        "functional.apps.visualize.hybrid_visualization"
+        "test/functional/apps/uptime/feature_controls/uptime_spaces.ts"
       ],
       "estimatedDuration": 726
     },
@@ -445,11 +269,6 @@
         "test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
         "test/spaces_api_integration/security_and_spaces/apis/get.ts"
       ],
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.security_and_spaces.apis.get_all",
-        "spaces_api_integration.security_and_spaces.apis.get"
-      ],
       "estimatedDuration": 687
     },
     {
@@ -459,11 +278,6 @@
         "test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
         "test/spaces_api_integration/security_and_spaces/apis/get.ts"
       ],
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.security_and_spaces.apis.get_all",
-        "spaces_api_integration.security_and_spaces.apis.get"
-      ],
       "estimatedDuration": 672
     },
     {
@@ -471,22 +285,12 @@
       "files": [
         "test/functional/apps/dashboard_mode/dashboard_view_mode.js",
         "test/functional/apps/monitoring/kibana/overview.js",
-        "test/functional/apps/uptime/feature_controls/uptime_spaces.ts",
+        "test/functional/apps/visualize/hybrid_visualization.ts",
         "test/functional/apps/monitoring/beats/overview.js",
         "test/functional/apps/monitoring/beats/listing.js",
-        "test/functional/apps/monitoring/beats/cluster.js",
         "test/functional/apps/infra/feature_controls/logs_spaces.ts",
+        "test/functional/apps/monitoring/beats/cluster.js",
         "test/functional/apps/index_patterns/feature_controls/index_patterns_spaces.ts"
-      ],
-      "tags": [
-        "functional.apps.dashboard_mode.dashboard_view_mode",
-        "functional.apps.monitoring.kibana.overview",
-        "functional.apps.uptime.feature_controls.uptime_spaces",
-        "functional.apps.monitoring.beats.overview",
-        "functional.apps.monitoring.beats.listing",
-        "functional.apps.monitoring.beats.cluster",
-        "functional.apps.infra.feature_controls.logs_spaces",
-        "functional.apps.index_patterns.feature_controls.index_patterns_spaces"
       ],
       "estimatedDuration": 764
     },
@@ -497,12 +301,6 @@
         "test/functional/apps/maps/saved_object_management.js",
         "test/functional/apps/monitoring/beats/beat_detail.js",
         "test/functional/apps/monitoring/time_filter.js"
-      ],
-      "tags": [
-        "functional.apps.maps.import_geojson.file_indexing_panel",
-        "functional.apps.maps.saved_object_management",
-        "functional.apps.monitoring.beats.beat_detail",
-        "functional.apps.monitoring.time_filter"
       ],
       "estimatedDuration": 759
     },
@@ -515,62 +313,7 @@
         "test/functional/apps/maps/embeddable/embeddable_state.js",
         "test/functional/apps/monitoring/kibana/instances.js"
       ],
-      "tags": [
-        "functional.apps.security.field_level_security",
-        "functional.apps.maps.documents_source.search_hits",
-        "functional.apps.visualize.feature_controls.visualize_spaces",
-        "functional.apps.maps.embeddable.embeddable_state",
-        "functional.apps.monitoring.kibana.instances"
-      ],
       "estimatedDuration": 741
-    },
-    {
-      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
-      "files": [
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/alerts.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/update.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/find.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/find.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/disable.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/delete.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/update_api_key.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/execute.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/get.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/list_alert_types.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/list_action_types.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/email.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/server_log.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/slack.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/pagerduty.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/servicenow.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/es_index.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/create.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/webhook.ts",
-        "test/alerting_api_integration/security_and_spaces/tests/alerting/mute_all.ts"
-      ],
-      "tags": [
-        "alerting_api_integration.security_and_spaces.tests.alerting.alerts",
-        "alerting_api_integration.security_and_spaces.tests.alerting.update",
-        "alerting_api_integration.security_and_spaces.tests.alerting.find",
-        "alerting_api_integration.security_and_spaces.tests.actions.find",
-        "alerting_api_integration.security_and_spaces.tests.alerting.disable",
-        "alerting_api_integration.security_and_spaces.tests.alerting.delete",
-        "alerting_api_integration.security_and_spaces.tests.alerting.update_api_key",
-        "alerting_api_integration.security_and_spaces.tests.actions.execute",
-        "alerting_api_integration.security_and_spaces.tests.alerting.get",
-        "alerting_api_integration.security_and_spaces.tests.alerting.list_alert_types",
-        "alerting_api_integration.security_and_spaces.tests.actions.list_action_types",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.email",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.server_log",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.slack",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.pagerduty",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.servicenow",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.es_index",
-        "alerting_api_integration.security_and_spaces.tests.actions.create",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.webhook",
-        "alerting_api_integration.security_and_spaces.tests.alerting.mute_all"
-      ],
-      "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.js",
@@ -582,15 +325,33 @@
         "test/functional/apps/snapshot_restore/home_page.ts",
         "test/functional/apps/graph/feature_controls/graph_spaces.ts"
       ],
-      "tags": [
-        "functional.apps.machine_learning.anomaly_detection.multi_metric_job",
-        "functional.apps.security.rbac_phase1",
-        "functional.apps.monitoring.elasticsearch.overview",
-        "functional.apps.monitoring.kibana.instance",
-        "functional.apps.snapshot_restore.home_page",
-        "functional.apps.graph.feature_controls.graph_spaces"
-      ],
       "estimatedDuration": 786
+    },
+    {
+      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
+      "files": [
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/alerts.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/update.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/find.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/find.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/delete.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/disable.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/update_api_key.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/execute.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/get.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/list_alert_types.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/list_action_types.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/email.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/server_log.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/slack.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/servicenow.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/pagerduty.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/es_index.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/create.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/webhook.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/mute_all.ts"
+      ],
+      "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.js",
@@ -600,12 +361,6 @@
         "test/functional/apps/visualize/feature_controls/visualize_security.ts",
         "test/functional/apps/machine_learning/anomaly_detection/single_metric_viewer.ts"
       ],
-      "tags": [
-        "functional.apps.maps.joins",
-        "functional.apps.spaces.spaces_selection",
-        "functional.apps.visualize.feature_controls.visualize_security",
-        "functional.apps.machine_learning.anomaly_detection.single_metric_viewer"
-      ],
       "estimatedDuration": 774
     },
     {
@@ -614,13 +369,7 @@
         "test/functional/apps/saved_objects_management/feature_controls/saved_objects_management_security.ts",
         "test/functional/apps/infra/feature_controls/infrastructure_security.ts",
         "test/functional/apps/logstash/pipeline_list.js",
-        "test/functional/apps/monitoring/elasticsearch/index_detail.js"
-      ],
-      "tags": [
-        "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security",
-        "functional.apps.infra.feature_controls.infrastructure_security",
-        "functional.apps.logstash.pipeline_list",
-        "functional.apps.monitoring.elasticsearch.index_detail"
+        "test/functional/apps/spaces/enter_space.ts"
       ],
       "estimatedDuration": 737
     },
@@ -630,15 +379,8 @@
         "test/functional/apps/machine_learning/anomaly_detection/population_job.ts",
         "test/functional/apps/graph/graph.ts",
         "test/functional/apps/security/doc_level_security_roles.js",
-        "test/functional/apps/spaces/enter_space.ts",
+        "test/functional/apps/monitoring/elasticsearch/index_detail.js",
         "test/functional/apps/monitoring/elasticsearch/indices.js"
-      ],
-      "tags": [
-        "functional.apps.machine_learning.anomaly_detection.population_job",
-        "functional.apps.graph.graph",
-        "functional.apps.security.doc_level_security_roles",
-        "functional.apps.spaces.enter_space",
-        "functional.apps.monitoring.elasticsearch.indices"
       ],
       "estimatedDuration": 784
     },
@@ -649,12 +391,6 @@
         "test/functional_with_es_ssl/apps/triggers_actions_ui/details.ts",
         "test/functional_with_es_ssl/apps/triggers_actions_ui/home_page.ts",
         "test/functional_with_es_ssl/apps/triggers_actions_ui/connectors.ts"
-      ],
-      "tags": [
-        "functional_with_es_ssl.apps.triggers_actions_ui.alerts",
-        "functional_with_es_ssl.apps.triggers_actions_ui.details",
-        "functional_with_es_ssl.apps.triggers_actions_ui.home_page",
-        "functional_with_es_ssl.apps.triggers_actions_ui.connectors"
       ],
       "estimatedDuration": 467
     },
@@ -668,125 +404,84 @@
         "test/functional/apps/machine_learning/feature_controls/ml_spaces.ts",
         "test/functional/apps/rollup_job/hybrid_index_pattern.js"
       ],
-      "tags": [
-        "functional.apps.canvas.feature_controls.canvas_security",
-        "functional.apps.advanced_settings.feature_controls.advanced_settings_security",
-        "functional.apps.logstash.pipeline_create",
-        "functional.apps.machine_learning.anomaly_detection.anomaly_explorer",
-        "functional.apps.machine_learning.feature_controls.ml_spaces",
-        "functional.apps.rollup_job.hybrid_index_pattern"
-      ],
       "estimatedDuration": 791
     },
     {
       "config": "test/functional/config.js",
       "files": [
         "test/functional/apps/spaces/feature_controls/spaces_security.ts",
-        "test/functional/apps/maps/sample_data.js",
-        "test/functional/apps/monitoring/cluster/alerts.js",
+        "test/functional/apps/maps/feature_controls/maps_security.ts",
+        "test/functional/apps/endpoint/management.ts",
         "test/functional/apps/security/users.js",
-        "test/functional/apps/infra/metrics_source_configuration.ts",
-        "test/functional/apps/monitoring/feature_controls/monitoring_spaces.ts"
-      ],
-      "tags": [
-        "functional.apps.spaces.feature_controls.spaces_security",
-        "functional.apps.maps.sample_data",
-        "functional.apps.monitoring.cluster.alerts",
-        "functional.apps.security.users",
-        "functional.apps.infra.metrics_source_configuration",
-        "functional.apps.monitoring.feature_controls.monitoring_spaces"
+        "test/functional/apps/monitoring/feature_controls/monitoring_spaces.ts",
+        "test/functional/apps/infra/metrics_source_configuration.ts"
       ],
       "estimatedDuration": 771
     },
     {
       "config": "test/functional/config.js",
       "files": [
-        "test/functional/apps/maps/feature_controls/maps_spaces.ts",
         "test/functional/apps/discover/feature_controls/discover_security.ts",
-        "test/functional/apps/maps/feature_controls/maps_security.ts",
-        "test/functional/apps/dashboard/feature_controls/dashboard_security.ts"
-      ],
-      "tags": [
-        "functional.apps.maps.feature_controls.maps_spaces",
-        "functional.apps.discover.feature_controls.discover_security",
-        "functional.apps.maps.feature_controls.maps_security",
-        "functional.apps.dashboard.feature_controls.dashboard_security"
+        "test/functional/apps/infra/logs_source_configuration.ts",
+        "test/functional/apps/endpoint/policy_list.ts",
+        "test/functional/apps/machine_learning/anomaly_detection/categorization_job.ts"
       ],
       "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.js",
       "files": [
-        "test/functional/apps/infra/logs_source_configuration.ts",
-        "test/functional/apps/monitoring/elasticsearch/shards.js",
+        "test/functional/apps/endpoint/alert_list.ts",
+        "test/functional/apps/dashboard/feature_controls/dashboard_security.ts",
+        "test/functional/apps/monitoring/logstash/pipelines.js",
+        "test/functional/apps/monitoring/elasticsearch/shards.js"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "files": [
+        "test/functional/apps/maps/feature_controls/maps_spaces.ts",
         "test/functional/apps/watcher/watcher_test.js",
+        "test/functional/apps/monitoring/cluster/alerts.js",
         "test/functional/apps/spaces/copy_saved_objects.ts"
       ],
-      "tags": [
-        "functional.apps.infra.logs_source_configuration",
-        "functional.apps.monitoring.elasticsearch.shards",
-        "functional.apps.watcher.watcher_test",
-        "functional.apps.spaces.copy_saved_objects"
-      ],
       "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.js",
       "files": [
-        "test/functional/apps/monitoring/logstash/pipelines.js",
+        "test/functional/apps/transform/cloning.ts",
+        "test/functional/apps/maps/sample_data.js",
         "test/functional/apps/monitoring/cluster/overview.js",
         "test/functional/apps/machine_learning/anomaly_detection/single_metric_job.ts",
-        "test/functional/apps/maps/embeddable/dashboard.js",
         "test/functional/apps/machine_learning/feature_controls/ml_security.ts"
       ],
-      "tags": [
-        "functional.apps.monitoring.logstash.pipelines",
-        "functional.apps.monitoring.cluster.overview",
-        "functional.apps.machine_learning.anomaly_detection.single_metric_job",
-        "functional.apps.maps.embeddable.dashboard",
-        "functional.apps.machine_learning.feature_controls.ml_security"
-      ],
-      "estimatedDuration": 770
+      "estimatedDuration": 784
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/maps/embeddable/dashboard.js",
         "test/functional/apps/discover/feature_controls/discover_spaces.ts",
         "test/functional/apps/security/secure_roles_perm.js",
         "test/functional/apps/dev_tools/feature_controls/dev_tools_security.ts",
-        "test/functional/apps/monitoring/feature_controls/monitoring_security.ts",
         "test/functional/apps/machine_learning/data_frame_analytics/outlier_detection_creation.ts",
         "test/functional/apps/apm/feature_controls/apm_spaces.ts"
       ],
-      "tags": [
-        "functional.apps.discover.feature_controls.discover_spaces",
-        "functional.apps.security.secure_roles_perm",
-        "functional.apps.dev_tools.feature_controls.dev_tools_security",
-        "functional.apps.monitoring.feature_controls.monitoring_security",
-        "functional.apps.machine_learning.data_frame_analytics.outlier_detection_creation",
-        "functional.apps.apm.feature_controls.apm_spaces"
-      ],
-      "estimatedDuration": 754
+      "estimatedDuration": 777
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/monitoring/feature_controls/monitoring_security.ts",
         "test/functional/apps/monitoring/elasticsearch/nodes.js",
         "test/functional/apps/maps/documents_source/top_hits.js",
-        "test/functional/apps/dashboard_mode/dashboard_empty_screen.js",
         "test/functional/apps/lens/smokescreen.ts",
-        "test/functional/apps/timelion/feature_controls/timelion_security.ts",
+        "test/functional/apps/dashboard_mode/dashboard_empty_screen.js",
         "test/functional/apps/transform/creation_index_pattern.ts"
       ],
-      "tags": [
-        "functional.apps.monitoring.elasticsearch.nodes",
-        "functional.apps.maps.documents_source.top_hits",
-        "functional.apps.dashboard_mode.dashboard_empty_screen",
-        "functional.apps.lens.smokescreen",
-        "functional.apps.timelion.feature_controls.timelion_security",
-        "functional.apps.transform.creation_index_pattern"
-      ],
-      "estimatedDuration": 779
+      "estimatedDuration": 785
     },
     {
       "config": "test/reporting/configs/generate_api.js",
@@ -794,31 +489,19 @@
         "test/reporting/api/generate/csv_saved_search.ts",
         "test/reporting/api/generate/csv_job_params.ts"
       ],
-      "tags": [
-        "reporting.api.generate.csv_saved_search",
-        "reporting.api.generate.csv_job_params"
-      ],
       "estimatedDuration": 163
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/timelion/feature_controls/timelion_security.ts",
         "test/functional/apps/canvas/custom_elements.ts",
         "test/functional/apps/advanced_settings/feature_controls/advanced_settings_spaces.ts",
         "test/functional/apps/monitoring/cluster/list.js",
         "test/functional/apps/security/management.js",
-        "test/functional/apps/rollup_job/tsvb.js",
         "test/functional/apps/machine_learning/data_visualizer/index_data_visualizer.ts"
       ],
-      "tags": [
-        "functional.apps.canvas.custom_elements",
-        "functional.apps.advanced_settings.feature_controls.advanced_settings_spaces",
-        "functional.apps.monitoring.cluster.list",
-        "functional.apps.security.management",
-        "functional.apps.rollup_job.tsvb",
-        "functional.apps.machine_learning.data_visualizer.index_data_visualizer"
-      ],
-      "estimatedDuration": 743
+      "estimatedDuration": 753
     },
     {
       "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
@@ -832,17 +515,6 @@
         "test/saved_object_api_integration/security_and_spaces/apis/find.ts",
         "test/saved_object_api_integration/security_and_spaces/apis/bulk_update.ts",
         "test/saved_object_api_integration/security_and_spaces/apis/get.ts"
-      ],
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
-        "saved_object_api_integration.security_and_spaces.apis.export",
-        "saved_object_api_integration.security_and_spaces.apis.delete",
-        "saved_object_api_integration.security_and_spaces.apis.import",
-        "saved_object_api_integration.security_and_spaces.apis.create",
-        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
-        "saved_object_api_integration.security_and_spaces.apis.find",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_update",
-        "saved_object_api_integration.security_and_spaces.apis.get"
       ],
       "estimatedDuration": 722
     },
@@ -860,113 +532,65 @@
         "test/saved_object_api_integration/security_and_spaces/apis/update.ts",
         "test/saved_object_api_integration/security_and_spaces/apis/get.ts"
       ],
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_get",
-        "saved_object_api_integration.security_and_spaces.apis.delete",
-        "saved_object_api_integration.security_and_spaces.apis.import",
-        "saved_object_api_integration.security_and_spaces.apis.create",
-        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
-        "saved_object_api_integration.security_and_spaces.apis.find",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_update",
-        "saved_object_api_integration.security_and_spaces.apis.update",
-        "saved_object_api_integration.security_and_spaces.apis.get"
-      ],
       "estimatedDuration": 765
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/rollup_job/tsvb.js",
         "test/functional/apps/dashboard/feature_controls/dashboard_spaces.ts",
-        "test/functional/apps/graph/feature_controls/graph_security.ts",
         "test/functional/apps/maps/documents_source/docvalue_fields.js",
+        "test/functional/apps/graph/feature_controls/graph_security.ts",
         "test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
-        "test/functional/apps/security/user_email.js",
-        "test/functional/apps/infra/feature_controls/logs_security.ts",
-        "test/functional/apps/uptime/overview.ts"
+        "test/functional/apps/uptime/overview.ts",
+        "test/functional/apps/timelion/feature_controls/timelion_spaces.ts"
       ],
-      "tags": [
-        "functional.apps.dashboard.feature_controls.dashboard_spaces",
-        "functional.apps.graph.feature_controls.graph_security",
-        "functional.apps.maps.documents_source.docvalue_fields",
-        "functional.apps.upgrade_assistant.upgrade_assistant",
-        "functional.apps.security.user_email",
-        "functional.apps.infra.feature_controls.logs_security",
-        "functional.apps.uptime.overview"
-      ],
-      "estimatedDuration": 793
+      "estimatedDuration": 786
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/security/user_email.js",
+        "test/functional/apps/infra/feature_controls/logs_security.ts",
         "test/functional/apps/maps/add_layer_panel.js",
         "test/functional/apps/security/security.ts",
-        "test/functional/apps/infra/feature_controls/infrastructure_spaces.ts",
-        "test/functional/apps/monitoring/elasticsearch/node_detail.js",
         "test/functional/apps/maps/import_geojson/add_layer_import_panel.js",
-        "test/functional/apps/machine_learning/data_frame_analytics/regression_creation.ts",
-        "test/functional/apps/timelion/feature_controls/timelion_spaces.ts"
+        "test/functional/apps/monitoring/elasticsearch/node_detail.js",
+        "test/functional/apps/dev_tools/feature_controls/dev_tools_spaces.ts"
       ],
-      "tags": [
-        "functional.apps.maps.add_layer_panel",
-        "functional.apps.security.security",
-        "functional.apps.infra.feature_controls.infrastructure_spaces",
-        "functional.apps.monitoring.elasticsearch.node_detail",
-        "functional.apps.maps.import_geojson.add_layer_import_panel",
-        "functional.apps.machine_learning.data_frame_analytics.regression_creation",
-        "functional.apps.timelion.feature_controls.timelion_spaces"
-      ],
-      "estimatedDuration": 730
+      "estimatedDuration": 747
     },
     {
       "config": "test/reporting/configs/chromium_api.js",
       "files": [
         "test/reporting/api/usage.js"
       ],
-      "tags": [
-        "reporting.api.usage"
-      ],
       "estimatedDuration": 106
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/infra/feature_controls/infrastructure_spaces.ts",
+        "test/functional/apps/machine_learning/data_frame_analytics/regression_creation.ts",
         "test/functional/apps/transform/creation_saved_search.ts",
         "test/functional/apps/canvas/smoke_test.js",
         "test/functional/apps/index_patterns/feature_controls/index_patterns_security.ts",
-        "test/functional/apps/maps/layer_errors.js",
-        "test/functional/apps/canvas/expression.ts",
         "test/functional/apps/machine_learning/data_frame_analytics/classification_creation.ts",
-        "test/functional/apps/grok_debugger/grok_debugger.js",
-        "test/functional/apps/dev_tools/feature_controls/dev_tools_spaces.ts"
+        "test/functional/apps/canvas/expression.ts",
+        "test/functional/apps/uptime/feature_controls/uptime_security.ts"
       ],
-      "tags": [
-        "functional.apps.transform.creation_saved_search",
-        "functional.apps.canvas.smoke_test",
-        "functional.apps.index_patterns.feature_controls.index_patterns_security",
-        "functional.apps.maps.layer_errors",
-        "functional.apps.canvas.expression",
-        "functional.apps.machine_learning.data_frame_analytics.classification_creation",
-        "functional.apps.grok_debugger.grok_debugger",
-        "functional.apps.dev_tools.feature_controls.dev_tools_spaces"
-      ],
-      "estimatedDuration": 798
+      "estimatedDuration": 812
     },
     {
       "config": "test/functional/config.js",
       "files": [
-        "test/functional/apps/canvas/feature_controls/canvas_spaces.ts",
+        "test/functional/apps/maps/layer_errors.js",
+        "test/functional/apps/grok_debugger/grok_debugger.js",
         "test/functional/apps/infra/home_page.ts",
-        "test/functional/apps/apm/feature_controls/apm_security.ts",
-        "test/functional/apps/uptime/feature_controls/uptime_security.ts"
+        "test/functional/apps/canvas/feature_controls/canvas_spaces.ts",
+        "test/functional/apps/apm/feature_controls/apm_security.ts"
       ],
-      "tags": [
-        "functional.apps.canvas.feature_controls.canvas_spaces",
-        "functional.apps.infra.home_page",
-        "functional.apps.apm.feature_controls.apm_security",
-        "functional.apps.uptime.feature_controls.uptime_security"
-      ],
-      "estimatedDuration": 385
+      "estimatedDuration": 488
     },
     {
       "config": "test/saved_object_api_integration/security_only/config_basic.ts",
@@ -983,48 +607,22 @@
         "test/saved_object_api_integration/security_only/apis/export.ts",
         "test/saved_object_api_integration/security_only/apis/bulk_get.ts"
       ],
-      "tags": [
-        "saved_object_api_integration.security_only.apis.bulk_create",
-        "saved_object_api_integration.security_only.apis.import",
-        "saved_object_api_integration.security_only.apis.find",
-        "saved_object_api_integration.security_only.apis.delete",
-        "saved_object_api_integration.security_only.apis.bulk_update",
-        "saved_object_api_integration.security_only.apis.resolve_import_errors",
-        "saved_object_api_integration.security_only.apis.create",
-        "saved_object_api_integration.security_only.apis.update",
-        "saved_object_api_integration.security_only.apis.get",
-        "saved_object_api_integration.security_only.apis.export",
-        "saved_object_api_integration.security_only.apis.bulk_get"
-      ],
       "estimatedDuration": 432
     },
     {
       "config": "test/saved_object_api_integration/security_only/config_trial.ts",
       "files": [
         "test/saved_object_api_integration/security_only/apis/bulk_create.ts",
-        "test/saved_object_api_integration/security_only/apis/import.ts",
         "test/saved_object_api_integration/security_only/apis/find.ts",
+        "test/saved_object_api_integration/security_only/apis/import.ts",
         "test/saved_object_api_integration/security_only/apis/delete.ts",
-        "test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
         "test/saved_object_api_integration/security_only/apis/bulk_update.ts",
+        "test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
         "test/saved_object_api_integration/security_only/apis/create.ts",
         "test/saved_object_api_integration/security_only/apis/update.ts",
         "test/saved_object_api_integration/security_only/apis/get.ts",
         "test/saved_object_api_integration/security_only/apis/export.ts",
         "test/saved_object_api_integration/security_only/apis/bulk_get.ts"
-      ],
-      "tags": [
-        "saved_object_api_integration.security_only.apis.bulk_create",
-        "saved_object_api_integration.security_only.apis.import",
-        "saved_object_api_integration.security_only.apis.find",
-        "saved_object_api_integration.security_only.apis.delete",
-        "saved_object_api_integration.security_only.apis.resolve_import_errors",
-        "saved_object_api_integration.security_only.apis.bulk_update",
-        "saved_object_api_integration.security_only.apis.create",
-        "saved_object_api_integration.security_only.apis.update",
-        "saved_object_api_integration.security_only.apis.get",
-        "saved_object_api_integration.security_only.apis.export",
-        "saved_object_api_integration.security_only.apis.bulk_get"
       ],
       "estimatedDuration": 405
     },
@@ -1039,24 +637,12 @@
         "test/spaces_api_integration/spaces_only/apis/create.ts",
         "test/spaces_api_integration/spaces_only/apis/get_all.ts"
       ],
-      "tags": [
-        "spaces_api_integration.spaces_only.apis.copy_to_space",
-        "spaces_api_integration.spaces_only.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.spaces_only.apis.get",
-        "spaces_api_integration.spaces_only.apis.delete",
-        "spaces_api_integration.spaces_only.apis.update",
-        "spaces_api_integration.spaces_only.apis.create",
-        "spaces_api_integration.spaces_only.apis.get_all"
-      ],
       "estimatedDuration": 151
     },
     {
       "config": "test/upgrade_assistant_integration/config.js",
       "files": [
         "test/upgrade_assistant_integration/upgrade_assistant/reindexing.js"
-      ],
-      "tags": [
-        "upgrade_assistant_integration.upgrade_assistant.reindexing"
       ],
       "estimatedDuration": 80
     },
@@ -1065,10 +651,6 @@
       "files": [
         "test/plugin_api_integration/test_suites/task_manager/task_manager_integration.js",
         "test/plugin_api_integration/test_suites/encrypted_saved_objects/encrypted_saved_objects_api.ts"
-      ],
-      "tags": [
-        "plugin_api_integration.task_manager.task_manager_integration",
-        "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
       ],
       "estimatedDuration": 107
     },
@@ -1080,9 +662,10 @@
         "test/api_integration/apis/infra/sources.ts",
         "test/api_integration/apis/siem/saved_objects/timeline.ts",
         "test/api_integration/apis/monitoring/elasticsearch/nodes.js",
-        "test/api_integration/apis/endpoint/endpoints.ts",
         "test/api_integration/apis/monitoring/logstash/pipelines.js",
+        "test/api_integration/apis/endpoint/metadata.ts",
         "test/api_integration/apis/monitoring/logstash/multicluster_pipelines.js",
+        "test/api_integration/apis/ml/categorization_field_examples.ts",
         "test/api_integration/apis/infra/log_entries.ts",
         "test/api_integration/apis/lens/existing_fields.ts",
         "test/api_integration/apis/lens/field_stats.ts",
@@ -1091,296 +674,143 @@
         "test/api_integration/apis/management/advanced_settings/feature_controls.ts",
         "test/api_integration/apis/apm/feature_controls.ts",
         "test/api_integration/apis/siem/saved_objects/pinned_events.ts",
-        "test/api_integration/apis/uptime/rest/snapshot.ts",
         "test/api_integration/apis/siem/overview_network.ts",
         "test/api_integration/apis/infra/feature_controls.ts",
         "test/api_integration/apis/infra/log_summary.ts",
-        "test/api_integration/apis/monitoring/beats/overview.js",
-        "test/api_integration/apis/beats/assign_tags_to_beats.js",
-        "test/api_integration/apis/infra/ip_to_hostname.ts",
-        "test/api_integration/apis/console/feature_controls.ts",
+        "test/api_integration/apis/uptime/rest/snapshot.ts",
         "test/api_integration/apis/infra/log_item.ts",
         "test/api_integration/apis/infra/log_entry_highlights.ts",
-        "test/api_integration/apis/beats/remove_tags_from_beats.js",
-        "test/api_integration/apis/monitoring/elasticsearch/overview.js",
-        "test/api_integration/apis/beats/enroll_beat.js",
+        "test/api_integration/apis/infra/ip_to_hostname.ts",
+        "test/api_integration/apis/console/feature_controls.ts",
+        "test/api_integration/apis/monitoring/beats/overview.js",
+        "test/api_integration/apis/beats/assign_tags_to_beats.js",
         "test/api_integration/apis/uptime/graphql/monitor_states.ts",
-        "test/api_integration/apis/siem/feature_controls.ts",
         "test/api_integration/apis/uptime/feature_controls.ts",
-        "test/api_integration/apis/logstash/pipeline/delete.js",
+        "test/api_integration/apis/monitoring/elasticsearch/overview.js",
+        "test/api_integration/apis/siem/feature_controls.ts",
+        "test/api_integration/apis/beats/enroll_beat.js",
+        "test/api_integration/apis/beats/remove_tags_from_beats.js",
+        "test/api_integration/apis/telemetry/telemetry.js",
+        "test/api_integration/apis/apm/agent_configuration.ts",
         "test/api_integration/apis/ml/calculate_model_memory_limit.ts",
         "test/api_integration/apis/ml/bucket_span_estimator.ts",
-        "test/api_integration/apis/telemetry/telemetry.js",
         "test/api_integration/apis/lens/telemetry.ts",
-        "test/api_integration/apis/apm/agent_configuration.ts",
-        "test/api_integration/apis/kibana/kql_telemetry/kql_telemetry.js",
-        "test/api_integration/apis/infra/log_analysis.ts",
-        "test/api_integration/apis/beats/create_enrollment_tokens.js",
+        "test/api_integration/apis/logstash/pipeline/delete.js",
         "test/api_integration/apis/logstash/pipeline/save.js",
-        "test/api_integration/apis/short_urls/feature_controls.ts",
-        "test/api_integration/apis/beats/set_tag.js",
-        "test/api_integration/apis/management/rollup/rollup.js",
-        "test/api_integration/apis/siem/kpi_network.ts",
         "test/api_integration/apis/security/change_password.ts",
+        "test/api_integration/apis/short_urls/feature_controls.ts",
         "test/api_integration/apis/spaces/get_active_space.ts",
+        "test/api_integration/apis/beats/set_tag.js",
         "test/api_integration/apis/siem/network_top_n_flow.ts",
+        "test/api_integration/apis/siem/network_dns.ts",
+        "test/api_integration/apis/infra/log_analysis.ts",
+        "test/api_integration/apis/siem/kpi_hosts.ts",
+        "test/api_integration/apis/kibana/kql_telemetry/kql_telemetry.js",
         "test/api_integration/apis/monitoring/cluster/list.js",
         "test/api_integration/apis/monitoring/cluster/overview.js",
-        "test/api_integration/apis/siem/network_dns.ts",
-        "test/api_integration/apis/siem/kpi_hosts.ts",
-        "test/api_integration/apis/monitoring/elasticsearch/indices.js",
-        "test/api_integration/apis/logstash/pipeline/load.js",
-        "test/api_integration/apis/kibana/stats/stats.js",
-        "test/api_integration/apis/logstash/pipelines/delete.js",
-        "test/api_integration/apis/telemetry/opt_in.ts",
-        "test/api_integration/apis/siem/overview_host.ts",
-        "test/api_integration/apis/telemetry/telemetry_local.js",
+        "test/api_integration/apis/siem/kpi_network.ts",
+        "test/api_integration/apis/beats/create_enrollment_tokens.js",
+        "test/api_integration/apis/management/rollup/rollup.js",
         "test/api_integration/apis/endpoint/alerts.ts",
+        "test/api_integration/apis/telemetry/telemetry_local.js",
+        "test/api_integration/apis/kibana/stats/stats.js",
         "test/api_integration/apis/infra/metrics_explorer.ts",
-        "test/api_integration/apis/siem/timeline_details.ts",
-        "test/api_integration/apis/beats/get_beat.js",
-        "test/api_integration/apis/management/cross_cluster_replication/follower_indices.js",
         "test/api_integration/apis/management/index_management/indices.js",
-        "test/api_integration/apis/uptime/graphql/ping_list.ts",
-        "test/api_integration/apis/uptime/graphql/doc_count.js",
-        "test/api_integration/apis/management/index_lifecycle_management/indices.js",
-        "test/api_integration/apis/monitoring/elasticsearch/node_detail_advanced.js",
-        "test/api_integration/apis/management/rollup/index_patterns_extensions.js",
-        "test/api_integration/apis/siem/tls.ts",
-        "test/api_integration/apis/siem/authentications.ts",
-        "test/api_integration/apis/siem/hosts.ts",
-        "test/api_integration/apis/monitoring/logstash/node_detail.js",
-        "test/api_integration/apis/beats/update_beat.js",
-        "test/api_integration/apis/endpoint/resolver.ts",
+        "test/api_integration/apis/siem/timeline_details.ts",
+        "test/api_integration/apis/logstash/pipeline/load.js",
+        "test/api_integration/apis/beats/get_beat.js",
+        "test/api_integration/apis/logstash/pipelines/delete.js",
+        "test/api_integration/apis/monitoring/elasticsearch/indices.js",
+        "test/api_integration/apis/telemetry/opt_in.ts",
+        "test/api_integration/apis/management/cross_cluster_replication/follower_indices.js",
+        "test/api_integration/apis/siem/overview_host.ts",
         "test/api_integration/apis/xpack_main/settings/settings.js",
-        "test/api_integration/apis/es/has_privileges.js",
-        "test/api_integration/apis/uptime/graphql/monitor_charts.js",
         "test/api_integration/apis/infra/metrics.ts",
-        "test/api_integration/apis/features/features/features.ts",
         "test/api_integration/apis/monitoring/setup/collection/es_and_kibana_mb.js",
-        "test/api_integration/apis/security/roles.js",
-        "test/api_integration/apis/spaces/space_attributes.ts",
-        "test/api_integration/apis/monitoring/setup/collection/security.js",
-        "test/api_integration/apis/monitoring/beats/list.js",
-        "test/api_integration/apis/monitoring/beats/detail.js",
         "test/api_integration/apis/monitoring/elasticsearch/ccr_shard.js",
         "test/api_integration/apis/monitoring/elasticsearch/ccr.js",
         "test/api_integration/apis/monitoring/elasticsearch/index_detail.js",
+        "test/api_integration/apis/monitoring/elasticsearch/node_detail_advanced.js",
         "test/api_integration/apis/monitoring/elasticsearch/node_detail.js",
+        "test/api_integration/apis/monitoring/setup/collection/security.js",
+        "test/api_integration/apis/monitoring/beats/detail.js",
+        "test/api_integration/apis/monitoring/beats/list.js",
+        "test/api_integration/apis/spaces/space_attributes.ts",
+        "test/api_integration/apis/security/roles.js",
+        "test/api_integration/apis/monitoring/logstash/node_detail.js",
         "test/api_integration/apis/security/basic_login.js",
-        "test/api_integration/apis/uptime/get_all_pings.js",
-        "test/api_integration/apis/monitoring/setup/collection/detect_logstash_management.js",
-        "test/api_integration/apis/management/remote_clusters/remote_clusters.js",
-        "test/api_integration/apis/logstash/cluster/load.js",
-        "test/api_integration/apis/monitoring/setup/collection/ccs.js",
-        "test/api_integration/apis/siem/sources.ts",
-        "test/api_integration/apis/monitoring/setup/collection/detect_beats_management.js",
+        "test/api_integration/apis/es/has_privileges.js",
+        "test/api_integration/apis/features/features/features.ts",
+        "test/api_integration/apis/endpoint/resolver.ts",
+        "test/api_integration/apis/siem/tls.ts",
+        "test/api_integration/apis/siem/hosts.ts",
+        "test/api_integration/apis/siem/authentications.ts",
+        "test/api_integration/apis/uptime/graphql/ping_list.ts",
+        "test/api_integration/apis/uptime/graphql/monitor_charts.js",
+        "test/api_integration/apis/uptime/graphql/doc_count.js",
+        "test/api_integration/apis/management/index_lifecycle_management/indices.js",
+        "test/api_integration/apis/management/rollup/index_patterns_extensions.js",
+        "test/api_integration/apis/beats/update_beat.js",
+        "test/api_integration/apis/es/post_privileges.js",
+        "test/api_integration/apis/monitoring/setup/collection/kibana_mb.js",
+        "test/api_integration/apis/monitoring/logs/node_detail.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_apm.js",
+        "test/api_integration/apis/monitoring/setup/collection/kibana_exclusive_mb.js",
+        "test/api_integration/apis/monitoring/logstash/nodes.js",
+        "test/api_integration/apis/monitoring/logstash/overview.js",
         "test/api_integration/apis/monitoring/apm/instance.js",
         "test/api_integration/apis/monitoring/apm/instances.js",
         "test/api_integration/apis/monitoring/apm/overview.js",
-        "test/api_integration/apis/monitoring/setup/collection/detect_beats.js",
+        "test/api_integration/apis/monitoring/standalone_cluster/cluster.js",
         "test/api_integration/apis/spaces/saved_objects.ts",
-        "test/api_integration/apis/monitoring/setup/collection/es_and_kibana_exclusive_mb.js",
+        "test/api_integration/apis/monitoring/setup/collection/ccs.js",
         "test/api_integration/apis/security/session.ts",
         "test/api_integration/apis/security/privileges.ts",
-        "test/api_integration/apis/telemetry/telemetry_optin_notice_seen.ts",
+        "test/api_integration/apis/monitoring/setup/collection/es_and_kibana_exclusive_mb.js",
         "test/api_integration/apis/security/index_fields.ts",
-        "test/api_integration/apis/monitoring/setup/collection/kibana_exclusive_mb.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_beats.js",
         "test/api_integration/apis/security/builtin_es_privileges.ts",
-        "test/api_integration/apis/monitoring/setup/collection/kibana_mb.js",
-        "test/api_integration/apis/es/post_privileges.js",
-        "test/api_integration/apis/siem/timeline.ts",
-        "test/api_integration/apis/management/rollup/rollup_search.js",
-        "test/api_integration/apis/siem/uncommon_processes.ts",
-        "test/api_integration/apis/siem/users.ts",
-        "test/api_integration/apis/monitoring/logs/multiple_clusters.js",
-        "test/api_integration/apis/monitoring/logs/cluster.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_beats_management.js",
         "test/api_integration/apis/monitoring/logs/index_detail.js",
-        "test/api_integration/apis/monitoring/logs/node_detail.js",
-        "test/api_integration/apis/infra/logs_without_millis.ts",
-        "test/api_integration/apis/monitoring/standalone_cluster/cluster.js",
-        "test/api_integration/apis/monitoring/standalone_cluster/clusters.js",
-        "test/api_integration/apis/monitoring/common/mappings_exist.js",
-        "test/api_integration/apis/uptime/rest/monitor_latest_status.ts",
-        "test/api_integration/apis/uptime/rest/selected_monitor.ts",
-        "test/api_integration/apis/uptime/rest/ping_histogram.ts",
-        "test/api_integration/apis/maps/index_settings.js",
-        "test/api_integration/apis/maps/migrations.js",
-        "test/api_integration/apis/management/index_management/mapping.js",
-        "test/api_integration/apis/monitoring/logstash/nodes.js",
-        "test/api_integration/apis/monitoring/logstash/overview.js",
-        "test/api_integration/apis/management/index_management/settings.js",
-        "test/api_integration/apis/monitoring/setup/collection/detect_apm.js",
-        "test/api_integration/apis/management/index_management/stats.js",
-        "test/api_integration/apis/management/index_management/templates.js",
-        "test/api_integration/apis/management/index_lifecycle_management/policies.js",
-        "test/api_integration/apis/management/index_lifecycle_management/templates.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_logstash_management.js",
         "test/api_integration/apis/monitoring/kibana/instance.js",
         "test/api_integration/apis/monitoring/kibana/listing.js",
         "test/api_integration/apis/monitoring/kibana/overview.js",
+        "test/api_integration/apis/siem/users.ts",
+        "test/api_integration/apis/siem/uncommon_processes.ts",
+        "test/api_integration/apis/siem/timeline.ts",
+        "test/api_integration/apis/siem/sources.ts",
         "test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_interval.js",
         "test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_enabled.js",
+        "test/api_integration/apis/maps/migrations.js",
+        "test/api_integration/apis/maps/index_settings.js",
+        "test/api_integration/apis/uptime/rest/ping_histogram.ts",
+        "test/api_integration/apis/uptime/rest/selected_monitor.ts",
+        "test/api_integration/apis/uptime/rest/monitor_latest_status.ts",
         "test/api_integration/apis/monitoring/elasticsearch_settings/check_nodes.js",
         "test/api_integration/apis/monitoring/elasticsearch_settings/check_cluster.js",
-        "test/api_integration/apis/management/cross_cluster_replication/auto_follow_pattern.js",
+        "test/api_integration/apis/monitoring/standalone_cluster/clusters.js",
+        "test/api_integration/apis/uptime/get_all_pings.js",
         "test/api_integration/apis/management/index_lifecycle_management/nodes.js",
+        "test/api_integration/apis/monitoring/common/mappings_exist.js",
+        "test/api_integration/apis/management/index_lifecycle_management/templates.js",
+        "test/api_integration/apis/management/index_lifecycle_management/policies.js",
+        "test/api_integration/apis/management/index_management/templates.js",
+        "test/api_integration/apis/management/index_management/stats.js",
+        "test/api_integration/apis/management/index_management/settings.js",
+        "test/api_integration/apis/management/index_management/mapping.js",
+        "test/api_integration/apis/management/rollup/rollup_search.js",
+        "test/api_integration/apis/monitoring/logs/cluster.js",
+        "test/api_integration/apis/management/remote_clusters/remote_clusters.js",
+        "test/api_integration/apis/management/cross_cluster_replication/auto_follow_pattern.js",
+        "test/api_integration/apis/monitoring/logs/multiple_clusters.js",
         "test/api_integration/apis/beats/list_beats.js",
+        "test/api_integration/apis/telemetry/telemetry_optin_notice_seen.ts",
+        "test/api_integration/apis/infra/logs_without_millis.ts",
+        "test/api_integration/apis/logstash/cluster/load.js",
         "test/api_integration/apis/monitoring/setup/collection/detect_logstash.js"
       ],
-      "tags": [
-        "api_integration.apis.infra.metadata",
-        "api_integration.apis.logstash.pipelines.list",
-        "api_integration.apis.infra.sources",
-        "api_integration.apis.siem.saved_objects.timeline",
-        "api_integration.apis.monitoring.elasticsearch.nodes",
-        "api_integration.apis.endpoint.endpoints",
-        "api_integration.apis.monitoring.logstash.pipelines",
-        "api_integration.apis.monitoring.logstash.multicluster_pipelines",
-        "api_integration.apis.infra.log_entries",
-        "api_integration.apis.lens.existing_fields",
-        "api_integration.apis.lens.field_stats",
-        "api_integration.apis.siem.saved_objects.notes",
-        "api_integration.apis.infra.waffle",
-        "api_integration.apis.management.advanced_settings.feature_controls",
-        "api_integration.apis.apm.feature_controls",
-        "api_integration.apis.siem.saved_objects.pinned_events",
-        "api_integration.apis.uptime.rest.snapshot",
-        "api_integration.apis.siem.overview_network",
-        "api_integration.apis.infra.feature_controls",
-        "api_integration.apis.infra.log_summary",
-        "api_integration.apis.monitoring.beats.overview",
-        "api_integration.apis.beats.assign_tags_to_beats",
-        "api_integration.apis.infra.ip_to_hostname",
-        "api_integration.apis.console.feature_controls",
-        "api_integration.apis.infra.log_item",
-        "api_integration.apis.infra.log_entry_highlights",
-        "api_integration.apis.beats.remove_tags_from_beats",
-        "api_integration.apis.monitoring.elasticsearch.overview",
-        "api_integration.apis.beats.enroll_beat",
-        "api_integration.apis.uptime.graphql.monitor_states",
-        "api_integration.apis.siem.feature_controls",
-        "api_integration.apis.uptime.feature_controls",
-        "api_integration.apis.logstash.pipeline.delete",
-        "api_integration.apis.ml.calculate_model_memory_limit",
-        "api_integration.apis.ml.bucket_span_estimator",
-        "api_integration.apis.telemetry.telemetry",
-        "api_integration.apis.lens.telemetry",
-        "api_integration.apis.apm.agent_configuration",
-        "api_integration.apis.kibana.kql_telemetry.kql_telemetry",
-        "api_integration.apis.infra.log_analysis",
-        "api_integration.apis.beats.create_enrollment_tokens",
-        "api_integration.apis.logstash.pipeline.save",
-        "api_integration.apis.short_urls.feature_controls",
-        "api_integration.apis.beats.set_tag",
-        "api_integration.apis.management.rollup.rollup",
-        "api_integration.apis.siem.kpi_network",
-        "api_integration.apis.security.change_password",
-        "api_integration.apis.spaces.get_active_space",
-        "api_integration.apis.siem.network_top_n_flow",
-        "api_integration.apis.monitoring.cluster.list",
-        "api_integration.apis.monitoring.cluster.overview",
-        "api_integration.apis.siem.network_dns",
-        "api_integration.apis.siem.kpi_hosts",
-        "api_integration.apis.monitoring.elasticsearch.indices",
-        "api_integration.apis.logstash.pipeline.load",
-        "api_integration.apis.kibana.stats.stats",
-        "api_integration.apis.logstash.pipelines.delete",
-        "api_integration.apis.telemetry.opt_in",
-        "api_integration.apis.siem.overview_host",
-        "api_integration.apis.telemetry.telemetry_local",
-        "api_integration.apis.endpoint.alerts",
-        "api_integration.apis.infra.metrics_explorer",
-        "api_integration.apis.siem.timeline_details",
-        "api_integration.apis.beats.get_beat",
-        "api_integration.apis.management.cross_cluster_replication.follower_indices",
-        "api_integration.apis.management.index_management.indices",
-        "api_integration.apis.uptime.graphql.ping_list",
-        "api_integration.apis.uptime.graphql.doc_count",
-        "api_integration.apis.management.index_lifecycle_management.indices",
-        "api_integration.apis.monitoring.elasticsearch.node_detail_advanced",
-        "api_integration.apis.management.rollup.index_patterns_extensions",
-        "api_integration.apis.siem.tls",
-        "api_integration.apis.siem.authentications",
-        "api_integration.apis.siem.hosts",
-        "api_integration.apis.monitoring.logstash.node_detail",
-        "api_integration.apis.beats.update_beat",
-        "api_integration.apis.endpoint.resolver",
-        "api_integration.apis.xpack_main.settings.settings",
-        "api_integration.apis.es.has_privileges",
-        "api_integration.apis.uptime.graphql.monitor_charts",
-        "api_integration.apis.infra.metrics",
-        "api_integration.apis.features.features.features",
-        "api_integration.apis.monitoring.setup.collection.es_and_kibana_mb",
-        "api_integration.apis.security.roles",
-        "api_integration.apis.spaces.space_attributes",
-        "api_integration.apis.monitoring.setup.collection.security",
-        "api_integration.apis.monitoring.beats.list",
-        "api_integration.apis.monitoring.beats.detail",
-        "api_integration.apis.monitoring.elasticsearch.ccr_shard",
-        "api_integration.apis.monitoring.elasticsearch.ccr",
-        "api_integration.apis.monitoring.elasticsearch.index_detail",
-        "api_integration.apis.monitoring.elasticsearch.node_detail",
-        "api_integration.apis.security.basic_login",
-        "api_integration.apis.uptime.get_all_pings",
-        "api_integration.apis.monitoring.setup.collection.detect_logstash_management",
-        "api_integration.apis.management.remote_clusters.remote_clusters",
-        "api_integration.apis.logstash.cluster.load",
-        "api_integration.apis.monitoring.setup.collection.ccs",
-        "api_integration.apis.siem.sources",
-        "api_integration.apis.monitoring.setup.collection.detect_beats_management",
-        "api_integration.apis.monitoring.apm.instance",
-        "api_integration.apis.monitoring.apm.instances",
-        "api_integration.apis.monitoring.apm.overview",
-        "api_integration.apis.monitoring.setup.collection.detect_beats",
-        "api_integration.apis.spaces.saved_objects",
-        "api_integration.apis.monitoring.setup.collection.es_and_kibana_exclusive_mb",
-        "api_integration.apis.security.session",
-        "api_integration.apis.security.privileges",
-        "api_integration.apis.telemetry.telemetry_optin_notice_seen",
-        "api_integration.apis.security.index_fields",
-        "api_integration.apis.monitoring.setup.collection.kibana_exclusive_mb",
-        "api_integration.apis.security.builtin_es_privileges",
-        "api_integration.apis.monitoring.setup.collection.kibana_mb",
-        "api_integration.apis.es.post_privileges",
-        "api_integration.apis.siem.timeline",
-        "api_integration.apis.management.rollup.rollup_search",
-        "api_integration.apis.siem.uncommon_processes",
-        "api_integration.apis.siem.users",
-        "api_integration.apis.monitoring.logs.multiple_clusters",
-        "api_integration.apis.monitoring.logs.cluster",
-        "api_integration.apis.monitoring.logs.index_detail",
-        "api_integration.apis.monitoring.logs.node_detail",
-        "api_integration.apis.infra.logs_without_millis",
-        "api_integration.apis.monitoring.standalone_cluster.cluster",
-        "api_integration.apis.monitoring.standalone_cluster.clusters",
-        "api_integration.apis.monitoring.common.mappings_exist",
-        "api_integration.apis.uptime.rest.monitor_latest_status",
-        "api_integration.apis.uptime.rest.selected_monitor",
-        "api_integration.apis.uptime.rest.ping_histogram",
-        "api_integration.apis.maps.index_settings",
-        "api_integration.apis.maps.migrations",
-        "api_integration.apis.management.index_management.mapping",
-        "api_integration.apis.monitoring.logstash.nodes",
-        "api_integration.apis.monitoring.logstash.overview",
-        "api_integration.apis.management.index_management.settings",
-        "api_integration.apis.monitoring.setup.collection.detect_apm",
-        "api_integration.apis.management.index_management.stats",
-        "api_integration.apis.management.index_management.templates",
-        "api_integration.apis.management.index_lifecycle_management.policies",
-        "api_integration.apis.management.index_lifecycle_management.templates",
-        "api_integration.apis.monitoring.kibana.instance",
-        "api_integration.apis.monitoring.kibana.listing",
-        "api_integration.apis.monitoring.kibana.overview",
-        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_interval",
-        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_enabled",
-        "api_integration.apis.monitoring.elasticsearch_settings.check_nodes",
-        "api_integration.apis.monitoring.elasticsearch_settings.check_cluster",
-        "api_integration.apis.management.cross_cluster_replication.auto_follow_pattern",
-        "api_integration.apis.management.index_lifecycle_management.nodes",
-        "api_integration.apis.beats.list_beats",
-        "api_integration.apis.monitoring.setup.collection.detect_logstash"
-      ],
-      "estimatedDuration": 651
+      "estimatedDuration": 681
     },
     {
       "config": "test/saved_object_api_integration/spaces_only/config.ts",
@@ -1389,26 +819,13 @@
         "test/saved_object_api_integration/spaces_only/apis/bulk_update.ts",
         "test/saved_object_api_integration/spaces_only/apis/delete.ts",
         "test/saved_object_api_integration/spaces_only/apis/update.ts",
-        "test/saved_object_api_integration/spaces_only/apis/import.ts",
         "test/saved_object_api_integration/spaces_only/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/spaces_only/apis/import.ts",
         "test/saved_object_api_integration/spaces_only/apis/create.ts",
         "test/saved_object_api_integration/spaces_only/apis/get.ts",
         "test/saved_object_api_integration/spaces_only/apis/find.ts",
         "test/saved_object_api_integration/spaces_only/apis/export.ts",
         "test/saved_object_api_integration/spaces_only/apis/bulk_get.ts"
-      ],
-      "tags": [
-        "saved_object_api_integration.spaces_only.apis.bulk_create",
-        "saved_object_api_integration.spaces_only.apis.bulk_update",
-        "saved_object_api_integration.spaces_only.apis.delete",
-        "saved_object_api_integration.spaces_only.apis.update",
-        "saved_object_api_integration.spaces_only.apis.import",
-        "saved_object_api_integration.spaces_only.apis.resolve_import_errors",
-        "saved_object_api_integration.spaces_only.apis.create",
-        "saved_object_api_integration.spaces_only.apis.get",
-        "saved_object_api_integration.spaces_only.apis.find",
-        "saved_object_api_integration.spaces_only.apis.export",
-        "saved_object_api_integration.spaces_only.apis.bulk_get"
       ],
       "estimatedDuration": 139
     },
@@ -1418,10 +835,6 @@
         "test/saved_object_api_integration/security_and_spaces/apis/update.ts",
         "test/saved_object_api_integration/security_and_spaces/apis/bulk_get.ts"
       ],
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.update",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_get"
-      ],
       "estimatedDuration": 110
     },
     {
@@ -1430,65 +843,36 @@
         "test/alerting_api_integration/spaces_only/tests/actions/type_not_enabled.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/alerts_space1.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/alerts_default_space.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/builtin_action_types/webhook.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/get_alert_state.ts",
         "test/alerting_api_integration/spaces_only/tests/actions/execute.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/disable.ts",
         "test/alerting_api_integration/spaces_only/tests/actions/delete.ts",
-        "test/alerting_api_integration/spaces_only/tests/alerting/enable.ts",
-        "test/alerting_api_integration/spaces_only/tests/alerting/find.ts",
-        "test/alerting_api_integration/spaces_only/tests/alerting/get.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/update_api_key.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/update.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/get.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/enable.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/find.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/create.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/delete.ts",
-        "test/alerting_api_integration/spaces_only/tests/actions/find.ts",
-        "test/alerting_api_integration/spaces_only/tests/alerting/unmute_instance.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/unmute_all.ts",
-        "test/alerting_api_integration/spaces_only/tests/actions/update.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/unmute_instance.ts",
         "test/alerting_api_integration/spaces_only/tests/actions/get.ts",
-        "test/alerting_api_integration/spaces_only/tests/alerting/mute_instance.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/find.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/update.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/mute_all.ts",
-        "test/alerting_api_integration/spaces_only/tests/actions/builtin_action_types/es_index.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/mute_instance.ts",
         "test/alerting_api_integration/spaces_only/tests/actions/create.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/builtin_action_types/es_index.ts",
         "test/alerting_api_integration/spaces_only/tests/alerting/list_alert_types.ts",
         "test/alerting_api_integration/spaces_only/tests/actions/list_action_types.ts"
       ],
-      "tags": [
-        "alerting_api_integration.spaces_only.tests.actions.type_not_enabled",
-        "alerting_api_integration.spaces_only.tests.alerting.alerts_space1",
-        "alerting_api_integration.spaces_only.tests.alerting.alerts_default_space",
-        "alerting_api_integration.spaces_only.tests.alerting.get_alert_state",
-        "alerting_api_integration.spaces_only.tests.actions.execute",
-        "alerting_api_integration.spaces_only.tests.alerting.disable",
-        "alerting_api_integration.spaces_only.tests.actions.delete",
-        "alerting_api_integration.spaces_only.tests.alerting.enable",
-        "alerting_api_integration.spaces_only.tests.alerting.find",
-        "alerting_api_integration.spaces_only.tests.alerting.get",
-        "alerting_api_integration.spaces_only.tests.alerting.update_api_key",
-        "alerting_api_integration.spaces_only.tests.alerting.update",
-        "alerting_api_integration.spaces_only.tests.alerting.create",
-        "alerting_api_integration.spaces_only.tests.alerting.delete",
-        "alerting_api_integration.spaces_only.tests.actions.find",
-        "alerting_api_integration.spaces_only.tests.alerting.unmute_instance",
-        "alerting_api_integration.spaces_only.tests.alerting.unmute_all",
-        "alerting_api_integration.spaces_only.tests.actions.update",
-        "alerting_api_integration.spaces_only.tests.actions.get",
-        "alerting_api_integration.spaces_only.tests.alerting.mute_instance",
-        "alerting_api_integration.spaces_only.tests.alerting.mute_all",
-        "alerting_api_integration.spaces_only.tests.actions.builtin_action_types.es_index",
-        "alerting_api_integration.spaces_only.tests.actions.create",
-        "alerting_api_integration.spaces_only.tests.alerting.list_alert_types",
-        "alerting_api_integration.spaces_only.tests.actions.list_action_types"
-      ],
-      "estimatedDuration": 232
+      "estimatedDuration": 262
     },
     {
       "config": "test/pki_api_integration/config.ts",
       "files": [
         "test/pki_api_integration/apis/security/pki_auth.ts"
-      ],
-      "tags": [
-        "pki_api_integration.apis.security.pki_auth"
       ],
       "estimatedDuration": 57
     },
@@ -1497,18 +881,12 @@
       "files": [
         "test/kerberos_api_integration/apis/security/kerberos_login.ts"
       ],
-      "tags": [
-        "kerberos_api_integration.apis.security.kerberos_login"
-      ],
       "estimatedDuration": 56
     },
     {
       "config": "test/kerberos_api_integration/anonymous_access.config.ts",
       "files": [
         "test/kerberos_api_integration/apis/security/kerberos_login.ts"
-      ],
-      "tags": [
-        "kerberos_api_integration.apis.security.kerberos_login"
       ],
       "estimatedDuration": 55
     },
@@ -1517,18 +895,12 @@
       "files": [
         "test/saved_object_api_integration/security_and_spaces/apis/export.ts"
       ],
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.export"
-      ],
       "estimatedDuration": 54
     },
     {
       "config": "test/saml_api_integration/config.ts",
       "files": [
         "test/saml_api_integration/apis/security/saml_login.ts"
-      ],
-      "tags": [
-        "saml_api_integration.apis.security.saml_login"
       ],
       "estimatedDuration": 51
     },
@@ -1545,17 +917,6 @@
         "test/alerting_api_integration/security_and_spaces/tests/alerting/unmute_instance.ts",
         "test/alerting_api_integration/security_and_spaces/tests/alerting/create.ts"
       ],
-      "tags": [
-        "alerting_api_integration.security_and_spaces.tests.alerting.get_alert_state",
-        "alerting_api_integration.security_and_spaces.tests.alerting.enable",
-        "alerting_api_integration.security_and_spaces.tests.actions.get",
-        "alerting_api_integration.security_and_spaces.tests.actions.update",
-        "alerting_api_integration.security_and_spaces.tests.alerting.mute_instance",
-        "alerting_api_integration.security_and_spaces.tests.actions.delete",
-        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_all",
-        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_instance",
-        "alerting_api_integration.security_and_spaces.tests.alerting.create"
-      ],
       "estimatedDuration": 182
     },
     {
@@ -1563,18 +924,12 @@
       "files": [
         "test/oidc_api_integration/apis/authorization_code_flow/oidc_auth.js"
       ],
-      "tags": [
-        "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
-      ],
       "estimatedDuration": 35
     },
     {
       "config": "test/licensing_plugin/config.public.ts",
       "files": [
         "test/licensing_plugin/public/updates.ts"
-      ],
-      "tags": [
-        "licensing_plugin.public.updates"
       ],
       "estimatedDuration": 34
     },
@@ -1585,20 +940,12 @@
         "test/licensing_plugin/server/info.ts",
         "test/licensing_plugin/server/header.ts"
       ],
-      "tags": [
-        "licensing_plugin.server.updates",
-        "licensing_plugin.server.info",
-        "licensing_plugin.server.header"
-      ],
       "estimatedDuration": 30
     },
     {
       "config": "test/licensing_plugin/config.legacy.ts",
       "files": [
         "test/licensing_plugin/legacy/updates.ts"
-      ],
-      "tags": [
-        "licensing_plugin.legacy.updates"
       ],
       "estimatedDuration": 29
     },
@@ -1607,18 +954,12 @@
       "files": [
         "test/plugin_functional/test_suites/resolver"
       ],
-      "tags": [
-        "plugin_functional.resolver"
-      ],
       "estimatedDuration": 27
     },
     {
       "config": "test/functional/config_security_basic.js",
       "files": [
         "test/functional/apps/security/basic_license/role_mappings.ts"
-      ],
-      "tags": [
-        "functional.apps.security.basic_license.role_mappings"
       ],
       "estimatedDuration": 26
     },
@@ -1630,12 +971,6 @@
         "test/token_api_integration/auth/logout.js",
         "test/token_api_integration/auth/login.js"
       ],
-      "tags": [
-        "token_api_integration.auth.session",
-        "token_api_integration.auth.header",
-        "token_api_integration.auth.logout",
-        "token_api_integration.auth.login"
-      ],
       "estimatedDuration": 59
     },
     {
@@ -1645,26 +980,7 @@
         "test/ui_capabilities/security_and_spaces/tests/nav_links.ts",
         "test/ui_capabilities/security_and_spaces/tests/foo.ts"
       ],
-      "tags": [
-        "ui_capabilities.security_and_spaces.tests.catalogue",
-        "ui_capabilities.security_and_spaces.tests.nav_links",
-        "ui_capabilities.security_and_spaces.tests.foo"
-      ],
       "estimatedDuration": 10
-    },
-    {
-      "config": "test/ui_capabilities/security_only/config.ts",
-      "files": [
-        "test/ui_capabilities/security_only/tests/catalogue.ts",
-        "test/ui_capabilities/security_only/tests/foo.ts",
-        "test/ui_capabilities/security_only/tests/nav_links.ts"
-      ],
-      "tags": [
-        "ui_capabilities.security_only.tests.catalogue",
-        "ui_capabilities.security_only.tests.foo",
-        "ui_capabilities.security_only.tests.nav_links"
-      ],
-      "estimatedDuration": 2
     },
     {
       "config": "test/api_integration/config_security_basic.js",
@@ -1677,15 +993,6 @@
         "test/api_integration/apis/security/index_fields.ts",
         "test/api_integration/apis/security/builtin_es_privileges.ts"
       ],
-      "tags": [
-        "api_integration.apis.security.change_password",
-        "api_integration.apis.security.basic_login",
-        "api_integration.apis.security.roles",
-        "api_integration.apis.security.session",
-        "api_integration.apis.security.privileges",
-        "api_integration.apis.security.index_fields",
-        "api_integration.apis.security.builtin_es_privileges"
-      ],
       "estimatedDuration": 5
     },
     {
@@ -1693,8 +1000,14 @@
       "files": [
         "test/oidc_api_integration/apis/implicit_flow/oidc_auth.ts"
       ],
-      "tags": [
-        "oidc_api_integration.apis.implicit_flow.oidc_auth"
+      "estimatedDuration": 2
+    },
+    {
+      "config": "test/ui_capabilities/security_only/config.ts",
+      "files": [
+        "test/ui_capabilities/security_only/tests/catalogue.ts",
+        "test/ui_capabilities/security_only/tests/foo.ts",
+        "test/ui_capabilities/security_only/tests/nav_links.ts"
       ],
       "estimatedDuration": 2
     },
@@ -1704,11 +1017,6 @@
         "test/ui_capabilities/spaces_only/tests/catalogue.ts",
         "test/ui_capabilities/spaces_only/tests/foo.ts",
         "test/ui_capabilities/spaces_only/tests/nav_links.ts"
-      ],
-      "tags": [
-        "ui_capabilities.spaces_only.tests.catalogue",
-        "ui_capabilities.spaces_only.tests.foo",
-        "ui_capabilities.spaces_only.tests.nav_links"
       ],
       "estimatedDuration": 0
     }
@@ -1727,17 +1035,6 @@
         "test/functional/apps/discover/_field_data.js",
         "test/functional/apps/visualize/_heatmap_chart.js"
       ],
-      "tags": [
-        "functional.apps.visualize._tsvb_chart",
-        "functional.apps.console._console",
-        "functional.apps.home._home",
-        "functional.apps.management._create_index_pattern_wizard",
-        "functional.apps.context._discover_navigation",
-        "functional.apps.discover._doc_navigation",
-        "functional.apps.visualize.input_control_vis.chained_controls",
-        "functional.apps.discover._field_data",
-        "functional.apps.visualize._heatmap_chart"
-      ],
       "estimatedDuration": 738
     },
     {
@@ -1746,11 +1043,6 @@
         "test/functional/apps/dashboard/panel_controls.js",
         "test/functional/apps/home/_sample_data.ts",
         "test/functional/apps/dashboard/time_zones.js"
-      ],
-      "tags": [
-        "functional.apps.dashboard.panel_controls",
-        "functional.apps.home._sample_data",
-        "functional.apps.dashboard.time_zones"
       ],
       "estimatedDuration": 764
     },
@@ -1763,22 +1055,12 @@
         "test/functional/apps/dashboard/dashboard_save.js",
         "test/functional/apps/visualize/_gauge_chart.js"
       ],
-      "tags": [
-        "functional.apps.dashboard.dashboard_filtering",
-        "functional.apps.visualize._inspector",
-        "functional.apps.getting_started._shakespeare",
-        "functional.apps.dashboard.dashboard_save",
-        "functional.apps.visualize._gauge_chart"
-      ],
       "estimatedDuration": 788
     },
     {
       "config": "test/functional/config.firefox.js",
       "files": [
         "test/functional/apps/visualize/_experimental_vis.js"
-      ],
-      "tags": [
-        "functional.apps.visualize._experimental_vis"
       ],
       "estimatedDuration": 109
     }
@@ -1798,18 +1080,6 @@
         "test/functional/apps/grok_debugger/grok_debugger.js",
         "test/functional/apps/index_management/home_page.ts"
       ],
-      "tags": [
-        "functional.apps.logstash.pipeline_list",
-        "functional.apps.infra.log_entry_categories_tab",
-        "functional.apps.infra.log_entry_rate_tab",
-        "functional.apps.infra.link_to",
-        "functional.apps.remote_clusters.home_page",
-        "functional.apps.cross_cluster_replication.home_page",
-        "functional.apps.index_lifecycle_management.home_page",
-        "functional.apps.status_page.status_page",
-        "functional.apps.grok_debugger.grok_debugger",
-        "functional.apps.index_management.home_page"
-      ],
       "estimatedDuration": 787
     },
     {
@@ -1821,13 +1091,6 @@
         "test/functional/apps/infra/metrics_source_configuration.ts",
         "test/functional/apps/snapshot_restore/home_page.ts"
       ],
-      "tags": [
-        "functional.apps.spaces.spaces_selection",
-        "functional.apps.infra.home_page",
-        "functional.apps.security.users",
-        "functional.apps.infra.metrics_source_configuration",
-        "functional.apps.snapshot_restore.home_page"
-      ],
       "estimatedDuration": 805
     },
     {
@@ -1838,12 +1101,6 @@
         "test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
         "test/functional/apps/transform/creation_index_pattern.ts"
       ],
-      "tags": [
-        "functional.apps.logstash.pipeline_create",
-        "functional.apps.machine_learning.pages",
-        "functional.apps.upgrade_assistant.upgrade_assistant",
-        "functional.apps.transform.creation_index_pattern"
-      ],
       "estimatedDuration": 755
     },
     {
@@ -1853,11 +1110,6 @@
         "test/functional/apps/security/user_email.js",
         "test/functional/apps/canvas/smoke_test.js"
       ],
-      "tags": [
-        "functional.apps.security.security",
-        "functional.apps.security.user_email",
-        "functional.apps.canvas.smoke_test"
-      ],
       "estimatedDuration": 729
     },
     {
@@ -1865,16 +1117,17 @@
       "files": [
         "test/functional/apps/transform/creation_saved_search.ts",
         "test/functional/apps/spaces/enter_space.ts",
-        "test/functional/apps/watcher/watcher_test.js",
-        "test/functional/apps/infra/logs_source_configuration.ts"
-      ],
-      "tags": [
-        "functional.apps.transform.creation_saved_search",
-        "functional.apps.spaces.enter_space",
-        "functional.apps.watcher.watcher_test",
-        "functional.apps.infra.logs_source_configuration"
+        "test/functional/apps/infra/logs_source_configuration.ts",
+        "test/functional/apps/watcher/watcher_test.js"
       ],
       "estimatedDuration": 752
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "files": [
+        "test/functional/apps/transform/cloning.ts"
+      ],
+      "estimatedDuration": 180
     }
   ]
 }

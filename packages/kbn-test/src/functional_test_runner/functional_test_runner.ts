@@ -121,31 +121,21 @@ export class FunctionalTestRunner {
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
 
-      const tagsByFile: Record<string, string> = {};
+      const suites: Record<string, object> = {};
 
-      const findLeafTags = (suite: any) => {
+      const findLeafSuites = (suite: any) => {
         if (suite.tests && suite.tests.length && suite.suiteTag) {
-          // tagsByFile[suite.file] = tagsByFile[suite.file] || new Set();
-          // tagsByFile[suite.file].add(suite.suiteTag);
-          tagsByFile[suite.file] = suite.suiteTag;
+          suites[suite.suiteTag] = { file: suite.suiteTag };
         }
 
         if (suite.suites && suite.suites.length) {
-          suite.suites.forEach((s: any) => findLeafTags(s));
+          suite.suites.forEach((s: any) => findLeafSuites(s));
         }
       };
 
-      findLeafTags(mocha.suite);
+      findLeafSuites(mocha.suite);
 
-      const final: object[] = [];
-      Object.keys(tagsByFile).forEach(file => {
-        final.push({
-          file,
-          tag: tagsByFile[file],
-        });
-      });
-
-      return final;
+      return Object.values(suites);
     });
   }
 

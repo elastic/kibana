@@ -65,16 +65,9 @@ export function decorateMochaUi(lifecycle, context, config) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
-          const filePath = this.file.match(/\/((x-pack\/)?test\/.*?)$/)[1];
-          const tag = filePath
-            .slice(5)
-            .replace('/index.js', '')
-            .replace(/\.(j|t)s$/, '')
-            .replace('/test_suites/', '/')
-            .replace(/\//g, '.');
-
-          this.tags([tag, filePath]);
-          this.suiteTag = filePath;
+          const filePath = this.file.match(/\/((x-pack\/)?test\/.*?)$/)[1]; // TODO replace with REPO_ROOT removal?
+          this.tags(filePath);
+          this.suiteTag = filePath; // The tag that uniquely targets this suite/file
 
           this.ftrConfig = config;
 

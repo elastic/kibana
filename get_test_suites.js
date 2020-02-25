@@ -28,7 +28,6 @@ const ROOT = __dirname;
 const getTestsTransformed = async (config, overrides = {}) => {
   const suites = await getTests(config, overrides);
   return suites.map(suite => ({
-    tag: suite.tag,
     file: path.relative(ROOT, suite.file),
     config: path.relative(ROOT, config),
     duration: suite.file.match('api_integration') ? 30 : 180,
