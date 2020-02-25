@@ -124,18 +124,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   // TO DO refactor each of these const's into their own components
   const propertyActions = [
     {
-      iconType: 'securitySignalResolved',
-      label: 'Close case',
-      onClick: () => null,
-    },
-    {
       iconType: 'trash',
       label: 'Delete case',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Push as ServiceNow incident',
       onClick: () => null,
     },
     {
