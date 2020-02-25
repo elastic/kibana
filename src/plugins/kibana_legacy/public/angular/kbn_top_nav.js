@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import angular from 'angular';
 import 'ngreact';
 
 export function createTopNavDirective() {
@@ -113,3 +114,15 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     'useDefaultBehaviors',
   ]);
 };
+
+let isLoaded = false;
+
+export function loadKbnTopNavDirectives(navUi) {
+  if (!isLoaded) {
+    isLoaded = true;
+    angular
+      .module('kibana')
+      .directive('kbnTopNav', createTopNavDirective)
+      .directive('kbnTopNavHelper', createTopNavHelper(navUi));
+  }
+}

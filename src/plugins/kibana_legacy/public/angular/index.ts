@@ -23,4 +23,4 @@ export { watchMultiDecorator } from './watch_multi';
 export * from './angular_config';
 export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';
 // @ts-ignore
-export { createTopNavDirective, createTopNavHelper } from './kbn_top_nav';
+export { createTopNavDirective, createTopNavHelper, loadKbnTopNavDirectives } from './kbn_top_nav';
