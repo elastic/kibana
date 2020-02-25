@@ -15,7 +15,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraLogs']);
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/58059
   describe('Logs Source Configuration', function() {
     this.tags('smoke');
 
