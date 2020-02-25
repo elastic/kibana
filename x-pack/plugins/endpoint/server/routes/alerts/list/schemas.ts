@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { encode, decode } from 'rison-node';
+import { decode } from 'rison-node';
 import { schema } from '@kbn/config-schema';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 

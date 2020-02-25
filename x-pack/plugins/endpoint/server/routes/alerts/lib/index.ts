@@ -7,7 +7,7 @@ import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { esKuery, esQuery } from '../../../../../../../src/plugins/data/server';
-import { AlertData, Direction, EndpointAppConstants } from '../../../../common/types';
+import { AlertEvent, Direction, EndpointAppConstants } from '../../../../common/types';
 import {
   AlertSearchQuery,
   AlertSearchRequest,
@@ -140,10 +140,10 @@ const buildAlertSearchQuery = async (
 export const searchESForAlerts = async (
   dataClient: IScopedClusterClient,
   query: AlertSearchQuery
-): Promise<SearchResponse<AlertData>> => {
+): Promise<SearchResponse<AlertEvent>> => {
   const reqWrapper = await buildAlertSearchQuery(query);
   const response = (await dataClient.callAsCurrentUser('search', reqWrapper)) as SearchResponse<
-    AlertData
+    AlertEvent
   >;
 
   // Reverse the hits if we used `search_before`.

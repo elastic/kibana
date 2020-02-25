@@ -82,6 +82,6 @@ export interface AlertListRequestQuery {
   date_range: string;
   sort: string;
   order: Direction;
-  after?: [any, any];
-  before?: [any, any];
+  after?: SearchCursor;
+  before?: SearchCursor;
 }

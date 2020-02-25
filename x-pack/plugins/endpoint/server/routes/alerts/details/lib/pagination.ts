@@ -6,7 +6,7 @@
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertData, AlertHits, Direction } from '../../../../../common/types';
+import { AlertEvent, AlertHits, Direction } from '../../../../../common/types';
 import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
@@ -17,13 +17,13 @@ import { BASE_ALERTS_ROUTE } from '../..';
  */
 export class AlertDetailsPagination extends Pagination<
   AlertDetailsRequestParams,
-  GetResponse<AlertData>
+  GetResponse<AlertEvent>
 > {
   constructor(
     config: EndpointConfigType,
     requestContext: RequestHandlerContext,
     state: AlertDetailsRequestParams,
-    data: GetResponse<AlertData>
+    data: GetResponse<AlertEvent>
   ) {
     super(config, requestContext, state, data);
   }
@@ -31,7 +31,7 @@ export class AlertDetailsPagination extends Pagination<
   protected async doSearch(
     direction: Direction,
     cursor: SearchCursor
-  ): Promise<SearchResponse<AlertData>> {
+  ): Promise<SearchResponse<AlertEvent>> {
     const reqData: AlertSearchQuery = {
       pageSize: 1,
       sort: this.config.alertResultListDefaultSort,

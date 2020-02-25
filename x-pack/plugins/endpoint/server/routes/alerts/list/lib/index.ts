@@ -9,6 +9,7 @@ import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
 import { Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
+  AlertEvent,
   AlertData,
   AlertResultList,
   AlertHits,
@@ -61,7 +62,7 @@ export async function mapToAlertResultList(
   reqCtx: RequestHandlerContext,
   endpointAppContext: EndpointAppContext,
   reqData: AlertSearchQuery,
-  searchResponse: SearchResponse<AlertData>
+  searchResponse: SearchResponse<AlertEvent>
 ): Promise<AlertResultList> {
   let totalNumberOfAlerts: number = 0;
   let totalIsLowerBound: boolean = false;
@@ -86,6 +87,8 @@ export async function mapToAlertResultList(
     return {
       id: entry._id,
       ...entry._source,
+      prev: null,
+      next: null,
     };
   }
 
