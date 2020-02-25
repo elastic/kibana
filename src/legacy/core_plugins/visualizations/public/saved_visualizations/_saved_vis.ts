@@ -33,8 +33,8 @@ import { updateOldState } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../plugins/data/public';
 import { VisSavedObject } from '../embeddable/visualize_embeddable';
+import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
-import { createSavedSearchesLoader } from '../../../kibana/public/discover';
 import { VisualizeConstants } from '../../../kibana/public/visualize';
 import { VisImpl } from '../np_ready/public/vis_impl';
 
