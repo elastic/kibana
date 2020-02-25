@@ -10,9 +10,9 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
-import { IFeature } from '../../../../../features/public';
+import { FeatureConfig } from '../../../../../features/public';
 
-const features: IFeature[] = [
+const features: FeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',

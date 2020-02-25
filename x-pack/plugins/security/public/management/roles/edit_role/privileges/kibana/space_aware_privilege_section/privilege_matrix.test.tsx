@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../spaces/public';
-import { IFeature } from '../../../../../../../../features/public';
+import { FeatureConfig } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { PrivilegeMatrix } from './privilege_matrix';
@@ -21,7 +21,7 @@ describe('PrivilegeMatrix', () => {
       disabledFeatures: [],
     }));
 
-    const features: IFeature[] = [
+    const features: FeatureConfig[] = [
       {
         id: 'feature1',
         name: 'feature 1',

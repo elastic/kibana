@@ -8,7 +8,7 @@ import Joi from 'joi';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { IFeature } from '../common/feature';
+import { FeatureConfig } from '../common/feature';
 import { FeatureKibanaPrivileges } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
@@ -119,7 +119,7 @@ const schema = Joi.object({
   }),
 });
 
-export function validateFeature(feature: IFeature) {
+export function validateFeature(feature: FeatureConfig) {
   const validateResult = Joi.validate(feature, schema);
   if (validateResult.error) {
     throw validateResult.error;

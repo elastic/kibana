@@ -5,14 +5,14 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { IFeature, Feature, FeatureKibanaPrivileges } from '../common';
+import { FeatureConfig, Feature, FeatureKibanaPrivileges } from '../common';
 import { validateFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;
-  private features: Record<string, IFeature> = {};
+  private features: Record<string, FeatureConfig> = {};
 
-  public register(feature: IFeature) {
+  public register(feature: FeatureConfig) {
     if (this.locked) {
       throw new Error(
         `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
@@ -25,9 +25,9 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
-    const featureCopy: IFeature = cloneDeep(feature as IFeature);
+    const featureCopy: FeatureConfig = cloneDeep(feature as FeatureConfig);
 
-    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as IFeature);
+    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as FeatureConfig);
   }
 
   public getAll(): Feature[] {
@@ -36,7 +36,7 @@ export class FeatureRegistry {
   }
 }
 
-function applyAutomaticPrivilegeGrants(feature: IFeature): IFeature {
+function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
   const allPrivilege = feature.privileges?.all;
   const readPrivilege = feature.privileges?.read;
   const reservedPrivilege = feature.reserved?.privilege;

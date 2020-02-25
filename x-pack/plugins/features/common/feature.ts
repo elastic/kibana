@@ -6,14 +6,14 @@
 
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { ISubFeature, SubFeature } from './sub_feature';
+import { SubFeatureConfig, SubFeature } from './sub_feature';
 
 /**
  * Interface for registering a feature.
  * Feature registration allows plugins to hide their applications with spaces,
  * and secure access when configured for security.
  */
-export interface IFeature {
+export interface FeatureConfig {
   /**
    * Unique identifier for this feature.
    * This identifier is also used when generating UI Capabilities.
@@ -106,7 +106,7 @@ export interface IFeature {
   /**
    * Optional sub-feature privilege definitions. This can only be specified if `privileges` are are also defined.
    */
-  subFeatures?: ISubFeature[];
+  subFeatures?: SubFeatureConfig[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.
@@ -125,7 +125,7 @@ export interface IFeature {
 export class Feature {
   public readonly subFeatures: SubFeature[];
 
-  constructor(protected readonly config: RecursiveReadonly<IFeature>) {
+  constructor(protected readonly config: RecursiveReadonly<FeatureConfig>) {
     this.subFeatures = (config.subFeatures ?? []).map(
       subFeatureConfig => new SubFeature(subFeatureConfig)
     );
@@ -176,6 +176,6 @@ export class Feature {
   }
 
   public toRaw() {
-    return { ...this.config } as IFeature;
+    return { ...this.config } as FeatureConfig;
   }
 }

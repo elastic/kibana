@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IFeature } from '../../../../../../../../features/public';
+import { FeatureConfig } from '../../../../../../../../features/public';
 import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../common/model';
 import {
   AllowedPrivilege,
@@ -30,7 +30,7 @@ import { ChangeAllPrivilegesControl } from './change_all_privileges';
 
 interface Props {
   role: Role;
-  features: IFeature[];
+  features: FeatureConfig[];
   calculatedPrivileges: CalculatedPrivilege;
   allowedPrivileges: AllowedPrivilege;
   rankedFeaturePrivileges: FeaturesPrivileges;
@@ -41,7 +41,7 @@ interface Props {
   disabled?: boolean;
 }
 
-interface TableFeature extends IFeature {
+interface TableFeature extends FeatureConfig {
   hasAnyPrivilegeAssigned: boolean;
 }
 

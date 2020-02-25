@@ -5,7 +5,7 @@
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-import { Feature, IFeature } from '.';
+import { Feature, FeatureConfig } from '.';
 
 function createFeaturePrivilege(key: string, capabilities: string[] = []) {
   return {
@@ -34,7 +34,7 @@ describe('populateUICapabilities', () => {
           app: ['bar-app'],
           privileges: ({
             ...createFeaturePrivilege('all'),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
       ])
     ).toEqual({
@@ -53,7 +53,7 @@ describe('populateUICapabilities', () => {
           app: ['bar-app'],
           privileges: ({
             ...createFeaturePrivilege('all', ['capability1', 'capability2']),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
       ])
     ).toEqual({
@@ -78,7 +78,7 @@ describe('populateUICapabilities', () => {
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz'),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
       ])
     ).toEqual({
@@ -107,7 +107,7 @@ describe('populateUICapabilities', () => {
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
       ])
     ).toEqual({
@@ -134,7 +134,7 @@ describe('populateUICapabilities', () => {
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
         new Feature({
           id: 'anotherNewFeature',
@@ -143,7 +143,7 @@ describe('populateUICapabilities', () => {
           privileges: ({
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
         new Feature({
           id: 'yetAnotherNewFeature',
@@ -158,7 +158,7 @@ describe('populateUICapabilities', () => {
               'something2',
               'something3',
             ]),
-          } as unknown) as IFeature['privileges'],
+          } as unknown) as FeatureConfig['privileges'],
         }),
       ])
     ).toEqual({

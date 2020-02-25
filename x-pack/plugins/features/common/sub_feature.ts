@@ -10,17 +10,17 @@ import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 /**
  * Configuration for a sub-feature.
  */
-export interface ISubFeature {
+export interface SubFeatureConfig {
   /** Display name for this sub-feature */
   name: string;
 
   /** Collection of privilege groups */
-  privilegeGroups: ISubFeaturePrivilegeGroup[];
+  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
 }
 /**
  * Configuration for a sub-feature privilege group.
  */
-export interface ISubFeaturePrivilegeGroup {
+export interface SubFeaturePrivilegeGroupConfig {
   /**
    * The type of privilege group.
    * - `mutually_exclusive`::
@@ -34,13 +34,13 @@ export interface ISubFeaturePrivilegeGroup {
   /**
    * The privileges which belong to this group.
    */
-  privileges: ISubFeaturePrivilege[];
+  privileges: SubFeaturePrivilegeConfig[];
 }
 
 /**
  * Configuration for a sub-feature privilege.
  */
-export interface ISubFeaturePrivilege
+export interface SubFeaturePrivilegeConfig
   extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges'> {
   /**
    * Identifier for this privilege. Must be unique across all other privileges within a feature.
@@ -60,7 +60,7 @@ export interface ISubFeaturePrivilege
 }
 
 export class SubFeature {
-  constructor(protected readonly config: RecursiveReadonly<ISubFeature>) {}
+  constructor(protected readonly config: RecursiveReadonly<SubFeatureConfig>) {}
 
   public get name() {
     return this.config.name;

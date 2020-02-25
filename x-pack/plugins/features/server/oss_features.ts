@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { IFeature } from '../common/feature';
+import { FeatureConfig } from '../common/feature';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
@@ -339,10 +339,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
     },
     ...(includeTimelion ? [timelionFeature] : []),
-  ] as IFeature[];
+  ] as FeatureConfig[];
 };
 
-const timelionFeature: IFeature = {
+const timelionFeature: FeatureConfig = {
   id: 'timelion',
   name: 'Timelion',
   icon: 'timelionApp',

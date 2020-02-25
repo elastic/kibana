@@ -5,11 +5,11 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
-import { IFeature } from '../common/feature';
+import { FeatureConfig } from '../common/feature';
 
 describe('FeatureRegistry', () => {
   it('allows a minimal feature to be registered', () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -27,7 +27,7 @@ describe('FeatureRegistry', () => {
   });
 
   it('allows a complex feature to be registered', () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       excludeFromBasePrivileges: true,
@@ -138,7 +138,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`requires a value for privileges`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -151,7 +151,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`does not allow sub-features to be registered when no primary privileges are not registered`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -187,7 +187,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`automatically grants 'all' access to telemetry saved objects for the 'all' privilege`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -221,7 +221,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`automatically grants 'read' access to config and url saved objects for both privileges`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -257,7 +257,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`automatically grants 'all' access to telemetry and 'read' to [config, url] saved objects for the reserved privilege`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -284,7 +284,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -321,14 +321,14 @@ describe('FeatureRegistry', () => {
   });
 
   it(`does not allow duplicate features to be registered`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
       privileges: null,
     };
 
-    const duplicateFeature: IFeature = {
+    const duplicateFeature: FeatureConfig = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
       app: [],
@@ -401,7 +401,7 @@ describe('FeatureRegistry', () => {
   });
 
   it('prevents features from being registered with invalid privilege names', () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['app1', 'app2'],
@@ -426,7 +426,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['bar'],
@@ -458,7 +458,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying app entries that don't exist at the privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['foo', 'bar', 'baz'],
@@ -513,7 +513,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents reserved privileges from specifying app entries that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['bar'],
@@ -539,7 +539,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying app entries that don't exist at the reserved privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['foo', 'bar', 'baz'],
@@ -565,7 +565,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents privileges from specifying catalogue entries that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -600,7 +600,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying catalogue entries that don't exist at the privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -658,7 +658,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents reserved privileges from specifying catalogue entries that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -686,7 +686,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying catalogue entries that don't exist at the reserved privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -714,7 +714,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents privileges from specifying management sections that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -758,7 +758,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying management sections that don't exist at the privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -829,7 +829,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents reserved privileges from specifying management entries that don't exist at the root level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -863,7 +863,7 @@ describe('FeatureRegistry', () => {
   });
 
   it(`prevents features from specifying management entries that don't exist at the reserved privilege level`, () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -897,7 +897,7 @@ describe('FeatureRegistry', () => {
   });
 
   it('prevents features from specifying sub feature ids which collide with the primary feature privileges', () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -949,7 +949,7 @@ describe('FeatureRegistry', () => {
   });
 
   it('prevents features from specifying sub feature ids which collide with other sub-feature privileges', () => {
-    const feature: IFeature = {
+    const feature: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
@@ -1021,13 +1021,13 @@ describe('FeatureRegistry', () => {
   });
 
   it('cannot register feature after getAll has been called', () => {
-    const feature1: IFeature = {
+    const feature1: FeatureConfig = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
       privileges: null,
     };
-    const feature2: IFeature = {
+    const feature2: FeatureConfig = {
       id: 'test-feature-2',
       name: 'Test Feature 2',
       app: [],
