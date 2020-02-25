@@ -65,7 +65,10 @@ export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
-    .should('be.above', 0);
+    .then(strCount => {
+      const intCount = +strCount;
+      cy.wrap(intCount).should('be.above', 0);
+    });
 };
 
 export const uncheckTimestampToggleField = () => {
