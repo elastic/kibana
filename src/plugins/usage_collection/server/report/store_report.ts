@@ -54,11 +54,13 @@ export async function storeReport(
         ],
       };
     }),
-    internalRepository.bulkCreate(
-      appUsage.map(([appId, metric]) => ({
-        type: 'application_usage_transactional',
-        attributes: { ...metric, appId, timestamp },
-      }))
-    ),
+    appUsage.length
+      ? internalRepository.bulkCreate(
+          appUsage.map(([appId, metric]) => ({
+            type: 'application_usage_transactional',
+            attributes: { ...metric, appId, timestamp },
+          }))
+        )
+      : { saved_objects: [] },
   ]);
 }
