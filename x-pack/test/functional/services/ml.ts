@@ -42,7 +42,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
-  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(context);
+  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
+    context,
+    common
+  );
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
