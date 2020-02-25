@@ -8,7 +8,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 
 import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
+import { npStart } from 'ui/new_platform';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -22,17 +22,13 @@ const legacyBasePath = {
   get: chrome.getBasePath,
   remove: () => {},
 };
-const legacyDocLinks = {
-  ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  DOC_LINK_VERSION: metadata.branch,
-};
 
 let DependenciesContext: React.Context<AppDependencies>;
 
 const setAppDependencies = (deps: AppDependencies) => {
   setDependencyCache({
     autocomplete: deps.plugins.data.autocomplete,
-    docLinks: legacyDocLinks as any,
+    docLinks: npStart.core.docLinks as any,
     basePath: legacyBasePath as any,
     XSRF: chrome.getXsrfToken(),
   });
@@ -46,6 +42,13 @@ export const useAppDependencies = () => {
     Use the "setAppDependencies()" method when bootstrapping the app.`);
   }
   return useContext<AppDependencies>(DependenciesContext);
+};
+
+export const useDocumentationLinks = () => {
+  const {
+    core: { documentation },
+  } = useAppDependencies();
+  return documentation;
 };
 
 export const useToastNotifications = () => {

@@ -11,7 +11,6 @@ import { renderReact } from './app/app';
 import { Core, Plugins } from './shim';
 
 import { breadcrumbService, docTitleService } from './app/services/navigation';
-import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
@@ -42,6 +41,7 @@ export class Plugin {
     const appDependencies = {
       core: {
         chrome,
+        documentation,
         http,
         i18n: core.i18n,
         notifications,
@@ -71,7 +71,6 @@ export class Plugin {
     textService.init();
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     uiMetricService.init(uiMetric.createUiStatsReporter);
-    documentationLinksService.init(documentation.esDocBasePath);
     docTitleService.init(docTitle.change);
 
     const unmountReactApp = (): void => {

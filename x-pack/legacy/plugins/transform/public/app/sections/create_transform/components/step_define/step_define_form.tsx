@@ -9,8 +9,6 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { metadata } from 'ui/metadata';
-
 import {
   EuiButton,
   EuiCodeEditor,
@@ -28,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useDocumentationLinks, useToastNotifications } from '../../../../app_dependencies';
 import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';
@@ -248,6 +246,7 @@ interface Props {
 export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const kibanaContext = useKibanaContext();
   const toastNotifications = useToastNotifications();
+  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
@@ -491,15 +490,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     setAdvancedSourceEditorApplyButtonEnabled(false);
   };
 
-  // metadata.branch corresponds to the version used in documentation links.
-  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-resource.html#transform-pivot`;
   const advancedEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the pivot configuration of the transform.',
       })}{' '}
-      <EuiLink href={docsUrl} target="_blank">
+      <EuiLink href={esTransformPivot} target="_blank">
         {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
@@ -507,14 +504,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     </Fragment>
   );
 
-  const sourceDocsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/query-dsl.html`;
   const advancedSourceEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the source query clause of the transform.',
       })}{' '}
-      <EuiLink href={sourceDocsUrl} target="_blank">
+      <EuiLink href={esQueryDsl} target="_blank">
         {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
