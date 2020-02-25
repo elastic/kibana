@@ -16,7 +16,9 @@ import {
   TickFormatter,
   Position,
 } from '@elastic/charts';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
 import { useUiSetting } from '../../lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
@@ -54,7 +56,7 @@ export interface ChartSeriesData {
   color?: string | undefined;
 }
 
-export const WrappedByAutoSizer = styled.div<{ height?: string }>`
+const WrappedByAutoSizerComponent = styled.div<{ height?: string }>`
   ${style =>
     `
     height: ${style.height != null ? style.height : defaultChartHeight};
@@ -66,7 +68,9 @@ export const WrappedByAutoSizer = styled.div<{ height?: string }>`
   }
 `;
 
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+WrappedByAutoSizerComponent.displayName = 'WrappedByAutoSizer';
+
+export const WrappedByAutoSizer = React.memo(WrappedByAutoSizerComponent);
 
 export enum SeriesType {
   BAR = 'bar',
@@ -96,8 +100,9 @@ const theme: PartialTheme = {
 export const useTheme = () => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);
 
-  return mergeWithDefaultTheme(theme, defaultTheme);
+  return themeValue;
 };
 
 export const chartDefaultSettings = {
