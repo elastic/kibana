@@ -20,6 +20,7 @@ import {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface DependencyCache {
   timefilter: TimefilterSetup | null;
@@ -38,6 +39,7 @@ export interface DependencyCache {
   APP_URL: string | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
+  security: SecurityPluginSetup | null;
 }
 
 const cache: DependencyCache = {
@@ -57,6 +59,7 @@ const cache: DependencyCache = {
   APP_URL: null,
   application: null,
   http: null,
+  security: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -187,6 +190,13 @@ export function getHttp() {
     throw new Error("http hasn't been initialized");
   }
   return cache.http;
+}
+
+export function getSecurity() {
+  if (cache.security === null) {
+    throw new Error("security hasn't been initialized");
+  }
+  return cache.security;
 }
 
 export function clearCache() {
