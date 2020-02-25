@@ -29,7 +29,11 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { Environment, FeatureCatalogueEntry } from '../../../../../plugins/home/public';
+import {
+  Environment,
+  FeatureCatalogueEntry,
+  TutorialStart,
+} from '../../../../../plugins/home/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -47,7 +51,6 @@ export interface HomeKibanaServices {
     devMode: boolean;
     uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
   };
-  getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   telemetryOptInProvider: any;
   uiSettings: IUiSettingsClient;
@@ -62,6 +65,8 @@ export interface HomeKibanaServices {
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environment: Environment;
+  tutorialVariables: TutorialStart['get'];
+  getInjected: (name: string, defaultValue?: any) => unknown;
 }
 
 let services: HomeKibanaServices | null = null;

@@ -143,6 +143,7 @@ kibana_vars=(
     xpack.code.security.enableGitCertCheck
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
+    xpack.encryptedSavedObjects.encryptionKey
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy

@@ -10,7 +10,7 @@ import { EuiBasicTableColumn, EuiIconTip, EuiLink, EuiTextColor } from '@elastic
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import React from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
-import { ColumnTypes } from './index';
+import { ColumnTypes } from './types';
 
 const actions: Array<DefaultItemIconButtonAction<ColumnTypes>> = [
   {

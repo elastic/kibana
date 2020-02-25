@@ -17,7 +17,8 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_saved_search', function() {
+  // flaky test, see #55179
+  describe.skip('creation_saved_search', function() {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/farequote');

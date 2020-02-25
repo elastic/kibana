@@ -9,8 +9,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
 import { i18n } from '@kbn/i18n';
+
+import { timefilter } from 'ui/timefilter';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -80,6 +82,11 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, config, mode }) => {
     checkGetJobsPrivilege,
     checkMlNodesAvailable,
   });
+
+  useEffect(() => {
+    timefilter.disableTimeRangeSelector();
+    timefilter.disableAutoRefreshSelector();
+  }, []);
 
   const canCreateFilter = checkPermission('canCreateFilter');
   const canDeleteFilter = checkPermission('canDeleteFilter');

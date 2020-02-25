@@ -54,11 +54,9 @@ Granted that you share your thoughts, we might even be able to come up with crea
 
 First of all, **sorry about that!** We want you to have a great time with Kibana.
 
-Hosting meaningful discussions on GitHub can be challenging. For that reason, we'll sometimes ask that you join us on IRC _([#kibana](https://kiwiirc.com/client/irc.freenode.net/?#kibana) on freenode)_ to chat about your issues. You may also experience **faster response times** when engaging us via IRC.
-
 There's hundreds of open issues and prioritizing what to work on is an important aspect of our daily jobs. We prioritize issues according to impact and difficulty, so some issues can be neglected while we work on more pressing issues.
 
-Feel free to bump your issues if you think they've been neglected for a prolonged period, or just jump on IRC and let us have it!
+Feel free to bump your issues if you think they've been neglected for a prolonged period.
 
 ### "I want to help!"
 

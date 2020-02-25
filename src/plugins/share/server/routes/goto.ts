@@ -22,6 +22,7 @@ import { schema } from '@kbn/config-schema';
 
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
+import { modifyUrl } from '../../../../core/utils';
 
 export const createGotoRoute = ({
   router,
@@ -48,9 +49,16 @@ export const createGotoRoute = ({
       const uiSettings = context.core.uiSettings.client;
       const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
       if (!stateStoreInSessionStorage) {
+        const basePath = http.basePath.get(request);
+
+        const prependedUrl = modifyUrl(url, parts => {
+          if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+            parts.pathname = `${basePath}${parts.pathname}`;
+          }
+        });
         return response.redirected({
           headers: {
-            location: http.basePath.prepend(url),
+            location: prependedUrl,
           },
         });
       }

@@ -253,6 +253,8 @@ export interface ChromeNavLink {
     readonly baseUrl: string;
     // @deprecated
     readonly disabled?: boolean;
+    // @deprecated
+    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
     readonly icon?: string;

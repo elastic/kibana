@@ -39,7 +39,7 @@ function isEnabled(config) {
 export function apmSpecProvider(server) {
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
-  const { cloud } = server.newPlatform.setup;
+  const { cloud } = server.newPlatform.setup.plugins;
 
   const savedObjects = [
     {

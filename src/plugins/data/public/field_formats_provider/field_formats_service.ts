@@ -24,7 +24,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -37,6 +36,8 @@ import {
   TruncateFormat,
   UrlFormat,
 } from '../../common/';
+
+import { DateFormat } from '../field_formats/converters';
 
 export class FieldFormatsService {
   private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
+import { timefilter } from 'ui/timefilter';
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { OverviewPage } from '../../overview';
@@ -41,6 +42,11 @@ const PageWrapper: FC<PageProps> = ({ config }) => {
     getMlNodeCount,
     loadMlServerInfo,
   });
+
+  useEffect(() => {
+    timefilter.disableTimeRangeSelector();
+    timefilter.enableAutoRefreshSelector();
+  }, []);
 
   return (
     <PageLoader context={context}>
