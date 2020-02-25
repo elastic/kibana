@@ -16,32 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import fs from 'fs';
-import { resolve, sep } from 'path';
-
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
-
-const allSuites: any = {};
-const setSuccessStatus = (suite: any) => {
-  if (suite.tests && suite.tests.length) {
-    suite.success = !suite.tests.find((t: any) => t.state === 'failed');
-
-    if (!suite.success) {
-      return;
-    }
-  }
-
-  if (suite.suites && suite.suites.length) {
-    suite.success = !suite.suites.find((s: any) => !s.success);
-  }
-};
-
-const BASE_PATH = resolve(__dirname, '..', '..', '..', '..', '..', '..'); // TODO use REPO_ROOT
-
-const getTestMetadataPath = () => {
-  return process.env.TEST_METADATA_PATH || resolve(BASE_PATH, 'target', 'test_metadata.json');
-};
 
 /**
  *  Run the tests that have already been loaded into
@@ -58,63 +34,8 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     runComplete = true;
   });
 
-  if (fs.existsSync(getTestMetadataPath())) {
-    fs.unlinkSync(getTestMetadataPath());
-  }
-
   lifecycle.cleanup.add(() => {
     if (!runComplete) runner.abort();
-  });
-
-  // TODO move all of the start/end time tracking and such to a separate file, but add the hooks here
-  // and gate behind a CI env var or something
-
-  lifecycle.beforeTestSuite.add(s => {
-    s.startTime = new Date();
-    s.success = true;
-  });
-
-  lifecycle.afterTestSuite.add(suite => {
-    suite.endTime = new Date();
-    suite.duration = new Date(suite.endTime).getTime() - new Date(suite.startTime).getTime();
-    suite.duration = Math.floor(suite.duration / 1000);
-    suite.durationMin = Math.round(suite.duration / 60);
-
-    setSuccessStatus(suite);
-
-    const config = suite.ftrConfig.path.replace(BASE_PATH + sep, '');
-    const file = suite.file.replace(BASE_PATH + sep, '');
-
-    // TODO should non-leaf suite (e.g. index files) still be included here? is it confusing?
-    allSuites[config] = allSuites[config] || {};
-    allSuites[config][file] = {
-      config,
-      file,
-      tag: suite.suiteTag,
-      title: suite.title,
-      startTime: suite.startTime,
-      endTime: suite.endTime,
-      duration: suite.duration,
-      success: suite.success,
-      leafSuite: !!(
-        (suite.tests && suite.tests.length) ||
-        (allSuites[config][file] && allSuites[config][file].leafSuite)
-      ),
-    };
-  });
-
-  // TODO
-  interface SuiteWithDuration {
-    duration: number;
-  }
-
-  lifecycle.cleanup.add(() => {
-    const flattened: SuiteWithDuration[] = [];
-    Object.values(allSuites).forEach((x: any) =>
-      Object.values(x).forEach((y: any) => flattened.push(y))
-    );
-    flattened.sort((a: SuiteWithDuration, b: SuiteWithDuration) => b.duration - a.duration);
-    fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
   });
 
   return new Promise(res => {
