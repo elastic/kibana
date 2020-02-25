@@ -174,10 +174,11 @@ export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
   payload: [{ rule_id: 'rule-1' }],
 });
 
-export const getPrivilegeRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: DETECTION_ENGINE_PRIVILEGES_URL,
-});
+export const getPrivilegeRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_PRIVILEGES_URL,
+  });
 
 export const addPrepackagedRulesRequest = () =>
   requestMock.create({
@@ -429,7 +430,7 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  is_authenticated: false,
+  is_authenticated: true,
   has_encryption_key: true,
 });
 
