@@ -24,7 +24,6 @@ import {
   moduleStringRenderer,
   defaultStringRenderer,
 } from './zeek_signature';
-import { ReputationLink } from '../../../../links';
 
 describe('ZeekSignature', () => {
   const mount = useMountAppended();
