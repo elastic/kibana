@@ -9,6 +9,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 
 import { euiStyled } from '../../../../observability/public';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 interface TabConfiguration {
   title: string | React.ReactNode;
@@ -21,43 +22,37 @@ interface RoutedTabsProps {
 
 const noop = () => {};
 
-export class RoutedTabs extends React.Component<RoutedTabsProps> {
-  public render() {
-    return <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>;
-  }
+export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
+  return (
+    <EuiTabs display="condensed">
+      {tabs.map(tab => {
+        return <Tab {...tab} />;
+      })}
+    </EuiTabs>
+  );
+};
 
-  private renderTabs() {
-    return this.props.tabs.map(tab => {
-      return (
-        <Route
-          key={`${tab.path}-${tab.title}`}
-          path={tab.path}
-          children={({ match, history }) => {
-            return (
-              <TabContainer className="euiTab">
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiLink
-                  href={history.createHref({
-                    pathname: tab.path,
-                  })}
-                  data-test-subj={`infrastructureNavLink_${tab.path}`}
-                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                    e.preventDefault();
-                    history.push(tab.path);
-                  }}
-                >
-                  <EuiTab onClick={noop} isSelected={match !== null}>
-                    {tab.title}
-                  </EuiTab>
-                </EuiLink>
-              </TabContainer>
-            );
-          }}
-        />
-      );
-    });
-  }
-}
+const Tab = ({ title, path }: TabConfiguration) => {
+  const linkProps = useLinkProps({ pathname: path });
+  return (
+    <Route
+      key={`${path}-${title}`}
+      path={path}
+      children={({ match, history }) => {
+        return (
+          <TabContainer className="euiTab">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${path}`}>
+              <EuiTab onClick={noop} isSelected={match !== null}>
+                {title}
+              </EuiTab>
+            </EuiLink>
+          </TabContainer>
+        );
+      }}
+    />
+  );
+};
 
 const TabContainer = euiStyled.div`
   .euiLink {

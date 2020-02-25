@@ -1,0 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { useMemo } from 'react';
+import { stringify } from 'query-string';
+import url from 'url';
+import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
+import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
+import { useHistory } from '../utils/history_context';
+
+export interface LinkDescriptor {
+  // When an app isn't provided (for external linking) the history instance will
+  // be used to ensure either metrics or logs is used.
+  app?: string;
+  pathname?: string;
+  hash?: string;
+  search?: Record<string, string>;
+}
+
+interface LinkProps {
+  href?: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+}
+
+export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): LinkProps => {
+  validateParams({ app, pathname, hash, search });
+
+  const history = useHistory();
+  const prefixer = usePrefixPathWithBasepath();
+
+  const href = useMemo(() => {
+    if (!app) {
+      return history
+        ? history.createHref({
+            pathname: pathname ? formatPathname(pathname) : undefined,
+            search: search ? encodeSearch(search) : undefined,
+          })
+        : undefined;
+    } else {
+      // The URI spec defines that the query should appear before the fragment
+      // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
+      // hash based routing expect the query to be part of the hash. This will handle that.
+      const encodedSearch = search ? encodeSearch(search) : undefined;
+      const mergedHash = hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
+
+      const link = url.format({
+        pathname,
+        hash: mergedHash,
+        search: !hash ? encodedSearch : undefined,
+      });
+      return prefixer(app, link);
+    }
+  }, [app, history, pathname, hash, search, prefixer]);
+
+  const onClick = useMemo(() => {
+    if (!app) {
+      return (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+        e.preventDefault();
+        if (history) {
+          history.push({
+            pathname: pathname ? formatPathname(pathname) : undefined,
+            search: search ? encodeSearch(search) : undefined,
+          });
+        }
+      };
+    } else {
+      return undefined;
+    }
+  }, [app, history, pathname, search]);
+
+  return {
+    href,
+    onClick,
+  };
+};
+
+const encodeSearch = (search: LinkDescriptor['search']) => {
+  return stringify(urlUtils.encodeQuery(search), { sort: false, encode: false });
+};
+
+const formatPathname = (pathname: string) => {
+  return pathname[0] === '/' ? pathname : `/${pathname}`;
+};
+
+const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
+  if (!app && hash) {
+    throw new Error(
+      'The metrics and logs apps use browserHistory. Please provide a pathname rather than a hash.'
+    );
+  }
+};

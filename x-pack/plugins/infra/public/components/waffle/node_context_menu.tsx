@@ -24,6 +24,7 @@ import {
   SectionLinks,
   SectionLink,
 } from '../../../../observability/public';
+import { useLinkProps } from '../../hooks/use_link_props';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 
 interface Props {
@@ -46,10 +47,26 @@ export const NodeContextMenu: React.FC<Props> = ({
   nodeType,
   popoverPosition,
 }) => {
-  const urlPrefixer = usePrefixPathWithBasepath();
-  const uiCapabilities = useKibana().services.application?.capabilities;
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  const nodeLogsMenuItemLinkProps = useLinkProps({
+    app: 'logs',
+    ...getNodeLogsUrl({
+      nodeType,
+      nodeId: node.id,
+      time: currentTime,
+    }),
+  });
+  const nodeDetailMenuItemLinkProps = useLinkProps({
+    ...getNodeDetailUrl({
+      nodeType,
+      nodeId: node.id,
+      from: nodeDetailFrom,
+      to: currentTime,
+    }),
+  });
+  const urlPrefixer = usePrefixPathWithBasepath();
+  const uiCapabilities = useKibana().services.application?.capabilities;
   // Due to the changing nature of the fields between APM and this UI,
   // We need to have some exceptions until 7.0 & ECS is finalized. Reference
   // #26620 for the details for these fields.
@@ -86,14 +103,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} logs',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer(
-      'logs',
-      getNodeLogsUrl({
-        nodeType,
-        nodeId: node.id,
-        time: currentTime,
-      })
-    ),
+    ...nodeLogsMenuItemLinkProps,
     'data-test-subj': 'viewLogsContextMenuItem',
     isDisabled: !showLogsLink,
   };
@@ -103,15 +113,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} metrics',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer(
-      'metrics',
-      getNodeDetailUrl({
-        nodeType,
-        nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
-      })
-    ),
+    ...nodeDetailMenuItemLinkProps,
     isDisabled: !showDetail,
   };
 
@@ -172,6 +174,7 @@ export const NodeContextMenu: React.FC<Props> = ({
             <SectionLink
               label={nodeDetailMenuItem.label}
               href={nodeDetailMenuItem.href}
+              onClick={nodeDetailMenuItem.onClick}
               isDisabled={nodeDetailMenuItem.isDisabled}
             />
             <SectionLink
