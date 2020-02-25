@@ -132,10 +132,13 @@ const seriesItems = Joi.object({
     )
     .optional(),
   fill: numberOptionalOrEmptyString,
-  filter: Joi.object({
-    query: stringRequired,
-    language: stringOptionalNullable,
-  }).optional(),
+  filter: Joi.alternatives(
+    Joi.object({
+      query: stringRequired,
+      language: stringOptionalNullable,
+    }).optional(),
+    stringOptionalNullable
+  ),
   formatter: stringRequired,
   hide_in_legend: numberIntegerOptional,
   hidden: Joi.boolean().optional(),
