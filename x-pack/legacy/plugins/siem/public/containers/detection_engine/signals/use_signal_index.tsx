@@ -13,7 +13,7 @@ import { isApiError } from '../../../utils/api';
 
 type Func = () => void;
 
-interface Return {
+export interface ReturnSignalIndex {
   loading: boolean;
   signalIndexExists: boolean | null;
   signalIndexName: string | null;
@@ -25,10 +25,10 @@ interface Return {
  *
  *
  */
-export const useSignalIndex = (): Return => {
+export const useSignalIndex = (): ReturnSignalIndex => {
   const [loading, setLoading] = useState(true);
   const [signalIndex, setSignalIndex] = useState<
-    Pick<Return, 'signalIndexExists' | 'signalIndexName' | 'createDeSignalIndex'>
+    Pick<ReturnSignalIndex, 'signalIndexExists' | 'signalIndexName' | 'createDeSignalIndex'>
   >({
     signalIndexExists: null,
     signalIndexName: null,

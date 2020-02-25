@@ -24,3 +24,6 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
 
 export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> =>
   Promise.resolve(mockUserPrivilege);
+
+export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> =>
+  Promise.resolve(mockSignalIndex);
