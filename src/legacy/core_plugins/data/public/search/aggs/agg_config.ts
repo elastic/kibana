@@ -87,9 +87,9 @@ export class AggConfig {
    * @param  {array[object]} list - a list of objects, objects can be anything really
    * @return {array} - the list that was passed in
    */
-  static ensureIds(list: AggConfig[]) {
-    const have: AggConfig[] = [];
-    const haveNot: AggConfig[] = [];
+  static ensureIds(list: any[]) {
+    const have: IAggConfig[] = [];
+    const haveNot: AggConfigOptions[] = [];
     list.forEach(function(obj) {
       (obj.id ? have : haveNot).push(obj);
     });
@@ -107,7 +107,7 @@ export class AggConfig {
    *
    * @return {array} list - a list of objects with id properties
    */
-  static nextId(list: AggConfig[]) {
+  static nextId(list: IAggConfig[]) {
     return (
       1 +
       list.reduce(function(max, obj) {

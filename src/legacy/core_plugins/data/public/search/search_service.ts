@@ -27,6 +27,7 @@ import {
   AggTypesRegistryStart,
   AggConfig,
   AggConfigs,
+  CreateAggConfigParams,
   FieldParamType,
   MetricAggType,
   aggTypeFieldFilters,
@@ -53,7 +54,7 @@ interface AggsStartLegacy {
 interface AggsStart {
   createAggConfigs: (
     indexPattern: IndexPattern,
-    configStates?: any,
+    configStates?: CreateAggConfigParams[],
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;

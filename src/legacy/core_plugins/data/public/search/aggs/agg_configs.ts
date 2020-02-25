@@ -55,6 +55,8 @@ export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
 }
 
+export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
+
 /**
  * @name AggConfigs
  *
@@ -77,7 +79,11 @@ export class AggConfigs {
 
   aggs: IAggConfig[];
 
-  constructor(indexPattern: IndexPattern, configStates = [] as any, opts: AggConfigsOptions) {
+  constructor(
+    indexPattern: IndexPattern,
+    configStates: CreateAggConfigParams[] = [],
+    opts: AggConfigsOptions
+  ) {
     this.typesRegistry = opts.typesRegistry;
 
     configStates = AggConfig.ensureIds(configStates);
@@ -93,6 +99,7 @@ export class AggConfigs {
     }
   }
 
+  // do this wherever the schemas were passed in, & pass in state defaults instead
   initializeDefaultsFromSchemas(schemas: Schemas) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
@@ -105,6 +112,7 @@ export class AggConfigs {
       })
       .each((schema: any) => {
         if (!this.aggs.find((agg: AggConfig) => agg.schema && agg.schema.name === schema.name)) {
+          // the result here should be passable as a configState
           const defaults = schema.defaults.slice(0, schema.max);
           _.each(defaults, defaultState => {
             const state = _.defaults({ id: AggConfig.nextId(this.aggs) }, defaultState);
@@ -148,7 +156,7 @@ export class AggConfigs {
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
-    params: Assign<AggConfigOptions, { type: string | IAggType }>,
+    params: CreateAggConfigParams,
     { addToAggConfigs = true } = {}
   ) => {
     const { type } = params;
@@ -188,10 +196,10 @@ export class AggConfigs {
     return true;
   }
 
-  toDsl(hierarchical: boolean = false) {
+  toDsl(hierarchical: boolean = false): Record<string, any> {
     const dslTopLvl = {};
     let dslLvlCursor: Record<string, any>;
-    let nestedMetrics: Array<{ config: AggConfig; dsl: any }> | [];
+    let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
