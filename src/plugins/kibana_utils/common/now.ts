@@ -24,6 +24,6 @@
 export const now: () => number =
   typeof performance === 'object'
     ? performance.now.bind(performance)
-    : typeof require === 'function'
+    : typeof window === 'undefined'
     ? () => require('perf_hooks').performance.now()
     : Date.now;
