@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart } from 'src/core/public';
 // @ts-ignore
+import { CoreSetup, CoreStart } from 'kibana/server';
 import { JsonUploadAndParse } from './components/json_upload_and_parse';
 // @ts-ignore
-import { initServicesAndConstants } from './kibana_services';
+import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -20,10 +20,12 @@ export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
 /** @internal */
 export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
-  public setup() {}
+  public setup(core: CoreSetup, plugins: any) {
+    setupInitServicesAndConstants(core, plugins);
+  }
 
   public start(core: CoreStart) {
-    initServicesAndConstants(core);
+    startInitServicesAndConstants(core);
     return {
       JsonUploadAndParse,
     };

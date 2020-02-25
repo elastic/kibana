@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FileUploadPlugin } from './plugin';
 
-import { npStart } from 'ui/new_platform';
-import { plugin } from '.';
+export * from './plugin';
 
-const pluginInstance = plugin();
-
-export const start = pluginInstance.start(npStart.core);
+export const plugin = () => new FileUploadPlugin();
