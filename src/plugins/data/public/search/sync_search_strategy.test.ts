@@ -53,8 +53,7 @@ describe('Sync search strategy', () => {
 
   it('increments and decrements loading count on success', async () => {
     const expectedLoadingCountValues = [0, 1, 0];
-    expect.assertions(expectedLoadingCountValues.length);
-    let i = 0;
+    const receivedLoadingCountValues: number[] = [];
 
     mockCoreStart.http.fetch.mockImplementationOnce(() => Promise.resolve());
 
@@ -64,22 +63,24 @@ describe('Sync search strategy', () => {
     });
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
-    loadingCount$.subscribe(value => {
-      expect(value).toBe(expectedLoadingCountValues[i++]);
-    });
+    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
 
-    await syncSearch.search(
-      {
-        serverStrategy: SYNC_SEARCH_STRATEGY,
-      },
-      {}
-    );
+    await syncSearch
+      .search(
+        {
+          serverStrategy: SYNC_SEARCH_STRATEGY,
+        },
+        {}
+      )
+      .toPromise();
+
+    expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
   });
 
   it('increments and decrements loading count on failure', async () => {
+    expect.assertions(1);
     const expectedLoadingCountValues = [0, 1, 0];
-    expect.assertions(expectedLoadingCountValues.length);
-    let i = 0;
+    const receivedLoadingCountValues: number[] = [];
 
     mockCoreStart.http.fetch.mockImplementationOnce(() => Promise.reject());
 
@@ -89,19 +90,19 @@ describe('Sync search strategy', () => {
     });
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
-    loadingCount$.subscribe(value => {
-      expect(value).toBe(expectedLoadingCountValues[i++]);
-    });
+    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
 
     try {
-      await syncSearch.search(
-        {
-          serverStrategy: SYNC_SEARCH_STRATEGY,
-        },
-        {}
-      );
+      await syncSearch
+        .search(
+          {
+            serverStrategy: SYNC_SEARCH_STRATEGY,
+          },
+          {}
+        )
+        .toPromise();
     } catch (e) {
-      // Just swallow the error silently (because of the expect.assertions)
+      expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
     }
   });
 });
