@@ -22,6 +22,8 @@ include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
 include::user/index.asciidoc[]
 
+include::accessibility.asciidoc[]
+
 include::limitations.asciidoc[]
 
 include::release-notes/highlights.asciidoc[]

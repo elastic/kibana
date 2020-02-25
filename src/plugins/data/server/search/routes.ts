@@ -19,6 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../core/server';
+import { getRequestAbortedSignal } from '../lib';
 
 export function registerSearchRoute(router: IRouter): void {
   router.post(
@@ -35,8 +36,10 @@ export function registerSearchRoute(router: IRouter): void {
     async (context, request, res) => {
       const searchRequest = request.body;
       const strategy = request.params.strategy;
+      const signal = getRequestAbortedSignal(request.events.aborted$);
+
       try {
-        const response = await context.search!.search(searchRequest, {}, strategy);
+        const response = await context.search!.search(searchRequest, { signal }, strategy);
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

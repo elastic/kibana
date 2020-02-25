@@ -12,7 +12,8 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { closeJobs, stopDatafeeds, isStartable, isStoppable, isClosable } from '../utils';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class MultiJobActionsMenuUI extends Component {
   constructor(props) {
@@ -46,10 +47,12 @@ class MultiJobActionsMenuUI extends Component {
         size="s"
         onClick={this.onButtonClick}
         iconType="gear"
-        aria-label={this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
-          defaultMessage: 'Management actions',
-        })}
+        aria-label={i18n.translate(
+          'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
+          {
+            defaultMessage: 'Management actions',
+          }
+        )}
         color="text"
         disabled={
           anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
@@ -155,4 +158,4 @@ MultiJobActionsMenuUI.propTypes = {
   refreshJobs: PropTypes.func.isRequired,
 };
 
-export const MultiJobActionsMenu = injectI18n(MultiJobActionsMenuUI);
+export const MultiJobActionsMenu = MultiJobActionsMenuUI;

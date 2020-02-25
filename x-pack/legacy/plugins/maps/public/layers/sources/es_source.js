@@ -6,6 +6,7 @@
 
 import { AbstractVectorSource } from './vector_source';
 import {
+  autocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
   SearchSource,
@@ -344,4 +345,25 @@ export class AbstractESSource extends AbstractVectorSource {
 
     return resp.aggregations;
   }
+
+  getValueSuggestions = async (fieldName, query) => {
+    if (!fieldName) {
+      return [];
+    }
+
+    try {
+      const indexPattern = await this.getIndexPattern();
+      const field = indexPattern.fields.getByName(fieldName);
+      return await autocompleteService.getValueSuggestions({
+        indexPattern,
+        field,
+        query,
+      });
+    } catch (error) {
+      console.warn(
+        `Unable to fetch suggestions for field: ${fieldName}, query: ${query}, error: ${error.message}`
+      );
+      return [];
+    }
+  };
 }

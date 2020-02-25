@@ -28,7 +28,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
       <EuiIconTip
         className="ml-explorer-chart-eui-icon-tip"
         content={
-          <InjectIntl(ExplorerChartInfoTooltip)
+          <ExplorerChartInfoTooltip
             aggregationInterval="1h"
             chartFunction="sum nginx.access.body_sent.bytes"
             entityFields={
@@ -67,7 +67,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       <EuiIconTip
         className="ml-explorer-chart-eui-icon-tip"
         content={
-          <InjectIntl(ExplorerChartInfoTooltip)
+          <ExplorerChartInfoTooltip
             aggregationInterval="1h"
             chartFunction="sum nginx.access.body_sent.bytes"
             entityFields={

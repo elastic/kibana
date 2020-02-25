@@ -6,11 +6,24 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
+export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const mlSecurity = getService('mlSecurity');
+
   describe('Machine Learning', function() {
     this.tags(['mlqa']);
 
+    before(async () => {
+      await mlSecurity.createMlRoles();
+      await mlSecurity.createMlUsers();
+    });
+
+    after(async () => {
+      await mlSecurity.cleanMlUsers();
+      await mlSecurity.cleanMlRoles();
+    });
+
     loadTestFile(require.resolve('./bucket_span_estimator'));
     loadTestFile(require.resolve('./calculate_model_memory_limit'));
+    loadTestFile(require.resolve('./categorization_field_examples'));
   });
 }

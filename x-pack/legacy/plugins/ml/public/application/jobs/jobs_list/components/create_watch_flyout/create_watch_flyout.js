@@ -19,28 +19,28 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
 import { mlCreateWatchService } from './create_watch_service';
 import { CreateWatch } from './create_watch_view';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-function getSuccessToast(id, url, intl) {
+function getSuccessToast(id, url) {
   return {
-    title: intl.formatMessage(
+    title: i18n.translate(
+      'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
       {
-        id: 'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
         defaultMessage: 'Watch {id} created successfully',
-      },
-      { id }
+        values: { id },
+      }
     ),
     text: (
       <React.Fragment>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton size="s" href={url} target="_blank" iconType="link">
-              {intl.formatMessage({
-                id: 'xpack.ml.jobsList.createWatchFlyout.editWatchButtonLabel',
+              {i18n.translate('xpack.ml.jobsList.createWatchFlyout.editWatchButtonLabel', {
                 defaultMessage: 'Edit watch',
               })}
             </EuiButton>
@@ -51,7 +51,7 @@ function getSuccessToast(id, url, intl) {
   };
 }
 
-class CreateWatchFlyoutUI extends Component {
+export class CreateWatchFlyoutUI extends Component {
   constructor(props) {
     super(props);
 
@@ -100,19 +100,21 @@ class CreateWatchFlyoutUI extends Component {
   };
 
   save = () => {
-    const { intl } = this.props;
+    const { toasts } = this.props.kibana.services.notifications;
     mlCreateWatchService
       .createNewWatch(this.state.jobId)
       .then(resp => {
-        toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url, intl));
+        toasts.addSuccess(getSuccessToast(resp.id, resp.url));
         this.closeFlyout(true);
       })
       .catch(error => {
-        toastNotifications.addDanger(
-          intl.formatMessage({
-            id: 'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',
-            defaultMessage: 'Could not save watch',
-          })
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',
+            {
+              defaultMessage: 'Could not save watch',
+            }
+          )
         );
         console.error(error);
       });
@@ -176,4 +178,4 @@ CreateWatchFlyoutUI.propTypes = {
   flyoutHidden: PropTypes.func,
 };
 
-export const CreateWatchFlyout = injectI18n(CreateWatchFlyoutUI);
+export const CreateWatchFlyout = withKibana(CreateWatchFlyoutUI);

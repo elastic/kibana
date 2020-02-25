@@ -42,8 +42,14 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new Source(sourceDescriptor, inspectorAdapters);
 }
 
-export const getTooltipState = ({ map }) => {
-  return map.tooltipState;
+export const getOpenTooltips = ({ map }) => {
+  return map && map.openTooltips ? map.openTooltips : [];
+};
+
+export const getHasLockedTooltips = state => {
+  return getOpenTooltips(state).some(({ isLocked }) => {
+    return isLocked;
+  });
 };
 
 export const getMapReady = ({ map }) => map && map.ready;

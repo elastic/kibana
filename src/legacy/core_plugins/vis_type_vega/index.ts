@@ -39,17 +39,10 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
 
         return {
           emsTileLayerId: mapConfig.emsTileLayerId,
-          enableExternalUrls: serverConfig.get('vega.enableExternalUrls'),
         };
       },
     },
     init: (server: Legacy.Server) => ({}),
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        enableExternalUrls: Joi.boolean().default(false),
-      }).default();
-    },
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

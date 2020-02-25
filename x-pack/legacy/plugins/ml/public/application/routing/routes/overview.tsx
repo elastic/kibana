@@ -16,6 +16,7 @@ import { checkFullLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
+import { useTimefilter } from '../../contexts/kibana';
 import { ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -30,17 +31,18 @@ const breadcrumbs = [
 
 export const overviewRoute: MlRoute = {
   path: '/overview',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     getMlNodeCount,
     loadMlServerInfo,
   });
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   return (
     <PageLoader context={context}>

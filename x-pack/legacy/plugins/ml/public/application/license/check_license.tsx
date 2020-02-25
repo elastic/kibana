@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-// @ts-ignore No declaration file for module
-import { banners } from 'ui/notify';
 import { EuiCallOut } from '@elastic/eui';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 // @ts-ignore No declaration file for module
 import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { LICENSE_TYPE } from '../../../common/constants/license';
 import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
+import { getOverlays } from '../util/dependency_cache';
 
 let licenseHasExpired = true;
 let licenseType: LICENSE_TYPE | null = null;
@@ -75,9 +75,10 @@ function setLicenseExpired(features: any) {
     const message = features.message;
     if (expiredLicenseBannerId === undefined) {
       // Only show the banner once with no way to dismiss it
-      expiredLicenseBannerId = banners.add({
-        component: <EuiCallOut iconType="iInCircle" color="warning" title={message} />,
-      });
+      const overlays = getOverlays();
+      expiredLicenseBannerId = overlays.banners.add(
+        toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={message} />)
+      );
     }
   }
 }

@@ -43,6 +43,7 @@ import {
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
+  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
   PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
@@ -119,6 +120,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
+  await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);

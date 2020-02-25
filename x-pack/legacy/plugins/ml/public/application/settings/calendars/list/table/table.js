@@ -9,9 +9,12 @@ import React from 'react';
 
 import { EuiButton, EuiLink, EuiInMemoryTable } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const CalendarsListTable = injectI18n(function CalendarsListTable({
+import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
+
+export const CalendarsListTable = ({
   calendarsList,
   onDeleteClick,
   setSelectedCalendarList,
@@ -20,8 +23,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
   canDeleteCalendar,
   mlNodesAvailable,
   itemsSelected,
-  intl,
-}) {
+}) => {
   const sorting = {
     sort: {
       field: 'calendar_id',
@@ -37,8 +39,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
   const columns = [
     {
       field: 'calendar_id',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsList.table.idColumnName',
+      name: i18n.translate('xpack.ml.calendarsList.table.idColumnName', {
         defaultMessage: 'ID',
       }),
       sortable: true,
@@ -48,28 +49,35 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
     },
     {
       field: 'job_ids_string',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsList.table.jobsColumnName',
+      name: i18n.translate('xpack.ml.calendarsList.table.jobsColumnName', {
         defaultMessage: 'Jobs',
       }),
       sortable: true,
       truncateText: true,
+      render: jobList => {
+        return jobList === GLOBAL_CALENDAR ? (
+          <span style={{ fontStyle: 'italic' }}>
+            <FormattedMessage
+              id="xpack.ml.calendarsList.table.allJobsLabel"
+              defaultMessage="Applies to all jobs"
+            />
+          </span>
+        ) : (
+          jobList
+        );
+      },
     },
     {
       field: 'events_length',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsList.table.eventsColumnName',
+      name: i18n.translate('xpack.ml.calendarsList.table.eventsColumnName', {
         defaultMessage: 'Events',
       }),
       sortable: true,
       render: eventsLength =>
-        intl.formatMessage(
-          {
-            id: 'xpack.ml.calendarsList.table.eventsCountLabel',
-            defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
-          },
-          { eventsLength }
-        ),
+        i18n.translate('xpack.ml.calendarsList.table.eventsCountLabel', {
+          defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
+          values: { eventsLength },
+        }),
     },
   ];
 
@@ -125,9 +133,9 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       />
     </React.Fragment>
   );
-});
+};
 
-CalendarsListTable.WrappedComponent.propTypes = {
+CalendarsListTable.propTypes = {
   calendarsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,

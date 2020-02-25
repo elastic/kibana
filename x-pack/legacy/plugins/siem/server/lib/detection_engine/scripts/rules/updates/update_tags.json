@@ -1,4 +1,10 @@
 {
-  "rule_id": "tags-query",
-  "tags": ["tag_3"]
+  "rule_id": "query-rule-id",
+  "tags": ["tag_1", "tag_2", "tag_3"],
+  "name": "Some new name",
+  "description": "Adding tags and a few other updates such as name",
+  "type": "query",
+  "query": "user.name: root or user.name: admin",
+  "severity": "low",
+  "risk_score": 10
 }
