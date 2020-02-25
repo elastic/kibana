@@ -15,10 +15,11 @@ import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
-import { transformValidateBulkError, validateRulesBulkSchema } from './validate';
+import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (
   config: LegacyServices['config'],
@@ -147,16 +148,16 @@ export const createCreateRulesBulkRoute = (
           })
         ),
       ];
-      const validate = validateRulesBulkSchema(rulesBulk);
-      if (validate.errors != null) {
+      const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
+      if (errors != null) {
         return headers
           .response({
-            message: validate.errors,
+            message: errors,
             status_code: 500,
           })
           .code(500);
       } else {
-        return validate.transformed;
+        return validated;
       }
     },
   };

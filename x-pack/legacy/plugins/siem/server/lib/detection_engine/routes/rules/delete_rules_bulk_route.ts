@@ -11,11 +11,12 @@ import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { getIdBulkError } from './utils';
-import { transformValidateBulkError, validateRulesBulkSchema } from './validate';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError } from '../utils';
 import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
@@ -68,16 +69,16 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
           }
         })
       );
-      const validate = validateRulesBulkSchema(rules);
-      if (validate.errors != null) {
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
         return headers
           .response({
-            message: validate.errors,
+            message: errors,
             status_code: 500,
           })
           .code(500);
       } else {
-        return validate.transformed;
+        return validated;
       }
     },
   };

@@ -137,16 +137,16 @@ export const createCreateRulesRoute = (
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const validate = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
-        if (validate.errors != null) {
+        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        if (errors != null) {
           return headers
             .response({
-              message: validate.errors,
+              message: errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          return validate.transformed;
+          return validated;
         }
       } catch (err) {
         const error = transformError(err);

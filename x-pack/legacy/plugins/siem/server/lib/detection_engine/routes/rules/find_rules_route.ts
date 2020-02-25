@@ -60,16 +60,16 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
             return results;
           })
         );
-        const validate = transformValidateFindAlerts(rules, ruleStatuses);
-        if (validate.errors != null) {
+        const [validated, errors] = transformValidateFindAlerts(rules, ruleStatuses);
+        if (errors != null) {
           return headers
             .response({
-              message: validate.errors,
+              message: errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          return validate.transformed;
+          return validated;
         }
       } catch (err) {
         const error = transformError(err);

@@ -15,8 +15,11 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { PrePackagedRulesStatusSchema } from '../schemas/response/prepackaged_rules_status_schema';
-import { validateAddPrePackagedRulesStatus } from './validate';
+import {
+  PrePackagedRulesStatusSchema,
+  prePackagedRulesStatusSchema,
+} from '../schemas/response/prepackaged_rules_status_schema';
+import { validate } from './validate';
 
 export const createGetPrepackagedRulesStatusRoute = (
   getClients: GetScopedClients
@@ -58,16 +61,16 @@ export const createGetPrepackagedRulesStatusRoute = (
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
         };
-        const validate = validateAddPrePackagedRulesStatus(prepackagedRulesStatus);
-        if (validate.errors != null) {
+        const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
+        if (errors != null) {
           return headers
             .response({
-              message: validate.errors,
+              message: errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          return validate.transformed;
+          return validated;
         }
       } catch (err) {
         const error = transformError(err);

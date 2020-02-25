@@ -14,11 +14,12 @@ import {
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { getIdBulkError } from './utils';
-import { transformValidateBulkError, validateRulesBulkSchema } from './validate';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
@@ -123,16 +124,16 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
           }
         })
       );
-      const validate = validateRulesBulkSchema(rules);
-      if (validate.errors != null) {
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
         return headers
           .response({
-            message: validate.errors,
+            message: errors,
             status_code: 500,
           })
           .code(500);
       } else {
-        return validate.transformed;
+        return validated;
       }
     },
   };

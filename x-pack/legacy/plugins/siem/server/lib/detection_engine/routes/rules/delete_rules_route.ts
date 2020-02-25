@@ -59,16 +59,16 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const validate = transformValidate(rule, ruleStatuses.saved_objects[0]);
-          if (validate.errors != null) {
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
             return headers
               .response({
-                message: validate.errors,
+                message: errors,
                 status_code: 500,
               })
               .code(500);
           } else {
-            return validate.transformed;
+            return validated;
           }
         } else {
           const error = getIdError({ id, ruleId });

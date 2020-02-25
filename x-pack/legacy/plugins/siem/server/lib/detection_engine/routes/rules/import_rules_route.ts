@@ -28,9 +28,9 @@ import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
-import { validateImportRules } from './validate';
+import { validate } from './validate';
 import { GetScopedClients } from '../../../../services';
-import { ImportRulesSchema } from '../schemas/response/import_rules_schema';
+import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -263,16 +263,16 @@ export const createImportRulesRoute = (
         success_count: successes.length,
         errors: errorsResp,
       };
-      const validate = validateImportRules(importRules);
-      if (validate.errors != null) {
+      const [validated, errors] = validate(importRules, importRulesSchema);
+      if (errors != null) {
         return headers
           .response({
-            message: validate.errors,
+            message: errors,
             status_code: 500,
           })
           .code(500);
       } else {
-        return validate.transformed;
+        return validated;
       }
     },
   };
