@@ -2,6 +2,4 @@
 # Disabled plugins
 ########################
 logging.verbose: true
-elasticsearch.username: "admin"
-elasticsearch.password: "changeme"
-xpack.security.encryptionKey: "something_at_least_32_characters"
+elasticsearch:
