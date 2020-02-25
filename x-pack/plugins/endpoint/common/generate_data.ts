@@ -5,9 +5,9 @@
  */
 
 import uuid from 'uuid';
-import { AlertData, EndpointEvent, EndpointMetadata } from './types';
+import { AlertData, EndpointEvent, EndpointMetadata, OSFields } from './types';
 
-const Windows: Array<{ name: string; full: string; version: string; variant: string }> = [
+const Windows: OSFields[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -34,15 +34,11 @@ const Windows: Array<{ name: string; full: string; version: string; variant: str
   },
 ];
 
-const Linux: Array<{ name: string; full: string; version: string; variant: string }> = [];
+const Linux: OSFields[] = [];
 
-const Mac: Array<{ name: string; full: string; version: string; variant: string }> = [];
+const Mac: OSFields[] = [];
 
-const OS: Array<{ name: string; full: string; version: string; variant: string }> = [
-  ...Windows,
-  ...Mac,
-  ...Linux,
-];
+const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   // mapping name and ID as a sperate attribute makes query more complicated
@@ -59,6 +55,9 @@ const POLICIES: Array<{ name: string; id: string }> = [
 ];
 
 const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'deletion'];
+
+// These are from the v1 schemas and aren't all valid ECS event categories, still in flux
+const OTHER_EVENT_CATEGORIES: string[] = ['driver', 'file', 'library', 'network', 'registry'];
 
 function randomN(n: number): number {
   return Math.floor(Math.random() * n);
@@ -100,6 +99,101 @@ function randomHostname(): string {
   return `Host-${randomString(10)}`;
 }
 
+export function makeRelatedEvents(
+  node: EndpointEvent,
+  generator: EndpointDocGenerator,
+  numRelatedEvents = 10
+): EndpointEvent[] {
+  const ts = new Date(node['@timestamp'].getTime() + 1000);
+  const relatedEvents: EndpointEvent[] = [];
+  for (let i = 0; i < numRelatedEvents; i++) {
+    relatedEvents.push(
+      generator.generateEvent(
+        ts,
+        node.process.entity_id,
+        node.process.parent?.entity_id,
+        randomChoice(OTHER_EVENT_CATEGORIES)
+      )
+    );
+  }
+  return relatedEvents;
+}
+
+export function generateProcessChildren(
+  root: EndpointEvent,
+  generator: EndpointDocGenerator,
+  generations = 3,
+  maxChildrenPerNode = 3,
+  relatedEventsPerNode = 10,
+  percentNodesWithRelated = 10,
+  percentChildrenTerminated = 30
+): EndpointEvent[] {
+  const events: EndpointEvent[] = [];
+  let parents = [root];
+  let timestamp = root['@timestamp'];
+  for (let i = 0; i < generations; i++) {
+    const newParents: EndpointEvent[] = [];
+    parents.forEach(element => {
+      const numChildren = randomN(maxChildrenPerNode);
+      for (let j = 0; j < numChildren; j++) {
+        timestamp = new Date(timestamp.getTime() + 1000);
+        const child = generator.generateEvent(timestamp, undefined, element.process.entity_id);
+        newParents.push(child);
+      }
+    });
+    events.concat(newParents);
+    parents = newParents;
+  }
+  const terminationEvents: EndpointEvent[] = [];
+  const relatedEvents: EndpointEvent[] = [];
+  events.forEach(element => {
+    if (randomN(100) < percentChildrenTerminated) {
+      timestamp = new Date(timestamp.getTime() + 1000);
+      terminationEvents.push(
+        generator.generateEvent(
+          timestamp,
+          element.process.entity_id,
+          element.process.parent?.entity_id,
+          'process',
+          'end'
+        )
+      );
+    }
+    if (randomN(100) < percentNodesWithRelated) {
+      relatedEvents.concat(makeRelatedEvents(element, generator, relatedEventsPerNode));
+    }
+  });
+  events.concat(terminationEvents);
+  events.concat(relatedEvents);
+  return events;
+}
+
+export function generateResolverEvents(alertAncestors = 3): Array<AlertData | EndpointEvent> {
+  const events = [];
+  const startDate = new Date();
+  const generator = new EndpointDocGenerator();
+  const endpointDoc = generator.generateEndpointMetadata(startDate);
+  const root = generator.generateEvent(new Date(startDate.getTime() + 1000));
+  events.push(root);
+  let ancestor = root;
+  for (let i = 0; i < alertAncestors; i++) {
+    ancestor = generator.generateEvent(
+      new Date(startDate.getTime() + 1000 * (i + 1)),
+      undefined,
+      ancestor.process.entity_id
+    );
+    events.push(ancestor);
+  }
+  events.push(
+    generator.generateAlert(
+      new Date(startDate.getTime() + 1000 * alertAncestors),
+      ancestor.process.entity_id,
+      ancestor.process.parent?.entity_id
+    )
+  );
+  return events;
+}
+
 class EndpointDocGenerator {
   agentId: string;
   agentName: string;
@@ -109,7 +203,7 @@ class EndpointDocGenerator {
   macAddress: string[];
   ip: string[];
   agentVersion: string;
-  os: { name: string; full: string; version: string; variant: string };
+  os: OSFields;
   policy: { name: string; id: string };
 
   constructor() {
@@ -155,7 +249,7 @@ class EndpointDocGenerator {
     };
   }
 
-  generateAlert(ts: Date, parentEntityID?: string): AlertData {
+  generateAlert(ts: Date, entityID?: string, parentEntityID?: string): AlertData {
     return {
       '@timestamp': ts,
       agent: {
@@ -195,10 +289,10 @@ class EndpointDocGenerator {
 
   generateEvent(
     ts: Date,
-    eventCategory?: string,
-    eventType?: string,
     entityID?: string,
-    parentEntityID?: string
+    parentEntityID?: string,
+    eventCategory?: string,
+    eventType?: string
   ): EndpointEvent {
     return {
       '@timestamp': ts,

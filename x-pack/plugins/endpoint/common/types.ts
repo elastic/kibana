@@ -70,6 +70,13 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
+export interface OSFields {
+  full: string;
+  name: string;
+  version: string;
+  variant: string;
+}
+
 export interface AlertData {
   '@timestamp': Date;
   agent: {
@@ -95,12 +102,7 @@ export interface AlertData {
     hostname: string;
     ip: string[];
     mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-      variant: string;
-    };
+    os: OSFields;
   };
   process: {
     entity_id: string;
@@ -131,12 +133,7 @@ export interface EndpointMetadata {
     hostname: string;
     ip: string[];
     mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-      variant: string;
-    };
+    os: OSFields;
   };
 }
 
@@ -176,12 +173,7 @@ export interface EndpointEvent {
     hostname: string;
     ip: string[];
     mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-      variant: string;
-    };
+    os: OSFields;
   };
   process: {
     entity_id: string;
