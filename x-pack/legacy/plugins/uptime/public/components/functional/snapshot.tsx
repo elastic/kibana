@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { get } from 'lodash';
 import { DonutChart } from './charts';
 import { ChartWrapper } from './charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
