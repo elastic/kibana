@@ -18,6 +18,10 @@ import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/publ
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
 
@@ -26,6 +30,7 @@ export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -33,6 +38,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   uiActions: UiActionsStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 

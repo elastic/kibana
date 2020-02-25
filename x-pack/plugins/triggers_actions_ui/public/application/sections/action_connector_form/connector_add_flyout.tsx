@@ -19,18 +19,31 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { ActionType, ActionConnector, IErrorObject } from '../../../types';
-import { useAppDependencies } from '../../app_context';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
-export const ConnectorAddFlyout = () => {
+export interface ConnectorAddFlyoutProps {
+  addFlyoutVisible: boolean;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const ConnectorAddFlyout = ({
+  addFlyoutVisible,
+  setAddFlyoutVisibility,
+}: ConnectorAddFlyoutProps) => {
   let hasErrors = false;
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    reloadConnectors,
+  } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
 
   // hooks
@@ -47,11 +60,6 @@ export const ConnectorAddFlyout = () => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
 
-  const {
-    addFlyoutVisible,
-    setAddFlyoutVisibility,
-    reloadConnectors,
-  } = useActionsConnectorsContext();
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
@@ -77,12 +85,7 @@ export const ConnectorAddFlyout = () => {
   let currentForm;
   let actionTypeModel;
   if (!actionType) {
-    currentForm = (
-      <ActionTypeMenu
-        onActionTypeChange={onActionTypeChange}
-        actionTypeRegistry={actionTypeRegistry}
-      />
-    );
+    currentForm = <ActionTypeMenu onActionTypeChange={onActionTypeChange} />;
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
@@ -107,17 +110,19 @@ export const ConnectorAddFlyout = () => {
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then(savedConnector => {
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
-            {
-              defaultMessage: "Created '{connectorName}'",
-              values: {
-                connectorName: savedConnector.name,
-              },
-            }
-          )
-        );
+        if (toastNotifications) {
+          toastNotifications.addSuccess(
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
+              {
+                defaultMessage: "Created '{connectorName}'",
+                values: {
+                  connectorName: savedConnector.name,
+                },
+              }
+            )
+          );
+        }
         return savedConnector;
       })
       .catch(errorRes => {
@@ -195,7 +200,9 @@ export const ConnectorAddFlyout = () => {
                   setIsSaving(false);
                   if (savedAction) {
                     closeFlyout();
-                    reloadConnectors();
+                    if (reloadConnectors) {
+                      reloadConnectors();
+                    }
                   }
                 }}
               >
