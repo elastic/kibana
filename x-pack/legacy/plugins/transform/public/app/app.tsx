@@ -16,6 +16,7 @@ import { getAppProviders } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppDependencies } from '../shim';
 
+import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
@@ -39,6 +40,10 @@ export const App: FC = () => {
   return (
     <div data-test-subj="transformApp">
       <Switch>
+        <Route
+          path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+          component={CloneTransformSection}
+        />
         <Route
           path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
           component={CreateTransformSection}
