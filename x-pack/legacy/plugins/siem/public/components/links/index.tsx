@@ -240,12 +240,12 @@ const ReputationLinkComponent: React.FC<{
       <EuiFlexGroup
         gutterSize="none"
         justifyContent="center"
-        direction="column"
+        direction={direction}
         alignItems="center"
         data-test-subj="reputationLinkGroup"
       >
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="none" justifyContent="center" direction={direction}>
+          <EuiFlexGroup gutterSize="none" justifyContent="center">
             {ipReputationLinks
               ?.slice(0, overflowIndexStart)
               .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
