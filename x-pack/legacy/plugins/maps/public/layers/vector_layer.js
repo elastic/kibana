@@ -365,8 +365,10 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isRequestStillActive,
   }) {
-    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+    const dataRequestId = SOURCE_DATA_ID_ORIGIN;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
@@ -382,22 +384,25 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
+      startLoading(dataRequestId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data: sourceFeatureCollection, meta } = await this._source.getGeoJsonWithMeta(
         layerName,
         searchFilters,
-        registerCancelCallback.bind(null, requestToken)
+        registerCancelCallback.bind(null, requestToken),
+        () => {
+          return isRequestStillActive(dataRequestId, requestToken);
+        }
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, layerFeatureCollection, meta);
+      stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
         featureCollection: layerFeatureCollection,
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+        onLoadError(dataRequestId, requestToken, error.message);
       }
       return {
         refreshed: false,
