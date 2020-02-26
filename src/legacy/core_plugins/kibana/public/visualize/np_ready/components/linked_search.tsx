@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { I18nStart } from 'kibana/public';
 
 interface LinkedSearchProps {
   savedSearchId: string;
@@ -111,3 +112,16 @@ export function LinkedSearch({ savedSearchId, savedSearchTitle, unlink }: Linked
     </>
   );
 }
+
+export const createLinkedSearchComponent = (I18nContext: I18nStart['Context']) => (
+  reactDirective: any
+) => {
+  return reactDirective(
+    (props: LinkedSearchProps) => (
+      <I18nContext>
+        <LinkedSearch {...props} />
+      </I18nContext>
+    ),
+    ['savedSearchId', 'savedSearchTitle', 'unlink']
+  );
+};
