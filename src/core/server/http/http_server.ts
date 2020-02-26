@@ -27,7 +27,7 @@ import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_p
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 
-import { IRouter } from './router';
+import { IRouter, RouteConfigOptions } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -148,15 +148,15 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {} } = route.options;
+        const { authRequired, tags, body = {} } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
+
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
-            // Enforcing the comparison with true because plugins could overwrite the auth strategy by doing `options: { authRequired: authStrategy as any }`
-            auth: authRequired === true ? undefined : false,
+            auth: this.getAuthOption(authRequired),
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
@@ -188,6 +188,20 @@ export class HttpServer {
     this.log.debug('stopping http server');
     await this.server.stop();
     this.server = undefined;
+  }
+
+  private getAuthOption(
+    authRequired: RouteConfigOptions<any>['authRequired'] = true
+  ): false | { mode: 'required' | 'optional' } {
+    if (this.authRegistered) {
+      if (authRequired === true) {
+        return { mode: 'required' };
+      }
+      if (authRequired === 'optional') {
+        return { mode: 'optional' };
+      }
+    }
+    return false;
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
@@ -302,6 +316,11 @@ export class HttpServer {
             // we mutate headers only for the backward compatibility with the legacy platform.
             // where some plugin read directly from headers to identify whether a user is authenticated.
             Object.assign(req.headers, requestHeaders);
+          }
+        },
+        (req, { responseHeaders }) => {
+          if (responseHeaders) {
+            this.authResponseHeaders.set(req, responseHeaders);
           }
         }
       ),

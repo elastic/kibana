@@ -30,6 +30,7 @@ import {
 /** @public */
 export enum AuthResultType {
   authenticated = 'authenticated',
+  notHandled = 'notHandled',
 }
 
 /** @public */
@@ -38,10 +39,15 @@ export interface Authenticated extends AuthResultParams {
 }
 
 /** @public */
-export type AuthResult = Authenticated;
+export interface AuthNotHandled extends AuthNotHandledResultParams {
+  type: AuthResultType.notHandled;
+}
+
+/** @public */
+export type AuthResult = Authenticated | AuthNotHandled;
 
 const authResult = {
-  authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
+  authenticated(data: AuthResultParams = {}): AuthResult {
     return {
       type: AuthResultType.authenticated,
       state: data.state,
@@ -49,8 +55,17 @@ const authResult = {
       responseHeaders: data.responseHeaders,
     };
   },
+  notHandled(data: AuthNotHandledResultParams = {}): AuthResult {
+    return {
+      type: AuthResultType.notHandled,
+      responseHeaders: data.responseHeaders,
+    };
+  },
   isAuthenticated(result: AuthResult): result is Authenticated {
     return result && result.type === AuthResultType.authenticated;
+  },
+  isNotHandled(result: AuthResult): result is AuthNotHandled {
+    return result && result.type === AuthResultType.notHandled;
   },
 };
 
@@ -82,6 +97,14 @@ export interface AuthResultParams {
   responseHeaders?: AuthHeaders;
 }
 
+interface AuthNotHandledResultParams {
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client when needed.
+   */
+  responseHeaders?: AuthHeaders;
+}
+
 /**
  * @public
  * A tool set defining an outcome of Auth interceptor for incoming request.
@@ -89,10 +112,12 @@ export interface AuthResultParams {
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
   authenticated: (data?: AuthResultParams) => AuthResult;
+  notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
+  notHandled: authResult.notHandled,
 };
 
 /**
@@ -109,29 +134,44 @@ export type AuthenticationHandler = (
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,
-  onSuccess: (req: Request, data: AuthResultParams) => void = () => undefined
+  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined,
+  onNotHandled: (request: Request, data: AuthNotHandledResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
     request: Request,
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    const kibanaRequest = KibanaRequest.from(request, undefined, false);
+
     try {
-      const result = await fn(
-        KibanaRequest.from(request, undefined, false),
-        lifecycleResponseFactory,
-        toolkit
-      );
+      const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
+
       if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
       if (authResult.isAuthenticated(result)) {
-        onSuccess(request, {
+        onAuth(request, {
           state: result.state,
           requestHeaders: result.requestHeaders,
           responseHeaders: result.responseHeaders,
         });
         return responseToolkit.authenticated({ credentials: result.state || {} });
+      }
+
+      if (authResult.isNotHandled(result)) {
+        onNotHandled(request, {
+          responseHeaders: result.responseHeaders,
+        });
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+        if (kibanaRequest.route.options.authRequired) {
+          return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
+        }
+        throw new Error(
+          `Unexpected route.options.authRequired value in AuthenticationHandler. Expected 'optional' or true, but given: ${result}.`
+        );
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`

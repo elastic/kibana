@@ -183,7 +183,7 @@ export class KibanaRequest<
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
 
     const options = ({
-      authRequired: request.route.settings.auth !== false,
+      authRequired: this.getAuthRequired(request),
       tags: request.route.settings.tags || [],
       body: ['get', 'options'].includes(method)
         ? undefined
@@ -200,6 +200,31 @@ export class KibanaRequest<
       method,
       options,
     };
+  }
+
+  private getAuthRequired(request: Request): boolean | 'optional' {
+    const authOptions = request.route.settings.auth;
+    if (typeof authOptions === 'object') {
+      // 'try' is used in the legacy platform
+      if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
+        return 'optional';
+      }
+      if (authOptions.mode === 'required') {
+        return true;
+      }
+    }
+
+    // legacy platform routes
+    if (authOptions === undefined) {
+      return true;
+    }
+
+    if (authOptions === false) return false;
+    throw new Error(
+      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
+        this.url.href
+      }`
+    );
   }
 }
 

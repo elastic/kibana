@@ -106,7 +106,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *
    * Enabled by default.
    */
-  authRequired?: boolean;
+  authRequired?: boolean | 'optional';
 
   /**
    * Additional metadata tag strings to attach to the route.
