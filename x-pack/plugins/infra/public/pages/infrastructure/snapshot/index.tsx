@@ -18,10 +18,7 @@ import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import {
-  ViewSourceConfigurationButton,
-  ViewSourceConfigurationButtonHrefBase,
-} from '../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
 import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
@@ -92,10 +89,7 @@ export const SnapshotPage = () => {
               </EuiFlexItem>
               {uiCapabilities?.infrastructure?.configureSource ? (
                 <EuiFlexItem>
-                  <ViewSourceConfigurationButton
-                    data-test-subj="configureSourceButton"
-                    hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
-                  >
+                  <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
                     {i18n.translate('xpack.infra.configureSourceActionLabel', {
                       defaultMessage: 'Change source configuration',
                     })}

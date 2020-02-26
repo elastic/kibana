@@ -19,6 +19,7 @@ import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 
 class NewCalendarUI extends Component {
   static propTypes = {
@@ -46,6 +47,7 @@ class NewCalendarUI extends Component {
       events: [],
       saving: false,
       selectedCalendar: undefined,
+      isGlobalCalendar: false,
     };
   }
 
@@ -65,6 +67,7 @@ class NewCalendarUI extends Component {
       let eventsList = [];
       let selectedCalendar;
       let formCalendarId = '';
+      let isGlobalCalendar = false;
 
       // Editing existing calendar.
       if (this.props.calendarId !== undefined) {
@@ -74,13 +77,17 @@ class NewCalendarUI extends Component {
           formCalendarId = selectedCalendar.calendar_id;
           eventsList = selectedCalendar.events;
 
-          selectedCalendar.job_ids.forEach(id => {
-            if (jobIds.find(jobId => jobId === id)) {
-              selectedJobOptions.push({ label: id });
-            } else if (groupIds.find(groupId => groupId === id)) {
-              selectedGroupOptions.push({ label: id });
-            }
-          });
+          if (selectedCalendar.job_ids.includes(GLOBAL_CALENDAR)) {
+            isGlobalCalendar = true;
+          } else {
+            selectedCalendar.job_ids.forEach(id => {
+              if (jobIds.find(jobId => jobId === id)) {
+                selectedJobOptions.push({ label: id });
+              } else if (groupIds.find(groupId => groupId === id)) {
+                selectedGroupOptions.push({ label: id });
+              }
+            });
+          }
         }
       }
 
@@ -96,6 +103,7 @@ class NewCalendarUI extends Component {
         selectedJobOptions,
         selectedGroupOptions,
         selectedCalendar,
+        isGlobalCalendar,
       });
     } catch (error) {
       console.log(error);
@@ -181,10 +189,15 @@ class NewCalendarUI extends Component {
       events,
       selectedGroupOptions,
       selectedJobOptions,
+      isGlobalCalendar,
     } = this.state;
 
-    const jobIds = selectedJobOptions.map(option => option.label);
-    const groupIds = selectedGroupOptions.map(option => option.label);
+    const allIds = isGlobalCalendar
+      ? [GLOBAL_CALENDAR]
+      : [
+          ...selectedJobOptions.map(option => option.label),
+          ...selectedGroupOptions.map(option => option.label),
+        ];
 
     // Reduce events to fields expected by api
     const eventsToSave = events.map(event => ({
@@ -198,7 +211,7 @@ class NewCalendarUI extends Component {
       calendarId: formCalendarId,
       description,
       events: eventsToSave,
-      job_ids: [...jobIds, ...groupIds],
+      job_ids: allIds,
     };
 
     return calendar;
@@ -212,6 +225,12 @@ class NewCalendarUI extends Component {
     this.setState(prevState => ({
       selectedGroupOptions: prevState.selectedGroupOptions.concat(newOption),
     }));
+  };
+
+  onGlobalCalendarChange = ({ currentTarget }) => {
+    this.setState({
+      isGlobalCalendar: currentTarget.checked,
+    });
   };
 
   onJobSelection = selectedJobOptions => {
@@ -295,6 +314,7 @@ class NewCalendarUI extends Component {
       selectedCalendar,
       selectedJobOptions,
       selectedGroupOptions,
+      isGlobalCalendar,
     } = this.state;
 
     let modal = '';
@@ -351,6 +371,8 @@ class NewCalendarUI extends Component {
                 selectedJobOptions={selectedJobOptions}
                 onCreateGroupOption={this.onCreateGroupOption}
                 showNewEventModal={this.showNewEventModal}
+                isGlobalCalendar={isGlobalCalendar}
+                onGlobalCalendarChange={this.onGlobalCalendarChange}
               />
             </EuiPageContent>
             {modal}
