@@ -42,14 +42,25 @@ export const DensityChart: React.FC<DensityChartProps> = ({
     .domain([0, xMax])
     .range([0, width]);
 
-  // FIXME: path is not closed at the bottom.
   const path = area<LogEntriesSummaryBucket>()
     .x0(xScale(0))
     .x1(bucket => xScale(bucket.entriesCount))
     .y0(bucket => yScale(bucket.start))
     .y1(bucket => yScale(bucket.end))
     .curve(curveMonotoneY);
-  const pathData = path(buckets);
+
+  const firstBucket = buckets[0];
+  const lastBucket = buckets[buckets.length - 1];
+  const pathBuckets = [
+    // Make sure the graph starts at the count of the first point
+    { start, end: start, entriesCount: firstBucket.entriesCount },
+    ...buckets,
+    // Make sure the line ends at the height of the last point
+    { start: lastBucket.end, end: lastBucket.end, entriesCount: lastBucket.entriesCount },
+    // If the last point is not at the end of the minimap, make sure it doesn't extend indefinitely and goes to 0
+    { start: end, end, entriesCount: 0 },
+  ];
+  const pathData = path(pathBuckets);
 
   return (
     <g transform={`translate(${x}, 0)`}>
