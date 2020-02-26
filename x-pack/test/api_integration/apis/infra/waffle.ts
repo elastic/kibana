@@ -231,9 +231,9 @@ export default function({ getService }: FtrProviderContext) {
           expect(firstNode).to.have.property('metric');
           expect(firstNode.metric).to.eql({
             name: 'custom',
-            value: 0.0041964285714285714,
-            max: 0.0041964285714285714,
-            avg: 0.0006994047619047619,
+            value: 0.0016,
+            max: 0.0018333333333333333,
+            avg: 0.0013666666666666669,
           });
         }
       });
