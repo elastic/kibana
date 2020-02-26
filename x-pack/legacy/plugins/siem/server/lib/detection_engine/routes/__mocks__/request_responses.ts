@@ -151,29 +151,33 @@ export const getPatchBulkRequest = (): ServerInjectOptions => ({
   payload: [typicalPayload()],
 });
 
-export const getDeleteBulkRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteBulkRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
-export const getDeleteBulkRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteBulkRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequestById = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteAsPostBulkRequestById = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteAsPostBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
 export const getPrivilegeRequest = () =>
   requestMock.create({
