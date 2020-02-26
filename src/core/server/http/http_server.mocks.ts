@@ -19,8 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
@@ -29,12 +28,13 @@ import {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
+  RouteValidationSpec,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
-interface RequestFixtureOptions {
+interface RequestFixtureOptions<P = any, Q = any, B = any> {
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -43,9 +43,14 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  validation?: {
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+    body?: RouteValidationSpec<B>;
+  };
 }
 
-function createKibanaRequestMock({
+function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -54,9 +59,11 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
-}: RequestFixtureOptions = {}) {
-  const queryString = querystring.stringify(query);
-  return KibanaRequest.from(
+  validation = {},
+}: RequestFixtureOptions<P, Q, B> = {}) {
+  const queryString = stringify(query, { sort: false });
+
+  return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
       headers,
       params,
@@ -76,9 +83,9 @@ function createKibanaRequestMock({
       },
     }),
     {
-      params: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
-      query: schema.object({}, { allowUnknowns: true }),
+      params: validation.params || schema.any(),
+      body: validation.body || schema.any(),
+      query: validation.query || schema.any(),
     }
   );
 }

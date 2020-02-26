@@ -8,7 +8,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 // @ts-ignore: Untyped Local
@@ -43,8 +42,6 @@ export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
-    QueryString: any;
-    storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
   };
 }
@@ -93,7 +90,6 @@ export class CanvasPlugin
     loadExpressionTypes();
     loadTransitions();
 
-    initClipboard(plugins.__LEGACY.storage);
     initLoadingIndicator(core.http.addLoadingCountSource);
 
     core.chrome.setBadge(

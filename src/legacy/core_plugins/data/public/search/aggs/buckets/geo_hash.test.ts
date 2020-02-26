@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { geoHashBucketAgg, IBucketGeoHashGridAggConfig } from './geo_hash';
+import { geoHashBucketAgg } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { IBucketAggConfig } from './_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -77,78 +78,25 @@ describe('Geohash Agg', () => {
     it('should select precision parameter', () => {
       expect(precisionParam.name).toEqual('precision');
     });
-
-    describe('precision parameter write', () => {
-      const zoomToGeoHashPrecision: Record<string, any> = {
-        0: 1,
-        1: 2,
-        2: 2,
-        3: 2,
-        4: 3,
-        5: 3,
-        6: 4,
-        7: 4,
-        8: 4,
-        9: 5,
-        10: 5,
-        11: 6,
-        12: 6,
-        13: 6,
-        14: 7,
-        15: 7,
-        16: 8,
-        17: 8,
-        18: 8,
-        19: 9,
-        20: 9,
-        21: 10,
-      };
-
-      Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel: string) => {
-        it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
-          const aggConfigs = getAggConfigs({
-            autoPrecision: true,
-            mapZoom: zoomLevel,
-          });
-
-          const { [BUCKET_TYPES.GEOHASH_GRID]: params } = aggConfigs.aggs[0].toDsl();
-
-          expect(params.precision).toEqual(zoomToGeoHashPrecision[zoomLevel]);
-        });
-      });
-    });
   });
 
   describe('getRequestAggs', () => {
     describe('initial aggregation creation', () => {
       let aggConfigs: IAggConfigs;
-      let geoHashGridAgg: IBucketGeoHashGridAggConfig;
+      let geoHashGridAgg: IBucketAggConfig;
 
       beforeEach(() => {
         aggConfigs = getAggConfigs();
-        geoHashGridAgg = aggConfigs.aggs[0] as IBucketGeoHashGridAggConfig;
+        geoHashGridAgg = aggConfigs.aggs[0] as IBucketAggConfig;
       });
 
       it('should create filter, geohash_grid, and geo_centroid aggregations', () => {
-        const requestAggs = geoHashBucketAgg.getRequestAggs(
-          geoHashGridAgg
-        ) as IBucketGeoHashGridAggConfig[];
+        const requestAggs = geoHashBucketAgg.getRequestAggs(geoHashGridAgg) as IBucketAggConfig[];
 
         expect(requestAggs.length).toEqual(3);
         expect(requestAggs[0].type.name).toEqual('filter');
         expect(requestAggs[1].type.name).toEqual('geohash_grid');
         expect(requestAggs[2].type.name).toEqual('geo_centroid');
-      });
-
-      it('should set mapCollar in vis session state', () => {
-        const [, geoHashAgg] = geoHashBucketAgg.getRequestAggs(
-          geoHashGridAgg
-        ) as IBucketGeoHashGridAggConfig[];
-
-        expect(geoHashAgg).toHaveProperty('lastMapCollar');
-        expect(geoHashAgg.lastMapCollar).toHaveProperty('top_left');
-        expect(geoHashAgg.lastMapCollar).toHaveProperty('bottom_right');
-        expect(geoHashAgg.lastMapCollar).toHaveProperty('zoom');
       });
     });
   });
@@ -157,8 +105,8 @@ describe('Geohash Agg', () => {
     it('should only create geohash_grid and geo_centroid aggregations when isFilteredByCollar is false', () => {
       const aggConfigs = getAggConfigs({ isFilteredByCollar: false });
       const requestAggs = geoHashBucketAgg.getRequestAggs(
-        aggConfigs.aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
+        aggConfigs.aggs[0] as IBucketAggConfig
+      ) as IBucketAggConfig[];
 
       expect(requestAggs.length).toEqual(2);
       expect(requestAggs[0].type.name).toEqual('geohash_grid');
@@ -168,8 +116,8 @@ describe('Geohash Agg', () => {
     it('should only create filter and geohash_grid aggregations when useGeocentroid is false', () => {
       const aggConfigs = getAggConfigs({ useGeocentroid: false });
       const requestAggs = geoHashBucketAgg.getRequestAggs(
-        aggConfigs.aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
+        aggConfigs.aggs[0] as IBucketAggConfig
+      ) as IBucketAggConfig[];
 
       expect(requestAggs.length).toEqual(2);
       expect(requestAggs[0].type.name).toEqual('filter');
@@ -178,23 +126,28 @@ describe('Geohash Agg', () => {
   });
 
   describe('aggregation creation after map interaction', () => {
-    let originalRequestAggs: IBucketGeoHashGridAggConfig[];
+    let originalRequestAggs: IBucketAggConfig[];
 
     beforeEach(() => {
       originalRequestAggs = geoHashBucketAgg.getRequestAggs(
-        getAggConfigs().aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
+        getAggConfigs({
+          boundingBox: {
+            top_left: { lat: 1, lon: -1 },
+            bottom_right: { lat: -1, lon: 1 },
+          },
+        }).aggs[0] as IBucketAggConfig
+      ) as IBucketAggConfig[];
     });
 
     it('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
-          mapBounds: {
+          boundingBox: {
             top_left: { lat: 10.0, lon: -10.0 },
             bottom_right: { lat: 9.0, lon: -9.0 },
           },
-        }).aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
+        }).aggs[0] as IBucketAggConfig
+      ) as IBucketAggConfig[];
 
       expect(originalRequestAggs[1].params).not.toEqual(geoBoxingBox.params);
     });
@@ -202,24 +155,14 @@ describe('Geohash Agg', () => {
     it('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
-          mapBounds: {
+          boundingBox: {
             top_left: { lat: 1, lon: -1 },
             bottom_right: { lat: -1, lon: 1 },
           },
-        }).aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
+        }).aggs[0] as IBucketAggConfig
+      ) as IBucketAggConfig[];
 
       expect(originalRequestAggs[1].params).toEqual(geoBoxingBox.params);
-    });
-
-    it('should change geo_bounding_box filter aggregation and vis session state when map zoom level changes', () => {
-      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
-        getAggConfigs({
-          mapZoom: -1,
-        }).aggs[0] as IBucketGeoHashGridAggConfig
-      ) as IBucketGeoHashGridAggConfig[];
-
-      expect(originalRequestAggs[1].lastMapCollar).not.toEqual(geoBoxingBox.lastMapCollar);
     });
   });
 });

@@ -24,7 +24,7 @@ import util from 'util';
 import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
-import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
+import { ProcRunner, ToolingLog } from '@kbn/dev-utils';
 import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
@@ -70,8 +70,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   });
 
   describe(`then running`, () => {
-    it(`'yarn test:browser' should exit 0`, async () => {
-      await execa('yarn', ['test:browser'], {
+    it(`'yarn test:karma' should exit 0`, async () => {
+      await execa('yarn', ['test:karma'], {
         cwd: generatedPath,
         env: {
           DISABLE_JUNIT_REPORTER: '1',
@@ -84,27 +84,30 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     describe('with es instance', () => {
-      const log = new ToolingLog();
+      const log = new ToolingLog({
+        level: 'verbose',
+        writeTo: process.stdout,
+      });
+      const pr = new ProcRunner(log);
 
       const es = createLegacyEsTestCluster({ license: 'basic', log });
       beforeAll(es.start);
       afterAll(es.stop);
+      afterAll(() => pr.teardown());
 
       it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
-        await withProcRunner(log, async proc => {
-          await proc.run('kibana', {
-            cmd: 'yarn',
-            args: [
-              'start',
-              '--optimize.enabled=false',
-              '--logging.json=false',
-              '--migrations.skip=true',
-            ],
-            cwd: generatedPath,
-            wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
-          });
-          await proc.stop('kibana');
+        await pr.run('kibana', {
+          cmd: 'yarn',
+          args: [
+            'start',
+            '--optimize.enabled=false',
+            '--logging.json=false',
+            '--migrations.skip=true',
+          ],
+          cwd: generatedPath,
+          wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
         });
+        await pr.stop('kibana');
       });
     });
 

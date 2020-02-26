@@ -10,7 +10,7 @@ import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
 import {
   IFieldType,
-  isFilterable,
+  indexPatterns as indexPatternsUtils,
   QuerySuggestionField,
   QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
@@ -43,7 +43,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
   return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       indexPatterns.map(indexPattern => {
-        return indexPattern.fields.filter(isFilterable);
+        return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
       })
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();

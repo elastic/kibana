@@ -5,12 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash/fp';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { PluginInitializerContext } from '../../../../src/core/server';
 import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -30,9 +28,10 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
-import { initServerWithKibana } from './server/kibana.index';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -147,31 +146,36 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        [IP_REPUTATION_LINKS_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.ipReputationLinks', {
+            defaultMessage: 'IP Reputation Links',
+          }),
+          value: IP_REPUTATION_LINKS_SETTING_DEFAULT,
+          type: 'json',
+          description: i18n.translate('xpack.siem.uiSettings.ipReputationLinksDescription', {
+            defaultMessage:
+              'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
       },
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const { config, newPlatform, plugins, route } = server;
-      const { coreContext, env, setup } = newPlatform;
-      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
-      const serverFacade = {
-        config,
-        usingEphemeralEncryptionKey:
-          get('usingEphemeralEncryptionKey', newPlatform.setup.plugins.encryptedSavedObjects) ??
-          false,
-        plugins: {
-          alerting: plugins.alerting,
-          actions: newPlatform.start.plugins.actions,
-          elasticsearch: plugins.elasticsearch,
-          spaces: plugins.spaces,
-          savedObjects: server.savedObjects.SavedObjectsClient,
-        },
-        route: route.bind(server),
+      const { coreContext, env, setup, start } = server.newPlatform;
+      const initializerContext = { ...coreContext, env };
+      const __legacy = {
+        config: server.config,
+        route: server.route.bind(server),
       };
-      // @ts-ignore-next-line: setup.plugins is too loosely typed
-      plugin(initializerContext).setup(setup.core, setup.plugins);
 
-      initServerWithKibana(initializerContext, serverFacade);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      const pluginInstance = plugin(initializerContext);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.setup(setup.core, setup.plugins, __legacy);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.start(start.core, start.plugins);
     },
     config(Joi: Root) {
       // See x-pack/plugins/siem/server/config.ts if you're adding another

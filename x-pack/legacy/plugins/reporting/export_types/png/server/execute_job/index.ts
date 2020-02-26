@@ -7,14 +7,9 @@
 import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { ReportingCore } from '../../../../server';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-  Logger,
-} from '../../../../types';
+import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
@@ -26,12 +21,13 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+  parentLogger: Logger
 ) {
+  const browserDriverFactory = await reporting.getBrowserDriverFactory();
   const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 

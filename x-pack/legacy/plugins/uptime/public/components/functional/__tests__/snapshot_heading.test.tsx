@@ -10,17 +10,17 @@ import { SnapshotHeading } from '../snapshot_heading';
 
 describe('SnapshotHeading', () => {
   it('renders custom heading for no down monitors', () => {
-    const wrapper = shallowWithIntl(<SnapshotHeading down={0} total={23} />);
+    const wrapper = shallowWithIntl(<SnapshotHeading total={23} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders standard heading for valid counts', () => {
-    const wrapper = shallowWithIntl(<SnapshotHeading down={3} total={17} />);
+    const wrapper = shallowWithIntl(<SnapshotHeading total={17} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders custom heading for no monitors', () => {
-    const wrapper = shallowWithIntl(<SnapshotHeading down={0} total={0} />);
+    const wrapper = shallowWithIntl(<SnapshotHeading total={0} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

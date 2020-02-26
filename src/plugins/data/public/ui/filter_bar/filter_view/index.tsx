@@ -21,10 +21,10 @@ import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FilterLabel } from '../filter_editor/lib/filter_label';
-import { esFilters } from '../../..';
+import { Filter, isFilterPinned } from '../../../../common';
 
 interface Props {
-  filter: esFilters.Filter;
+  filter: Filter;
   valueLabel: string;
   [propName: string]: any;
 }
@@ -43,7 +43,7 @@ export const FilterView: FC<Props> = ({
     values: { innerText },
   });
 
-  if (esFilters.isFilterPinned(filter)) {
+  if (isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;

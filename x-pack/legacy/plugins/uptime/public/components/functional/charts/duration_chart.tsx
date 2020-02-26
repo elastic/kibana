@@ -8,6 +8,7 @@ import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts'
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/graphql/types';
@@ -50,9 +51,15 @@ export const DurationChart = ({
   loading,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
-  const [getUrlParams] = useUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
+  const onBrushEnd = (minX: number, maxX: number) => {
+    updateUrlParams({
+      dateRangeStart: moment(minX).toISOString(),
+      dateRangeEnd: moment(maxX).toISOString(),
+    });
+  };
   return (
     <>
       <EuiPanel paddingSize="m">
@@ -68,7 +75,12 @@ export const DurationChart = ({
         <ChartWrapper height="400px" loading={loading}>
           {hasLines ? (
             <Chart>
-              <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
+              <Settings
+                xDomain={{ min, max }}
+                showLegend={true}
+                legendPosition={Position.Bottom}
+                onBrushEnd={onBrushEnd}
+              />
               <Axis
                 id="bottom"
                 position={Position.Bottom}
