@@ -53,8 +53,6 @@ export const allRulesReducer = (
         ...state,
         loadingRuleIds: action.actionType == null ? [] : [...state.loadingRuleIds, ...action.ids],
         loadingRulesAction: action.actionType,
-        // TODO when EuiBasicTable will give us away to clear selections
-        // selectedRuleIds: action.actionType == null ? [] : state.selectedRuleIds,
       };
     }
     case 'selectedRuleIds': {
