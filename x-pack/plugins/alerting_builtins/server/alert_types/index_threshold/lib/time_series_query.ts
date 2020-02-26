@@ -96,7 +96,7 @@ export async function timeSeriesQuery(
 
   let esResult: any;
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
-  logger.info(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
+  logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
 
   try {
     esResult = await callCluster('search', esQuery);
@@ -105,7 +105,7 @@ export async function timeSeriesQuery(
     throw new Error('error running search');
   }
 
-  logger.info(`${logPrefix} result: ${JSON.stringify(esResult)}`);
+  logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 

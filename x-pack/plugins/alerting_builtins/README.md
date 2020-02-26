@@ -135,6 +135,7 @@ server    log   [17:32:10.060] [warning][actions][actions][plugins] \
 
 [kbn-action]: https://github.com/pmuellr/kbn-action
 [es-hb-sim]: https://github.com/pmuellr/es-hb-sim
+[now-iso]: https://github.com/pmuellr/now-iso
 
 
 ### http endpoints
@@ -155,24 +156,22 @@ The request body is very similar to the alertType's parameters.
 #### example
 
 Continuing with the example above, here's a query to get the values calculated
-for the last 10 seconds:
-
-_note: you'll need to change the `dateStart` and `dateEnd`
-values as appropriate_
+for the last 10 seconds.
+This example uses [now-iso][] to generate iso date strings.
 
 ```console
 curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_threshold/_time_series_query" \
-    -H "kbn-xsrf: foo" -H "content-type: application/json"   -d '{
-    "index":         "es-hb-sim",
-    "timeField":     "@timestamp",
-    "aggType":       "average",
-    "aggField":      "summary.up",
-    "groupField":    "monitor.name.keyword",
-    "interval":      "1s",
-    "dateStart":     "2020-02-26T15:10:40.000Z",
-    "dateEnd":       "2020-02-26T15:10:50.000Z",
-    "window":        "5s"
-}'
+    -H "kbn-xsrf: foo" -H "content-type: application/json"   -d "{
+    \"index\":         \"es-hb-sim\",
+    \"timeField\":     \"@timestamp\",
+    \"aggType\":       \"average\",
+    \"aggField\":      \"summary.up\",
+    \"groupField\":    \"monitor.name.keyword\",
+    \"interval\":      \"1s\",
+    \"dateStart\":     \"`now-iso -10s`\",
+    \"dateEnd\":       \"`now-iso`\",
+    \"window\":        \"5s\"
+}"
 ```
 
 ```
