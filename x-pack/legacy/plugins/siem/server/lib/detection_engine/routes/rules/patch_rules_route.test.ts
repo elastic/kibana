@@ -4,130 +4,81 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
-import { omit } from 'lodash/fp';
 import { patchRulesRoute } from './patch_rules_route';
 
 import {
   getEmptyFindResult,
   getFindResultStatus,
   getResult,
-  updateActionResult,
   getPatchRequest,
   typicalPayload,
   getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
-import { createMockServer, clientsServiceMock } from '../__mocks__';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
 describe('patch_rules', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    getClients.mockResolvedValue(clients);
-    patchRulesRoute(server.route, getClients);
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.update.mockResolvedValue(getResult());
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+
+    patchRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.update.mockResolvedValue(updateActionResult());
-      clients.alertsClient.update.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getPatchRequest());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getPatchRequest(), context);
+      expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.update.mockResolvedValue(updateActionResult());
-      clients.alertsClient.update.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getPatchRequest());
-      expect(statusCode).toBe(404);
+      const response = await server.inject(getPatchRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'rule_id: "rule-1" not found',
+        statusCode: 404,
+      });
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
-      patchRulesRoute(route, getClients);
-      const { statusCode } = await inject(getPatchRequest());
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(getPatchRequest(), context);
+      expect(response.notFound).toHaveBeenCalled();
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if id is not given in either the body or the url', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { rule_id, ...noId } = typicalPayload();
-      const request: ServerInjectOptions = {
-        method: 'PATCH',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: {
-          payload: noId,
-        },
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+  describe('request validation', () => {
+    test('rejects payloads with no ID', async () => {
+      const response = responseMock.create();
+      const { rule_id, ...body } = typicalPayload();
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.badRequest).toHaveBeenCalled();
     });
 
-    test('returns 404 if the record does not exist yet', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      clients.actionsClient.update.mockResolvedValue(updateActionResult());
-      clients.alertsClient.update.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'PATCH',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: typicalPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(404);
+    test('allows query rule type', async () => {
+      const response = responseMock.create();
+      const body = { ...typicalPayload(), type: 'query' };
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.ok).toHaveBeenCalled();
     });
 
-    test('returns 200 if type is query', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.update.mockResolvedValue(updateActionResult());
-      clients.alertsClient.update.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'PATCH',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: typicalPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
+    test('rejects unknown rule type', async () => {
+      const response = responseMock.create();
+      const body = { ...typicalPayload(), type: 'oh hi' };
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
 
-    test('returns 400 if type is not filter or kql', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.update.mockResolvedValue(updateActionResult());
-      clients.alertsClient.update.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { type, ...noType } = typicalPayload();
-      const request: ServerInjectOptions = {
-        method: 'PATCH',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: {
-          ...noType,
-          type: 'something-made-up',
-        },
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+      expect(response.badRequest).toHaveBeenCalled();
     });
   });
 });

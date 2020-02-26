@@ -55,7 +55,7 @@ describe('patch_rules_bulk', () => {
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
       const response = responseMock.create();
-      const body = [{}];
+      const body = [{ ...typicalPayload(), rule_id: undefined }];
       // @ts-ignore ambiguous validation types
       server.getRoute().config.validate.body(body, response);
 

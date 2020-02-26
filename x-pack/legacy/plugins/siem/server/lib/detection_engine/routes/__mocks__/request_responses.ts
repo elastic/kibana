@@ -112,13 +112,12 @@ export const getUpdateRequest = (): ServerInjectOptions => ({
   },
 });
 
-export const getPatchRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getPatchRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
 export const getReadRequest = () =>
   requestMock.create({
