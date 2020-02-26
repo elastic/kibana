@@ -192,10 +192,11 @@ export const addPrepackagedRulesRequest = () =>
     path: DETECTION_ENGINE_PREPACKAGED_URL,
   });
 
-export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
-});
+export const getPrepackagedRulesStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+  });
 
 export interface FindHit {
   page: number;
