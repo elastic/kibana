@@ -15,6 +15,7 @@ const initialState = (): ManagementListState => {
     pageIndex: 0,
     total: 0,
     loading: false,
+    details: undefined,
     location: undefined,
   };
 };
@@ -37,6 +38,11 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
       pageSize,
       pageIndex,
       loading: false,
+    };
+  } else if (action.type === 'serverReturnedManagementDetails') {
+    return {
+      ...state,
+      details: action.payload,
     };
   } else if (action.type === 'userExitedManagementList') {
     return initialState();

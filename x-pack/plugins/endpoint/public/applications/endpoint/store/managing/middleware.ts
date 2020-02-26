@@ -18,12 +18,15 @@ import { AppAction } from '../action';
 export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
+    const state = getState();
     if (
-      (action.type === 'userChangedUrl' && isOnManagementPage(getState())) ||
+      (action.type === 'userChangedUrl' &&
+        isOnManagementPage(state) &&
+        hasSelectedHost(state) !== undefined) ||
       action.type === 'userPaginatedManagementList'
     ) {
-      const managementPageIndex = pageIndex(getState());
-      const managementPageSize = pageSize(getState());
+      const managementPageIndex = pageIndex(state);
+      const managementPageSize = pageSize(state);
       const response = await coreStart.http.post('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [
@@ -38,13 +41,15 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
         payload: response,
       });
     }
-    if (action.type === 'userChangedUrl' && hasSelectedHost !== undefined) {
-      const { selected_host: selectedHost } = uiQueryParams(getState());
-      const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
-      dispatch({
-        type: 'serverReturnedManagementDetails',
-        payload: response,
-      });
+    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== undefined) {
+      const { selected_host: selectedHost } = uiQueryParams(state);
+      if (selectedHost !== undefined) {
+        const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+        dispatch({
+          type: 'serverReturnedManagementDetails',
+          payload: response,
+        });
+      }
     }
   };
 };

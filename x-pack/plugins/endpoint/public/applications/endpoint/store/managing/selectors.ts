@@ -18,6 +18,10 @@ export const totalHits = (state: ManagementListState) => state.total;
 
 export const isLoading = (state: ManagementListState) => state.loading;
 
+export const detailsData = (state: ManagementListState) => {
+  return state.details;
+};
+
 export const isOnManagementPage = (state: ManagementListState) =>
   state.location ? state.location.pathname === '/management' : false;
 
@@ -46,9 +50,9 @@ export const uiQueryParams: (
   }
 );
 
-// change into arrow functions + add types
-export const hasSelectedHost = createSelector(uiQueryParams, function({
-  selected_host: selectedHost,
-}) {
-  return selectedHost !== undefined;
-});
+export const hasSelectedHost: (state: ManagementListState) => boolean = createSelector(
+  uiQueryParams,
+  ({ selected_host: selectedHost }) => {
+    return selectedHost !== undefined;
+  }
+);

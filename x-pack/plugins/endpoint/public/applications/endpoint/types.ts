@@ -28,6 +28,7 @@ export interface ManagementListState {
   pageSize: number;
   pageIndex: number;
   loading: boolean;
+  details: EndpointMetadata;
   location?: Immutable<EndpointAppLocation>;
 }
 
