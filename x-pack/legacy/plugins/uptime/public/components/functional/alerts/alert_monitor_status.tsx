@@ -14,7 +14,10 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { KueryBar } from '../../connected';
 
 interface AlertMonitorStatusProps {
@@ -76,6 +79,33 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       label: location,
     }))
   );
+  const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>([
+    {
+      key: 's',
+      label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
+        defaultMessage: 'Seconds',
+      }),
+    },
+    {
+      checked: 'on',
+      key: 'm',
+      label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.minutes', {
+        defaultMessage: 'Minutes',
+      }),
+    },
+    {
+      key: 'h',
+      label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
+        defaultMessage: 'Hours',
+      }),
+    },
+    {
+      key: 'd',
+      label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
+        defaultMessage: 'Hours',
+      }),
+    },
+  ]);
 
   const { setAlertParams } = props;
 
@@ -84,8 +114,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   }, [numTimes, setAlertParams]);
 
   useEffect(() => {
-    setAlertParams('timerange', { from: `now-${numMins}m`, to: 'now' });
-  }, [numMins, setAlertParams]);
+    const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
+    setAlertParams('timerange', { from: `now-${numMins}${timerangeUnit}`, to: 'now' });
+  }, [numMins, timerangeUnitOptions, setAlertParams]);
 
   useEffect(() => {
     if (allLabels) {
@@ -121,18 +152,56 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
 
       <EuiSpacer size="xs" />
 
-      <AlertExpressionPopover
-        id="timerange"
-        description="within"
-        value={`last ${numMins} minutes`}
-        content={
-          <EuiFieldNumber
-            compressed
-            value={numMins}
-            onChange={e => setNumMins(parseInt(e.target.value, 10))}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <AlertExpressionPopover
+            id="timerange"
+            description="within"
+            value={`last ${numMins}`}
+            content={
+              <EuiFieldNumber
+                compressed
+                value={numMins}
+                onChange={e => setNumMins(parseInt(e.target.value, 10))}
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AlertExpressionPopover
+            id="timerange-unit"
+            description=""
+            value={
+              timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ??
+              ''
+            }
+            content={
+              <>
+                <EuiTitle size="xxs">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.uptime.alerts.monitorStatus.timerangeSelectionHeader"
+                      defaultMessage="Select time range unit"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSelectable
+                  options={timerangeUnitOptions}
+                  onChange={newOptions => {
+                    if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
+                      setTimerangeUnitOptions(newOptions);
+                    }
+                  }}
+                  singleSelection={true}
+                  listProps={{ showIcons: true }}
+                >
+                  {list => list}
+                </EuiSelectable>
+              </>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="xs" />
 
