@@ -14,12 +14,15 @@ import {
   InfraSnapshotGroupbyInput,
 } from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SnapshotNodeResponse } from '../../../../plugins/infra/common/http_api/snapshot_api';
+import {
+  SnapshotNodeResponse,
+  SnapshotMetricInput,
+} from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
 
 interface SnapshotRequest {
   filterQuery?: string | null;
-  metric: InfraSnapshotMetricInput;
+  metric: SnapshotMetricInput;
   groupBy: InfraSnapshotGroupbyInput[];
   nodeType: InfraNodeType;
   sourceId: string;
@@ -195,6 +198,44 @@ export default function({ getService }: FtrProviderContext) {
             });
           }
         });
+      });
+
+      it('should work with custom metrics', async () => {
+        const data = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '1m',
+          },
+          metric: {
+            type: 'custom',
+            field: 'system.cpu.user.pct',
+            aggregation: 'avg',
+            id: '1',
+          } as SnapshotMetricInput,
+          nodeType: 'host' as InfraNodeType,
+          groupBy: [],
+        });
+
+        const snapshot = data;
+        expect(snapshot).to.have.property('nodes');
+        if (snapshot) {
+          const { nodes } = snapshot;
+          expect(nodes.length).to.equal(1);
+          const firstNode = first(nodes);
+          expect(firstNode).to.have.property('path');
+          expect(firstNode.path.length).to.equal(1);
+          expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+          expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+          expect(firstNode).to.have.property('metric');
+          expect(firstNode.metric).to.eql({
+            name: 'custom',
+            value: 0.0041964285714285714,
+            max: 0.0041964285714285714,
+            avg: 0.0006994047619047619,
+          });
+        }
       });
 
       it('should basically work with 1 grouping', () => {

@@ -5,9 +5,10 @@
  */
 
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
+import { getField, addFieldToDSL } from '../util/es_agg_utils';
 
 export class ESAggMetricField extends AbstractField {
   static type = 'ES_AGG';
@@ -34,12 +35,11 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return this.getAggType() === COUNT_AGG_TYPE ? true : !!this._esDocField;
+    return this.getAggType() === AGG_TYPE.COUNT ? true : !!this._esDocField;
   }
 
   async getDataType() {
-    // aggregations only provide numerical data
-    return 'number';
+    return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
   getESDocFieldName() {
@@ -47,9 +47,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getRequestDescription() {
-    return this.getAggType() !== COUNT_AGG_TYPE
+    return this.getAggType() !== AGG_TYPE.COUNT
       ? `${this.getAggType()} ${this.getESDocFieldName()}`
-      : COUNT_AGG_TYPE;
+      : AGG_TYPE.COUNT;
   }
 
   async createTooltipProperty(value) {
@@ -63,18 +63,13 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-  makeMetricAggConfig() {
-    const metricAggConfig = {
-      id: this.getName(),
-      enabled: true,
-      type: this.getAggType(),
-      schema: 'metric',
-      params: {},
+  getValueAggDsl(indexPattern) {
+    const field = getField(indexPattern, this.getESDocFieldName());
+    const aggType = this.getAggType();
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
+    return {
+      [aggType]: addFieldToDSL(aggBody, field),
     };
-    if (this.getAggType() !== COUNT_AGG_TYPE) {
-      metricAggConfig.params = { field: this.getESDocFieldName() };
-    }
-    return metricAggConfig;
   }
 
   supportsFieldMeta() {
@@ -84,5 +79,9 @@ export class ESAggMetricField extends AbstractField {
 
   async getOrdinalFieldMetaRequest(config) {
     return this._esDocField.getOrdinalFieldMetaRequest(config);
+  }
+
+  async getCategoricalFieldMetaRequest() {
+    return this._esDocField.getCategoricalFieldMetaRequest();
   }
 }
