@@ -10,7 +10,7 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { LicenseCheckResult } from './plugin';
+import { LicenseCheckResult } from '../types';
 
 export const licensePreRoutingFactory = (
   getLicenseCheckResults: () => LicenseCheckResult,

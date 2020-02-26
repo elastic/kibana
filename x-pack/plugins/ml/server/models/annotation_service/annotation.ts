@@ -8,7 +8,7 @@ import Boom from 'boom';
 import _ from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 
-import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { ANNOTATION_TYPE } from '../../../../../legacy/plugins/ml/common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -19,7 +19,7 @@ import {
   Annotations,
   isAnnotation,
   isAnnotations,
-} from '../../../common/types/annotations';
+} from '../../../../../legacy/plugins/ml/common/types/annotations';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

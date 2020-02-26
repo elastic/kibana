@@ -5,7 +5,11 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
+import {
+  Aggregation,
+  Field,
+  NewJobCaps,
+} from '../../../../../../legacy/plugins/ml/common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
 interface NewJobCapsResponse {

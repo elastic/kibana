@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
+import { MAX_BYTES } from '../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
 import { wrapError } from '../client/error_wrapper';
 import {
   InputOverrides,

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["ml"],
-  "requiredPlugins": ["cloud", "features", "home", "licensing", "security", "space", "usageCollection"],
+  "requiredPlugins": ["cloud", "features", "home", "licensing", "security", "spaces", "usageCollection"],
   "server": true,
   "ui": false
 }

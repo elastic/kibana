@@ -24,7 +24,10 @@ import {
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
 } from '../../../common/types/modules';
-import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
+import {
+  getLatestDataOrBucketTimestamp,
+  prefixDatafeedId,
+} from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import { mlLog } from '../../client/log';
 // @ts-ignore
 import { jobServiceProvider } from '../job_service';

@@ -407,7 +407,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: any) {
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.records', {
           jobId: request.params.jobId,

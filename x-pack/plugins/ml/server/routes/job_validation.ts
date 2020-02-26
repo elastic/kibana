@@ -26,7 +26,7 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
  * Routes for job validation
  */
 export function jobValidationRoutes({ version, getLicenseCheckResults, router }: any) {
-  const { isSecurityDisabled } = getLicenseCheckResults();
+  // const { isSecurityDisabled } = getLicenseCheckResults();
 
   function calculateModelMemoryLimit(
     context: RequestHandlerContext,
@@ -75,7 +75,7 @@ export function jobValidationRoutes({ version, getLicenseCheckResults, router }:
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          isSecurityDisabled
+          getLicenseCheckResults().isSecurityDisabled
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
@@ -181,7 +181,7 @@ export function jobValidationRoutes({ version, getLicenseCheckResults, router }:
           request.body,
           version,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          isSecurityDisabled
+          getLicenseCheckResults().isSecurityDisabled
         );
 
         return response.ok({

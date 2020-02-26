@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LICENSE_TYPE } from '../../../common/constants/license';
-import { LicenseCheckResult } from '../../new_platform/plugin';
+import { LICENSE_TYPE } from '../../../../../legacy/plugins/ml/common/constants/license';
+import { LicenseCheckResult } from '../../types';
 
 interface Response {
   isAvailable: boolean;

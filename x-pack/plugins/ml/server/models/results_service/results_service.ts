@@ -10,7 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'kibana/server';
 import { buildAnomalyTableItems, AnomaliesTableRecord } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../legacy/plugins/ml/common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 

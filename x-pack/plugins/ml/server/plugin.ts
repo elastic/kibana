@@ -34,6 +34,7 @@ import { systemRoutes } from './routes/system';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
+    savedObjects: any;
     ml?: {
       mlClient: IScopedClusterClient;
     };
@@ -133,11 +134,15 @@ export class MlServerPlugin {
 
     plugins.licensing.license$.subscribe(async (license: any) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
+      // @ts-ignore isAvailable is not read
       const { isAvailable, isEnabled } = license.getFeature(this.pluginId);
 
       this.licenseCheckResults = {
         isActive: license.isActive,
-        isAvailable,
+        // This isAvailable check for the ml plugin returns false for a basic license
+        // ML should be available on basic with reduced functionality (onlyfile data visualizer)
+        // TODO: This will need to be updated once cutover is complete.
+        isAvailable: isEnabled,
         isEnabled,
         isSecurityDisabled: securityIsEnabled === false,
         type: license.type,

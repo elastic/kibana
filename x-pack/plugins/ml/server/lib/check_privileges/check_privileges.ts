@@ -5,11 +5,14 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
+import {
+  Privileges,
+  getDefaultPrivileges,
+} from '../../../../../legacy/plugins/ml/common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
 import { checkLicense } from '../check_license';
-import { LICENSE_TYPE } from '../../../common/constants/license';
-import { LicenseCheckResult } from '../../new_platform/plugin';
+import { LICENSE_TYPE } from '../../../../../legacy/plugins/ml/common/constants/license';
+import { LicenseCheckResult } from '../../types';
 
 import { mlPrivileges } from './privileges';
 

@@ -20,7 +20,7 @@ import { LicenseCheckResult } from '../types';
  */
 export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, cloud }: any) {
   let cachedLicenseCheckResult: LicenseCheckResult;
-  const { isSecurityDisabled } = getLicenseCheckResults();
+  // const { isSecurityDisabled } = getLicenseCheckResults();
 
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
@@ -77,7 +77,7 @@ export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, clo
           }
         }
 
-        if (isSecurityDisabled) {
+        if (getLicenseCheckResults().isSecurityDisabled) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return response.ok({
@@ -162,7 +162,7 @@ export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, clo
       try {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (isSecurityDisabled) {
+        if (getLicenseCheckResults().isSecurityDisabled) {
           return response.ok({
             body: await getNodeCount(context),
           });

@@ -6,8 +6,8 @@
 
 import { CallAPIOptions, IScopedClusterClient } from 'src/core/server';
 import _ from 'lodash';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
-import { getSafeAggregationName } from '../../../common/util/job_utils';
+import { ML_JOB_FIELD_TYPES } from '../../../../../legacy/plugins/ml/common/constants/field_types';
+import { getSafeAggregationName } from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
