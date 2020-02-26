@@ -51,12 +51,6 @@ function FieldParamEditor({
   setValue,
 }: FieldParamEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
-  /**
-   * isValueSelected should be stored as a ref,
-   * since the "onSearchChange" callback is called right after the "onChange"
-   */
-  const isValueSelected = useRef(false);
-
   const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
     ? [{ label: value.displayName || value.name, target: value }]
     : [];
@@ -64,9 +58,9 @@ function FieldParamEditor({
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption: IndexPatternField = get(options, '0.target');
 
-    isValueSelected.current = true;
-    setIsDirty(false);
-    setValue(selectedOption);
+    if (!(aggParam.required && !selectedOption)) {
+      setValue(selectedOption);
+    }
 
     if (aggParam.onChange) {
       aggParam.onChange(agg);
@@ -106,13 +100,7 @@ function FieldParamEditor({
     }
   }, []);
 
-  const onSearchChange = useCallback(() => {
-    if (!isValueSelected.current) {
-      setIsDirty(true);
-    } else {
-      isValueSelected.current = false;
-    }
-  }, []);
+  const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
 
   return (
     <EuiFormRow
