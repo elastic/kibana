@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { schema } from '@kbn/config-schema';
 import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'src/core/server';
 import { ReindexStatus } from '../../common/types';
@@ -103,7 +102,13 @@ export function registerReindexIndicesRoutes(
 
           return response.ok({ body: reindexOp.attributes });
         } catch (e) {
-          return response.internalError({ body: e });
+          if (!e.isBoom) {
+            return response.internalError({ body: e });
+          }
+          return response.customError({
+            body: { message: e.message },
+            statusCode: e.output?.statusCode ?? 500,
+          });
         }
       }
     )
@@ -166,7 +171,7 @@ export function registerReindexIndicesRoutes(
             body: {
               message: e.message,
             },
-            statusCode: e.statusCode,
+            statusCode: e.output?.statusCode ?? 500,
           });
         }
       }
@@ -217,7 +222,7 @@ export function registerReindexIndicesRoutes(
             body: {
               message: e.message,
             },
-            statusCode: e.statusCode,
+            statusCode: e.output?.statusCode ?? 500,
           });
         }
       }
