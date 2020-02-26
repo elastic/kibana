@@ -17,6 +17,7 @@ import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
+import { DurationAnomaliesBar } from './duration_line_bar_list';
 
 interface DurationChartProps {
   /**
@@ -54,6 +55,7 @@ export const DurationChartComponent = ({
       dateRangeEnd: moment(maxX).toISOString(),
     });
   };
+
   return (
     <>
       <EuiPanel paddingSize="m">
@@ -104,6 +106,7 @@ export const DurationChartComponent = ({
                 })}
               />
               <DurationLineSeriesList lines={locationDurationLines} />
+              <DurationAnomaliesBar anomalies={anomalies} />
             </Chart>
           ) : (
             <DurationChartEmptyState />
