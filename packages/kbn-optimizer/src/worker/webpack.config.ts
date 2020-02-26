@@ -150,7 +150,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                 {
                   loader: 'sass-loader',
                   options: {
-                    sourceMap: !worker.dist,
+                    // must always be enabled as long as we're using the `resolve-url-loader` to
+                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
+                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
