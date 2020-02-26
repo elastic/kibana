@@ -185,7 +185,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
         }
         if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
-          throw new Error('At least gold license is required for third party action types');
+          throw new Error(
+            `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
+          );
         }
         actionTypeRegistry.register(actionType);
       },

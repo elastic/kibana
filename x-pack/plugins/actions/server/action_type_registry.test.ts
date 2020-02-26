@@ -106,6 +106,7 @@ describe('get()', () => {
       Object {
         "executor": [Function],
         "id": "my-action-type",
+        "minimumLicenseRequired": "basic",
         "name": "My action type",
       }
     `);
