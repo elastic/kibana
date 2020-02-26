@@ -51,7 +51,7 @@ import './management';
 import './dev_tools';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import { showAppRedirectNotification } from 'ui/notify';
+import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
@@ -66,4 +66,6 @@ routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });
 
-uiModules.get('kibana').run(showAppRedirectNotification);
+uiModules
+  .get('kibana')
+  .run($location => showAppRedirectNotification($location, npSetup.core.notifications.toasts));

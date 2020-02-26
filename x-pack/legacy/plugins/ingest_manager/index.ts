@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { resolve } from 'path';
 import {
   savedObjectMappings,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -18,6 +19,7 @@ import {
 export function ingestManager(kibana: any) {
   return new kibana.Plugin({
     id: 'ingestManager',
+    publicDir: resolve(__dirname, '../../../plugins/ingest_manager/public'),
     uiExports: {
       savedObjectSchemas: {
         [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {

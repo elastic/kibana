@@ -252,6 +252,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           cache: false,
           sourceMap: false,
           extractComments: false,
+          parallel: false,
           terserOptions: {
             compress: false,
             mangle: false,
