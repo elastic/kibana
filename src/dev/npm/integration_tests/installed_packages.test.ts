@@ -26,8 +26,7 @@ import { REPO_ROOT } from '../../constants';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
-// FLAKY
-describe.skip('src/dev/npm/installed_packages', () => {
+describe('src/dev/npm/installed_packages', () => {
   describe('getInstalledPackages()', function() {
     let kibanaPackages: InstalledPackage[];
     let fixture1Packages: InstalledPackage[];
@@ -42,7 +41,7 @@ describe.skip('src/dev/npm/installed_packages', () => {
           includeDev: true,
         }),
       ]);
-    }, 60 * 1000);
+    }, 360 * 1000);
 
     it('reads all installed packages of a module', () => {
       expect(fixture1Packages).toEqual([
