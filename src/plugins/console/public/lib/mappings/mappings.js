@@ -23,7 +23,7 @@ const es = require('../es/es');
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
+const POLL_INTERVAL = 2000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
@@ -252,8 +252,7 @@ function clear() {
   templates = [];
 }
 
-function retrieveSettings(settingsKey, settingsToRetrieve, autocompleteSettings) {
-  console.log(arguments);
+function retrieveSettings(settingsKey, settingsToRetrieve) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -261,16 +260,17 @@ function retrieveSettings(settingsKey, settingsToRetrieve, autocompleteSettings)
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
-  if (autocompleteSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
+  if (settingsToRetrieve[settingsKey] === true) {
     return es.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
-    // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
-    if (autocompleteSettings[settingsKey]) {
+    if (settingsToRetrieve[settingsKey] === false) {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
+      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
+    } else {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
       return settingsPromise.resolve();
     }
-    // If the user doesn't want autocomplete suggestions, then clear any that exist
-    return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
   }
 }
 
@@ -299,10 +299,9 @@ function clearSubscriptions() {
 function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
-  const autocompleteSettings = settings.getAutocomplete();
-  const mappingPromise = retrieveSettings('fields', settingsToRetrieve, autocompleteSettings);
-  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve, autocompleteSettings);
-  const templatesPromise = retrieveSettings('templates', settingsToRetrieve, autocompleteSettings);
+  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
+  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
+  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
     let mappingsResponse;
