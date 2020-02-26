@@ -175,7 +175,7 @@ pivoting the data. There is also a preview of the transform for reviewing the co
 image::release-notes/images/7.2-data-frames.png[{dataframes-cap}]
 
 {transforms-cap} are managed on a new list page, displaying the details and 
-status of each {tranform}, and controls for starting, stopping, or deleting {transforms}.
+status of each {transform}, and controls for starting, stopping, or deleting {transforms}.
 
 [role="screenshot"]
 image::release-notes/images/7.2-data-frames-list-view.png[{dataframes-cap}]
