@@ -1,23 +1,96 @@
 [role="xpack"]
+#Remove role xpack?
 [[example-using-index-lifecycle-policy]]
-=== Example of using an index lifecycle policy
+=== Tutorial:  Use ILM to manage Filebeat time-based indices
 
-A common use case for managing index lifecycle policies is when you’re using 
-{beats-ref}/beats-reference.html[Beats] to continually send time-series data, 
-such as metrics and log data, to {es}.  When you create the Beats packages, an 
-index template is installed.  The template includes a default policy to apply 
-when new indices are created.  
+With Index Lifecycle Management (ILM), you can create policies to define actions that will be performed automatically against indices as they age.  In this tutorial, you will use {kib}’s Index Lifecycle Policies UI to modify and create ILM policies.
 
-You can edit the policy in {kib}'s *Index Lifecycle Policies*.  For example, you might:
 
-* Rollover the index when it reaches 50 GB in size or is 30 days old.  These 
-settings are the default for the Beats lifecycle policy. This avoids 
-having 1000s of tiny indices. When a rollover occurs, a new “hot” index is 
-created and added to the index alias.
+[float]
+==== Scenario
 
-* Move the index into the warm phase, shrink the index down to a single shard, 
-and force merge to a single segment.
+You’ve been tasked with sending syslog files to an Elasticsearch cluster. This project has the following specific data retention guidelines for log data:
 
-* After 60 days, move the index into the cold phase and onto less expensive hardware.
+* Keep logs on hot nodes for 30 days
+* Rollover to a new index if the size reaches 50GB
+* After 30 days:
+** Move the logs to warm nodes
+** Decrease replicas to 1
+** Force merge indices to a single segment
+* Delete logs after 90 days
 
-* Delete the index after 90 days.
+
+[float]
+==== Prerequisites
+
+To complete this tutorial, you'll need:
+
+. An {es} cluster with hot and warm nodes configured using shard allocation awareness. If you’re using https://www.elastic.co/guide/en/cloud/current/ec-getting-started-templates-hot-warm.html[Elasticsearch Service], choose the hot/warm template for your deployment.
+
++
+For a self-managed cluster, use https://www.elastic.co/guide/en/elasticsearch/reference/current/allocation-awareness.html[shard allocation awareness] to label nodes as hot and warm.
+For example, this can be set in `elasticsearch.yml` for each node:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+node.attr.data: "warm"
+--------------------------------------------------------------------------------
+
+. A server with Filebeat installed and configured to send logs to the `elasticsearch` output as described in https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html[Getting Started with Filebeat]
+
+[float]
+==== View the filebeat ILM policy
+
+Filebeat includes a pre-configured ILM policy.  Configuring index lifecycle management happens automatically on index creation if you’re using the default `filebeat.yml` and index template.
+
+To view the policy in {kib}, go to *Management* > *Index Lifecycle Policies*, search for _filebeat_, and choose the _filebeat-version_ policy.
+
+This policy will initiate a rollover to a new index when the index size reaches 50G or 30 days old.
+
+[role="screenshot"]
+image::images/tutorial-ilm-hotphaserollover-default.png["Default policy"]
+
+
+[float]
+==== Modify the policy
+
+The default policy is enough to prevent the creation of many tiny daily indices. You can modify the policy to meet more complex requirements.
+
+. Activate the warm phase.
+
++
+There is a choice to make, you can’t meet the requirements exactly with rollover enabled in the hot phase.
+
+
+.. Enable *move to warm phase on rollover*. The index may move to the warm phase more quickly than intended if it reaches the Maximum index size condition before Maximum age.
+.. Provide a value for *Timing for warm phase*. Setting this to 15 will keep the indices on hot nodes for a range of  15-45 days.
+
+
+NOTE:  When rollover is enabled in the hot phase, the rest of the timings are based on the rollover date.
+
+[role="screenshot"]
+image::images/tutorial-ilm-default-warmphaserollover.png["Modify to add warm phase"]
+
+[role="screenshot"]
+image::images/tutorial-ilm-delete-rollover.png["Add a delete phase"]
+
+[float]
+==== Create a custom policy
+
+If meeting a specific retention time period is the most important priority, you can create a custom policy.  For this option, you will use filebeat daily indices without rollover.
+
+<placeholder for filebeat settings if needed>
+
+* *Hot phase:* disable rollover
+* *Warm phase:*
+** *Timing for warm phase:* 30 days from index creation
+** *Node attribute:* data:warm
+** *Number of replicas:* 1
+** *Force merge data:* enable
+** *Number of segments:* 1
+* *Delete phase:*
+** *Activate delete phase*
+** *Timing for delete phase:* 60
+
+[role="screenshot"]
+image::images/tutorial-ilm-delete-phase-creation.png["Modify to add warm phase"]
