@@ -75,7 +75,7 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(legacyServer: any) {
+    async init(legacyServer: any) {
       const { newPlatform } = legacyServer as KbnServer;
       const { core, plugins } = newPlatform.setup;
 
@@ -98,7 +98,7 @@ export function infra(kibana: any) {
       };
 
       const infraPluginInstance = plugin(initContext);
-      infraPluginInstance.setup(core, pluginDeps);
+      await infraPluginInstance.setup(core, pluginDeps);
 
       // NP_TODO: EVERYTHING BELOW HERE IS LEGACY
 
