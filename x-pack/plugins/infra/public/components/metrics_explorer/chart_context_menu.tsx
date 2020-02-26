@@ -24,7 +24,6 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 import { useLinkProps } from '../../hooks/use_link_props';
 
 export interface Props {
@@ -81,7 +80,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const urlPrefixer = usePrefixPathWithBasepath();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {

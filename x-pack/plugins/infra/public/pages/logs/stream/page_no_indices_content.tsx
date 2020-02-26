@@ -15,7 +15,7 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const LogsPageNoIndicesContent = () => {
   const {
-    services: { application, http },
+    services: { application },
   } = useKibana<{}>();
 
   const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;

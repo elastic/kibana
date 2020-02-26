@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { identity } from 'fp-ts/lib/function';
 import React, { useContext } from 'react';
 
 import { SnapshotPageContent } from './page_content';
