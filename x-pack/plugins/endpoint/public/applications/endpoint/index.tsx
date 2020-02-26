@@ -8,12 +8,10 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { RouteCapture } from './view/route_capture';
-import { Route, Switch, BrowserRouter, useLocation, Link } from 'react-router-dom';
-import { Provider, useDispatch } from 'react-redux';
+import { Route, Switch, BrowserRouter, NavLink } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import { Store } from 'redux';
-import { memo } from 'react';
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { RouteCapture } from './view/route_capture';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
@@ -38,21 +36,61 @@ interface RouterProps {
   store: Store;
 }
 
+interface NavTabs {
+  name: string;
+  display: string;
+  exact: boolean;
+  to: string;
+}
+const navTabs: NavTabs[] = [
+  {
+    name: 'home',
+    display: 'Home',
+    exact: true,
+    to: '/',
+  },
+  {
+    name: 'management',
+    display: 'Management',
+    exact: false,
+    to: '/management',
+  },
+  {
+    name: 'alerts',
+    display: 'Alerts',
+    exact: false,
+    to: '/alerts',
+  },
+  {
+    name: 'policies',
+    display: 'Policies',
+    exact: false,
+    to: '/policy',
+  },
+];
+
+function renderNavTabs(tabs: NavTabs[]) {
+  return tabs.map((tab, index) => {
+    return (
+      <NavLink
+        data-testid={`${tab.name}Link`}
+        exact={tab.exact}
+        to={tab.to}
+        key={index}
+        className="euiTab"
+        activeClassName="euiTab-isSelected"
+      >
+        <span className="euiTab__content">{tab.display}</span>
+      </NavLink>
+    );
+  });
+}
+
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
   <Provider store={store}>
     <I18nProvider>
       <BrowserRouter basename={basename}>
-        <div>
-          <Link data-testid="homeLink" to="/">
-            Home
-          </Link>
-          <Link data-testid="managementLink" to="/management">
-            Management
-          </Link>
-          <Link data-testid="alertsLink" to="/alerts">
-            Alerts
-          </Link>
-        </div>
+        <div className="euiTabs">{renderNavTabs(navTabs)}</div>
         <RouteCapture>
           <Switch>
             <Route
