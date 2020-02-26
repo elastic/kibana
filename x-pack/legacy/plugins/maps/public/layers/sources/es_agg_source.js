@@ -80,6 +80,10 @@ export class AbstractESAggSource extends AbstractESSource {
     return aggType !== AGG_TYPE.COUNT ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
   }
 
+  async getFields() {
+    return this.getMetricFields();
+  }
+
   getValueAggsDsl(indexPattern) {
     const valueAggsDsl = {};
     this.getMetricFields()

@@ -5,6 +5,7 @@
  */
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
+import _ from 'lodash';
 
 jest.mock('ui/new_platform');
 jest.mock('../vector_layer', () => {});
@@ -63,6 +64,30 @@ describe('getMetricFields', () => {
     expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
     expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
+  });
+
+  it('should match getFields since term_source is agg_source', async () => {
+    const source = new ESTermSource({
+      indexPatternTitle: indexPatternTitle,
+      term: termFieldName,
+      metrics: metricExamples,
+    });
+    const metrics = source.getMetricFields();
+    const fields = await source.getFields();
+
+    const getFieldMeta = async field => {
+      return {
+        aggType: field.getAggType(),
+        name: field.getName(),
+        label: await field.getLabel(),
+        esDoc: field.getESDocFieldName(),
+      };
+    };
+
+    const metricsFieldMeta = await Promise.all(metrics.map(getFieldMeta));
+    const fieldsFieldMeta = await Promise.all(fields.map(getFieldMeta));
+
+    expect(_.isEqual(metricsFieldMeta, fieldsFieldMeta)).toEqual(true);
   });
 });
 
