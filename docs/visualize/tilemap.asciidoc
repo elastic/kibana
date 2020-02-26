@@ -3,15 +3,15 @@
 
 To tell a story and answer questions about your geographical data, you can create several types of interactive maps with Visualize.
 
-Visualize supports the following types of maps:
+Visualize supports the following maps:
 
-* *Coordinate* &mdash; Display geographic areas overlaid with circles keyed to the data determined by the buckets you specify.
+* *Coordinate* &mdash; Display latitude and longitude coordinates that are associated to the specified bucket aggregation.
 
 * *Region* &mdash; Display colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
 
 * *Heat* &mdash; Display graphical representations of data where the individual values are represented by colors.
 
-NOTE: Visualize maps have been replaced with <<maps>>, which offers more functionality.
+NOTE: The maps in Visualize have been replaced with <<maps>>, which offers more functionality.
 
 [float]
 [[coordinate-map]]
@@ -26,6 +26,8 @@ image::images/visualize_coordinate_map_example.png[]
 [[build-coordinate-map]]
 ==== Build a coordinate map
 
+Configure the `kibana.yml` settings and add the aggregations.
+
 . Configure the following `kibana.yml` settings:
 
 * Set `xpack.maps.showMapVisualizationTypes` to `true`.
@@ -36,26 +38,26 @@ image::images/visualize_coordinate_map_example.png[]
 
 * <<visualize-metric-aggregations,Metric>>
 
-* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
+* <<visualize-bucket-aggregations,Geohash bucket aggregation>>
 
 . Specify the geohash bucket aggregation options:
 
-* *Precision* slider &mdash; Determines the granularity of the results displayed on the map. To show the *Precision* slider, deselect *Change precision on map zoom*d. For information on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
-
+* *Precision* slider &mdash; Determines the granularity of the results displayed on the map. To show the *Precision* slider, deselect *Change precision on map zoom*. For information on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
++
 NOTE: Higher precisions increase memory usage for the browser that displays {kib} and the underlying
 {es} cluster.
 
 * *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])* &mdash; When you selected, the markers are
 placed in the center of all documents in the bucket, and a more accurate visualization is created. When deselected, the markers are placed in the center
 of the geohash grid cell.
-
++
 NOTE: When you have multiple values in the geo_point, the coordinate map is unable to accurately calculate the geo_centroid.
 
 [float]
 [[navigate-coordinate-map]]
 ==== Navigate the coordinate map
 
-To navigate the coordinate map, use the following navigation options:
+To navigate the coordinate map, use the navigation options.
 
 * To move the map center, click and hold anywhere on the map and move the cursor.
 
@@ -77,6 +79,8 @@ image::images/visualize_region_map_example.png[]
 [[build-region-maps]]
 ==== Build a region map
 
+Configure the `kibana.yml` settings and add the aggregations.
+
 . In `kibana.yml`, set `xpack.maps.showMapVisualizationTypes` to `true`.
 
 . To display your data on the region map, use the following aggregations:
@@ -89,7 +93,7 @@ image::images/visualize_region_map_example.png[]
 [[navigate-region-map]]
 ==== Navigate the region map
 
-To navigate the region map, use the following options:
+To navigate the region map, use the navigation options.
 
 * To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
 
@@ -108,7 +112,9 @@ image::images/visualize_heat_map_example.png[]
 [[build-heat-map]]
 ==== Build a heat map
 
-To display your data on the heat map, use the following aggregations:
+To display your data on the heat map, use the supported aggregations.
+
+Heat maps support the following aggregations:
 
 * <<visualize-metric-aggregations,Metric>>
 * <<visualize-parent-pipeline-aggregations,Parent pipeline>>
