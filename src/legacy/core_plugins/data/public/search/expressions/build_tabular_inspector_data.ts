@@ -20,7 +20,7 @@
 import { set } from 'lodash';
 // @ts-ignore
 import { FormattedData } from '../../../../../../plugins/inspector/public';
-// @ts-ignore
+
 import { createFilter } from './create_filter';
 
 import { TabbedTable } from '../tabify';

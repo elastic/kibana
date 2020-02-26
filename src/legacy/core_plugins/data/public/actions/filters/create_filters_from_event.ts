@@ -23,10 +23,8 @@ import { deserializeAggConfig } from '../../search/expressions/utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
 
-type Table = Pick<KibanaDatatable, 'rows' | 'columns'>;
-
 interface EventData {
-  table: Table;
+  table: Pick<KibanaDatatable, 'rows' | 'columns'>;
   column: number;
   row: number;
   value: any;
@@ -36,12 +34,16 @@ interface EventData {
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
  *
- * @param  {Table} table - tabified table data
+ * @param  {EventData['table']} table - tabified table data
  * @param  {number} columnIndex - current column index
  * @param  {number} rowIndex - current row index
  * @return {array} - array of terms to filter against
  */
-const getOtherBucketFilterTerms = (table: Table, columnIndex: number, rowIndex: number) => {
+const getOtherBucketFilterTerms = (
+  table: EventData['table'],
+  columnIndex: number,
+  rowIndex: number
+) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -69,13 +71,13 @@ const getOtherBucketFilterTerms = (table: Table, columnIndex: number, rowIndex: 
  * Assembles the filters needed to apply filtering against a specific cell value, while accounting
  * for cases like if the value is a terms agg in an `__other__` or `__missing__` bucket.
  *
- * @param  {Table} table - tabified table data
+ * @param  {EventData['table']} table - tabified table data
  * @param  {number} columnIndex - current column index
  * @param  {number} rowIndex - current row index
  * @param  {string} cellValue - value of the current cell
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = async (table: Table, columnIndex: number, rowIndex: number) => {
+const createFilter = async (table: EventData['table'], columnIndex: number, rowIndex: number) => {
   if (!table || !table.columns || !table.columns[columnIndex]) {
     return;
   }
