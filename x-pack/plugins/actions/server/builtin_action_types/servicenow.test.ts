@@ -49,7 +49,7 @@ beforeAll(() => {
 describe('get()', () => {
   test('should return correct action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('servicenow');
+    expect(actionType.name).toEqual('ServiceNow');
   });
 });
 
