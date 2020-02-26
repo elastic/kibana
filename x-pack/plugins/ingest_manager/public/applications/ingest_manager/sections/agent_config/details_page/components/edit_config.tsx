@@ -20,38 +20,38 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useCore, sendRequest } from '../../../../hooks';
 import { agentConfigRouteService } from '../../../../services';
 import { AgentConfig } from '../../../../types';
-import { PolicyForm, policyFormValidation } from './policy_form';
+import { ConfigForm, configFormValidation } from './config_form';
 
 interface Props {
   agentConfig: AgentConfig;
   onClose: () => void;
 }
 
-export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
+export const EditConfigFlyout: React.FunctionComponent<Props> = ({
   agentConfig: originalAgentConfig,
   onClose,
 }) => {
   const { notifications } = useCore();
-  const [policy, setPolicy] = useState<Partial<AgentConfig>>({
+  const [config, setConfig] = useState<Partial<AgentConfig>>({
     name: originalAgentConfig.name,
     description: originalAgentConfig.description,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const updatePolicy = (updatedFields: Partial<AgentConfig>) => {
-    setPolicy({
-      ...policy,
+  const updateConfig = (updatedFields: Partial<AgentConfig>) => {
+    setConfig({
+      ...config,
       ...updatedFields,
     });
   };
-  const validation = policyFormValidation(policy);
+  const validation = configFormValidation(config);
 
   const header = (
-    <EuiFlyoutHeader hasBorder aria-labelledby="FleetEditPolicyFlyoutTitle">
+    <EuiFlyoutHeader hasBorder aria-labelledby="FleetEditConfigFlyoutTitle">
       <EuiTitle size="m">
-        <h2 id="FleetEditPolicyFlyoutTitle">
+        <h2 id="FleetEditConfigFlyoutTitle">
           <FormattedMessage
-            id="xpack.ingestManager.editPolicy.flyoutTitle"
-            defaultMessage="Edit policy"
+            id="xpack.ingestManager.editConfig.flyoutTitle"
+            defaultMessage="Edit config"
           />
         </h2>
       </EuiTitle>
@@ -60,7 +60,7 @@ export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
 
   const body = (
     <EuiFlyoutBody>
-      <PolicyForm policy={policy} updatePolicy={updatePolicy} validation={validation} />
+      <ConfigForm config={config} updateConfig={updateConfig} validation={validation} />
     </EuiFlyoutBody>
   );
 
@@ -70,7 +70,7 @@ export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             <FormattedMessage
-              id="xpack.ingestManager.editPolicy.cancelButtonLabel"
+              id="xpack.ingestManager.editConfig.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -86,27 +86,27 @@ export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
                 const { error } = await sendRequest({
                   path: agentConfigRouteService.getUpdatePath(originalAgentConfig.id),
                   method: 'put',
-                  body: JSON.stringify(policy),
+                  body: JSON.stringify(config),
                 });
                 if (!error) {
                   notifications.toasts.addSuccess(
-                    i18n.translate('xpack.ingestManager.editPolicy.successNotificationTitle', {
+                    i18n.translate('xpack.ingestManager.editConfig.successNotificationTitle', {
                       defaultMessage: "Agent config '{name}' updated",
-                      values: { name: policy.name },
+                      values: { name: config.name },
                     })
                   );
                 } else {
                   notifications.toasts.addDanger(
                     error
                       ? error.message
-                      : i18n.translate('xpack.ingestManager.editPolicy.errorNotificationTitle', {
+                      : i18n.translate('xpack.ingestManager.editConfig.errorNotificationTitle', {
                           defaultMessage: 'Unable to update agent config',
                         })
                   );
                 }
               } catch (e) {
                 notifications.toasts.addDanger(
-                  i18n.translate('xpack.ingestManager.editPolicy.errorNotificationTitle', {
+                  i18n.translate('xpack.ingestManager.editConfig.errorNotificationTitle', {
                     defaultMessage: 'Unable to update agent config',
                   })
                 );
@@ -116,7 +116,7 @@ export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
             }}
           >
             <FormattedMessage
-              id="xpack.ingestManager.editPolicy.submitButtonLabel"
+              id="xpack.ingestManager.editConfig.submitButtonLabel"
               defaultMessage="Update"
             />
           </EuiButton>

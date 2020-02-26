@@ -21,7 +21,7 @@ export function useEnrollmentApiKeys(pagination: Pagination) {
   };
 }
 
-export function usePolicies() {
+export function useConfigs() {
   const request = useGetAgentConfigs();
 
   return {

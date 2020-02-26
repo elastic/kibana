@@ -32,7 +32,7 @@ export async function generateOutputApiKey(outputId: string, agentId: string): P
   return `${key.id}:${key.api_key}`;
 }
 
-export async function generateAccessApiKey(agentId: string, policyId: string) {
+export async function generateAccessApiKey(agentId: string, configId: string) {
   const key = await createAPIKey(agentId, {
     'fleet-agent': {},
   });

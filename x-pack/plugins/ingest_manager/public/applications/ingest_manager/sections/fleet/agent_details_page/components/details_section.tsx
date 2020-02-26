@@ -58,7 +58,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
 
   // Fetch AgentConfig information
   const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
-    agent.policy_id as string
+    agent.config_id as string
   );
 
   const items = [
@@ -87,7 +87,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
       description: isAgentConfigLoading ? (
         <Loading />
       ) : agentConfigData && agentConfigData.item ? (
-        <ConnectedLink color="primary" path={`/configs/${agent.policy_id}`}>
+        <ConnectedLink color="primary" path={`/configs/${agent.config_id}`}>
           {agentConfigData.item.name}
         </ConnectedLink>
       ) : (
@@ -102,7 +102,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
               />
             }
           />{' '}
-          <EuiTextColor color="subdued">{agent.policy_id}</EuiTextColor>
+          <EuiTextColor color="subdued">{agent.config_id}</EuiTextColor>
         </Fragment>
       ),
     },

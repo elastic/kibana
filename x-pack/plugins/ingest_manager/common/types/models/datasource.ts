@@ -8,7 +8,7 @@ export interface NewDatasource {
   name: string;
   namespace?: string;
   read_alias?: string;
-  agent_config_id: string;
+  config_id: string;
   package?: {
     assets: Array<{
       id: string;

@@ -15,7 +15,7 @@ export type AgentType =
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
 export interface AgentAction extends SavedObjectAttributes {
-  type: 'POLICY_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
   id: string;
   created_at: string;
   data?: string;
@@ -42,7 +42,7 @@ export interface AgentEvent {
   payload?: any;
   agent_id: string;
   action_id?: string;
-  policy_id?: string;
+  config_id?: string;
   stream_id?: string;
 }
 
@@ -55,7 +55,7 @@ interface AgentBase {
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
-  policy_id?: string;
+  config_id?: string;
   last_checkin?: string;
   config_updated_at?: string;
   actions: AgentAction[];

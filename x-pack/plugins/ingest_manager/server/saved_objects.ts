@@ -29,7 +29,7 @@ export const savedObjectMappings = {
       version: { type: 'keyword' },
       user_provided_metadata: { type: 'text' },
       local_metadata: { type: 'text' },
-      policy_id: { type: 'keyword' },
+      config_id: { type: 'keyword' },
       last_updated: { type: 'date' },
       last_checkin: { type: 'date' },
       config_updated_at: { type: 'date' },
@@ -56,7 +56,7 @@ export const savedObjectMappings = {
       subtype: { type: 'keyword' },
       agent_id: { type: 'keyword' },
       action_id: { type: 'keyword' },
-      policy_id: { type: 'keyword' },
+      config_id: { type: 'keyword' },
       stream_id: { type: 'keyword' },
       timestamp: { type: 'date' },
       message: { type: 'text' },
@@ -83,7 +83,7 @@ export const savedObjectMappings = {
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'binary' },
       api_key_id: { type: 'keyword' },
-      policy_id: { type: 'keyword' },
+      config_id: { type: 'keyword' },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
       expire_at: { type: 'date' },
@@ -113,7 +113,7 @@ export const savedObjectMappings = {
       name: { type: 'keyword' },
       namespace: { type: 'keyword' },
       read_alias: { type: 'keyword' },
-      agent_config_id: { type: 'keyword' },
+      config_id: { type: 'keyword' },
       package: {
         properties: {
           assets: {

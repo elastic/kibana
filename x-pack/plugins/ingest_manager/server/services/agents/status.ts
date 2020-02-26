@@ -47,9 +47,9 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   return 'online';
 }
 
-export async function getAgentsStatusForPolicy(
+export async function getAgentStatusForConfig(
   soClient: SavedObjectsClientContract,
-  policyId: string
+  configId: string
 ) {
   const [all, error, offline] = await Promise.all(
     [undefined, buildKueryForErrorAgents(), buildKueryForOfflineAgents()].map(kuery =>
@@ -58,14 +58,14 @@ export async function getAgentsStatusForPolicy(
         perPage: 0,
         page: 1,
         kuery: kuery
-          ? `(${kuery}) and (agents.policy_id:"${policyId}")`
-          : `agents.policy_id:"${policyId}"`,
+          ? `(${kuery}) and (agents.config_id:"${configId}")`
+          : `agents.config_id:"${configId}"`,
       })
     )
   );
 
   return {
-    events: await getEventsCountForPolicyId(soClient, policyId),
+    events: await getEventsCountForPolicyId(soClient, configId),
     total: all.total,
     online: all.total - error.total - offline.total,
     error: error.total,
@@ -73,10 +73,10 @@ export async function getAgentsStatusForPolicy(
   };
 }
 
-async function getEventsCountForPolicyId(soClient: SavedObjectsClientContract, policyId: string) {
+async function getEventsCountForPolicyId(soClient: SavedObjectsClientContract, configId: string) {
   const { total } = await soClient.find({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    filter: `agent_events.attributes.policy_id:"${policyId}"`,
+    filter: `agent_events.attributes.config_id:"${configId}"`,
     perPage: 0,
     page: 1,
     sortField: 'timestamp',

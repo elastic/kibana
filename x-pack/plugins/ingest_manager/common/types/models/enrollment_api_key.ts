@@ -11,7 +11,7 @@ export interface EnrollmentAPIKey {
   api_key: string;
   name?: string;
   active: boolean;
-  policy_id?: string;
+  config_id?: string;
 }
 
 export interface EnrollmentAPIKeySOAttributes extends SavedObjectAttributes {
@@ -19,5 +19,5 @@ export interface EnrollmentAPIKeySOAttributes extends SavedObjectAttributes {
   api_key: string;
   name?: string;
   active: boolean;
-  policy_id?: string;
+  config_id?: string;
 }

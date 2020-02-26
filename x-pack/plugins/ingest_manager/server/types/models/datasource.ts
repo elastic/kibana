@@ -10,7 +10,7 @@ const DatasourceBaseSchema = {
   name: schema.string(),
   namespace: schema.maybe(schema.string()),
   read_alias: schema.maybe(schema.string()),
-  agent_config_id: schema.string(),
+  config_id: schema.string(),
   package: schema.maybe(
     schema.object({
       assets: schema.arrayOf(

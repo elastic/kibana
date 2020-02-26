@@ -16,13 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useInput, sendRequest } from '../../../../../hooks';
-import { usePolicies } from './hooks';
+import { useConfigs } from './hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../../services';
 
 export const CreateApiKeyForm: React.FunctionComponent<{ onChange: () => void }> = ({
   onChange,
 }) => {
-  const { data: policies } = usePolicies();
+  const { data: configs } = useConfigs();
   const { inputs, onSubmit, submitted } = useCreateApiKey(() => onChange());
 
   return (
@@ -38,15 +38,15 @@ export const CreateApiKeyForm: React.FunctionComponent<{ onChange: () => void }>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.apiKeysForm.policyLabel', {
-            defaultMessage: 'Policy',
+          label={i18n.translate('xpack.ingestManager.apiKeysForm.configLabel', {
+            defaultMessage: 'Config',
           })}
         >
           <EuiSelect
-            {...inputs.policyIdInput.props}
-            options={policies.map(policy => ({
-              value: policy.id,
-              text: policy.name,
+            {...inputs.configIdInput.props}
+            options={configs.map(config => ({
+              value: config.id,
+              text: config.name,
             }))}
           />
         </EuiFormRow>
@@ -69,7 +69,7 @@ function useCreateApiKey(onSuccess: () => void) {
   const [submitted, setSubmitted] = React.useState(false);
   const inputs = {
     nameInput: useInput(),
-    policyIdInput: useInput('default'),
+    configIdInput: useInput('default'),
   };
 
   const onSubmit = async () => {
@@ -79,7 +79,7 @@ function useCreateApiKey(onSuccess: () => void) {
       path: enrollmentAPIKeyRouteService.getCreatePath(),
       body: JSON.stringify({
         name: inputs.nameInput.value,
-        policy_id: inputs.policyIdInput.value,
+        config_id: inputs.configIdInput.value,
       }),
     });
     setSubmitted(false);

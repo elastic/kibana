@@ -122,7 +122,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `agents.policy_id : (${agentConfigsToCheck.join(' or ')})`,
+        kuery: `agents.config_id : (${agentConfigsToCheck.join(' or ')})`,
       },
     });
     setAgentsCount(data?.total || 0);

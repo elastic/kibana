@@ -21,7 +21,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
-  GetAgentStatusForPolicySchema,
+  GetAgentStatusForConfigSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -33,7 +33,7 @@ import {
   postAgentEnrollHandler,
   postAgentAcksHandler,
   postAgentsUnenrollHandler,
-  getAgentStatusForPolicyHandler,
+  getAgentStatusForConfigHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -123,13 +123,13 @@ export const registerRoutes = (router: IRouter) => {
     getAgentEventsHandler
   );
 
-  // Get agent status for policy
+  // Get agent status for config
   router.get(
     {
-      path: AGENT_API_ROUTES.STATUS_FOR_POLICY_PATTERN,
-      validate: GetAgentStatusForPolicySchema,
+      path: AGENT_API_ROUTES.STATUS_FOR_CONFIG_PATTERN,
+      validate: GetAgentStatusForConfigSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    getAgentStatusForPolicyHandler
+    getAgentStatusForConfigHandler
   );
 };

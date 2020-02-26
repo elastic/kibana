@@ -11,14 +11,14 @@ import { unenrollAgents } from './unenroll';
 
 export async function updateAgentsForPolicyId(
   soClient: SavedObjectsClientContract,
-  policyId: string
+  configId: string
 ) {
   let hasMore = true;
   let page = 1;
   const now = new Date().toISOString();
   while (hasMore) {
     const { agents } = await listAgents(soClient, {
-      kuery: `agents.policy_id:"${policyId}"`,
+      kuery: `agents.config_id:"${configId}"`,
       page: page++,
       perPage: 1000,
       showInactive: true,
@@ -37,12 +37,12 @@ export async function updateAgentsForPolicyId(
   }
 }
 
-export async function unenrollForPolicyId(soClient: SavedObjectsClientContract, policyId: string) {
+export async function unenrollForPolicyId(soClient: SavedObjectsClientContract, configId: string) {
   let hasMore = true;
   let page = 1;
   while (hasMore) {
     const { agents } = await listAgents(soClient, {
-      kuery: `agents.policy_id:"${policyId}"`,
+      kuery: `agents.config_id:"${configId}"`,
       page: page++,
       perPage: 1000,
       showInactive: true,
