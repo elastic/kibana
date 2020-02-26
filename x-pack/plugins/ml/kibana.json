@@ -5,5 +5,5 @@
   "configPath": ["ml"],
   "requiredPlugins": ["cloud", "features", "home", "licensing", "security", "space", "usageCollection"],
   "server": true,
-  "ui": true
+  "ui": false
 }

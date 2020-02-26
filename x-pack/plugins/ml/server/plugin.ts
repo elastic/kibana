@@ -12,6 +12,7 @@ import { LicenseCheckResult, PLUGIN_ID, PluginsSetup } from './types';
 import { elasticsearchJsPlugin } from '../../../legacy/plugins/ml/server/client/elasticsearch_ml';
 import { makeMlUsageCollector } from '../../../legacy/plugins/ml/server/lib/ml_telemetry';
 import { initMlServerLog } from '../../../legacy/plugins/ml/server/client/log';
+import { addLinksToSampleDatasets } from '../../../legacy/plugins/ml/server/lib/sample_data_sets';
 
 import { annotationRoutes } from '../../../legacy/plugins/ml/server/routes/annotations';
 import { calendars } from '../../../legacy/plugins/ml/server/routes/calendars';
@@ -50,9 +51,11 @@ export class MlServerPlugin {
     isEnabled: false,
     isSecurityDisabled: false,
   };
+
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
-    this.version = ctx.env.packageInfo.version; // or should it be branch to correspond to docs?
+    // or should it be branch to correspond to docs?
+    this.version = ctx.env.packageInfo.version;
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
@@ -121,6 +124,11 @@ export class MlServerPlugin {
     initMlServerLog({ log: this.log });
     coreSetup.getStartServices().then(([core]) => {
       makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
+    });
+
+    // TODO: this needs to happen once we have license info and has to have license checks
+    addLinksToSampleDatasets({
+      addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
     });
 
     plugins.licensing.license$.subscribe(async (license: any) => {
