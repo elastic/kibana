@@ -69,6 +69,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
         <EuiFlexItem grow={false}>
           <EuiButton
             color="secondary"
+            data-test-subj="editable-title-submit-btn"
             fill
             iconType="save"
             onClick={() => onClickSubmit(changedTitle as string)}
@@ -78,7 +79,12 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onCancel} size="s">
+          <EuiButtonEmpty
+            data-test-subj="editable-title-cancel-btn"
+            iconType="cross"
+            onClick={onCancel}
+            size="s"
+          >
             {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>

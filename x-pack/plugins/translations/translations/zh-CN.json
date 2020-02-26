@@ -10991,7 +10991,6 @@
     "xpack.siem.editDataProvider.doesNotExistLabel": "不存在",
     "xpack.siem.editDataProvider.existsLabel": "存在",
     "xpack.siem.editDataProvider.fieldLabel": "字段",
-    "xpack.siem.editDataProvider.fieldPlaceholder": "选择字段",
     "xpack.siem.editDataProvider.isLabel": "是",
     "xpack.siem.editDataProvider.isNotLabel": "不是",
     "xpack.siem.editDataProvider.operatorLabel": "运算符",
