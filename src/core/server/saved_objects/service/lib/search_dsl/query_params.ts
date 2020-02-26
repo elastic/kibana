@@ -70,22 +70,22 @@ function getClauseForType(
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
+        must_not: [{ exists: { field: 'namespace' } }],
       },
     };
-  }
-
-  if (namespace && registry.isNamespace(type)) {
+  } else if (namespace && registry.isNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],
+        must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
   }
-
+  // isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],
-      must_not: [{ exists: { field: 'namespace' } }],
+      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
     },
   };
 }
