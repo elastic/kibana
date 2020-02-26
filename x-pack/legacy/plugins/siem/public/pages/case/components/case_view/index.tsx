@@ -91,13 +91,11 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           break;
         case 'tags':
           setTags(updateValue as string[]);
-          if (updateValue.length > 0) {
-            dispatchUpdateCaseProperty({
-              updateKey: 'tags',
-              updateValue,
-            });
-            setIsEditTags(false);
-          }
+          dispatchUpdateCaseProperty({
+            updateKey: 'tags',
+            updateValue,
+          });
+          setIsEditTags(false);
           break;
         default:
           return null;
