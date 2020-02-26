@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import { CoreSetup, CoreStart } from 'kibana/server';
+// @ts-ignore
 import { JsonUploadAndParse } from './components/json_upload_and_parse';
 // @ts-ignore
 import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
@@ -20,12 +21,12 @@ export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
 /** @internal */
 export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
-  public setup(core: CoreSetup, plugins: any) {
-    setupInitServicesAndConstants(core, plugins);
+  public setup(core: CoreSetup) {
+    setupInitServicesAndConstants(core);
   }
 
-  public start(core: CoreStart) {
-    startInitServicesAndConstants(core);
+  public start(core: CoreStart, plugins: any) {
+    startInitServicesAndConstants(core, plugins);
     return {
       JsonUploadAndParse,
     };

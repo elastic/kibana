@@ -9,12 +9,12 @@ export let savedObjectsClient;
 export let basePath;
 export let kbnFetch;
 
-export const setupInitServicesAndConstants = ({ http }, { data }) => {
-  indexPatternService = data.indexPatterns;
+export const setupInitServicesAndConstants = ({ http }) => {
   basePath = http.basePath.basePath;
   kbnFetch = http.fetch;
 };
 
-export const startInitServicesAndConstants = ({ savedObjects }) => {
+export const startInitServicesAndConstants = ({ savedObjects }, { data }) => {
+  indexPatternService = data.indexPatterns;
   savedObjectsClient = savedObjects.client;
 };
