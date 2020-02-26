@@ -74,12 +74,16 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      if (e.response?.contentType) {
+      if (e.response) {
         dispatch({
           type: 'requestFail',
           payload: e,
         });
       } else {
+        dispatch({
+          type: 'requestFail',
+          payload: undefined,
+        });
         notifications.toasts.addError(e, {
           title: i18n.translate('console.notification.unknownRequestErrorTitle', {
             defaultMessage: 'Unknown Request Error',
