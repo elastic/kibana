@@ -39,7 +39,8 @@ enum TrayType {
 
 interface Props {
   workpadName: string;
-
+  isWriteable: boolean;
+  canUserWrite: boolean;
   tray: TrayType | null;
   setTray: (tray: TrayType | null) => void;
 
@@ -66,11 +67,16 @@ export const Toolbar = (props: Props) => {
     totalPages,
     showWorkpadManager,
     setShowWorkpadManager,
+    isWriteable,
   } = props;
 
   const elementIsSelected = Boolean(selectedElement);
 
   const done = () => setTray(null);
+
+  if (!isWriteable && tray === TrayType.expression) {
+    done();
+  }
 
   const showHideTray = (exp: TrayType) => {
     if (tray && tray === exp) {
@@ -135,7 +141,7 @@ export const Toolbar = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem />
-          {elementIsSelected && (
+          {elementIsSelected && isWriteable && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 color="text"
@@ -166,4 +172,5 @@ Toolbar.propTypes = {
   selectedElement: PropTypes.object,
   showWorkpadManager: PropTypes.bool.isRequired,
   setShowWorkpadManager: PropTypes.func.isRequired,
+  isWriteable: PropTypes.bool.isRequired,
 };
