@@ -13,6 +13,7 @@ import { addRoutes } from './routes';
 import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
+import { registerWhitelistRoutes } from './routes/whitelist';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -73,6 +74,7 @@ export class EndpointPlugin
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
+    registerWhitelistRoutes(router, endpointContext);
   }
 
   public start() {
