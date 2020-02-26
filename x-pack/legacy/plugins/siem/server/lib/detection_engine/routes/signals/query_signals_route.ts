@@ -24,20 +24,27 @@ export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => 
         payload: querySignalsSchema,
       },
     },
-    async handler(request: SignalsQueryRequest) {
+    async handler(request: SignalsQueryRequest, headers) {
       const { query, aggs, _source, track_total_hits, size } = request.payload;
       const index = getIndex(request, server);
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
       try {
-        return callWithRequest(request, 'search', {
+        const searchSignalsIndexResult = await callWithRequest(request, 'search', {
           index,
           body: { query, aggs, _source, track_total_hits, size },
           ignoreUnavailable: true,
         });
+        return searchSignalsIndexResult;
       } catch (exc) {
         // error while getting or updating signal with id: id in signal index .siem-signals
-        return transformError(exc);
+        const error = transformError(exc);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
