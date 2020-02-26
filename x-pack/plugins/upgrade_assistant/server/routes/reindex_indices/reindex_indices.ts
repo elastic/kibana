@@ -137,7 +137,8 @@ export function registerReindexIndicesRoutes(
                 message: i18n.translate(
                   'xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch',
                   {
-                    defaultMessage: `You do not have adequate privileges to reindex "${indexName}".`,
+                    defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
+                    values: { indexName },
                   }
                 ),
                 indexName,
