@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subject, merge } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Reporter } from '@kbn/analytics';
 
@@ -30,8 +30,7 @@ export function reportApplicationUsage(
   currentAppId$: Observable<string | undefined>,
   reporter: Reporter
 ) {
-  const customAppIdEmitter$ = new Subject<string>();
-  merge(currentAppId$, customAppIdEmitter$)
+  currentAppId$
     .pipe(
       filter(appId => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
       distinctUntilChanged()

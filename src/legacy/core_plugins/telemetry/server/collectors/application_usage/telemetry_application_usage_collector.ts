@@ -30,10 +30,15 @@ import {
 /**
  * Roll indices every 24h
  */
-const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
 
-const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
-const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
+/**
+ * Start rolling indices after 5 minutes up
+ */
+export const ROLL_INDICES_START = 5 * 60 * 1000;
+
+export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
+export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 interface ApplicationUsageTotal extends SavedObjectAttributes {
   appId: string;
@@ -157,7 +162,7 @@ export function registerApplicationUsageCollector(
   usageCollection.registerCollector(collector);
 
   setInterval(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_INTERVAL);
-  setTimeout(() => rollTotals(getSavedObjectsClient()), 5 * 60 * 1000); // On startup, wait 5 minutes to rollup totals.
+  setTimeout(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_START);
 }
 
 async function rollTotals(savedObjectsClient?: ISavedObjectsRepository) {
