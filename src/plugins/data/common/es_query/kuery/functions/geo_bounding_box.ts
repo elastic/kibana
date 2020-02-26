@@ -47,7 +47,9 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const field = _.get(indexPattern, 'fields', []).find((fld: IFieldType) => fld.name === fieldName);
+  const fieldList: IFieldType[] = indexPattern?.fields ?? [];
+  const field = fieldList.find((fld: IFieldType) => fld.name === fieldName);
+
   const queryParams = args.reduce((acc: any, arg: any) => {
     const snakeArgName = _.snakeCase(arg.name);
     return {
@@ -56,7 +58,7 @@ export function toElasticsearchQuery(
     };
   }, {});
 
-  if (field && (field as IFieldType).scripted) {
+  if (field?.scripted) {
     throw new Error(`Geo bounding box query does not support scripted fields`);
   }
 
