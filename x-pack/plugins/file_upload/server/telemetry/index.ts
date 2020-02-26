@@ -5,3 +5,4 @@
  */
 
 export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
+export { fileUploadTelemetryMappingsType } from './mappings';
