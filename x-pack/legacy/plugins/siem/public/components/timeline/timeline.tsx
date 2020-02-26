@@ -8,14 +8,13 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { KqlMode, EventType } from '../../store/timeline/model';
-import { ColumnHeader } from './body/column_headers/column_header';
+import { ColumnHeaderOptions, KqlMode, EventType } from '../../store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
@@ -57,7 +56,7 @@ export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   end: number;
   eventType?: EventType;
@@ -84,7 +83,7 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** The parent Timeline component */
@@ -230,8 +229,4 @@ export const TimelineComponent: React.FC<Props> = ({
   );
 };
 
-TimelineComponent.displayName = 'TimelineComponent';
-
 export const Timeline = React.memo(TimelineComponent);
-
-Timeline.displayName = 'Timeline';

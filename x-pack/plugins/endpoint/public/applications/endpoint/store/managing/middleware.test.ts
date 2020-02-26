@@ -32,6 +32,7 @@ describe('endpoint list saga', () => {
       agent: {
         version: '',
         id: '',
+        name: '',
       },
       host: {
         id: '',
@@ -42,6 +43,7 @@ describe('endpoint list saga', () => {
           name: '',
           full: '',
           version: '',
+          variant: '',
         },
       },
     };
@@ -70,7 +72,7 @@ describe('endpoint list saga', () => {
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
     dispatch({ type: 'userNavigatedToPage', payload: 'managementPage' });
     await sleep();
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/endpoints', {
+    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),

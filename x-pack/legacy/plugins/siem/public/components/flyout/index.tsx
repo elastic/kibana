@@ -6,7 +6,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
 
@@ -15,7 +15,7 @@ import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 60;
@@ -58,28 +58,39 @@ export const FlyoutComponent = React.memo<Props>(
     timelineId,
     usersViewing,
     width,
-  }) => (
-    <>
-      <Visible show={show}>
-        <Pane
-          flyoutHeight={flyoutHeight}
-          headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
+  }) => {
+    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
+      showTimeline,
+      timelineId,
+    ]);
+    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+      showTimeline,
+      timelineId,
+    ]);
+
+    return (
+      <>
+        <Visible show={show}>
+          <Pane
+            flyoutHeight={flyoutHeight}
+            headerHeight={headerHeight}
+            onClose={handleClose}
+            timelineId={timelineId}
+            usersViewing={usersViewing}
+            width={width}
+          >
+            {children}
+          </Pane>
+        </Visible>
+        <FlyoutButton
+          dataProviders={dataProviders!}
+          show={!show}
           timelineId={timelineId}
-          usersViewing={usersViewing}
-          width={width}
-        >
-          {children}
-        </Pane>
-      </Visible>
-      <FlyoutButton
-        dataProviders={dataProviders!}
-        show={!show}
-        timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
-      />
-    </>
-  )
+          onOpen={handleOpen}
+        />
+      </>
+    );
+  }
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';
