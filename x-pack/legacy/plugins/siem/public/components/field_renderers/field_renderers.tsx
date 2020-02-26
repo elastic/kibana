@@ -180,14 +180,16 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
 
     return draggables.length > 0 ? (
       <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
-        {draggables}{' '}
-        <DefaultFieldRendererOverflow
-          rowItems={rowItems}
-          idPrefix={idPrefix}
-          render={render as OverflowRenderer}
-          overflowIndexStart={displayCount}
-          moreMaxHeight={moreMaxHeight}
-        />
+        <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DefaultFieldRendererOverflow
+            rowItems={rowItems}
+            idPrefix={idPrefix}
+            render={render as OverflowRenderer}
+            overflowIndexStart={displayCount}
+            moreMaxHeight={moreMaxHeight}
+          />
+        </EuiFlexItem>
       </DraggableContainerFlexGroup>
     ) : (
       getEmptyTagValue()
