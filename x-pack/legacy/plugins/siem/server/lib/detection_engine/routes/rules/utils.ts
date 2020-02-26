@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy } from 'lodash/fp';
-import { Dictionary } from 'lodash';
+import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -18,7 +17,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -180,9 +179,7 @@ export const transform = (
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
-  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
     return null;
@@ -195,7 +192,7 @@ export const transformOrBulkError = (
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
       return transformAlertToRule(alert);
@@ -226,10 +223,14 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
-  const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
+export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+  const mappedDuplicates = countBy(
+    by,
+    ruleDefinitions.filter(r => r[by] != null)
+  );
+  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
   if (hasDuplicates) {
-    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
+    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
   }
   return [];
 };

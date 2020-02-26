@@ -117,16 +117,16 @@ export const DRAW_TYPE = {
   POLYGON: 'POLYGON',
 };
 
-export const METRIC_TYPE = {
+export const AGG_TYPE = {
   AVG: 'avg',
   COUNT: 'count',
   MAX: 'max',
   MIN: 'min',
   SUM: 'sum',
+  TERMS: 'terms',
   UNIQUE_COUNT: 'cardinality',
 };
 
-export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });

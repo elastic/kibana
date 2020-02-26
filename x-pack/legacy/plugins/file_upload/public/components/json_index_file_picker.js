@@ -268,6 +268,10 @@ export class JsonIndexFilePicker extends Component {
                     maxFileSize: bytesToSize(MAX_FILE_SIZE),
                   }}
                 />
+                <br />
+                {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.coordinateSystemAccepted', {
+                  defaultMessage: 'Coordinates must be in EPSG:4326 coordinate reference system.',
+                })}{' '}
               </span>
             )
           }
