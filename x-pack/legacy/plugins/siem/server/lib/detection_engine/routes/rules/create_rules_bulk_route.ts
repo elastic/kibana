@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction, countBy } from 'lodash/fp';
+import { isFunction } from 'lodash/fp';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
@@ -48,8 +48,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       }
 
       const ruleDefinitions = request.payload;
-      const mappedDuplicates = countBy('rule_id', ruleDefinitions);
-      const dupes = getDuplicates(mappedDuplicates);
+      const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
       const rules = await Promise.all(
         ruleDefinitions
