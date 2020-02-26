@@ -17,29 +17,19 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export { ScopedHistory } from './scoped_history';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  AppStatus,
-  AppNavLinkStatus,
-  AppUpdatableFields,
-  AppUpdater,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
-  LegacyApp,
-} from './types';
+import { IScope } from 'angular';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import chrome from 'ui/chrome';
+
+const App = () => <h1 data-test-subj="legacyAppH1">legacy_app</h1>;
+
+chrome.setRootController('legacy_app', ($scope: IScope, $element: JQLite) => {
+  const element = $element[0];
+
+  ReactDOM.render(<App />, element);
+  $scope.$on('$destroy', () => {
+    ReactDOM.unmountComponentAtNode(element);
+  });
+});
