@@ -30,6 +30,8 @@ import {
   addTimeStamp,
   distro,
   buildId,
+  coveredFilePath,
+  ciRunUrl,
 } from './transforms';
 import { resolve } from "path";
 
@@ -38,27 +40,29 @@ const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || undefined;
+const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
+const prokStatsTimeStampBuildId = pipe(
+  statsAndstaticSiteUrl,
+  buildId,
+  addPrePopulatedTimeStamp,
+);
+const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
 
 export default ({ coverageSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
+
   validateRoot(KIBANA_ROOT, log);
-  const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
 
-  const prokStatsTimeStampBuildId = pipe(
-    statsAndstaticSiteUrl,
-    buildId,
-    addPrePopulatedTimeStamp,
-  );
   const addCoverageSummaryPathAndDistro = pipe(addCoverageSummaryPath(coverageSummaryPath), distro);
-  const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
-
   const objStream = jsonStream(coverageSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
       map(prokStatsTimeStampBuildId),
+      map(coveredFilePath),
+      map(ciRunUrl(log)),
       map(addCoverageSummaryPathAndDistro),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))

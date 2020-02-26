@@ -18,7 +18,7 @@
  */
 
 import { left, right } from './either';
-import { always } from './utils';
+import { always, id } from './utils';
 import { XPACK, STATIC_SITE_URL_PROP_NAME } from './constants';
 
 const maybeTotal = x =>
@@ -90,6 +90,27 @@ export const staticSite = urlBase => obj => {
     .map(buildFinalStaticSiteUrl)
     .fold(always(assignstaticSiteUrl(undefined)), assignstaticSiteUrl);
 
+};
+
+export const coveredFilePath = obj => {
+  const { staticSiteUrl } = obj;
+
+  const withoutCoveredFilePath = always(obj);
+  const dropFront = x => trimLeftFrom('/kibana/', x).replace(/(^\/kibana\/)/, '')
+
+  return maybeTotal(staticSiteUrl)
+    .map(dropFront)
+    .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
+};
+
+export const ciRunUrl = log => obj => {
+  const ciRunUrl = process.env.CI_RUN_URL || 'CI RUN URL NOT PROVIDED';
+  log.verbose(`\n### ciRunUrl: \n\t${ciRunUrl}`)
+
+  return {
+    ...obj,
+    ciRunUrl,
+  }
 };
 
 export const testRunner = obj => {
