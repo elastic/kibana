@@ -26,6 +26,7 @@ export function getAlertType(service: Service): AlertType {
     id: ID,
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
+    defaultActionGroupId: ActionGroupId,
     validate: {
       params: ParamsSchema,
     },
