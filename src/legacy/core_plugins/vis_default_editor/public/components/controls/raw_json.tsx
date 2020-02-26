@@ -19,7 +19,7 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -49,10 +49,9 @@ function RawJsonParamEditor({
   );
   const isValid = isValidJson(value);
 
-  const onChange = (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const textValue = ev.target.value;
-    setValue(textValue);
-    setValidity(isValidJson(textValue));
+  const onChange = (newValue: string) => {
+    setValue(newValue);
+    setValidity(isValidJson(newValue));
   };
 
   useEffect(() => {
@@ -66,15 +65,20 @@ function RawJsonParamEditor({
       fullWidth={true}
       compressed
     >
-      <EuiTextArea
+      <EuiCodeEditor
         id={`visEditorRawJson${agg.id}`}
-        isInvalid={showValidation ? !isValid : false}
+        mode="json"
+        theme="github"
+        width="100%"
+        height="250px"
         value={value}
+        setOptions={{
+          fontSize: '14px',
+        }}
         onChange={onChange}
-        rows={2}
         fullWidth={true}
         onBlur={setTouched}
-        compressed
+        aria-label="Code Editor"
       />
     </EuiFormRow>
   );
