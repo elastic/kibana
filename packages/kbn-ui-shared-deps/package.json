@@ -27,7 +27,7 @@
     "moment-timezone": "^0.5.27",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-intl": "^2.8.0",
+    "react-intl": "^3.12.0",
     "read-pkg": "^5.2.0",
     "regenerator-runtime": "^0.13.3",
     "symbol-observable": "^1.2.0",
