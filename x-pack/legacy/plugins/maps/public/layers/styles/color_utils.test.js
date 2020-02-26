@@ -80,6 +80,31 @@ describe('getColorRampStops', () => {
       '#072f6b',
     ]);
   });
+
+  it('Should create color stops for custom range', () => {
+    expect(getOrdinalColorRampStops('Blues', 0, 1000)).toEqual([
+      0,
+      '#f7faff',
+      125,
+      '#ddeaf7',
+      250,
+      '#c5daee',
+      375,
+      '#9dc9e0',
+      500,
+      '#6aadd5',
+      625,
+      '#4191c5',
+      750,
+      '#2070b4',
+      875,
+      '#072f6b',
+    ]);
+  });
+
+  it('Should snap to end of color stops for identical range', () => {
+    expect(getOrdinalColorRampStops('Blues', 23, 23)).toEqual([23, '#072f6b']);
+  });
 });
 
 describe('getLinearGradient', () => {
