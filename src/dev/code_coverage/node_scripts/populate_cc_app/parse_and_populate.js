@@ -82,9 +82,13 @@ function currentItem(currentBuildNumber, log) {
 
 function normalize(xs) {
   const dropEmpty = x => x !== '';
+
+  const dontDropDuplicates = () => [...xs.filter(dropEmpty)];
   const dropDuplicates = () => [...new Set(xs.filter(dropEmpty))];
-  // const dontDropDuplicates = () => [...xs.filter(dropEmpty)];
-  return dropDuplicates();
+
+  console.log(`\n### process.env.ALLOW_DUPLICATES: \n\t${process.env.ALLOW_DUPLICATES}`);
+
+  return process.env.ALLOW_DUPLICATES ? dontDropDuplicates() : dropDuplicates();
 }
 
 function flush (initData) {

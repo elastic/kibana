@@ -79,6 +79,25 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER}
 
+                  # Bootstrap the CC App
+                  . src/dev/code_coverage/shell_scripts/query_app_initial_data.sh ${BUILD_NUMBER} 100
+
+                  # Check the bootstrapping
+                  cat src/dev/code_coverage/shell_scripts/bootstrapped.dat
+
+                  # Populate the CC App with bootstrapped dat file
+                  node src/dev/code_coverage/node_scripts/populate_cc_app/index.js ${BUILD_NUMBER} \
+src/dev/code_coverage/shell_scripts/bootstrapped.dat \
+src/dev/code_coverage/cc_app/public/initial_data.js
+
+                  # Check the population
+                  cat src/dev/code_coverage/cc_app/public/initial_data.js
+
+                  # build cc app
+                  pushd src/dev/code_coverage/cc_app
+                  yarn
+                  yarn build:prod
+                  popd
                 """,
                   "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
                 )
