@@ -83,7 +83,8 @@ function getInitialLayersFromUrlParam() {
         defaultMessage: `Inital layers not added to map`,
       }),
       text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
-        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: ${e.message}`,
+        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
+        values: { errorMsg: e.message },
       }),
     });
     return [];
