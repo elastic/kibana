@@ -5,7 +5,7 @@
  */
 
 import { buildOSSFeatures } from './oss_features';
-import { featurePrivilegeIterator } from '../../security/server';
+import { featurePrivilegeIterator } from '../../security/server/authorization';
 import { Feature } from '.';
 
 describe('buildOSSFeatures', () => {
