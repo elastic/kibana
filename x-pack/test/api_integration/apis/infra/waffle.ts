@@ -191,7 +191,7 @@ export default function({ getService }: FtrProviderContext) {
               name: 'cpu',
               value: 0.0032,
               max: 0.0038333333333333336,
-              avg: 0.002794444444444445,
+              avg: 0.0027944444444444444,
             });
           }
         });
