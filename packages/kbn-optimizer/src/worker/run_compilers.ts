@@ -27,7 +27,7 @@ import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig } from '../common';
+import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -110,7 +110,7 @@ const observeCompiler = (
         const path = getModulePath(module);
 
         const parsedPath = Path.parse(path);
-        const dirSegments = parsedPath.dir.split(Path.sep);
+        const dirSegments = parsedPath.dir.slice(parsedPath.root.length).split(Path.sep);
         if (!dirSegments.includes('node_modules')) {
           referencedFiles.add(path);
           continue;
@@ -146,7 +146,7 @@ const observeCompiler = (
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModules.length,
-        files,
+        files: files.sort(ascending(f => f)),
       });
 
       return compilerMsgs.compilerSuccess({

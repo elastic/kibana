@@ -135,7 +135,12 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                       }
 
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && base.split(Path.sep).includes('legacy')) {
+                      if (
+                        uri.startsWith('ui/') &&
+                        Path.resolve(base)
+                          .split(Path.sep)
+                          .includes('legacy')
+                      ) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',
