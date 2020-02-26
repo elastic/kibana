@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Action, IncompatibleActionError } from '../../ui_actions';
+import { ActionByType, IncompatibleActionError, ActionType } from '../../ui_actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
-export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
+export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION' as ActionType;
 
 export interface FullNameEmbeddableOutput extends EmbeddableOutput {
   fullName: string;
@@ -35,12 +35,12 @@ export function hasFullNameOutput(
   );
 }
 
-interface ActionContext {
+export interface SayHelloActionContext {
   embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
   message?: string;
 }
 
-export class SayHelloAction implements Action<ActionContext> {
+export class SayHelloAction implements ActionByType<typeof SAY_HELLO_ACTION> {
   public readonly type = SAY_HELLO_ACTION;
   public readonly id = SAY_HELLO_ACTION;
 
@@ -62,7 +62,7 @@ export class SayHelloAction implements Action<ActionContext> {
 
   // Can use typescript generics to get compiler time warnings for immediate feedback if
   // the context is not compatible.
-  async isCompatible(context: ActionContext) {
+  async isCompatible(context: SayHelloActionContext) {
     // Option 1: only compatible with Greeting Embeddables.
     // return context.embeddable.type === CONTACT_CARD_EMBEDDABLE;
 
@@ -70,7 +70,7 @@ export class SayHelloAction implements Action<ActionContext> {
     return hasFullNameOutput(context.embeddable);
   }
 
-  async execute(context: ActionContext) {
+  async execute(context: SayHelloActionContext) {
     if (!(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }

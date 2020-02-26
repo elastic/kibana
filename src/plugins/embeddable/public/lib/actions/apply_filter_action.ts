@@ -18,19 +18,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action, createAction, IncompatibleActionError } from '../ui_actions';
+import { ActionByType, createAction, IncompatibleActionError } from '../ui_actions';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
 import { Filter } from '../../../../../plugins/data/public';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
 type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
-interface ActionContext {
+export interface FilterActionContext {
   embeddable: IEmbeddable;
   filters: Filter[];
 }
 
-async function isCompatible(context: ActionContext) {
+async function isCompatible(context: FilterActionContext) {
   if (context.embeddable === undefined) {
     return false;
   }
@@ -38,8 +38,8 @@ async function isCompatible(context: ActionContext) {
   return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
 }
 
-export function createFilterAction(): Action<ActionContext> {
-  return createAction<ActionContext>({
+export function createFilterAction(): ActionByType<typeof APPLY_FILTER_ACTION> {
+  return createAction<typeof APPLY_FILTER_ACTION>({
     type: APPLY_FILTER_ACTION,
     id: APPLY_FILTER_ACTION,
     getDisplayName: () => {

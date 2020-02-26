@@ -27,17 +27,17 @@ import {
   lookUpWeatherAction,
   viewInMapsAction,
   createEditUserAction,
-  CALL_PHONE_NUMBER_ACTION,
-  VIEW_IN_MAPS_ACTION,
-  TRAVEL_GUIDE_ACTION,
-  PHONE_USER_ACTION,
-  EDIT_USER_ACTION,
   makePhoneCallAction,
   showcasePluggability,
-  SHOWCASE_PLUGGABILITY_ACTION,
   UserContext,
   CountryContext,
   PhoneContext,
+  EDIT_USER_ACTION,
+  SHOWCASE_PLUGGABILITY_ACTION,
+  CALL_PHONE_NUMBER_ACTION,
+  TRAVEL_GUIDE_ACTION,
+  VIEW_IN_MAPS_ACTION,
+  PHONE_USER_ACTION,
 } from './actions/actions';
 
 interface StartDeps {
@@ -54,6 +54,15 @@ declare module '../../../src/plugins/ui_actions/public' {
     [COUNTRY_TRIGGER]: CountryContext;
     [PHONE_TRIGGER]: PhoneContext;
   }
+
+  export interface ActionContextMapping {
+    [EDIT_USER_ACTION]: UserContext;
+    [SHOWCASE_PLUGGABILITY_ACTION]: undefined;
+    [CALL_PHONE_NUMBER_ACTION]: PhoneContext;
+    [TRAVEL_GUIDE_ACTION]: CountryContext;
+    [VIEW_IN_MAPS_ACTION]: CountryContext;
+    [PHONE_USER_ACTION]: UserContext;
+  }
 }
 
 export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
@@ -67,29 +76,26 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     deps.uiActions.registerTrigger({
       id: USER_TRIGGER,
     });
-    deps.uiActions.registerAction(lookUpWeatherAction);
-    deps.uiActions.registerAction(viewInMapsAction);
-    deps.uiActions.registerAction(makePhoneCallAction);
-    deps.uiActions.registerAction(showcasePluggability);
 
     const startServices = core.getStartServices();
-    deps.uiActions.registerAction(
+
+    deps.uiActions.attachAction(
+      USER_TRIGGER,
       createPhoneUserAction(async () => (await startServices)[1].uiActions)
     );
-    deps.uiActions.registerAction(
+    deps.uiActions.attachAction(
+      USER_TRIGGER,
       createEditUserAction(async () => (await startServices)[0].overlays.openModal)
     );
-    deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
-    deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
 
     // What's missing here is type analysis to ensure the context emitted by the trigger
     // is the same context that the action requires.
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, TRAVEL_GUIDE_ACTION);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-    deps.uiActions.attachAction(PHONE_TRIGGER, CALL_PHONE_NUMBER_ACTION);
-    deps.uiActions.attachAction(PHONE_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-    deps.uiActions.attachAction(USER_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, viewInMapsAction);
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, lookUpWeatherAction);
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, showcasePluggability);
+    deps.uiActions.attachAction(PHONE_TRIGGER, makePhoneCallAction);
+    deps.uiActions.attachAction(PHONE_TRIGGER, showcasePluggability);
+    deps.uiActions.attachAction(USER_TRIGGER, showcasePluggability);
 
     core.application.register({
       id: 'uiActionsExplorer',

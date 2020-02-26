@@ -22,7 +22,7 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
 
-const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
+export const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
 
 type GetUserData = (context: ActionContext) => Promise<{ title: string | undefined }>;
 

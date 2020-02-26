@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 import {
-  Action,
+  ActionByType,
   createAction,
   IncompatibleActionError,
 } from '../../../../../plugins/ui_actions/public';
@@ -39,12 +39,12 @@ import {
 
 export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
 
-interface ActionContext {
+export interface ValueClickActionContext {
   data: any;
   timeFieldName: string;
 }
 
-async function isCompatible(context: ActionContext) {
+async function isCompatible(context: ValueClickActionContext) {
   try {
     const filters: Filter[] = (await createFiltersFromEvent(context.data)) || [];
     return filters.length > 0;
@@ -56,8 +56,8 @@ async function isCompatible(context: ActionContext) {
 export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): Action<ActionContext> {
-  return createAction<ActionContext>({
+): ActionByType<typeof VALUE_CLICK_ACTION> {
+  return createAction<typeof VALUE_CLICK_ACTION>({
     type: VALUE_CLICK_ACTION,
     id: VALUE_CLICK_ACTION,
     getDisplayName: () => {
@@ -66,7 +66,7 @@ export function valueClickAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: ActionContext) => {
+    execute: async ({ timeFieldName, data }: ValueClickActionContext) => {
       if (!(await isCompatible({ timeFieldName, data }))) {
         throw new IncompatibleActionError();
       }

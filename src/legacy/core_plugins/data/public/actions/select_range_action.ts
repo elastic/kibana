@@ -19,21 +19,21 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  Action,
   createAction,
   IncompatibleActionError,
+  ActionByType,
 } from '../../../../../plugins/ui_actions/public';
 import { onBrushEvent } from './filters/brush_event';
 import { FilterManager, TimefilterContract, esFilters } from '../../../../../plugins/data/public';
 
 export const SELECT_RANGE_ACTION = 'SELECT_RANGE_ACTION';
 
-interface ActionContext {
+export interface SelectRangeActionContext {
   data: any;
   timeFieldName: string;
 }
 
-async function isCompatible(context: ActionContext) {
+async function isCompatible(context: SelectRangeActionContext) {
   try {
     return Boolean(await onBrushEvent(context.data));
   } catch {
@@ -44,8 +44,8 @@ async function isCompatible(context: ActionContext) {
 export function selectRangeAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): Action<ActionContext> {
-  return createAction<ActionContext>({
+): ActionByType<typeof SELECT_RANGE_ACTION> {
+  return createAction<typeof SELECT_RANGE_ACTION>({
     type: SELECT_RANGE_ACTION,
     id: SELECT_RANGE_ACTION,
     getDisplayName: () => {
@@ -54,7 +54,7 @@ export function selectRangeAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: ActionContext) => {
+    execute: async ({ timeFieldName, data }: SelectRangeActionContext) => {
       if (!(await isCompatible({ timeFieldName, data }))) {
         throw new IncompatibleActionError();
       }

@@ -19,27 +19,27 @@
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
-import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
-interface ActionContext {
+export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
 }
 
-async function isCompatible(context: ActionContext) {
+async function isCompatible(context: ApplyGlobalFilterActionContext) {
   return context.filters !== undefined;
 }
 
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): Action<ActionContext> {
-  return createAction<ActionContext>({
+): ActionByType<typeof GLOBAL_APPLY_FILTER_ACTION> {
+  return createAction<typeof GLOBAL_APPLY_FILTER_ACTION>({
     type: GLOBAL_APPLY_FILTER_ACTION,
     id: GLOBAL_APPLY_FILTER_ACTION,
     getDisplayName: () => {
@@ -48,7 +48,7 @@ export function createFilterAction(
       });
     },
     isCompatible,
-    execute: async ({ filters, timeFieldName }: ActionContext) => {
+    execute: async ({ filters, timeFieldName }: ApplyGlobalFilterActionContext) => {
       if (!filters) {
         throw new Error('Applying a filter requires a filter');
       }

@@ -34,7 +34,7 @@ export const EDIT_USER_ACTION = 'EDIT_USER_ACTION';
 export const PHONE_USER_ACTION = 'PHONE_USER_ACTION';
 export const SHOWCASE_PLUGGABILITY_ACTION = 'SHOWCASE_PLUGGABILITY_ACTION';
 
-export const showcasePluggability = createAction({
+export const showcasePluggability = createAction<typeof SHOWCASE_PLUGGABILITY_ACTION>({
   type: SHOWCASE_PLUGGABILITY_ACTION,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
   execute: async () => alert("Isn't that cool?!"),
@@ -42,24 +42,24 @@ export const showcasePluggability = createAction({
 
 export type PhoneContext = string;
 
-export const makePhoneCallAction = createAction<PhoneContext>({
+export const makePhoneCallAction = createAction<typeof CALL_PHONE_NUMBER_ACTION>({
   type: CALL_PHONE_NUMBER_ACTION,
   getDisplayName: () => 'Call phone number',
   execute: async phone => alert(`Pretend calling ${phone}...`),
 });
 
-export const lookUpWeatherAction = createAction<{ country: string }>({
+export const lookUpWeatherAction = createAction<typeof TRAVEL_GUIDE_ACTION>({
   type: TRAVEL_GUIDE_ACTION,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
-  execute: async ({ country }) => {
+  execute: async country => {
     window.open(`https://www.worldtravelguide.net/?s=${country},`, '_blank');
   },
 });
 
 export type CountryContext = string;
 
-export const viewInMapsAction = createAction<CountryContext>({
+export const viewInMapsAction = createAction<typeof VIEW_IN_MAPS_ACTION>({
   type: VIEW_IN_MAPS_ACTION,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
@@ -100,10 +100,7 @@ function EditUserModal({
 }
 
 export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
-  createAction<{
-    user: User;
-    update: (user: User) => void;
-  }>({
+  createAction<typeof EDIT_USER_ACTION>({
     type: EDIT_USER_ACTION,
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
@@ -120,7 +117,7 @@ export interface UserContext {
 }
 
 export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
-  createAction<UserContext>({
+  createAction<typeof PHONE_USER_ACTION>({
     type: PHONE_USER_ACTION,
     getDisplayName: () => 'Call phone number',
     isCompatible: async ({ user }) => user.phone !== undefined,

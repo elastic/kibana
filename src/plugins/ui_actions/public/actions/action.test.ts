@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
+import { createAction } from '../../../ui_actions/public';
+import { ActionType } from '../types';
 
-test('SayHelloAction is not compatible with not matching context', async () => {
-  const sayHelloAction = createSayHelloAction((() => {}) as any);
+const sayHelloAction = createAction({
+  type: 'test' as ActionType,
+  isCompatible: ({ amICompatible }: { amICompatible: boolean }) => Promise.resolve(amICompatible),
+  execute: () => Promise.resolve(),
+});
 
-  const isCompatible = await sayHelloAction.isCompatible({} as any);
+test('action is not compatible based on context', async () => {
+  const isCompatible = await sayHelloAction.isCompatible({ amICompatible: false });
   expect(isCompatible).toBe(false);
 });
 
-test('HelloWorldAction inherits isCompatible from base action', async () => {
-  const helloWorldAction = createSayHelloAction({} as any);
-  const isCompatible = await helloWorldAction.isCompatible({ name: 'Sue' });
+test('action is compatible based on context', async () => {
+  const isCompatible = await sayHelloAction.isCompatible({ amICompatible: true });
   expect(isCompatible).toBe(true);
 });

@@ -17,12 +17,14 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { Action, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
+export const SAMPLE_PANEL_LINK = 'samplePanelLink' as ActionType;
+
 export const createSamplePanelLink = (): Action =>
-  createAction({
-    type: 'samplePanelLink',
+  createAction<typeof SAMPLE_PANEL_LINK>({
+    type: SAMPLE_PANEL_LINK,
     getDisplayName: () => 'Sample panel Link',
     execute: async () => {},
     getHref: () => 'https://example.com/kibana/test',
@@ -30,4 +32,4 @@ export const createSamplePanelLink = (): Action =>
 
 const action = createSamplePanelLink();
 npStart.plugins.uiActions.registerAction(action);
-npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);

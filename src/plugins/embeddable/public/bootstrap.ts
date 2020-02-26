@@ -33,6 +33,13 @@ import {
   SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
+  ADD_PANEL_ACTION_ID,
+  CUSTOMIZE_PANEL_ACTION_ID,
+  INSPECT_PANEL_ACTION_ID,
+  REMOVE_PANEL_ACTION,
+  EDIT_PANEL_ACTION_ID,
+  FilterActionContext,
+  APPLY_FILTER_ACTION,
 } from './lib';
 
 declare module '../../ui_actions/public' {
@@ -45,6 +52,15 @@ declare module '../../ui_actions/public' {
     };
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+  }
+
+  export interface ActionContextMapping {
+    [CUSTOMIZE_PANEL_ACTION_ID]: EmbeddableContext;
+    [ADD_PANEL_ACTION_ID]: EmbeddableContext;
+    [INSPECT_PANEL_ACTION_ID]: EmbeddableContext;
+    [REMOVE_PANEL_ACTION]: EmbeddableContext;
+    [EDIT_PANEL_ACTION_ID]: EmbeddableContext;
+    [APPLY_FILTER_ACTION]: FilterActionContext;
   }
 }
 

@@ -18,14 +18,14 @@
  */
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { createAction, IncompatibleActionError } from '../../ui_actions';
+import { createAction, IncompatibleActionError, ActionType } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 
-export const SEND_MESSAGE_ACTION = 'SEND_MESSAGE_ACTION';
+export const SEND_MESSAGE_ACTION = 'SEND_MESSAGE_ACTION' as ActionType;
 
 interface ActionContext {
   embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
@@ -42,11 +42,11 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
     overlays.openFlyout(toMountPoint(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
   };
 
-  return createAction<ActionContext>({
+  return createAction<typeof SEND_MESSAGE_ACTION>({
     type: SEND_MESSAGE_ACTION,
     getDisplayName: () => 'Send message',
     isCompatible,
-    execute: async context => {
+    execute: async (context: ActionContext) => {
       if (!(await isCompatible(context))) {
         throw new IncompatibleActionError();
       }

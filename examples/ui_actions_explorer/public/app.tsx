@@ -76,8 +76,9 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
               <EuiButton
                 data-test-subj="addDynamicAction"
                 onClick={() => {
-                  const dynamicAction = createAction<{}>({
-                    type: `${HELLO_WORLD_ACTION_TYPE}-${name}`,
+                  const dynamicAction = createAction<typeof HELLO_WORLD_ACTION_TYPE>({
+                    id: `${HELLO_WORLD_ACTION_TYPE}-${name}`,
+                    type: HELLO_WORLD_ACTION_TYPE,
                     getDisplayName: () => `Say hello to ${name}`,
                     execute: async () => {
                       const overlay = openModal(
@@ -95,10 +96,10 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                     },
                   });
                   uiActionsApi.registerAction(dynamicAction);
-                  uiActionsApi.attachAction(HELLO_WORLD_TRIGGER_ID, dynamicAction.type);
+                  uiActionsApi.attachAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
                     `You've successfully added a new action: ${dynamicAction.getDisplayName(
-                      {}
+                      undefined
                     )}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
                   );
                 }}

@@ -20,8 +20,9 @@
 import React from 'react';
 import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { createAction, Action } from '../../actions';
+import { createAction, ActionByType } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
+import { ActionType } from '../../types';
 
 const ReactMenuItem: React.FC = () => {
   return (
@@ -36,10 +37,12 @@ const ReactMenuItem: React.FC = () => {
 
 const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
-export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID' as ActionType;
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): Action {
-  return createAction({
+export function createHelloWorldAction(
+  overlays: CoreStart['overlays']
+): ActionByType<typeof HELLO_WORLD_ACTION_ID> {
+  return createAction<typeof HELLO_WORLD_ACTION_ID>({
     type: HELLO_WORLD_ACTION_ID,
     getIconType: () => 'lock',
     MenuItem: UiMenuItem,

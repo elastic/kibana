@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Action } from './actions/action';
+import { ActionByType } from './actions/action';
 import { TriggerInternal } from './triggers/trigger_internal';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, Action<any>>;
+export type ActionRegistry = Map<string, ActionByType<any>>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';
@@ -33,4 +33,11 @@ export type BaseContext = object | undefined | string | number;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
+}
+
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
 }
