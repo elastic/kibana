@@ -9,8 +9,8 @@ export { Datasource, NewDatasource } from '../../../common';
 const DatasourceBaseSchema = {
   name: schema.string(),
   namespace: schema.maybe(schema.string()),
-  read_alias: schema.maybe(schema.string()),
   config_id: schema.string(),
+  enabled: schema.boolean(),
   package: schema.maybe(
     schema.object({
       assets: schema.arrayOf(
@@ -25,19 +25,21 @@ const DatasourceBaseSchema = {
       version: schema.string(),
     })
   ),
-  streams: schema.arrayOf(
+  output_id: schema.string(),
+  inputs: schema.arrayOf(
     schema.object({
-      config: schema.recordOf(schema.string(), schema.any()),
-      input: schema.object({
-        type: schema.string(),
-        config: schema.recordOf(schema.string(), schema.any()),
-        fields: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-        ilm_policy: schema.maybe(schema.string()),
-        index_template: schema.maybe(schema.string()),
-        ingest_pipelines: schema.maybe(schema.arrayOf(schema.string())),
-      }),
-      output_id: schema.string(),
+      type: schema.string(),
+      enabled: schema.boolean(),
       processors: schema.maybe(schema.arrayOf(schema.string())),
+      streams: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          enabled: schema.boolean(),
+          dataset: schema.string(),
+          processors: schema.maybe(schema.arrayOf(schema.string())),
+          config: schema.recordOf(schema.string(), schema.any()),
+        })
+      ),
     })
   ),
 };

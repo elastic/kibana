@@ -7,8 +7,8 @@
 export interface NewDatasource {
   name: string;
   namespace?: string;
-  read_alias?: string;
   config_id: string;
+  enabled: boolean;
   package?: {
     assets: Array<{
       id: string;
@@ -19,18 +19,18 @@ export interface NewDatasource {
     title: string;
     version: string;
   };
-  streams: Array<{
-    config: Record<string, any>;
-    input: {
-      type: string;
-      config: Record<string, any>;
-      fields?: Array<Record<string, any>>;
-      ilm_policy?: string;
-      index_template?: string;
-      ingest_pipelines?: string[];
-    };
-    output_id: string;
+  output_id: string;
+  inputs: Array<{
+    type: string;
+    enabled: boolean;
     processors?: string[];
+    streams: Array<{
+      id: string;
+      enabled: boolean;
+      dataset: string;
+      processors?: string[];
+      config?: Record<string, any>;
+    }>;
   }>;
 }
 
