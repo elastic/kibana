@@ -17,7 +17,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     },
   };
 
-  const router = new RouterMock();
+  const router = new RouterMock('snapshotRestore.client');
 
   beforeAll(() => {
     registerRepositoriesRoutes({

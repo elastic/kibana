@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { set } from 'lodash';
+
 type RequestHandler = (...params: any[]) => any;
 
 type RequestMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
@@ -58,13 +60,13 @@ export class RouterMock {
 
   private _callAsCurrentUserCallCount = 0;
   private _callAsCurrentUserResponses: any[] = [];
-  private contextMock = {
-    core: {
-      elasticsearch: {
-        dataClient: { callAsCurrentUser: this.callAsCurrentUser.bind(this) },
-      },
-    },
-  };
+  private contextMock = {};
+
+  constructor(pathToESclient = 'core.elasticsearch.dataClient') {
+    set(this.contextMock, pathToESclient, {
+      callAsCurrentUser: this.callAsCurrentUser.bind(this),
+    });
+  }
 
   get({ path }: { path: string }, handler: RequestHandler) {
     this.cacheHandlers.get[path] = handler;

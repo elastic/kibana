@@ -27,7 +27,7 @@ const defaultSnapshot = {
 };
 
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
-  const router = new RouterMock();
+  const router = new RouterMock('snapshotRestore.client');
 
   beforeAll(() => {
     registerSnapshotsRoutes({

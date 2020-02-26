@@ -41,7 +41,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     isManagedPolicy: false,
   };
 
-  const router = new RouterMock();
+  const router = new RouterMock('snapshotRestore.client');
 
   beforeAll(() => {
     registerPolicyRoutes({
