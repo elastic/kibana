@@ -36,7 +36,7 @@ import { RouteDependencies } from './types';
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
-  apmOSS: APMOSSPluginSetup;
+  apm_oss: APMOSSPluginSetup;
   cloud?: CloudSetup;
 }
 
