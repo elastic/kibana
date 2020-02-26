@@ -98,6 +98,13 @@ src/dev/code_coverage/cc_app/public/initial_data.js
                   yarn
                   yarn build:prod
                   popd
+
+                  # copy built app over to it's final resting place :)
+                  cp -R src/dev/code_coverage/cc_app/build src/dev/code_coverage/live_coverage_app
+
+                  # NOW!!! ... we need to upload the summary folders up, underneath the time stamp dir in gcp.
+
+
                 """,
                   "### Run `yarn kbn bootstrap && merge coverage` AND Ingest Code Coverage to ES Cluster AND Boot Coverage App"
                 )
