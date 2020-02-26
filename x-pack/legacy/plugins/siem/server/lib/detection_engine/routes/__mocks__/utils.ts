@@ -27,6 +27,20 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
 });
 
 /**
+ * This is a typical simple rule for testing that is easy for most basic testing
+ * @param ruleId
+ */
+export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  id,
+  severity: 'high',
+  type: 'query',
+  query: 'user.name: root or user.name: admin',
+});
+
+/**
  * Given an array of rule_id strings this will return a ndjson buffer which is useful
  * for testing uploads.
  * @param ruleIds Array of strings of rule_ids
@@ -37,6 +51,29 @@ export const getSimpleRuleAsMultipartContent = (ruleIds: string[], isNdjson = tr
     const simpleRule = getSimpleRule(ruleId);
     return JSON.stringify(simpleRule);
   });
+  const stringOfRules = arrayOfRules.join('\r\n');
+
+  const resultingPayload =
+    `--${TEST_BOUNDARY}\r\n` +
+    `Content-Disposition: form-data; name="file"; filename="rules.${
+      isNdjson ? 'ndjson' : 'json'
+    }\r\n` +
+    'Content-Type: application/octet-stream\r\n' +
+    '\r\n' +
+    `${stringOfRules}\r\n` +
+    `--${TEST_BOUNDARY}--\r\n`;
+
+  return Buffer.from(resultingPayload);
+};
+
+/**
+ * Given an array of rule_id strings this will return a ndjson buffer which is useful
+ * for testing uploads.
+ * @param count Number of rules to generate
+ * @param isNdjson Boolean to determine file extension
+ */
+export const getSimpleRuleAsMultipartContentNoRuleId = (count: number, isNdjson = true): Buffer => {
+  const arrayOfRules = Array(count).fill(JSON.stringify(getSimpleRuleWithId()));
   const stringOfRules = arrayOfRules.join('\r\n');
 
   const resultingPayload =

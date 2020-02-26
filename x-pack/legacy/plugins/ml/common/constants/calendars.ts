@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const parseFilterQuery = (query?: string | null) => {
-  try {
-    return query ? JSON.parse(query) : null;
-  } catch {
-    return null;
-  }
-};
+export const GLOBAL_CALENDAR = '_all';
