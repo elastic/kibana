@@ -17,29 +17,41 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export { ScopedHistory } from './scoped_history';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  AppStatus,
-  AppNavLinkStatus,
-  AppUpdatableFields,
-  AppUpdater,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
-  LegacyApp,
-} from './types';
+import { Location } from 'history';
+import { ScopedHistory } from './scoped_history';
+
+type ScopedHistoryMock = jest.Mocked<Pick<ScopedHistory, keyof ScopedHistory>>;
+const createMock = ({
+  pathname = '/',
+  search = '',
+  hash = '',
+  key,
+  state,
+}: Partial<Location> = {}) => {
+  const mock: ScopedHistoryMock = {
+    block: jest.fn(),
+    createHref: jest.fn(),
+    createSubHistory: jest.fn(),
+    go: jest.fn(),
+    goBack: jest.fn(),
+    goForward: jest.fn(),
+    listen: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    action: 'PUSH',
+    length: 1,
+    location: {
+      pathname,
+      search,
+      state,
+      hash,
+      key,
+    },
+  };
+
+  return mock;
+};
+
+export const scopedHistoryMock = {
+  create: createMock,
+};
