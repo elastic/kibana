@@ -34,7 +34,6 @@ import { systemRoutes } from './routes/system';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
-    savedObjects: any;
     ml?: {
       mlClient: IScopedClusterClient;
     };
@@ -55,11 +54,12 @@ export class MlServerPlugin {
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
-    // or should it be branch to correspond to docs?
-    this.version = ctx.env.packageInfo.version;
+    this.version = ctx.env.packageInfo.branch;
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+    let sampleLinksInitialized = false;
+
     plugins.features.registerFeature({
       id: 'ml',
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -101,7 +101,10 @@ export class MlServerPlugin {
       getLicenseCheckResults: () => this.licenseCheckResults,
     };
 
-    annotationRoutes(routeInit);
+    annotationRoutes({
+      ...routeInit,
+      securityPlugin: plugins.security,
+    });
     calendars(routeInit);
     dataFeedRoutes(routeInit);
     dataFrameAnalyticsRoutes(routeInit);
@@ -127,26 +130,37 @@ export class MlServerPlugin {
       makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
     });
 
-    // TODO: this needs to happen once we have license info and has to have license checks
-    addLinksToSampleDatasets({
-      addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
-    });
-
-    plugins.licensing.license$.subscribe(async (license: any) => {
+    plugins.licensing.license$.subscribe(async license => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
       // @ts-ignore isAvailable is not read
       const { isAvailable, isEnabled } = license.getFeature(this.pluginId);
 
       this.licenseCheckResults = {
         isActive: license.isActive,
-        // This isAvailable check for the ml plugin returns false for a basic license
-        // ML should be available on basic with reduced functionality (onlyfile data visualizer)
+        // This `isAvailable` check for the ml plugin returns false for a basic license
+        // ML should be available on basic with reduced functionality (only file data visualizer)
         // TODO: This will need to be updated once cutover is complete.
         isAvailable: isEnabled,
         isEnabled,
         isSecurityDisabled: securityIsEnabled === false,
         type: license.type,
       };
+
+      if (sampleLinksInitialized === false) {
+        sampleLinksInitialized = true;
+        // Add links to the Kibana sample data sets if ml is enabled
+        // and license is trial or platinum.
+        if (isEnabled === true && plugins.home) {
+          if (
+            this.licenseCheckResults.type &&
+            ['platinum', 'trial'].includes(this.licenseCheckResults.type)
+          ) {
+            addLinksToSampleDatasets({
+              addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
+            });
+          }
+        }
+      }
     });
   }
 

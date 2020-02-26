@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectAttributes,
-  SavedObjectsServiceStart,
-  ISavedObjectsRepository,
-} from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 
 export interface MlTelemetry extends SavedObjectAttributes {
   file_data_visualizer: {
@@ -31,21 +27,20 @@ export function createMlTelemetry(count: number = 0): MlTelemetry {
 }
 // savedObjects
 export function storeMlTelemetry(
-  internalRepository: ISavedObjectsRepository,
+  savedObjectsClient: SavedObjectsClientContract,
   mlTelemetry: MlTelemetry
 ): void {
-  internalRepository.create('ml-telemetry', mlTelemetry, {
+  savedObjectsClient.create('ml-telemetry', mlTelemetry, {
     id: ML_TELEMETRY_DOC_ID,
     overwrite: true,
   });
 }
 
 export async function incrementFileDataVisualizerIndexCreationCount(
-  savedObjects: SavedObjectsServiceStart
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> {
-  const internalRepository = await savedObjects.createInternalRepository();
   try {
-    const { attributes } = await internalRepository.get('telemetry', 'telemetry');
+    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
 
     if (attributes.enabled === false) {
       return;
@@ -59,7 +54,7 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   let indicesCount = 1;
 
   try {
-    const { attributes } = (await internalRepository.get(
+    const { attributes } = (await savedObjectsClient.get(
       'ml-telemetry',
       ML_TELEMETRY_DOC_ID
     )) as MlTelemetrySavedObject;
@@ -69,5 +64,5 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   }
 
   const mlTelemetry = createMlTelemetry(indicesCount);
-  storeMlTelemetry(internalRepository, mlTelemetry);
+  storeMlTelemetry(savedObjectsClient, mlTelemetry);
 }

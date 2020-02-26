@@ -10,7 +10,7 @@ import Boom from 'boom';
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../../../legacy/plugins/ml/common/util/string_utils';
 import { getMessages } from './messages';
-import { VALIDATION_STATUS } from '../../../common/constants/validation';
+import { VALIDATION_STATUS } from '../../../../../legacy/plugins/ml/common/constants/validation';
 
 import {
   basicJobValidation,

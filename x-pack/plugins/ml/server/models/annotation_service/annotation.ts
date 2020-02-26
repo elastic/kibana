@@ -12,7 +12,7 @@ import { ANNOTATION_TYPE } from '../../../../../legacy/plugins/ml/common/constan
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-} from '../../../common/constants/index_patterns';
+} from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
 
 import {
   Annotation,

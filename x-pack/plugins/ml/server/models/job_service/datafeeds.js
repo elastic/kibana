@@ -5,7 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import {
+  JOB_STATE,
+  DATAFEED_STATE,
+} from '../../../../../legacy/plugins/ml/common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 
 export function datafeedsProvider(callWithRequest) {

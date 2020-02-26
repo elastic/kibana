@@ -133,7 +133,8 @@ export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: any
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          await incrementFileDataVisualizerIndexCreationCount(context.savedObjects);
+          // @ts-ignore
+          await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
         }
 
         const result = await importData(

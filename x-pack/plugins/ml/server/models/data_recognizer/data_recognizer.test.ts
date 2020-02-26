@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { Module } from '../../../common/types/modules';
+import { Module } from '../../../../../legacy/plugins/ml/common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 describe('ML - data recognizer', () => {

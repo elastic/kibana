@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { MlJob } from '../../../common/types/jobs';
+import { MlJob } from '../../../../../legacy/plugins/ml/common/types/jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -23,7 +23,7 @@ import {
   JobResponse,
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
-} from '../../../common/types/modules';
+} from '../../../../../legacy/plugins/ml/common/types/modules';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,

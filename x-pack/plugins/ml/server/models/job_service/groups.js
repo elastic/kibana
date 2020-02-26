@@ -5,7 +5,7 @@
  */
 
 import { CalendarManager } from '../calendar';
-import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { GLOBAL_CALENDAR } from '../../../../../legacy/plugins/ml/common/constants/calendars';
 
 export function groupsProvider(callWithRequest) {
   const calMngr = new CalendarManager(callWithRequest);
