@@ -5,19 +5,24 @@
  */
 
 import { UMSavedObjectsAdapter } from './types';
-import { umDynamicSettings } from '../../sources';
-import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+import {
+  DynamicSettings,
+  defaultDynamicSettings,
+} from '../../../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+import { umDynamicSettings } from '../../saved_object_mappings';
+
+const id = 'uptime-dynamic-settings-singleton';
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
-      const obj = await client.get<DynamicSettings>(umDynamicSettings.type, umDynamicSettings.id)
+      const obj = await client.get<DynamicSettings>(umDynamicSettings.name, id);
       return obj.attributes;
     } catch (e) {
       try {
         return (
-          await client.create(umDynamicSettings.type, umDynamicSettings.defaults, {
-            id: umDynamicSettings.id,
+          await client.create(umDynamicSettings.name, defaultDynamicSettings, {
+            id,
             overwrite: false,
           })
         ).attributes;
@@ -27,7 +32,6 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
     }
   },
   setUptimeDynamicSettings: async (client, settings) => {
-    // @ts-ignore
-    client.update(umDynamicSettings.type, umDynamicSettings.id, settings);
+    client.update(umDynamicSettings.name, id, settings);
   },
 };

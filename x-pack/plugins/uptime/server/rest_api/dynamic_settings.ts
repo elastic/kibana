@@ -7,13 +7,13 @@
 import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { UMServerLibs } from '../../lib/lib';
+import { UMServerLibs } from '../lib/lib';
 import {
   DynamicSettings,
   DynamicSettingsType,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
-import { UMRestApiRouteFactory } from '..';
+} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { UMRestApiRouteFactory } from '.';
+import { savedObjectsAdapter } from '../lib/adapters/saved_objects/kibana_saved_objects_adapter';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
