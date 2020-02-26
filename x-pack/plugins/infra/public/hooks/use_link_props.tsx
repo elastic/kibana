@@ -22,7 +22,7 @@ export interface LinkDescriptor {
 
 interface LinkProps {
   href?: string;
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
 }
 
 export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): LinkProps => {
@@ -31,19 +31,22 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   const history = useHistory();
   const prefixer = usePrefixPathWithBasepath();
 
+  const encodedSearch = useMemo(() => {
+    return search ? encodeSearch(search) : undefined;
+  }, [search]);
+
   const href = useMemo(() => {
     if (!app) {
       return history
         ? history.createHref({
             pathname: pathname ? formatPathname(pathname) : undefined,
-            search: search ? encodeSearch(search) : undefined,
+            search: encodedSearch,
           })
         : undefined;
     } else {
       // The URI spec defines that the query should appear before the fragment
       // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
       // hash based routing expect the query to be part of the hash. This will handle that.
-      const encodedSearch = search ? encodeSearch(search) : undefined;
       const mergedHash = hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
 
       const link = url.format({
@@ -53,23 +56,23 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
       });
       return prefixer(app, link);
     }
-  }, [app, history, pathname, hash, search, prefixer]);
+  }, [app, history, pathname, hash, encodedSearch, prefixer]);
 
   const onClick = useMemo(() => {
     if (!app) {
-      return (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
         e.preventDefault();
         if (history) {
           history.push({
             pathname: pathname ? formatPathname(pathname) : undefined,
-            search: search ? encodeSearch(search) : undefined,
+            search: encodedSearch,
           });
         }
       };
     } else {
       return undefined;
     }
-  }, [app, history, pathname, search]);
+  }, [app, history, pathname, encodedSearch]);
 
   return {
     href,

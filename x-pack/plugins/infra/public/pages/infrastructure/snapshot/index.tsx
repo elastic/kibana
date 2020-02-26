@@ -25,6 +25,7 @@ import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffl
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -39,7 +40,10 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
+  const tutorialLinkProps = useLinkProps({
+    app: 'kibana',
+    hash: '/home/tutorial_directory/metrics',
+  });
 
   return (
     <ColumnarPage>
@@ -77,7 +81,7 @@ export const SnapshotPage = () => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiButton
-                  href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
+                  {...tutorialLinkProps}
                   color="primary"
                   fill
                   data-test-subj="infrastructureViewSetupInstructionsButton"

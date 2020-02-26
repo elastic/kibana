@@ -21,6 +21,7 @@ import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
+import { LinkDescriptor } from '../../../hooks/use_link_props';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === 'rate') {
@@ -102,7 +103,7 @@ export const createTSVBLink = (
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,
   chartOptions: MetricsExplorerChartOptions
-) => {
+): LinkDescriptor => {
   const appState = {
     filters: [],
     linked: false,
@@ -139,7 +140,13 @@ export const createTSVBLink = (
     time: { from: timeRange.from, to: timeRange.to },
   };
 
-  return `../app/kibana#/visualize/create?type=metrics&_g=${encode(globalState)}&_a=${encode(
-    appState as any
-  )}`;
+  return {
+    app: 'kibana',
+    hash: '/visualize/create',
+    search: {
+      type: 'metrics',
+      _g: encode(globalState),
+      _a: encode(appState as any),
+    },
+  };
 };
