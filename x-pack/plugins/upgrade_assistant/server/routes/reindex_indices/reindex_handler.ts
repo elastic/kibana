@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
+import { ReindexStatus } from '../../../common/types';
+
+import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
+import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
+import { CredentialStore } from '../../lib/reindexing/credential_store';
+
+export const SYMBOL_FORBIDDEN = Symbol('Forbidden');
+
+interface ReindexHandlerArgs {
+  savedObjects: SavedObjectsClientContract;
+  dataClient: IScopedClusterClient;
+  indexName: string;
+  log: Logger;
+  licensing: LicensingPluginSetup;
+  headers: Record<string, any>;
+  credentialStore: CredentialStore;
+  getWorker: () => ReindexWorker;
+}
+
+export const reindexHandler = async ({
+  credentialStore,
+  dataClient,
+  headers,
+  indexName,
+  licensing,
+  log,
+  savedObjects,
+  getWorker,
+}: ReindexHandlerArgs) => {
+  const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
+  const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
+
+  if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+    throw SYMBOL_FORBIDDEN;
+  }
+
+  const existingOp = await reindexService.findReindexOperation(indexName);
+
+  // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
+  const reindexOp =
+    existingOp && existingOp.attributes.status === ReindexStatus.paused
+      ? await reindexService.resumeReindexOperation(indexName)
+      : await reindexService.createReindexOperation(indexName);
+
+  // Add users credentials for the worker to use
+  credentialStore.set(reindexOp, headers);
+
+  // Kick the worker on this node to immediately pickup the new reindex operation.
+  getWorker().forceRefresh();
+
+  return reindexOp.attributes;
+};

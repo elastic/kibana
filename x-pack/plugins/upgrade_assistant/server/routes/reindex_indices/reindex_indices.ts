@@ -3,16 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'src/core/server';
-import { ReindexStatus } from '../../common/types';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
-import { CredentialStore } from '../lib/reindexing/credential_store';
-import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
-import { RouteDependencies } from '../types';
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'kibana/server';
+
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
+import { ReindexOperation } from '../../../common/types';
+
+import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
+import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
+import { CredentialStore } from '../../lib/reindexing/credential_store';
+import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
+import { RouteDependencies } from '../../types';
+
+import { reindexHandler, SYMBOL_FORBIDDEN } from './reindex_handler';
 
 interface CreateReindexWorker {
   logger: Logger;
@@ -53,49 +58,100 @@ export function registerReindexIndicesRoutes(
       async (
         {
           core: {
-            savedObjects,
+            savedObjects: { client: savedObjectsClient },
             elasticsearch: { dataClient },
           },
         },
         request,
         response
       ) => {
-        const { indexName } = request.params as any;
-        const { client } = savedObjects;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing
-        );
-
+        const { indexName } = request.params;
         try {
-          if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+          return response.ok({
+            body: await reindexHandler({
+              savedObjects: savedObjectsClient,
+              dataClient,
+              indexName,
+              log,
+              licensing,
+              headers: request.headers,
+              credentialStore,
+              getWorker,
+            }),
+          });
+        } catch (e) {
+          if (e === SYMBOL_FORBIDDEN) {
             return response.forbidden({
-              body: `You do not have adequate privileges to reindex this index.`,
+              body: i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorSingle', {
+                defaultMessage: `You do not have adequate privileges to reindex this index.`,
+              }),
             });
           }
-
-          const existingOp = await reindexService.findReindexOperation(indexName);
-
-          // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
-          const reindexOp =
-            existingOp && existingOp.attributes.status === ReindexStatus.paused
-              ? await reindexService.resumeReindexOperation(indexName)
-              : await reindexService.createReindexOperation(indexName);
-
-          // Add users credentials for the worker to use
-          credentialStore.set(reindexOp, request.headers);
-
-          // Kick the worker on this node to immediately pickup the new reindex operation.
-          getWorker().forceRefresh();
-
-          return response.ok({ body: reindexOp.attributes });
-        } catch (e) {
-          return response.internalError({ body: e });
+          return response.internalError(e);
         }
+      }
+    )
+  );
+
+  router.post(
+    {
+      path: `${BASE_PATH}/batch`,
+      validate: {
+        body: schema.object({
+          indexNames: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            savedObjects: { client: savedObjectsClient },
+            elasticsearch: { dataClient },
+          },
+        },
+        request,
+        response
+      ) => {
+        const { indexNames } = request.body;
+        const results = {
+          successes: [] as ReindexOperation[],
+          errors: [] as Array<{ indexName: string; message: string }>,
+        };
+        for (const indexName of indexNames) {
+          try {
+            const result = await reindexHandler({
+              savedObjects: savedObjectsClient,
+              dataClient,
+              indexName,
+              log,
+              licensing,
+              headers: request.headers,
+              credentialStore,
+              getWorker,
+            });
+            results.successes.push(result);
+          } catch (e) {
+            if (e === SYMBOL_FORBIDDEN) {
+              results.errors.push({
+                message: i18n.translate(
+                  'xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch',
+                  {
+                    defaultMessage: `You do not have adequate privileges to reindex "${indexName}".`,
+                  }
+                ),
+                indexName,
+              });
+            } else {
+              results.errors.push({
+                indexName,
+                message: e.message,
+              });
+            }
+          }
+        }
+
+        return response.ok({ body: results });
       }
     )
   );
@@ -122,7 +178,7 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { client } = savedObjects;
-        const { indexName } = request.params as any;
+        const { indexName } = request.params;
         const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
         const reindexService = reindexServiceFactory(
@@ -185,7 +241,7 @@ export function registerReindexIndicesRoutes(
         request,
         response
       ) => {
-        const { indexName } = request.params as any;
+        const { indexName } = request.params;
         const { client } = savedObjects;
         const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
