@@ -190,7 +190,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('starts polling immediately and then every esVersionCheckInterval', () => {
+  it.skip('starts polling immediately and then every esVersionCheckInterval', () => {
     expect.assertions(1);
     callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
     callWithInternalUser.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
@@ -221,7 +221,7 @@ describe('pollEsNodesVersion', () => {
     });
   });
 
-  it('waits for es version check requests to complete before scheduling the next one', () => {
+  it.skip('waits for es version check requests to complete before scheduling the next one', () => {
     expect.assertions(2);
 
     getTestScheduler().run(({ expectObservable }) => {
