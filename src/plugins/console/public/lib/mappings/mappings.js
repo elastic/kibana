@@ -23,7 +23,7 @@ const es = require('../es/es');
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
-const POLL_INTERVAL = 2000;
+const POLL_INTERVAL = 60000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
