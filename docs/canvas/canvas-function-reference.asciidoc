@@ -1244,7 +1244,7 @@ Alias: `format`
 [[formatnumber_fn]]
 === `formatnumber`
 
-Formats a number into a formatted number string using NumeralJS. For more information, see http://numeraljs.com/#format.
+Formats a number into a formatted number string using the <<numeral, numeral pattern syntax>>.
 
 *Expression syntax*
 [source,js]
@@ -1276,7 +1276,7 @@ The `formatnumber` subexpression receives the same `context` as the `progress` f
 
 Alias: `format`
 |`string`
-|A NumeralJS format string. For example, `"0.0a"` or `"0%"`. See http://numeraljs.com/#format.
+|A <<numeral, numeral pattern>> string. For example, `"0.0a"` or `"0%"`.
 |===
 
 *Returns:* `string`
@@ -1675,7 +1675,7 @@ Default: `${font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" colo
 
 Alias: `format`
 |`string`
-|A NumeralJS format string. For example, `"0.0a"` or `"0%"`. See http://numeraljs.com/#format.
+|A <<numeral, numeral pattern>> string. For example, `"0.0a"` or `"0%"`.
 |===
 
 *Returns:* `render`
