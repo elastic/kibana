@@ -30,6 +30,7 @@ import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
+import { parsePath } from './parse_path';
 import {
   isExternalModule,
   isNormalModule,
@@ -108,25 +109,19 @@ const observeCompiler = (
 
       for (const module of normalModules) {
         const path = getModulePath(module);
+        const parsedPath = parsePath(path);
 
-        const parsedPath = Path.parse(path);
-
-        // parsedPath.dir starts with the root, remove it before
-        // splitting into dirs as the root is both not a directory
-        // and will put an empty string into dirs on unix systems
-        const dirs = parsedPath.dir.slice(parsedPath.root.length).split(Path.sep);
-
-        if (!dirs.includes('node_modules')) {
+        if (!parsedPath.dirs.includes('node_modules')) {
           referencedFiles.add(path);
           continue;
         }
 
-        const nmIndex = dirs.lastIndexOf('node_modules');
-        const isScoped = dirs[nmIndex + 1].startsWith('@');
+        const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+        const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
         referencedFiles.add(
           Path.join(
             parsedPath.root,
-            ...dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+            ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
             'package.json'
           )
         );

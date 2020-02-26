@@ -17,8 +17,18 @@
  * under the License.
  */
 
-declare function NormalizePath(path: string, stripTrailing?: boolean): string;
+import normalizePath from 'normalize-path';
 
-declare module 'normalize-path' {
-  export = NormalizePath;
+/**
+ * Parse an absolute path, supporting normalized paths from webpack,
+ * into a list of directories and root
+ */
+export function parsePath(path: string) {
+  const normalized = normalizePath(path);
+  const [root, ...others] = normalized.split('/');
+  return {
+    root: root === '' ? '/' : root,
+    dirs: others.slice(0, -1),
+    filename: others[others.length - 1] || undefined,
+  };
 }
