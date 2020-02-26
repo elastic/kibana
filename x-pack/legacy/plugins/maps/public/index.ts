@@ -13,7 +13,6 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
-import 'ui/kbn_top_nav';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 
