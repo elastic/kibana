@@ -35,7 +35,7 @@ export function addFieldToDSL(dsl: object, field: IFieldType) {
 export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = []) {
   const properties: Record<string | number, unknown> = {};
   for (const key in bucket) {
-    if (ignoreKeys.includes(key)) {
+    if (ignoreKeys.includes(key) || !bucket.hasOwnProperty(key)) {
       continue;
     }
 
