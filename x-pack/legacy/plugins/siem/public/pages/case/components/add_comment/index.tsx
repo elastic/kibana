@@ -6,12 +6,12 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
-import { Form, useForm } from '../../../shared_imports';
+import { Form, useForm } from '../../../../shared_imports';
 import { NewComment } from '../../../../containers/case/types';
 import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
-import { MarkdownEditor } from '../markdown_editor';
+import { MarkdownEditor } from '../../../../components/markdown_editor';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;

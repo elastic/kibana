@@ -38,10 +38,6 @@ export const DESCRIPTION = i18n.translate('xpack.siem.case.caseView.description'
   defaultMessage: 'Description',
 });
 
-export const MARKDOWN = i18n.translate('xpack.siem.case.caseView.markdown', {
-  defaultMessage: 'Markdown',
-});
-
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.siem.case.createCase.descriptionFieldRequiredError',
   {
@@ -85,10 +81,6 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Cases',
 });
 
-export const PREVIEW = i18n.translate('xpack.siem.case.caseView.preview', {
-  defaultMessage: 'Preview',
-});
-
 export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
   defaultMessage: 'State',
 });
@@ -117,13 +109,6 @@ export const NO_TAGS = i18n.translate('xpack.siem.case.caseView.noTags', {
 export const TITLE_REQUIRED = i18n.translate('xpack.siem.case.createCase.titleFieldRequiredError', {
   defaultMessage: 'A title is required.',
 });
-
-export const MARKDOWN_SYNTAX_HELP = i18n.translate(
-  'xpack.siem.case.caseView.description.markdownInputHelp',
-  {
-    defaultMessage: 'Markdown syntax help',
-  }
-);
 
 export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
   defaultMessage: 'Add comment',

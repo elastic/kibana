@@ -23,7 +23,7 @@ import {
 } from '../../../../components/formatted_date';
 import { PropertyActions } from '../property_actions';
 import { Markdown } from '../../../../components/markdown';
-import { MarkdownEditor } from '../markdown_editor';
+import { MarkdownEditor } from '../../../../components/markdown_editor';
 import { AddComment } from '../add_comment';
 import { Case } from '../../../../containers/case/types';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';

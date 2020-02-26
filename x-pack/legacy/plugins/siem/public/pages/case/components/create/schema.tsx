@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../../shared_imports';
 import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from '../../translations';
 

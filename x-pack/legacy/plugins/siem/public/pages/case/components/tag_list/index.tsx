@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import * as i18n from '../../translations';
-import { Form, useForm } from '../../../shared_imports';
+import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 

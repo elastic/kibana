@@ -15,9 +15,10 @@ import {
 import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { Markdown } from '../../../../components/markdown';
-import * as i18n from '../../translations';
-import { CommonUseField } from '../create';
+import { Markdown } from '../markdown';
+import * as i18n from './translations';
+import { Field, getUseField } from '../../shared_imports';
+const CommonUseField = getUseField({ component: Field });
 
 const TextArea = styled(EuiTextArea)`
   width: 100%;
@@ -80,9 +81,7 @@ export const MarkdownEditor = React.memo<{
       content: formHook ? (
         <CommonUseField
           path={fieldName}
-          onChange={e => {
-            setContent(e as string);
-          }}
+          onChange={e => setContent(e as string)}
           componentProps={{
             idAria: `case${fieldName}`,
             'data-test-subj': `case${fieldName}`,
