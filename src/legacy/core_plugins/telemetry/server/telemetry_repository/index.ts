@@ -27,4 +27,6 @@ export interface TelemetrySavedObjectAttributes {
   lastReported?: number;
   telemetryAllowChangingOptInStatus?: boolean;
   userHasSeenNotice?: boolean;
+  reportFailureCount?: number;
+  reportFailureVersion?: string;
 }
