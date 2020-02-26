@@ -5,9 +5,11 @@
  */
 
 import _ from 'lodash';
+import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 const LAT_INDEX = 0;
 const LON_INDEX = 1;
+const PEW_PEW_BUCKET_KEYS_TO_IGNORE = ['key', 'sourceCentroid'];
 
 function parsePointFromKey(key) {
   const split = key.split(',');
@@ -25,25 +27,16 @@ export function convertToLines(esResponse) {
     const dest = parsePointFromKey(destBucket.key);
     const sourceBuckets = _.get(destBucket, 'sourceGrid.buckets', []);
     for (let j = 0; j < sourceBuckets.length; j++) {
-      const { key, sourceCentroid, ...rest } = sourceBuckets[j];
-
-      // flatten metrics
-      Object.keys(rest).forEach(key => {
-        if (_.has(rest[key], 'value')) {
-          rest[key] = rest[key].value;
-        }
-      });
-
+      const sourceBucket = sourceBuckets[j];
+      const sourceCentroid = sourceBucket.sourceCentroid;
       lineFeatures.push({
         type: 'Feature',
         geometry: {
           type: 'LineString',
           coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest],
         },
-        id: `${dest.join()},${key}`,
-        properties: {
-          ...rest,
-        },
+        id: `${dest.join()},${sourceBucket.key}`,
+        properties: extractPropertiesFromBucket(sourceBucket, PEW_PEW_BUCKET_KEYS_TO_IGNORE),
       });
     }
   }
