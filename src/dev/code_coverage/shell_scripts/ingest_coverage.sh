@@ -7,8 +7,9 @@ echo ""
 BUILD_ID=$1
 export BUILD_ID
 
-CI_RUN_URL$2
+CI_RUN_URL=$2
 export CI_RUN_URL
+echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 
 ES_HOST=https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243
 export ES_HOST
