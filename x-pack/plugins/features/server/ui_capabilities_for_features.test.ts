@@ -6,6 +6,7 @@
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { Feature, FeatureConfig } from '.';
+import { SubFeaturePrivilegeGroupConfig } from '../common';
 
 function createFeaturePrivilege(key: string, capabilities: string[] = []) {
   return {
@@ -17,6 +18,20 @@ function createFeaturePrivilege(key: string, capabilities: string[] = []) {
       app: [],
       ui: [...capabilities],
     },
+  };
+}
+
+function createSubFeaturePrivilege(privilegeId: string, capabilities: string[] = []) {
+  return {
+    id: privilegeId,
+    name: `sub-feature privilege ${privilegeId}`,
+    includeIn: 'none',
+    savedObject: {
+      all: [],
+      read: [],
+    },
+    app: [],
+    ui: [...capabilities],
   };
 }
 
@@ -122,6 +137,70 @@ describe('populateUICapabilities', () => {
     });
   });
 
+  it(`supports merging features with sub privileges`, () => {
+    expect(
+      uiCapabilitiesForFeatures([
+        new Feature({
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          privileges: ({
+            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+          } as unknown) as FeatureConfig['privileges'],
+          subFeatures: [
+            {
+              name: 'sub-feature-1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    createSubFeaturePrivilege('privilege-1', ['capability5']),
+                    createSubFeaturePrivilege('privilege-2', ['capability6']),
+                  ],
+                } as SubFeaturePrivilegeGroupConfig,
+                {
+                  groupType: 'mutually_exclusive',
+                  privileges: [
+                    createSubFeaturePrivilege('privilege-3', ['capability7']),
+                    createSubFeaturePrivilege('privilege-4', ['capability8']),
+                  ],
+                } as SubFeaturePrivilegeGroupConfig,
+              ],
+            },
+            {
+              name: 'sub-feature-2',
+              privilegeGroups: [
+                {
+                  name: 'Group Name',
+                  groupType: 'independent',
+                  privileges: [
+                    createSubFeaturePrivilege('privilege-5', ['capability9', 'capability10']),
+                  ],
+                } as SubFeaturePrivilegeGroupConfig,
+              ],
+            },
+          ],
+        }),
+      ])
+    ).toEqual({
+      catalogue: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        capability5: true,
+        capability6: true,
+        capability7: true,
+        capability8: true,
+        capability9: true,
+        capability10: true,
+      },
+    });
+  });
+
   it('supports merging multiple features with multiple privileges each', () => {
     expect(
       uiCapabilitiesForFeatures([
@@ -159,6 +238,20 @@ describe('populateUICapabilities', () => {
               'something3',
             ]),
           } as unknown) as FeatureConfig['privileges'],
+          subFeatures: [
+            {
+              name: 'sub-feature-1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    createSubFeaturePrivilege('privilege-1', ['capability3']),
+                    createSubFeaturePrivilege('privilege-2', ['capability4']),
+                  ],
+                } as SubFeaturePrivilegeGroupConfig,
+              ],
+            },
+          ],
         }),
       ])
     ).toEqual({
@@ -179,6 +272,8 @@ describe('populateUICapabilities', () => {
       yetAnotherNewFeature: {
         capability1: true,
         capability2: true,
+        capability3: true,
+        capability4: true,
         something1: true,
         something2: true,
         something3: true,

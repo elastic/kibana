@@ -57,82 +57,6 @@ describe('features', () => {
     });
   });
 
-  test('actions defined at the privilege take precedence', () => {
-    const features: Feature[] = [
-      new Feature({
-        id: 'foo',
-        name: 'Foo Feature',
-        icon: 'arrowDown',
-        app: ['ignore-me-1', 'ignore-me-2'],
-        catalogue: ['ignore-me-1', 'ignore-me-2'],
-        management: {
-          foo: ['ignore-me-1', 'ignore-me-2'],
-        },
-        privileges: {
-          all: {
-            app: ['all-app-1', 'all-app-2'],
-            catalogue: ['catalogue-all-1', 'catalogue-all-2'],
-            management: {
-              all: ['all-management-1', 'all-management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-          read: {
-            app: ['read-app-1', 'read-app-2'],
-            catalogue: ['catalogue-read-1', 'catalogue-read-2'],
-            management: {
-              read: ['read-management-1', 'read-management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-        },
-      }),
-    ];
-
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-    const expectedAllPrivileges = [
-      actions.login,
-      actions.version,
-      actions.app.get('all-app-1'),
-      actions.app.get('all-app-2'),
-      actions.ui.get('catalogue', 'catalogue-all-1'),
-      actions.ui.get('catalogue', 'catalogue-all-2'),
-      actions.ui.get('management', 'all', 'all-management-1'),
-      actions.ui.get('management', 'all', 'all-management-2'),
-      actions.allHack,
-    ];
-
-    const expectedReadPrivileges = [
-      actions.login,
-      actions.version,
-      actions.app.get('read-app-1'),
-      actions.app.get('read-app-2'),
-      actions.ui.get('catalogue', 'catalogue-read-1'),
-      actions.ui.get('catalogue', 'catalogue-read-2'),
-      actions.ui.get('management', 'read', 'read-management-1'),
-      actions.ui.get('management', 'read', 'read-management-2'),
-    ];
-
-    const actual = privileges.get();
-    expect(actual).toHaveProperty('features.foo', {
-      all: [...expectedAllPrivileges],
-      read: [...expectedReadPrivileges],
-    });
-  });
-
   test(`actions only specified at the privilege are alright too`, () => {
     const features: Feature[] = [
       new Feature({
@@ -682,54 +606,6 @@ describe('reserved', () => {
     expect(actual).toHaveProperty('reserved.foo', [
       actions.version,
       actions.ui.get('navLinks', 'kibana:foo'),
-    ]);
-  });
-
-  test('actions defined at the reservedPrivilege take precedence', () => {
-    const features: Feature[] = [
-      new Feature({
-        id: 'foo',
-        name: 'Foo Feature',
-        icon: 'arrowDown',
-        app: ['ignore-me-1', 'ignore-me-2'],
-        catalogue: ['ignore-me-1', 'ignore-me-2'],
-        management: {
-          foo: ['ignore-me-1', 'ignore-me-2'],
-        },
-        privileges: null,
-        reserved: {
-          privilege: {
-            app: ['app-1', 'app-2'],
-            catalogue: ['catalogue-1', 'catalogue-2'],
-            management: {
-              bar: ['management-1', 'management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-          description: '',
-        },
-      }),
-    ];
-
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-    const actual = privileges.get();
-    expect(actual).toHaveProperty('reserved.foo', [
-      actions.version,
-      actions.app.get('app-1'),
-      actions.app.get('app-2'),
-      actions.ui.get('catalogue', 'catalogue-1'),
-      actions.ui.get('catalogue', 'catalogue-2'),
-      actions.ui.get('management', 'bar', 'management-1'),
-      actions.ui.get('management', 'bar', 'management-2'),
     ]);
   });
 

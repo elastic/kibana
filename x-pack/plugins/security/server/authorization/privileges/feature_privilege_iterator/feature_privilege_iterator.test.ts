@@ -16,12 +16,11 @@ describe('featurePrivilegeIterator', () => {
       app: [],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
 
     expect(actualPrivileges).toHaveLength(0);
   });
@@ -32,6 +31,12 @@ describe('featurePrivilegeIterator', () => {
       name: 'foo',
       privileges: {
         all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -39,6 +44,12 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
         read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -46,20 +57,25 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
       },
-      app: [],
+      app: ['foo'],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
 
     expect(actualPrivileges).toEqual([
       {
         privilegeId: 'all',
         privilege: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -70,6 +86,12 @@ describe('featurePrivilegeIterator', () => {
       {
         privilegeId: 'read',
         privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -86,6 +108,12 @@ describe('featurePrivilegeIterator', () => {
       name: 'foo',
       privileges: {
         all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -93,6 +121,12 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
         read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -100,21 +134,26 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
       },
-      app: [],
+      app: ['foo'],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-      predicate: privilegeId => privilegeId === 'all',
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+        predicate: privilegeId => privilegeId === 'all',
+      })
+    );
 
     expect(actualPrivileges).toEqual([
       {
         privilegeId: 'all',
         privilege: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -132,6 +171,12 @@ describe('featurePrivilegeIterator', () => {
       app: [],
       privileges: {
         all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -139,6 +184,12 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
         read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -157,16 +208,17 @@ describe('featurePrivilegeIterator', () => {
                   id: 'sub-feature-priv-1',
                   name: 'first sub feature privilege',
                   includeIn: 'read',
-                  savedObject: {
-                    all: ['all-sub-type'],
-                    read: ['read-sub-type'],
-                  },
-                  ui: ['ui-sub-type'],
+                  api: ['sub-feature-api'],
                   app: ['sub-app'],
                   catalogue: ['sub-catalogue'],
                   management: {
                     kibana: ['sub-management'],
                   },
+                  savedObject: {
+                    all: ['all-sub-type'],
+                    read: ['read-sub-type'],
+                  },
+                  ui: ['ui-sub-type'],
                 },
               ],
             },
@@ -175,17 +227,22 @@ describe('featurePrivilegeIterator', () => {
       ],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: false,
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: false,
+      })
+    );
 
     expect(actualPrivileges).toEqual([
       {
         privilegeId: 'all',
         privilege: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -196,6 +253,12 @@ describe('featurePrivilegeIterator', () => {
       {
         privilegeId: 'read',
         privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -213,6 +276,12 @@ describe('featurePrivilegeIterator', () => {
       app: [],
       privileges: {
         all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -220,6 +289,12 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
         read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -238,16 +313,17 @@ describe('featurePrivilegeIterator', () => {
                   id: 'sub-feature-priv-1',
                   name: 'first sub feature privilege',
                   includeIn: 'none',
-                  savedObject: {
-                    all: ['all-sub-type'],
-                    read: ['read-sub-type'],
-                  },
-                  ui: ['ui-sub-type'],
+                  api: ['sub-feature-api'],
                   app: ['sub-app'],
                   catalogue: ['sub-catalogue'],
                   management: {
                     kibana: ['sub-management'],
                   },
+                  savedObject: {
+                    all: ['all-sub-type'],
+                    read: ['read-sub-type'],
+                  },
+                  ui: ['ui-sub-type'],
                 },
               ],
             },
@@ -256,17 +332,22 @@ describe('featurePrivilegeIterator', () => {
       ],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
 
     expect(actualPrivileges).toEqual([
       {
         privilegeId: 'all',
         privilege: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -277,6 +358,12 @@ describe('featurePrivilegeIterator', () => {
       {
         privilegeId: 'read',
         privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -294,6 +381,12 @@ describe('featurePrivilegeIterator', () => {
       app: [],
       privileges: {
         all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
@@ -301,6 +394,323 @@ describe('featurePrivilegeIterator', () => {
           ui: ['ui-action'],
         },
         read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: [],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'sub feature 1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'first sub feature privilege',
+                  includeIn: 'read',
+                  api: ['sub-feature-api'],
+                  app: ['sub-app'],
+                  catalogue: ['sub-catalogue'],
+                  management: {
+                    section: ['other-sub-management'],
+                    kibana: ['sub-management'],
+                  },
+                  savedObject: {
+                    all: ['all-sub-type'],
+                    read: ['read-sub-type'],
+                  },
+                  ui: ['ui-sub-type'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
+
+    expect(actualPrivileges).toEqual([
+      {
+        privilegeId: 'all',
+        privilege: {
+          api: ['all-api', 'read-api', 'sub-feature-api'],
+          app: ['foo', 'sub-app'],
+          catalogue: ['foo-catalogue', 'sub-catalogue'],
+          management: {
+            section: ['foo-management', 'other-sub-management'],
+            kibana: ['sub-management'],
+          },
+          savedObject: {
+            all: ['all-type', 'all-sub-type'],
+            read: ['read-type', 'read-sub-type'],
+          },
+          ui: ['ui-action', 'ui-sub-type'],
+        },
+      },
+      {
+        privilegeId: 'read',
+        privilege: {
+          api: ['read-api', 'sub-feature-api'],
+          app: ['foo', 'sub-app'],
+          catalogue: ['foo-catalogue', 'sub-catalogue'],
+          management: {
+            section: ['foo-management', 'other-sub-management'],
+            kibana: ['sub-management'],
+          },
+          savedObject: {
+            all: ['all-sub-type'],
+            read: ['read-type', 'read-sub-type'],
+          },
+          ui: ['ui-action', 'ui-sub-type'],
+        },
+      },
+    ]);
+  });
+
+  it('includes sub feature privileges into both all and read when`augmentWithSubFeaturePrivileges` is true and `includeIn: all`', () => {
+    const feature = new Feature({
+      id: 'foo',
+      name: 'foo',
+      app: [],
+      privileges: {
+        all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: ['all-type'],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+        read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: [],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'sub feature 1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'first sub feature privilege',
+                  includeIn: 'all',
+                  api: ['sub-feature-api'],
+                  app: ['sub-app'],
+                  catalogue: ['sub-catalogue'],
+                  management: {
+                    section: ['other-sub-management'],
+                    kibana: ['sub-management'],
+                  },
+                  savedObject: {
+                    all: ['all-sub-type'],
+                    read: ['read-sub-type'],
+                  },
+                  ui: ['ui-sub-type'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
+
+    expect(actualPrivileges).toEqual([
+      {
+        privilegeId: 'all',
+        privilege: {
+          api: ['all-api', 'read-api', 'sub-feature-api'],
+          app: ['foo', 'sub-app'],
+          catalogue: ['foo-catalogue', 'sub-catalogue'],
+          management: {
+            section: ['foo-management', 'other-sub-management'],
+            kibana: ['sub-management'],
+          },
+          savedObject: {
+            all: ['all-type', 'all-sub-type'],
+            read: ['read-type', 'read-sub-type'],
+          },
+          ui: ['ui-action', 'ui-sub-type'],
+        },
+      },
+      {
+        privilegeId: 'read',
+        privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: [],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+    ]);
+  });
+
+  it(`can augment primary feature privileges even if they don't specify their own`, () => {
+    const feature = new Feature({
+      id: 'foo',
+      name: 'foo',
+      app: [],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'sub feature 1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'first sub feature privilege',
+                  includeIn: 'read',
+                  api: ['sub-feature-api'],
+                  app: ['sub-app'],
+                  catalogue: ['sub-catalogue'],
+                  management: {
+                    section: ['other-sub-management'],
+                    kibana: ['sub-management'],
+                  },
+                  savedObject: {
+                    all: ['all-sub-type'],
+                    read: ['read-sub-type'],
+                  },
+                  ui: ['ui-sub-type'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
+
+    expect(actualPrivileges).toEqual([
+      {
+        privilegeId: 'all',
+        privilege: {
+          api: ['sub-feature-api'],
+          app: ['sub-app'],
+          catalogue: ['sub-catalogue'],
+          management: {
+            section: ['other-sub-management'],
+            kibana: ['sub-management'],
+          },
+          savedObject: {
+            all: ['all-sub-type'],
+            read: ['read-sub-type'],
+          },
+          ui: ['ui-sub-type'],
+        },
+      },
+      {
+        privilegeId: 'read',
+        privilege: {
+          api: ['sub-feature-api'],
+          app: ['sub-app'],
+          catalogue: ['sub-catalogue'],
+          management: {
+            section: ['other-sub-management'],
+            kibana: ['sub-management'],
+          },
+          savedObject: {
+            all: ['all-sub-type'],
+            read: ['read-sub-type'],
+          },
+          ui: ['ui-sub-type'],
+        },
+      },
+    ]);
+  });
+
+  it(`can augment primary feature privileges even if the sub-feature privileges don't specify their own`, () => {
+    const feature = new Feature({
+      id: 'foo',
+      name: 'foo',
+      app: [],
+      privileges: {
+        all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: ['all-type'],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+        read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
@@ -320,16 +730,10 @@ describe('featurePrivilegeIterator', () => {
                   name: 'first sub feature privilege',
                   includeIn: 'read',
                   savedObject: {
-                    all: ['all-sub-type'],
-                    read: ['read-sub-type'],
+                    all: [],
+                    read: [],
                   },
-                  ui: ['ui-sub-type'],
-                  app: ['sub-app'],
-                  api: ['sub-api'],
-                  catalogue: ['sub-catalogue'],
-                  management: {
-                    kibana: ['sub-management'],
-                  },
+                  ui: [],
                 },
               ],
             },
@@ -338,127 +742,38 @@ describe('featurePrivilegeIterator', () => {
       ],
     });
 
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-    })) {
-      actualPrivileges.push(privilege);
-    }
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
 
     expect(actualPrivileges).toEqual([
       {
         privilegeId: 'all',
         privilege: {
-          savedObject: {
-            all: ['all-type', 'all-sub-type'],
-            read: ['read-type', 'read-sub-type'],
-          },
-          ui: ['ui-action', 'ui-sub-type'],
-          app: ['sub-app'],
-          api: ['sub-api'],
-          catalogue: ['sub-catalogue'],
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
           management: {
-            kibana: ['sub-management'],
+            section: ['foo-management'],
           },
-        },
-      },
-      {
-        privilegeId: 'read',
-        privilege: {
-          savedObject: {
-            all: ['all-sub-type'],
-            read: ['read-type', 'read-sub-type'],
-          },
-          ui: ['ui-action', 'ui-sub-type'],
-          app: ['sub-app'],
-          api: ['sub-api'],
-          catalogue: ['sub-catalogue'],
-          management: {
-            kibana: ['sub-management'],
-          },
-        },
-      },
-    ]);
-  });
-
-  it('includes sub feature privileges into all when`augmentWithSubFeaturePrivileges` is true and `includeIn: all`', () => {
-    const feature = new Feature({
-      id: 'foo',
-      name: 'foo',
-      app: [],
-      privileges: {
-        all: {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
           },
           ui: ['ui-action'],
         },
-        read: {
-          savedObject: {
-            all: [],
-            read: ['read-type'],
-          },
-          ui: ['ui-action'],
-        },
-      },
-      subFeatures: [
-        {
-          name: 'sub feature 1',
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'sub-feature-priv-1',
-                  name: 'first sub feature privilege',
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['all-sub-type'],
-                    read: ['read-sub-type'],
-                  },
-                  ui: ['ui-sub-type'],
-                  app: ['sub-app'],
-                  api: ['sub-api'],
-                  catalogue: ['sub-catalogue'],
-                  management: {
-                    kibana: ['sub-management'],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-
-    const actualPrivileges = [];
-    for (const privilege of featurePrivilegeIterator(feature, {
-      augmentWithSubFeaturePrivileges: true,
-    })) {
-      actualPrivileges.push(privilege);
-    }
-
-    expect(actualPrivileges).toEqual([
-      {
-        privilegeId: 'all',
-        privilege: {
-          savedObject: {
-            all: ['all-type', 'all-sub-type'],
-            read: ['read-type', 'read-sub-type'],
-          },
-          ui: ['ui-action', 'ui-sub-type'],
-          app: ['sub-app'],
-          api: ['sub-api'],
-          catalogue: ['sub-catalogue'],
-          management: {
-            kibana: ['sub-management'],
-          },
-        },
       },
       {
         privilegeId: 'read',
         privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
           savedObject: {
             all: [],
             read: ['read-type'],
