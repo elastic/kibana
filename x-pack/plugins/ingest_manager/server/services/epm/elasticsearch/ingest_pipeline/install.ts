@@ -26,7 +26,7 @@ export const installPipelines = async (
 ) => {
   const datasets = registryPackage.datasets;
   if (datasets) {
-    return datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
+    const pipelines = datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
       if (dataset.ingest_pipeline) {
         acc.push(
           installPipelinesForDataset({
@@ -40,6 +40,7 @@ export const installPipelines = async (
       }
       return acc;
     }, []);
+    return Promise.all(pipelines).then(results => results.flat());
   }
   return [];
 };
@@ -149,7 +150,7 @@ async function installPipeline({
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-  return { id: pipeline.name, type: IngestAssetType.IngestPipeline };
+  return { id: pipeline.nameForInstallation, type: IngestAssetType.IngestPipeline };
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');

@@ -22,23 +22,22 @@ export async function installPackage(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
 
-  const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
-  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
-  const installIndexPatternsPromise = installIndexPatterns(savedObjectsClient, pkgkey);
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgkey,
   });
+  const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
+  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
+  // index patterns are not associated with a particular so we do not save them in the package saved object state
+  await installIndexPatterns(savedObjectsClient, pkgkey);
 
   const res = await Promise.all([
-    installIndexPatternsPromise,
     installKibanaAssetsPromise,
     installPipelinePromises,
     installTemplatePromises,
   ]);
-  // save the response of assets that were installed and return
-  const toSave = res[1];
 
+  const toSave = res.flat();
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
     savedObjectsClient,
@@ -83,7 +82,6 @@ export async function saveInstallationReferences(options: {
   };
 
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
-
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     { installed: toInstall },

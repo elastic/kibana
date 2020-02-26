@@ -16,7 +16,7 @@ export const installTemplates = async (
 ) => {
   const datasets = registryPackage.datasets;
   if (datasets) {
-    return datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
+    const templates = datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
       acc.push(
         installTemplateForDataset({
           pkg: registryPackage,
@@ -26,6 +26,7 @@ export const installTemplates = async (
       );
       return acc;
     }, []);
+    return Promise.all(templates).then(results => results.flat());
   }
   return [];
 };
