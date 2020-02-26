@@ -10,9 +10,15 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
+import * as readRules from './read_rules';
 import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
 
 describe('get_export_by_object_ids', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
       const alertsClient = alertsClientMock.create();
@@ -115,6 +121,23 @@ describe('get_export_by_object_ids', () => {
             version: 1,
           },
         ],
+      };
+      expect(exports).toEqual(expected);
+    });
+
+    test('it returns error when readRules throws error', async () => {
+      const alertsClient = alertsClientMock.create();
+      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const objects = [{ rule_id: 'rule-1' }];
+      const exports = await getRulesFromObjects(alertsClient, objects);
+      const expected: RulesErrors = {
+        exportedCount: 0,
+        missingRules: [{ rule_id: objects[0].rule_id }],
+        rules: [],
       };
       expect(exports).toEqual(expected);
     });
