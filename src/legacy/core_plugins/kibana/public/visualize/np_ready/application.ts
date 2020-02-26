@@ -34,12 +34,14 @@ import {
   PrivateProvider,
   PromiseServiceCreator,
   StateManagementConfigProvider,
+  wrapInI18nContext,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
 import { VisualizeKibanaServices } from '../kibana_services';
+import { LinkedSearch } from './components/linked_search';
 
 let angularModuleInstance: IModule | null = null;
 
@@ -92,6 +94,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalStateModule();
   createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
+  createLocalLinkedSearchModule();
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -101,6 +104,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/PersistedState',
     'app/visualize/TopNav',
     'app/visualize/State',
+    'app/visualize/LinkedSearch',
   ]);
   return visualizeAngularModule;
 }
@@ -173,4 +177,16 @@ function createLocalI18nModule() {
     .provider('i18n', I18nProvider)
     .filter('i18n', i18nFilter)
     .directive('i18nId', i18nDirective);
+}
+
+function createLocalLinkedSearchModule() {
+  angular
+    .module('app/visualize/LinkedSearch', ['react'])
+    .directive('linkedSearch', reactDirective => {
+      return reactDirective(wrapInI18nContext(LinkedSearch), [
+        'savedSearchId',
+        'savedSearchTitle',
+        'unlink',
+      ]);
+    });
 }
