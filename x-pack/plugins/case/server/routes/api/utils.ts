@@ -56,7 +56,8 @@ export const formatNewComment = ({
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const boom = isBoom(error) ? error : boomify(error);
+  const options = { statusCode: error.statusCode ?? 500 };
+  const boom = isBoom(error) ? error : boomify(error, options);
   return {
     body: boom,
     headers: boom.output.headers,
