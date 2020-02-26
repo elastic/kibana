@@ -74,7 +74,7 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      if (e.response) {
+      if (e?.response) {
         dispatch({
           type: 'requestFail',
           payload: e,

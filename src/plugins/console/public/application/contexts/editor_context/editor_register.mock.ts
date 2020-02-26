@@ -17,19 +17,11 @@
  * under the License.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
+import { EditorRegistry } from './editor_registry';
 
-export class EditorRegistry {
-  private inputEditor: SenseEditor | undefined;
-
-  setInputEditor(inputEditor: SenseEditor) {
-    this.inputEditor = inputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor!;
-  }
+export class MockEditorRegistry extends EditorRegistry {
+  getInputEditor = jest.fn();
+  setInputEditor = jest.fn();
 }
 
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
+export const instance = new MockEditorRegistry();
