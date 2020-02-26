@@ -70,7 +70,7 @@ export const ProcessEventDot = styled(
         <svg
           className={className}
           style={style}
-          viewBox="-15 -15 30 30"
+          viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
           role="treeitem"
           aria-level={event.data_buffer.depth}
@@ -92,8 +92,8 @@ export const ProcessEventDot = styled(
                 ? `#${SymbolIds.processNodeWithHorizontalRule}`
                 : `#${SymbolIds.processNode}`
             }
-            x="-15.5"
-            y="-12.5"
+            x={markerPosition(magFactorX) + markerSize(magFactorX) -2}
+            y={markerPosition(magFactorX) + .25 * markerSize(magFactorX)}
             width="31"
             height="10"
             opacity="1"
@@ -134,7 +134,7 @@ export const ProcessEventDot = styled(
 )`
   position: absolute;
   display: block;
-  width: 120px;
+  width: 360px;
   height: 120px;
   text-align: left;
   font-size: 10px;
