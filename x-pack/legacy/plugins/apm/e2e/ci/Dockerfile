@@ -1,4 +1,5 @@
-FROM node:12
+ARG NODE_VERSION
+FROM node:$NODE_VERSION
 
 RUN apt-get -qq update \
   && apt-get -y -qq install xvfb \
