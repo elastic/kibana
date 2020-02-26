@@ -32,6 +32,7 @@ export async function getAllEnvironments({
       indices['apm_oss.errorIndices'],
       indices['apm_oss.transactionIndices']
     ],
+    timeout: '1s',
     body: {
       size: 0,
       query: {
