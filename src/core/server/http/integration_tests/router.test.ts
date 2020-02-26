@@ -104,7 +104,7 @@ describe('Options', () => {
           .get('/')
           .expect(200, 'ok');
 
-        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+        expect(response.header['www-authenticate']).toBe(undefined);
       });
     });
     describe('true', () => {

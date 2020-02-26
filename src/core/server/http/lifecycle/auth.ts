@@ -160,13 +160,13 @@ export function adoptToHapiAuthFormat(
       }
 
       if (authResult.isNotHandled(result)) {
-        onNotHandled(request, {
-          responseHeaders: result.responseHeaders,
-        });
         if (kibanaRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
         if (kibanaRequest.route.options.authRequired) {
+          onNotHandled(request, {
+            responseHeaders: result.responseHeaders,
+          });
           return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
         }
         throw new Error(
