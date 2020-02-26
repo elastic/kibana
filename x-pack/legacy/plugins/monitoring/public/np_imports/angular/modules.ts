@@ -9,13 +9,15 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../../src/plugins/kibana_legacy/public';
 
 import {
   GlobalStateProvider,
   StateManagementConfigProvider,
   AppStateProvider,
-  createTopNavDirective,
-  createTopNavHelper,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   npStart,

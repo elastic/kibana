@@ -34,8 +34,6 @@ import { GlobalStateProvider } from 'ui/state_management/global_state';
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -60,7 +58,6 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { initAngularBootstrap } from '../../../../../plugins/kibana_legacy/public';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
@@ -68,6 +65,7 @@ import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll'
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
+  initAngularBootstrap,
   configureAppAngularModule,
   IPrivate,
   KbnAccessibleClickProvider,
@@ -75,6 +73,8 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
+  createTopNavDirective,
+  createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**

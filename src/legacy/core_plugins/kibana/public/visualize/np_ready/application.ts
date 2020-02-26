@@ -23,8 +23,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
   GlobalStateProvider,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
@@ -34,6 +32,10 @@ import {
   StateManagementConfigProvider,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
