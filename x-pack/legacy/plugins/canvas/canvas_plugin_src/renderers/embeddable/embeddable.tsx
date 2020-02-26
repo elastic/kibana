@@ -31,7 +31,7 @@ const embeddablesRegistry: {
 const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
   return (
     <div
-      className="embeddable"
+      className="canvasEmbeddable"
       style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
     >
       <I18nContext>
