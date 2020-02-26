@@ -36,25 +36,14 @@ export const createReadIndexRoute = (
         const indexExists = await getIndexExists(callCluster, index);
 
         if (indexExists) {
-          // head request is used for if you want to get if the index exists
-          // or not and it will return a content-length: 0 along with either a 200 or 404
-          // depending on if the index exists or not.
-          if (request.method.toLowerCase() === 'head') {
-            return headers.response().code(200);
-          } else {
-            return headers.response({ name: index }).code(200);
-          }
+          return headers.response({ name: index }).code(200);
         } else {
-          if (request.method.toLowerCase() === 'head') {
-            return headers.response().code(404);
-          } else {
-            return headers
-              .response({
-                message: 'index for this space does not exist',
-                status_code: 404,
-              })
-              .code(404);
-          }
+          return headers
+            .response({
+              message: 'index for this space does not exist',
+              status_code: 404,
+            })
+            .code(404);
         }
       } catch (err) {
         const error = transformError(err);

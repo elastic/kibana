@@ -88,15 +88,27 @@ export class KibanaMigrator {
   }
 
   /**
-   * Migrates the mappings and documents in the Kibana index. This will run only
+   * Migrates the mappings and documents in the Kibana index. By default, this will run only
    * once and subsequent calls will return the result of the original call.
+   *
+   * @param rerun - If true, method will run a new migration when called again instead of
+   * returning the result of the initial migration. This should only be used when factors external
+   * to Kibana itself alter the kibana index causing the saved objects mappings or data to change
+   * after the Kibana server performed the initial migration.
+   *
+   * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
+   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can lead to
+   * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
+   * code should ensure that the initial call resolves before calling the function again.
    *
    * @returns - A promise which resolves once all migrations have been applied.
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations(): Promise<Array<{ status: string }>> {
-    if (this.migrationResult === undefined) {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
+    Array<{ status: string }>
+  > {
+    if (this.migrationResult === undefined || rerun) {
       this.migrationResult = this.runMigrationsInternal();
     }
 

@@ -26,6 +26,7 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AppRouter } from '../routers';
+import '../index.scss';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -74,12 +75,8 @@ export async function startApp(
     </KibanaContextProvider>
   );
 
-  // Ensure the element we're handed from application mounting takes up
-  // the full size it can, so that our inner application styles work as
-  // expected.
-  element.style.height = '100%';
-  element.style.display = 'flex';
-  element.style.overflowY = 'hidden'; // Prevent having scroll within a container having scroll. It messes up with drag-n-drop elements
+  // Ensure the element we're handed from application mounting is assigned a class
+  // for our index.scss styles to apply to.
   element.className += ` ${CONTAINER_CLASSNAME}`;
 
   ReactDOM.render(<App />, element);

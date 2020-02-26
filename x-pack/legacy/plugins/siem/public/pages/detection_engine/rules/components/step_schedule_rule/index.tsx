@@ -7,8 +7,8 @@
 // eslint-disable @kbn/eslint/no-restricted-paths
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 
@@ -96,7 +96,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
       const myDefaultValues = {
         ...defaultValues,
         isNew: false,
