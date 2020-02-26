@@ -24,6 +24,7 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -34,6 +35,11 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
+      await security.testUser.setRoles([
+        'kibana_user',
+        'test_logstash_reader',
+        'long_window_logstash',
+      ]);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('visualize');
