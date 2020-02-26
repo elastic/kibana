@@ -110,18 +110,23 @@ const observeCompiler = (
         const path = getModulePath(module);
 
         const parsedPath = Path.parse(path);
-        const dirSegments = parsedPath.dir.slice(parsedPath.root.length).split(Path.sep);
-        if (!dirSegments.includes('node_modules')) {
+
+        // parsedPath.dir starts with the root, remove it before
+        // splitting into dirs as the root is both not a directory
+        // and will put an empty string into dirs on unix systems
+        const dirs = parsedPath.dir.slice(parsedPath.root.length).split(Path.sep);
+
+        if (!dirs.includes('node_modules')) {
           referencedFiles.add(path);
           continue;
         }
 
-        const nmIndex = dirSegments.lastIndexOf('node_modules');
-        const isScoped = dirSegments[nmIndex + 1].startsWith('@');
+        const nmIndex = dirs.lastIndexOf('node_modules');
+        const isScoped = dirs[nmIndex + 1].startsWith('@');
         referencedFiles.add(
           Path.join(
             parsedPath.root,
-            ...dirSegments.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+            ...dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
             'package.json'
           )
         );
