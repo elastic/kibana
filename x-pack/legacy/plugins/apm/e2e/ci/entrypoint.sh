@@ -21,9 +21,9 @@ npm config set cache ${HOME}
 #      --exclude=packages/ \
 #      --exclude=built_assets  --exclude=target \
 #      --exclude=data /app ${HOME}/
-#cd ${HOME}/app/x-pack/legacy/plugins/apm/cypress
+#cd ${HOME}/app/x-pack/legacy/plugins/apm/e2e/cypress
 
-cd /app/x-pack/legacy/plugins/apm/cypress
+cd /app/x-pack/legacy/plugins/apm/e2e
 ## Install dependencies for cypress
 CI=true npm install
 yarn install
@@ -33,4 +33,4 @@ npm install wait-on
 ./node_modules/.bin/wait-on ${CYPRESS_BASE_URL}/status && echo 'Kibana is up and running'
 
 # Run cypress
-./node_modules/.bin/cypress run
+npm run cypress:run

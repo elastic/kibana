@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-CYPRESS_DIR="x-pack/legacy/plugins/apm/cypress"
+CYPRESS_DIR="x-pack/legacy/plugins/apm/e2e"
 
 echo "1/3 Install dependencies ..."
 # shellcheck disable=SC1091
