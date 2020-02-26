@@ -15,6 +15,14 @@ export interface IngestManagerConfigType {
   fleet: {
     enabled: boolean;
     defaultOutputHost: string;
+    kibana: {
+      host?: string;
+      ca_sha256?: string;
+    };
+    elasticsearch: {
+      host?: string;
+      ca_sha256?: string;
+    };
   };
 }
 

@@ -16,6 +16,7 @@ export interface NewOutput {
   index_name?: string;
   ingest_pipeline?: string;
   hosts?: string[];
+  ca_sha256?: string;
   api_key?: string;
   admin_username?: string;
   admin_password?: string;

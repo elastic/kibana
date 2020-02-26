@@ -100,6 +100,7 @@ export const savedObjectMappings = {
       index_name: { type: 'keyword' },
       ingest_pipeline: { type: 'keyword' },
       hosts: { type: 'keyword' },
+      ca_sha256: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'keyword' },
       admin_username: { type: 'binary' },
