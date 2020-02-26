@@ -19,21 +19,13 @@
 
 import moment from 'moment';
 
-jest.mock('../../../../../../plugins/data/public/services', () => ({
-  getIndexPatterns: () => {
-    return {
-      get: async () => {
-        return {
-          id: 'logstash-*',
-          timeFieldName: 'time',
-        };
-      },
-    };
-  },
-}));
-
 import { onBrushEvent, BrushEvent } from './brush_event';
+
 import { mockDataServices } from '../../search/aggs/test_helpers';
+import { IndexPatternsContract } from '../../../../../../plugins/data/public';
+import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -57,6 +49,17 @@ describe('brushEvent', () => {
 
   beforeEach(() => {
     mockDataServices();
+    setIndexPatterns(({
+      ...dataPluginMock.createStartContract().indexPatterns,
+      get: async () => ({
+        id: 'indexPatternId',
+        timeFieldName: 'time',
+        fields: {
+          getByName: () => undefined,
+          filter: () => [],
+        },
+      }),
+    } as unknown) as IndexPatternsContract);
 
     baseEvent = {
       data: {

@@ -33,7 +33,7 @@ describe('Histogram Agg', () => {
 
   const typesRegistry = mockAggTypesRegistry([histogramBucketAgg]);
 
-  const getAggConfigs = (params: Record<string, any> = {}) => {
+  const getAggConfigs = (params: Record<string, any>) => {
     const indexPattern = {
       id: '1234',
       title: 'logstash-*',
@@ -52,9 +52,6 @@ describe('Histogram Agg', () => {
       indexPattern,
       [
         {
-          field: {
-            name: 'field',
-          },
           id: 'test',
           type: BUCKET_TYPES.HISTOGRAM,
           schema: 'segment',

@@ -25,3 +25,4 @@ export {
 } from '../../data/public';
 export { createAggConfigs } from 'ui/agg_types';
 export { createSavedSearchesLoader } from '../../../../plugins/discover/public';
+export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';

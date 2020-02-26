@@ -34,10 +34,10 @@ import {
 import { getFieldFormats } from '../../../../../../plugins/data/public/services';
 
 export interface AggConfigOptions {
-  enabled: boolean;
   type: IAggType;
-  params: any;
+  enabled?: boolean;
   id?: string;
+  params?: Record<string, any>;
   schema?: string | Schema;
 }
 
