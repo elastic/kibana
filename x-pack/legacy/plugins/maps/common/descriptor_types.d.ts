@@ -20,4 +20,5 @@ export interface IXYZTMSSourceDescriptor extends ISourceDescriptor {
 export interface ILayerDescriptor {
   sourceDescriptor: ISourceDescriptor;
   id: string;
+  label?: string;
 }
