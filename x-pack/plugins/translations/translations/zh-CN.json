@@ -2873,7 +2873,6 @@
     "visualizations.newVisWizard.title": "新建可视化",
     "visualizations.newVisWizard.visTypeAliasDescription": "打开 Visualize 外部的 Kibana 应用程序。",
     "visualizations.newVisWizard.visTypeAliasTitle": "Kibana 应用程序",
-    "visualizations.queryGeohashBounds.unableToGetBoundErrorTitle": "无法获取边界",
     "visDefaultEditor.aggSelect.aggregationLabel": "聚合",
     "visDefaultEditor.aggSelect.helpLinkLabel": "{aggTitle} 帮助",
     "visDefaultEditor.aggSelect.noCompatibleAggsDescription": "索引模式“{indexPatternTitle}”不包含任何聚合。",
