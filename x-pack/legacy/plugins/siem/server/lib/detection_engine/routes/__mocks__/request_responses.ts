@@ -127,10 +127,11 @@ export const getReadRequest = () =>
     query: { rule_id: 'rule-1' },
   });
 
-export const getFindRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}/_find`,
-});
+export const getFindRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+  });
 
 export const getReadBulkRequest = () =>
   requestMock.create({

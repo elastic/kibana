@@ -4,78 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
-import { createMockServer } from '../__mocks__';
-import { clientsServiceMock } from '../__mocks__/clients_service_mock';
+import { requestContextMock, serverMock } from '../__mocks__';
 
 import { findRulesRoute } from './find_rules_route';
-import { ServerInjectOptions } from 'hapi';
 
-import { getEmptyFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  getResult,
+  getFindRequest,
+  getFindResultWithSingleHit,
+  getFindResultStatus,
+} from '../__mocks__/request_responses';
 
 describe('find_rules', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let { getRoute, router, response } = serverMock.create();
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    ({ getRoute, router, response } = serverMock.create());
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
-    getClients.mockResolvedValue(clients);
-
-    findRulesRoute(server.route, getClients);
+    findRulesRoute(router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      clients.actionsClient.find.mockResolvedValue({
-        page: 1,
-        perPage: 1,
-        total: 0,
-        data: [],
-      });
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getFindRequest());
-      expect(statusCode).toBe(200);
+      await getRoute().handler(context, getFindRequest(), response);
+      expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { route, inject } = createMockServer();
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      findRulesRoute(route, getClients);
-      const { statusCode } = await inject(getFindRequest());
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      await getRoute().handler(context, getFindRequest(), response);
+      expect(response.notFound).toHaveBeenCalled();
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if a bad query parameter is given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find?invalid_value=500`,
+  describe('request validation', () => {
+    test('allows optional query params', async () => {
+      const query = {
+        page: 2,
+        per_page: 20,
+        sort_field: 'timestamp',
+        fields: ['field1', 'field2'],
       };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+      // @ts-ignore ambiguous validation types
+      getRoute().config.validate.query(query, response);
+
+      expect(response.ok).toHaveBeenCalled();
     });
 
-    test('returns 200 if the set of optional query parameters are given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+    test('disallows unknown query params', async () => {
+      const query = { invalid_value: 500 };
+      // @ts-ignore ambiguous validation types
+      getRoute().config.validate.query(query, response);
+
+      expect(response.badRequest).toHaveBeenCalled();
     });
   });
 });
