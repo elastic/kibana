@@ -18,4 +18,5 @@ export interface SavedObjectsClientWrapperOptions
 |  --- | --- | --- |
 |  [client](./kibana-plugin-server.savedobjectsclientwrapperoptions.client.md) | <code>SavedObjectsClientContract</code> |  |
 |  [request](./kibana-plugin-server.savedobjectsclientwrapperoptions.request.md) | <code>KibanaRequest</code> |  |
+|  [typeRegistry](./kibana-plugin-server.savedobjectsclientwrapperoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> |  |
 
