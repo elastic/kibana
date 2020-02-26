@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractLayer } from './layer';
+import { AbstractLayer, ILayerArguments } from './layer';
+import { ITMSSource } from './sources/tms_source';
+import { ILayerDescriptor } from '../../common/descriptor_types';
 
-export class TileLayer extends AbstractLayer {}
+interface ITileLayerArguments extends ILayerArguments {
+  source: ITMSSource;
+  layerDescriptor: ILayerDescriptor;
+}
+
+export class TileLayer extends AbstractLayer {
+  constructor(args: ITileLayerArguments);
+}

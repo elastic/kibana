@@ -10,7 +10,7 @@ export interface ILayer {
   destroy(): void;
 }
 
-interface ILayerArguments {
+export interface ILayerArguments {
   layerDescriptor: ILayerDescriptor;
   source: ISource;
 }
