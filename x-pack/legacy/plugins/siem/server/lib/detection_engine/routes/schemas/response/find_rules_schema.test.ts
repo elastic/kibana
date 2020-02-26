@@ -7,8 +7,12 @@
 import { findRulesSchema, FindRulesSchema } from './find_rules_schema';
 import { exactCheck } from './exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getFindResponseSingle, getBaseResponsePayload } from './__mocks__/utils';
-import { getPaths } from './utils';
+import {
+  foldLeftRight,
+  getFindResponseSingle,
+  getBaseResponsePayload,
+  getPaths,
+} from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
 

@@ -13,8 +13,7 @@ import {
   addSavedId,
   addTimelineTitle,
 } from './check_type_dependents';
-import { foldLeftRight, getBaseResponsePayload } from './__mocks__/utils';
-import { getPaths } from './utils';
+import { foldLeftRight, getBaseResponsePayload, getPaths } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { exactCheck } from './exact_check';
 import { RulesSchema } from './rules_schema';

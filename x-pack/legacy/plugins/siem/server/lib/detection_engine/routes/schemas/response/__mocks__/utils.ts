@@ -10,6 +10,8 @@ import { RulesSchema } from '../rules_schema';
 import { RulesBulkSchema } from '../rules_bulk_schema';
 import { ErrorSchema } from '../error_schema';
 import { FindRulesSchema } from '../find_rules_schema';
+import { formatErrors } from '../utils';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 interface Message<T> {
   errors: t.Errors;
@@ -81,3 +83,18 @@ export const getFindResponseSingle = (): FindRulesSchema => ({
   total: 1,
   data: [getBaseResponsePayload()],
 });
+
+/**
+ * Convenience utility to keep the error message handling within tests to be
+ * very concise.
+ * @param validation The validation to get the errors from
+ */
+export const getPaths = <A>(validation: t.Validation<A>): string[] => {
+  return pipe(
+    validation,
+    fold(
+      errors => formatErrors(errors),
+      () => ['no errors']
+    )
+  );
+};

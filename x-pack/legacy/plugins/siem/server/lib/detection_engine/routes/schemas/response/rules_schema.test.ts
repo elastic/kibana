@@ -9,8 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from './exact_check';
 import { rulesSchema, RulesSchema } from './rules_schema';
-import { foldLeftRight, getBaseResponsePayload } from './__mocks__/utils';
-import { getPaths } from './utils';
+import { foldLeftRight, getBaseResponsePayload, getPaths } from './__mocks__/utils';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

@@ -8,8 +8,7 @@ import * as t from 'io-ts';
 import { left, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { getPaths } from './utils';
-import { foldLeftRight } from './__mocks__/utils';
+import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { exactCheck, findDifferencesRecursive } from './exact_check';
 
 describe('exact_check', () => {

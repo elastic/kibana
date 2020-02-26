@@ -8,8 +8,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from './exact_check';
-import { foldLeftRight } from './__mocks__/utils';
-import { getPaths } from './utils';
+import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 
 describe('prepackaged_rule_schema', () => {

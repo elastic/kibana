@@ -6,8 +6,7 @@
 
 import { exactCheck } from './exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight } from './__mocks__/utils';
-import { getPaths } from './utils';
+import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
 import { ErrorSchema } from './error_schema';

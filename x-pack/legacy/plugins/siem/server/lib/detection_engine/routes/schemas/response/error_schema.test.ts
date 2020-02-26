@@ -8,8 +8,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from './exact_check';
-import { foldLeftRight, getErrorPayload } from './__mocks__/utils';
-import { getPaths } from './utils';
+import { foldLeftRight, getErrorPayload, getPaths } from './__mocks__/utils';
 import { errorSchema, ErrorSchema } from './error_schema';
 
 describe('error_schema', () => {
