@@ -62,7 +62,13 @@ class EsInitializationSteps {
   async createInitialIndexIfNotExists(): Promise<void> {
     const exists = await this.esContext.esAdapter.doesAliasExist(this.esContext.esNames.alias);
     if (!exists) {
-      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex);
+      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex, {
+        aliases: {
+          [this.esContext.esNames.alias]: {
+            is_write_index: true,
+          },
+        },
+      });
     }
   }
 }

@@ -18,8 +18,9 @@
  */
 
 import expect from '@kbn/expect';
-
-export default function({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+// eslint-disable-next-line import/no-default-export
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -40,8 +41,6 @@ export default function({ getService, getPageObjects }) {
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
-        // TODO: Remove this once https://github.com/elastic/kibana/issues/19750 is properly resolved
-        await PageObjects.common.sleep(500);
       });
 
       it('should create a visualization from a saved search', async () => {
