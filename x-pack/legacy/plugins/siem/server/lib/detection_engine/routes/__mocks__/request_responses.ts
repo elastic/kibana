@@ -104,13 +104,12 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
   status: 'closed',
 });
 
-export const getUpdateRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getUpdateRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
 export const getPatchRequest = () =>
   requestMock.create({
