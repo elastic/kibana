@@ -81,6 +81,11 @@ export class ESAggMetricField extends AbstractField {
     return !isMetricCountable(this.getAggType());
   }
 
+  canValueBeFormatted() {
+    // Do not use field formatters for counting metrics
+    return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
+  }
+
   async getOrdinalFieldMetaRequest(config) {
     return this._esDocField.getOrdinalFieldMetaRequest(config);
   }

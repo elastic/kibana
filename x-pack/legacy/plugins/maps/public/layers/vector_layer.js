@@ -561,9 +561,13 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
 
       const formatters = {};
-      const promises = fields.map(async field => {
-        formatters[field.getName()] = await source.createFieldFormatter(field);
-      });
+      const promises = fields
+        .filter(field => {
+          return field.canValueBeFormatted();
+        })
+        .map(async field => {
+          formatters[field.getName()] = await source.createFieldFormatter(field);
+        });
       await Promise.all(promises);
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
