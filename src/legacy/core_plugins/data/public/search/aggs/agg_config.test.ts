@@ -398,7 +398,7 @@ describe('AggConfig', () => {
     });
 
     it('empty label if the type is not defined', () => {
-      aggConfig.type = undefined as IAggType;
+      aggConfig.type = (undefined as unknown) as AggType;
       const label = aggConfig.makeLabel();
       expect(label).toBe('');
     });

@@ -19,7 +19,7 @@
 
 import { termsBucketAgg } from '../terms';
 import { createFilterTerms } from './terms';
-import { AggConfigs } from '../../agg_configs';
+import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
@@ -28,7 +28,7 @@ import { Filter, ExistsFilter } from '../../../../../../../../plugins/data/publi
 describe('AggConfig Filters', () => {
   describe('terms', () => {
     const typesRegistry = mockAggTypesRegistry([termsBucketAgg]);
-    const getAggConfigs = (aggs: Array<Record<string, any>>) => {
+    const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
