@@ -74,7 +74,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
       });
 
-      it('alerts api should return `prev` and `next` using `after` and `before`.', async () => {
+      it('alerts api should return links to the next and previous pages using cursor-based pagination', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
@@ -132,15 +132,13 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(0);
       });
 
-      it('alerts api should return data using `before` by custom sort parameter', async () => {
+      it('alerts api should return 400 when using `before` by custom sort parameter', async () => {
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&before=2180&before=8362fcde-0b10-476f-97a8-8d6a43865226`
           )
           .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.alerts.length).to.eql(4);
-        expect(body.alerts[3].thread.id).to.eql(2824);
+          .expect(400);
       });
 
       it('alerts api should return data using `after` by custom sort parameter', async () => {
@@ -154,11 +152,23 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts[0].thread.id).to.eql(1912);
       });
 
-      it('alerts api should filter results of alert data', async () => {
+      it('alerts api should filter results of alert data using rison-encoded filters', async () => {
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?filters=!((%27%24state%27%3A(store%3AappState)%2Cmeta%3A(alias%3A!n%2Cdisabled%3A!f%2Ckey%3Ahost.hostname%2Cnegate%3A!f%2Cparams%3A(query%3AHD-m3z-4c803698)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(host.hostname%3AHD-m3z-4c803698))))`
           )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.total).to.eql(72);
+        expect(body.alerts.length).to.eql(10);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+        expect(body.result_from_index).to.eql(0);
+      });
+
+      it('alerts api should filter results of alert data using KQL', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/alerts?query=agent.id:c89dc040-2350-4d59-baea-9ff2e369136f`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.total).to.eql(72);

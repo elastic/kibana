@@ -3,42 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { encode } from 'rison-node';
-import {
-  IClusterClient,
-  IRouter,
-  IScopedClusterClient,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from 'kibana/server';
+import { IClusterClient, IRouter, IScopedClusterClient } from 'kibana/server';
 import {
   elasticsearchServiceMock,
-  httpServerMock,
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { AlertEvent, AlertResultList } from '../../../common/types';
-import { SearchResponse } from 'elasticsearch';
 import { alertListReqSchema } from './list/schemas';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
-  let routeHandler: RequestHandler<any, any, any>;
-  let routeConfig: RouteConfig<any, any, any, any>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
-    mockResponse = httpServerMock.createResponseFactory();
     registerAlertRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),

@@ -55,6 +55,9 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
     return pageParams.slice(0, -1); // strip trailing `&`
   }
 
+  /**
+   * Gets the next set of alerts after this one.
+   */
   async getNextUrl(): Promise<string | null> {
     let url = null;
     if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
@@ -68,6 +71,9 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
     return url;
   }
 
+  /**
+   * Gets the previous set of alerts before this one.
+   */
   async getPrevUrl(): Promise<string | null> {
     let url = null;
     if (this.hitLen > 0) {

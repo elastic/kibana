@@ -6,7 +6,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PluginInitializerContext } from 'kibana/server';
-import { Direction } from '../common/types';
 
 export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
   ? P
@@ -24,10 +23,6 @@ export const EndpointConfigSchema = schema.object({
   /**
    * Alert Configuration
    */
-  alertResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
-  alertResultListDefaultSort: schema.string({ defaultValue: '@timestamp' }),
-  alertResultListDefaultOrder: schema.string({ defaultValue: Direction.desc }),
   alertResultListDefaultDateRange: schema.object({
     from: schema.string({ defaultValue: 'now-15m' }),
     to: schema.string({ defaultValue: 'now' }),

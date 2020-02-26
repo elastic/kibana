@@ -24,6 +24,11 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+export enum Direction {
+  asc = 'asc',
+  desc = 'desc',
+}
+
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ALERT_INDEX_NAME = 'my-index';
@@ -34,6 +39,13 @@ export class EndpointAppConstants {
    * Legacy events are stored in indices with endgame-* prefix
    */
   static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
+
+  /**
+   * Alerts
+   **/
+  static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
+  static ALERT_LIST_DEFAULT_SORT = '@timestamp';
+  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
 }
 
 export interface AlertResultList {
@@ -84,6 +96,10 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
+/**
+ * Describes an Alert Event.
+ * Should be in line with ECS schema.
+ */
 export type AlertEvent = Immutable<{
   '@timestamp': number;
   agent: {
@@ -112,6 +128,9 @@ export type AlertEvent = Immutable<{
   thread: {};
 }>;
 
+/**
+ * Metadata associated with an alert event.
+ */
 interface AlertMetadata {
   id: string;
 
@@ -120,6 +139,9 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+/**
+ * Union of alert data and metadata.
+ */
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
@@ -150,17 +172,18 @@ export interface EndpointMetadata {
   };
 }
 
+/**
+ * Represents `total` response from Elasticsearch after ES 7.0.
+ */
 export interface ESTotal {
   value: number;
   relation: string;
 }
 
+/**
+ * `Hits` array in responses from ES search API.
+ */
 export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
-
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
 
 export interface LegacyEndpointEvent {
   '@timestamp': Date;

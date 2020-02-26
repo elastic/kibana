@@ -13,7 +13,7 @@ import {
   AlertData,
   AlertResultList,
   AlertHits,
-  Direction,
+  EndpointAppConstants,
   ESTotal,
 } from '../../../../../common/types';
 import { EndpointAppContext } from '../../../../types';
@@ -27,9 +27,9 @@ export const getRequestData = async (
   const config = await endpointAppContext.config();
   const reqData: AlertSearchQuery = {
     // Defaults not enforced by schema
-    pageSize: request.query.page_size || config.alertResultListDefaultPageSize,
-    sort: request.query.sort || config.alertResultListDefaultSort,
-    order: request.query.order || (config.alertResultListDefaultOrder as Direction),
+    pageSize: request.query.page_size || EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
+    sort: request.query.sort || EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
+    order: request.query.order || EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
     dateRange: ((request.query.date_range !== undefined
       ? decode(request.query.date_range)
       : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
@@ -50,7 +50,7 @@ export const getRequestData = async (
   if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
     // simple pagination
     if (reqData.pageIndex === undefined) {
-      reqData.pageIndex = config.alertResultListDefaultFirstPageIndex;
+      reqData.pageIndex = 0;
     }
     reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
   }

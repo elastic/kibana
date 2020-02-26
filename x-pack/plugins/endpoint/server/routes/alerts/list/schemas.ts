@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { decode } from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
+import { EndpointAppConstants } from '../../../../common/types';
 
 export const alertListReqSchema = schema.object(
   {
@@ -37,7 +39,9 @@ export const alertListReqSchema = schema.object(
       schema.string({
         validate(value) {
           if (value !== 'asc' && value !== 'desc') {
-            return 'must be `asc` or `desc`';
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_sort_direction', {
+              defaultMessage: 'must be `asc` or `desc`',
+            });
           }
         },
       })
@@ -48,7 +52,9 @@ export const alertListReqSchema = schema.object(
           try {
             esKuery.fromKueryExpression(value);
           } catch (err) {
-            return 'must be valid KQL';
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
+              defaultMessage: 'must be valid KQL',
+            });
           }
         },
       })
@@ -61,7 +67,9 @@ export const alertListReqSchema = schema.object(
           try {
             decode(value);
           } catch (err) {
-            return 'must be a valid rison-encoded string';
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
+              defaultMessage: 'must be a valid rison-encoded string',
+            });
           }
         },
       })
@@ -74,7 +82,9 @@ export const alertListReqSchema = schema.object(
           try {
             decode(value);
           } catch (err) {
-            return 'must be a valid rison-encoded string';
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
+              defaultMessage: 'must be a valid rison-encoded string',
+            });
           }
         },
       })
@@ -83,13 +93,34 @@ export const alertListReqSchema = schema.object(
   {
     validate(value) {
       if (value.after !== undefined && value.page_index !== undefined) {
-        return '[page_index] cannot be used with [after]';
+        return i18n.translate('xpack.endpoint.alerts.errors.page_index_cannot_be_used_with_after', {
+          defaultMessage: '[page_index] cannot be used with [after]',
+        });
       }
       if (value.before !== undefined && value.page_index !== undefined) {
-        return '[page_index] cannot be used with [before]';
+        return i18n.translate(
+          'xpack.endpoint.alerts.errors.page_index_cannot_be_used_with_before',
+          {
+            defaultMessage: '[page_index] cannot be used with [before]',
+          }
+        );
       }
       if (value.before !== undefined && value.after !== undefined) {
-        return '[before] cannot be used with [after]';
+        return i18n.translate('xpack.endpoint.alerts.errors.before_cannot_be_used_with_after', {
+          defaultMessage: '[before] cannot be used with [after]',
+        });
+      }
+      if (
+        value.before !== undefined &&
+        value.sort !== undefined &&
+        value.sort !== EndpointAppConstants.ALERT_LIST_DEFAULT_SORT
+      ) {
+        return i18n.translate(
+          'xpack.endpoint.alerts.errors.before_cannot_be_used_with_custom_sort',
+          {
+            defaultMessage: '[before] cannot be used with custom sort',
+          }
+        );
       }
     },
   }
