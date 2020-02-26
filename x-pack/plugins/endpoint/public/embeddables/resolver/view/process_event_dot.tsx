@@ -57,12 +57,13 @@ export const ProcessEventDot = styled(
         transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
 
+      const markerBaseSize = 15;
       const markerSize = (magFactor: number) => {
-        return magFactor >= 1 ? 4 * (1 / magFactor) : 3;
+        return markerBaseSize * (1 / magFactor);
       };
 
       const markerPosition = (magFactor: number) => {
-        return magFactor >= 1 ? -2 * (1 / magFactorX) : -1.5;
+        return -markerBaseSize/2 * (1 / magFactorX);
       };
 
       return (
@@ -76,7 +77,7 @@ export const ProcessEventDot = styled(
         >
           <use
             role="presentation"
-            xlinkHref={`#${SymbolIds.solidHexagon}`}
+            xlinkHref={`#${SymbolIds.runningProcessCube}`}
             x={markerPosition(magFactorX)}
             y={markerPosition(magFactorX)}
             width={markerSize(magFactorX)}
