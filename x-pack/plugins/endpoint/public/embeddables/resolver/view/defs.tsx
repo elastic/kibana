@@ -125,14 +125,14 @@ const SymbolsAndShapes = memo(() => (
       viewBox="-10 0 128.6889 29.31389"
       preserveAspectRatio="xMidYMid meet"
     >
-      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.darkLinearReflect})`} stroke={NamedColors.ok} stroke-width=".88" paintOrder="normal"/>
+      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
     </symbol>
     <symbol
       id={SymbolIds.processNodeWithHorizontalRule}
       viewBox="-10 0 128.6889 29.31389"
       preserveAspectRatio="xMidYMid meet"
     >
-      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.darkLinearReflect})`} stroke={NamedColors.ok} stroke-width=".88" paintOrder="normal"/>
+      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
       <line x1="1.425" x2="108.5" y1="10" y2="10" stroke={NamedColors.ok} strokeWidth="0.449" />
     </symbol>
 
@@ -165,14 +165,7 @@ const SymbolsAndShapes = memo(() => (
         <polygon id="Path-4_1_" fill="#FFFFFF" points="-10.4 0.9 -1.8 -4.1 6.6 0.9 6.6 10.4 -1.8 15.3 -10.4 10.4"/>
         <polygon fill="#D8D8D8" points="-10.4 0.9 -1.9 5.6 -1.9 15.3 -10.4 10.4"/>
         <polygon  fill="#959595" points="-1.9 15.3 -1.9 5.6 6.6 0.9 6.6 10.4"/>
-        <animate
-          attributeName="opacity"
-          values=".1 ; .75 ; .5 ; .25 ; .1"
-          keyTimes="0 ; 0.25 ; 0.5 ; 0.75 ; 1"
-          begin="DOMNodeInsertedIntoDocument"
-          dur="3.5s"
-          repeatCount="indefinite"
-        />
+        
       </g>
       <g id="Path-4_2_" opacity="0.7504">
         <g filter="url(#filter-3)">
