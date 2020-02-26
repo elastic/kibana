@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import {
@@ -22,8 +23,9 @@ const FIRED_ACTIONS = {
 
 async function getMetric(
   { callCluster }: AlertServices,
-  { metric, searchField, aggregation, interval, indexPattern }: MetricThresholdAlertTypeParams
+  { metric, aggType, timeUnit, timeSize, indexPattern }: MetricThresholdAlertTypeParams
 ) {
+  const interval = `${timeSize}${timeUnit}`;
   const searchBody = {
     query: {
       bool: {
@@ -34,21 +36,8 @@ async function getMetric(
                 gte: `now-${interval}`,
               },
             },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  match_phrase: {
-                    [searchField.name]: searchField.value,
-                  },
-                },
-                {
-                  exists: {
-                    field: metric,
-                  },
-                },
-              ],
+            exists: {
+              field: metric,
             },
           },
         ],
@@ -59,11 +48,11 @@ async function getMetric(
       aggregatedIntervals: {
         date_histogram: {
           field: '@timestamp',
-          calendar_interval: interval,
+          fixed_interval: interval,
         },
         aggregations: {
           aggregatedValue: {
-            [aggregation]: {
+            [aggType]: {
               field: metric,
             },
           },
@@ -95,6 +84,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
       'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'
     );
   }
+  const alertUUID = uuid.v4();
 
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -103,22 +93,18 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
       params: schema.object({
         threshold: schema.number(),
         comparator: schema.string(),
-        aggregation: schema.string(),
-        searchField: schema.object({
-          name: schema.string(),
-          value: schema.string(),
-        }),
+        aggType: schema.string(),
         metric: schema.string(),
-        interval: schema.string(),
+        timeUnit: schema.string(),
+        timeSize: schema.number(),
         indexPattern: schema.string(),
       }),
     },
+    defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     async executor({ services, params }) {
-      const { threshold, comparator, searchField } = params as MetricThresholdAlertTypeParams;
-      const alertInstance = services.alertInstanceFactory(
-        `${searchField.name}:${searchField.value}`
-      );
+      const { threshold, comparator } = params as MetricThresholdAlertTypeParams;
+      const alertInstance = services.alertInstanceFactory(alertUUID);
       const currentValue = await getMetric(services, params as MetricThresholdAlertTypeParams);
       if (typeof currentValue === 'undefined')
         throw new Error('Could not get current value of metric');

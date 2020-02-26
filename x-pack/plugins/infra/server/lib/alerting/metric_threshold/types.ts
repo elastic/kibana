@@ -20,14 +20,13 @@ export enum AlertStates {
   ALERT,
 }
 
+export type TimeUnit = 's' | 'm' | 'h' | 'd';
+
 export interface MetricThresholdAlertTypeParams {
-  aggregation: MetricsExplorerAggregation;
+  aggType: MetricsExplorerAggregation;
   metric: string;
-  searchField: {
-    name: string;
-    value: string;
-  };
-  interval: string;
+  timeSize: number;
+  timeUnit: TimeUnit;
   indexPattern: string;
   threshold: number;
   comparator: Comparator;
