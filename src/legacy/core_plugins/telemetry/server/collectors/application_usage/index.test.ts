@@ -39,6 +39,7 @@ describe('telemetry_application_usage', () => {
   } as any;
 
   const getUsageCollector = jest.fn();
+  const callCluster = jest.fn();
 
   beforeAll(() => registerApplicationUsageCollector(usageCollectionMock, getUsageCollector));
   afterAll(() => jest.clearAllTimers());
@@ -48,7 +49,7 @@ describe('telemetry_application_usage', () => {
   });
 
   test('if no savedObjectClient initialised, return undefined', async () => {
-    expect(await collector.fetch({})).toBeUndefined();
+    expect(await collector.fetch(callCluster)).toBeUndefined();
     jest.runTimersToTime(ROLL_INDICES_INTERVAL);
   });
 
@@ -63,7 +64,7 @@ describe('telemetry_application_usage', () => {
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch({})).toStrictEqual({});
+    expect(await collector.fetch(callCluster)).toStrictEqual({});
     jest.runTimersToTime(ROLL_INDICES_INTERVAL);
   });
 
@@ -86,7 +87,7 @@ describe('telemetry_application_usage', () => {
           total: 1,
         } as any;
       }
-      if (opts.page > 2) {
+      if ((opts.page || 1) > 2) {
         return { saved_objects: [], total };
       }
       const doc = {
@@ -104,7 +105,7 @@ describe('telemetry_application_usage', () => {
     });
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch({})).toStrictEqual({
+    expect(await collector.fetch(callCluster)).toStrictEqual({
       appId: {
         clicks_total: total - 1 + 10,
         clicks_30_days: total - 1,
