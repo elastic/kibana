@@ -20,7 +20,7 @@
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(child: any) {
+export function buildNodeParams(child: KueryNode) {
   return {
     arguments: [child],
   };

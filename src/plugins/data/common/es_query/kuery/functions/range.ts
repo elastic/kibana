@@ -26,7 +26,7 @@ import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
-export function buildNodeParams(fieldName: any, params: any) {
+export function buildNodeParams(fieldName: string, params: any) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
   const fieldNameArg =
     typeof fieldName === 'string'

@@ -20,7 +20,7 @@
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(children: any[]) {
+export function buildNodeParams(children: KueryNode[]) {
   return {
     arguments: children,
   };
@@ -36,7 +36,7 @@ export function toElasticsearchQuery(
 
   return {
     bool: {
-      should: children.map((child: any) => {
+      should: children.map((child: KueryNode) => {
         return ast.toElasticsearchQuery(child, indexPattern, config, context);
       }),
       minimum_should_match: 1,
