@@ -96,7 +96,7 @@ export function registerPolicyRoutes({
   );
 
   // Create policy
-  router.put(
+  router.post(
     { path: addBasePath('policies'), validate: { body: policySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
@@ -106,11 +106,14 @@ export function registerPolicyRoutes({
       try {
         // Check that policy with the same name doesn't already exist
         const policyByName = await callAsCurrentUser('sr.policy', { name });
-
         if (policyByName[name]) {
           return res.conflict({ body: 'There is already a policy with that name.' });
         }
+      } catch (e) {
+        // Silently swallow errors
+      }
 
+      try {
         // Otherwise create new policy
         const response = await callAsCurrentUser('sr.updatePolicy', {
           name,

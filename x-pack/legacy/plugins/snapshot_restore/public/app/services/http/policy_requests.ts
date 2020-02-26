@@ -66,7 +66,7 @@ export const deletePolicies = async (names: Array<SlmPolicy['name']>) => {
 export const addPolicy = async (newPolicy: SlmPolicyPayload) => {
   const result = sendRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}policies`),
-    method: 'put',
+    method: 'post',
     body: newPolicy,
   });
 

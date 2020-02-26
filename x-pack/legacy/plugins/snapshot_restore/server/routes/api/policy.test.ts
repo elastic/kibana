@@ -255,7 +255,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     const name = 'fooPolicy';
 
     const mockRequest: RequestMock = {
-      method: 'put',
+      method: 'post',
       path: addBasePath('policies'),
       body: {
         name,
