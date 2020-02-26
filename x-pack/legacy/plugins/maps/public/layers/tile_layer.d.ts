@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { makeLayer } from './foobar';
+import { AbstractLayer } from './layer';
 
-describe('layertest', () => {
-  it('test layer destroy', () => {
-    const layer = makeLayer();
-    layer.destroy();
-  });
-});
+export class TileLayer extends AbstractLayer {}
