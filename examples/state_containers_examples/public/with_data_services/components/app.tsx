@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
@@ -41,6 +41,7 @@ import {
   QueryState,
   Filter,
   esFilters,
+  Query,
 } from '../../../../../src/plugins/data/public';
 import {
   BaseState,
@@ -65,8 +66,7 @@ interface StateDemoAppDeps {
 interface AppState {
   name: string;
   filters: Filter[];
-  // TODO: https://github.com/elastic/kibana/issues/58111
-  // query?: Query;
+  query?: Query;
 }
 const defaultAppState: AppState = {
   name: '',
@@ -92,17 +92,16 @@ const App = ({
   useGlobalStateSyncing(data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
-  // TODO: https://github.com/elastic/kibana/issues/58111
-  // useEffect indefinite cycle inside TopNavManu
-  // const onQuerySubmit = useCallback(
-  //   ({ query }) => {
-  //     appStateContainer.set({ ...appState, query });
-  //   },
-  //   [appStateContainer, appState]
-  // );
+  const onQuerySubmit = useCallback(
+    ({ query }) => {
+      appStateContainer.set({ ...appState, query });
+    },
+    [appStateContainer, appState]
+  );
 
   const indexPattern = useIndexPattern(data);
-  if (!indexPattern) return <div>Loading...</div>;
+  if (!indexPattern)
+    return <div>No index pattern found. Please create an intex patter before loading...</div>;
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
@@ -115,9 +114,8 @@ const App = ({
             showSearchBar={true}
             indexPatterns={[indexPattern]}
             useDefaultBehaviors={true}
-            // TODO: https://github.com/elastic/kibana/issues/58111
-            // onQuerySubmit={onQuerySubmit}
-            // query={appState.query}
+            onQuerySubmit={onQuerySubmit}
+            query={appState.query}
           />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
