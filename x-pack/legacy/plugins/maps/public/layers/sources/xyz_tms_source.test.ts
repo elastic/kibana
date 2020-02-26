@@ -22,9 +22,18 @@ describe('xyz Tilemap Source', () => {
     expect(layer instanceof TileLayer).toEqual(true);
   });
 
-  it('should echo url template', () => {
+  it('should echo url template for url template', async () => {
     const source = new XYZTMSSource(descriptor, null);
-    const template = source.getUrlTemplate();
+    const template = await source.getUrlTemplate();
     expect(template).toEqual(descriptor.urlTemplate);
+  });
+
+  it('should echo url for diplay-name', async () => {
+    const source = new XYZTMSSource(descriptor, null);
+    const displayName = await source.getDisplayName();
+    expect(displayName).toEqual(descriptor.urlTemplate);
+
+    const layer: ILayer = source.createDefaultLayer();
+    expect(await layer.getDisplayName()).toEqual(await source.getDisplayName());
   });
 });

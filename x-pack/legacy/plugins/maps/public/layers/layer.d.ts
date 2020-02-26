@@ -7,7 +7,7 @@ import { ILayerDescriptor } from '../../common/descriptor_types';
 import { ISource } from './sources/source';
 
 export interface ILayer {
-  destroy(): void;
+  getDisplayName(): Promise<string>;
 }
 
 export interface ILayerArguments {
@@ -17,5 +17,5 @@ export interface ILayerArguments {
 
 export class AbstractLayer implements ILayer {
   constructor(layerArguments: ILayerArguments);
-  destroy(): void;
+  getDisplayName(): Promise<string>;
 }
