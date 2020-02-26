@@ -24,12 +24,6 @@ export interface IKibanaSearchResponse {
   id?: string;
 
   /**
-   * If relevant to the search strategy, return a percentage
-   * that represents how progress is indicated.
-   */
-  percentComplete?: number;
-
-  /**
    * If relevant to the search strategy, return a total number
    * that represents how progress is indicated.
    */
