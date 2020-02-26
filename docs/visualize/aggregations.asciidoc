@@ -52,6 +52,8 @@ You can also nest these aggregations. For example, if you want to produce a thir
 
 {ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[Cumulative sum]:: Calculates the cumulative sum of a specified metric in a parent histogram.
 
+{ref}/search-aggregations-pipeline-cumulative-cardinality-aggregation.html[Cumulative unique count]:: Used for showing total new values of a specific field. Requires a parent histogram or date histogram.
+
 {ref}/search-aggregations-pipeline-derivative-aggregation.html[Derivative]:: Calculates the derivative of specific metrics.
 
 {ref}/search-aggregations-pipeline-movavg-aggregation.html[Moving avg]:: Slides a window across the data and emits the average value of the window.
