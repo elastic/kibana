@@ -34,7 +34,7 @@ class MockTileSource implements ITMSSource {
   }
 }
 
-describe('xyz Tilemap Source', () => {
+describe('TileLayer', () => {
   it('should use display-label from source', async () => {
     const source = new MockTileSource(sourceDescriptor);
     const layer: ILayer = new TileLayer({
