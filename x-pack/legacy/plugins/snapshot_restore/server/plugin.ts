@@ -3,14 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    snapshotRestore?: SnapshotRestoreContext;
+  }
+}
+
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+  IScopedClusterClient,
+} from 'kibana/server';
 
 import { PLUGIN } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
 import { isEsError, wrapEsError } from './lib';
+import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
 import { Dependencies } from './types';
+
+export interface SnapshotRestoreContext {
+  client: IScopedClusterClient;
+}
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -23,7 +40,10 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public setup({ http }: CoreSetup, { licensing, security, cloud }: Dependencies): void {
+  public setup(
+    { http, elasticsearch }: CoreSetup,
+    { licensing, security, cloud }: Dependencies
+  ): void {
     const router = http.createRouter();
 
     this.license.setup(
@@ -39,6 +59,14 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
         logger: this.logger,
       }
     );
+
+    const config = { plugins: [elasticsearchJsPlugin] };
+    const snapshotRestoreESClient = elasticsearch.createClient('snapshotRestore', config);
+    http.registerRouteHandlerContext('snapshotRestore', (ctx, request) => {
+      return {
+        client: snapshotRestoreESClient.asScoped(request),
+      };
+    });
 
     this.apiRoutes.setup({
       router,

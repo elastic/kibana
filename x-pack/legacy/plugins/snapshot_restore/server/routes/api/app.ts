@@ -29,7 +29,7 @@ export function registerAppRoutes({
   router.get(
     { path: addBasePath('privileges'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,

@@ -17,7 +17,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
   router.get(
     { path: addBasePath('restores'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       try {
         const snapshotRestores: SnapshotRestore[] = [];
@@ -102,7 +102,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
       const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
 

@@ -32,7 +32,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const managedRepositoryName = await getManagedRepositoryName(callAsCurrentUser);
 
       let repositoryNames: string[] | undefined;
@@ -100,7 +100,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
@@ -174,7 +174,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repository_types'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       // In ECE/ESS, do not enable the default types
       const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
 
@@ -213,7 +213,7 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -254,7 +254,7 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -292,7 +292,7 @@ export function registerRepositoriesRoutes({
   router.put(
     { path: addBasePath('repositories'), validate: { body: repositorySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name = '', type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
       // Check that repository with the same name doesn't already exist
@@ -339,7 +339,7 @@ export function registerRepositoriesRoutes({
       validate: { body: repositorySchema, params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const { type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
@@ -378,7 +378,7 @@ export function registerRepositoriesRoutes({
   router.delete(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const repositoryNames = name.split(',');
 

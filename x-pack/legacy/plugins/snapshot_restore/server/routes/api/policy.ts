@@ -21,7 +21,8 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policies'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+
       const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
 
       try {
@@ -57,7 +58,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -98,7 +99,7 @@ export function registerPolicyRoutes({
   router.put(
     { path: addBasePath('policies'), validate: { body: policySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const policy = req.body as TypeOf<typeof policySchema>;
       const { name } = policy;
 
@@ -137,7 +138,7 @@ export function registerPolicyRoutes({
       validate: { params: nameParameterSchema, body: policySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const policy = req.body as TypeOf<typeof policySchema>;
 
@@ -170,7 +171,7 @@ export function registerPolicyRoutes({
   router.delete(
     { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const policyNames = name.split(',');
 
@@ -200,7 +201,7 @@ export function registerPolicyRoutes({
   router.post(
     { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -225,7 +226,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policies/indices'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       try {
         const indices: Array<{
@@ -257,7 +258,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policies/retention_settings'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { persistent, transient, defaults } = await callAsCurrentUser('cluster.getSettings', {
         filterPath: '**.slm.retention*',
         includeDefaults: true,
@@ -285,7 +286,7 @@ export function registerPolicyRoutes({
       validate: { body: retentionSettingsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { retentionSchedule } = req.body as TypeOf<typeof retentionSettingsSchema>;
 
       try {
@@ -317,7 +318,7 @@ export function registerPolicyRoutes({
   router.post(
     { path: addBasePath('policies/retention'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const response = await callAsCurrentUser('sr.executeRetention');
       return res.ok({ body: response });
     })

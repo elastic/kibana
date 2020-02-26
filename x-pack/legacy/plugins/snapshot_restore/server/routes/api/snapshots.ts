@@ -19,7 +19,7 @@ export function registerSnapshotsRoutes({
   router.get(
     { path: addBasePath('snapshots'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
 
@@ -122,7 +122,7 @@ export function registerSnapshotsRoutes({
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
       const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
 
@@ -187,7 +187,7 @@ export function registerSnapshotsRoutes({
   router.delete(
     { path: addBasePath('snapshots/{ids}'), validate: { params: deleteParamsSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
       const { ids } = req.params as TypeOf<typeof deleteParamsSchema>;
       const snapshotIds = ids.split(',');
       const response: {
