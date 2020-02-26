@@ -11,6 +11,7 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
@@ -24,7 +25,6 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory(coreStart);
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} coreStart={coreStart} />, element);
-
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
@@ -37,36 +37,41 @@ interface RouterProps {
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ basename, store, coreStart }) => (
+  ({ basename, store, coreStart: { http } }) => (
     <Provider store={store}>
-      <I18nProvider>
-        <BrowserRouter basename={basename}>
-          <RouteCapture>
-            <Switch>
-              <Route
-                exact
-                path="/"
-                render={() => (
-                  <h1 data-test-subj="welcomeTitle">
+      <KibanaContextProvider services={{ http }}>
+        <I18nProvider>
+          <BrowserRouter basename={basename}>
+            <RouteCapture>
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={() => (
+                    <h1 data-test-subj="welcomeTitle">
+                      <FormattedMessage
+                        id="xpack.endpoint.welcomeTitle"
+                        defaultMessage="Hello World"
+                      />
+                    </h1>
+                  )}
+                />
+                <Route path="/management" component={ManagementList} />
+                <Route path="/alerts" component={AlertIndex} />
+                <Route path="/policy" exact component={PolicyList} />
+                <Route
+                  render={() => (
                     <FormattedMessage
-                      id="xpack.endpoint.welcomeTitle"
-                      defaultMessage="Hello World"
+                      id="xpack.endpoint.notFound"
+                      defaultMessage="Page Not Found"
                     />
-                  </h1>
-                )}
-              />
-              <Route path="/management" component={ManagementList} />
-              <Route path="/alerts" render={() => <AlertIndex coreStart={coreStart} />} />
-              <Route path="/policy" exact component={PolicyList} />
-              <Route
-                render={() => (
-                  <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-                )}
-              />
-            </Switch>
-          </RouteCapture>
-        </BrowserRouter>
-      </I18nProvider>
+                  )}
+                />
+              </Switch>
+            </RouteCapture>
+          </BrowserRouter>
+        </I18nProvider>
+      </KibanaContextProvider>
     </Provider>
   )
 );

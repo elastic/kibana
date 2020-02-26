@@ -7,7 +7,7 @@
 import { animatePanning } from './camera/methods';
 import { processNodePositionsAndEdgeLineSegments } from './selectors';
 import { ResolverState } from '../types';
-import { EndpointEvent } from '../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 const animationDuration = 1000;
 
@@ -17,7 +17,7 @@ const animationDuration = 1000;
 export function animateProcessIntoView(
   state: ResolverState,
   startTime: number,
-  process: EndpointEvent
+  process: LegacyEndpointEvent
 ): ResolverState {
   const { processNodePositions } = processNodePositionsAndEdgeLineSegments(state);
   const position = processNodePositions.get(process);

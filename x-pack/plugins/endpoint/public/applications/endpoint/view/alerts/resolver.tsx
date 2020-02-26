@@ -7,23 +7,17 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Provider } from 'react-redux';
-import { CoreStart } from 'kibana/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Resolver } from '../../../../embeddables/resolver/view';
-import { ResolverEvent } from '../../../../../common/types';
+import { EndpointPluginServices } from '../../../../plugin';
+import { LegacyEndpointEvent } from '../../../../../common/types';
 import { storeFactory } from '../../../../embeddables/resolver/store';
 
 export const AlertDetailResolver = styled(
   React.memo(
-    ({
-      className,
-      selectedEvent,
-      coreStart,
-    }: {
-      className?: string;
-      selectedEvent?: ResolverEvent;
-      coreStart: CoreStart;
-    }) => {
-      const { store } = storeFactory(coreStart);
+    ({ className, selectedEvent }: { className?: string; selectedEvent?: LegacyEndpointEvent }) => {
+      const context = useKibana<EndpointPluginServices>();
+      const { store } = storeFactory(context);
       return (
         <div className={className}>
           <Provider store={store}>

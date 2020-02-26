@@ -7,11 +7,11 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AlertIndex } from './index';
 import { appStoreFactory } from '../../store';
 import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { fireEvent, waitForElement, act } from '@testing-library/react';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -45,8 +45,7 @@ describe('when on the alerting page', () => {
      * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
      */
     store = appStoreFactory(coreMock.createStart(), true);
-    type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-    let mockStartContext: DeeplyMocked<CoreStart>;
+
     /**
      * Render the test component, use this after setting up anything in `beforeEach`.
      */
@@ -59,13 +58,15 @@ describe('when on the alerting page', () => {
        */
       return reactTestingLibrary.render(
         <Provider store={store}>
-          <I18nProvider>
-            <Router history={history}>
-              <RouteCapture>
-                <AlertIndex {...{ coreStart: mockStartContext }} />
-              </RouteCapture>
-            </Router>
-          </I18nProvider>
+          <KibanaContextProvider services={undefined}>
+            <I18nProvider>
+              <Router history={history}>
+                <RouteCapture>
+                  <AlertIndex />
+                </RouteCapture>
+              </Router>
+            </I18nProvider>
+          </KibanaContextProvider>
         </Provider>
       );
     };

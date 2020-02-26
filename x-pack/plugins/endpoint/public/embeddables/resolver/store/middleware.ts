@@ -4,40 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
+import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction } from '../types';
 
 type MiddlewareFactory<S = ResolverState> = (
-  coreStart?: CoreStart
+  context?: KibanaReactContextValue<EndpointPluginServices>
 ) => (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-export const resolverMiddlewareFactory: MiddlewareFactory = coreStart => {
+export const resolverMiddlewareFactory: MiddlewareFactory = context => {
   return api => next => async (action: ResolverAction) => {
     next(action);
     if (action.type === 'userChangedSelectedEvent') {
-      if (coreStart) {
-        // this is brittle as it is going to change assumedly.
+      if (context?.services.http) {
         api.dispatch({ type: 'appRequestedResolverData' });
         // const uniquePid = action.payload.selectedEvent?.endgame.unique_pid;
+        // const legacyEndpointID = action.payload.selectedEvent?.agent.id;
         const uniquePid = '3096';
-        const { lifecycle } = await coreStart.http.get(`/api/endpoint/resolver/${uniquePid}`, {
-          query: { legacyEndpointID: '5f78bf8f-ddee-4890-ad61-6b5182309639' },
-        });
-        const { children } = await coreStart.http.get(
-          `/api/endpoint/resolver/${uniquePid}/children`,
-          {
-            query: { legacyEndpointID: '5f78bf8f-ddee-4890-ad61-6b5182309639' },
-          }
-        );
-        const { events: relatedEvents } = await coreStart.http.get(
-          `/api/endpoint/resolver/${uniquePid}/related`,
-          {
-            query: { legacyEndpointID: '5f78bf8f-ddee-4890-ad61-6b5182309639' },
-          }
-        );
+        const legacyEndpointID = '5f78bf8f-ddee-4890-ad61-6b5182309639';
+        const [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
+          context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
+            query: { legacyEndpointID },
+          }),
+          context.services.http.get(`/api/endpoint/resolver/${uniquePid}/children`, {
+            query: { legacyEndpointID },
+          }),
+          context.services.http.get(`/api/endpoint/resolver/${uniquePid}/related`, {
+            query: { legacyEndpointID },
+          }),
+        ]);
         const response = [...lifecycle, ...children, ...relatedEvents];
         api.dispatch({
           type: 'serverReturnedResolverData',

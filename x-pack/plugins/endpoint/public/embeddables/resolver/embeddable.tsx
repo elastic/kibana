@@ -10,7 +10,6 @@ import { Provider } from 'react-redux';
 import { Resolver } from './view';
 import { storeFactory } from './store';
 import { Embeddable } from '../../../../../../src/plugins/embeddable/public';
-import { getCore } from '../../index';
 
 export class ResolverEmbeddable extends Embeddable {
   public readonly type = 'resolver';
@@ -21,8 +20,7 @@ export class ResolverEmbeddable extends Embeddable {
       ReactDOM.unmountComponentAtNode(this.lastRenderTarget);
     }
     this.lastRenderTarget = node;
-    const coreStart = getCore();
-    const { store } = storeFactory(coreStart);
+    const { store } = storeFactory();
     ReactDOM.render(
       <Provider store={store}>
         <Resolver />

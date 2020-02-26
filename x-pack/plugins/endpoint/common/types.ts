@@ -131,11 +131,19 @@ export interface EndpointMetadata {
 export interface LegacyEndpointEvent {
   '@timestamp': string;
   endgame: {
-    event_type_full: string;
-    event_subtype_full: string;
+    pid?: number;
+    ppid?: number;
+    event_type_full?: string;
+    event_subtype_full?: string;
+    event_timestamp?: number;
+    event_type?: number;
     unique_pid: number;
-    unique_ppid: number;
-    serial_event_id: number;
+    unique_ppid?: number;
+    machine_id?: string;
+    process_name?: string;
+    process_path?: string;
+    timestamp_utc?: string;
+    serial_event_id?: number;
   };
   agent: {
     id: string;
@@ -159,21 +167,8 @@ export interface EndpointEvent {
     };
   };
   agent: {
+    id: string;
     type: string;
-  };
-  endgame: {
-    pid?: number;
-    ppid?: number;
-    event_type_full: string;
-    event_subtype_full: string;
-    event_timestamp: number;
-    event_type?: number;
-    unique_pid: number;
-    unique_ppid: number;
-    machine_id: string;
-    process_name: string;
-    process_path?: string;
-    timestamp_utc: string;
   };
 }
 

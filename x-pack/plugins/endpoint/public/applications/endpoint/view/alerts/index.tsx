@@ -21,18 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
 import { FormattedDate } from 'react-intl';
-import { CoreStart } from 'kibana/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailResolver } from './resolver';
 
-interface AlertIndexProps {
-  coreStart: CoreStart;
-}
-
-export const AlertIndex: React.FunctionComponent<AlertIndexProps> = memo(({ coreStart }) => {
+export const AlertIndex = memo(() => {
   const history = useHistory();
 
   const columns = useMemo((): EuiDataGridColumn[] => {
@@ -220,7 +215,7 @@ export const AlertIndex: React.FunctionComponent<AlertIndexProps> = memo(({ core
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <AlertDetailResolver selectedEvent={selectedEvent} coreStart={coreStart} />
+            <AlertDetailResolver selectedEvent={selectedEvent} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

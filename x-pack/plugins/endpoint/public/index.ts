@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer, CoreStart } from 'kibana/public';
+import { PluginInitializer } from 'kibana/public';
 import {
   EndpointPlugin,
   EndpointPluginStart,
@@ -19,15 +19,3 @@ export const plugin: PluginInitializer<
   EndpointPluginSetupDependencies,
   EndpointPluginStartDependencies
 > = () => new EndpointPlugin();
-
-let endpointCore: CoreStart;
-
-export function initCore(core: CoreStart) {
-  if (endpointCore === undefined) {
-    endpointCore = core;
-  }
-}
-
-export function getCore() {
-  return endpointCore;
-}

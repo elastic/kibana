@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent } from '../../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../../common/types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
   readonly payload: {
     readonly data: {
       readonly result: {
-        readonly search_results: readonly EndpointEvent[];
+        readonly search_results: readonly LegacyEndpointEvent[];
       };
     };
   };

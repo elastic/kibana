@@ -8,20 +8,20 @@ import { Store, createStore } from 'redux';
 import { DataAction } from './action';
 import { dataReducer } from './reducer';
 import { DataState } from '../../types';
-import { EndpointEvent } from '../../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../../common/types';
 import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 
 describe('resolver graph layout', () => {
-  let processA: EndpointEvent;
-  let processB: EndpointEvent;
-  let processC: EndpointEvent;
-  let processD: EndpointEvent;
-  let processE: EndpointEvent;
-  let processF: EndpointEvent;
-  let processG: EndpointEvent;
-  let processH: EndpointEvent;
-  let processI: EndpointEvent;
+  let processA: LegacyEndpointEvent;
+  let processB: LegacyEndpointEvent;
+  let processC: LegacyEndpointEvent;
+  let processD: LegacyEndpointEvent;
+  let processE: LegacyEndpointEvent;
+  let processF: LegacyEndpointEvent;
+  let processG: LegacyEndpointEvent;
+  let processH: LegacyEndpointEvent;
+  let processI: LegacyEndpointEvent;
   let store: Store<DataState, DataAction>;
 
   beforeEach(() => {

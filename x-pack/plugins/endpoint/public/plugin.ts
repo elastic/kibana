@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
 import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
@@ -16,6 +16,10 @@ export interface EndpointPluginSetupDependencies {
 }
 
 export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export interface EndpointPluginServices extends Partial<CoreStart> {
+  http: CoreStart['http'];
+}
 
 export class EndpointPlugin
   implements
@@ -34,7 +38,6 @@ export class EndpointPlugin
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
-        require('./index').initCore(coreStart);
         return renderApp(coreStart, params);
       },
     });

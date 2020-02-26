@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3 } from '../types';
-import { EndpointEvent } from '../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 /**
  * A placeholder view for a process node.
@@ -32,7 +32,7 @@ export const ProcessEventDot = styled(
       /**
        * An event which contains details about the process node.
        */
-      event: EndpointEvent;
+      event: LegacyEndpointEvent;
       /**
        * projectionMatrix which can be used to convert `position` to screen coordinates.
        */

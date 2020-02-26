@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent } from '../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
 /**
@@ -15,17 +15,17 @@ type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
  */
 export function mockProcessEvent(parts: {
   endgame: {
-    unique_pid: EndpointEvent['endgame']['unique_pid'];
-    unique_ppid?: EndpointEvent['endgame']['unique_ppid'];
-    process_name?: EndpointEvent['endgame']['process_name'];
-    event_subtype_full?: EndpointEvent['endgame']['event_subtype_full'];
-    event_type_full?: EndpointEvent['endgame']['event_type_full'];
-  } & DeepPartial<EndpointEvent>;
-}): EndpointEvent {
+    unique_pid: LegacyEndpointEvent['endgame']['unique_pid'];
+    unique_ppid?: LegacyEndpointEvent['endgame']['unique_ppid'];
+    process_name?: LegacyEndpointEvent['endgame']['process_name'];
+    event_subtype_full?: LegacyEndpointEvent['endgame']['event_subtype_full'];
+    event_type_full?: LegacyEndpointEvent['endgame']['event_type_full'];
+  } & DeepPartial<LegacyEndpointEvent>;
+}): LegacyEndpointEvent {
   const { endgame: dataBuffer } = parts;
   return {
-    ...parts,
     endgame: {
+      ...dataBuffer,
       event_timestamp: 1,
       event_type: 1,
       unique_ppid: 0,
@@ -36,24 +36,13 @@ export function mockProcessEvent(parts: {
       process_name: '',
       process_path: '',
       timestamp_utc: '',
-      ...dataBuffer,
+      serial_event_id: 1,
     },
     '@timestamp': '',
-    event: {
-      category: '',
+    agent: {
       type: '',
       id: '',
     },
-    endpoint: {
-      process: {
-        entity_id: '',
-        parent: {
-          entity_id: '',
-        },
-      },
-    },
-    agent: {
-      type: '',
-    },
+    ...parts,
   };
 }

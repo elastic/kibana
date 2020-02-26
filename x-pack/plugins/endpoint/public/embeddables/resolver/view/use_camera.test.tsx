@@ -6,13 +6,12 @@
 
 import React from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import { Matrix3, ResolverAction, ResolverStore, SideEffectSimulator } from '../types';
-import { EndpointEvent } from '../../../../common/types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
@@ -24,11 +23,9 @@ describe('useCamera on an unpainted element', () => {
   let reactRenderResult: RenderResult;
   let store: ResolverStore;
   let simulator: SideEffectSimulator;
-  type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-  let mockStartContext: DeeplyMocked<CoreStart>;
 
   beforeEach(async () => {
-    ({ store } = storeFactory(mockStartContext));
+    ({ store } = storeFactory());
 
     const Test = function Test() {
       const camera = useCamera();
@@ -135,10 +132,10 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: EndpointEvent;
+      let process: LegacyEndpointEvent;
       beforeEach(() => {
         // At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
-        const processes: EndpointEvent[] = [
+        const processes: LegacyEndpointEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
             .processNodePositions.keys(),
