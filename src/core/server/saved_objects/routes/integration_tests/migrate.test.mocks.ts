@@ -17,23 +17,10 @@
  * under the License.
  */
 
-import { Client } from 'elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 
-import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
-
-export async function emptyKibanaIndexAction({
-  client,
-  log,
-  kbnClient,
-}: {
-  client: Client;
-  log: ToolingLog;
-  kbnClient: KbnClient;
-}) {
-  const stats = createStats('emptyKibanaIndex', log);
-
-  await deleteKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex({ client, kbnClient });
-  return stats;
-}
+export const migratorInstanceMock = mockKibanaMigrator.create();
+export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
+jest.doMock('../../migrations/kibana/kibana_migrator', () => ({
+  KibanaMigrator: KibanaMigratorMock,
+}));
