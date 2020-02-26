@@ -32,24 +32,41 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
+import _ from 'lodash';
 
-const apiExtractorConfig = (folder: string): ExtractorConfig => {
+/*
+ * Step 1: execute build:types
+ * This users tsconfig.types.json to generate types in `target/types`
+ * Step 2: run Api Extractor to detect API changes
+ * Step 3:
+ */
+
+const getReportFileName = (folder: string) => {
+  if (folder.startsWith('core')) {
+    return folder.split('/')[1];
+  } else {
+    return folder.replace(/\//g, '_');
+  }
+};
+
+const apiExtractorConfig = (srcFolder: string, trgFolder: string): ExtractorConfig => {
+  const fname = getReportFileName(srcFolder);
   const config: IConfigFile = {
     newlineKind: 'lf',
     compiler: {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
     projectFolder: path.resolve('./'),
-    mainEntryPointFilePath: `target/types/core/${folder}/index.d.ts`,
+    mainEntryPointFilePath: `target/types/${srcFolder}/index.d.ts`,
     apiReport: {
       enabled: true,
-      reportFileName: `${folder}.api.md`,
-      reportFolder: `<projectFolder>/src/core/${folder}/`,
-      reportTempFolder: `<projectFolder>/build/${folder}/`,
+      reportFileName: `${fname}.api.md`,
+      reportFolder: `<projectFolder>/src/${srcFolder}/`,
+      reportTempFolder: `<projectFolder>/build/${srcFolder}/`,
     },
     docModel: {
       enabled: true,
-      apiJsonFilePath: `./build/${folder}/${folder}.api.json`,
+      apiJsonFilePath: `./build/${srcFolder}/${fname}.api.json`,
     },
     tsdocMetadata: {
       enabled: false,
@@ -91,7 +108,8 @@ const runApiDocumenter = async (folder: string) => {
 };
 
 const renameExtractedApiPackageName = async (folder: string) => {
-  const json = JSON.parse(fs.readFileSync(`build/${folder}/${folder}.api.json`).toString());
+  const fname = getReportFileName(folder);
+  const json = JSON.parse(fs.readFileSync(`build/${folder}/${fname}.api.json`).toString());
   json.canonicalReference = `kibana-plugin-${folder}`;
   json.name = `kibana-plugin-${folder}`;
   fs.writeFileSync(`build/${folder}/${folder}.api.json`, JSON.stringify(json, null, 2));
@@ -103,10 +121,11 @@ const renameExtractedApiPackageName = async (folder: string) => {
  */
 const runApiExtractor = (
   log: ToolingLog,
-  folder: string,
+  srcFolder: string,
+  trgFolder: string,
   acceptChanges: boolean = false
 ): ExtractorResult => {
-  const config = apiExtractorConfig(folder);
+  const config = apiExtractorConfig(srcFolder, trgFolder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
     // e.g. on developer's machine. For example, if the *.api.md output file
@@ -116,7 +135,7 @@ const runApiExtractor = (
     messageCallback: (message: ExtractorMessage) => {
       if (message.messageId === 'console-api-report-not-copied') {
         // ConsoleMessageId.ApiReportNotCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${srcFolder} Core API`);
         log.warning(
           'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
             "\t 1. Commit the updated documentation and API review file '" +
@@ -127,7 +146,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-copied') {
         // ConsoleMessageId.ApiReportCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${srcFolder} Core API`);
         log.warning(
           "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
@@ -135,7 +154,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-unchanged') {
         // ConsoleMessageId.ApiReportUnchanged
-        log.info(`Core ${folder} API: no changes detected ✔`);
+        log.info(`Core ${srcFolder} API: no changes detected ✔`);
         message.handled = true;
       }
     },
@@ -151,12 +170,13 @@ interface Options {
 }
 
 async function run(
-  folder: string,
+  srcFolder: string,
+  trgFolder: string,
   { log, opts }: { log: ToolingLog; opts: Options }
 ): Promise<boolean> {
-  log.info(`Core ${folder} API: checking for changes in API signature...`);
+  log.info(`Core ${srcFolder} API: checking for changes in API signature...`);
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+  const { apiReportChanged, succeeded } = runApiExtractor(log, srcFolder, trgFolder, opts.accept);
 
   // If we're not accepting changes and there's a failure, exit.
   if (!opts.accept && !succeeded) {
@@ -166,13 +186,13 @@ async function run(
   // Attempt to generate docs even if api-extractor didn't succeed
   if ((opts.accept && apiReportChanged) || opts.docs) {
     try {
-      await renameExtractedApiPackageName(folder);
-      await runApiDocumenter(folder);
+      await renameExtractedApiPackageName(srcFolder);
+      await runApiDocumenter(srcFolder);
     } catch (e) {
       log.error(e);
       return false;
     }
-    log.info(`Core ${folder} API: updated documentation ✔`);
+    log.info(`Core ${srcFolder} API: updated documentation ✔`);
   }
 
   // If the api signature changed or any errors or warnings occured, exit with an error
@@ -243,8 +263,18 @@ async function run(
     return false;
   }
 
-  const folders = ['public', 'server'];
-  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
+  const folderMapping: { [key: string]: string } = {
+    'core/public': 'core/public',
+    'core/server': 'core/server',
+    'plugins/data/server': 'data/server',
+    'plugins/data/public': 'data/public',
+  };
+
+  const results = await Promise.all(
+    Object.keys(folderMapping).map(srcFolder =>
+      run(srcFolder, folderMapping[srcFolder], { log, opts })
+    )
+  );
 
   if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;
