@@ -61,7 +61,7 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      mappings.retrieveAutoCompleteInfo(settings, changedSettings.autocomplete);
+      mappings.retrieveAutoCompleteInfo(settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
       mappings.retrieveAutoCompleteInfo(settings, settings.getAutocomplete());

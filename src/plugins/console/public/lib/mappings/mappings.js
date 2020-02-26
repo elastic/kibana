@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { legacyBackDoorToSettings } from '../../application';
-
 const $ = require('jquery');
 const _ = require('lodash');
 const es = require('../es/es');
@@ -254,8 +252,8 @@ function clear() {
   templates = [];
 }
 
-function retrieveSettings(settingsKey, settingsToRetrieve) {
-  const currentSettings = legacyBackDoorToSettings().getAutocomplete();
+function retrieveSettings(settingsKey, settingsToRetrieve, autocompleteSettings) {
+  console.log(arguments);
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -263,12 +261,12 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
-  if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
+  if (autocompleteSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
     return es.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
     // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
-    if (currentSettings[settingsKey]) {
+    if (autocompleteSettings[settingsKey]) {
       return settingsPromise.resolve();
     }
     // If the user doesn't want autocomplete suggestions, then clear any that exist
@@ -293,14 +291,18 @@ function clearSubscriptions() {
   }
 }
 
-function retrieveAutoCompleteInfo(
-  settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()
-) {
+/**
+ *
+ * @param settings Settings A way to retrieve the current settings
+ * @param settingsToRetrieve any
+ */
+function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
-  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
-  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
-  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
+  const autocompleteSettings = settings.getAutocomplete();
+  const mappingPromise = retrieveSettings('fields', settingsToRetrieve, autocompleteSettings);
+  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve, autocompleteSettings);
+  const templatesPromise = retrieveSettings('templates', settingsToRetrieve, autocompleteSettings);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
     let mappingsResponse;
@@ -334,8 +336,8 @@ function retrieveAutoCompleteInfo(
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
-      if (legacyBackDoorToSettings().getPolling()) {
-        retrieveAutoCompleteInfo();
+      if (settings.getPolling()) {
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
     }, POLL_INTERVAL);
   });
