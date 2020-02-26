@@ -133,15 +133,29 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
+    } else {
+      const fieldMeta = this.getFieldMeta();
+      if (!fieldMeta) {
+        return null;
+      }
+
+      return [
+        'interpolate',
+        ['linear'],
+        [
+          'coalesce',
+          [
+            'max',
+            ['min', ['to-number', ['feature-state', targetName]], fieldMeta.max],
+            fieldMeta.min,
+          ],
+          -1,
+        ],
+        -1,
+        'rgba(0,0,0,0)',
+        ...colorStops,
+      ];
     }
-    return [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1,
-      'rgba(0,0,0,0)',
-      ...colorStops,
-    ];
   }
 
   _getColorPaletteStops() {
