@@ -5,7 +5,6 @@ exports[`Snapshot component renders without errors 1`] = `
   loading={false}
 >
   <SnapshotHeading
-    down={2}
     total={10}
   />
   <EuiSpacer

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy } from 'lodash/fp';
+import { pickBy, countBy } from 'lodash/fp';
 import { Dictionary } from 'lodash';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
@@ -20,7 +20,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -238,10 +238,14 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
-  const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
+export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+  const mappedDuplicates = countBy(
+    by,
+    ruleDefinitions.filter(r => r[by] != null)
+  );
+  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
   if (hasDuplicates) {
-    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
+    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
   }
   return [];
 };

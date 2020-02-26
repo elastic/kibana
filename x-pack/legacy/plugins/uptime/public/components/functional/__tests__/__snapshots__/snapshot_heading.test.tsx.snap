@@ -5,7 +5,9 @@ exports[`SnapshotHeading renders custom heading for no down monitors 1`] = `
   size="s"
 >
   <h2>
-    All monitors are up
+    23
+     
+    Monitors
   </h2>
 </EuiTitle>
 `;
@@ -15,7 +17,9 @@ exports[`SnapshotHeading renders custom heading for no monitors 1`] = `
   size="s"
 >
   <h2>
-    No monitors found
+    0
+     
+    Monitors
   </h2>
 </EuiTitle>
 `;
@@ -25,7 +29,9 @@ exports[`SnapshotHeading renders standard heading for valid counts 1`] = `
   size="s"
 >
   <h2>
-    3/17 monitors are down
+    17
+     
+    Monitors
   </h2>
 </EuiTitle>
 `;
