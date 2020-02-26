@@ -80,19 +80,15 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
                 """,
-                  "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
+                  "### Run `yarn kbn bootstrap && merge coverage` AND Ingest Code Coverage to ES Cluster AND Boot Coverage App"
                 )
                 kibanaPipeline.bash(
                   """
                   echo "### About to upload the static site per this TIME_STAMP: ${TIME_STAMP}"
 
-                  echo "### The following may be used to build a url to the historical ci run."
-                  echo "### env.BUILD_URL: ${env.BUILD_URL}"
-                  echo "### env.JOB_URL: ${env.JOB_URL}"
-
                   """,
                   "### Upload Code Coverage Static Site"
-                )
+                )x
 //                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
                 kibanaPipeline.uploadCoverageStaticSite_PROD(TIME_STAMP)
               }

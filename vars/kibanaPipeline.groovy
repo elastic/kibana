@@ -210,20 +210,13 @@ def uploadCoverageStaticSite(timestamp) {
 }
 
 def uploadCoverageStaticSite_PROD(timestamp) {
-  def ARTIFACT_PATTERNS = [
-    'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined',
-    'src/dev/code_coverage/live_coverage_app'
-  ]
-
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${timestamp}/"
 
   uploadWithVault(uploadPrefix, 'src/dev/code_coverage/404.html')
+  uploadWithVault(uploadPrefix, 'src/dev/code_coverage/live_coverage_app')
 
-  ARTIFACT_PATTERNS.each { pattern ->
-    uploadWithVault(uploadPrefix, pattern)
-  }
+  def dataUploadPrefix = uploadPrefix + 'live_coverage_app/'
+  uploadCoverageStaticSiteData(dataUploadPrefix)
 }
 
 def uploadWithVault(prefix, x) {
@@ -233,6 +226,16 @@ def uploadWithVault(prefix, x) {
     sh """
         gsutil -m cp -r -a public-read -z js,css,html ${x} '${prefix}'
       """
+  }
+}
+
+def uploadCoverageStaticSiteData(prefix) {
+  [
+    'target/kibana-coverage/functional-combined',
+    'target/kibana-coverage/jest-combined',
+    'target/kibana-coverage/mocha-combined',
+  ].each { x ->
+    uploadWithVault(prefix, x)
   }
 }
 
