@@ -17,33 +17,4 @@
  * under the License.
  */
 
-export interface IKibanaSearchResponse {
-  /**
-   * Some responses may contain a unique id to identify the request this response came from.
-   */
-  id?: string;
-
-  /**
-   * If relevant to the search strategy, return a total number
-   * that represents how progress is indicated.
-   */
-  total?: number;
-
-  /**
-   * If relevant to the search strategy, return a loaded number
-   * that represents how progress is indicated.
-   */
-  loaded?: number;
-}
-
-export interface IKibanaSearchRequest {
-  /**
-   * An id can be used to uniquely identify this request.
-   */
-  id?: string;
-
-  /**
-   * Optionally tell search strategies to output debug information.
-   */
-  debug?: boolean;
-}
+export { getRequestAbortedSignal } from './get_request_aborted_signal';

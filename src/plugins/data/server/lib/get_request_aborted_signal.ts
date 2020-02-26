@@ -17,33 +17,17 @@
  * under the License.
  */
 
-export interface IKibanaSearchResponse {
-  /**
-   * Some responses may contain a unique id to identify the request this response came from.
-   */
-  id?: string;
+import { Observable } from 'rxjs';
+// @ts-ignore not typed
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 
-  /**
-   * If relevant to the search strategy, return a total number
-   * that represents how progress is indicated.
-   */
-  total?: number;
-
-  /**
-   * If relevant to the search strategy, return a loaded number
-   * that represents how progress is indicated.
-   */
-  loaded?: number;
-}
-
-export interface IKibanaSearchRequest {
-  /**
-   * An id can be used to uniquely identify this request.
-   */
-  id?: string;
-
-  /**
-   * Optionally tell search strategies to output debug information.
-   */
-  debug?: boolean;
+/**
+ * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`
+ * which aborts when the given request is aborted.
+ * @param aborted$ The observable of abort events (usually `request.events.aborted$`)
+ */
+export function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
 }
