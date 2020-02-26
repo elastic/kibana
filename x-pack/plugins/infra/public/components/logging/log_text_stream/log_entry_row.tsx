@@ -27,6 +27,7 @@ import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle } from './text_styles';
+import { LogEntryActionsColumn } from './log_entry_actions_column';
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
@@ -181,11 +182,12 @@ export const LogEntryRow = ({
         key="logColumn iconLogColumn iconLogColumn:details"
         {...columnWidths[iconColumnId]}
       >
-        <LogEntryDetailsIconColumn
+        {/* <LogEntryDetailsIconColumn
           isHighlighted={isHighlighted}
           isHovered={isHovered}
           openFlyout={openFlyout}
-        />
+        /> */}
+        <LogEntryActionsColumn isHighlighted={isHighlighted} isHovered={isHovered} />
       </LogEntryColumn>
     </LogEntryRowWrapper>
   );
