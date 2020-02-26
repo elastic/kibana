@@ -72,10 +72,14 @@ async function getMetric(
 }
 
 const comparatorMap = {
-  [Comparator.GT]: (a: number, b: number) => a > b,
-  [Comparator.LT]: (a: number, b: number) => a < b,
-  [Comparator.GT_OR_EQ]: (a: number, b: number) => a >= b,
-  [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
+  [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
+    value >= Math.min(a, b) && value <= Math.max(a, b),
+  // `threshold` is always an array of numbers in case the BETWEEN comparator is
+  // used; all other compartors will just destructure the first value in the array
+  [Comparator.GT]: (a: number, [b]: number[]) => a > b,
+  [Comparator.LT]: (a: number, [b]: number[]) => a < b,
+  [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
+  [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
 export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
@@ -91,7 +95,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     name: 'Metric Alert - Threshold',
     validate: {
       params: schema.object({
-        threshold: schema.number(),
+        threshold: schema.arrayOf(schema.number()),
         comparator: schema.string(),
         aggType: schema.string(),
         metric: schema.string(),

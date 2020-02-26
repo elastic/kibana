@@ -13,6 +13,7 @@ export enum Comparator {
   LT = '<',
   GT_OR_EQ = '>=',
   LT_OR_EQ = '<=',
+  BETWEEN = 'between',
 }
 
 export enum AlertStates {
@@ -28,6 +29,6 @@ export interface MetricThresholdAlertTypeParams {
   timeSize: number;
   timeUnit: TimeUnit;
   indexPattern: string;
-  threshold: number;
+  threshold: number[];
   comparator: Comparator;
 }
