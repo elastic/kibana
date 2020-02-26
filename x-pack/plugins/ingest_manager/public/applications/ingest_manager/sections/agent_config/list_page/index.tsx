@@ -15,14 +15,14 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiLink,
-  EuiBadge,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../types';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import { AGENT_CONFIG_DETAILS_PATH, FLEET_PATH } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 // import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
@@ -76,6 +76,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
   // Base path for config details
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+  const FLEET_URI = useLink(FLEET_PATH);
 
   // Some configs retrieved, set up table props
   const columns = useMemo(
@@ -105,17 +106,45 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'namespace',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.namespaceColumnTitle', {
-          defaultMessage: 'Namespace',
-        }),
-        render: (namespace: string) => (namespace ? <EuiBadge>{namespace}</EuiBadge> : null),
-      },
-      {
         field: 'description',
         name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
+        render: (description: AgentConfig['description']) => (
+          <EuiTextColor color="subdued">{description}</EuiTextColor>
+        ),
+      },
+      {
+        field: 'updated_on',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
+          defaultMessage: 'Last updated on',
+        }),
+        render: (date: AgentConfig['updated_on']) => (
+          <FormattedDate value={date} year="numeric" month="long" day="2-digit" />
+        ),
+      },
+      {
+        field: 'agents',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        render: () => {
+          // FIXME: implement agents once known in API/Schema
+          const agentCount = 99;
+          const displayValue = (
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.agentsText"
+              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+              values={{ agentCount }}
+            />
+          );
+          // FIXME: add kuery value to URI to filter list in fleet list
+          return agentCount > 0 ? (
+            <EuiLink href={`${FLEET_URI}?kuery=tbd`}>{displayValue}</EuiLink>
+          ) : (
+            displayValue
+          );
+        },
       },
       {
         field: 'datasources',
@@ -145,7 +174,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         width: '100px',
       },
     ],
-    [DETAILS_URI]
+    [DETAILS_URI, FLEET_URI]
   );
 
   const emptyPrompt = (
