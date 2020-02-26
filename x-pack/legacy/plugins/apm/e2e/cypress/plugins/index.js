@@ -22,22 +22,8 @@ const wp = require('@cypress/webpack-preprocessor');
 const fs = require('fs');
 
 module.exports = on => {
-  // add typescript support
   const options = {
-    webpackOptions: {
-      resolve: {
-        extensions: ['.ts', '.tsx', '.js']
-      },
-      module: {
-        rules: [
-          {
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            options: { transpileOnly: true }
-          }
-        ]
-      }
-    }
+    webpackOptions: require('../webpack.config.js')
   };
   on('file:preprocessor', wp(options));
 
