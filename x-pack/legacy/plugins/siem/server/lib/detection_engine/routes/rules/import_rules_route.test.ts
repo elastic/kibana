@@ -16,7 +16,7 @@ import { ImportSuccessError } from '../utils';
 import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   getEmptyIndex,
   getFindResultWithSingleHit,
@@ -69,7 +69,7 @@ describe('import_rules_route', () => {
 
   describe('status codes with actionsClient and alertClient', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
@@ -99,7 +99,7 @@ describe('import_rules_route', () => {
   describe('validation', () => {
     test('returns reported error if index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
@@ -131,7 +131,7 @@ describe('import_rules_route', () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(
         mockFn.mockImplementation(mockThrowError)
       );
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
@@ -155,7 +155,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 400 if file extension type is not .ndjson', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1'], false);
@@ -172,7 +172,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
@@ -196,7 +196,7 @@ describe('import_rules_route', () => {
         `${UNPARSABLE_LINE}\r\n` +
         `--${TEST_BOUNDARY}--\r\n`;
 
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = Buffer.from(multipartPayload);
@@ -221,7 +221,7 @@ describe('import_rules_route', () => {
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -259,7 +259,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -292,7 +292,7 @@ describe('import_rules_route', () => {
 
   describe('multi rule import', () => {
     test('returns 200 if all rules imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2']);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -316,7 +316,7 @@ describe('import_rules_route', () => {
         `${JSON.stringify(getSimpleRule('rule-2'))}\r\n` +
         `--${TEST_BOUNDARY}--\r\n`;
 
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
       const requestPayload = Buffer.from(multipartPayload);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -340,7 +340,7 @@ describe('import_rules_route', () => {
 
     describe('rules with matching rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
         clients.alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
@@ -364,7 +364,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
         clients.alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
@@ -384,7 +384,7 @@ describe('import_rules_route', () => {
 
     describe('rules with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -423,7 +423,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns 200 with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));

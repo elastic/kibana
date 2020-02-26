@@ -203,7 +203,7 @@ export interface FindHit {
   data: RuleAlertType[];
 }
 
-export const getFindResult = (): FindHit => ({
+export const getEmptyFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,

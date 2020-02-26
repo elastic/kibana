@@ -7,7 +7,7 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { readRulesRoute } from './read_rules_route';
 import {
-  getFindResult,
+  getEmptyFindResult,
   getReadRequest,
   getFindResultWithSingleHit,
   getFindResultStatus,
@@ -46,7 +46,7 @@ describe('read_signals', () => {
 
   describe('data validation', () => {
     test('returns 404 if given a non-existent id', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const request = requestMock.create({
         method: 'get',
         path: DETECTION_ENGINE_RULES_URL,

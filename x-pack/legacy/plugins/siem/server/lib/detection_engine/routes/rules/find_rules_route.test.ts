@@ -12,7 +12,7 @@ import { clientsServiceMock } from '../__mocks__/clients_service_mock';
 import { findRulesRoute } from './find_rules_route';
 import { ServerInjectOptions } from 'hapi';
 
-import { getFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
+import { getEmptyFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('find_rules', () => {
@@ -34,7 +34,7 @@ describe('find_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.actionsClient.find.mockResolvedValue({
         page: 1,
         perPage: 1,
@@ -57,7 +57,7 @@ describe('find_rules', () => {
 
   describe('validation', () => {
     test('returns 400 if a bad query parameter is given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',
@@ -68,7 +68,7 @@ describe('find_rules', () => {
     });
 
     test('returns 200 if the set of optional query parameters are given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',

@@ -7,7 +7,7 @@
 import { deleteRulesRoute } from './delete_rules_route';
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   getDeleteRequest,
   getFindResultWithSingleHit,
@@ -45,7 +45,7 @@ describe('delete_rules', () => {
     });
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       await getRoute().handler(context, getDeleteRequest(), response);
 
       expect(response.customError).toHaveBeenCalledWith({

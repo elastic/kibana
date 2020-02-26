@@ -5,7 +5,7 @@
  */
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
   getEmptyIndex,
@@ -91,7 +91,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
       await getRoute().handler(context, request, response);
 

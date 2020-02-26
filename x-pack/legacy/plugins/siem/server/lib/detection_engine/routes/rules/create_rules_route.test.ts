@@ -7,7 +7,7 @@
 import { createRulesRoute } from './create_rules_route';
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   getCreateRequest,
   typicalPayload,
@@ -26,7 +26,7 @@ describe('create_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
     clients.alertsClient.create.mockResolvedValue(getResult());
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 

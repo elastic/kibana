@@ -9,7 +9,7 @@ import { patchRulesRoute } from './patch_rules_route';
 import { omit } from 'lodash/fp';
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   updateActionResult,
   typicalPayload,
@@ -48,7 +48,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns 200 as a response when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
@@ -57,7 +57,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns 404 within the payload when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
@@ -96,7 +96,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns errors as 200 to just indicate ok something happened', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
@@ -109,7 +109,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns 404 in the payload if the record does not exist yet', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {

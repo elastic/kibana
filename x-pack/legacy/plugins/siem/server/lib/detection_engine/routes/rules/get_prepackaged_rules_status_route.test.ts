@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status_route';
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   createActionResult,
   getFindResultWithSingleHit,
@@ -61,7 +61,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.create.mockResolvedValue(createActionResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
@@ -80,7 +80,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
   describe('payload', () => {
     test('0 rules installed, 0 custom rules, 1 rules not installed, and 1 rule not updated', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.create.mockResolvedValue(createActionResult());
       clients.alertsClient.create.mockResolvedValue(getResult());

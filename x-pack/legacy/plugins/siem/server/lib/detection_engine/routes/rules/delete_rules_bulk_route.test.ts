@@ -5,7 +5,7 @@
  */
 
 import {
-  getFindResult,
+  getEmptyFindResult,
   getFindResultWithSingleHit,
   getDeleteBulkRequest,
   getDeleteBulkRequestById,
@@ -51,13 +51,13 @@ describe('delete_rules', () => {
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       await getRoute().handler(context, getDeleteBulkRequest(), response);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
       await getRoute().handler(context, getDeleteBulkRequest(), response);
       expect(response.ok).toHaveBeenCalledWith({

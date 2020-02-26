@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 
 import { updateRulesRoute } from './update_rules_route';
 import {
-  getFindResult,
+  getEmptyFindResult,
   getFindResultStatus,
   getResult,
   updateActionResult,
@@ -50,7 +50,7 @@ describe('update_rules', () => {
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
@@ -86,7 +86,7 @@ describe('update_rules', () => {
     });
 
     test('returns 404 if the record does not exist yet', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
