@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -16,6 +16,8 @@ import {
   EuiBasicTable,
   EuiLink,
   EuiBadge,
+  EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -76,55 +78,60 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Some configs retrieved, set up table props
-  const columns = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
-        defaultMessage: 'Name',
-      }),
-      render: (name: string, agentConfig: AgentConfig) => name || agentConfig.id,
-    },
-    {
-      field: 'namespace',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.namespaceColumnTitle', {
-        defaultMessage: 'Namespace',
-      }),
-      render: (namespace: string) => (namespace ? <EuiBadge>{namespace}</EuiBadge> : null),
-    },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
-        defaultMessage: 'Description',
-      }),
-    },
-    {
-      field: 'datasources',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
-        defaultMessage: 'Datasources',
-      }),
-      render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
-    },
-    {
-      name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          render: ({ id }: AgentConfig) => {
-            return (
-              <EuiLink href={`${DETAILS_URI}${id}`}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.viewActionLinkText"
-                  defaultMessage="view"
-                />
-              </EuiLink>
-            );
+  const columns = useMemo(
+    (): Array<
+      EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
+    > => [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
+          defaultMessage: 'Name',
+        }),
+        render: (name: string, agentConfig: AgentConfig) => name || agentConfig.id,
+      },
+      {
+        field: 'namespace',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.namespaceColumnTitle', {
+          defaultMessage: 'Namespace',
+        }),
+        render: (namespace: string) => (namespace ? <EuiBadge>{namespace}</EuiBadge> : null),
+      },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
+      },
+      {
+        field: 'datasources',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
+          defaultMessage: 'Datasources',
+        }),
+        render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
+      },
+      {
+        name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            render: ({ id }: AgentConfig) => {
+              return (
+                <EuiLink href={`${DETAILS_URI}${id}`}>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigList.viewActionLinkText"
+                    defaultMessage="view"
+                  />
+                </EuiLink>
+              );
+            },
           },
-        },
-      ],
-      width: '100px',
-    },
-  ];
+        ],
+        width: '100px',
+      },
+    ],
+    [DETAILS_URI]
+  );
 
   const emptyPrompt = (
     <EuiEmptyPrompt
