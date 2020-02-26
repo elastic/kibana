@@ -131,7 +131,7 @@
     "@elastic/eui": "19.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
-    "@elastic/numeral": "2.3.5",
+    "@elastic/numeral": "2.4.0",
     "@elastic/request-crypto": "^1.0.2",
     "@elastic/ui-ace": "0.2.3",
     "@hapi/wreck": "^15.0.1",
