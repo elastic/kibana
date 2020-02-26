@@ -7263,7 +7263,6 @@
     "xpack.maps.source.esGrid.finestDropdownOption": "最も細かい",
     "xpack.maps.source.esGrid.geospatialFieldLabel": "地理空間フィールド",
     "xpack.maps.source.esGrid.indexPatternLabel": "インデックスパターン",
-    "xpack.maps.source.esGrid.inspectorDescription": "Elasticsearch ジオグリッド集約リクエスト",
     "xpack.maps.source.esGrid.metricsLabel": "メトリック",
     "xpack.maps.source.esGrid.noIndexPatternErrorMessage": "インデックスパターン {id} が見つかりません",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "グリッド解像度パラメーターが認識されません: {resolution}",
