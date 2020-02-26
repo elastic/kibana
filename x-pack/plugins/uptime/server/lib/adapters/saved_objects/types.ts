@@ -5,7 +5,7 @@
  */
 
 import { UMSavedObjectsQueryFn } from '../framework';
-import { DynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface UMSavedObjectsAdapter {
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;

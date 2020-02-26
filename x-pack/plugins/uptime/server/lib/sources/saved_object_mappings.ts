@@ -1,4 +1,4 @@
-import { defaultDynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
+import { defaultDynamicSettings } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one

@@ -5,14 +5,14 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
-import { defaultDynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
   let mockEsSearchResult: any;
   beforeEach(() => {
     expectedGetLatestSearchParams = {
-      index: 'heartbeat-8*',
+      index: defaultDynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {

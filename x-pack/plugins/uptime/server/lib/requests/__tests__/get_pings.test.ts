@@ -6,7 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
-import { defaultDynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -44,7 +44,7 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: 'heartbeat-8*',
+      index: defaultDynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {
