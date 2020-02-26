@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
 
@@ -38,8 +39,8 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     if (!runComplete) runner.abort();
   });
 
-  return new Promise(res => {
-    const respond = () => res(runner.failures);
+  return new Promise(resolve => {
+    const respond = () => resolve(runner.failures);
 
     // if there are no tests, mocha.run() is sync
     // and the 'end' event can't be listened to

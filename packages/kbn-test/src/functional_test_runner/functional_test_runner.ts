@@ -70,7 +70,7 @@ export class FunctionalTestRunner {
     });
   }
 
-  async getTestStats() {
+  async runWithStubs<T = any>(f: (mocha: any) => Promise<T>): Promise<T> {
     return await this._run(async (config, coreProviders) => {
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
@@ -89,8 +89,12 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      return f(await setupMocha(this.lifecycle, this.log, config, providers));
+    });
+  }
 
+  async getTestStats() {
+    return await this.runWithStubs(async mocha => {
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
@@ -102,27 +106,7 @@ export class FunctionalTestRunner {
   }
 
   async getTestSuites() {
-    // TODO re-factor this so that it's not duplicated
-    return await this._run(async (config, coreProviders) => {
-      // replace the function of custom service providers so that they return
-      // promise-like objects which never resolve, essentially disabling them
-      // allowing us to load the test files and populate the mocha suites
-      const readStubbedProviderSpec = (type: string, providers: any) =>
-        readProviderSpec(type, providers).map(p => ({
-          ...p,
-          fn: () => ({
-            then: () => {},
-          }),
-        }));
-
-      const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
-        ...readStubbedProviderSpec('Service', config.get('services')),
-        ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
-      ]);
-
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-
+    return await this.runWithStubs(async mocha => {
       const suites: Record<string, object> = {};
 
       const findLeafSuites = (suite: any) => {

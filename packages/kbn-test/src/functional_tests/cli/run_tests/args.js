@@ -30,7 +30,7 @@ const options = {
   },
   esFrom: {
     arg: '<snapshot|source>',
-    // choices: ['snapshot', 'source'],
+    choices: ['snapshot', 'source'],
     desc: 'Build Elasticsearch from source or run from snapshot.',
     defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
   },

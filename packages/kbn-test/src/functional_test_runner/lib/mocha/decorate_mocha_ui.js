@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { sep } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
@@ -65,7 +66,7 @@ export function decorateMochaUi(lifecycle, context, config) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
-          const filePath = this.file.match(/\/((x-pack\/)?test\/.*?)$/)[1]; // TODO replace with REPO_ROOT removal?
+          const filePath = this.file.replace(REPO_ROOT + sep, '');
           this.tags(filePath);
           this.suiteTag = filePath; // The tag that uniquely targets this suite/file
 

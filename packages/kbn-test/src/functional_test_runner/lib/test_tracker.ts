@@ -23,31 +23,40 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { Lifecycle } from './lifecycle';
 
-export interface SuiteWithDuration {
+export interface TrackedSuiteMetadata {
+  startTime?: Date;
+  endTime?: Date;
+  duration?: number;
+  success?: boolean;
+}
+
+export interface TrackedSuite {
+  config: string;
+  file: string;
+  tag: string;
+  title: string;
+  startTime: Date;
+  endTime: Date;
   duration: number;
+  success: boolean;
+  leafSuite: boolean;
 }
 
 const getTestMetadataPath = () => {
   return process.env.TEST_METADATA_PATH || resolve(REPO_ROOT, 'target', 'test_metadata.json');
 };
 
-const setSuccessStatus = (suite: any) => {
-  if (suite.tests && suite.tests.length) {
-    suite.success = !suite.tests.find((t: any) => t.state === 'failed');
-
-    if (!suite.success) {
-      return;
-    }
-  }
-
-  if (suite.suites && suite.suites.length) {
-    suite.success = !suite.suites.find((s: any) => !s.success);
-  }
-};
-
 export class TestTracker {
   lifecycle: Lifecycle;
-  allSuites: any = {};
+  allSuites: Record<string, Record<string, TrackedSuite>> = {};
+  trackedSuites: Map<object, TrackedSuiteMetadata> = new Map<object, TrackedSuiteMetadata>();
+
+  getTracked(suite: object): TrackedSuiteMetadata {
+    if (!this.trackedSuites.has(suite)) {
+      this.trackedSuites.set(suite, {} as TrackedSuiteMetadata);
+    }
+    return this.trackedSuites.get(suite) || ({} as TrackedSuiteMetadata);
+  }
 
   constructor(lifecycle: Lifecycle) {
     this.lifecycle = lifecycle;
@@ -56,18 +65,19 @@ export class TestTracker {
       fs.unlinkSync(getTestMetadataPath());
     }
 
-    lifecycle.beforeTestSuite.add(s => {
-      s.startTime = new Date();
-      s.success = true;
+    lifecycle.beforeTestSuite.add(suite => {
+      const tracked = this.getTracked(suite);
+      tracked.startTime = new Date();
+      tracked.success = true;
     });
 
     lifecycle.afterTestSuite.add(suite => {
-      suite.endTime = new Date();
-      suite.duration = new Date(suite.endTime).getTime() - new Date(suite.startTime).getTime();
-      suite.duration = Math.floor(suite.duration / 1000);
-      suite.durationMin = Math.round(suite.duration / 60);
+      const tracked = this.getTracked(suite);
+      tracked.endTime = new Date();
+      tracked.duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
+      tracked.duration = Math.floor(tracked.duration / 1000);
 
-      setSuccessStatus(suite);
+      this.setSuccessStatus(suite);
 
       const config = suite.ftrConfig.path.replace(REPO_ROOT + sep, '');
       const file = suite.file.replace(REPO_ROOT + sep, '');
@@ -75,29 +85,42 @@ export class TestTracker {
       // TODO should non-leaf suite (e.g. index files) still be included here? is it confusing?
       this.allSuites[config] = this.allSuites[config] || {};
       this.allSuites[config][file] = {
+        ...tracked,
         config,
         file,
         tag: suite.suiteTag,
         title: suite.title,
-        startTime: suite.startTime,
-        endTime: suite.endTime,
-        duration: suite.duration,
-        success: suite.success,
         leafSuite: !!(
           (suite.tests && suite.tests.length) ||
           (this.allSuites[config][file] && this.allSuites[config][file].leafSuite)
         ),
-      };
+      } as TrackedSuite;
     });
 
     // TODO gate behind a CI env var or something
     lifecycle.cleanup.add(() => {
-      const flattened: SuiteWithDuration[] = [];
-      Object.values(this.allSuites).forEach((x: any) =>
-        Object.values(x).forEach((y: any) => flattened.push(y))
+      const flattened: TrackedSuite[] = [];
+      Object.values(this.allSuites).forEach((x: Record<string, TrackedSuite>) =>
+        Object.values(x).forEach((y: TrackedSuite) => flattened.push(y))
       );
-      flattened.sort((a: SuiteWithDuration, b: SuiteWithDuration) => b.duration - a.duration);
+      flattened.sort((a, b) => b.duration - a.duration);
       fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
     });
+  }
+
+  setSuccessStatus(suite: any) {
+    const tracked = this.getTracked(suite);
+
+    if (suite.tests && suite.tests.length) {
+      tracked.success = !suite.tests.find((t: any) => t.state === 'failed');
+
+      if (!tracked.success) {
+        return;
+      }
+    }
+
+    if (suite.suites && suite.suites.length) {
+      tracked.success = !suite.suites.find((s: any) => this.getTracked(s).success === false);
+    }
   }
 }
