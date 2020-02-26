@@ -20,8 +20,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { EditorRenderProps } from '../../kibana/public/visualize/np_ready/types';
-import { VisualizeEmbeddable } from '../../visualizations/public/embeddable';
-import { VisualizeEmbeddableFactory } from '../../visualizations/public/embeddable/visualize_embeddable_factory';
+import {
+  VisualizeEmbeddableContract as VisualizeEmbeddable,
+  VisualizeEmbeddableFactoryContract as VisualizeEmbeddableFactory,
+} from '../../visualizations/public/';
 import { PanelsContainer, Panel } from '../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';
