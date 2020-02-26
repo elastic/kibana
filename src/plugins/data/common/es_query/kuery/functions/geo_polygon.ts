@@ -54,7 +54,7 @@ export function toElasticsearchQuery(
     }),
   };
 
-  if (field && (field as IFieldType).scripted) {
+  if (field?.scripted) {
     throw new Error(`Geo polygon query does not support scripted fields`);
   }
 
