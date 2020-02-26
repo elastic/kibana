@@ -19,8 +19,7 @@ export const SectionError: React.FunctionComponent<Props> = ({
   actions,
   ...rest
 }) => {
-  const errorMessage =
-    error?.message !== undefined ? error.message : JSON.stringify(error, null, 2);
+  const errorMessage = error?.message ?? JSON.stringify(error, null, 2);
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>

@@ -29,7 +29,7 @@ export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string 
 }
 
 export const RedirectToTransformManagement: FC = () => (
-  <Redirect from={`${CLIENT_BASE_PATH}`} to={`${CLIENT_BASE_PATH}${SECTION_SLUG.HOME}`} />
+  <Redirect from={CLIENT_BASE_PATH} to={CLIENT_BASE_PATH + SECTION_SLUG.HOME} />
 );
 
 export const RedirectToCreateTransform: FC<{ savedObjectId: string }> = ({ savedObjectId }) => (

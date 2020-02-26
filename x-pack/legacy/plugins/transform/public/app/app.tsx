@@ -5,8 +5,7 @@
  */
 
 import React, { useContext, FC } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -51,10 +50,10 @@ export const App: FC = () => {
           />
           <Route
             exact
-            path={`${CLIENT_BASE_PATH}${SECTION_SLUG.HOME}`}
+            path={CLIENT_BASE_PATH + SECTION_SLUG.HOME}
             component={TransformManagementSection}
           />
-          <Redirect from={`${CLIENT_BASE_PATH}`} to={`${CLIENT_BASE_PATH}${SECTION_SLUG.HOME}`} />
+          <Redirect from={CLIENT_BASE_PATH} to={CLIENT_BASE_PATH + SECTION_SLUG.HOME} />
         </Switch>
       </HashRouter>
     </div>

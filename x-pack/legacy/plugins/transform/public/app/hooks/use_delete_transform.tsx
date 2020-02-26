@@ -56,9 +56,7 @@ export const useDeleteTransforms = () => {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
         }),
         text: toMountPoint(
-          <ToastNotificationText
-            text={e.message !== undefined ? e.message : JSON.stringify(e, null, 2)}
-          />
+          <ToastNotificationText text={e?.message ?? JSON.stringify(e, null, 2)} />
         ),
       });
     }
