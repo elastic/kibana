@@ -12,6 +12,7 @@ export interface NewOutput {
   name: string;
   type: OutputType;
   hosts?: string[];
+  ca_sha256?: string;
   api_key?: string;
   admin_username?: string;
   admin_password?: string;

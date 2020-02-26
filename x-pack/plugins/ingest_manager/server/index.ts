@@ -20,7 +20,14 @@ export const config = {
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      defaultOutputHost: schema.string({ defaultValue: 'http://localhost:9200' }),
+      kibana: schema.object({
+        host: schema.maybe(schema.string()),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
+      elasticsearch: schema.object({
+        host: schema.string({ defaultValue: 'http://localhost:9200' }),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
     }),
   }),
 };

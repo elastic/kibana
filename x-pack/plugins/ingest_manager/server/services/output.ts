@@ -28,7 +28,8 @@ class OutputService {
     if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [appContextService.getConfig()!.fleet.defaultOutputHost],
+        hosts: [appContextService.getConfig()!.fleet.elasticsearch.host],
+        ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
         admin_username: adminUser.username,
         admin_password: adminUser.password,
       } as NewOutput;
