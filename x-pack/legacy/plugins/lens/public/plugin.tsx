@@ -38,6 +38,8 @@ import {
 import { FormatFactory } from './legacy_imports';
 import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameStart } from './types';
+import { setup as visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+import { getLensAliasConfig } from './vis_type_alias';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -99,6 +101,8 @@ export class LensPlugin {
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
+
+    visualizations.types.registerAlias(getLensAliasConfig());
 
     kibanaLegacy.registerLegacyApp({
       id: 'lens',
