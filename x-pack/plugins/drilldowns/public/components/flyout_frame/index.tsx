@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { FormCreateDrilldown } from '..';
-
-storiesOf('components/FormCreateDrilldown', module).add('default', () => {
-  return <FormCreateDrilldown />;
-});
+export * from './flyout_frame';
