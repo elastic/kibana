@@ -18,11 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
+import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { MetricAggType, IMetricAggConfig, MetricAggParam } from './metric_agg_type';
 import { IAggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 
 const cumulativeCardinalityTitle = i18n.translate(
   'data.search.aggs.metrics.cumulativeCardinalityTitle',
@@ -34,9 +35,10 @@ const cumulativeCardinalityTitle = i18n.translate(
 export const cumulativeCardinalityMetricAgg = new MetricAggType({
   name: METRIC_TYPES.CUMULATIVE_CARDINALITY,
   title: cumulativeCardinalityTitle,
+  subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => {
-    return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
-      defaultMessage: 'Cumulative Unique count of {field}',
+    return i18n.translate('data.search.aggs.metrics.cumulativeUniqueCountLabel', {
+      defaultMessage: 'Cumulative Unique Count of {field}',
       values: { field: agg.getParam('field')?.name },
     });
   },
@@ -69,9 +71,4 @@ export const cumulativeCardinalityMetricAgg = new MetricAggType({
       },
     },
   ] as Array<MetricAggParam<IMetricAggConfig>>,
-  getFormat() {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
-
-    return fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
-  },
 });

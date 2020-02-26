@@ -28,6 +28,7 @@ export const serializeFieldFormat = (agg: IAggConfig): SerializedFieldFormat => 
     percentile_ranks: () => ({ id: 'percent' }),
     count: () => ({ id: 'number' }),
     cardinality: () => ({ id: 'number' }),
+    cumulative_cardinality: () => ({ id: 'number' }),
     date_histogram: () => ({
       id: 'date',
       params: {

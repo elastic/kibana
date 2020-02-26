@@ -87,11 +87,13 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
     const type = param.advanced ? 'advanced' : 'basic';
 
-    let paramEditor: ParamInstance['paramEditor'];
+    let paramEditor: ParamInstance['paramEditor'] | undefined;
 
     if (agg.type.subtype && aggParamsMap[agg.type.subtype]) {
       paramEditor = get(aggParamsMap, [agg.type.subtype, param.name]);
-    } else {
+    }
+
+    if (!agg.type.subtype || !paramEditor) {
       const aggType = agg.type.type;
       const aggName = agg.type.name;
       const aggParams = get(aggParamsMap, [aggType, aggName], {});

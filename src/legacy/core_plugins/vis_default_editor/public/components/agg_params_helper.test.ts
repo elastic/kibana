@@ -19,7 +19,7 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES, METRIC_TYPES } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -151,6 +151,53 @@ describe('DefaultEditorAggParams helpers', () => {
             metricAggs,
             state,
             value: agg.params.orderBy,
+          },
+        ],
+        advanced: [],
+      });
+      expect(agg.getIndexPattern).toBeCalledTimes(1);
+    });
+
+    it('should create a field editor if no subtype matches', () => {
+      agg = ({
+        type: {
+          type: AggGroupNames.Metrics,
+          name: METRIC_TYPES.CUMULATIVE_CARDINALITY,
+          subtype: METRIC_TYPES.CUMULATIVE_CARDINALITY,
+          params: [
+            {
+              name: 'field',
+              type: 'field',
+              getAvailableFields: jest.fn(
+                (aggConfig: IAggConfig) => aggConfig.getIndexPattern().fields
+              ),
+            },
+          ],
+        },
+        schema: {},
+        getIndexPattern: jest.fn(() => ({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'geo_desc', type: 'string' },
+          ],
+        })),
+        params: {
+          field: 'field',
+        },
+      } as any) as IAggConfig;
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+
+      expect(params).toEqual({
+        basic: [
+          {
+            agg,
+            aggParam: agg.type.params[0],
+            editorConfig,
+            indexedFields: ['indexedFields'],
+            paramEditor: FieldParamEditor,
+            metricAggs,
+            state,
+            value: agg.params.field,
           },
         ],
         advanced: [],
