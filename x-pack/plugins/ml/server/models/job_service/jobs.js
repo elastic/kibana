@@ -14,7 +14,7 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
-} from '../../../common/util/job_utils';
+} from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import { groupsProvider } from './groups';
 import { uniq } from 'lodash';
 

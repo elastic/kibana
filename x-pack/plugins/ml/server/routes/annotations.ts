@@ -12,8 +12,8 @@ import { schema } from '@kbn/config-schema';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
-import { RouteInitialization } from '../new_platform/plugin';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
+// import { RouteInitialization } from '../new_platform/plugin';
 import {
   deleteAnnotationSchema,
   getAnnotationsSchema,
@@ -34,11 +34,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
 /**
  * Routes for annotations
  */
-export function annotationRoutes({
-  router,
-  securityPlugin,
-  getLicenseCheckResults,
-}: RouteInitialization) {
+export function annotationRoutes({ router, securityPlugin, getLicenseCheckResults }: any) {
   /**
    * @apiGroup Annotations
    *

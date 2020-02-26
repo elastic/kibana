@@ -9,9 +9,9 @@ import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { getModuleIdParamSchema, setupModuleBodySchema } from './schemas/modules';
-import { RouteInitialization } from '../new_platform/plugin';
+// import { RouteInitialization } from '../new_platform/plugin';
 
 function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
   const dr = new DataRecognizer(context);
@@ -65,7 +65,7 @@ function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: strin
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ router, getLicenseCheckResults }: RouteInitialization) {
+export function dataRecognizer({ router, getLicenseCheckResults }: any) {
   /**
    * @apiGroup DataRecognizer
    *

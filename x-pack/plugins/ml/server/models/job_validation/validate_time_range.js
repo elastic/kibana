@@ -6,8 +6,8 @@
 
 import _ from 'lodash';
 
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/server';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
+import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
 import { validateJobObject } from './validate_job_object';
 
 const BUCKET_SPAN_COMPARE_FACTOR = 25;

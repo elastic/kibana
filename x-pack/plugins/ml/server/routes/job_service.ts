@@ -7,9 +7,9 @@
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'src/core/server';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../new_platform/plugin';
+// import { RouteInitialization } from '../new_platform/plugin';
 import {
   categorizationFieldExamplesSchema,
   chartSchema,
@@ -28,7 +28,7 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function jobServiceRoutes({ router, getLicenseCheckResults }: any) {
   async function hasPermissionToCreateJobs(
     callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
   ) {

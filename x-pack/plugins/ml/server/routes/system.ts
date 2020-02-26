@@ -12,18 +12,13 @@ import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { privilegesProvider } from '../lib/check_privileges';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
-import { LicenseCheckResult, RouteInitialization } from '../new_platform/plugin';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
+import { LicenseCheckResult } from '../types';
 
 /**
  * System routes
  */
-export function systemRoutes({
-  getLicenseCheckResults,
-  router,
-  spacesPlugin,
-  cloud,
-}: RouteInitialization) {
+export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, cloud }: any) {
   let cachedLicenseCheckResult: LicenseCheckResult;
   const { isSecurityDisabled } = getLicenseCheckResults();
 

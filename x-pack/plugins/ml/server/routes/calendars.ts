@@ -6,9 +6,9 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../new_platform/plugin';
+// import { RouteInitialization } from '../new_platform/plugin';
 import { calendarSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
@@ -42,7 +42,7 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
   return cal.getCalendarsByIds(calendarIds);
 }
 
-export function calendars({ router, getLicenseCheckResults }: RouteInitialization) {
+export function calendars({ router, getLicenseCheckResults }: any) {
   router.get(
     {
       path: '/api/ml/calendars',

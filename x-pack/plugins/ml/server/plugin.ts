@@ -9,28 +9,28 @@ import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } fro
 import { LicenseCheckResult, PLUGIN_ID, PluginsSetup } from './types';
 
 // @ts-ignore: could not find declaration file for module
-import { elasticsearchJsPlugin } from '../../../legacy/plugins/ml/server/client/elasticsearch_ml';
-import { makeMlUsageCollector } from '../../../legacy/plugins/ml/server/lib/ml_telemetry';
-import { initMlServerLog } from '../../../legacy/plugins/ml/server/client/log';
-import { addLinksToSampleDatasets } from '../../../legacy/plugins/ml/server/lib/sample_data_sets';
+import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
+import { makeMlUsageCollector } from './lib/ml_telemetry';
+import { initMlServerLog } from './client/log';
+import { addLinksToSampleDatasets } from './lib/sample_data_sets';
 
-import { annotationRoutes } from '../../../legacy/plugins/ml/server/routes/annotations';
-import { calendars } from '../../../legacy/plugins/ml/server/routes/calendars';
-import { dataFeedRoutes } from '../../../legacy/plugins/ml/server/routes/datafeeds';
-import { dataFrameAnalyticsRoutes } from '../../../legacy/plugins/ml/server/routes/data_frame_analytics';
-import { dataRecognizer } from '../../../legacy/plugins/ml/server/routes/modules';
-import { dataVisualizerRoutes } from '../../../legacy/plugins/ml/server/routes/data_visualizer';
-import { fieldsService } from '../../../legacy/plugins/ml/server/routes/fields_service';
-import { fileDataVisualizerRoutes } from '../../../legacy/plugins/ml/server/routes/file_data_visualizer';
-import { filtersRoutes } from '../../../legacy/plugins/ml/server/routes/filters';
-import { indicesRoutes } from '../../../legacy/plugins/ml/server/routes/indices';
-import { jobAuditMessagesRoutes } from '../../../legacy/plugins/ml/server/routes/job_audit_messages';
-import { jobRoutes } from '../../../legacy/plugins/ml/server/routes/anomaly_detectors';
-import { jobServiceRoutes } from '../../../legacy/plugins/ml/server/routes/job_service';
-import { jobValidationRoutes } from '../../../legacy/plugins/ml/server/routes/job_validation';
-import { notificationRoutes } from '../../../legacy/plugins/ml/server/routes/notification_settings';
-import { resultsServiceRoutes } from '../../../legacy/plugins/ml/server/routes/results_service';
-import { systemRoutes } from '../../../legacy/plugins/ml/server/routes/system';
+import { annotationRoutes } from './routes/annotations';
+import { calendars } from './routes/calendars';
+import { dataFeedRoutes } from './routes/datafeeds';
+import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
+import { dataRecognizer } from './routes/modules';
+import { dataVisualizerRoutes } from './routes/data_visualizer';
+import { fieldsService } from './routes/fields_service';
+import { fileDataVisualizerRoutes } from './routes/file_data_visualizer';
+import { filtersRoutes } from './routes/filters';
+import { indicesRoutes } from './routes/indices';
+import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
+import { jobRoutes } from './routes/anomaly_detectors';
+import { jobServiceRoutes } from './routes/job_service';
+import { jobValidationRoutes } from './routes/job_validation';
+import { notificationRoutes } from './routes/notification_settings';
+import { resultsServiceRoutes } from './routes/results_service';
+import { systemRoutes } from './routes/system';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {

@@ -7,9 +7,9 @@
 import Boom from 'boom';
 import { RequestHandlerContext } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../new_platform/plugin';
+// import { RouteInitialization } from '../new_platform/plugin';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
@@ -25,11 +25,7 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes({
-  version,
-  getLicenseCheckResults,
-  router,
-}: RouteInitialization) {
+export function jobValidationRoutes({ version, getLicenseCheckResults, router }: any) {
   const { isSecurityDisabled } = getLicenseCheckResults();
 
   function calculateModelMemoryLimit(
