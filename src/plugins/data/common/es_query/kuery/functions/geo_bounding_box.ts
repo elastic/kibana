@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
-import { JsonValue } from '../../../../../kibana_utils/public';
 
 export function buildNodeParams(fieldName: string, params: any) {
   params = _.pick(params, 'topLeft', 'bottomRight');
@@ -41,7 +40,7 @@ export function toElasticsearchQuery(
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-): JsonValue {
+) {
   const [fieldNameArg, ...args] = node.arguments;
   const fullFieldNameArg = {
     ...fieldNameArg,
