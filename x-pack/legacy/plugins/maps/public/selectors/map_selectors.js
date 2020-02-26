@@ -125,6 +125,21 @@ export const getRefreshConfig = ({ map }) => {
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
 
+function getLayerDescriptor(state = {}, layerId) {
+  const layerListRaw = getLayerListRaw(state);
+  return layerListRaw.find(layer => layer.id === layerId);
+}
+
+export function getDataRequestDescriptor(state = {}, layerId, dataId) {
+  const layerDescriptor = getLayerDescriptor(state, layerId);
+  if (!layerDescriptor || !layerDescriptor.__dataRequests) {
+    return;
+  }
+  return _.get(layerDescriptor, '__dataRequests', []).find(dataRequest => {
+    return dataRequest.dataId === dataId;
+  });
+}
+
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
