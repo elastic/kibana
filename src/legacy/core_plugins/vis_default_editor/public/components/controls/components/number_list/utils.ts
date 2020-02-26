@@ -97,7 +97,7 @@ function validateValueUnique(
     result.error = i18n.translate(
       'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
       {
-        defaultMessage: 'Duplicated value.',
+        defaultMessage: 'Duplicate value.',
       }
     );
   }
