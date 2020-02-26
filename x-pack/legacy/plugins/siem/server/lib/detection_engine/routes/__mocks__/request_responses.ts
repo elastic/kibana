@@ -139,11 +139,12 @@ export const getReadBulkRequest = () =>
     body: [typicalPayload()],
   });
 
-export const getUpdateBulkRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getUpdateBulkRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
