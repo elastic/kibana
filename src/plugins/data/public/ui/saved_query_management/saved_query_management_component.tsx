@@ -72,10 +72,10 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         requestGotCancelled = true;
       };
 
-      const [savedQueryCount, savedQueryItems] = await Promise.all([
-        savedQueryService.getSavedQueryCount(),
-        savedQueryService.findSavedQueries('', perPage, activePage + 1),
-      ]);
+      const {
+        total: savedQueryCount,
+        queries: savedQueryItems,
+      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
 
       if (requestGotCancelled) return;
 
