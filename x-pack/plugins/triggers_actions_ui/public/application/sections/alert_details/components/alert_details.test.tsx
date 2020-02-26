@@ -32,6 +32,7 @@ const mockAlertApis = {
   unmuteAlert: jest.fn(),
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
+  requestRefresh: jest.fn(),
 };
 
 // const AlertDetails = withBulkAlertOperations(RawAlertDetails);
@@ -43,7 +44,8 @@ describe('alert_details', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -63,7 +65,8 @@ describe('alert_details', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -90,7 +93,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -139,7 +143,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
       const actionTypes: ActionType[] = [
@@ -189,7 +194,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -213,7 +219,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -237,7 +244,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -266,7 +274,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -291,7 +300,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -316,7 +326,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -350,7 +361,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -387,7 +399,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -413,7 +426,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -439,7 +453,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -474,7 +489,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -509,7 +525,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 

@@ -94,7 +94,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="A unique identifier for this policy."
         />
       }
-      idAria="nameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -104,7 +103,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Name"
           />
         }
-        describedByIds={['nameDescription']}
         isInvalid={touched.name && Boolean(errors.name)}
         error={errors.name}
         fullWidth
@@ -158,7 +156,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The repository where you want to store the snapshots."
         />
       }
-      idAria="policyRepositoryDescription"
       fullWidth
     >
       <EuiFormRow
@@ -168,7 +165,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Repository"
           />
         }
-        describedByIds={['policyRepositoryDescription']}
         isInvalid={touched.repository && Boolean(errors.repository)}
         error={errors.repository}
         fullWidth
@@ -307,7 +303,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The name for the snapshots. A unique identifier is automatically added to each name."
         />
       }
-      idAria="policySnapshotNameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -317,7 +312,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Snapshot name"
           />
         }
-        describedByIds={['policySnapshotNameDescription']}
         isInvalid={touched.snapshotName && Boolean(errors.snapshotName)}
         error={errors.snapshotName}
         helpText={
@@ -389,7 +383,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The frequency at which to take the snapshots."
         />
       }
-      idAria="policyScheduleDescription"
       fullWidth
     >
       {isAdvancedCronVisible ? (
@@ -401,7 +394,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Schedule"
               />
             }
-            describedByIds={['policyScheduleDescription']}
             isInvalid={touched.schedule && Boolean(errors.schedule)}
             error={errors.schedule}
             helpText={

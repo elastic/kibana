@@ -18,22 +18,14 @@
  */
 
 import { uniqFilters } from './uniq_filters';
-import { esFilters } from '../../../../common';
+import { buildQueryFilter, Filter, FilterStateStore } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('niqFilter', () => {
     test('should filter out dups', () => {
-      const before: esFilters.Filter[] = [
-        esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
-        esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+      const before: Filter[] = [
+        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       ];
       const results = uniqFilters(before);
 
@@ -41,17 +33,9 @@ describe('filter manager utilities', () => {
     });
 
     test('should filter out duplicates, ignoring meta attributes', () => {
-      const before: esFilters.Filter[] = [
-        esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index1',
-          ''
-        ),
-        esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index2',
-          ''
-        ),
+      const before: Filter[] = [
+        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index1', ''),
+        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index2', ''),
       ];
       const results = uniqFilters(before);
 
@@ -59,18 +43,18 @@ describe('filter manager utilities', () => {
     });
 
     test('should filter out duplicates, ignoring $state attributes', () => {
-      const before: esFilters.Filter[] = [
+      const before: Filter[] = [
         {
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
-          ...esFilters.buildQueryFilter(
+          $state: { store: FilterStateStore.APP_STATE },
+          ...buildQueryFilter(
             { _type: { match: { query: 'apache', type: 'phrase' } } },
             'index',
             ''
           ),
         },
         {
-          $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
-          ...esFilters.buildQueryFilter(
+          $state: { store: FilterStateStore.GLOBAL_STATE },
+          ...buildQueryFilter(
             { _type: { match: { query: 'apache', type: 'phrase' } } },
             'index',
             ''

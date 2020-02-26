@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
-import { fieldFormats } from '../../../common';
+import { FieldFormatsContentType } from '../../../common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -31,7 +31,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     hit: Record<string, any>,
     val: any,
     fieldName: string,
-    type: fieldFormats.ContentType = 'html'
+    type: FieldFormatsContentType = 'html'
   ) {
     const field = indexPattern.fields.getByName(fieldName);
     const format = field ? field.format : defaultFormat;

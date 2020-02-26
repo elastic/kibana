@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
-import { renderWithRouter } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import { SummaryHistogramPoint } from '../../../../../common/graphql/types';
 
 describe('MonitorBarSeries component', () => {
@@ -161,13 +160,13 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('shallow renders a series when there are down items', () => {
-    const component = shallowWithIntl(renderWithRouter(<MonitorBarSeries {...props} />));
+    const component = shallowWithRouter(<MonitorBarSeries {...props} />);
     expect(component).toMatchSnapshot();
   });
 
   it('shallow renders null when there are no down items', () => {
     props.histogramSeries = [];
-    const component = shallowWithIntl(renderWithRouter(<MonitorBarSeries {...props} />));
+    const component = shallowWithRouter(<MonitorBarSeries {...props} />);
     expect(component).toEqual({});
   });
 
@@ -189,20 +188,20 @@ describe('MonitorBarSeries component', () => {
         up: 0,
       },
     ];
-    const component = shallowWithIntl(renderWithRouter(<MonitorBarSeries {...props} />));
+    const component = shallowWithRouter(<MonitorBarSeries {...props} />);
     expect(component).toEqual({});
   });
 
   it('shallow renders nothing if the data series is null', () => {
-    const component = shallowWithIntl(
-      renderWithRouter(<MonitorBarSeries dangerColor="danger" histogramSeries={null} />)
+    const component = shallowWithRouter(
+      <MonitorBarSeries dangerColor="danger" histogramSeries={null} />
     );
     expect(component).toEqual({});
   });
 
   it('renders if the data series is present', () => {
-    const component = renderWithIntl(
-      renderWithRouter(<MonitorBarSeries dangerColor="danger" histogramSeries={histogramSeries} />)
+    const component = renderWithRouter(
+      <MonitorBarSeries dangerColor="danger" histogramSeries={histogramSeries} />
     );
     expect(component).toMatchSnapshot();
   });

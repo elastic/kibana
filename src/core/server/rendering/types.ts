@@ -39,6 +39,7 @@ export interface RenderingMetadata {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
     env: Env;
     legacyMode: boolean;
     i18n: {

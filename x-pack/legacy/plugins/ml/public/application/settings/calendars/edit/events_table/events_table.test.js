@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn(),
-}));
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { EventsTable } from './events_table';
@@ -31,7 +27,7 @@ const testProps = {
 
 describe('EventsTable', () => {
   test('Renders events table with no search bar', () => {
-    const wrapper = shallowWithIntl(<EventsTable.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<EventsTable {...testProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -42,7 +38,7 @@ describe('EventsTable', () => {
       showSearchBar: true,
     };
 
-    const wrapper = shallowWithIntl(<EventsTable.WrappedComponent {...showSearchBarProps} />);
+    const wrapper = shallowWithIntl(<EventsTable {...showSearchBarProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });

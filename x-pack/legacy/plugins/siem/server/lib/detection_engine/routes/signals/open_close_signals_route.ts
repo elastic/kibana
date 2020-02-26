@@ -6,12 +6,16 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { ServerFacade } from '../../../../types';
 import { transformError, getIndex } from '../utils';
 
-export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
+export const setSignalsStatusRouteDef = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -24,10 +28,11 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
         payload: setSignalsStatusSchema,
       },
     },
-    async handler(request: SignalsStatusRequest) {
+    async handler(request: SignalsStatusRequest, headers) {
       const { signal_ids: signalIds, query, status } = request.payload;
-      const index = getIndex(request, server);
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const { clusterClient, spacesClient } = await getClients(request);
+      const index = getIndex(spacesClient.getSpaceId, config);
+
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
@@ -40,7 +45,7 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
         };
       }
       try {
-        return callWithRequest(request, 'updateByQuery', {
+        const updateByQueryResponse = await clusterClient.callAsCurrentUser('updateByQuery', {
           index,
           body: {
             script: {
@@ -49,15 +54,26 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
             },
             query: queryObject,
           },
+          ignoreUnavailable: true,
         });
-      } catch (exc) {
-        // error while getting or updating signal with id: id in signal index .siem-signals
-        return transformError(exc);
+        return updateByQueryResponse;
+      } catch (err) {
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const setSignalsStatusRoute = (server: ServerFacade) => {
-  server.route(setSignalsStatusRouteDef(server));
+export const setSignalsStatusRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(setSignalsStatusRouteDef(config, getClients));
 };

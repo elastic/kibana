@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IPrivate } from './private';
+export { IPrivate } from '../../../../plugins/kibana_legacy/public/utils/private';

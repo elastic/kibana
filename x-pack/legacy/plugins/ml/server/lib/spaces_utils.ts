@@ -5,8 +5,8 @@
  */
 
 import { Request } from 'hapi';
+import { Space } from '../../../../../plugins/spaces/server';
 import { LegacySpacesPlugin } from '../../../spaces';
-import { Space } from '../../../spaces/common/model/space';
 
 interface GetActiveSpaceResponse {
   valid: boolean;

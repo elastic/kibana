@@ -4,10 +4,7 @@
     "Some networks may utilize PPTP protocols but this is uncommon as more modern VPN technologies are available. Usage that is unfamiliar to local network administrators can be unexpected and suspicious. Torrenting applications may use this port. Because this port is in the ephemeral range, this rule may false under certain conditions, such as when an application server replies to a client that used this port by coincidence. This is uncommon but such servers can be excluded."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -38,5 +35,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

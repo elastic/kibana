@@ -18,7 +18,10 @@
  */
 
 import expect from '@kbn/expect';
-import { addSystemApiHeader, isSystemApiRequest } from '../system_api';
+import {
+  addSystemApiHeader,
+  isSystemApiRequest,
+} from '../../../../../plugins/kibana_legacy/public';
 
 describe('system_api', () => {
   describe('#addSystemApiHeader', () => {
@@ -28,8 +31,8 @@ describe('system_api', () => {
       };
       const newHeaders = addSystemApiHeader(headers);
 
-      expect(newHeaders).to.have.property('kbn-system-api');
-      expect(newHeaders['kbn-system-api']).to.be(true);
+      expect(newHeaders).to.have.property('kbn-system-request');
+      expect(newHeaders['kbn-system-request']).to.be(true);
 
       expect(newHeaders).to.have.property('kbn-version');
       expect(newHeaders['kbn-version']).to.be('4.6.0');
@@ -37,7 +40,16 @@ describe('system_api', () => {
   });
 
   describe('#isSystemApiRequest', () => {
-    it('returns true for a system API HTTP request', () => {
+    it('returns true for a system HTTP request', () => {
+      const mockRequest = {
+        headers: {
+          'kbn-system-request': true,
+        },
+      };
+      expect(isSystemApiRequest(mockRequest)).to.be(true);
+    });
+
+    it('returns true for a legacy system API HTTP request', () => {
       const mockRequest = {
         headers: {
           'kbn-system-api': true,

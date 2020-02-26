@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';

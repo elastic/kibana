@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { renderWithRouter } from './helper/render_with_router';
+export { renderWithRouter, shallowWithRouter, mountWithRouter } from './helper/helper_with_router';

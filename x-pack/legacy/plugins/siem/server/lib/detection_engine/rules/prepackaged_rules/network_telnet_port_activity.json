@@ -4,10 +4,7 @@
     "IoT (Internet of Things) devices and networks may use telnet and can be excluded if\n    desired. Some business work-flows may use Telnet for administration of older devices. These\n    often have a predictable behavior. Telnet activity involving an unusual source or destination\n    may be more suspicious. Telnet activity involving a production server that has no known\n    associated Telnet work-flow or business requirement is often suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -68,5 +65,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

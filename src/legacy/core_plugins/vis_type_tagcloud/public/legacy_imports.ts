@@ -18,3 +18,5 @@
  */
 
 export { Schemas } from 'ui/agg_types';
+export { ValidatedDualRange } from 'ui/validated_range';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';

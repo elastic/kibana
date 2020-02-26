@@ -37,7 +37,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { Space } from '../../../../../spaces/common/model/space';
+import { Space } from '../../../../../spaces/public';
 import { Feature } from '../../../../../features/public';
 import {
   KibanaPrivileges,

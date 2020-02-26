@@ -23,10 +23,10 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
-import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsStart } from '../../../../../../../core/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-import { TypesStart, VisType, VisTypeAlias } from '../types';
+import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
 
 interface TypeSelectionProps {
@@ -145,8 +145,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       params = this.props.addBasePath(visType.aliasUrl);
       if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
         params = `${params}?addToDashboard`;
-        this.props.onClose();
       }
+      this.props.onClose();
       window.location.assign(params);
       return;
     }

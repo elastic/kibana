@@ -29,7 +29,7 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(<ConditionExpression.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<ConditionExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -42,7 +42,7 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(<ConditionExpression.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<ConditionExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });

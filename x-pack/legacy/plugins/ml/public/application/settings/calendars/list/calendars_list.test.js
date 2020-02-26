@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';
@@ -32,6 +32,17 @@ jest.mock('../../../services/ml_api_service', () => ({
       return Promise.resolve([]);
     },
     delete: jest.fn(),
+  },
+}));
+
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: x => x };
+});
+
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: node => {
+    return node;
   },
 }));
 
@@ -76,34 +87,43 @@ const testingState = {
 const props = {
   canCreateCalendar: true,
   canDeleteCalendar: true,
+  kibana: {
+    services: {
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              disableTimeRangeSelector: jest.fn(),
+              disableAutoRefreshSelector: jest.fn(),
+            },
+          },
+        },
+      },
+      notifications: {
+        toasts: {
+          addDanger: () => {},
+        },
+      },
+      docLinks: {
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+      },
+    },
+  },
 };
 
 describe('CalendarsList', () => {
   test('loads calendars on mount', () => {
     ml.calendars = jest.fn(() => []);
-    shallowWithIntl(<CalendarsList.WrappedComponent {...props} />);
+    shallowWithIntl(<CalendarsList {...props} />);
 
     expect(ml.calendars).toHaveBeenCalled();
   });
 
   test('Renders calendar list with calendars', () => {
-    const wrapper = shallowWithIntl(<CalendarsList.WrappedComponent {...props} />);
-
+    const wrapper = shallowWithIntl(<CalendarsList {...props} />);
     wrapper.instance().setState(testingState);
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-  });
-
-  test('Sets selected calendars list on checkbox change', () => {
-    const wrapper = mountWithIntl(<CalendarsList.WrappedComponent {...props} />);
-
-    const instance = wrapper.instance();
-    const spy = jest.spyOn(instance, 'setSelectedCalendarList');
-    instance.setState(testingState);
-    wrapper.update();
-
-    const checkbox = wrapper.find('input[type="checkbox"]').first();
-    checkbox.simulate('change');
-    expect(spy).toHaveBeenCalled();
   });
 });

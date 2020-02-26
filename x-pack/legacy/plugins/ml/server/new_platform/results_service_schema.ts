@@ -15,7 +15,9 @@ const criteriaFieldSchema = schema.object({
 export const anomaliesTableDataSchema = {
   jobIds: schema.arrayOf(schema.string()),
   criteriaFields: schema.arrayOf(criteriaFieldSchema),
-  influencers: schema.arrayOf(schema.maybe(schema.string())),
+  influencers: schema.arrayOf(
+    schema.maybe(schema.object({ fieldName: schema.string(), fieldValue: schema.any() }))
+  ),
   aggregationInterval: schema.string(),
   threshold: schema.number(),
   earliestMs: schema.number(),
@@ -24,6 +26,23 @@ export const anomaliesTableDataSchema = {
   maxRecords: schema.number(),
   maxExamples: schema.maybe(schema.number()),
   influencersFilterQuery: schema.maybe(schema.any()),
+};
+
+export const categoryDefinitionSchema = {
+  jobId: schema.maybe(schema.string()),
+  categoryId: schema.string(),
+};
+
+export const maxAnomalyScoreSchema = {
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.maybe(schema.number()),
+  latestMs: schema.maybe(schema.number()),
+};
+
+export const categoryExamplesSchema = {
+  jobId: schema.string(),
+  categoryIds: schema.arrayOf(schema.string()),
+  maxExamples: schema.number(),
 };
 
 export const partitionFieldValuesSchema = {

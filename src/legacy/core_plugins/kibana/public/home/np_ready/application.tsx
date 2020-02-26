@@ -26,8 +26,11 @@ import { getServices } from '../kibana_services';
 
 export const renderApp = async (element: HTMLElement) => {
   const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const { getFeatureCatalogueEntries, chrome } = getServices();
-  const directories = await getFeatureCatalogueEntries();
+  const { featureCatalogue, chrome } = getServices();
+
+  // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
+  const directories = featureCatalogue.get();
+
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   render(<HomeApp directories={directories} />, element);

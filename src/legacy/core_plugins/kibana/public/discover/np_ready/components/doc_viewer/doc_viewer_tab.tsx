@@ -31,7 +31,7 @@ interface Props {
 }
 
 interface State {
-  error: null | Error | string;
+  error: Error | string;
   hasError: boolean;
 }
 /**
@@ -42,7 +42,7 @@ interface State {
 export class DocViewerTab extends React.Component<Props, State> {
   state = {
     hasError: false,
-    error: null,
+    error: '',
   };
 
   static getDerivedStateFromError(error: unknown) {

@@ -11,6 +11,9 @@ import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
   anomaliesTableDataSchema,
+  categoryDefinitionSchema,
+  categoryExamplesSchema,
+  maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
 } from '../new_platform/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
@@ -83,7 +86,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/anomalies_table_data',
       validate: {
-        body: schema.object({ ...anomaliesTableDataSchema }),
+        body: schema.object(anomaliesTableDataSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -110,10 +113,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/category_definition',
       validate: {
-        body: schema.object({
-          jobId: schema.maybe(schema.string()),
-          categoryId: schema.string(),
-        }),
+        body: schema.object(categoryDefinitionSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -140,11 +140,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/max_anomaly_score',
       validate: {
-        body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
-          earliestMs: schema.number(),
-          latestMs: schema.number(),
-        }),
+        body: schema.object(maxAnomalyScoreSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -171,11 +167,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/category_examples',
       validate: {
-        body: schema.object({
-          jobId: schema.string(),
-          categoryIds: schema.arrayOf(schema.string()),
-          maxExamples: schema.number(),
-        }),
+        body: schema.object(categoryExamplesSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -202,7 +194,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     {
       path: '/api/ml/results/partition_fields_values',
       validate: {
-        body: schema.object({ ...partitionFieldValuesSchema }),
+        body: schema.object(partitionFieldValuesSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {

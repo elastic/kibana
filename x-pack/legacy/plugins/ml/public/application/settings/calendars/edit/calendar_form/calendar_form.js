@@ -18,11 +18,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { EventsTable } from '../events_table';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function EditHeader({ calendarId, description }) {
   return (
@@ -44,7 +46,7 @@ function EditHeader({ calendarId, description }) {
   );
 }
 
-export const CalendarForm = injectI18n(function CalendarForm({
+export const CalendarForm = ({
   calendarId,
   canCreateCalendar,
   canDeleteCalendar,
@@ -67,10 +69,10 @@ export const CalendarForm = injectI18n(function CalendarForm({
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
-  intl,
-}) {
-  const msg = intl.formatMessage({
-    id: 'xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription',
+  isGlobalCalendar,
+  onGlobalCalendarChange,
+}) => {
+  const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
       'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
       'must start and end with an alphanumeric character',
@@ -82,7 +84,9 @@ export const CalendarForm = injectI18n(function CalendarForm({
 
   return (
     <EuiForm>
-      {!isEdit && (
+      {isEdit === true ? (
+        <EditHeader calendarId={calendarId} description={description} />
+      ) : (
         <Fragment>
           <EuiTitle>
             <h1>
@@ -129,39 +133,59 @@ export const CalendarForm = injectI18n(function CalendarForm({
           </EuiFormRow>
         </Fragment>
       )}
-      {isEdit && <EditHeader calendarId={calendarId} description={description} />}
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
-            defaultMessage="Jobs"
-          />
-        }
-      >
-        <EuiComboBox
-          options={jobIds}
-          selectedOptions={selectedJobOptions}
-          onChange={onJobSelection}
-          isDisabled={saving === true || canCreateCalendar === false}
-        />
-      </EuiFormRow>
 
-      <EuiFormRow
+      <EuiSpacer size="xl" />
+
+      <EuiSwitch
+        name="switch"
         label={
           <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-            defaultMessage="Groups"
+            id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+            defaultMessage="Apply calendar to all jobs"
           />
         }
-      >
-        <EuiComboBox
-          onCreateOption={onCreateGroupOption}
-          options={groupIds}
-          selectedOptions={selectedGroupOptions}
-          onChange={onGroupSelection}
-          isDisabled={saving === true || canCreateCalendar === false}
-        />
-      </EuiFormRow>
+        checked={isGlobalCalendar}
+        onChange={onGlobalCalendarChange}
+      />
+
+      {isGlobalCalendar === false && (
+        <>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+                defaultMessage="Jobs"
+              />
+            }
+          >
+            <EuiComboBox
+              options={jobIds}
+              selectedOptions={selectedJobOptions}
+              onChange={onJobSelection}
+              isDisabled={saving === true || canCreateCalendar === false}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+                defaultMessage="Groups"
+              />
+            }
+          >
+            <EuiComboBox
+              onCreateOption={onCreateGroupOption}
+              options={groupIds}
+              selectedOptions={selectedGroupOptions}
+              onChange={onGroupSelection}
+              isDisabled={saving === true || canCreateCalendar === false}
+            />
+          </EuiFormRow>
+        </>
+      )}
 
       <EuiSpacer size="xl" />
 
@@ -217,9 +241,9 @@ export const CalendarForm = injectI18n(function CalendarForm({
       </EuiFlexGroup>
     </EuiForm>
   );
-});
+};
 
-CalendarForm.WrappedComponent.propTypes = {
+CalendarForm.propTypes = {
   calendarId: PropTypes.string.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
   canDeleteCalendar: PropTypes.bool.isRequired,
@@ -241,4 +265,6 @@ CalendarForm.WrappedComponent.propTypes = {
   selectedGroupOptions: PropTypes.array.isRequired,
   selectedJobOptions: PropTypes.array.isRequired,
   showNewEventModal: PropTypes.func.isRequired,
+  isGlobalCalendar: PropTypes.bool.isRequired,
+  onGlobalCalendarChange: PropTypes.func.isRequired,
 };

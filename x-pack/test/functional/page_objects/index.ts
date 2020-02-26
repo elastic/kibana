@@ -22,8 +22,6 @@ import { WatcherPageProvider } from './watcher_page';
 // @ts-ignore not ts yet
 import { ReportingPageProvider } from './reporting_page';
 // @ts-ignore not ts yet
-import { SpaceSelectorPageProvider } from './space_selector_page';
-// @ts-ignore not ts yet
 import { AccountSettingProvider } from './accountsetting_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
@@ -46,6 +44,8 @@ import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_spa
 import { LensPageProvider } from './lens_page';
 import { InfraMetricExplorerProvider } from './infra_metric_explorer';
 import { RoleMappingsPageProvider } from './role_mappings_page';
+import { SpaceSelectorPageProvider } from './space_selector_page';
+import { EndpointPageProvider } from './endpoint_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -78,4 +78,5 @@ export const pageObjects = {
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   lens: LensPageProvider,
   roleMappings: RoleMappingsPageProvider,
+  endpoint: EndpointPageProvider,
 };

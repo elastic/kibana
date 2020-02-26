@@ -5,19 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_RULES_URL,
@@ -30,20 +29,16 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         query: queryRulesSchema,
       },
     },
-    async handler(request: QueryRequest, headers) {
+    async handler(request: QueryRequest & LegacyRequest, headers) {
       const { id, rule_id: ruleId } = request.query;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
 
       try {
+        const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
         const rule = await deleteRules({
           actionsClient,
           alertsClient,
@@ -62,17 +57,42 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
+          if (transformed == null) {
+            return headers
+              .response({
+                message: 'Internal error transforming rules',
+                status_code: 500,
+              })
+              .code(500);
+          } else {
+            return transformed;
+          }
         } else {
-          return getIdError({ id, ruleId });
+          const error = getIdError({ id, ruleId });
+          return headers
+            .response({
+              message: error.message,
+              status_code: error.statusCode,
+            })
+            .code(error.statusCode);
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const deleteRulesRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesRoute(server));
+export const deleteRulesRoute = (
+  route: LegacyServices['route'],
+  getClients: GetScopedClients
+): void => {
+  route(createDeleteRulesRoute(getClients));
 };
