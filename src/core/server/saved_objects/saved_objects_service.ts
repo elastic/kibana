@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { CoreService } from 'src/core/types';
+import { Subject } from 'rxjs';
 import { first, filter, take } from 'rxjs/operators';
+import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -36,7 +37,7 @@ import {
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { KibanaRequest, InternalHttpServiceSetup } from '../http';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -47,8 +48,8 @@ import { Logger } from '../logging';
 import { convertLegacyTypes } from './utils';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
-import { registerRoutes } from './routes';
 import { SavedObjectsSerializer } from './serialization';
+import { registerRoutes } from './routes';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -247,9 +248,9 @@ export interface SavedObjectsRepositoryFactory {
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
+  http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
-  http: InternalHttpServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -271,6 +272,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
+  private migrator$ = new Subject<KibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
 
@@ -308,6 +310,7 @@ export class SavedObjectsService
       http: setupDeps.http,
       logger: this.logger,
       config: this.config,
+      migratorPromise: this.migrator$.pipe(first()).toPromise(),
       importableExportableTypes,
     });
 
@@ -347,6 +350,8 @@ export class SavedObjectsService
       .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
     const migrator = this.createMigrator(kibanaConfig, this.config.migration, migrationsRetryDelay);
+
+    this.migrator$.next(migrator);
 
     /**
      * Note: We want to ensure that migrations have completed before

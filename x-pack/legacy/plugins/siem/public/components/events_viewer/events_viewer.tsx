@@ -5,10 +5,10 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
-import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
+import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { BrowserFields } from '../../containers/source';
@@ -228,7 +228,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 export const EventsViewer = React.memo(
   EventsViewerComponent,
   (prevProps, nextProps) =>
-    isEqual(prevProps.browserFields, nextProps.browserFields) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
@@ -241,9 +241,9 @@ export const EventsViewer = React.memo(
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    isEqual(prevProps.query, nextProps.query) &&
+    deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    isEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
+    deepEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
     prevProps.utilityBar === nextProps.utilityBar
 );
