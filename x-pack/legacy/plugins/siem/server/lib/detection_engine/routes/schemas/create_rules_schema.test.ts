@@ -5,12 +5,12 @@
  */
 
 import { createRulesSchema } from './create_rules_schema';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
 import { ThreatParams, RuleAlertParamsRest } from '../../types';
 
 describe('create rules schema', () => {
   test('empty objects do not validate', () => {
-    expect(createRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({}).error).toBeTruthy();
+    expect(createRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({}).error).toBeTruthy();
   });
 
   test('made up values do not validate', () => {

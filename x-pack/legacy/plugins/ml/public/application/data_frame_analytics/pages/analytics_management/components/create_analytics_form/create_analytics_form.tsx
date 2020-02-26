@@ -21,11 +21,11 @@ import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { metadata } from 'ui/metadata';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   JOB_TYPES,
@@ -45,8 +45,12 @@ import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../comm
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const { setFormState } = actions;
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
@@ -92,7 +96,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
   const validateSourceIndexFields = async () => {
     try {
-      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
         indexPatternsMap[sourceIndex].value
       );
       const containsNumericalFields: boolean = indexPattern.fields.some(
@@ -207,7 +211,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       sourceIndexContainsNumericalFields: true,
     });
     try {
-      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
         indexPatternsMap[sourceIndex].value
       );
 
@@ -456,7 +460,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   )}
                   <br />
                   <EuiLink
-                    href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
+                    href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`}
                     target="_blank"
                   >
                     {i18n.translate(

@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getSearchService } from '../../../../plugins/data/public/services';
-import { esFilters, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
+import { Filter, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
@@ -33,7 +33,7 @@ import { VisParams } from './vega_fn';
 
 interface VegaRequestHandlerParams {
   query: Query;
-  filters: esFilters.Filter;
+  filters: Filter;
   timeRange: TimeRange;
   visParams: VisParams;
 }

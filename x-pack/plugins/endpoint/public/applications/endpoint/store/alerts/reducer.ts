@@ -11,6 +11,11 @@ import { AppAction } from '../action';
 const initialState = (): AlertListState => {
   return {
     alerts: [],
+    request_page_size: 10,
+    request_page_index: 0,
+    result_from_index: 0,
+    total: 0,
+    location: undefined,
   };
 };
 
@@ -21,7 +26,12 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
   if (action.type === 'serverReturnedAlertsData') {
     return {
       ...state,
-      alerts: action.payload,
+      ...action.payload,
+    };
+  } else if (action.type === 'userChangedUrl') {
+    return {
+      ...state,
+      location: action.payload,
     };
   }
 

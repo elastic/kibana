@@ -29,7 +29,7 @@ import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import {
   KBN_FIELD_TYPES,
-  fieldFormats,
+  IFieldFormat,
   ISearchSource,
 } from '../../../../../../plugins/data/public';
 
@@ -58,7 +58,7 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => fieldFormats.FieldFormat;
+  getFormat?: (agg: TAggConfig) => IFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
@@ -199,7 +199,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => fieldFormats.FieldFormat;
+  getFormat: (agg: TAggConfig) => IFieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

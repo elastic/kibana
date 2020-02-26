@@ -12,6 +12,7 @@
 - <<pki-authentication>>
 - <<saml>>
 - <<oidc>>
+- <<kerberos>>
 
 [[basic-authentication]]
 ==== Basic authentication
@@ -214,3 +215,26 @@ leaked, it can't be re-used after logout. This is known as "local" logout.
 {kib} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
 explicitly disabled by {es}. In this case, the user is redirected to the external authentication provider for log out of
 all applications associated with the active provider session.
+
+[[kerberos]]
+==== Kerberos single sign-on
+
+As with the previous SSOs, make sure that you have configured {es} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
+
+Next, to enable Kerberos in {kib}, you will need to enable the Kerberos authentication provider in the `kibana.yml` configuration file, as follows:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers: [kerberos]
+-----------------------------------------------
+
+You may want to be able to authenticate with the basic authentication provider as a secondary mechanism or while you are setting up Kerberos for the stack:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers: [kerberos, basic]
+-----------------------------------------------
+
+As a reminder, the order is important as it determines the order in which each authentication provider is attempted.
+
+Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.

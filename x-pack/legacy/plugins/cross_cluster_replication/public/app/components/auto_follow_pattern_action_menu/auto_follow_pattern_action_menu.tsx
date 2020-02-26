@@ -68,7 +68,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
       ? patterns[0].active
         ? {
             name: i18n.translate('xpack.crossClusterReplication.pauseAutoFollowPatternsLabel', {
-              defaultMessage: 'Pause {total, plural, one {pattern} other {patterns}}',
+              defaultMessage: 'Pause {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
             icon: <EuiIcon type="pause" />,
@@ -79,7 +79,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           }
         : {
             name: i18n.translate('xpack.crossClusterReplication.resumeAutoFollowPatternsLabel', {
-              defaultMessage: 'Resume {total, plural, one {pattern} other {patterns}}',
+              defaultMessage: 'Resume {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
             icon: <EuiIcon type="play" />,

@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const MONITOR_ROUTE = '/monitor/:monitorId?';
+
+export const OVERVIEW_ROUTE = '/';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',

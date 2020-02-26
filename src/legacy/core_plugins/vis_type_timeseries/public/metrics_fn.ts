@@ -19,14 +19,18 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { PersistedState } from 'ui/persisted_state';
-import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  Render,
+} from '../../../../plugins/expressions/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+import { PersistedState } from './legacy_imports';
 
-const name = 'tsvb';
-type Context = KibanaContext | null;
+type Input = KibanaContext | null;
+type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
   params: string;
@@ -38,19 +42,20 @@ type VisParams = Required<Arguments>;
 
 interface RenderValue {
   visType: 'metrics';
-  visData: Context;
+  visData: Input;
   visConfig: VisParams;
   uiState: any;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
-export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
-  name,
+export const createMetricsFn = (): ExpressionFunctionDefinition<
+  'tsvb',
+  Input,
+  Arguments,
+  Output
+> => ({
+  name: 'tsvb',
   type: 'render',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('visTypeTimeseries.function.help', {
     defaultMessage: 'TSVB visualization',
   }),
@@ -71,16 +76,16 @@ export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Argu
       help: '',
     },
   },
-  async fn(context: Context, args: Arguments) {
+  async fn(input, args) {
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
     const savedObjectId = args.savedObjectId;
     const uiState = new PersistedState(uiStateParams);
 
     const response = await metricsRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
+      timeRange: get(input, 'timeRange', null),
+      query: get(input, 'query', null),
+      filters: get(input, 'filters', null),
       visParams: params,
       uiState,
       savedObjectId,

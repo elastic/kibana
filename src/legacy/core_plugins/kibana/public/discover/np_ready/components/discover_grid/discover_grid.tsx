@@ -120,7 +120,7 @@ function CellPopover({
   );
 }
 
-export function DiscoverGrid({
+export const DiscoverGrid = React.memo(function DiscoverGridInner({
   rows,
   columns,
   sort,
@@ -138,17 +138,9 @@ export function DiscoverGrid({
 }: Props) {
   const actionColumnId = 'uniqueString'; // TODO should be guaranteed unique...
   const lowestPageSize = 50;
-  const timeNode = useMemo(
-    () => (
-      <span>
-        {i18n.translate('kbn.discover.timeLabel', {
-          defaultMessage: 'Time',
-        })}
-      </span>
-    ),
-    []
-  );
-  const timeString = useRenderToText(timeNode, 'Time');
+  const timeString = i18n.translate('kbn.discover.timeLabel', {
+    defaultMessage: 'Time',
+  });
   const [flyoutRow, setFlyoutRow] = useState<ElasticSearchHit | undefined>(undefined);
 
   const dataGridColumns = columns.map(
@@ -223,9 +215,14 @@ export function DiscoverGrid({
    * Visibility and order
    */
   const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map(obj => obj.id));
+  const mounted = React.useRef(false);
   useEffect(() => {
     // every time a column is added, make it visible
-    setVisibleColumns(dataGridColumns.map(obj => obj.id));
+    if (!mounted.current) {
+      mounted.current = true;
+    } else {
+      setVisibleColumns(dataGridColumns.map(obj => obj.id));
+    }
   }, [dataGridColumns.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
@@ -451,4 +448,4 @@ export function DiscoverGrid({
       )}
     </>
   );
-}
+});

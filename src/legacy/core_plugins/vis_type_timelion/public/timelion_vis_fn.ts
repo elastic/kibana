@@ -19,36 +19,36 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  Render,
+} from 'src/plugins/expressions/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
 
-const name = 'timelion_vis';
-
+type Input = KibanaContext | null;
+type Output = Promise<Render<RenderValue>>;
 interface Arguments {
   expression: string;
   interval: string;
 }
 
 interface RenderValue {
-  visData: Context;
+  visData: Input;
   visType: 'timelion';
   visParams: VisParams;
 }
 
-type Context = KibanaContext | null;
 export type VisParams = Arguments;
-type Return = Promise<Render<RenderValue>>;
 
 export const getTimelionVisualizationConfig = (
   dependencies: TimelionVisDependencies
-): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
-  name,
+): ExpressionFunctionDefinition<'timelion_vis', Input, Arguments, Output> => ({
+  name: 'timelion_vis',
   type: 'render',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('timelion.function.help', {
     defaultMessage: 'Timelion visualization',
   }),
@@ -65,15 +65,15 @@ export const getTimelionVisualizationConfig = (
       help: '',
     },
   },
-  async fn(context, args) {
+  async fn(input, args) {
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
 
     const response = await timelionRequestHandler({
-      timeRange: get(context, 'timeRange'),
-      query: get(context, 'query'),
-      filters: get(context, 'filters'),
+      timeRange: get(input, 'timeRange'),
+      query: get(input, 'query'),
+      filters: get(input, 'filters'),
       visParams,
       forceFetch: true,
     });

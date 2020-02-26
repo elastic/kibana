@@ -17,7 +17,7 @@ import { LoadingPanel } from '../loading_panel';
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -64,7 +64,7 @@ export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
     undefined
   );
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
@@ -107,7 +107,7 @@ export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
       try {
         const sourceIndex = jobConfig.source.index[0];
         const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+        const indexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
         if (indexPattern !== undefined) {
           await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
         }

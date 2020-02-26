@@ -3,14 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 
 import { fetchIndices } from '../../../lib/fetch_indices';
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
 
-const handler: RouterRouteHandler = async (request, callWithRequest) => {
-  return fetchIndices(callWithRequest);
-};
-
-export function registerListRoute(router: Router) {
-  router.get('indices', handler);
+export function registerListRoute({ router, license, indexDataEnricher, lib }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/indices'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      try {
+        const indices = await fetchIndices(
+          ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+          indexDataEnricher
+        );
+        return res.ok({ body: indices });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }

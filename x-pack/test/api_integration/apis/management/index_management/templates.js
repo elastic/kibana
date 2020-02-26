@@ -92,14 +92,16 @@ export default function({ getService }) {
         await createTemplate(payload).expect(409);
       });
 
-      it('should handle ES errors', async () => {
+      it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = getTemplatePayload(templateName);
 
         delete payload.indexPatterns; // index patterns are required
 
         const { body } = await createTemplate(payload);
-        expect(body.message).to.contain('index patterns are missing');
+        expect(body.message).to.contain(
+          '[request body.indexPatterns]: expected value of type [array] '
+        );
       });
     });
 

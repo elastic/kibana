@@ -30,7 +30,8 @@ import { IAggConfigs } from '../agg_configs';
 import { Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   ISearchSource,
-  fieldFormats,
+  IFieldFormat,
+  FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../../plugins/data/public';
 
@@ -80,9 +81,9 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket): fieldFormats.FieldFormat {
+  getFormat(bucket): IFieldFormat {
     return {
-      getConverterFor: (type: fieldFormats.ContentType) => {
+      getConverterFor: (type: FieldFormatsContentType) => {
         return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
@@ -94,7 +95,7 @@ export const termsBucketAgg = new BucketAggType({
           return bucket.params.field.format.convert(val, type);
         };
       },
-    } as fieldFormats.FieldFormat;
+    } as IFieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (

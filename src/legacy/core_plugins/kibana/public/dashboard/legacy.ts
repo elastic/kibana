@@ -18,39 +18,13 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart, legacyChrome } from './legacy_imports';
-import { LegacyAngularInjectedDependencies } from './plugin';
-import { start as data } from '../../../data/public/legacy';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './dashboard_config';
+import { npSetup, npStart } from './legacy_imports';
 import { plugin } from './index';
 
-/**
- * Get dependencies relying on the global angular context.
- * They also have to get resolved together with the legacy imports above
- */
-async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
-  const injector = await legacyChrome.dangerouslyGetActiveInjector();
-
-  return {
-    dashboardConfig: injector.get('dashboardConfig'),
-  };
-}
-
 (async () => {
-  const instance = plugin({} as PluginInitializerContext);
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    npData: npSetup.plugins.data,
-    __LEGACY: {
-      getAngularDependencies,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    data,
-    npData: npStart.plugins.data,
-    embeddables,
-    navigation: npStart.plugins.navigation,
-  });
+  const instance = plugin({
+    env: npSetup.plugins.kibanaLegacy.env,
+  } as PluginInitializerContext);
+  instance.setup(npSetup.core, npSetup.plugins);
+  instance.start(npStart.core, npStart.plugins);
 })();

@@ -5,21 +5,24 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -33,18 +36,15 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       },
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
+      const { actionsClient, alertsClient, savedObjectsClient, spacesClient } = await getClients(
+        request
       );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
             description,
@@ -74,6 +74,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             references,
             version,
           } = payloadRule;
+          const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -81,11 +82,12 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
               timelineId,
@@ -132,6 +134,10 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const updateRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createUpdateRulesBulkRoute(server));
+export const updateRulesBulkRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createUpdateRulesBulkRoute(config, getClients));
 };

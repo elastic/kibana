@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertData, ImmutableArray } from '../../../../../common/types';
+import { AlertResultList } from '../../../../../common/types';
 import { AppAction } from '../action';
-import { MiddlewareFactory } from '../../types';
+import { MiddlewareFactory, AlertListState } from '../../types';
+import { isOnAlertPage, apiQueryParams } from './selectors';
 
-export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
+export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreStart => {
   return api => next => async (action: AppAction) => {
     next(action);
-    if (action.type === 'userNavigatedToPage' && action.payload === 'alertsPage') {
-      const response: ImmutableArray<AlertData> = await coreStart.http.get('/api/endpoint/alerts');
+    const state = api.getState();
+    if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
+      const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
+        query: apiQueryParams(state),
+      });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
   };

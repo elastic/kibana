@@ -24,7 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IAggType, documentationLinks } from '../legacy_imports';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IAggType } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
@@ -51,6 +52,7 @@ function DefaultEditorAggSelect({
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
+  const { services } = useKibana();
   const selectedOptions: ComboBoxGroupedOptions<IAggType> = value
     ? [{ label: value.title, target: value }]
     : [];
@@ -69,7 +71,7 @@ function DefaultEditorAggSelect({
 
   let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
-    aggHelpLink = get(documentationLinks, ['aggs', value.name]);
+    aggHelpLink = services.docLinks.links.aggs[value.name];
   }
 
   const helpLink = value && aggHelpLink && (

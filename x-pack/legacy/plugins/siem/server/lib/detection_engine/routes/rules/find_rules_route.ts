@@ -5,17 +5,17 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { transformFindAlertsOrError } from './utils';
+import { transformFindAlerts } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createFindRulesRoute = (): Hapi.ServerRoute => {
+export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -28,17 +28,14 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
         query: findRulesSchema,
       },
     },
-    async handler(request: FindRulesRequest, headers) {
+    async handler(request: FindRulesRequest & LegacyRequest, headers) {
       const { query } = request;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
+        const { alertsClient, savedObjectsClient } = await getClients(request);
+        if (!alertsClient) {
+          return headers.response().code(404);
+        }
+
         const rules = await findRules({
           alertsClient,
           perPage: query.per_page,
@@ -62,14 +59,30 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
             return results;
           })
         );
-        return transformFindAlertsOrError(rules, ruleStatuses);
+        const transformed = transformFindAlerts(rules, ruleStatuses);
+        if (transformed == null) {
+          return headers
+            .response({
+              message: 'unknown data type, error transforming alert',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformed;
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const findRulesRoute = (server: ServerFacade) => {
-  server.route(createFindRulesRoute());
+export const findRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
+  route(createFindRulesRoute(getClients));
 };

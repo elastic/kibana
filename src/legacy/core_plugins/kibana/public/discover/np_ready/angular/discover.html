@@ -111,7 +111,8 @@
                   id="reload_saved_search"
                   ng-click="resetQuery()"
                 >
-                  {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset results'} }}
+                  {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset
+                  results'} }}
                 </button>
               </div>
               <select
@@ -193,6 +194,7 @@
                 on-change-sort-order="setSortOrder"
                 on-move-column="moveColumn"
                 on-remove-column="removeColumn"
+                data-test-subj="discoverDocTable"
               ></doc-table>
 
               <a tabindex="0" id="discoverBottomMarker"></a>

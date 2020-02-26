@@ -30,72 +30,8 @@ import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/u
 
 import { LoggerFactory } from '../../logging';
 import { PackageInfo } from '../../config';
-
-import {
-  LegacyUiExports,
-  LegacyNavLink,
-  LegacyPluginSpec,
-  LegacyPluginPack,
-  LegacyConfig,
-} from '../types';
-
-const REMOVE_FROM_ARRAY: LegacyNavLink[] = [];
-
-function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
-  return uiAppSpecs.flatMap(spec => {
-    if (!spec) {
-      return REMOVE_FROM_ARRAY;
-    }
-
-    const id = spec.pluginId || spec.id;
-
-    if (!id) {
-      throw new Error('Every app must specify an id');
-    }
-
-    if (spec.pluginId && !pluginSpecs.some(plugin => plugin.getId() === spec.pluginId)) {
-      throw new Error(`Unknown plugin id "${spec.pluginId}"`);
-    }
-
-    const listed = typeof spec.listed === 'boolean' ? spec.listed : true;
-
-    if (spec.hidden || !listed) {
-      return REMOVE_FROM_ARRAY;
-    }
-
-    return {
-      id,
-      category: spec.category,
-      title: spec.title,
-      order: typeof spec.order === 'number' ? spec.order : 0,
-      icon: spec.icon,
-      euiIconType: spec.euiIconType,
-      url: spec.url || `/app/${id}`,
-      linkToLastSubUrl: spec.linkToLastSubUrl,
-    };
-  });
-}
-
-function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
-  return (uiExports.navLinkSpecs || [])
-    .map<LegacyNavLink>(spec => ({
-      id: spec.id,
-      category: spec.category,
-      title: spec.title,
-      order: typeof spec.order === 'number' ? spec.order : 0,
-      url: spec.url,
-      subUrlBase: spec.subUrlBase || spec.url,
-      disableSubUrlTracking: spec.disableSubUrlTracking,
-      icon: spec.icon,
-      euiIconType: spec.euiIconType,
-      linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
-      hidden: 'hidden' in spec ? spec.hidden : false,
-      disabled: 'disabled' in spec ? spec.disabled : false,
-      tooltip: spec.tooltip || '',
-    }))
-    .concat(getUiAppsNavLinks(uiExports, pluginSpecs))
-    .sort((a, b) => a.order - b.order);
-}
+import { LegacyPluginSpec, LegacyPluginPack, LegacyConfig } from '../types';
+import { getNavLinks } from './get_nav_links';
 
 export async function findLegacyPluginSpecs(
   settings: unknown,

@@ -5,21 +5,15 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { Fragment, useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
-import { useTrackPageview } from '../../../infra/public';
-import { PageHeader } from './page_header';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
 
-interface MonitorPageProps {
-  setBreadcrumbs: UMUpdateBreadcrumbs;
-}
-
-export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
+export const MonitorPage = () => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
@@ -46,8 +40,7 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   return (
-    <Fragment>
-      <PageHeader setBreadcrumbs={setBreadcrumbs} />
+    <>
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
@@ -69,6 +62,6 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
           status: selectedPingStatus,
         }}
       />
-    </Fragment>
+    </>
   );
 };

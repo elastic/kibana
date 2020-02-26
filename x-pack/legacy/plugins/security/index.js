@@ -86,6 +86,7 @@ export const security = kibana =>
             tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
           },
           enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
+          logoutUrl: `${server.newPlatform.setup.core.http.basePath.serverBasePath}/logout`,
         };
       },
     },
@@ -114,9 +115,6 @@ export const security = kibana =>
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
         auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
-        isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
-          server.plugins.kibana.systemApi
-        ),
       });
 
       // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`

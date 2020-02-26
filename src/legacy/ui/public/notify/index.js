@@ -19,5 +19,5 @@
 
 export { fatalError, addFatalErrorCallback } from './fatal_error';
 export { toastNotifications } from './toasts';
-export { banners } from './banners';
 export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+export { banners } from './banners';

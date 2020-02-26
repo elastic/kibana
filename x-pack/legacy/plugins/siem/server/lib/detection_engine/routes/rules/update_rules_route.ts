@@ -5,18 +5,20 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { updateRules } from '../../rules/update_rules';
 import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { getIdError, transformOrError } from './utils';
-import { transformError } from '../utils';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
+import { getIdError, transform } from './utils';
+import { transformError, getIndex } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_RULES_URL,
@@ -39,8 +41,8 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         language,
         output_index: outputIndex,
         saved_id: savedId,
-        timeline_id: timelineId = null,
-        timeline_title: timelineTitle = null,
+        timeline_id: timelineId,
+        timeline_title: timelineTitle,
         meta,
         filters,
         rule_id: ruleId,
@@ -59,18 +61,16 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         version,
       } = request.payload;
 
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
+        const { alertsClient, actionsClient, savedObjectsClient, spacesClient } = await getClients(
+          request
+        );
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
         const rule = await updateRules({
           alertsClient,
           actionsClient,
@@ -78,9 +78,10 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           enabled,
           falsePositives,
           from,
+          immutable: false,
           query,
           language,
-          outputIndex,
+          outputIndex: finalIndex,
           savedId,
           savedObjectsClient,
           timelineId,
@@ -113,17 +114,43 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             search: rule.id,
             searchFields: ['alertId'],
           });
-          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
+          if (transformed == null) {
+            return headers
+              .response({
+                message: 'Internal error transforming rules',
+                status_code: 500,
+              })
+              .code(500);
+          } else {
+            return transformed;
+          }
         } else {
-          return getIdError({ id, ruleId });
+          const error = getIdError({ id, ruleId });
+          return headers
+            .response({
+              message: error.message,
+              status_code: error.statusCode,
+            })
+            .code(error.statusCode);
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute(server));
+export const updateRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(createUpdateRulesRoute(config, getClients));
 };

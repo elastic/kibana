@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IE_REGEX } from '../url_overflow_service.js';
+import { IE_REGEX } from '../../../../../plugins/kibana_legacy/public';
 
 describe('IE_REGEX', () => {
   it('should detect IE 9', () => {
