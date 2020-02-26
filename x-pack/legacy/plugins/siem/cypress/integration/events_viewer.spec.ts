@@ -8,7 +8,6 @@ import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
-  FIELDS_BROWSER_TITLE,
 } from '../screens/fields_browser';
 import {
   HEADER_SUBTITLE,
@@ -59,12 +58,6 @@ describe('Events Viewer', () => {
     afterEach(() => {
       closeFieldsBrowser();
       cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
-    });
-
-    it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
-      cy.get(FIELDS_BROWSER_TITLE)
-        .invoke('text')
-        .should('eq', 'Customize Columns');
     });
 
     it('displays the `default ECS` category (by default)', () => {
