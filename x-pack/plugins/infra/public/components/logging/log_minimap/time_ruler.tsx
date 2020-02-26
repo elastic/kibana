@@ -8,7 +8,7 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
-import { timeLabelFormat } from './time_label_formatter';
+import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
   end: number;
@@ -24,7 +24,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
     .range([0, height]);
 
   const ticks = yScale.ticks(tickCount);
-  const formatTick = yScale.tickFormat(tickCount, timeLabelFormat(start, end));
+  const formatTick = yScale.tickFormat(tickCount, getTimeLabelFormat(start, end));
 
   return (
     <g>

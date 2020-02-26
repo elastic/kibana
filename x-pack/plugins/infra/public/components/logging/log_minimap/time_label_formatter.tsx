@@ -5,7 +5,7 @@
  */
 
 // The default d3-time-format is a bit strange for small ranges, so we will specify our own
-export function timeLabelFormat(start: number, end: number): string | undefined {
+export function getTimeLabelFormat(start: number, end: number): string | undefined {
   const diff = Math.abs(end - start);
 
   // 15 seconds
