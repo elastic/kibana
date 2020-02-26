@@ -89,7 +89,9 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.servicenow',
-    name: 'servicenow',
+    name: i18n.translate('xpack.actions.builtin.servicenowTitle', {
+      defaultMessage: 'ServiceNow',
+    }),
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

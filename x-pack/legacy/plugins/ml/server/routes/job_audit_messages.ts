@@ -50,7 +50,7 @@ export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitial
   /**
    * @apiGroup JobAuditMessages
    *
-   * @api {get} /api/ml/results/anomalies_table_data Get all audit messages
+   * @api {get} /api/ml/job_audit_messages/messages Get all audit messages
    * @apiName GetAllJobAuditMessages
    * @apiDescription Returns all audit messages
    */

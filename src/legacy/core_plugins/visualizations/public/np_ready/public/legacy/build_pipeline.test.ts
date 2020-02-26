@@ -31,11 +31,6 @@ import { IAggConfig } from '../../../legacy_imports';
 import { searchSourceMock } from '../../../legacy_mocks';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/agg_types', () => ({
-  setBounds: () => {},
-  dateHistogramBucketAgg: () => {},
-  isDateHistogramBucketAggConfig: () => true,
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
