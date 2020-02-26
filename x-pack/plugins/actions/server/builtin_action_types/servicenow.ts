@@ -90,7 +90,7 @@ export function getActionType({
   return {
     id: '.servicenow',
     name: 'servicenow',
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
