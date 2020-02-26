@@ -19,7 +19,7 @@ export const config = {
       registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
     }),
     fleet: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
