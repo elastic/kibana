@@ -96,7 +96,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.pagerduty',
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),

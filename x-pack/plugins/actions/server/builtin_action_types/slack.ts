@@ -50,7 +50,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.slack',
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),

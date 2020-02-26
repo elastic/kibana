@@ -66,7 +66,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.webhook',
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
