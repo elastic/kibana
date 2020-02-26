@@ -7,6 +7,7 @@
 import { omit } from 'lodash/fp';
 
 import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status_route';
+import * as findRules from '../../rules/find_rules';
 
 import {
   getFindResult,
@@ -47,7 +48,12 @@ describe('get_prepackaged_rule_status_route', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
 
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
@@ -75,6 +81,17 @@ describe('get_prepackaged_rule_status_route', () => {
       getPrepackagedRulesStatusRoute(route, getClients);
       const { statusCode } = await inject(getPrepackagedRulesStatusRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('catch error when findRules function throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      jest.spyOn(findRules, 'findRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getPrepackagedRulesStatusRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
