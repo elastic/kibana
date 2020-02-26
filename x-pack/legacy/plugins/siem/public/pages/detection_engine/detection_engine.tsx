@@ -173,7 +173,6 @@ const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                             hideHeaderChildren={true}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
