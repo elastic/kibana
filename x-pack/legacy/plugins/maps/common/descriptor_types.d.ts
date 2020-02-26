@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type EMSXYZSourceType = 'EMS_XYZ';
-export type SourceType = EMSXYZSourceType | string;
-
 export interface ISourceDescriptor {
   id: string;
-  type: SourceType;
+  type: string;
 }
 
 export interface IXYZTMSSourceDescriptor extends ISourceDescriptor {
   urlTemplate: string;
-  type: EMSXYZSourceType;
 }
 
 export interface ILayerDescriptor {
