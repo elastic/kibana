@@ -13,7 +13,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { AlertsClient } from '../../../../../../../plugins/alerting/server';
+import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { LegacyRequest } from '../../../types';
@@ -189,12 +189,12 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
-  return obj.every(rule => isAlertType(rule));
+export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+  return partialAlert.every(rule => isAlertType(rule));
 };
 
-export const isAlertType = (obj: unknown): obj is RuleAlertType => {
-  return get('alertTypeId', obj) === SIGNALS_ID;
+export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+  return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
 export const isRuleStatusSavedObjectType = (
