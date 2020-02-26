@@ -5,6 +5,7 @@
  */
 
 import { readPrivilegesRoute } from './read_privileges_route';
+import * as readPrivileges from '../../privileges/read_privileges';
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivileges } from '../__mocks__/request_responses';
 
@@ -37,6 +38,17 @@ describe('read_privileges', () => {
     test('returns the payload when doing a normal request', async () => {
       const { payload } = await inject(getPrivilegeRequest());
       expect(JSON.parse(payload)).toEqual(getMockPrivileges());
+    });
+
+    test('returns 500 when bad response from readPrivileges', async () => {
+      jest.spyOn(readPrivileges, 'readPrivileges').mockImplementation(() => {
+        throw new Error('Test error');
+      });
+      const { payload } = await inject(getPrivilegeRequest());
+      expect(JSON.parse(payload)).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 });

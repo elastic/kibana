@@ -7,8 +7,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getIndexListUri } from '../../../../../../../../index_management/public/application/services/navigation';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,12 +29,11 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-
 import 'brace/theme/textmate';
 
-import { ContextMenu } from '../context_menu';
-
+import { getIndexListUri } from '../../../../../../../../../../plugins/index_management/public';
 import { API_STATUS } from '../../../../../constants';
+import { ContextMenu } from '../context_menu';
 
 export class DetailPanel extends Component {
   static propTypes = {

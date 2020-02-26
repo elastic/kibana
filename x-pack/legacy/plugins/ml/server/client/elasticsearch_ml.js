@@ -450,6 +450,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST',
   });
 
+  ml.records = ca({
+    url: {
+      fmt: '/_ml/anomaly_detectors/<%=jobId%>/results/records',
+      req: {
+        jobId: {
+          type: 'string',
+        },
+      },
+    },
+    method: 'POST',
+  });
+
   ml.buckets = ca({
     urls: [
       {
