@@ -14,15 +14,14 @@ import {
   COUNT_PROP_NAME,
   ES_GEO_GRID,
   LAYER_TYPE,
-  METRIC_TYPE,
+  AGG_TYPE,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import { ESGeoGridSource, RENDER_AS } from './sources/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 
 function getAggType(dynamicProperty) {
-  // TODO change 'terms' to constant once top terms PR is merged
-  return dynamicProperty.isOrdinal() ? METRIC_TYPE.AVG : 'terms';
+  return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 
 export class BlendedVectorLayer extends VectorLayer {
@@ -76,7 +75,7 @@ export class BlendedVectorLayer extends VectorLayer {
     });
     clusterSourceDescriptor.metrics = [
       {
-        type: METRIC_TYPE.COUNT,
+        type: AGG_TYPE.COUNT,
         label: COUNT_PROP_LABEL,
       },
       ...this._documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
