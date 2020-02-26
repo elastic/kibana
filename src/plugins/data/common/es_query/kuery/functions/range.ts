@@ -51,7 +51,7 @@ export function toElasticsearchQuery(
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
-    context && context.nested ? context.nested.path : undefined
+    context?.nested ? context.nested.path : undefined
   );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);

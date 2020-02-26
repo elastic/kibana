@@ -60,7 +60,7 @@ export function toElasticsearchQuery(
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
-    context && context.nested ? context.nested.path : undefined
+    context?.nested ? context.nested.path : undefined
   );
   const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
@@ -114,7 +114,7 @@ export function toElasticsearchQuery(
       if (
         !(fullFieldNameArg.type === 'wildcard') ||
         !get(field, 'subType.nested') ||
-        (context && context.nested)
+        context?.nested
       ) {
         return query;
       } else {

@@ -38,10 +38,7 @@ export function toElasticsearchQuery(
   } = node;
   const fullFieldNameArg = {
     ...fieldNameArg,
-    value:
-      context && context.nested
-        ? `${context.nested.path}.${fieldNameArg.value}`
-        : fieldNameArg.value,
+    value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find((fld: IFieldType) => fld.name === fieldName);

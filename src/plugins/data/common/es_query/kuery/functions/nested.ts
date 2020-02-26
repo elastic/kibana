@@ -37,10 +37,7 @@ export function toElasticsearchQuery(
 ) {
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path);
-  const fullPath =
-    context && context.nested && context.nested.path
-      ? `${context.nested.path}.${stringPath}`
-      : stringPath;
+  const fullPath = context?.nested?.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {
     nested: {
