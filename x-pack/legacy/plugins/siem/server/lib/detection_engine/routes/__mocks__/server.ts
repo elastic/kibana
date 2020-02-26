@@ -8,11 +8,11 @@ import {
   RequestHandler,
   RouteConfig,
   KibanaRequest,
+  RequestHandlerContext,
 } from '../../../../../../../../../src/core/server';
-import { httpServiceMock, httpServerMock } from '../../../../../../../../../src/core/server/mocks';
+import { httpServiceMock } from '../../../../../../../../../src/core/server/mocks';
 import { requestContextMock } from './request_context';
-
-export { requestContextMock };
+import { responseMock as responseFactoryMock } from './response_factory';
 
 interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get'>;
@@ -21,30 +21,30 @@ interface Route {
 
 const createMockServer = () => {
   const routeSpy = jest.fn();
-  const router = httpServiceMock.createRouter();
-  const response = httpServerMock.createResponseFactory();
-  const context = requestContextMock.create();
+  const routerMock = httpServiceMock.createRouter();
+  const responseMock = responseFactoryMock.create();
+  const contextMock = requestContextMock.create();
 
-  router.get.mockImplementation(routeSpy);
-  router.post.mockImplementation(routeSpy);
-  router.patch.mockImplementation(routeSpy);
-  router.put.mockImplementation(routeSpy);
-  router.delete.mockImplementation(routeSpy);
+  routerMock.get.mockImplementation(routeSpy);
+  routerMock.post.mockImplementation(routeSpy);
+  routerMock.patch.mockImplementation(routeSpy);
+  routerMock.put.mockImplementation(routeSpy);
+  routerMock.delete.mockImplementation(routeSpy);
 
   const getRoute = (): Route => {
     const [config, handler] = routeSpy.mock.calls[routeSpy.mock.calls.length - 1];
     return { config, handler };
   };
 
-  const inject = (request: KibanaRequest) => {
-    return getRoute().handler(context, request, response);
+  const inject = async (request: KibanaRequest, context: RequestHandlerContext = contextMock) => {
+    await getRoute().handler(context, request, responseMock);
+    return responseMock;
   };
 
   return {
     getRoute,
-    router,
     inject,
-    response,
+    router: routerMock,
   };
 };
 

@@ -12,54 +12,54 @@ import {
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 
 describe('delete_rules', () => {
-  let { getRoute, router, response } = serverMock.create();
+  let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    ({ getRoute, router, response } = serverMock.create());
+    server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    deleteRulesBulkRoute(router);
+    deleteRulesBulkRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
-      await getRoute().handler(context, getDeleteBulkRequest(), response);
+      const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
-      await getRoute().handler(context, getDeleteAsPostBulkRequest(), response);
+      const response = await server.inject(getDeleteAsPostBulkRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      await getRoute().handler(context, getDeleteBulkRequestById(), response);
+      const response = await server.inject(getDeleteBulkRequestById(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id using POST', async () => {
-      await getRoute().handler(context, getDeleteAsPostBulkRequestById(), response);
+      const response = await server.inject(getDeleteAsPostBulkRequestById(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      await getRoute().handler(context, getDeleteBulkRequest(), response);
+      const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
-      await getRoute().handler(context, getDeleteBulkRequest(), response);
+      const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.ok).toHaveBeenCalledWith({
         body: expect.arrayContaining([
           {
@@ -72,7 +72,7 @@ describe('delete_rules', () => {
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
-      await getRoute().handler(context, getDeleteBulkRequest(), response);
+      const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
   });
@@ -80,8 +80,9 @@ describe('delete_rules', () => {
   describe('request validation', () => {
     test('rejects requests without IDs', async () => {
       const body = [{}];
+      const response = responseMock.create();
       // @ts-ignore ambiguous validation types
-      getRoute().config.validate.body(body, response);
+      server.getRoute().config.validate.body(body, response);
 
       expect(response.badRequest).toHaveBeenCalled();
     });

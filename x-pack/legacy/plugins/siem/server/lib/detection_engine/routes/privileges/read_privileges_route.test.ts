@@ -9,25 +9,25 @@ import { serverMock, requestContextMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivileges } from '../__mocks__/request_responses';
 
 describe('read_privileges', () => {
-  let { getRoute, router, response } = serverMock.create();
+  let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    ({ getRoute, router, response } = serverMock.create());
+    server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivileges());
-    readPrivilegesRoute(router, false);
+    readPrivilegesRoute(server.router, false);
   });
 
   describe('normal status codes', () => {
     test('returns 200 when doing a normal request', async () => {
-      await getRoute().handler(context, getPrivilegeRequest(), response);
+      const response = await server.inject(getPrivilegeRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns the payload when doing a normal request', async () => {
-      await getRoute().handler(context, getPrivilegeRequest(), response);
+      const response = await server.inject(getPrivilegeRequest(), context);
       expect(response.ok).toHaveBeenCalledWith({
         body: getMockPrivileges(),
       });

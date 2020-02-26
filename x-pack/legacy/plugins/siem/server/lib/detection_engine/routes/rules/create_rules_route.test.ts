@@ -15,14 +15,14 @@ import {
   getNonEmptyIndex,
   getEmptyIndex,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
 describe('create_rules', () => {
-  let { getRoute, router, response } = serverMock.create();
+  let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    ({ router, getRoute, response } = serverMock.create());
+    server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
@@ -30,29 +30,24 @@ describe('create_rules', () => {
     clients.alertsClient.create.mockResolvedValue(getResult());
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
-    createRulesRoute(router);
+    createRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      const { handler } = getRoute();
-      await handler(context, getCreateRequest(), response);
-
+      const response = await server.inject(getCreateRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
-      const { handler } = getRoute();
-      await handler(context, getCreateRequest(), response);
-
+      const response = await server.inject(getCreateRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
 
     test('it returns a 400 if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      const { handler } = getRoute();
-      await handler(context, getCreateRequest(), response);
+      const response = await server.inject(getCreateRequest(), context);
 
       expect(response.badRequest).toHaveBeenCalledWith({
         body: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
@@ -63,16 +58,18 @@ describe('create_rules', () => {
   describe('request validation', () => {
     test('allows rule type of query', async () => {
       const body = { ...typicalPayload(), type: 'query' };
+      const response = responseMock.create();
       // @ts-ignore ambiguous validation types
-      getRoute().config.validate.body(body, response);
+      server.getRoute().config.validate.body(body, response);
 
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('disallows unknown rule type', async () => {
       const body = { ...typicalPayload(), type: 'unexpected_type' };
+      const response = responseMock.create();
       // @ts-ignore ambiguous validation types
-      getRoute().config.validate.body(body, response);
+      server.getRoute().config.validate.body(body, response);
 
       expect(response.badRequest).toHaveBeenCalled();
     });

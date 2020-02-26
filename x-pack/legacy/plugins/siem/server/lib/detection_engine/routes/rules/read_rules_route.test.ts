@@ -15,30 +15,28 @@ import {
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
 describe('read_signals', () => {
-  let { getRoute, router, response } = serverMock.create();
+  let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    ({ router, getRoute, response } = serverMock.create());
+    server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    readRulesRoute(router);
+    readRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { handler } = getRoute();
-      await handler(context, getReadRequest(), response);
+      const response = await server.inject(getReadRequest(), context);
 
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
-      const { handler } = getRoute();
-      await handler(context, getReadRequest(), response);
+      const response = await server.inject(getReadRequest(), context);
 
       expect(response.notFound).toHaveBeenCalled();
     });
@@ -52,8 +50,7 @@ describe('read_signals', () => {
         path: DETECTION_ENGINE_RULES_URL,
         query: { rule_id: 'DNE_RULE' },
       });
-      const { handler } = getRoute();
-      await handler(context, request, response);
+      const response = await server.inject(request, context);
 
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({

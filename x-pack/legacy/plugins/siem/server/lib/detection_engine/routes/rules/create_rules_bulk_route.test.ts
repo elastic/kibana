@@ -5,30 +5,30 @@
  */
 
 import { typicalPayload, getReadBulkRequest, getEmptyIndex } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock, responseMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 
 describe('create_rules_bulk', () => {
-  let { getRoute, router, response } = serverMock.create();
+  let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    ({ getRoute, router, response } = serverMock.create());
+    server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    createRulesBulkRoute(router);
+    createRulesBulkRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      await getRoute().handler(context, getReadBulkRequest(), response);
+      const response = await server.inject(getReadBulkRequest(), context);
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
-      await getRoute().handler(context, getReadBulkRequest(), response);
+      const response = await server.inject(getReadBulkRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
   });
@@ -36,7 +36,7 @@ describe('create_rules_bulk', () => {
   describe('validation', () => {
     it('returns an error object if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      await getRoute().handler(context, getReadBulkRequest(), response);
+      const response = await server.inject(getReadBulkRequest(), context);
       expect(response.ok).toHaveBeenCalledWith({
         body: expect.arrayContaining([
           {
@@ -57,7 +57,7 @@ describe('create_rules_bulk', () => {
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
         body: [typicalPayload(), typicalPayload()],
       });
-      await getRoute().handler(context, request, response);
+      const response = await server.inject(request, context);
 
       expect(response.ok).toHaveBeenCalledWith({
         body: [
@@ -75,16 +75,18 @@ describe('create_rules_bulk', () => {
   describe('request validation', () => {
     test('allows rule type of query', async () => {
       const body = [{ ...typicalPayload(), type: 'query' }];
+      const response = responseMock.create();
       // @ts-ignore ambiguous validation types
-      getRoute().config.validate.body(body, response);
+      server.getRoute().config.validate.body(body, response);
 
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('disallows unknown rule type', async () => {
       const body = [{ ...typicalPayload(), type: 'unexpected_type' }];
+      const response = responseMock.create();
       // @ts-ignore ambiguous validation types
-      getRoute().config.validate.body(body, response);
+      server.getRoute().config.validate.body(body, response);
 
       expect(response.badRequest).toHaveBeenCalled();
     });
