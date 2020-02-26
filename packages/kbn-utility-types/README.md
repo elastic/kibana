@@ -19,7 +19,6 @@ type B = UnwrapPromise<A>; // string
 ## Reference
 
 - `Ensure<T, X>` &mdash; Makes sure `T` is of type `X`.
-- `Mutable<T>` &mdash; Removes `readonly` attribute from all properties of `T`.
 - `ObservableLike<T>` &mdash; Minimal interface for an object resembling an `Observable`.
 - `PublicContract<T>` &mdash; Returns an object with public keys only.
 - `PublicKeys<T>` &mdash; Returns public keys of an object.

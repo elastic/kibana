@@ -97,10 +97,3 @@ export type PublicKeys<T> = keyof T;
  * Returns an object with public keys only.
  */
 export type PublicContract<T> = Pick<T, PublicKeys<T>>;
-
-/**
- * Remove readonly modifier from all properties of T.
- */
-export type Mutable<T> = {
-  -readonly [P in keyof T]: T[P];
-};
