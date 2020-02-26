@@ -181,7 +181,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     return {
       registerType: (actionType: ActionType) => {
-        if (actionType.minimumLicenseRequired < LICENSE_TYPE.gold) {
+        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
           throw new Error('At least gold license is required for third party action types');
         }
         actionTypeRegistry.register(actionType);

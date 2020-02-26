@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
+import { LicenseType } from '../../../licensing/common/types';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -54,7 +54,7 @@ test('successfully executes', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic' as LicenseType,
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -101,7 +101,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
   const actionType = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic' as LicenseType,
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -126,7 +126,7 @@ test('throws an error when config is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic' as LicenseType,
     validate: {
       config: schema.object({
         param1: schema.string(),
@@ -159,7 +159,7 @@ test('throws an error when params is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic' as LicenseType,
     validate: {
       params: schema.object({
         param1: schema.string(),
@@ -199,7 +199,7 @@ test('returns an error if actionType is not enabled', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic' as LicenseType,
     executor: jest.fn(),
   };
   const actionSavedObject = {

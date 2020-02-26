@@ -7,7 +7,6 @@ import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
-import { LICENSE_TYPE } from '../../../../../../plugins/licensing/common/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -43,7 +42,7 @@ export default function(kibana: any) {
       const noopActionType: ActionType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        minimumLicenseRequired: LICENSE_TYPE.basic,
+        minimumLicenseRequired: 'basic',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -51,7 +50,7 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
-        minimumLicenseRequired: LICENSE_TYPE.basic,
+        minimumLicenseRequired: 'basic',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -83,7 +82,7 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        minimumLicenseRequired: LICENSE_TYPE.basic,
+        minimumLicenseRequired: 'basic',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -108,7 +107,7 @@ export default function(kibana: any) {
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
-        minimumLicenseRequired: LICENSE_TYPE.basic,
+        minimumLicenseRequired: 'basic',
         maxAttempts: 2,
         validate: {
           params: schema.object({
@@ -138,7 +137,7 @@ export default function(kibana: any) {
       const authorizationActionType: ActionType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
-        minimumLicenseRequired: LICENSE_TYPE.basic,
+        minimumLicenseRequired: 'basic',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),

@@ -15,7 +15,6 @@ import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 // config definition
 enum WebhookMethods {
@@ -67,7 +66,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.webhook',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),

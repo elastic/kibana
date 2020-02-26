@@ -12,7 +12,6 @@ import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 import {
   ActionType,
@@ -51,7 +50,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.slack',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),

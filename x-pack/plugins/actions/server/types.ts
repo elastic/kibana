@@ -8,7 +8,7 @@ import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../s
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
-import { LICENSE_TYPE } from '../../licensing/common/types';
+import { LicenseType } from '../../licensing/common/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -85,7 +85,7 @@ export interface ActionType {
   id: string;
   name: string;
   maxAttempts?: number;
-  minimumLicenseRequired: LICENSE_TYPE;
+  minimumLicenseRequired: LicenseType;
   validate?: {
     params?: ValidatorType;
     config?: ValidatorType;

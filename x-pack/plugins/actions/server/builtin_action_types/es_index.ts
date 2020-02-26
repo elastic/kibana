@@ -11,7 +11,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 // config definition
 
@@ -39,7 +38,7 @@ const ParamsSchema = schema.object({
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.index',
-    minimumLicenseRequired: LICENSE_TYPE.basic,
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
