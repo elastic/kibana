@@ -38,10 +38,11 @@ export function mockProcessEvent(parts: {
       timestamp_utc: '',
       serial_event_id: 1,
     },
-    '@timestamp': '',
+    '@timestamp': 1582233383000,
     agent: {
       type: '',
       id: '',
+      version: '',
     },
     ...parts,
   };

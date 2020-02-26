@@ -12,10 +12,11 @@ Object {
   "edgeLineSegments": Array [],
   "processNodePositions": Map {
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -167,10 +168,11 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -183,10 +185,11 @@ Object {
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "already_running",
@@ -199,10 +202,11 @@ Object {
       -82.46615467370032,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -215,10 +219,11 @@ Object {
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -231,10 +236,11 @@ Object {
       -143.70339824327976,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -247,10 +253,11 @@ Object {
       -102.87856919689347,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -263,10 +270,11 @@ Object {
       -62.053740150507174,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -279,10 +287,11 @@ Object {
       -21.228911104120883,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -314,10 +323,11 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "creation_event",
@@ -330,10 +340,11 @@ Object {
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": "",
+      "@timestamp": 1582233383000,
       "agent": Object {
         "id": "",
         "type": "",
+        "version": "",
       },
       "endgame": Object {
         "event_subtype_full": "already_running",

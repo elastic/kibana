@@ -134,7 +134,111 @@ describe('useCamera on an unpainted element', () => {
     describe('when the camera begins animation', () => {
       let process: LegacyEndpointEvent;
       beforeEach(() => {
-        // At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
+        const serverResponseAction: ResolverAction = {
+          type: 'serverReturnedResolverData',
+          payload: {
+            data: {
+              result: {
+                search_results: [
+                  {
+                    '@timestamp': 1582233383000,
+                    agent: {
+                      id: '5f78bf8f-ddee-4890-ad61-6b5182309639',
+                      type: 'endgame',
+                      version: '3.53.9',
+                    },
+                    endgame: {
+                      event_subtype_full: 'creation_event',
+                      event_type_full: 'process_event',
+                      pid: 6508,
+                      ppid: 3828,
+                      process_name: 'mimikatz.exe',
+                      process_path: 'C:\\Users\\zeus\\Desktop\\mimikatz.exe',
+                      serial_event_id: 3096,
+                      timestamp_utc: '2020-02-20 21:16:23Z',
+                      unique_pid: 3096,
+                      unique_ppid: 2732,
+                    },
+                    process: {
+                      args: ['C:\\Users\\zeus\\Desktop\\mimikatz.exe'],
+                      executable: 'C:\\Users\\zeus\\Desktop\\mimikatz.exe',
+                      hash: {
+                        md5: '9cd25cee26f115876f1592dcc63cc650',
+                        sha1: '40963139cc017a296cb9826c88749099ffdf413e',
+                        sha256: 'ece23612029589623e0ae27da942440a9b0a9cd4f9681ec866613e64a247969d',
+                      },
+                      name: 'mimikatz.exe',
+                      parent: {
+                        executable:
+                          'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                        name: 'powershell.exe',
+                        pid: 3828,
+                      },
+                      pid: 6508,
+                      ppid: 3828,
+                      thread: {},
+                    },
+                    rule: {},
+                    user: {
+                      domain: 'DESKTOP-QBBSCUT',
+                      group: {},
+                      id: 'S-1-5-21-4215045029-3277270250-148079304-1004',
+                      name: 'zeus',
+                    },
+                  },
+                  {
+                    '@timestamp': 1582233383000,
+                    agent: {
+                      id: '5f78bf8f-ddee-4890-ad61-6b5182309639',
+                      type: 'endgame',
+                      version: '3.53.9',
+                    },
+                    endgame: {
+                      event_subtype_full: 'creation_event',
+                      event_type_full: 'process_event',
+                      pid: 6509,
+                      ppid: 6508,
+                      process_name: 'mimikatz.exe',
+                      process_path: 'C:\\Users\\zeus\\Desktop\\mimikatz.exe',
+                      serial_event_id: 3097,
+                      timestamp_utc: '2020-02-20 21:16:23Z',
+                      unique_pid: 3097,
+                      unique_ppid: 3096,
+                    },
+                    process: {
+                      args: ['C:\\Users\\zeus\\Desktop\\mimikatz.exe'],
+                      executable: 'C:\\Users\\zeus\\Desktop\\mimikatz.exe',
+                      hash: {
+                        md5: '9cd25cee26f115876f1592dcc63cc650',
+                        sha1: '40963139cc017a296cb9826c88749099ffdf413e',
+                        sha256: 'ece23612029589623e0ae27da942440a9b0a9cd4f9681ec866613e64a247969d',
+                      },
+                      name: 'mimikatz.exe',
+                      parent: {
+                        executable: 'C:\\test.exe',
+                        name: 'powershell.exe',
+                        pid: 3828,
+                      },
+                      pid: 6509,
+                      ppid: 6508,
+                      thread: {},
+                    },
+                    rule: {},
+                    user: {
+                      domain: 'DESKTOP-QBBSCUT',
+                      group: {},
+                      id: 'S-1-5-21-4215045029-3277270250-148079304-1004',
+                      name: 'zeus',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        };
+        act(() => {
+          store.dispatch(serverResponseAction);
+        });
         const processes: LegacyEndpointEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
@@ -142,7 +246,7 @@ describe('useCamera on an unpainted element', () => {
         ];
         process = processes[processes.length - 1];
         simulator.controls.time = 0;
-        const action: ResolverAction = {
+        const cameraAction: ResolverAction = {
           type: 'userBroughtProcessIntoView',
           payload: {
             time: simulator.controls.time,
@@ -150,7 +254,7 @@ describe('useCamera on an unpainted element', () => {
           },
         };
         act(() => {
-          store.dispatch(action);
+          store.dispatch(cameraAction);
         });
       });
 

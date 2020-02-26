@@ -83,7 +83,7 @@ export function paginatedResults(
   // results will be at least 1 because of length check at the top of the function
   const next = results[results.length - 1];
   const cursor = {
-    timestamp: next['@timestamp'],
+    timestamp: String(next['@timestamp']),
     eventID: extractEventID(next),
   };
 

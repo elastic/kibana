@@ -129,7 +129,7 @@ export interface EndpointMetadata {
 }
 
 export interface LegacyEndpointEvent {
-  '@timestamp': string;
+  '@timestamp': number;
   endgame: {
     pid?: number;
     ppid?: number;
@@ -148,11 +148,15 @@ export interface LegacyEndpointEvent {
   agent: {
     id: string;
     type: string;
+    version: string;
   };
+  process?: object;
+  rule?: object;
+  user?: object;
 }
 
 export interface EndpointEvent {
-  '@timestamp': string;
+  '@timestamp': number;
   event: {
     category: string;
     type: string;
