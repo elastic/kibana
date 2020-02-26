@@ -9,8 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageBody,
-  EuiPageContent,
   EuiCallOut,
   EuiText,
   EuiSpacer,
@@ -33,14 +31,10 @@ import { sendRequest, useCore, useGetOneAgentConfig } from '../../../hooks';
 import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { ConnectedLink } from '../../fleet/components';
+import { WithHeaderLayout } from '../../../layouts';
 import { AgentConfigDeleteProvider } from '../components';
 import { DEFAULT_AGENT_CONFIG_ID } from '../../../constants';
 
-export const Layout: React.FunctionComponent = ({ children }) => (
-  <EuiPageBody>
-    <EuiPageContent>{children}</EuiPageContent>
-  </EuiPageBody>
-);
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId },
@@ -121,7 +115,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
 
   if (error) {
     return (
-      <Layout>
+      <WithHeaderLayout>
         <EuiCallOut
           title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
             defaultMessage: 'An error happened while loading the config',
@@ -133,13 +127,13 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             <EuiText>{error.message}</EuiText>
           </p>
         </EuiCallOut>
-      </Layout>
+      </WithHeaderLayout>
     );
   }
 
   if (!agentConfig) {
     return (
-      <Layout>
+      <WithHeaderLayout>
         <FormattedMessage
           id="xpack.ingestManager.configDetails.configNotFoundErrorTitle"
           defaultMessage="Config '{id}' not found"
@@ -147,14 +141,84 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             id: configId,
           }}
         />
-      </Layout>
+      </WithHeaderLayout>
     );
   }
 
   return (
     <ConfigRefreshContext.Provider value={{ refresh: refreshAgentConfig }}>
       <AgentStatusRefreshContext.Provider value={{ refresh: refreshAgentStatus }}>
-        <Layout>
+        <WithHeaderLayout
+          leftColumn={
+            <React.Fragment>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="l">
+                        <h1>
+                          {agentConfig.name || (
+                            <FormattedMessage
+                              id="xpack.ingestManager.configDetails.configDetailsTitle"
+                              defaultMessage="Config '{id}'"
+                              values={{
+                                id: configId,
+                              }}
+                            />
+                          )}
+                        </h1>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    {agentConfig.name ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge>{agentConfig.name}</EuiBadge>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                  {agentConfig.description ? (
+                    <Fragment>
+                      <EuiSpacer size="s" />
+                      <EuiText color="subdued">{agentConfig.description}</EuiText>
+                    </Fragment>
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={() => setIsEditConfigFlyoutOpen(true)} iconType="pencil">
+                        <FormattedMessage
+                          id="xpack.ingestManager.configDetails.editConfigButtonLabel"
+                          defaultMessage="Edit config"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <AgentConfigDeleteProvider>
+                        {deleteConfigsPrompt => (
+                          <EuiButtonEmpty
+                            color="danger"
+                            onClick={() => {
+                              deleteConfigsPrompt([configId], () => {
+                                setRedirectToAgentConfigsList(true);
+                              });
+                            }}
+                            disabled={configId === DEFAULT_AGENT_CONFIG_ID}
+                          >
+                            <FormattedMessage
+                              id="xpack.ingestManager.configDetails.deleteConfigButtonLabel"
+                              defaultMessage="Delete"
+                            />
+                          </EuiButtonEmpty>
+                        )}
+                      </AgentConfigDeleteProvider>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="l" />
+            </React.Fragment>
+          }
+        >
           {isEditConfigFlyoutOpen ? (
             <EditConfigFlyout
               onClose={() => {
@@ -175,71 +239,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               }}
             />
           ) : null}
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1>
-                      {agentConfig.name || (
-                        <FormattedMessage
-                          id="xpack.ingestManager.configDetails.configDetailsTitle"
-                          defaultMessage="Config '{id}'"
-                          values={{
-                            id: configId,
-                          }}
-                        />
-                      )}
-                    </h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {agentConfig.name ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{agentConfig.name}</EuiBadge>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-              {agentConfig.description ? (
-                <Fragment>
-                  <EuiSpacer size="s" />
-                  <EuiText color="subdued">{agentConfig.description}</EuiText>
-                </Fragment>
-              ) : null}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => setIsEditConfigFlyoutOpen(true)} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.editConfigButtonLabel"
-                      defaultMessage="Edit config"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <AgentConfigDeleteProvider>
-                    {deleteConfigsPrompt => (
-                      <EuiButtonEmpty
-                        color="danger"
-                        onClick={() => {
-                          deleteConfigsPrompt([configId], () => {
-                            setRedirectToAgentConfigsList(true);
-                          });
-                        }}
-                        disabled={configId === DEFAULT_AGENT_CONFIG_ID}
-                      >
-                        <FormattedMessage
-                          id="xpack.ingestManager.configDetails.deleteConfigButtonLabel"
-                          defaultMessage="Delete"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </AgentConfigDeleteProvider>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
           <EuiTitle size="m">
             <h3>
               <FormattedMessage
@@ -248,7 +247,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               />
             </h3>
           </EuiTitle>
-
           <EuiSpacer size="l" />
           {agentStatusIsLoading ? (
             <Loading />
@@ -446,7 +444,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             }}
             isSelectable={true}
           />
-        </Layout>
+        </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
   );

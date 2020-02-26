@@ -7,7 +7,6 @@
 import Hapi from 'hapi';
 import { chunk, isEmpty } from 'lodash/fp';
 import { extname } from 'path';
-import uuid from 'uuid';
 
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -21,6 +20,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
+import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { GetScopedClients } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
@@ -76,25 +76,9 @@ export const createImportRulesRoute = (
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
-      const uniqueParsedObjects = Array.from(
-        parsedObjects
-          .reduce(
-            (acc, parsedRule) => {
-              if (parsedRule instanceof Error) {
-                acc.set(uuid.v4(), parsedRule);
-              } else {
-                const { rule_id: ruleId } = parsedRule;
-                if (ruleId != null) {
-                  acc.set(ruleId, parsedRule);
-                } else {
-                  acc.set(uuid.v4(), parsedRule);
-                }
-              }
-              return acc;
-            }, // using map (preserves ordering)
-            new Map()
-          )
-          .values()
+      const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
+        parsedObjects,
+        request.query.overwrite
       );
 
       const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
@@ -111,7 +95,6 @@ export const createImportRulesRoute = (
                   // early with the error and an (unknown) for the ruleId
                   resolve(
                     createBulkErrorObject({
-                      ruleId: '(unknown)',
                       statusCode: 400,
                       message: parsedRule.message,
                     })
@@ -251,7 +234,11 @@ export const createImportRulesRoute = (
             return [...accum, importsWorkerPromise];
           }, [])
         );
-        importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
+        importRuleResponse = [
+          ...duplicateIdErrors,
+          ...importRuleResponse,
+          ...newImportRuleResponse,
+        ];
       }
 
       const errorsResp = importRuleResponse.filter(resp => !isEmpty(resp.error));

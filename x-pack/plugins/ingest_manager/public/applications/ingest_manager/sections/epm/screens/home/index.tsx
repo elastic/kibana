@@ -3,28 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+
+import {
+  EuiHorizontalRule,
+  // @ts-ignore
+  EuiSearchBar,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
-import styled from 'styled-components';
-// import { PLUGIN } from '../../../common/constants';
+import { useGetCategories, useGetPackages } from '../../../../hooks';
+import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 // import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
-import { Header } from './header';
+import { HeroCopy, HeroImage } from './header';
 import { useAllPackages, useInstalledPackages, useLocalSearch } from './hooks';
-import { useGetCategories, useGetPackages } from '../../../../hooks';
 import { SearchPackages } from './search_packages';
 
-export const FullBleedPage = styled(EuiPage)`
-  padding: 0;
-`;
-
 export function Home() {
-  const maxContentWidth = 1200;
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const state = useHomeState();
+  const searchBar = (
+    <EuiSearchBar
+      query={state.searchTerm}
+      key="search-input"
+      box={{
+        placeholder: 'Find a new package, or one you already use.',
+        incremental: true,
+      }}
+      onChange={({ queryText: userInput }: { queryText: string }) => {
+        state.setSearchTerm(userInput);
+      }}
+    />
+  );
   const body = state.searchTerm ? (
     <SearchPackages
       searchTerm={state.searchTerm}
@@ -44,14 +57,25 @@ export function Home() {
   );
 
   return (
-    <Fragment>
-      <Header restrictWidth={maxContentWidth} onSearch={state.setSearchTerm} />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="xxl" />
-      <FullBleedPage>
-        <EuiPageBody restrictWidth={maxContentWidth}>{body}</EuiPageBody>
-      </FullBleedPage>
-    </Fragment>
+    <WithHeaderLayout
+      leftColumn={<HeroCopy />}
+      rightColumn={<HeroImage />}
+      // tabs={[
+      //   {
+      //     id: 'all_packages',
+      //     name: 'All packages',
+      //     isSelected: true,
+      //   },
+      //   {
+      //     id: 'installed_packages',
+      //     name: 'Installed packages',
+      //   },
+      // ]}
+    >
+      {searchBar}
+      <EuiSpacer size="m" />
+      {body}
+    </WithHeaderLayout>
   );
 }
 
