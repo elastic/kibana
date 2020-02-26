@@ -219,8 +219,9 @@ export interface JobSource<JobParamsType> {
 export interface JobDocOutput {
   content_type: string;
   content: string | null;
-  max_size_reached: boolean;
   size: number;
+  max_size_reached?: boolean;
+  warnings?: string[];
 }
 
 export interface ESQueueWorker {

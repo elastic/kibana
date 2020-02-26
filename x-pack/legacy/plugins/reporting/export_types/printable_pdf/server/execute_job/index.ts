@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
+import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../../server';
-import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
-import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { ReportingCore } from '../../../../server';
+import {
+  ESQueueWorkerExecuteFn,
+  ExecuteJobFactory,
+  JobDocOutput,
+  Logger,
+  ServerFacade,
+} from '../../../../types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
-  getFullUrls,
   getCustomLogo,
+  getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
@@ -34,8 +40,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
 
   return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
-
-    const process$ = Rx.of(1).pipe(
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
@@ -54,10 +59,11 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
           logo
         );
       }),
-      map((buffer: Buffer) => ({
+      map(({ buffer, warnings }) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
+        warnings,
       })),
       catchError(err => {
         jobLogger.error(err);

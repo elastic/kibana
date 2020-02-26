@@ -11,9 +11,9 @@ import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
-  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
+  captureConfig: CaptureConfig,
   logger: LevelLogger
 ) => {
   logger.debug('waiting for rendering to complete');

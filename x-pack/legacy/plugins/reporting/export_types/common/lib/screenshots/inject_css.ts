@@ -22,17 +22,23 @@ export const injectCustomCss = async (
 
   const filePath = layout.getCssOverridesPath();
   const buffer = await fsp.readFile(filePath);
-  await browser.evaluate(
-    {
-      fn: css => {
-        const node = document.createElement('style');
-        node.type = 'text/css';
-        node.innerHTML = css; // eslint-disable-line no-unsanitized/property
-        document.getElementsByTagName('head')[0].appendChild(node);
+  try {
+    await browser.evaluate(
+      {
+        fn: css => {
+          const node = document.createElement('style');
+          node.type = 'text/css';
+          node.innerHTML = css; // eslint-disable-line no-unsanitized/property
+          document.getElementsByTagName('head')[0].appendChild(node);
+        },
+        args: [buffer.toString()],
       },
-      args: [buffer.toString()],
-    },
-    { context: CONTEXT_INJECTCSS },
-    logger
-  );
+      { context: CONTEXT_INJECTCSS },
+      logger
+    );
+  } catch (err) {
+    throw new Error(
+      'An error occurred when trying to inject the screencapture styles into Kibana. ' + err
+    ); // FIXME i18n
+  }
 };

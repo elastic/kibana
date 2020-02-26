@@ -17,16 +17,16 @@ const getAsyncDurationLogger = (logger: LevelLogger) => {
   };
 };
 
-export const getScreenshots = async ({
-  browser,
-  elementsPositionAndAttributes,
-  logger,
-}: {
-  logger: LevelLogger;
-  browser: HeadlessBrowser;
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[];
-}): Promise<Screenshot[]> => {
-  logger.info(`taking screenshots`);
+export const getScreenshots = async (
+  browser: HeadlessBrowser,
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[],
+  logger: LevelLogger
+): Promise<Screenshot[]> => {
+  logger.info(
+    i18n.translate('xpack.reporting.screencapture.takingScreenshots', {
+      defaultMessage: `taking screenshots`,
+    })
+  );
 
   const asyncDurationLogger = getAsyncDurationLogger(logger);
   const screenshots: Screenshot[] = [];

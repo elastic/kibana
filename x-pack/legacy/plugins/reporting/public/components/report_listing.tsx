@@ -9,7 +9,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiBasicTable,
@@ -140,15 +139,15 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
+    // const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis: jobsRefresh.interval,
+      pollFrequencyInMillis: 2000,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: 1,
     });
     this.poller.start();
   }

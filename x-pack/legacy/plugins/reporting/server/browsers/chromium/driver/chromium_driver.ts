@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { map, trunc } from 'lodash';
 import open from 'opn';
-import { EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
@@ -27,6 +27,7 @@ export interface ChromiumDriverOptions {
 
 interface WaitForSelectorOpts {
   silent?: boolean;
+  timeout: number;
 }
 
 interface EvaluateOpts {
@@ -66,10 +67,15 @@ export class HeadlessChromiumDriver {
     url: string,
     {
       conditionalHeaders,
-      waitForSelector,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
+      waitForSelector: pageLoadSelector,
+      timeout,
+    }: {
+      conditionalHeaders: ConditionalHeaders;
+      waitForSelector: string;
+      timeout: number;
+    },
     logger: LevelLogger
-  ) {
+  ): Promise<void> {
     logger.info(`opening url ${url}`);
     // @ts-ignore
     const client = this.page._client;
@@ -169,11 +175,16 @@ export class HeadlessChromiumDriver {
       await this.launchDebugger();
     }
 
-    await this.waitForSelector(waitForSelector, {}, logger);
+    await this.waitForSelector(
+      pageLoadSelector,
+      { timeout },
+      { context: 'waiting for page load selector' },
+      logger
+    );
     logger.info(`handled ${interceptedCount} page requests`);
   }
 
-  public async screenshot(elementPosition: ElementPosition) {
+  public async screenshot(elementPosition: ElementPosition): Promise<string> {
     let clip;
     if (elementPosition) {
       const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
@@ -201,28 +212,32 @@ export class HeadlessChromiumDriver {
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
+
   public async waitForSelector(
     selector: string,
-    opts: WaitForSelectorOpts = {},
+    opts: WaitForSelectorOpts = { timeout: 10000 },
+    context: EvaluateMetaOpts,
     logger: LevelLogger
-  ) {
-    const { silent = false } = opts;
+  ): Promise<ElementHandle<Element>> {
+    const { silent = false, timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
 
     let resp;
     try {
-      resp = await this.page.waitFor(selector);
+      resp = await this.page.waitFor(selector, { timeout });
     } catch (err) {
       if (!silent) {
         // Provide some troubleshooting info to see if we're on the login page,
         // "Kibana could not load correctly", etc
-        logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
+        logger.error(
+          `waitForSelector ${selector} failed after ${opts.timeout}ms on ${this.page.url()}`
+        );
         const pageText = await this.evaluate(
           {
             fn: () => document.querySelector('body')!.innerText,
             args: [],
           },
-          { context: `waitForSelector${selector}` },
+          context,
           logger
         );
         logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
@@ -234,30 +249,42 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor<T>(
+  public async waitFor(
     {
       fn,
       args,
       toEqual,
+      timeout,
     }: {
       fn: EvaluateFn;
       args: SerializableOrJSHandle[];
-      toEqual: T;
+      toEqual: number;
+      timeout: number;
     },
     context: EvaluateMetaOpts,
     logger: LevelLogger
-  ) {
+  ): Promise<void> {
+    const startTime = Date.now();
+
     while (true) {
       const result = await this.evaluate({ fn, args }, context, logger);
       if (result === toEqual) {
         return;
       }
 
+      if (Date.now() - startTime > timeout) {
+        throw new Error(
+          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
+        );
+      }
       await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 
-  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight, logger: LevelLogger) {
+  public async setViewport(
+    { width, height, zoom }: ViewZoomWidthHeight,
+    logger: LevelLogger
+  ): Promise<void> {
     logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
 
     await this.page.setViewport({

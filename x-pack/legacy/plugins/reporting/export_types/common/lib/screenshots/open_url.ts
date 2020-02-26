@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConditionalHeaders } from '../../../../types';
+import { ConditionalHeaders, ServerFacade } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { WAITFOR_SELECTOR } from '../../constants';
+import { PAGELOAD_SELECTOR } from '../../constants';
 
 export const openUrl = async (
+  server: ServerFacade,
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
-  await browser.open(
-    url,
-    {
-      conditionalHeaders,
-      waitForSelector: WAITFOR_SELECTOR,
-    },
-    logger
-  );
+  const config = server.config();
+
+  try {
+    await browser.open(
+      url,
+      {
+        conditionalHeaders,
+        waitForSelector: PAGELOAD_SELECTOR,
+        timeout: config.get('xpack.reporting.capture.timeouts.openUrl'),
+      },
+      logger
+    );
+  } catch (err) {
+    throw new Error('An error occurred when trying to load Kibana. ' + err); // FIXME i18n
+  }
 };
