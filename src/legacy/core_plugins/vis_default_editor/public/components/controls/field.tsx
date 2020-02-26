@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,15 +50,23 @@ function FieldParamEditor({
   setValidity,
   setValue,
 }: FieldParamEditorProps) {
+  const [isDirty, setIsDirty] = useState(false);
+  /**
+   * isValueSelected should be stored as a ref,
+   * since the "onSearchChange" callback is called right after the "onChange"
+   */
+  const isValueSelected = useRef(false);
+
   const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
     ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption: IndexPatternField = get(options, '0.target');
-    if (!(aggParam.required && !selectedOption)) {
-      setValue(selectedOption);
-    }
+
+    isValueSelected.current = true;
+    setIsDirty(false);
+    setValue(selectedOption);
 
     if (aggParam.onChange) {
       aggParam.onChange(agg);
@@ -79,7 +87,7 @@ function FieldParamEditor({
     );
   }
 
-  const isValid = !!value && !errors.length;
+  const isValid = !!value && !errors.length && !isDirty;
 
   useValidation(setValidity, isValid);
 
@@ -95,6 +103,14 @@ function FieldParamEditor({
       setValue(indexedField.target);
     } else if (indexedField.options.length === 1) {
       setValue(indexedField.options[0].target);
+    }
+  }, []);
+
+  const onSearchChange = useCallback(() => {
+    if (!isValueSelected.current) {
+      setIsDirty(true);
+    } else {
+      isValueSelected.current = false;
     }
   }, []);
 
@@ -119,6 +135,7 @@ function FieldParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
+        onSearchChange={onSearchChange}
         data-test-subj="visDefaultEditorField"
         fullWidth={true}
       />
