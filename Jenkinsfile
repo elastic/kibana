@@ -18,6 +18,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
               'kibana-functional-agent': kibanaPipeline.withWorkers('kibana-functional-tests',
                 {
+                  kibanaPipeline.bash "source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js"
                   kibanaPipeline.buildOss()
                   kibanaPipeline.prepareOssTestQueue(queue)
                 },

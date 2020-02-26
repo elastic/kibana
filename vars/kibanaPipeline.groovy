@@ -473,13 +473,13 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
 }
 
 def prepareOssTestQueue(queue) {
-  def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
+  def items = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
   queue.oss = items.oss.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
   queue.ossFirefox = items.ossFirefox.reverse()
 }
 
 def prepareXpackTestQueue(queue) {
-  def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
+  def items = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
   queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
   queue.xpackFirefox = items.xpackFirefox.reverse()
 }
