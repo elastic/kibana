@@ -6,14 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 
-import {
-  EuiSpacer,
-  EuiSelect,
-  EuiSuperSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiSpacer, EuiSelect, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
@@ -40,13 +33,13 @@ export class ColorMapSelect extends Component {
       {
         value: COLOR_MAP_TYPE.ORDINAL,
         text: i18n.translate('xpack.maps.styles.dynamicColorSelect.quantitativeLabel', {
-          defaultMessage: 'Quantitative',
+          defaultMessage: 'As number',
         }),
       },
       {
         value: COLOR_MAP_TYPE.CATEGORICAL,
-        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.qualitativeLavel', {
-          defaultMessage: 'Qualitative',
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.qualitativeLabel', {
+          defaultMessage: 'As category',
         }),
       },
     ];
@@ -56,29 +49,19 @@ export class ColorMapSelect extends Component {
       : COLOR_MAP_TYPE.CATEGORICAL;
 
     return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate(
-          'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeTooltip',
+      <EuiSelect
+        options={options}
+        value={selectedValue}
+        onChange={this.props.onColorMapTypeChange}
+        aria-label={i18n.translate(
+          'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeAriaLabel',
           {
             defaultMessage:
-              'Choose `quantitative` to map the value as a number to a color on a range. Choose `qualitative` to map the value as a category to a color from a palette',
+              'Choose `As number` to map by number in a color range, or `As category`to categorize by color palette.',
           }
         )}
-      >
-        <EuiSelect
-          options={options}
-          value={selectedValue}
-          onChange={this.props.onColorMapTypeChange}
-          aria-label={i18n.translate(
-            'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeAriaLabel',
-            {
-              defaultMessage: 'Select to style by gradient or color palette',
-            }
-          )}
-          compressed
-        />
-      </EuiToolTip>
+        compressed
+      />
     );
   }
 
