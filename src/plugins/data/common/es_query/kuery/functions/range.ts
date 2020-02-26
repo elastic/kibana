@@ -44,8 +44,8 @@ export function buildNodeParams(fieldName: string, params: any) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IIndexPattern,
-  config?: Record<string, any>,
-  context?: Record<string, any>
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
 ) {
   const [fieldNameArg, ...args] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
@@ -98,7 +98,7 @@ export function toElasticsearchQuery(
         script: getRangeScript(field, queryParams),
       };
     } else if (field.type === 'date') {
-      const timeZoneParam = config!.dateFormatTZ
+      const timeZoneParam = config.dateFormatTZ
         ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
         : {};
       return wrapWithNestedQuery({

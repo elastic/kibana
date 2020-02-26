@@ -51,8 +51,8 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IIndexPattern,
-  config?: Record<string, any>,
-  context?: Record<string, any>
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
 ) {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
@@ -164,7 +164,7 @@ export function toElasticsearchQuery(
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
-      const timeZoneParam = config!.dateFormatTZ
+      const timeZoneParam = config.dateFormatTZ
         ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
         : {};
       return [

@@ -30,8 +30,8 @@ export function buildNodeParams(fieldName: string) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IIndexPattern,
-  config?: Record<string, any>,
-  context?: Record<string, any>
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
 ) {
   const {
     arguments: [fieldNameArg],

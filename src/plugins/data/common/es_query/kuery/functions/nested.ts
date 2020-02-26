@@ -32,8 +32,8 @@ export function buildNodeParams(path: any, child: any) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IIndexPattern,
-  config?: Record<string, any>,
-  context?: Record<string, any>
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
 ) {
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path);

@@ -38,8 +38,8 @@ export function buildNodeParams(fieldName: string, points: LatLon[]) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IIndexPattern,
-  config?: Record<string, any>,
-  context?: Record<string, any>
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
 ) {
   const [fieldNameArg, ...points] = node.arguments;
   const fullFieldNameArg = {
