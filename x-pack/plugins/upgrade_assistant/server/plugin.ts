@@ -29,6 +29,7 @@ import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
+import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
 import { RouteDependencies } from './types';
@@ -95,6 +96,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this));
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(dependencies);
+    registerQueryDefaultFieldRoutes(dependencies);
 
     if (usageCollection) {
       getStartServices().then(([{ savedObjects }]) => {
