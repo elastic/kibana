@@ -178,64 +178,64 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'ms':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.ms"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {millisecond} other {miliseconds}}"
+          id="xpack.infra.logs.extendTimeframeByMillisecondsButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {millisecond} other {milliseconds}}"
           values={{ amount }}
         />
       );
     case 's':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.s"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {second} other {seconds}}"
+          id="xpack.infra.logs.extendTimeframeBySecondsButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {second} other {seconds}}"
           values={{ amount }}
         />
       );
     case 'm':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.m"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {minute} other {minutes}}"
+          id="xpack.infra.logs.extendTimeframeByMinutesButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {minute} other {minutes}}"
           values={{ amount }}
         />
       );
     case 'h':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.h"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {hour} other {hours}}"
+          id="xpack.infra.logs.extendTimeframeByHoursButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {hour} other {hours}}"
           values={{ amount }}
         />
       );
     case 'd':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.d"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {day} other {days}}"
+          id="xpack.infra.logs.extendTimeframeByDaysButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {day} other {days}}"
           values={{ amount }}
         />
       );
     case 'w':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.w"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {week} other {weeks}}"
+          id="xpack.infra.logs.extendTimeframeByWeeksButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {week} other {weeks}}"
           values={{ amount }}
         />
       );
     case 'M':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.M"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {month} other {months}}"
+          id="xpack.infra.logs.extendTimeframeByMonthsButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {month} other {months}}"
           values={{ amount }}
         />
       );
     case 'y':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe.y"
-          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {year} other {years}}"
+          id="xpack.infra.logs.extendTimeframeByYearsButton"
+          defaultMessage="Extend time frame by {amount, number} {amount, plural, one {year} other {years}}"
           values={{ amount }}
         />
       );
