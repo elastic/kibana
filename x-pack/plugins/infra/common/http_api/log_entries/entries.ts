@@ -52,16 +52,16 @@ export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 // JSON value
 const valueRT = rt.union([rt.string, rt.number, rt.boolean, rt.object, rt.null, rt.undefined]);
 
-export const logMessagePartConstantRT = rt.type({
+export const logMessageConstantPartRT = rt.type({
   constant: rt.string,
 });
-export const logMessagePartFieldRT = rt.type({
+export const logMessageFieldPartRT = rt.type({
   field: rt.string,
   value: valueRT,
   highlights: rt.array(rt.string),
 });
 
-export const logMessagePartRT = rt.union([logMessagePartConstantRT, logMessagePartFieldRT]);
+export const logMessagePartRT = rt.union([logMessageConstantPartRT, logMessageFieldPartRT]);
 
 export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt.number });
 export const logFieldColumnRT = rt.type({
@@ -83,8 +83,8 @@ export const logEntryRT = rt.type({
   columns: rt.array(logColumnRT),
 });
 
-export type LogMessagePartConstant = rt.TypeOf<typeof logMessagePartConstantRT>;
-export type LogMessagePartField = rt.TypeOf<typeof logMessagePartFieldRT>;
+export type LogMessageConstantPart = rt.TypeOf<typeof logMessageConstantPartRT>;
+export type LogMessageFieldPart = rt.TypeOf<typeof logMessageFieldPartRT>;
 export type LogMessagePart = rt.TypeOf<typeof logMessagePartRT>;
 export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
 export type LogFieldColumn = rt.TypeOf<typeof logFieldColumnRT>;

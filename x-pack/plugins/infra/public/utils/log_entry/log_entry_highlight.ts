@@ -11,7 +11,7 @@ import {
   LogMessageColumn,
   LogFieldColumn,
   LogMessagePart,
-  LogMessagePartField,
+  LogMessageFieldPart,
 } from '../../../common/http_api';
 
 export type LogEntryHighlightColumn = InfraLogEntryHighlightFields.Columns;
@@ -31,5 +31,5 @@ export const isHighlightMessageColumn = (column: LogColumn): column is LogMessag
 export const isHighlightFieldColumn = (column: LogColumn): column is LogFieldColumn =>
   column != null && 'field' in column;
 
-export const isHighlightFieldSegment = (segment: LogMessagePart): segment is LogMessagePartField =>
+export const isHighlightFieldSegment = (segment: LogMessagePart): segment is LogMessageFieldPart =>
   segment && 'field' in segment && 'highlights' in segment;
