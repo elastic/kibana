@@ -70,3 +70,9 @@ export const NewActionSchema = schema.object({
 export const FindActionsSchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
+
+export const CheckActionHealthSchema = schema.object({
+  apiUrl: schema.uri({ scheme: ['http', 'https'] }),
+  username: schema.string(),
+  password: schema.string(),
+});
