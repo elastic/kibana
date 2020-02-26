@@ -2551,7 +2551,7 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^17.0.2":
+"@elastic/charts@^17.1.1":
   version "17.1.1"
   resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-17.1.1.tgz#28df3d1be445aa4951fac59dec0831760a1ea034"
   integrity sha512-zI3ZHy51tqlsEenDbHFWlL6qbDMvrQXeuV+UFleILtVcfI0r4Lk7DtSbx4GQlHcBuVvvAk1MRdYKNGA0IYWP6w==
