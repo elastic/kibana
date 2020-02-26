@@ -92,13 +92,8 @@ export const savedObjectMappings = {
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
     properties: {
-      id: { type: 'keyword' },
       name: { type: 'keyword' },
       type: { type: 'keyword' },
-      username: { type: 'keyword' },
-      password: { type: 'keyword' },
-      index_name: { type: 'keyword' },
-      ingest_pipeline: { type: 'keyword' },
       hosts: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'keyword' },
@@ -109,11 +104,10 @@ export const savedObjectMappings = {
   },
   [DATASOURCE_SAVED_OBJECT_TYPE]: {
     properties: {
-      id: { type: 'keyword' },
       name: { type: 'keyword' },
       namespace: { type: 'keyword' },
-      read_alias: { type: 'keyword' },
       config_id: { type: 'keyword' },
+      enabled: { type: 'boolean' },
       package: {
         properties: {
           assets: {
@@ -128,13 +122,23 @@ export const savedObjectMappings = {
           version: { type: 'keyword' },
         },
       },
-      streams: {
+      output_id: { type: 'keyword' },
+      inputs: {
+        type: 'nested',
         properties: {
-          config: { type: 'flattened' },
-          id: { type: 'keyword' },
-          input: { type: 'flattened' },
-          output_id: { type: 'keyword' },
+          type: { type: 'keyword' },
+          enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
+          streams: {
+            type: 'nested',
+            properties: {
+              id: { type: 'keyword' },
+              enabled: { type: 'boolean' },
+              dataset: { type: 'keyword' },
+              processors: { type: 'keyword' },
+              config: { type: 'flattened' },
+            },
+          },
         },
       },
     },
