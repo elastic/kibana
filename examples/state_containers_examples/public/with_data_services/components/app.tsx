@@ -116,6 +116,7 @@ const App = ({
             useDefaultBehaviors={true}
             onQuerySubmit={onQuerySubmit}
             query={appState.query}
+            showSaveQuery={true}
           />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
