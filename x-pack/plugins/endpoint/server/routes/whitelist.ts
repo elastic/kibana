@@ -8,9 +8,13 @@ import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointAppContext } from '../types';
+import { WhitelistRule } from '../../common/types';
 
-const whitelistIdx = 'whitelist-index';
+const whitelistIdx = 'whitelist-index';  // TODO: change this
 
+/**
+ * Registers the whitelist routes for the API
+ */
 export function registerWhitelistRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(
     {
@@ -50,6 +54,9 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
   );
 }
 
+/**
+ * Handles the POST request for whitelist additions
+ */
 async function handleWhitelistPost(context, req, res) {
   try {
     // TODO check if one of whitelist fields exists
@@ -62,12 +69,11 @@ async function handleWhitelistPost(context, req, res) {
       sha256: 'malware.file.hashes.sha256',
     };
 
-    // TODO get the full list of whitelist rules and append
-    const newRules: object[] = [];
+    const newRules: WhitelistRule[] = [];
     Object.keys(whitelistAttributeMap).forEach(k => {
       if (req.body[k]) {
         newRules.push({
-          eventTypes: [], // TODO grab the alert and get eventTypes
+          eventTypes: [], // TODO grab the alert and get eventTypes from alert details API
           whitelistRuleType: 'simple',
           whitelistRule: {
             type: 'equality',
@@ -77,23 +83,31 @@ async function handleWhitelistPost(context, req, res) {
         });
       }
     });
-    await addWhitelistRule(context, newRules);
+    const errors = await addWhitelistRule(context, newRules); // TODO handle
     return res.ok({ body: newRules });
   } catch (err) {
     return res.internalError({ body: err });
   }
 }
 
+/**
+ * Handles the GET request for whitelist retrieval
+ */
 async function handleWhitelistGet(context, req, res) {
   try {
-    const whitelist = await getWhitelist(context);
+    const whitelist: WhitelistRule[] = await getWhitelist(context);
     return res.ok({ body: whitelist });
   } catch (err) {
     return res.internalError({ body: err });
   }
 }
 
-async function addWhitelistRule(ctx, whitelistRules: Array<Record<string, any>>) {
+/**
+ * Add a whitelist rule to the global whitelist
+ * @param ctx App context
+ * @param whitelistRules List of whitelist rules to apply
+ */
+async function addWhitelistRule(ctx, whitelistRules: Array<WhitelistRule>): Promise<boolean> {
   let body = '';
   whitelistRules.forEach(rule => {
     body = body.concat(`{ "index" : {} }\n ${JSON.stringify(rule)}\n`);
@@ -103,15 +117,24 @@ async function addWhitelistRule(ctx, whitelistRules: Array<Record<string, any>>)
     index: whitelistIdx,
     body,
   });
+  const errors: boolean = response.errors;
+  if (errors) {
+    // TODO log errors
+  }
+  return errors
 }
 
-async function getWhitelist(ctx) {
+/**
+ * Retrieve the global whitelist
+ * @param ctx App context
+ */
+async function getWhitelist(ctx): Promise<WhitelistRule[]> {
   const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('search', {
     index: whitelistIdx,
     body: {},
-  })) as SearchResponse<any>; // TODO
+  })) as SearchResponse<WhitelistRule>;
 
-  const resp: object[] = [];
+  const resp: WhitelistRule[] = [];
   response.hits.hits.forEach(hit => {
     resp.push(hit._source);
   });
@@ -119,6 +142,10 @@ async function getWhitelist(ctx) {
   return resp;
 }
 
+/**
+ * Determines whether a given string a valid UUID
+ * @param str string to validate
+ */
 function validateUUID(str: string): boolean {
   return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
 }
