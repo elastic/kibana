@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-//import { KibanaServer, plugin } from './server';
+// @ts-ignore
 import { savedObjectMappings } from '../../../plugins/uptime/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
@@ -33,6 +33,7 @@ export const uptime = (kibana: any) =>
         url: '/app/uptime#/',
         category: DEFAULT_APP_CATEGORIES.observability,
       },
+      // TODO: Once https://github.com/elastic/kibana/issues/50309 is merged, move this to NP
       mappings: savedObjectMappings,
       home: ['plugins/uptime/register_feature'],
     },
