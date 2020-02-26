@@ -267,16 +267,13 @@ describe('setupAuthentication()', () => {
       expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
 
-    it('returns `unauthorized` when authentication can not be handled', async () => {
+    it('returns `notHandled` when authentication can not be handled', async () => {
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.notHandled());
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[response]] = mockResponse.unauthorized.mock.calls;
-
-      expect(response!.body).toBeUndefined();
+      expect(mockAuthToolkit.notHandled).toHaveBeenCalledTimes(1);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();

@@ -153,8 +153,8 @@ export async function setupAuthentication({
     }
 
     authLogger.debug('Could not handle authentication attempt');
-    return response.unauthorized({
-      headers: authenticationResult.authResponseHeaders,
+    return t.notHandled({
+      responseHeaders: authenticationResult.authResponseHeaders,
     });
   });
 
