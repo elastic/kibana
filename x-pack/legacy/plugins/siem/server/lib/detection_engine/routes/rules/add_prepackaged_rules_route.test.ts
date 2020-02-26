@@ -6,7 +6,6 @@
 
 import { omit } from 'lodash/fp';
 
-import { createRulesRoute } from './create_rules_route';
 import {
   getFindResult,
   getResult,
@@ -17,6 +16,7 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
+import * as updatePrepackagedRules from '../../rules/update_prepacked_rules';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -54,7 +54,8 @@ describe('add_prepackaged_rules_route', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
@@ -78,9 +79,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('returns 404 if alertClient is not available on the route', async () => {
       getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { inject, route } = createMockServer();
-      createRulesRoute(route, config, getClients);
-      const { statusCode } = await inject(addPrepackagedRulesRequest());
+      const { statusCode } = await server.inject(addPrepackagedRulesRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -124,6 +123,20 @@ describe('add_prepackaged_rules_route', () => {
       expect(JSON.parse(payload)).toEqual({
         rules_installed: 0,
         rules_updated: 1,
+      });
+    });
+    test('catches errors if payloads cause errors to be thrown', async () => {
+      jest.spyOn(updatePrepackagedRules, 'updatePrepackagedRules').mockImplementation(() => {
+        throw new Error('Test error');
+      });
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      const { payload } = await server.inject(addPrepackagedRulesRequest());
+      expect(JSON.parse(payload)).toEqual({
+        message: 'Test error',
+        status_code: 500,
       });
     });
   });

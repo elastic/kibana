@@ -8,7 +8,6 @@ import { AuthenticatedUser } from '../../../../../plugins/security/public';
 import { RequestHandlerContext } from '../../../../../../src/core/server';
 export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
 
-import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
@@ -26,18 +25,17 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { Alerts } from './alerts';
+import { MatrixHistogram } from './matrix_histogram';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
-  alerts: Alerts;
-  anomalies: Anomalies;
   authentications: Authentications;
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
   ipDetails: IpDetails;
+  matrixHistogram: MatrixHistogram;
   network: Network;
   kpiNetwork: KpiNetwork;
   overview: Overview;
