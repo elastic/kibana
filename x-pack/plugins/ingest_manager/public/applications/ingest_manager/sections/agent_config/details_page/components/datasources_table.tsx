@@ -43,10 +43,10 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
 
   // Flatten some values so that they can be searched via in-memory table search
   const datasources =
-    originalDatasources?.map(({ id, name, streams, package: datasourcePackage, configs }) => ({
+    originalDatasources?.map(({ id, name, inputs, package: datasourcePackage, configs }) => ({
       id,
       name,
-      streams: streams?.length || 0,
+      streams: inputs.reduce((streamsCount, input) => streamsCount + input.streams.length, 0),
       packageName: datasourcePackage?.name,
       packageTitle: datasourcePackage?.title,
       packageVersion: datasourcePackage?.version,
