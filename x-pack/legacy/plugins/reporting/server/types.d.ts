@@ -5,17 +5,12 @@
  */
 
 import { Legacy } from 'kibana';
-import {
-  ElasticsearchServiceSetup,
-  SavedObjectsServiceStart,
-  UiSettingsServiceStart,
-} from 'src/core/server';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
-import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions } from '../types';
-import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingPluginSpecOptions } from '../types';
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;

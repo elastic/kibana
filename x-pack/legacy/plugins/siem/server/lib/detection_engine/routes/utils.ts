@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { snakeCase } from 'lodash/fp';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacyServices } from '../../../types';
 
@@ -44,7 +45,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
 };
 
 export interface BulkError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: {
     status_code: number;
     message: string;
@@ -53,24 +55,54 @@ export interface BulkError {
 
 export const createBulkErrorObject = ({
   ruleId,
+  id,
   statusCode,
   message,
 }: {
-  ruleId: string;
+  ruleId?: string;
+  id?: string;
   statusCode: number;
   message: string;
 }): BulkError => {
-  return {
-    rule_id: ruleId,
-    error: {
-      status_code: statusCode,
-      message,
-    },
-  };
+  if (id != null && ruleId != null) {
+    return {
+      id,
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (id != null) {
+    return {
+      id,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (ruleId != null) {
+    return {
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else {
+    return {
+      rule_id: '(unknown id)',
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  }
 };
 
 export interface ImportRuleResponse {
-  rule_id: string;
+  rule_id?: string;
+  id?: string;
   status_code?: number;
   message?: string;
   error?: {
@@ -179,4 +211,12 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
   const spaceId = getSpaceId();
 
   return `${signalsIndex}-${spaceId}`;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  return Object.keys(obj).reduce((acc, item) => {
+    const newKey = snakeCase(item);
+    return { ...acc, [newKey]: obj[item] };
+  }, {});
 };

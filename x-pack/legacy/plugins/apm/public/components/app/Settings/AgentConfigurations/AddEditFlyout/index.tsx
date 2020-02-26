@@ -23,15 +23,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
-import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
+import { transactionSampleRateRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_sample_rate_rt';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
 import { ServiceForm } from '../../../../shared/ServiceForm';
 import { DeleteButton } from './DeleteButton';
-import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
+import { transactionMaxSpansRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
-import { isRumAgentName } from '../../../../../../common/agent_name';
-import { ALL_OPTION_VALUE } from '../../../../../../common/agent_configuration_constants';
+import { isRumAgentName } from '../../../../../../../../../plugins/apm/common/agent_name';
+import { ALL_OPTION_VALUE } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../plugins/observability/public';
@@ -135,8 +135,8 @@ export function AddEditFlyout({
       sampleRate,
       captureBody,
       transactionMaxSpans,
-      configurationId: selectedConfig ? selectedConfig.id : undefined,
       agentName,
+      isExistingConfig: Boolean(selectedConfig),
       toasts,
       trackApmEvent
     });
