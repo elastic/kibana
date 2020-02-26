@@ -132,11 +132,12 @@ export const getFindRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
-export const getReadBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-  payload: [typicalPayload()],
-});
+export const getReadBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    body: [typicalPayload()],
+  });
 
 export const getUpdateBulkRequest = (): ServerInjectOptions => ({
   method: 'PUT',
