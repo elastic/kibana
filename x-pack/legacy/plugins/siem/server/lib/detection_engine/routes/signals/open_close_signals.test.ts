@@ -25,7 +25,12 @@ describe('set signal status', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
 
     server = createMockServer();
@@ -49,6 +54,15 @@ describe('set signal status', () => {
     test('returns 200 when setting a status on a signal by query', async () => {
       const { statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
       expect(statusCode).toBe(200);
+    });
+
+    test('catches error if callAsCurrentUser throws error', async () => {
+      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
