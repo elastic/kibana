@@ -18,7 +18,7 @@ type APICaller = (
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller, dynamicSettings: DynamicSettings } & P
+  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
 ) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
