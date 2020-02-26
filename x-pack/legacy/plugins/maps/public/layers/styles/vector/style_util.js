@@ -54,3 +54,17 @@ export function assignCategoriesToPalette({ categories, paletteValues }) {
     fallback,
   };
 }
+
+export function makeMbClampedNumberExpression({
+  lookupFunction,
+  fieldName,
+  minValue,
+  maxValue,
+  fallback,
+}) {
+  return [
+    'coalesce',
+    ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue],
+    fallback,
+  ];
+}

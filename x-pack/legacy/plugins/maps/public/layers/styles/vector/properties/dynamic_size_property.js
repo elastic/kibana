@@ -5,6 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
+import { makeMbClampedNumberExpression } from '../style_util';
 
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
@@ -74,24 +75,21 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncIconSizeWithMb(symbolLayerId, mbMap) {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
-      const rangeFieldMeta = this.getFieldMeta();
-
+    const rangeFieldMeta = this.getFieldMeta();
+    if (this._isSizeDynamicConfigComplete(this._options) && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getComputedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
         ['linear'],
-        [
-          'coalesce',
-          [
-            'max',
-            ['min', ['to-number', ['get', targetName]], rangeFieldMeta.max],
-            rangeFieldMeta.min,
-          ],
-          0,
-        ],
+        makeMbClampedNumberExpression({
+          minValue: rangeFieldMeta.min,
+          maxValue: rangeFieldMeta.max,
+          fallback: 0,
+          lookupFunction: 'get',
+          fieldName: targetName,
+        }),
         rangeFieldMeta.min,
         this._options.minSize / halfIconPixels,
         rangeFieldMeta.max,
@@ -123,7 +121,8 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   getMbSizeExpression() {
-    if (!this._isSizeDynamicConfigComplete(this._options)) {
+    const rangeFieldMeta = this.getFieldMeta();
+    if (!this._isSizeDynamicConfigComplete(this._options) || !rangeFieldMeta) {
       return null;
     }
 
@@ -131,28 +130,26 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       targetName: this.getComputedFieldName(),
       minSize: this._options.minSize,
       maxSize: this._options.maxSize,
+      minValue: rangeFieldMeta.min,
+      maxValue: rangeFieldMeta.max,
     });
   }
 
-  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
-    const rangeFieldMeta = this.getFieldMeta();
-
+  _getMbDataDrivenSize({ targetName, minSize, maxSize, minValue, maxValue }) {
     const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],
-      [
-        'coalesce',
-        [
-          'max',
-          ['min', ['to-number', [lookup, targetName]], rangeFieldMeta.max],
-          rangeFieldMeta.min,
-        ],
-        0,
-      ],
-      rangeFieldMeta.min,
+      makeMbClampedNumberExpression({
+        lookupFunction: lookup,
+        maxValue,
+        minValue,
+        fieldName: targetName,
+        fallback: 0,
+      }),
+      minValue,
       minSize,
-      rangeFieldMeta.max,
+      maxValue,
       maxSize,
     ];
   }
@@ -162,8 +159,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       this._field &&
       this._field.isValid() &&
       _.has(this._options, 'minSize') &&
-      _.has(this._options, 'maxSize') &&
-      this.getFieldMeta()
+      _.has(this._options, 'maxSize')
     );
   }
 

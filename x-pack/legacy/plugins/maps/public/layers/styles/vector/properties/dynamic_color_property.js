@@ -6,7 +6,11 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
-import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
+import {
+  getComputedFieldName,
+  getOtherCategoryLabel,
+  makeMbClampedNumberExpression,
+} from '../style_util';
 import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -23,6 +27,7 @@ import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
+const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -130,29 +135,28 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [
         'step',
         ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
-        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
     } else {
-      const fieldMeta = this.getFieldMeta();
-      if (!fieldMeta) {
+      const rangeFieldMeta = this.getFieldMeta();
+      if (!rangeFieldMeta) {
         return null;
       }
 
+      const lessThenFirstStopValue = rangeFieldMeta.min - 1;
       return [
         'interpolate',
         ['linear'],
-        [
-          'coalesce',
-          [
-            'max',
-            ['min', ['to-number', ['feature-state', targetName]], fieldMeta.max],
-            fieldMeta.min,
-          ],
-          -1,
-        ],
-        -1,
-        'rgba(0,0,0,0)',
+        makeMbClampedNumberExpression({
+          minValue: rangeFieldMeta.min,
+          maxValue: rangeFieldMeta.max,
+          lookupFunction: 'feature-state',
+          fallback: lessThenFirstStopValue,
+          fieldName: targetName,
+        }),
+        lessThenFirstStopValue,
+        RGBA_0000,
         ...colorStops,
       ];
     }
