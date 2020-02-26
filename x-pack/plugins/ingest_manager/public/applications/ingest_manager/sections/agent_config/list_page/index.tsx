@@ -87,7 +87,22 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (name: string, agentConfig: AgentConfig) => name || agentConfig.id,
+        render: (name: string, agentConfig: AgentConfig) => (
+          <EuiFlexGroup gutterSize="s" wrap={true} alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiLink href={`${DETAILS_URI}${agentConfig.id}`}>{name || agentConfig.id}</EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigList.revisionNumber"
+                  defaultMessage="rev. {revNumber}"
+                  values={{ revNumber: '999' }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       },
       {
         field: 'namespace',
