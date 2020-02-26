@@ -24,9 +24,5 @@ export {
   IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
-} from '../../../ui/public/agg_types';
-export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-export { I18nContext } from '../../../ui/public/i18n';
-import chrome from '../../../ui/public/chrome';
-export { chrome as legacyChrome };
-import '../../../ui/public/directives/bind';
+} from '../../data/public';
+export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';
