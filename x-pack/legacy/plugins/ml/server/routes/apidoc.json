@@ -31,6 +31,8 @@
     "DeleteAnomalyDetectorsJob",
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
+    "GetRecords",
+    "GetBuckets",
     "GetOverallBuckets",
     "GetCategories",
     "FileDataVisualizer",

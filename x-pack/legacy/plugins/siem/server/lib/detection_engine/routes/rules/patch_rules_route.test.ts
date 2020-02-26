@@ -7,6 +7,8 @@
 import { ServerInjectOptions } from 'hapi';
 import { omit } from 'lodash/fp';
 import { patchRulesRoute } from './patch_rules_route';
+import * as utils from './utils';
+import * as patchRules from '../../rules/patch_rules';
 
 import {
   getFindResult,
@@ -26,7 +28,13 @@ describe('patch_rules', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
@@ -62,6 +70,32 @@ describe('patch_rules', () => {
       patchRulesRoute(route, getClients);
       const { statusCode } = await inject(getPatchRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('returns 500 when transform fails', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.update.mockResolvedValue(updateActionResult());
+      clients.alertsClient.update.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(utils, 'transform').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getPatchRequest());
+      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(statusCode).toBe(500);
+    });
+
+    test('catches error if patchRules throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.update.mockResolvedValue(updateActionResult());
+      clients.alertsClient.update.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(patchRules, 'patchRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getPatchRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
