@@ -21,8 +21,8 @@ import { Observable } from 'rxjs';
 import { APMOSSConfig } from './';
 
 export interface APMOSSPluginSetup {
-  config$: Observable<APMOSSConfig>
-};
+  config$: Observable<APMOSSConfig>;
+}
 
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {

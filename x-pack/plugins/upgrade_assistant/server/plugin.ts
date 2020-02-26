@@ -67,7 +67,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, elasticsearch, getStartServices }: CoreSetup,
-    { usageCollection, cloud, licensing, apmOSS }: PluginsSetup
+    { usageCollection, cloud, licensing, apm_oss: apmOSS }: PluginsSetup
   ) {
     this.elasticSearchService = elasticsearch;
     this.licensing = licensing;

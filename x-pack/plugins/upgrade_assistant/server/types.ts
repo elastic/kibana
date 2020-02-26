@@ -8,7 +8,7 @@ import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
 import { CloudSetup } from '../../cloud/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server'
+import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 
 export interface RouteDependencies {
   router: IRouter;
