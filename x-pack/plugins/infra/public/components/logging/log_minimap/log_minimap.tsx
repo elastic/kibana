@@ -126,34 +126,33 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         onClick={this.handleClick}
         onMouseMove={this.updateTimeCursor}
       >
-        <g>
+        <MinimapBorder x1={TIMERULER_WIDTH} x2={TIMERULER_WIDTH} y1={0} y2={height} />
+        <TimeRuler
+          start={minTime}
+          end={maxTime}
+          width={TIMERULER_WIDTH}
+          height={height}
+          tickCount={tickCount}
+        />
+        <g transform={`translate(${TIMERULER_WIDTH}, 0)`}>
           <DensityChart
             buckets={summaryBuckets}
             start={minTime}
             end={maxTime}
             width={width - TIMERULER_WIDTH}
             height={height}
-            x={TIMERULER_WIDTH}
-          />
-
-          <MinimapBorder x1={TIMERULER_WIDTH} x2={TIMERULER_WIDTH} y1={0} y2={height} />
-          <TimeRuler
-            start={minTime}
-            end={maxTime}
-            width={TIMERULER_WIDTH}
-            height={height}
-            tickCount={tickCount}
           />
 
           <SearchMarkers
             buckets={summaryHighlightBuckets || []}
             start={minTime}
             end={maxTime}
-            width={width}
+            width={width - TIMERULER_WIDTH}
             height={height}
             jumpToTarget={jumpToTarget}
           />
         </g>
+
         {highlightedInterval ? (
           <HighlightedInterval
             end={highlightedInterval.end}

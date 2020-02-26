@@ -18,7 +18,6 @@ interface DensityChartProps {
   start: number;
   width: number;
   height: number;
-  x: number;
 }
 
 export const DensityChart: React.FC<DensityChartProps> = ({
@@ -27,7 +26,6 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   end,
   width,
   height,
-  x,
 }) => {
   if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
     return null;
@@ -63,7 +61,7 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   const pathData = path(pathBuckets);
 
   return (
-    <g transform={`translate(${x}, 0)`}>
+    <g>
       <DensityChartPositiveBackground width={width} height={height} />
       <PositiveAreaPath d={pathData || ''} />
     </g>
