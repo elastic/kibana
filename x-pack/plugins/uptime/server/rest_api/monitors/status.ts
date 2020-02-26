@@ -19,12 +19,12 @@ export const createGetMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs)
   options: {
     tags: ['access:uptime'],
   },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { monitorId } = request.query;
 
     return response.ok({
       body: {
-        ...(await libs.requests.getMonitor({ callES, monitorId })),
+        ...(await libs.requests.getMonitor({ callES, dynamicSettings, monitorId })),
       },
     });
   },
@@ -43,10 +43,11 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
   options: {
     tags: ['access:uptime'],
   },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
     const result = await libs.requests.getLatestMonitor({
       callES,
+      dynamicSettings,
       monitorId,
       dateStart,
       dateEnd,

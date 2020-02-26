@@ -1,3 +1,5 @@
+import { defaultDynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
@@ -13,9 +15,7 @@ const type = 'uptime-dynamic-settings';
 export const umDynamicSettings = {
   type,
   id: 'uptime-dynamic-settings-singleton',
-  defaults: {
-    heartbeatIndices: 'heartbeat-8.*',
-  },
+  defaults: defaultDynamicSettings,
   mapping: {
     [type]: {
       properties: {

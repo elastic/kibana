@@ -99,7 +99,6 @@ export const SettingsPageComponent = ({
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiDescribedFormGroup
-          idAria="heartbeatIndices"
           title={
             <h4>
               <FormattedMessage

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createAction } from 'redux-actions';
-import { DynamicSettings, DynamicSettingsSaveResponse } from '../../../common/runtime_types';
+import { DynamicSettings } from '../../../common/runtime_types';
 
 export const getDynamicSettings = createAction<{}>('GET_DYNAMIC_SETTING');
 export const getDynamicSettingsSuccess = createAction<DynamicSettings>(

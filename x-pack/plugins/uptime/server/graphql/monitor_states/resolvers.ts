@@ -13,6 +13,7 @@ import {
   StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants/context_defaults';
+import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -41,8 +42,11 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
       async getMonitorStates(
         _resolver,
         { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
-        { APICaller }
+        { APICaller, savedObjectsClient }
       ): Promise<MonitorSummaryResult> {
+
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
+
         const decodedPagination = pagination
           ? JSON.parse(decodeURIComponent(pagination))
           : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
@@ -50,9 +54,10 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           indexStatus,
           { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          libs.requests.getIndexStatus({ callES: APICaller }),
+          libs.requests.getIndexStatus({ callES: APICaller, dynamicSettings }),
           libs.requests.getMonitorStates({
             callES: APICaller,
+            dynamicSettings,
             dateRangeStart,
             dateRangeEnd,
             pagination: decodedPagination,
@@ -73,8 +78,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
-        return await libs.requests.getIndexStatus({ callES: APICaller });
+      async getStatesIndexStatus(_resolver, {}, { APICaller, savedObjectsClient }): Promise<StatesIndexStatus> {
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
+        return await libs.requests.getIndexStatus({ callES: APICaller, dynamicSettings });
       },
     },
   };

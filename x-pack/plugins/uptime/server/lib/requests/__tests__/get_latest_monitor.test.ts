@@ -5,6 +5,7 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
+import { defaultDynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
@@ -81,6 +82,7 @@ describe('getLatestMonitor', () => {
     const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
     const result = await getLatestMonitor({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',

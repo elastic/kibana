@@ -19,6 +19,9 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
+    dynamicSettings: {
+      loading: false,
+    },
     monitor: {
       monitorDetailsList: [],
       monitorLocationsList: new Map(),

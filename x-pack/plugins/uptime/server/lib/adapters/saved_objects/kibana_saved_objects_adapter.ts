@@ -6,11 +6,13 @@
 
 import { UMSavedObjectsAdapter } from './types';
 import { umDynamicSettings } from '../../sources';
+import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
-  getUptimeDynamicSettings: async (client): Promise<DynamicSettingsType> => {
+  getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
-      return (await client.get(umDynamicSettings.type, umDynamicSettings.id)).attributes;
+      const obj = await client.get<DynamicSettings>(umDynamicSettings.type, umDynamicSettings.id)
+      return obj.attributes;
     } catch (e) {
       try {
         return (

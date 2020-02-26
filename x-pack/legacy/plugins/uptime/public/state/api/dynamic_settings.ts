@@ -6,7 +6,6 @@
 
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
 import {
   DynamicSettingsType,

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DynamicSettings } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../framework';
+import { DynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
 
 export interface UMSavedObjectsAdapter {
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;

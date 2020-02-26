@@ -12,6 +12,7 @@ import {
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
+import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
 
@@ -33,10 +34,12 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getMonitorChartsData(
       _resolver,
       { monitorId, dateRangeStart, dateRangeEnd, location },
-      { APICaller }
+      { APICaller, savedObjectsClient }
     ): Promise<MonitorChart> {
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
       return await libs.requests.getMonitorCharts({
         callES: APICaller,
+        dynamicSettings,
         monitorId,
         dateRangeStart,
         dateRangeEnd,

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, CallAPIOptions } from 'src/core/server';
+import { RequestHandlerContext, CallAPIOptions, SavedObjectsClient } from 'src/core/server';
 import { UMServerLibs } from '../lib/lib';
-import { DynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
 
 export type UMContext = RequestHandlerContext & {
   APICaller: (
@@ -14,6 +13,7 @@ export type UMContext = RequestHandlerContext & {
     clientParams?: Record<string, any>,
     options?: CallAPIOptions | undefined
   ) => Promise<any>;
+  savedObjectsClient: SavedObjectsClient;
 };
 
 export interface UMGraphQLResolver {
