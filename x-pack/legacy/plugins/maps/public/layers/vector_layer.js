@@ -562,8 +562,7 @@ export class VectorLayer extends AbstractLayer {
 
       const formatters = {};
       const promises = fields.map(async field => {
-        const fieldName = field.getName();
-        formatters[fieldName] = await source.getFieldFormatter(fieldName);
+        formatters[field.getName()] = await source.createFieldFormatter(field);
       });
       await Promise.all(promises);
 
