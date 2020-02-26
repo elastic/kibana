@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
-import { Version } from '../types/version';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
 
@@ -112,7 +111,7 @@ export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
-export const version = Version;
+export const version = PositiveIntegerGreaterThanZero;
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
 export const last_failure_at = IsoDateString;
