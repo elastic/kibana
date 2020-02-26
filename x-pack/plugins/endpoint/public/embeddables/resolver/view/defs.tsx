@@ -46,7 +46,9 @@ type ResolverColorNames =
   | 'full'
   | 'warning'
   | 'strokeBehindEmpty'
-  | 'resolverBackground';
+  | 'resolverBackground'
+  | 'runningProcessStart'
+  | 'runningProcessEnd';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
@@ -56,6 +58,8 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   strokeBehindEmpty: euiColor85Shade,
   warning: resolverPalette.statii[3],
   resolverBackground: euiColor85Shade,
+  runningProcessStart: "#006BB4",
+  runningProcessEnd: "#017D73",
 };
 
 const idGenerator = htmlIdGenerator();
@@ -65,6 +69,7 @@ const idGenerator = htmlIdGenerator();
  */
 export const PaintServerIds = {
   darkLinearReflect: idGenerator('darkreflect'),
+  runningProcess: idGenerator('runningProcess'),
 };
 
 /**
@@ -85,6 +90,18 @@ const PaintServers = memo(() => (
       <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
       <stop offset="100%" stopColor={darken(0.1, NamedColors.okdark)} stopOpacity="1" />
     </linearGradient>
+    <linearGradient
+      id={PaintServerIds.runningProcess}
+      x1="0"
+      y1="0"
+      x2="1"
+      y2="1"
+      spreadMethod="reflect"
+      gradientUnits="objectBoundingBox"
+    >
+      <stop offset="0%" stopColor={NamedColors.runningProcessStart} stopOpacity="1" />
+      <stop offset="100%" stopColor={NamedColors.runningProcessEnd} stopOpacity="1" />
+    </linearGradient>
   </>
 ));
 
@@ -95,6 +112,7 @@ export const SymbolIds = {
   processNode: idGenerator('nodeSymbol'),
   processNodeWithHorizontalRule: idGenerator('nodeSymbolWithHR'),
   solidHexagon: idGenerator('hexagon'),
+  runningProcessCube: idGenerator('runningCube'),
 };
 
 /**
@@ -128,6 +146,42 @@ const SymbolsAndShapes = memo(() => (
           stroke="inherit"
         />
       </g>
+    </symbol>
+
+    <symbol id={SymbolIds.runningProcessCube} viewBox="0 0 66 73">
+      <filter id="filter-3" x="-37.5%" y="-34.9%" width="175%" height="169.8%">
+        <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="shadowSpreadOuter1"/>
+        <feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"/>
+        <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="2.5"/>
+        <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.0366586538 0"></feColorMatrix>
+      </filter>
+      <title>Group 2</title>
+      <desc>Created with Sketch.</desc>
+      <polygon
+      fill={`url(#${PaintServerIds.runningProcess})`}
+      points="11.4 24.2 33.5 11.3 55.4 24.2 55.4 48.6 33.5 61.3 11.4 48.6"/>
+      <polygon id="Path" opacity="0.2518" points="33.4 61.3 33.9 37.6 11.4 24.3 11.4 48.6"/>
+      <g transform="translate(23.5 33.217) rotate(180) translate(-8.5 -10)" opacity=".5">
+        <polygon id="Path-4_1_" fill="#FFFFFF" points="-10.4 0.9 -1.8 -4.1 6.6 0.9 6.6 10.4 -1.8 15.3 -10.4 10.4"/>
+        <polygon fill="#D8D8D8" points="-10.4 0.9 -1.9 5.6 -1.9 15.3 -10.4 10.4"/>
+        <polygon  fill="#959595" points="-1.9 15.3 -1.9 5.6 6.6 0.9 6.6 10.4"/>
+        <animate
+          attributeName="opacity"
+          values=".1 ; .75 ; .5 ; .25 ; .1"
+          keyTimes="0 ; 0.25 ; 0.5 ; 0.75 ; 1"
+          begin="DOMNodeInsertedIntoDocument"
+          dur="3.5s"
+          repeatCount="indefinite"
+        />
+      </g>
+      <g id="Path-4_2_" opacity="0.7504">
+        <g filter="url(#filter-3)">
+          <polygon id="path-2_2_" points="11.4 24.2 33.5 11.3 55.4 24.2 55.4 48.6 33.5 61.3 11.4 48.6"/>
+        </g>
+        <polygon id="path-2_1_" fill="url(#path-2_2_)" points="11.4 24.2 33.5 11.3 55.4 24.2 55.4 48.6 33.5 61.3 11.4 48.6"/>
+      </g>
+      <polygon id="Path_1_" opacity="0.2518" points="33.4 61.3 33.9 37.6 11.4 24.3 11.4 48.6"/>
+      <polygon id="Path_2_" opacity="0.1389" fill="#FFFFFF" points="55.4 24.3 33.4 11.3 11.4 24.3 33.9 37.6"/>
     </symbol>
   </>
 ));
