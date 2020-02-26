@@ -21,6 +21,7 @@ import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
+import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
@@ -48,7 +49,7 @@ export function toElasticsearchQuery(
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
   const field = get(indexPattern, 'fields', []).find((fld: IFieldType) => fld.name === fieldName);
   const queryParams = {
-    points: points.map((point: any) => {
+    points: points.map((point: LiteralTypeBuildNode) => {
       return ast.toElasticsearchQuery(point, indexPattern, config, context);
     }),
   };

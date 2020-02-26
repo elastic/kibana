@@ -35,7 +35,7 @@ module.exports = function(grunt) {
     'checkPlugins',
     'run:browserSCSS',
     'run:karmaTestServer',
-    'karma:unit',
+    // 'karma:unit',
   ]);
 
   grunt.registerTask('test:karma-ci', () => {
