@@ -38,7 +38,11 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
 }
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns) {
-  const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
+  const fieldLists = indexPatterns.map(indexPattern =>
+    indexPattern.attributes && indexPattern.attributes.fields
+      ? JSON.parse(indexPattern.attributes.fields)
+      : []
+  );
   const fieldListsWithGeoFields = fieldLists.filter(fields => {
     return fields.some(
       field =>
@@ -50,7 +54,9 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns) {
 
 export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings }) {
   const layerLists = mapSavedObjects.map(savedMapObject =>
-    JSON.parse(savedMapObject.attributes.layerListJSON)
+    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+      ? JSON.parse(savedMapObject.attributes.layerListJSON)
+      : []
   );
   const mapsCount = layerLists.length;
 

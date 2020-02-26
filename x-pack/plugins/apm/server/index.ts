@@ -15,6 +15,7 @@ export const config = {
     ui: true,
   },
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     serviceMapEnabled: schema.boolean({ defaultValue: false }),
     serviceMapInitialTimeRange: schema.number({ defaultValue: 60 * 1000 * 60 }), // last 1 hour
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),

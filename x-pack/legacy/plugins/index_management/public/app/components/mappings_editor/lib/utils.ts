@@ -54,12 +54,11 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
       Boolean(field[childFieldsName!]) &&
       Object.keys(field[childFieldsName!]!).length > 0;
 
-  const canHaveMultiFields = isMultiField ? false : childFieldsName === 'fields';
-  const hasMultiFields = isMultiField
-    ? false
-    : canHaveMultiFields &&
-      Boolean(field[childFieldsName!]) &&
-      Object.keys(field[childFieldsName!]!).length > 0;
+  const canHaveMultiFields = childFieldsName === 'fields';
+  const hasMultiFields =
+    canHaveMultiFields &&
+    Boolean(field[childFieldsName!]) &&
+    Object.keys(field[childFieldsName!]!).length > 0;
 
   return {
     childFieldsName,

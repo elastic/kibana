@@ -22,3 +22,4 @@ export * from './timefilter/types';
 export * from './query/types';
 export * from './kbn_field_types/types';
 export * from './index_patterns/types';
+export { TextContextTypeConvert } from './field_formats/types';

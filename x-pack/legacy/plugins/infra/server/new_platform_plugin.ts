@@ -6,6 +6,8 @@
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
+import { Observable } from 'rxjs';
+import { shareReplay, take } from 'rxjs/operators';
 import { InfraConfig } from '../../../../plugins/infra/server';
 import { initInfraServer } from './infra_server';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
@@ -42,30 +44,12 @@ export interface InfraPluginSetup {
   ) => void;
 }
 
-const DEFAULT_CONFIG: InfraConfig = {
-  enabled: true,
-  query: {
-    partitionSize: 75,
-    partitionFactor: 1.2,
-  },
-};
-
 export class InfraServerPlugin {
-  public config: InfraConfig = DEFAULT_CONFIG;
+  private config$: Observable<InfraConfig>;
   public libs: InfraBackendLibs | undefined;
 
   constructor(context: PluginInitializerContext) {
-    const config$ = context.config.create<InfraConfig>();
-    config$.subscribe(configValue => {
-      this.config = {
-        ...DEFAULT_CONFIG,
-        enabled: configValue.enabled,
-        query: {
-          ...DEFAULT_CONFIG.query,
-          ...configValue.query,
-        },
-      };
-    });
+    this.config$ = context.config.create<InfraConfig>().pipe(shareReplay(1));
   }
 
   getLibs() {
@@ -75,10 +59,11 @@ export class InfraServerPlugin {
     return this.libs;
   }
 
-  setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
-    const framework = new KibanaFramework(core, this.config, plugins);
+  async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
+    const config = await this.config$.pipe(take(1)).toPromise();
+    const framework = new KibanaFramework(core, config, plugins);
     const sources = new InfraSources({
-      config: this.config,
+      config,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
@@ -102,7 +87,7 @@ export class InfraServerPlugin {
     };
 
     this.libs = {
-      configuration: this.config,
+      configuration: config,
       framework,
       logEntryCategoriesAnalysis,
       logEntryRateAnalysis,
