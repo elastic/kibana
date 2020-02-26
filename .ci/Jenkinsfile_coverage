@@ -77,7 +77,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
 
-                  . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER}
+                  . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
                   # Bootstrap the CC App
                   . src/dev/code_coverage/shell_scripts/query_app_initial_data.sh ${BUILD_NUMBER} 100
