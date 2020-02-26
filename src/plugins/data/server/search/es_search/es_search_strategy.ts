@@ -36,18 +36,13 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
         ...request.params,
       };
-      const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
+      const rawResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.
-      return {
-        total: esSearchResponse._shards.total,
-        loaded:
-          esSearchResponse._shards.failed +
-          esSearchResponse._shards.skipped +
-          esSearchResponse._shards.successful,
-        rawResponse: esSearchResponse,
-      };
+      const { total, failed, skipped, successful } = rawResponse._shards;
+      const loaded = failed + skipped + successful;
+      return { total, loaded, rawResponse };
     },
   };
 };

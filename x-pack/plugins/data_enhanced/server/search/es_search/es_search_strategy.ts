@@ -37,14 +37,16 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 
       const esSearchResponse = (await caller(...args)) as SearchResponse<any>;
 
-      // TODO: This can be simplified once the async API is updated
       const { id, response: rawResponse } = esSearchResponse;
-      const failed = rawResponse._shards?.failed ?? rawResponse.shard_failures;
-      const total = rawResponse._shards?.total ?? rawResponse.total_shards;
-      const successful = rawResponse._shards?.successful ?? rawResponse.successful_shards;
-      const skipped = rawResponse._shards?.skipped ?? 0;
-      const loaded = failed + successful + skipped;
+      const { total, failed, skipped, successful } = rawResponse._shards;
+      const loaded = failed + skipped + successful;
       return { id, total, loaded, rawResponse };
+    },
+    cancel: id => {
+      caller('transport.request', {
+        path: `/_async_search/${id}`,
+        method: 'DELETE',
+      });
     },
   };
 };
