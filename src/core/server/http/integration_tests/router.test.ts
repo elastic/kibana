@@ -82,7 +82,7 @@ describe('Options', () => {
           .expect(200, 'ok');
       });
 
-      it('User with not recognized credentials has access to a route', async () => {
+      it('User with no credentials can access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
         const authResponseHeader = {
@@ -126,7 +126,7 @@ describe('Options', () => {
           .expect(200, 'ok');
       });
 
-      it('User with not recognized credentials has no access to a route', async () => {
+      it('User with no credentials cannot access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
         const authResponseHeader = {
