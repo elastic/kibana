@@ -38,6 +38,8 @@ export const policySchema = schema.object({
   retention: schema.maybe(snapshotRetentionSchema),
   isManagedPolicy: schema.boolean(),
   stats: schema.maybe(schema.object({}, { allowUnknowns: true })),
+  lastFailure: schema.maybe(schema.object({}, { allowUnknowns: true })),
+  lastSuccess: schema.maybe(schema.object({}, { allowUnknowns: true })),
 });
 
 const fsRepositorySettings = schema.object({
