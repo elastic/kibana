@@ -24,10 +24,8 @@ clearOutFile() {
 queryDataStore() {
   clearOutFile
 
-  for x in `seq ${PAST_BUILD_ID} ${CURRENT_BUILD_ID}`
-  do
-    gsutil ls -a ${BUCKET}/${x} 2> errs.txt | grep Z 1>> $OUT_FILE
-  done
+  gsutil ls ${BUCKET} 2> errs.txt | grep Z 1>> $OUT_FILE
+
   echo "### Querying App Initial Data - Complete"
 }
 queryDataStore
