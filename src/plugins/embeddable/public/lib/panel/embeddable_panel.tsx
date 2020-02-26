@@ -247,7 +247,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const sorted = (actions as Array<Action<{ embeddable: IEmbeddable }>>)
       .concat(extraActions)
-      .sort((a: Action<{ embeddable: IEmbeddable }>, b: Action<{ embeddable: IEmbeddable }>) => {
+      .sort((a, b) => {
         const bOrder = b.order || 0;
         const aOrder = a.order || 0;
         return bOrder - aOrder;

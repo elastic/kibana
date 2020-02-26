@@ -117,9 +117,9 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
     const actions = actionIds!
-      .map(actionId => this.actions.get(actionId))
-      .filter<AnyActionInternal>(Boolean as any)
-      .map<AnyActionContract>(({ contract }) => contract);
+      .map(actionId => this.actions.get(actionId) as AnyActionInternal)
+      .filter(Boolean)
+      .map(({ contract }) => contract);
 
     return actions;
   };
