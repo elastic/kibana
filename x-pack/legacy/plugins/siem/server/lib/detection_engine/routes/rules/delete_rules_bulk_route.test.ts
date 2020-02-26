@@ -11,6 +11,8 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
+  getFindResultStatusEmpty,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
@@ -24,7 +26,9 @@ describe('delete_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.alertsClient.delete.mockResolvedValue({}); // successful deletion
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // rule status request
 
     deleteRulesBulkRoute(server.router);
   });
@@ -37,12 +41,8 @@ describe('delete_rules', () => {
 
     test('resturns 200 when deleting a single rule and related rule status', async () => {
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue(true);
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getDeleteBulkRequest(), context);
+      expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
