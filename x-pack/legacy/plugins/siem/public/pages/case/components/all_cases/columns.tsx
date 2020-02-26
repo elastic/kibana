@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiBadge, EuiTableFieldDataColumnType, EuiTableComputedColumnType } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiAvatar,
+} from '@elastic/eui';
+import styled from 'styled-components';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
@@ -14,8 +20,9 @@ import * as i18n from './translations';
 
 export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
 
-const renderStringField = (field: string, dataTestSubj: string) =>
-  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
+const Spacer = styled.span`
+  margin-left: 8px;
+`;
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
@@ -26,6 +33,23 @@ export const getCasesColumns = (): CasesColumns[] => [
       }
       return getEmptyTagValue();
     },
+  },
+  {
+    field: 'createdBy',
+    name: i18n.REPORTER,
+    render: (createdBy: Case['createdBy']) =>
+      createdBy != null ? (
+        <>
+          <EuiAvatar
+            className="userAction__circle"
+            name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+            size="s"
+          />
+          <Spacer>{createdBy.username}</Spacer>
+        </>
+      ) : (
+        getEmptyTagValue()
+      ),
   },
   {
     field: 'tags',
@@ -51,8 +75,17 @@ export const getCasesColumns = (): CasesColumns[] => [
     truncateText: true,
   },
   {
+    align: 'right',
+    field: 'updatedAt', // TO DO once we have commentCount returned in the API: https://github.com/elastic/kibana/issues/58525
+    name: i18n.COMMENTS,
+    sortable: true,
+    render: () => {
+      return <span>{1}</span>;
+    },
+  },
+  {
     field: 'createdAt',
-    name: i18n.CREATED_AT,
+    name: i18n.OPENED_ON,
     sortable: true,
     render: (createdAt: Case['createdAt']) => {
       if (createdAt != null) {
@@ -65,33 +98,5 @@ export const getCasesColumns = (): CasesColumns[] => [
       }
       return getEmptyTagValue();
     },
-  },
-  {
-    field: 'createdBy.username',
-    name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']['username']) =>
-      renderStringField(createdBy, `case-table-column-username`),
-  },
-  {
-    field: 'updatedAt',
-    name: i18n.LAST_UPDATED,
-    sortable: true,
-    render: (updatedAt: Case['updatedAt']) => {
-      if (updatedAt != null) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={updatedAt}
-            data-test-subj={`case-table-column-updatedAt`}
-          />
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: 'state',
-    name: i18n.STATE,
-    sortable: true,
-    render: (state: Case['state']) => renderStringField(state, `case-table-column-state`),
   },
 ];

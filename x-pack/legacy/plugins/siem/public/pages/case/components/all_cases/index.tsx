@@ -31,6 +31,7 @@ import {
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
 import { getCreateCaseUrl } from '../../../../components/link_to';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
@@ -92,6 +93,10 @@ export const AllCases = React.memo(() => {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
 
+  const selection: EuiTableSelectionType<Case> = {
+    onSelectionChange: (selectedItems) => console.log('on selection change', selectedItems)
+  }
+
   return (
     <Panel loading={isLoading}>
       <HeaderSection split title={i18n.ALL_CASES}>
@@ -116,6 +121,7 @@ export const AllCases = React.memo(() => {
           </UtilityBar>
           <EuiBasicTable
             columns={memoizedGetCasesColumns}
+            isSelectable={true}
             itemId="id"
             items={data.cases}
             noItemsMessage={
@@ -132,6 +138,7 @@ export const AllCases = React.memo(() => {
             }
             onChange={tableOnChangeCallback}
             pagination={memoizedPagination}
+            selection={selection}
             sorting={sorting}
           />
         </>
