@@ -24,12 +24,12 @@ image::images/intro-kibana.png[]
 
 [float]
 [[get-data-into-kibana]]
-=== Get data into {kib}
+=== Getting data into {kib}
 
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
 and processes the data, with {kib} sitting on top.
 
-{kib} offers multiple ways to get data in:
+To get data into {kib}, you can:
 
 * Add a <<add-sample-data, sample data set>> and take {kib} for a test drive without loading data yourself.
 * Follow one of our built-in tutorials to set up a data flow between your app and the Elastic Stack.
@@ -41,12 +41,13 @@ in the {beats} family.)
 image::images/intro-data-tutorial.png[]
 
 * Use the upload file feature and upload your own data.
-* Use the {es} {ref}/docs-bulk.html[bulk] API to load your own data set.
+* Use the {es} {ref}/docs-bulk.html[bulk] API to load your own data.
 
-Before you can start working with data, you must have an <<index-patterns, index pattern>>.  This pattern
-tells {kib} which {es} indices you want to explore.
-Index patterns are included in our sample data sets
-and built-in tutorials. Or, you can create one at any time in **Management.**
+{kib} requires an
+<<index-patterns, index pattern>> to tell it which {es} indices to explore.
+If you add sample data or run a built-in tutorial, you get an index pattern for free,
+and are good to start exploring. If you load your own data, you can create an index
+pattern in <<management, Management>>.
 
 
 [float]
@@ -77,7 +78,7 @@ change in real time.
 [role="screenshot"]
 image::images/intro-dashboard.png[]
 
-{kib} also has these features that address specific visualization needs.
+{kib} also offers these features that address specific visualization needs.
 
 * <<lens, Lens>> provides a drag-and-drop experience that helps
 you get insights from your data in just a few clicks. If there is a
@@ -117,7 +118,7 @@ image::images/intro-spaces.jpg[]
 
 You can take this all one step further with Kibana’s security features, and
 control which users have access to each space. {kib} allows for fine-grained
-controls here, so you can give a user read-only access to
+controls, so you can give a user read-only access to
 dashboards in one space, but full access to all of Kibana’s features in another.
 
 [float]
@@ -142,6 +143,9 @@ monitor performance, and address your business needs. Get alerted if a key
 metric spikes. Detect anomalous behavior or forecast future spikes. Root out
 bottlenecks in your application code. Kibana doesn’t limit or dictate how you explore your data.
 
+[role="screenshot"]
+image::siem/images/detections-ui.png[]
+
 [float]
 [[try-kibana]]
 === Give {kib} a try
@@ -150,8 +154,8 @@ There is no faster way to try out {kib} than with our hosted {es} Service.
 https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial]
 and start exploring data in minutes.
 
-You can also install {kib} on your own &mdash; no code, no additional
+You can also <<install, install {kib} on your own>> &mdash; no code, no additional
 infrastructure required.
 
 Our <<tutorial-build-dashboard, Getting Started>> and in-product guidance can
-help you get up and running, faster. Our Help menu has options if you have questions or feedback.
+help you get up and running, faster. Use our Help menu if you have questions or feedback.
