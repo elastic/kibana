@@ -38,7 +38,7 @@ export const DESCRIPTION = i18n.translate('xpack.siem.case.caseView.description'
   defaultMessage: 'Description',
 });
 
-export const MARKDOWN = i18n.translate('xpack.siem.case.caseView.description', {
+export const MARKDOWN = i18n.translate('xpack.siem.case.caseView.markdown', {
   defaultMessage: 'Markdown',
 });
 
@@ -129,9 +129,12 @@ export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addC
   defaultMessage: 'Add comment',
 });
 
-export const ADD_COMMENT_HELP_TEXT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
-  defaultMessage: 'Add a new comment...',
-});
+export const ADD_COMMENT_HELP_TEXT = i18n.translate(
+  'xpack.siem.case.caseView.comment.addCommentHelpText',
+  {
+    defaultMessage: 'Add a new comment...',
+  }
+);
 
 export const SAVE = i18n.translate('xpack.siem.case.caseView.description.save', {
   defaultMessage: 'Save',
