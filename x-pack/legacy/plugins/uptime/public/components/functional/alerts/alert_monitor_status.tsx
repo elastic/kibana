@@ -82,9 +82,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   useEffect(() => {
     setAlertParams('numTimes', numTimes);
   }, [numTimes, setAlertParams]);
+
   useEffect(() => {
     setAlertParams('timerange', { from: `now-${numMins}m`, to: 'now' });
   }, [numMins, setAlertParams]);
+
   useEffect(() => {
     if (allLabels) {
       setAlertParams('locations', []);
@@ -95,6 +97,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       );
     }
   }, [locations, setAlertParams, allLabels]);
+
   useEffect(() => {
     setAlertParams('filters', props.filters);
   }, [props.filters, setAlertParams]);
@@ -112,7 +115,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
           />
         }
         id="ping-count"
-        description="any ping is down >"
+        description="any monitor is down >"
         value={`${numTimes} times`}
       />
 
