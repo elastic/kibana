@@ -5,6 +5,7 @@
  */
 
 import { CalendarManager } from '../calendar';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export function groupsProvider(callWithRequest) {
   const calMngr = new CalendarManager(callWithRequest);
@@ -12,11 +13,13 @@ export function groupsProvider(callWithRequest) {
   async function getAllGroups() {
     const groups = {};
     const jobIds = {};
-    const [JOBS, CALENDARS] = [0, 1];
-    const results = await Promise.all([callWithRequest('ml.jobs'), calMngr.getAllCalendars()]);
+    const [{ jobs }, calendars] = await Promise.all([
+      callWithRequest('ml.jobs'),
+      calMngr.getAllCalendars(),
+    ]);
 
-    if (results[JOBS] && results[JOBS].jobs) {
-      results[JOBS].jobs.forEach(job => {
+    if (jobs) {
+      jobs.forEach(job => {
         jobIds[job.job_id] = null;
         if (job.groups !== undefined) {
           job.groups.forEach(g => {
@@ -33,10 +36,11 @@ export function groupsProvider(callWithRequest) {
         }
       });
     }
-    if (results[CALENDARS]) {
-      results[CALENDARS].forEach(cal => {
+    if (calendars) {
+      calendars.forEach(cal => {
         cal.job_ids.forEach(jId => {
-          if (jobIds[jId] === undefined) {
+          // don't include _all in the calendar groups list
+          if (jId !== GLOBAL_CALENDAR && jobIds[jId] === undefined) {
             if (groups[jId] === undefined) {
               groups[jId] = {
                 id: jId,

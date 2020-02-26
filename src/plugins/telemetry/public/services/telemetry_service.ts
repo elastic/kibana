@@ -92,7 +92,10 @@ export class TelemetryService {
       body: JSON.stringify({
         unencrypted,
         timeRange: {
-          min: now.subtract(20, 'minutes').toISOString(),
+          min: now
+            .clone() // Need to clone it to avoid mutation (and max being the same value)
+            .subtract(20, 'minutes')
+            .toISOString(),
           max: now.toISOString(),
         },
       }),

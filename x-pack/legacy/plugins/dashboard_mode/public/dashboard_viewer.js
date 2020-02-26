@@ -37,7 +37,7 @@ import 'plugins/kibana/dashboard/legacy';
 import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';
 
-import { showAppRedirectNotification } from 'ui/notify';
+import { showAppRedirectNotification } from '../../../../../src/plugins/kibana_legacy/public';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
 npStart.plugins.kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
@@ -51,7 +51,9 @@ chrome.setRootController('kibana', function() {
   npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
 });
 
-uiModules.get('kibana').run(showAppRedirectNotification);
+uiModules
+  .get('kibana')
+  .run($location => showAppRedirectNotification($location, npStart.core.notifications.toasts));
 
 /**
  * If there is a configured `kibana.defaultAppId`, and it is a dashboard ID, we'll

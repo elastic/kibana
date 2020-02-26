@@ -22,13 +22,9 @@ const getApiPath = (page?: UptimePage) => {
 };
 
 const logPageLoad = async (fetch: HttpHandler, page?: UptimePage) => {
-  try {
-    await fetch(getApiPath(page), {
-      method: 'POST',
-    });
-  } catch (e) {
-    throw e;
-  }
+  await fetch(getApiPath(page), {
+    method: 'POST',
+  });
 };
 
 export const useUptimeTelemetry = (page?: UptimePage) => {
