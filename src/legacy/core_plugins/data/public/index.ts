@@ -54,6 +54,7 @@ export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
 export {
   // agg_types TODO need to group these under a namespace or prefix
+  AggConfigs,
   AggParamType,
   AggTypeFilters, // TODO convert to interface
   aggTypeFilters,
@@ -66,6 +67,7 @@ export {
   convertIPRangeToString,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
+  setBounds,
   isStringType,
   isType,
   isValidInterval,
@@ -81,4 +83,6 @@ export {
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from './search';

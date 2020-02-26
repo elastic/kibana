@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+export const startDatafeedSchema = schema.object({
+  start: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
+  end: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
+  timeout: schema.maybe(schema.any()),
+});
+
+export const datafeedConfigSchema = schema.object({
+  datafeed_id: schema.maybe(schema.string()),
+  feed_id: schema.maybe(schema.string()),
+  aggregations: schema.maybe(schema.any()),
+  aggs: schema.maybe(schema.any()),
+  chunking_config: schema.maybe(schema.any()),
+  frequency: schema.maybe(schema.string()),
+  indices: schema.arrayOf(schema.string()),
+  indexes: schema.maybe(schema.arrayOf(schema.string())),
+  job_id: schema.maybe(schema.string()),
+  query: schema.maybe(schema.any()),
+  max_empty_searches: schema.maybe(schema.number()),
+  query_delay: schema.maybe(schema.string()),
+  script_fields: schema.maybe(schema.any()),
+  scroll_size: schema.maybe(schema.number()),
+  delayed_data_check_config: schema.maybe(schema.any()),
+});

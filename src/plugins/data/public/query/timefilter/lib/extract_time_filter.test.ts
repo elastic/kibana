@@ -18,7 +18,14 @@
  */
 
 import { extractTimeFilter } from './extract_time_filter';
-import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
+import {
+  Filter,
+  IIndexPattern,
+  IFieldType,
+  buildQueryFilter,
+  buildRangeFilter,
+  buildPhraseFilter,
+} from '../../../../common';
 
 describe('filter manager utilities', () => {
   let indexPattern: IIndexPattern;
@@ -31,13 +38,13 @@ describe('filter manager utilities', () => {
 
   describe('extractTimeFilter()', () => {
     test('should detect timeFilter', async () => {
-      const filters: esFilters.Filter[] = [
-        esFilters.buildQueryFilter(
+      const filters: Filter[] = [
+        buildQueryFilter(
           { _type: { match: { query: 'apache', type: 'phrase' } } },
           'logstash-*',
           ''
         ),
-        esFilters.buildRangeFilter(
+        buildRangeFilter(
           { name: 'time' } as IFieldType,
           { gt: 1388559600000, lt: 1388646000000 },
           indexPattern
@@ -50,13 +57,13 @@ describe('filter manager utilities', () => {
     });
 
     test("should not return timeFilter when name doesn't match", async () => {
-      const filters: esFilters.Filter[] = [
-        esFilters.buildQueryFilter(
+      const filters: Filter[] = [
+        buildQueryFilter(
           { _type: { match: { query: 'apache', type: 'phrase' } } },
           'logstash-*',
           ''
         ),
-        esFilters.buildRangeFilter(
+        buildRangeFilter(
           { name: '@timestamp' } as IFieldType,
           { from: 1, to: 2 },
           indexPattern,
@@ -70,13 +77,13 @@ describe('filter manager utilities', () => {
     });
 
     test('should not return a non range filter, even when names match', async () => {
-      const filters: esFilters.Filter[] = [
-        esFilters.buildQueryFilter(
+      const filters: Filter[] = [
+        buildQueryFilter(
           { _type: { match: { query: 'apache', type: 'phrase' } } },
           'logstash-*',
           ''
         ),
-        esFilters.buildPhraseFilter({ name: 'time' } as IFieldType, 'banana', indexPattern),
+        buildPhraseFilter({ name: 'time' } as IFieldType, 'banana', indexPattern),
       ];
       const result = await extractTimeFilter('time', filters);
 

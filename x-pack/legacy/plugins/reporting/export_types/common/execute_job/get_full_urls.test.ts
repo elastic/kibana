@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../../../test_helpers/create_mock_server';
+import { createMockServer } from '../../../test_helpers';
 import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';

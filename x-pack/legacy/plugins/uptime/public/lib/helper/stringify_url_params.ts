@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import { stringify } from 'query-string';
 import { UptimeUrlParams } from './url_params';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
 
@@ -38,5 +38,5 @@ export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty
       }
     });
   }
-  return `?${qs.stringify(params)}`;
+  return `?${stringify(params, { sort: false })}`;
 };

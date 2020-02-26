@@ -5,7 +5,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query, IIndexPattern, esFilters } from 'src/plugins/data/public';
+import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
@@ -16,7 +16,7 @@ import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 interface HostBodyComponentDispatchProps {
@@ -58,7 +58,7 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
-    pageFilters?: esFilters.Filter[];
+    pageFilters?: Filter[];
     filterQuery: string;
     indexPattern: IIndexPattern;
     type: hostsModel.HostsType;

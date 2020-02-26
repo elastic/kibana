@@ -15,7 +15,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter as DataFilter } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;
@@ -36,7 +36,7 @@ export type SavedMapInput = EmbeddableInput & {
     interval: number;
   };
   hideFilterActions: true;
-  filters: esFilters.Filter[];
+  filters: DataFilter[];
   mapCenter?: {
     lat: number;
     lon: number;

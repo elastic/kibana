@@ -9,7 +9,6 @@ import { CallWithRequest } from '../types';
 export const getIndexExists = async (
   callWithRequest: CallWithRequest<
     { index: string; size: number; terminate_after: number; allow_no_indices: boolean },
-    {},
     { _shards: { total: number } }
   >,
   index: string

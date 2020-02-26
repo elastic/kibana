@@ -72,6 +72,8 @@ export class ColorMapSelect extends Component {
         <EuiSpacer size="s" />
         <ColorStopsCategorical
           colorStops={this.state.customColorMap}
+          field={this.props.styleProperty.getField()}
+          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}
         />
       </Fragment>
@@ -103,6 +105,7 @@ export class ColorMapSelect extends Component {
           onChange={this._onColorMapSelect}
           valueOfSelected={valueOfSelected}
           hasDividers={true}
+          compressed
         />
         {this._renderColorStopsInput()}
       </Fragment>

@@ -12,7 +12,7 @@ import { RouteDeps } from '../index';
 
 export const createRoute = async (
   api: (deps: RouteDeps) => void,
-  method: 'get' | 'post' | 'delete',
+  method: 'get' | 'post' | 'delete' | 'patch',
   badAuth = false
 ) => {
   const httpService = httpServiceMock.createSetupContract();

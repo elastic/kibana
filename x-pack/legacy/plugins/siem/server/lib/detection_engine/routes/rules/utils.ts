@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { pickBy } from 'lodash/fp';
+import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject } from 'kibana/server';
+import uuid from 'uuid';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -17,14 +17,17 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
   createSuccessObject,
   ImportSuccessError,
   createImportErrorObject,
+  OutputError,
 } from '../utils';
+
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getIdError = ({
   id,
@@ -32,13 +35,22 @@ export const getIdError = ({
 }: {
   id: string | undefined | null;
   ruleId: string | undefined | null;
-}) => {
+}): OutputError => {
   if (id != null) {
-    return Boom.notFound(`id: "${id}" not found`);
+    return {
+      message: `id: "${id}" not found`,
+      statusCode: 404,
+    };
   } else if (ruleId != null) {
-    return Boom.notFound(`rule_id: "${ruleId}" not found`);
+    return {
+      message: `rule_id: "${ruleId}" not found`,
+      statusCode: 404,
+    };
   } else {
-    return Boom.notFound('id or rule_id should have been defined');
+    return {
+      message: 'id or rule_id should have been defined',
+      statusCode: 404,
+    };
   }
 };
 
@@ -49,9 +61,16 @@ export const getIdBulkError = ({
   id: string | undefined | null;
   ruleId: string | undefined | null;
 }): BulkError => {
-  if (id != null) {
+  if (id != null && ruleId != null) {
     return createBulkErrorObject({
-      ruleId: id,
+      id,
+      ruleId,
+      statusCode: 404,
+      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
+    });
+  } else if (id != null) {
+    return createBulkErrorObject({
+      id,
       statusCode: 404,
       message: `id: "${id}" not found`,
     });
@@ -63,7 +82,6 @@ export const getIdBulkError = ({
     });
   } else {
     return createBulkErrorObject({
-      ruleId: '(unknown id)',
       statusCode: 404,
       message: `id or rule_id should have been defined`,
     });
@@ -136,10 +154,10 @@ export const transformAlertsToRules = (
   return alerts.map(alert => transformAlertToRule(alert));
 };
 
-export const transformFindAlertsOrError = (
+export const transformFindAlerts = (
   findResults: { data: unknown[] },
   ruleStatuses?: unknown[]
-): unknown | Boom => {
+): unknown | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
@@ -150,23 +168,21 @@ export const transformFindAlertsOrError = (
     );
     return findResults;
   } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
+    return null;
   }
 };
 
-export const transformOrError = (
+export const transform = (
   alert: unknown,
   ruleStatus?: unknown
-): Partial<OutputRuleAlertRest> | Boom => {
+): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
-  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
+    return null;
   }
 };
 
@@ -176,7 +192,7 @@ export const transformOrBulkError = (
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
       return transformAlertToRule(alert);
@@ -205,4 +221,54 @@ export const transformOrImportError = (
       existingImportSuccessError,
     });
   }
+};
+
+export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+  const mappedDuplicates = countBy(
+    by,
+    ruleDefinitions.filter(r => r[by] != null)
+  );
+  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
+  if (hasDuplicates) {
+    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
+  }
+  return [];
+};
+
+export const getTupleDuplicateErrorsAndUniqueRules = (
+  rules: PromiseFromStreams[],
+  isOverwrite: boolean
+): [BulkError[], PromiseFromStreams[]] => {
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId } = parsedRule;
+        if (ruleId != null) {
+          if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+            acc.errors.set(
+              uuid.v4(),
+              createBulkErrorObject({
+                ruleId,
+                statusCode: 400,
+                message: `More than one rule with rule-id: "${ruleId}" found`,
+              })
+            );
+          }
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          acc.rulesAcc.set(uuid.v4(), parsedRule);
+        }
+      }
+
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };

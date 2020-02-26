@@ -19,10 +19,10 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart, esFilters } from '../../..';
+import { DataPublicPluginStart, Filter } from '../../..';
 
 interface UseFilterManagerProps {
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   filterManager: DataPublicPluginStart['query']['filterManager'];
 }
 

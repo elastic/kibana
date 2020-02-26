@@ -22,7 +22,7 @@ import _ from 'lodash';
 import {
   FilterManager as QueryFilterManager,
   IndexPattern,
-  esFilters,
+  Filter,
 } from '../../../../../../plugins/data/public';
 
 export abstract class FilterManager {
@@ -41,7 +41,7 @@ export abstract class FilterManager {
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  abstract createFilter(phrases: any): esFilters.Filter;
+  abstract createFilter(phrases: any): Filter;
 
   abstract getValueFromFilterBar(): any;
 
@@ -53,7 +53,7 @@ export abstract class FilterManager {
     return this.indexPattern.fields.getByName(this.fieldName);
   }
 
-  findFilters(): esFilters.Filter[] {
+  findFilters(): Filter[] {
     const kbnFilters = _.flatten([
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),

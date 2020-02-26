@@ -21,7 +21,7 @@ import { createFilterTerms } from './terms';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { Filter, ExistsFilter } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -54,7 +54,7 @@ describe('AggConfig Filters', () => {
         aggConfigs.aggs[0] as IBucketAggConfig,
         'apache',
         {}
-      ) as esFilters.Filter;
+      ) as Filter;
 
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('match_phrase');
@@ -73,7 +73,7 @@ describe('AggConfig Filters', () => {
         aggConfigs.aggs[0] as IBucketAggConfig,
         '',
         {}
-      ) as esFilters.Filter;
+      ) as Filter;
 
       expect(filterFalse).toHaveProperty('query');
       expect(filterFalse.query).toHaveProperty('match_phrase');
@@ -84,7 +84,7 @@ describe('AggConfig Filters', () => {
         aggConfigs.aggs[0] as IBucketAggConfig,
         '1',
         {}
-      ) as esFilters.Filter;
+      ) as Filter;
 
       expect(filterTrue).toHaveProperty('query');
       expect(filterTrue.query).toHaveProperty('match_phrase');
@@ -100,7 +100,7 @@ describe('AggConfig Filters', () => {
         aggConfigs.aggs[0] as IBucketAggConfig,
         '__missing__',
         {}
-      ) as esFilters.ExistsFilter;
+      ) as ExistsFilter;
 
       expect(filter).toHaveProperty('exists');
       expect(filter.exists).toHaveProperty('field', 'field');
@@ -116,7 +116,7 @@ describe('AggConfig Filters', () => {
 
       const [filter] = createFilterTerms(aggConfigs.aggs[0] as IBucketAggConfig, '__other__', {
         terms: ['apache'],
-      }) as esFilters.Filter[];
+      }) as Filter[];
 
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('bool');

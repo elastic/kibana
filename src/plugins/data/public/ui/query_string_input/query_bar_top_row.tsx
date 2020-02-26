@@ -33,18 +33,11 @@ import {
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import {
-  IDataPluginServices,
-  IIndexPattern,
-  TimeRange,
-  TimeHistoryContract,
-  Query,
-  PersistedLog,
-  getQueryLog,
-} from '../..';
+import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '../../../common';
+import { PersistedLog, getQueryLog } from '../../query';
 
 interface Props {
   query?: Query;

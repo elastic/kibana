@@ -18,17 +18,11 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-// @ts-ignore
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'src/plugins/data/public';
-import {
-  IAggConfig,
-  setBounds,
-  isDateHistogramBucketAggConfig,
-  createFormat,
-} from '../../../legacy_imports';
-import { Vis, VisParams, VisState } from '..';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
+import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
+import { IAggConfig, setBounds, isDateHistogramBucketAggConfig } from '../../../legacy_imports';
+import { Vis, VisParams } from '../types';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -59,7 +53,7 @@ export interface Schemas {
 }
 
 type buildVisFunction = (
-  visState: VisState,
+  visState: ReturnType<Vis['getCurrentState']>,
   schemas: Schemas,
   uiState: any,
   meta?: { savedObjectId?: string }
@@ -102,7 +96,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       'max_bucket',
     ].includes(agg.type.name);
 
-    const format = createFormat(
+    const format = fieldFormats.serialize(
       hasSubAgg
         ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
         : agg
