@@ -415,6 +415,23 @@ describe('Auth', () => {
       .expect(200, { content: 'ok' });
   });
 
+  it('blocks access to a resource if credentials are not recognized', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: { content: 'ok' } })
+    );
+    registerAuth((req, res, t) => t.notHandled());
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(401);
+
+    expect(result.body.message).toBe('Unauthorized');
+  });
+
   it('enables auth for a route by default if registerAuth has been called', async () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -684,6 +701,27 @@ describe('Auth', () => {
     expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
   });
 
+  it('attach security header to not handled auth response', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    const authResponseHeader = {
+      'www-authenticate': 'from auth interceptor',
+    };
+    registerAuth((req, res, toolkit) => {
+      return toolkit.notHandled({ responseHeaders: authResponseHeader });
+    });
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    await server.start();
+
+    const response = await supertest(innerServer.listener)
+      .get('/')
+      .expect(401);
+
+    expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+  });
+
   it('attach security header to an error response', async () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -865,7 +903,7 @@ describe('Auth', () => {
       ]
     `);
   });
-  // eslint-disable-next-line
+
   it(`doesn't share request object between interceptors`, async () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');

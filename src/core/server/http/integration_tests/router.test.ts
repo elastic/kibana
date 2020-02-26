@@ -46,6 +46,114 @@ afterEach(async () => {
   await server.stop();
 });
 
+describe('Options', () => {
+  describe('authRequired', () => {
+    describe('optional', () => {
+      it('User has access to a route if auth mechanism not registered', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, 'ok');
+      });
+
+      it('Authenticated user has access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.authenticated();
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, 'ok');
+      });
+
+      it('User with not recognized credentials has access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        const authResponseHeader = {
+          'www-authenticate': 'from auth interceptor',
+        };
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.notHandled({
+            responseHeaders: authResponseHeader,
+          });
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        const response = await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, 'ok');
+
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+      });
+    });
+    describe('true', () => {
+      it('Authenticated user has access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.authenticated();
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, 'ok');
+      });
+
+      it('User with not recognized credentials has no access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        const authResponseHeader = {
+          'www-authenticate': 'from auth interceptor',
+        };
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.notHandled({
+            responseHeaders: authResponseHeader,
+          });
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        const response = await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
+
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+      });
+    });
+  });
+});
+
 describe('Handler', () => {
   it("Doesn't expose error details if handler throws", async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);

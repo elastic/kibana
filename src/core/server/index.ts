@@ -45,7 +45,7 @@ import {
   configSchema as elasticsearchConfigSchema,
 } from './elasticsearch';
 
-import { HttpServiceSetup } from './http';
+import { HttpServiceSetup, IsAuthenticated } from './http';
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
@@ -286,6 +286,9 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
+    auth: {
+      isAuthenticated: IsAuthenticated;
+    };
     rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
