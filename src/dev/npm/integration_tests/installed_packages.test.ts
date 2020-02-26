@@ -26,7 +26,8 @@ import { REPO_ROOT } from '../../constants';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
-describe('src/dev/npm/installed_packages', () => {
+// FLAKY
+describe.skip('src/dev/npm/installed_packages', () => {
   describe('getInstalledPackages()', function() {
     let kibanaPackages: InstalledPackage[];
     let fixture1Packages: InstalledPackage[];
