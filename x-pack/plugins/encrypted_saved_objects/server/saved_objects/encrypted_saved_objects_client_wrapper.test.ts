@@ -10,14 +10,16 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
 let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
+let mockBaseTypeRegistry: ReturnType<typeof savedObjectsTypeRegistryMock.create>;
 let encryptedSavedObjectsServiceMockInstance: jest.Mocked<EncryptedSavedObjectsService>;
 beforeEach(() => {
   mockBaseClient = savedObjectsClientMock.create();
+  mockBaseTypeRegistry = savedObjectsTypeRegistryMock.create();
   encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.create([
     {
       type: 'known-type',
@@ -28,6 +30,7 @@ beforeEach(() => {
   wrapper = new EncryptedSavedObjectsClientWrapper({
     service: encryptedSavedObjectsServiceMockInstance,
     baseClient: mockBaseClient,
+    baseTypeRegistry: mockBaseTypeRegistry,
   } as any);
 });
 
@@ -91,35 +94,50 @@ describe('#create', () => {
     );
   });
 
-  it('uses `namespace` to encrypt attributes if it is specified', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { overwrite: true, namespace: 'some-namespace' };
-    const mockedResponse = {
-      id: 'uuid-v4-id',
-      type: 'known-type',
-      attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      references: [],
+  describe('namespace', () => {
+    const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
+      const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+      const options = { overwrite: true, namespace };
+      const mockedResponse = {
+        id: 'uuid-v4-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+        references: [],
+      };
+
+      mockBaseClient.create.mockResolvedValue(mockedResponse);
+
+      expect(await wrapper.create('known-type', attributes, options)).toEqual({
+        ...mockedResponse,
+        attributes: { attrOne: 'one', attrThree: 'three' },
+      });
+
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+        {
+          type: 'known-type',
+          id: 'uuid-v4-id',
+          namespace: expectNamespaceInDescriptor ? namespace : undefined,
+        },
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      );
+
+      expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.create).toHaveBeenCalledWith(
+        'known-type',
+        { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+        { id: 'uuid-v4-id', overwrite: true, namespace }
+      );
     };
 
-    mockBaseClient.create.mockResolvedValue(mockedResponse);
-
-    expect(await wrapper.create('known-type', attributes, options)).toEqual({
-      ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
+    it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
+      await doTest('some-namespace', true);
     });
 
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
-    );
-
-    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.create).toHaveBeenCalledWith(
-      'known-type',
-      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      { id: 'uuid-v4-id', overwrite: true, namespace: 'some-namespace' }
-    );
+    it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
+      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      await doTest('some-namespace', false);
+    });
   });
 
   it('fails if base client fails', async () => {
@@ -190,14 +208,13 @@ describe('#bulkCreate', () => {
 
   it('fails if ID is specified for registered type', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: 'some-namespace' };
 
     const bulkCreateParams = [
       { id: 'some-id', type: 'known-type', attributes },
       { type: 'unknown-type', attributes },
     ];
 
-    await expect(wrapper.bulkCreate(bulkCreateParams, options)).rejects.toThrowError(
+    await expect(wrapper.bulkCreate(bulkCreateParams)).rejects.toThrowError(
       'Predefined IDs are not allowed for saved objects with encrypted attributes.'
     );
 
@@ -257,39 +274,57 @@ describe('#bulkCreate', () => {
     );
   });
 
-  it('uses `namespace` to encrypt attributes if it is specified', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: 'some-namespace' };
-    const mockedResponse = {
-      saved_objects: [{ id: 'uuid-v4-id', type: 'known-type', attributes, references: [] }],
+  describe('namespace', () => {
+    const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
+      const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+      const options = { namespace };
+      const mockedResponse = {
+        saved_objects: [{ id: 'uuid-v4-id', type: 'known-type', attributes, references: [] }],
+      };
+
+      mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
+
+      const bulkCreateParams = [{ type: 'known-type', attributes }];
+      await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
+        saved_objects: [
+          {
+            ...mockedResponse.saved_objects[0],
+            attributes: { attrOne: 'one', attrThree: 'three' },
+          },
+        ],
+      });
+
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+        {
+          type: 'known-type',
+          id: 'uuid-v4-id',
+          namespace: expectNamespaceInDescriptor ? namespace : undefined,
+        },
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      );
+
+      expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...bulkCreateParams[0],
+            id: 'uuid-v4-id',
+            attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+          },
+        ],
+        options
+      );
     };
 
-    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
-
-    const bulkCreateParams = [{ type: 'known-type', attributes }];
-    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
-      saved_objects: [
-        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
-      ],
+    it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
+      await doTest('some-namespace', true);
     });
 
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
-    );
-
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
-      [
-        {
-          ...bulkCreateParams[0],
-          id: 'uuid-v4-id',
-          attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-        },
-      ],
-      options
-    );
+    it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
+      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      await doTest('some-namespace', false);
+    });
   });
 
   it('fails if base client fails', async () => {
@@ -432,63 +467,79 @@ describe('#bulkUpdate', () => {
     );
   });
 
-  it('uses `namespace` to encrypt attributes if it is specified', async () => {
-    const docs = [
-      {
-        id: 'some-id',
-        type: 'known-type',
-        attributes: {
-          attrOne: 'one',
-          attrSecret: 'secret',
-          attrThree: 'three',
-        },
-        version: 'some-version',
-      },
-    ];
-
-    mockBaseClient.bulkUpdate.mockResolvedValue({
-      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
-    });
-
-    await expect(wrapper.bulkUpdate(docs, { namespace: 'some-namespace' })).resolves.toEqual({
-      saved_objects: [
+  describe('namespace', () => {
+    const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
+      const docs = [
         {
           id: 'some-id',
           type: 'known-type',
           attributes: {
             attrOne: 'one',
+            attrSecret: 'secret',
             attrThree: 'three',
           },
           version: 'some-version',
-          references: undefined,
         },
-      ],
+      ];
+      const options = { namespace };
+
+      mockBaseClient.bulkUpdate.mockResolvedValue({
+        saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
+      });
+
+      await expect(wrapper.bulkUpdate(docs, options)).resolves.toEqual({
+        saved_objects: [
+          {
+            id: 'some-id',
+            type: 'known-type',
+            attributes: {
+              attrOne: 'one',
+              attrThree: 'three',
+            },
+            version: 'some-version',
+            references: undefined,
+          },
+        ],
+      });
+
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+        {
+          type: 'known-type',
+          id: 'some-id',
+          namespace: expectNamespaceInDescriptor ? namespace : undefined,
+        },
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      );
+
+      expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'some-id',
+            type: 'known-type',
+            attributes: {
+              attrOne: 'one',
+              attrSecret: '*secret*',
+              attrThree: 'three',
+            },
+            version: 'some-version',
+
+            references: undefined,
+          },
+        ],
+        options
+      );
+    };
+
+    it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
+      await doTest('some-namespace', true);
     });
 
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
-    );
-
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
-      [
-        {
-          id: 'some-id',
-          type: 'known-type',
-          attributes: {
-            attrOne: 'one',
-            attrSecret: '*secret*',
-            attrThree: 'three',
-          },
-          version: 'some-version',
-
-          references: undefined,
-        },
-      ],
-      { namespace: 'some-namespace' }
-    );
+    it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
+      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      await doTest('some-namespace', false);
+    });
   });
 
   it('fails if base client fails', async () => {
@@ -843,31 +894,46 @@ describe('#update', () => {
     );
   });
 
-  it('uses `namespace` to encrypt attributes if it is specified', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { version: 'some-version', namespace: 'some-namespace' };
-    const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
+  describe('namespace', () => {
+    const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
+      const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+      const options = { version: 'some-version', namespace };
+      const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
 
-    mockBaseClient.update.mockResolvedValue(mockedResponse);
+      mockBaseClient.update.mockResolvedValue(mockedResponse);
 
-    await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
-      ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
+      await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
+        ...mockedResponse,
+        attributes: { attrOne: 'one', attrThree: 'three' },
+      });
+
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+        {
+          type: 'known-type',
+          id: 'some-id',
+          namespace: expectNamespaceInDescriptor ? namespace : undefined,
+        },
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      );
+
+      expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.update).toHaveBeenCalledWith(
+        'known-type',
+        'some-id',
+        { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+        options
+      );
+    };
+
+    it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
+      await doTest('some-namespace', true);
     });
 
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
-    );
-
-    expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.update).toHaveBeenCalledWith(
-      'known-type',
-      'some-id',
-      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      options
-    );
+    it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
+      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      await doTest('some-namespace', false);
+    });
   });
 
   it('fails if base client fails', async () => {

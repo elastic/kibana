@@ -21,11 +21,13 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsAddNamespacesOptions,
   SavedObjectsRemoveNamespacesOptions,
+  ISavedObjectTypeRegistry,
 } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 
 interface EncryptedSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
+  baseTypeRegistry: ISavedObjectTypeRegistry;
   service: Readonly<EncryptedSavedObjectsService>;
 }
 
@@ -42,6 +44,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     private readonly options: EncryptedSavedObjectsClientOptions,
     public readonly errors = options.baseClient.errors
   ) {}
+
+  // only include namespace in AAD descriptor if the specified type is single-namespace
+  private getDescriptorNamespace = (type: string, namespace?: string) =>
+    this.options.baseTypeRegistry.isNamespace(type) ? namespace : undefined;
 
   public async create<T = unknown>(
     type: string,
@@ -62,11 +68,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     const id = generateID();
+    const namespace = this.getDescriptorNamespace(type, options.namespace);
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.create(
         type,
         await this.options.service.encryptAttributes(
-          { type, id, namespace: options.namespace },
+          { type, id, namespace },
           attributes as Record<string, unknown>
         ),
         { ...options, id }
@@ -97,11 +104,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         }
 
         const id = generateID();
+        const namespace = this.getDescriptorNamespace(object.type, options?.namespace);
         return {
           ...object,
           id,
           attributes: await this.options.service.encryptAttributes(
-            { type: object.type, id, namespace: options && options.namespace },
+            { type: object.type, id, namespace },
             object.attributes as Record<string, unknown>
           ),
         } as SavedObjectsBulkCreateObject<T>;
@@ -126,10 +134,11 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
+        const namespace = this.getDescriptorNamespace(type, options?.namespace);
         return {
           ...object,
           attributes: await this.options.service.encryptAttributes(
-            { type, id, namespace: options && options.namespace },
+            { type, id, namespace },
             attributes
           ),
         };
@@ -175,15 +184,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);
     }
-
+    const namespace = this.getDescriptorNamespace(type, options?.namespace);
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.update(
         type,
         id,
-        await this.options.service.encryptAttributes(
-          { type, id, namespace: options && options.namespace },
-          attributes
-        ),
+        await this.options.service.encryptAttributes({ type, id, namespace }, attributes),
         options
       )
     );

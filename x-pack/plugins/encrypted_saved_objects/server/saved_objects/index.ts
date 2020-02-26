@@ -35,7 +35,8 @@ export function setupSavedObjects({
   savedObjects.addClientWrapper(
     Number.MAX_SAFE_INTEGER,
     'encryptedSavedObjects',
-    ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
+    ({ client: baseClient, typeRegistry: baseTypeRegistry }) =>
+      new EncryptedSavedObjectsClientWrapper({ baseClient, baseTypeRegistry, service })
   );
 
   const internalRepositoryPromise = getStartServices().then(([core]) =>
