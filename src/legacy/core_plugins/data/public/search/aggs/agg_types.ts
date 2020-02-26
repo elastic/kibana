@@ -42,6 +42,7 @@ import { ipRangeBucketAgg } from './buckets/ip_range';
 import { termsBucketAgg } from './buckets/terms';
 import { filterBucketAgg } from './buckets/filter';
 import { filtersBucketAgg } from './buckets/filters';
+import { adjacencyMatrixBucketAgg } from './buckets/adjacency_matrix';
 import { significantTermsBucketAgg } from './buckets/significant_terms';
 import { geoHashBucketAgg } from './buckets/geo_hash';
 import { geoTileBucketAgg } from './buckets/geo_tile';
@@ -83,6 +84,7 @@ export const aggTypes = {
     termsBucketAgg,
     filterBucketAgg,
     filtersBucketAgg,
+    adjacencyMatrixBucketAgg,
     significantTermsBucketAgg,
     geoHashBucketAgg,
     geoTileBucketAgg,

@@ -20,6 +20,7 @@
 export enum BUCKET_TYPES {
   FILTER = 'filter',
   FILTERS = 'filters',
+  ADJACENCY_MATRIX = 'adjacency_matrix',
   HISTOGRAM = 'histogram',
   IP_RANGE = 'ip_range',
   DATE_RANGE = 'date_range',

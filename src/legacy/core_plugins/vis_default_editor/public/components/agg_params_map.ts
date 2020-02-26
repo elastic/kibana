@@ -39,6 +39,9 @@ const buckets = {
   [BUCKET_TYPES.FILTERS]: {
     filters: controls.FiltersParamEditor,
   },
+  [BUCKET_TYPES.ADJACENCY_MATRIX]: {
+    filters: controls.FiltersParamEditor,
+  },
   [BUCKET_TYPES.GEOHASH_GRID]: {
     autoPrecision: controls.AutoPrecisionParamEditor,
     precision: controls.PrecisionParamEditor,
