@@ -36,7 +36,7 @@ export default ({ getService }) => {
   const es = getService('legacyEs');
   const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
 
-  describe('Kibana index migration', () => {
+  describe('saved objects migrations', () => {
     before(() => callCluster('indices.delete', { index: '.migrate-*' }));
 
     it('Migrates an existing index that has never been migrated before', async () => {
