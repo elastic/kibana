@@ -5,7 +5,6 @@
  */
 
 import { pickBy, countBy } from 'lodash/fp';
-import { Dictionary } from 'lodash';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
