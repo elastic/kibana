@@ -81,7 +81,7 @@ describe('update_rules', () => {
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       jest.spyOn(utils, 'transform').mockReturnValue(null);
       const { payload, statusCode } = await server.inject(getUpdateRequest());
-      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(JSON.parse(payload).message).toBe('Internal error transforming');
       expect(statusCode).toBe(500);
     });
 

@@ -118,8 +118,8 @@ ${requestStr}
           <EuiFlexItem>
             <EuiText>Response:</EuiText>
             <EuiProgress
-              value={(this.state.response && this.state.response.percentComplete) || 0}
-              max={100}
+              value={this.state.response?.loaded ?? 0}
+              max={this.state.response?.total ?? 0}
             />
             <EuiCodeBlock
               language="json"
