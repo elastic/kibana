@@ -18,7 +18,7 @@ import {
   getTransientLayerId,
   getOpenTooltips,
   getQuery,
-  getDataRequest,
+  getDataRequestDescriptor,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
@@ -89,7 +89,7 @@ function getLayerLoadingCallbacks(dispatch, getState, layerId) {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId, requestToken) => {
-      const dataRequest = getDataRequest(getState(), layerId, dataId);
+      const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
       if (!dataRequest) {
         return false;
       }

@@ -164,7 +164,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     );
   }
 
-  async compositeAggRequest({
+  async _compositeAggRequest({
     searchSource,
     indexPattern,
     precision,
@@ -254,7 +254,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   // Do not use composite aggregation when there are no terms sub-aggregations
   // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
-  async nonCompositeAggRequest({
+  async _nonCompositeAggRequest({
     searchSource,
     indexPattern,
     precision,
@@ -305,14 +305,14 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     const features =
       bucketsPerGrid === 1
-        ? await this.nonCompositeAggRequest({
+        ? await this._nonCompositeAggRequest({
             searchSource,
             indexPattern,
             precision: searchFilters.geogridPrecision,
             layerName,
             registerCancelCallback,
           })
-        : await this.compositeAggRequest({
+        : await this._compositeAggRequest({
             searchSource,
             indexPattern,
             precision: searchFilters.geogridPrecision,
