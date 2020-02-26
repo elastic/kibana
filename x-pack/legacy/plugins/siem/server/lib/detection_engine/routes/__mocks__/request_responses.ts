@@ -146,11 +146,12 @@ export const getUpdateBulkRequest = (): ServerInjectOptions => ({
   payload: [typicalPayload()],
 });
 
-export const getPatchBulkRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getPatchBulkRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
 export const getDeleteBulkRequest = () =>
   requestMock.create({
