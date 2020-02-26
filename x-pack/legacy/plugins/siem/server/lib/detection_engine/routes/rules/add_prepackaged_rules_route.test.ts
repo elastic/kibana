@@ -98,7 +98,6 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('1 rule is updated and 0 are installed when we return a single find and the versions are different', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -107,6 +106,19 @@ describe('add_prepackaged_rules_route', () => {
           rules_installed: 0,
           rules_updated: 1,
         },
+      });
+    });
+
+    test('catches errors if payloads cause errors to be thrown', async () => {
+      clients.clusterClient.callAsCurrentUser.mockImplementation(() => {
+        throw new Error('Test error');
+      });
+      const request = addPrepackagedRulesRequest();
+      const response = await server.inject(request, context);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
       });
     });
   });

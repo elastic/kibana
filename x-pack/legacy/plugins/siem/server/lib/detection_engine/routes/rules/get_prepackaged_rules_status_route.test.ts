@@ -44,6 +44,7 @@ describe('get_prepackaged_rule_status_route', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
@@ -60,6 +61,17 @@ describe('get_prepackaged_rule_status_route', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
+    });
+
+    test('catch error when finding rules throws error', async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
     });
   });
 

@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { typicalPayload, getReadBulkRequest, getEmptyIndex } from '../__mocks__/request_responses';
+import {
+  typicalPayload,
+  getReadBulkRequest,
+  getEmptyIndex,
+  getNonEmptyIndex,
+  getFindResultWithSingleHit,
+  getEmptyFindResult,
+  getResult,
+} from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock, responseMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
@@ -16,6 +24,10 @@ describe('create_rules_bulk', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
+    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
+    clients.alertsClient.create.mockResolvedValue(getResult()); // successful creation
 
     createRulesBulkRoute(server.router);
   });
@@ -33,7 +45,7 @@ describe('create_rules_bulk', () => {
     });
   });
 
-  describe('validation', () => {
+  describe('unhappy paths', () => {
     it('returns an error object if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(getReadBulkRequest(), context);
@@ -48,6 +60,38 @@ describe('create_rules_bulk', () => {
             rule_id: 'rule-1',
           },
         ]),
+      });
+    });
+
+    test('returns a duplicate error if rule_id already exists', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const response = await server.inject(getReadBulkRequest(), context);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: [
+          expect.objectContaining({
+            error: {
+              message: expect.stringContaining('already exists'),
+              status_code: 409,
+            },
+          }),
+        ],
+      });
+    });
+
+    test('catches error if creation throws', async () => {
+      clients.alertsClient.create.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getReadBulkRequest(), context);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: [
+          expect.objectContaining({
+            error: {
+              message: 'Test error',
+              status_code: 500,
+            },
+          }),
+        ],
       });
     });
 

@@ -40,6 +40,26 @@ describe('find_rules', () => {
       const response = await server.inject(getFindRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
+
+    test.skip('catches error if transformation fails', async () => {
+      // @ts-ignore
+      clients.alertsClient.create.mockResolvedValue(null);
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.internalError).toHaveBeenCalledWith({
+        body: 'Internal error transforming rules',
+      });
+    });
+
+    test('catches error if search throws error', async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
+    });
   });
 
   describe('request validation', () => {

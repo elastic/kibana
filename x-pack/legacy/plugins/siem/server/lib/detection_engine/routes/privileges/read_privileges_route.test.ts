@@ -32,5 +32,16 @@ describe('read_privileges', () => {
         body: getMockPrivileges(),
       });
     });
+
+    test('returns 500 when bad response from cluster', async () => {
+      clients.clusterClient.callAsCurrentUser.mockImplementation(() => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getPrivilegeRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
+    });
   });
 });

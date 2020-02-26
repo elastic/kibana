@@ -60,6 +60,26 @@ describe('delete_rules', () => {
 
       expect(response.notFound).toHaveBeenCalled();
     });
+
+    test.skip('catches error if transformation fails', async () => {
+      // @ts-ignore
+      clients.alertsClient.create.mockResolvedValue(null);
+      const response = await server.inject(getDeleteRequest(), context);
+      expect(response.internalError).toHaveBeenCalledWith({
+        body: 'Internal error transforming rules',
+      });
+    });
+
+    test('catches error if deletion throws error', async () => {
+      clients.alertsClient.delete.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getDeleteRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
+    });
   });
 
   describe('request validation', () => {

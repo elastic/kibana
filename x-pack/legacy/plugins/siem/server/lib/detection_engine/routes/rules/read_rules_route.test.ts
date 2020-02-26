@@ -10,7 +10,8 @@ import {
   getEmptyFindResult,
   getReadRequest,
   getFindResultWithSingleHit,
-  getFindResultStatus,
+  nonRuleFindResult,
+  getFindResultStatusEmpty,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
@@ -22,13 +23,14 @@ describe('read_signals', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
+
     readRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const response = await server.inject(getReadRequest(), context);
 
       expect(response.ok).toHaveBeenCalled();
@@ -39,6 +41,26 @@ describe('read_signals', () => {
       const response = await server.inject(getReadRequest(), context);
 
       expect(response.notFound).toHaveBeenCalled();
+    });
+
+    test('returns error if requesting a non-rule', async () => {
+      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: expect.stringMatching(/rule_id.*not found/),
+        statusCode: 404,
+      });
+    });
+
+    test('catches error if search throws error', async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
     });
   });
 

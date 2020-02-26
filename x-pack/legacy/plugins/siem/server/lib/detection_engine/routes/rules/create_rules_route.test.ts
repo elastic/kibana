@@ -14,6 +14,7 @@ import {
   getFindResultStatus,
   getNonEmptyIndex,
   getEmptyIndex,
+  getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
@@ -25,10 +26,10 @@ describe('create_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-    clients.alertsClient.create.mockResolvedValue(getResult());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
+    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
+    clients.alertsClient.create.mockResolvedValue(getResult()); // creation succeeds
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
     createRulesRoute(server.router);
   });
@@ -44,13 +45,44 @@ describe('create_rules', () => {
       const response = await server.inject(getCreateRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
+  });
 
+  describe('unhappy paths', () => {
     test('it returns a 400 if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(getCreateRequest(), context);
 
       expect(response.badRequest).toHaveBeenCalledWith({
         body: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
+      });
+    });
+
+    test('returns a duplicate error if rule_id already exists', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const response = await server.inject(getCreateRequest(), context);
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: expect.stringContaining('already exists'),
+      });
+    });
+
+    test('catches error if creation throws', async () => {
+      clients.alertsClient.create.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getCreateRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
+    });
+
+    test.skip('catches error if transformation fails', async () => {
+      // @ts-ignore
+      clients.alertsClient.create.mockResolvedValue(null);
+      const response = await server.inject(getCreateRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
       });
     });
   });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { IRouter } from '../../../../../../../../../src/core/server';
@@ -39,8 +38,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
       }
 
       const ruleDefinitions = request.body;
-      const mappedDuplicates = countBy('rule_id', ruleDefinitions);
-      const dupes = getDuplicates(mappedDuplicates);
+      const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
       const rules = await Promise.all(
         ruleDefinitions

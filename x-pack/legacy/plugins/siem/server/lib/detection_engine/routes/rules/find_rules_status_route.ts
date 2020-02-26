@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { snakeCase } from 'lodash/fp';
-
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
@@ -16,18 +14,7 @@ import {
   IRuleStatusAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { buildRouteValidation } from '../utils';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
-  if (!obj) {
-    return null;
-  }
-  return Object.keys(obj).reduce((acc, item) => {
-    const newKey = snakeCase(item);
-    return { ...acc, [newKey]: obj[item] };
-  }, {});
-};
+import { buildRouteValidation, transformError, convertToSnakeCase } from '../utils';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.get(
@@ -56,33 +43,44 @@ export const findRulesStatusesRoute = (router: IRouter) => {
             "anotherAlertId": ...
         }
     */
-      const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
-        const lastFiveErrorsForId = await savedObjectsClient.find<
-          IRuleSavedAttributesSavedObjectAttributes
-        >({
-          type: ruleStatusSavedObjectType,
-          perPage: 6,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: id,
-          searchFields: ['alertId'],
-        });
-        const accumulated = await acc;
-        const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
-          lastFiveErrorsForId.saved_objects[0]?.attributes
-        );
-        const failures = lastFiveErrorsForId.saved_objects
-          .slice(1)
-          .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
-        return {
-          ...accumulated,
-          [id]: {
-            current_status: currentStatus,
-            failures,
+      try {
+        const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(
+          async (acc, id) => {
+            const lastFiveErrorsForId = await savedObjectsClient.find<
+              IRuleSavedAttributesSavedObjectAttributes
+            >({
+              type: ruleStatusSavedObjectType,
+              perPage: 6,
+              sortField: 'statusDate',
+              sortOrder: 'desc',
+              search: id,
+              searchFields: ['alertId'],
+            });
+            const accumulated = await acc;
+            const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
+              lastFiveErrorsForId.saved_objects[0]?.attributes
+            );
+            const failures = lastFiveErrorsForId.saved_objects
+              .slice(1)
+              .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
+            return {
+              ...accumulated,
+              [id]: {
+                current_status: currentStatus,
+                failures,
+              },
+            };
           },
-        };
-      }, Promise.resolve<RuleStatusResponse>({}));
-      return response.ok({ body: statuses });
+          Promise.resolve<RuleStatusResponse>({})
+        );
+        return response.ok({ body: statuses });
+      } catch (err) {
+        const error = transformError(err);
+        return response.customError({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
     }
   );
 };

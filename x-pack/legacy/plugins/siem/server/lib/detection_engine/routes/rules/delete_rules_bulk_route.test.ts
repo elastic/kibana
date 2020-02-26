@@ -35,6 +35,16 @@ describe('delete_rules', () => {
       expect(response.ok).toHaveBeenCalled();
     });
 
+    test('resturns 200 when deleting a single rule and related rule status', async () => {
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.savedObjectsClient.delete.mockResolvedValue(true);
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
+      const { statusCode } = await server.inject(getDeleteBulkRequest());
+      expect(statusCode).toBe(200);
+    });
+
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
       const response = await server.inject(getDeleteAsPostBulkRequest(), context);
       expect(response.ok).toHaveBeenCalled();

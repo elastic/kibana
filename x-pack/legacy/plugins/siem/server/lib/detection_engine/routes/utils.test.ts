@@ -14,6 +14,7 @@ import {
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  convertToSnakeCase,
 } from './utils';
 
 describe('utils', () => {
@@ -290,6 +291,17 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('convertToSnakeCase', () => {
+    it('converts camelCase to snakeCase', () => {
+      const values = { myTestCamelCaseKey: 'something' };
+      expect(convertToSnakeCase(values)).toEqual({ my_test_camel_case_key: 'something' });
+    });
+    it('returns empty object when object is empty', () => {
+      const values = {};
+      expect(convertToSnakeCase(values)).toEqual({});
     });
   });
 });

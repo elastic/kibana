@@ -13,6 +13,7 @@ import {
   getPatchRequest,
   typicalPayload,
   getFindResultWithSingleHit,
+  nonRuleFindResult,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, responseMock } from '../__mocks__';
 
@@ -24,9 +25,9 @@ describe('patch_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.update.mockResolvedValue(getResult());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
+    clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
 
     patchRulesRoute(server.router);
   });
@@ -50,6 +51,26 @@ describe('patch_rules', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPatchRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
+    });
+
+    test('returns error if requesting a non-rule', async () => {
+      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
+      const response = await server.inject(getPatchRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: expect.stringContaining('not found'),
+        statusCode: 404,
+      });
+    });
+
+    test('catches error if update throws error', async () => {
+      clients.alertsClient.update.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getPatchRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
     });
   });
 
