@@ -293,21 +293,19 @@ export const getCreateRequest = () =>
     },
   });
 
-export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByIdsPayload(),
-  },
-});
+export const getSetSignalStatusByIdsRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByIdsPayload(),
+  });
 
-export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByQueryPayload(),
-  },
-});
+export const getSetSignalStatusByQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByQueryPayload(),
+  });
 
 export const getSignalsQueryRequest = (): ServerInjectOptions => ({
   method: 'POST',
