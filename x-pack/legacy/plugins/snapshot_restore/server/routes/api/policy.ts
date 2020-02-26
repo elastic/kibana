@@ -24,21 +24,32 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
 
-      // Get policies
-      const policiesByName: {
-        [key: string]: SlmPolicyEs;
-      } = await callAsCurrentUser('sr.policies', {
-        human: true,
-      });
+      try {
+        // Get policies
+        const policiesByName: {
+          [key: string]: SlmPolicyEs;
+        } = await callAsCurrentUser('sr.policies', {
+          human: true,
+        });
 
-      // Deserialize policies
-      return res.ok({
-        body: {
-          policies: Object.entries(policiesByName).map(([name, policy]) => {
-            return deserializePolicy(name, policy, managedPolicies);
-          }),
-        },
-      });
+        // Deserialize policies
+        return res.ok({
+          body: {
+            policies: Object.entries(policiesByName).map(([name, policy]) => {
+              return deserializePolicy(name, policy, managedPolicies);
+            }),
+          },
+        });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 
@@ -48,26 +59,38 @@ export function registerPolicyRoutes({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
-      const policiesByName: {
-        [key: string]: SlmPolicyEs;
-      } = await callAsCurrentUser('sr.policy', {
-        name,
-        human: true,
-      });
 
-      if (!policiesByName[name]) {
-        // If policy doesn't exist, ES will return 200 with an empty object, so manually throw 404 here
-        return res.notFound({ body: 'Policy not found' });
+      try {
+        const policiesByName: {
+          [key: string]: SlmPolicyEs;
+        } = await callAsCurrentUser('sr.policy', {
+          name,
+          human: true,
+        });
+
+        if (!policiesByName[name]) {
+          // If policy doesn't exist, ES will return 200 with an empty object, so manually throw 404 here
+          return res.notFound({ body: 'Policy not found' });
+        }
+
+        const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
+
+        // Deserialize policy
+        return res.ok({
+          body: {
+            policy: deserializePolicy(name, policiesByName[name], managedPolicies),
+          },
+        });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
       }
-
-      const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
-
-      // Deserialize policy
-      return res.ok({
-        body: {
-          policy: deserializePolicy(name, policiesByName[name], managedPolicies),
-        },
-      });
     })
   );
 
@@ -79,20 +102,31 @@ export function registerPolicyRoutes({
       const policy = req.body as TypeOf<typeof policySchema>;
       const { name } = policy;
 
-      // Check that policy with the same name doesn't already exist
-      const policyByName = await callAsCurrentUser('sr.policy', { name });
+      try {
+        // Check that policy with the same name doesn't already exist
+        const policyByName = await callAsCurrentUser('sr.policy', { name });
 
-      if (policyByName[name]) {
-        return res.conflict({ body: 'There is already a policy with that name.' });
+        if (policyByName[name]) {
+          return res.conflict({ body: 'There is already a policy with that name.' });
+        }
+
+        // Otherwise create new policy
+        const response = await callAsCurrentUser('sr.updatePolicy', {
+          name,
+          body: serializePolicy(policy),
+        });
+
+        return res.ok({ body: response });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
       }
-
-      // Otherwise create new policy
-      const response = await callAsCurrentUser('sr.updatePolicy', {
-        name,
-        body: serializePolicy(policy),
-      });
-
-      return res.ok({ body: response });
     })
   );
 
@@ -107,17 +141,28 @@ export function registerPolicyRoutes({
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const policy = req.body as TypeOf<typeof policySchema>;
 
-      // Check that policy with the given name exists
-      // If it doesn't exist, 404 will be thrown by ES and will be returned
-      await callAsCurrentUser('sr.policy', { name });
+      try {
+        // Check that policy with the given name exists
+        // If it doesn't exist, 404 will be thrown by ES and will be returned
+        await callAsCurrentUser('sr.policy', { name });
 
-      // Otherwise update policy
-      const response = await callAsCurrentUser('sr.updatePolicy', {
-        name,
-        body: serializePolicy(policy),
-      });
+        // Otherwise update policy
+        const response = await callAsCurrentUser('sr.updatePolicy', {
+          name,
+          body: serializePolicy(policy),
+        });
 
-      return res.ok({ body: response });
+        return res.ok({ body: response });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 
@@ -158,10 +203,21 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
-      const { snapshot_name: snapshotName } = await callAsCurrentUser('sr.executePolicy', {
-        name,
-      });
-      return res.ok({ body: { snapshotName } });
+      try {
+        const { snapshot_name: snapshotName } = await callAsCurrentUser('sr.executePolicy', {
+          name,
+        });
+        return res.ok({ body: { snapshotName } });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 
@@ -170,18 +226,30 @@ export function registerPolicyRoutes({
     { path: addBasePath('policies/indices'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const indices: Array<{
-        index: string;
-      }> = await callAsCurrentUser('cat.indices', {
-        format: 'json',
-        h: 'index',
-      });
 
-      return res.ok({
-        body: {
-          indices: indices.map(({ index }) => index).sort(),
-        },
-      });
+      try {
+        const indices: Array<{
+          index: string;
+        }> = await callAsCurrentUser('cat.indices', {
+          format: 'json',
+          h: 'index',
+        });
+
+        return res.ok({
+          body: {
+            indices: indices.map(({ index }) => index).sort(),
+          },
+        });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 
@@ -220,17 +288,28 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { retentionSchedule } = req.body as TypeOf<typeof retentionSettingsSchema>;
 
-      const response = await callAsCurrentUser('cluster.putSettings', {
-        body: {
-          persistent: {
-            slm: {
-              retention_schedule: retentionSchedule,
+      try {
+        const response = await callAsCurrentUser('cluster.putSettings', {
+          body: {
+            persistent: {
+              slm: {
+                retention_schedule: retentionSchedule,
+              },
             },
           },
-        },
-      });
+        });
 
-      return res.ok({ body: response });
+        return res.ok({ body: response });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 

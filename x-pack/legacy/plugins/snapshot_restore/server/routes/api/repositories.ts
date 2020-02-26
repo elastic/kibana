@@ -300,7 +300,6 @@ export function registerRepositoriesRoutes({
         const repositoryByName = await callAsCurrentUser('snapshot.getRepository', {
           repository: name,
         });
-
         if (repositoryByName[name]) {
           return res.conflict({ body: 'There is already a repository with that name.' });
         }

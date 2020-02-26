@@ -6,7 +6,7 @@
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
-import { MockRouter, routeDependencies, RunRequestParam } from './test_helpers';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Repositories', () => {
   const managedRepositoryName = 'myManagedRepository';
@@ -17,7 +17,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     },
   };
 
-  const router = new MockRouter();
+  const router = new RouterMock();
 
   beforeAll(() => {
     registerRepositoriesRoutes({
@@ -27,7 +27,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   });
 
   describe('getAllHandler()', () => {
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('repositories'),
     };
@@ -114,7 +114,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   describe('getOneHandler()', () => {
     const name = 'fooRepository';
 
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('repositories/{name}'),
       params: {
@@ -220,7 +220,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   describe('getVerificationHandler', () => {
     const name = 'fooRepository';
 
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('repositories/{name}/verify'),
       params: {
@@ -252,7 +252,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   });
 
   describe('getTypesHandler()', () => {
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('repository_types'),
     };
@@ -298,7 +298,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   describe('createHandler()', () => {
     const name = 'fooRepository';
 
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'put',
       path: addBasePath('repositories'),
       body: {
@@ -323,16 +323,18 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(new Error())];
+      const error = new Error('Oh no!');
+      router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(error)];
 
       const response = await router.runRequest(mockRequest);
+      expect(response.body.message).toEqual(error.message);
       expect(response.status).toBe(500);
     });
   });
 
   describe('updateHandler()', () => {
     const name = 'fooRepository';
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'put',
       path: addBasePath('repositories/{name}'),
       params: {
@@ -361,7 +363,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
   describe('deleteHandler()', () => {
     const names = ['fooRepository', 'barRepository'];
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'delete',
       path: addBasePath('repositories/{name}'),
       params: {

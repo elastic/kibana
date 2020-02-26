@@ -6,7 +6,7 @@
 
 import { addBasePath } from '../helpers';
 import { registerSnapshotsRoutes } from './snapshots';
-import { MockRouter, routeDependencies, RunRequestParam } from './test_helpers';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 const defaultSnapshot = {
   repository: undefined,
@@ -27,7 +27,7 @@ const defaultSnapshot = {
 };
 
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
-  const router = new MockRouter();
+  const router = new RouterMock();
 
   beforeAll(() => {
     registerSnapshotsRoutes({
@@ -37,7 +37,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
   });
 
   describe('getAllHandler()', () => {
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('snapshots'),
     };
@@ -151,7 +151,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const repository = 'fooRepository';
     const snapshot = 'snapshot1';
 
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('snapshots/{repository}/{snapshot}'),
       params: {
@@ -227,7 +227,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
   describe('deleteHandler()', () => {
     const ids = ['fooRepository/snapshot-1', 'barRepository/snapshot-2'];
 
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'delete',
       path: addBasePath('snapshots/{ids}'),
       params: {

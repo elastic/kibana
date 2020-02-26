@@ -5,7 +5,7 @@
  */
 import { addBasePath } from '../helpers';
 import { registerRestoreRoutes } from './restore';
-import { MockRouter, routeDependencies, RunRequestParam } from './test_helpers';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
   const mockEsShard = {
@@ -15,7 +15,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     index: { size: {}, files: {} },
   };
 
-  const router = new MockRouter();
+  const router = new RouterMock();
 
   beforeAll(() => {
     registerRestoreRoutes({
@@ -25,7 +25,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
   });
 
   describe('Restore snapshot', () => {
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'post',
       path: addBasePath('restore/{repository}/{snapshot}'),
       params: {
@@ -46,12 +46,13 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
-      await expect(router.runRequest(mockRequest)).rejects.toThrow();
+      const response = await router.runRequest(mockRequest);
+      expect(response.status).toBe(500);
     });
   });
 
   describe('getAllHandler()', () => {
-    const mockRequest: RunRequestParam = {
+    const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('restores'),
     };
@@ -108,7 +109,8 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
-      await expect(router.runRequest(mockRequest)).rejects.toThrow();
+      const response = await router.runRequest(mockRequest);
+      expect(response.status).toBe(500);
     });
   });
 });
