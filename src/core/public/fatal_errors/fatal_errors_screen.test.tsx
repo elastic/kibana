@@ -51,8 +51,7 @@ beforeAll(() => {
   delete window.addEventListener;
 
   window.addEventListener = jest.fn();
-  // @ts-ignore
-  window.location = {
+  (window as any).location = {
     reload: jest.fn(),
   };
 });
@@ -77,8 +76,7 @@ describe('reloading', () => {
     );
 
     expect(window.location.reload).not.toHaveBeenCalled();
-    // @ts-ignore
-    const [, handler] = window.addEventListener.mock.calls[0];
+    const [, handler] = (window as any).addEventListener.mock.calls[0];
     (handler as jest.Mock)();
     expect(window.location.reload).toHaveBeenCalledTimes(1);
   });
@@ -110,10 +108,8 @@ describe('rendering', () => {
 
 describe('buttons', () => {
   beforeAll(() => {
-    // @ts-ignore
-    delete window.localStorage;
-    // @ts-ignore
-    delete window.sessionStorage;
+    delete (window as any).localStorage;
+    delete (window as any).sessionStorage;
 
     Object.assign(window, {
       localStorage: {

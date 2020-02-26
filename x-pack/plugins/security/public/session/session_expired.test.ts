@@ -15,8 +15,7 @@ describe('#logout', () => {
   let newUrlPromise: Promise<string>;
 
   beforeAll(() => {
-    // @ts-ignore
-    delete window.sessionStorage;
+    delete (window as any).sessionStorage;
     delete window.location;
     Object.defineProperty(window, 'sessionStorage', {
       value: {
@@ -27,8 +26,7 @@ describe('#logout', () => {
   });
 
   beforeEach(() => {
-    // @ts-ignore
-    window.location = {
+    (window as any).location = {
       pathname: CURRENT_URL,
       assign: jest.fn(),
       search: '',

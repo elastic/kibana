@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../types';
+import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
-import { SavedObjectsStart } from 'kibana/public';
+import { SavedObjectsStart } from '../../../../../../../core/public';
 
 describe('NewVisModal', () => {
   const { location } = window;
@@ -66,8 +66,7 @@ describe('NewVisModal', () => {
 
   beforeAll(() => {
     delete window.location;
-    // @ts-ignore
-    window.location = { assign: jest.fn() };
+    (window as any).location = { assign: jest.fn() };
   });
 
   beforeEach(() => {

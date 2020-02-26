@@ -77,8 +77,7 @@ async function start({
 }
 
 beforeAll(() => {
-  // @ts-ignore
-  delete window.localStorage;
+  delete (window as any).localStorage;
   (window as any).localStorage = {
     setItem: (key: string, value: string) => store.set(String(key), String(value)),
     getItem: (key: string) => store.get(String(key)),

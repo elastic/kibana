@@ -379,8 +379,54 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/results/records  Retrieves anomaly records for a job.
+   * @apiName GetRecords
+   * @apiDescription Retrieves anomaly records for a job.
+   *
+   * @apiParam {String} jobId Job ID.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} records
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/results/records',
+      validate: {
+        params: schema.object({
+          jobId: schema.string(),
+        }),
+        body: schema.object({
+          desc: schema.maybe(schema.boolean()),
+          end: schema.maybe(schema.string()),
+          exclude_interim: schema.maybe(schema.boolean()),
+          'page.from': schema.maybe(schema.number()),
+          'page.size': schema.maybe(schema.number()),
+          record_score: schema.maybe(schema.number()),
+          sort: schema.maybe(schema.string()),
+          start: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.records', {
+          jobId: request.params.jobId,
+          ...request.body,
+        });
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
    * @api {post} /api/ml/anomaly_detectors/:jobId/results/buckets  Obtain bucket scores for the specified job ID
-   * @apiName GetOverallBuckets
+   * @apiName GetBuckets
    * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
    *
    * @apiParam {String} jobId Job ID.

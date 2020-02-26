@@ -30,8 +30,7 @@ import {
 } from './api_responses';
 
 delete window.location;
-// @ts-ignore
-window.location = {
+(window as any).location = {
   reload: jest.fn(),
 };
 
