@@ -25,3 +25,4 @@ export {
 } from './types';
 
 export { MetricsService } from './metrics_service';
+export { opsConfig } from './ops_config';

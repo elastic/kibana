@@ -48,7 +48,7 @@ export class MetricsService
     const metricsObservable = this.metrics$.asObservable().pipe(shareReplay(1));
 
     return {
-      getMetrics$: () => metricsObservable,
+      getOpsMetrics$: () => metricsObservable,
     };
   }
 

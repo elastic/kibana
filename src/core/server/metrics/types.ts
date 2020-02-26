@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 export interface MetricsServiceSetup {
-  getMetrics$: () => Observable<OpsMetrics>;
+  getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsServiceStart {}
