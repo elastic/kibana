@@ -81,7 +81,8 @@ export const ml = (kibana: any) => {
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch, // NP
+        coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
+        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
       };
       const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {

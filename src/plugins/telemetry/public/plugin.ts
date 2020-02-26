@@ -54,9 +54,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     }
 
     const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
-    const sendUsageFrom = injectedMetadata.getInjectedVar('telemetrySendUsageFrom') as
-      | 'browser'
-      | 'server';
 
     this.telemetryNotifications = new TelemetryNotifications({
       overlays,
@@ -69,7 +66,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return;
       }
 
-      this.maybeStartTelemetryPoller({ sendUsageFrom });
+      this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
         this.maybeShowOptedInNotificationBanner();
         this.maybeShowOptInBanner();
@@ -87,13 +84,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return anonymousPaths.isAnonymous(window.location.pathname);
   }
 
-  private maybeStartTelemetryPoller({ sendUsageFrom }: { sendUsageFrom: string }) {
+  private maybeStartTelemetryPoller() {
     if (!this.telemetrySender) {
       return;
     }
-    if (sendUsageFrom === 'browser') {
-      this.telemetrySender.startChecking();
-    }
+
+    this.telemetrySender.startChecking();
   }
 
   private maybeShowOptedInNotificationBanner() {

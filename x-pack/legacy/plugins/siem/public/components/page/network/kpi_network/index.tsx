@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { chunk as _chunk } from 'lodash/fp';
+
 import {
   StatItemsComponent,
   StatItemsProps,
