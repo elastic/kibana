@@ -5,9 +5,6 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
@@ -24,10 +21,42 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../types';
 import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import { WithHeaderLayout } from '../../../layouts';
 // import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
+
+const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
+  <WithHeaderLayout
+    leftColumn={
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigList.pageTitle"
+                defaultMessage="Agent Configurations"
+              />
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigList.pageSubtitle"
+                defaultMessage="Use agent configurations to manage your agents and the data they collect."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    }
+  >
+    {children}
+  </WithHeaderLayout>
+);
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   // Create agent config flyout state
@@ -123,71 +152,46 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   );
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        {isCreateAgentConfigFlyoutOpen ? (
-          <CreateAgentConfigFlyout
-            onClose={() => {
-              setIsCreateAgentConfigFlyoutOpen(false);
-              sendRequest();
-            }}
-          />
-        ) : null}
-
-        <EuiTitle size="l">
-          <h1>
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.pageTitle"
-              defaultMessage="Agent configurations"
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.pageDescription"
-                  defaultMessage="Lorem ipsum"
-                />
-              </EuiText>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup alignItems={'center'} gutterSize="m">
-          {selectedAgentConfigs.length ? (
-            <EuiFlexItem>
-              <AgentConfigDeleteProvider>
-                {deleteAgentConfigsPrompt => (
-                  <EuiButton
-                    color="danger"
-                    onClick={() => {
-                      deleteAgentConfigsPrompt(
-                        selectedAgentConfigs.map(agentConfig => agentConfig.id),
-                        () => {
-                          sendRequest();
-                          setSelectedAgentConfigs([]);
-                        }
-                      );
+    <AgentConfigListPageLayout>
+      {isCreateAgentConfigFlyoutOpen ? (
+        <CreateAgentConfigFlyout
+          onClose={() => {
+            setIsCreateAgentConfigFlyoutOpen(false);
+            sendRequest();
+          }}
+        />
+      ) : null}
+      <EuiFlexGroup alignItems={'center'} gutterSize="m">
+        {selectedAgentConfigs.length ? (
+          <EuiFlexItem>
+            <AgentConfigDeleteProvider>
+              {deleteAgentConfigsPrompt => (
+                <EuiButton
+                  color="danger"
+                  onClick={() => {
+                    deleteAgentConfigsPrompt(
+                      selectedAgentConfigs.map(agentConfig => agentConfig.id),
+                      () => {
+                        sendRequest();
+                        setSelectedAgentConfigs([]);
+                      }
+                    );
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigList.deleteButton"
+                    defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
+                    values={{
+                      count: selectedAgentConfigs.length,
                     }}
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentConfigList.deleteButton"
-                      defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
-                      values={{
-                        count: selectedAgentConfigs.length,
-                      }}
-                    />
-                  </EuiButton>
-                )}
-              </AgentConfigDeleteProvider>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={4}>
-            {/* <SearchBar
+                  />
+                </EuiButton>
+              )}
+            </AgentConfigDeleteProvider>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={4}>
+          {/* <SearchBar
               value={search}
               onChange={newSearch => {
                 setPagination({
@@ -198,83 +202,82 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
               }}
               fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
             /> */}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
-                defaultMessage="Reload"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.addButton"
-                defaultMessage="Create new agent configuration"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
+              defaultMessage="Reload"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.addButton"
+              defaultMessage="Create new agent configuration"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
-        <EuiBasicTable
-          loading={isLoading}
-          noItemsMessage={
-            isLoading ? (
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.loadingAgentConfigsMessage"
-                defaultMessage="Loading agent configurations…"
-              />
-            ) : !search.trim() && agentConfigData?.total === 0 ? (
-              emptyPrompt
-            ) : (
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.noFilteredAgentConfigsPrompt"
-                defaultMessage="No agent configurations found. {clearFiltersLink}"
-                values={{
-                  clearFiltersLink: (
-                    <EuiLink onClick={() => setSearch('')}>
-                      <FormattedMessage
-                        id="xpack.ingestManager.agentConfigList.clearFiltersLinkText"
-                        defaultMessage="Clear filters"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            )
-          }
-          items={agentConfigData ? agentConfigData.items : []}
-          itemId="id"
-          columns={columns}
-          isSelectable={true}
-          selection={{
-            selectable: (agentConfig: AgentConfig) => agentConfig.id !== DEFAULT_AGENT_CONFIG_ID,
-            onSelectionChange: (newSelectedAgentConfigs: AgentConfig[]) => {
-              setSelectedAgentConfigs(newSelectedAgentConfigs);
-            },
-          }}
-          pagination={{
-            pageIndex: pagination.currentPage - 1,
-            pageSize: pagination.pageSize,
-            totalItemCount: agentConfigData ? agentConfigData.total : 0,
-          }}
-          onChange={({ page }: { page: { index: number; size: number } }) => {
-            const newPagination = {
-              ...pagination,
-              currentPage: page.index + 1,
-              pageSize: page.size,
-            };
-            setPagination(newPagination);
-            sendRequest(); // todo: fix this to send pagination options
-          }}
-        />
-      </EuiPageContent>
-    </EuiPageBody>
+      <EuiSpacer size="m" />
+      <EuiBasicTable
+        loading={isLoading}
+        noItemsMessage={
+          isLoading ? (
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.loadingAgentConfigsMessage"
+              defaultMessage="Loading agent configurations…"
+            />
+          ) : !search.trim() && agentConfigData?.total === 0 ? (
+            emptyPrompt
+          ) : (
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.noFilteredAgentConfigsPrompt"
+              defaultMessage="No agent configurations found. {clearFiltersLink}"
+              values={{
+                clearFiltersLink: (
+                  <EuiLink onClick={() => setSearch('')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentConfigList.clearFiltersLinkText"
+                      defaultMessage="Clear filters"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )
+        }
+        items={agentConfigData ? agentConfigData.items : []}
+        itemId="id"
+        columns={columns}
+        isSelectable={true}
+        selection={{
+          selectable: (agentConfig: AgentConfig) => agentConfig.id !== DEFAULT_AGENT_CONFIG_ID,
+          onSelectionChange: (newSelectedAgentConfigs: AgentConfig[]) => {
+            setSelectedAgentConfigs(newSelectedAgentConfigs);
+          },
+        }}
+        pagination={{
+          pageIndex: pagination.currentPage - 1,
+          pageSize: pagination.pageSize,
+          totalItemCount: agentConfigData ? agentConfigData.total : 0,
+        }}
+        onChange={({ page }: { page: { index: number; size: number } }) => {
+          const newPagination = {
+            ...pagination,
+            currentPage: page.index + 1,
+            pageSize: page.size,
+          };
+          setPagination(newPagination);
+          sendRequest(); // todo: fix this to send pagination options
+        }}
+      />
+    </AgentConfigListPageLayout>
   );
 };

@@ -5,8 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
@@ -16,7 +15,12 @@ import { Watch } from '../../../models/watch/index';
 // @ts-ignore
 import { VisualizeOptions } from '../../../models/visualize_options/index';
 
-function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
+const bodySchema = schema.object({
+  watch: schema.object({}, { allowUnknowns: true }),
+  options: schema.object({}, { allowUnknowns: true }),
+});
+
+function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
   const params = {
     index,
     body,
@@ -25,46 +29,40 @@ function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
     ignore: [404],
   };
 
-  return callWithRequest('search', params);
+  return dataClient.callAsCurrentUser('search', params);
 }
 
 export function registerVisualizeRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-    const watch = Watch.fromDownstreamJson(request.body.watch);
-    const options = VisualizeOptions.fromDownstreamJson(request.body.options);
-    const body = watch.getVisualizeQuery(options);
-
-    try {
-      const hits = await fetchVisualizeData(callWithRequest, watch.index, body);
-      const visualizeData = watch.formatVisualizeData(hits);
-
-      return response.ok({
-        body: {
-          visualizeData,
-        },
-      });
-    } catch (e) {
-      // Case: Error from Elasticsearch JS client
-      if (isEsError(e)) {
-        return response.customError({ statusCode: e.statusCode, body: e });
-      }
-
-      // Case: default
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.post(
     {
       path: '/api/watcher/watch/visualize',
       validate: {
-        body: schema.object({
-          watch: schema.object({}, { allowUnknowns: true }),
-          options: schema.object({}, { allowUnknowns: true }),
-        }),
+        body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const watch = Watch.fromDownstreamJson(request.body.watch);
+      const options = VisualizeOptions.fromDownstreamJson(request.body.options);
+      const body = watch.getVisualizeQuery(options);
+
+      try {
+        const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
+        const visualizeData = watch.formatVisualizeData(hits);
+
+        return response.ok({
+          body: {
+            visualizeData,
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

@@ -9,7 +9,7 @@ Persists a SavedObject
 <b>Signature:</b>
 
 ```typescript
-create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
 ```
 
 ## Parameters

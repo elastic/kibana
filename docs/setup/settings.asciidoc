@@ -231,7 +231,7 @@ This setting does not impact <<tilemap, Coordinate map visualizations>> and <<re
 use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
-https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
+https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
 and only include polygons. If the file is hosted on a separate domain from
 Kibana, the server needs to be CORS-enabled so Kibana can download the file.
 The following example shows a valid regionmap configuration.

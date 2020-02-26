@@ -40,7 +40,7 @@ export function rollup(kibana: any) {
     },
     init(server: any) {
       const { core: coreSetup, plugins } = server.newPlatform.setup;
-      const { usageCollection, metrics } = plugins;
+      const { usageCollection, metrics, indexManagement } = plugins;
 
       const rollupSetup = (plugins.rollup as unknown) as RollupSetup;
 
@@ -54,11 +54,11 @@ export function rollup(kibana: any) {
       rollupPluginInstance.setup(coreSetup, {
         usageCollection,
         metrics,
+        indexManagement,
         __LEGACY: {
           plugins: {
             xpack_main: server.plugins.xpack_main,
             rollup: server.plugins[PLUGIN.ID],
-            index_management: server.plugins.index_management,
           },
         },
       });
