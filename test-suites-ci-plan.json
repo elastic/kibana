@@ -113,7 +113,7 @@
         "test/functional/apps/dashboard/dashboard_listing.js",
         "test/functional/apps/discover/_filter_editor.js",
         "test/functional/apps/dashboard/time_zones.js",
-        "test/functional/apps/visualize/_embedding_chart.js"
+        "test/functional/apps/visualize/_tsvb_markdown.ts"
       ],
       "estimatedDuration": 765
     },
@@ -121,8 +121,8 @@
       "config": "test/functional/config.js",
       "files": [
         "test/functional/apps/visualize/_data_table_nontimeindex.js",
+        "test/functional/apps/visualize/_linked_saved_searches.ts",
         "test/functional/apps/visualize/_visualize_listing.js",
-        "test/functional/apps/visualize/_vertical_bar_chart_nontimeindex.js",
         "test/functional/apps/dashboard/embeddable_rendering.js"
       ],
       "estimatedDuration": 720
@@ -131,51 +131,51 @@
       "config": "test/functional/config.js",
       "files": [
         "test/functional/apps/context/_date_nanos_custom_timestamp.js",
+        "test/functional/apps/visualize/_vertical_bar_chart_nontimeindex.js",
         "test/functional/apps/dashboard/dashboard_filter_bar.js",
         "test/functional/apps/dashboard/dashboard_clone.js",
-        "test/functional/apps/visualize/_metric_chart.js",
-        "test/functional/apps/visualize/_tsvb_markdown.ts",
-        "test/functional/apps/visualize/_gauge_chart.js"
+        "test/functional/apps/visualize/_embedding_chart.js"
       ],
-      "estimatedDuration": 791
+      "estimatedDuration": 750
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/visualize/_metric_chart.js",
         "test/functional/apps/discover/_discover.js",
         "test/functional/apps/home/_sample_data.ts",
         "test/functional/apps/dashboard/dashboard_time.js",
         "test/functional/apps/visualize/_tag_cloud.js",
-        "test/functional/apps/management/_kibana_settings.js",
-        "test/functional/apps/dashboard/dashboard_snapshots.js"
+        "test/functional/apps/visualize/_gauge_chart.js"
       ],
-      "estimatedDuration": 737
+      "estimatedDuration": 760
     },
     {
       "config": "test/functional/config.js",
       "files": [
+        "test/functional/apps/management/_kibana_settings.js",
         "test/functional/apps/management/_index_pattern_popularity.js",
         "test/functional/apps/getting_started/_shakespeare.js",
         "test/functional/apps/visualize/_inspector.js",
         "test/functional/apps/dashboard/create_and_add_embeddables.js",
         "test/functional/apps/discover/_discover_histogram.js",
-        "test/functional/apps/dashboard/dashboard_save.js",
-        "test/functional/apps/management/_handle_alias.js"
+        "test/functional/apps/dashboard/dashboard_snapshots.js"
       ],
-      "estimatedDuration": 751
+      "estimatedDuration": 759
     },
     {
       "config": "test/functional/config.js",
       "files": [
-        "test/functional/apps/visualize/_linked_saved_searches.js",
+        "test/functional/apps/dashboard/dashboard_save.js",
         "test/functional/apps/management/_index_pattern_results_sort.js",
         "test/functional/apps/visualize/_line_chart.js",
         "test/functional/apps/visualize/input_control_vis/input_control_options.js",
         "test/functional/apps/visualize/_tsvb_table.ts",
         "test/functional/apps/discover/_shared_links.js",
-        "test/functional/apps/management/_scripted_fields_preview.js"
+        "test/functional/apps/management/_scripted_fields_preview.js",
+        "test/functional/apps/management/_handle_alias.js"
       ],
-      "estimatedDuration": 679
+      "estimatedDuration": 767
     },
     {
       "config": "test/ui_capabilities/newsfeed_err/config.ts",
