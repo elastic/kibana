@@ -77,7 +77,7 @@ const authResult = {
 export type AuthHeaders = Record<string, string | string[]>;
 
 /**
- * Result of an incoming request authentication.
+ * Result of successful authentication.
  * @public
  */
 export interface AuthResultParams {
@@ -97,7 +97,11 @@ export interface AuthResultParams {
   responseHeaders?: AuthHeaders;
 }
 
-interface AuthNotHandledResultParams {
+/**
+ * Result of unhandled authentication.
+ * @public
+ */
+export interface AuthNotHandledResultParams {
   /**
    * Auth specific headers to attach to a response object.
    * Used to send back authentication mechanism related headers to a client when needed.
@@ -112,6 +116,7 @@ interface AuthNotHandledResultParams {
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
   authenticated: (data?: AuthResultParams) => AuthResult;
+  /** User has no credentials */
   notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
 }
 

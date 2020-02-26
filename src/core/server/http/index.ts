@@ -65,9 +65,11 @@ export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthNotHandledResultParams,
   AuthToolkit,
   AuthResult,
   Authenticated,
+  AuthNotHandled,
   AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';

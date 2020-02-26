@@ -8,6 +8,9 @@
 
 ```typescript
 core: {
+        auth: {
+            isAuthenticated: IsAuthenticated;
+        };
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;

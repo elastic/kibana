@@ -419,7 +419,18 @@ export type AuthenticationHandler = (request: KibanaRequest, response: Lifecycle
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public (undocumented)
-export type AuthResult = Authenticated;
+export interface AuthNotHandled extends AuthNotHandledResultParams {
+    // (undocumented)
+    type: AuthResultType.notHandled;
+}
+
+// @public
+export interface AuthNotHandledResultParams {
+    responseHeaders?: AuthHeaders;
+}
+
+// @public (undocumented)
+export type AuthResult = Authenticated | AuthNotHandled;
 
 // @public
 export interface AuthResultParams {
@@ -431,7 +442,9 @@ export interface AuthResultParams {
 // @public (undocumented)
 export enum AuthResultType {
     // (undocumented)
-    authenticated = "authenticated"
+    authenticated = "authenticated",
+    // (undocumented)
+    notHandled = "notHandled"
 }
 
 // @public
@@ -444,6 +457,7 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
+    notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
 }
 
 // @public
@@ -1346,6 +1360,9 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
+        auth: {
+            isAuthenticated: IsAuthenticated;
+        };
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
@@ -1391,7 +1408,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean;
+    authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
 }
