@@ -19,7 +19,6 @@
 
 import { Presentable } from '../util/presentable';
 import { Configurable } from '../util/configurable';
-import { ActionContract } from './action_contract';
 
 /**
  * Legacy action interface, do not use. Use @type {ActionDefinition} and
@@ -64,50 +63,35 @@ export interface Action<Context extends {} = {}> extends Partial<Presentable<Con
  * A convenience interface used to register an action.
  */
 export interface ActionDefinition<
-  PresentationContext extends object = object,
-  ExecutionContext extends object = PresentationContext,
-  Return = Promise<void>,
+  Context extends object = object,
   Config extends object | undefined = undefined
->
-  extends Partial<Presentable<PresentationContext>>,
-    Partial<Configurable<Config, PresentationContext>> {
+> extends Partial<Presentable<Context>>, Partial<Configurable<Config, Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
   readonly id: string;
 
-  readonly type?: string;
-
   /**
-   * ID of the `FactoryAction` that can be used to construct instances of
-   * this dynamic action.
+   * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly factoryId?: string;
+  readonly type?: string;
 
   /**
    * @deprecated
    *
    * Do not use this, use `execute` method instead.
    */
-  getHref?(context: ExecutionContext): string | undefined;
+  getHref?(context: Context): string | undefined;
 
   /**
    * Executes the action.
    */
-  execute(
-    context: ExecutionContext,
-    action: ActionContract<ActionDefinition<PresentationContext, ExecutionContext, Return, Config>>
-  ): Return;
+  execute(context: Context): Promise<void>;
 }
 
-export type AnyActionDefinition = ActionDefinition<any, any, any, any>;
-export type ActionPresentationContext<A> = A extends ActionDefinition<infer Context, any, any, any>
-  ? Context
-  : never;
-export type ActionExecutionContext<A> = A extends ActionDefinition<any, infer Context, any, any>
-  ? Context
-  : never;
-export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config> ? Config : never;
+export type AnyActionDefinition = ActionDefinition<any, any>;
+export type ActionContext<A> = A extends ActionDefinition<infer Context, any> ? Context : never;
+export type ActionConfig<A> = A extends ActionDefinition<any, infer Config> ? Config : never;
 
 /**
  * A convenience interface used to register a dynamic action.
@@ -118,31 +102,9 @@ export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config>
  * back.
  */
 export type DynamicActionDefinition<
-  PresentationContext extends object = object,
-  ExecutionContext extends object = PresentationContext,
-  Return = Promise<void>,
+  Context extends object = object,
   Config extends object | undefined = undefined
-> = ActionDefinition<PresentationContext, ExecutionContext, Return, Config> &
-  Required<
-    Pick<
-      ActionDefinition<PresentationContext, ExecutionContext, Return, Config>,
-      'CollectConfig' | 'defaultConfig' | 'factoryId'
-    >
-  >;
+> = ActionDefinition<Context, Config> &
+  Required<Pick<ActionDefinition<Context, Config>, 'CollectConfig' | 'defaultConfig' | 'type'>>;
 
-export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any, any, any>;
-
-/**
- * Factory actions are actions used to create dynamic actions - their `execute`
- * method returns a dynamic action.
- */
-export interface FactoryActionDefinition<
-  DAD extends AnyDynamicActionDefinition,
-  PresentationContext extends object = object,
-  ExecutionContext extends object = PresentationContext
-> extends ActionDefinition<PresentationContext, ExecutionContext, DAD> {
-  /**
-   * Returns an instance of a dynamic action definition.
-   */
-  execute(context: ExecutionContext): DAD;
-}
+export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any>;

@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { Action, ActionExecutionContext, AnyActionDefinition } from './action';
+import { Action, ActionContext, AnyActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { createActionStateContainer, ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionContract } from './action_contract';
 
 export class ActionInternal<A extends AnyActionDefinition>
-  implements Action<ActionExecutionContext<A>>, Presentable<ActionExecutionContext<A>> {
+  implements Action<ActionContext<A>>, Presentable<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
   public readonly type: string = this.definition.type || '';
-  public readonly factoryId: string = this.definition.factoryId || '';
+  public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
   public readonly CollectConfig? = this.definition.CollectConfig;
@@ -41,36 +41,32 @@ export class ActionInternal<A extends AnyActionDefinition>
     return this;
   }
 
-  public get order() {
-    return this.state.get().order;
-  }
-
   public readonly state = createActionStateContainer({
     name: '',
     order: this.definition.order || 0,
     config: this.definition.defaultConfig || {},
   });
 
-  public execute(context: ActionExecutionContext<A>): ReturnType<A['execute']> {
-    return this.definition.execute(context, this.contract);
+  public execute(context: ActionContext<A>) {
+    return this.definition.execute(context);
   }
 
-  public getIconType(context: ActionExecutionContext<A>): string | undefined {
+  public getIconType(context: ActionContext<A>): string | undefined {
     if (!this.definition.getIconType) return undefined;
     return this.definition.getIconType(context);
   }
 
-  public getDisplayName(context: ActionExecutionContext<A>): string {
+  public getDisplayName(context: ActionContext<A>): string {
     if (!this.definition.getDisplayName) return '';
     return this.definition.getDisplayName(context);
   }
 
-  public async isCompatible(context: ActionExecutionContext<A>): Promise<boolean> {
+  public async isCompatible(context: ActionContext<A>): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
   }
 
-  public getHref(context: ActionExecutionContext<A>): string | undefined {
+  public getHref(context: ActionContext<A>): string | undefined {
     if (!this.definition.getHref) return undefined;
     return this.definition.getHref(context);
   }
@@ -78,7 +74,6 @@ export class ActionInternal<A extends AnyActionDefinition>
   serialize(): SerializedAction {
     const state = this.state.get();
     const serialized: SerializedAction = {
-      factoryId: this.factoryId,
       id: this.id,
       type: this.type || '',
       state,
@@ -95,7 +90,6 @@ export class ActionInternal<A extends AnyActionDefinition>
 export type AnyActionInternal = ActionInternal<any>;
 
 export interface SerializedAction<Config extends object = object> {
-  readonly factoryId: string;
   readonly id: string;
   readonly type: string;
   readonly state: ActionState<Config>;

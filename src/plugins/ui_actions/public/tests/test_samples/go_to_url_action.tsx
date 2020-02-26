@@ -53,11 +53,11 @@ const CollectConfig: React.FC<CollectConfigProps<Config, object>> = ({ config, o
   );
 };
 
-export const createSampleGoToUrlAction = (): ActionDefinition<object, object, void, Config> => {
+export const createSampleGoToUrlAction = (): ActionDefinition<object, Config> => {
   return {
     type: SAMPLE_GO_TO_URL_ACTION,
     id: SAMPLE_GO_TO_URL_ACTION,
-    execute() {},
+    async execute() {},
     defaultConfig: {
       url: '',
       openInNewTab: false,

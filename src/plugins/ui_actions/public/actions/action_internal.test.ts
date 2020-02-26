@@ -47,7 +47,6 @@ describe('ActionInternal', () => {
     test('can serialize action with modified state', () => {
       const action = new ActionInternal({
         ...defaultActionDef,
-        factoryId: 'FACTORY_ID',
         type: 'ACTION_TYPE',
         order: 11,
       });
@@ -58,7 +57,6 @@ describe('ActionInternal', () => {
 
       expect(serialized).toMatchObject({
         id: 'test-action',
-        factoryId: 'FACTORY_ID',
         type: 'ACTION_TYPE',
         state: {
           name: 'qux',
@@ -74,7 +72,6 @@ describe('ActionInternal', () => {
   describe('deserialize', () => {
     const serialized = {
       id: 'id',
-      factoryId: 'factoryId',
       type: 'type',
       state: {
         name: 'name',
@@ -95,7 +92,7 @@ describe('ActionInternal', () => {
       expect(action.state.get()).toMatchObject(serialized.state);
     });
 
-    test('does not overwrite action id, factoryId and type', () => {
+    test('does not overwrite action id and type', () => {
       const action = new ActionInternal({
         ...defaultActionDef,
       });
@@ -104,7 +101,6 @@ describe('ActionInternal', () => {
 
       expect(action.id).toBe('test-action');
       expect(action.type).toBe('');
-      expect(action.factoryId).toBe('');
     });
   });
 });

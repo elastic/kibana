@@ -24,6 +24,11 @@ import { UiComponent } from 'src/plugins/kibana_utils/common';
  */
 export interface Presentable<Context extends object = object> {
   /**
+   * ID that uniquely identifies this object.
+   */
+  readonly id: string;
+
+  /**
    * Determines the display order in relation to other items. Higher numbers are
    * displayed first.
    */
