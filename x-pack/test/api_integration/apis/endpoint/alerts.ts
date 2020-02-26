@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect/expect.js';
-import { encode } from 'rison-node';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
@@ -23,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
 
       it('alerts api should not support post', async () => {
-        const { body } = await supertest
+        await supertest
           .post('/api/endpoint/alerts')
           .send({})
           .set('kbn-xsrf', 'xxx')
@@ -133,7 +132,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return 400 when using `before` by custom sort parameter', async () => {
-        const { body } = await supertest
+        await supertest
           .get(
             `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&before=2180&before=8362fcde-0b10-476f-97a8-8d6a43865226`
           )
@@ -189,7 +188,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return 404 when alert is not found', async () => {
-        const { body } = await supertest
+        await supertest
           .get('/api/endpoint/alerts/does-not-exist')
           .set('kbn-xsrf', 'xxx')
           .expect(404);
