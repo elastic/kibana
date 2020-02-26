@@ -44,7 +44,6 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
 import './home';
 import './discover/legacy';
 import './visualize/legacy';

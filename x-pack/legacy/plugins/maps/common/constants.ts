@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
@@ -54,6 +53,7 @@ export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
+export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
@@ -117,16 +117,16 @@ export const DRAW_TYPE = {
   POLYGON: 'POLYGON',
 };
 
-export const METRIC_TYPE = {
+export const AGG_TYPE = {
   AVG: 'avg',
   COUNT: 'count',
   MAX: 'max',
   MIN: 'min',
   SUM: 'sum',
+  TERMS: 'terms',
   UNIQUE_COUNT: 'cardinality',
 };
 
-export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });
