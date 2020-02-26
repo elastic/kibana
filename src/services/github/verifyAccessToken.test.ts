@@ -20,7 +20,9 @@ describe('verifyAccessToken', () => {
 
     expect(spy).toHaveBeenCalledWith(
       'https://api.github.com/repos/elastic/kibana',
-      { auth: { password: 'myAccessToken', username: 'sqren' } }
+      {
+        auth: { password: 'myAccessToken', username: 'sqren' }
+      }
     );
   });
 
@@ -28,7 +30,8 @@ describe('verifyAccessToken', () => {
     it('401', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         response: {
-          status: 401
+          status: 401,
+          headers: {}
         }
       });
 
@@ -41,7 +44,8 @@ describe('verifyAccessToken', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         message: 'unknown error',
         response: {
-          status: 403
+          status: 403,
+          headers: {}
         }
       });
 
@@ -53,10 +57,8 @@ describe('verifyAccessToken', () => {
     it('403 (SSO error)', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         response: {
-          headers: {
-            'x-github-sso': 'required; url=https://ssourl.com'
-          },
-          status: 403
+          status: 403,
+          headers: { 'x-github-sso': 'required; url=https://ssourl.com' }
         }
       });
 
@@ -106,7 +108,8 @@ describe('verifyAccessToken', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         message: 'unknown error',
         response: {
-          status: 500
+          status: 500,
+          headers: {}
         }
       });
 

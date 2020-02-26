@@ -9,8 +9,8 @@ addons:
       - git
 language: node_js
 node_js:
-  - '8'
   - '10'
+  - '12'
 cache: yarn
 before_script:
   - yarn

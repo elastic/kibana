@@ -1,12 +1,11 @@
 {
   "editor.formatOnSave": true,
-  "eslint.autoFixOnSave": true,
-  "eslint.validate": [
-    "javascript",
-    { "language": "typescript", "autoFix": true }
-  ],
+  "eslint.validate": ["javascript", "typescript"],
   "files.exclude": {
     "yarn.lock": true,
     "coverage": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
   }
 }

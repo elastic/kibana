@@ -1,16 +1,14 @@
 import axios from 'axios';
-import get from 'lodash.get';
 import { HandledError } from '../HandledError';
 import { GithubApiError } from './GithubApiTypes';
 import { validateRequiredOptions } from '../../options/options';
 
-function getSSOAuthUrl(error: GithubApiError) {
-  const githubSSO: string | undefined = get(
-    error,
-    'response.headers["x-github-sso"]'
-  );
-  if (githubSSO) {
-    return get(githubSSO.match(/url=(.*)/), '1');
+type MaybeString = string | undefined;
+
+function getSSOAuthUrl(ssoHeader?: string) {
+  const matches = ssoHeader?.match(/url=(.*)/);
+  if (matches) {
+    return matches[1];
   }
 }
 
@@ -33,13 +31,15 @@ export async function verifyAccessToken({
     );
   } catch (e) {
     const error = e as GithubApiError;
-    const statusCode = error.response && error.response.status;
+    const statusCode = error.response?.status;
 
-    const grantedScopes = get(error, 'response.headers["x-oauth-scopes"]');
-    const requiredScopes = get(
-      error,
-      'response.headers["x-accepted-oauth-scopes"]'
-    );
+    const grantedScopes: MaybeString =
+      error.response?.headers['x-oauth-scopes'];
+
+    const requiredScopes: MaybeString =
+      error.response?.headers['x-accepted-oauth-scopes'];
+
+    const ssoHeader: MaybeString = error.response?.headers['x-github-sso'];
 
     switch (statusCode) {
       case 401:
@@ -48,7 +48,7 @@ export async function verifyAccessToken({
         );
 
       case 403: {
-        const ssoAuthUrl = getSSOAuthUrl(error);
+        const ssoAuthUrl = getSSOAuthUrl(ssoHeader);
         if (ssoAuthUrl) {
           throw new HandledError(
             `Please follow the link to authorize your personal access token with SSO:\n\n${ssoAuthUrl}`

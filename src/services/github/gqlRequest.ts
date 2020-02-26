@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { HandledError } from '../HandledError';
 import { logger } from '../logger';
+import dedent from 'dedent';
 
 interface GithubResponse<DataResponse> {
   data: DataResponse;
@@ -31,7 +32,7 @@ export async function gqlRequest<DataResponse>({
   try {
     logger.verbose(query);
     logger.verbose(variables as any);
-    const { data } = await axios.post<GithubResponse<DataResponse>>(
+    const response = await axios.post<GithubResponse<DataResponse>>(
       `https://${apiHostname}/graphql`,
       { query, variables },
       {
@@ -42,28 +43,35 @@ export async function gqlRequest<DataResponse>({
       }
     );
 
-    logger.verbose(data);
+    logger.verbose(response.data);
 
-    if (data.errors) {
-      const message = data.errors.map(error => error.message).join(', ');
-      throw new HandledError(message);
+    if (response.data.errors) {
+      const newError = new Error();
+      ((newError as unknown) as any).response = response;
+
+      throw newError;
     }
 
-    return data.data;
+    return response.data.data;
   } catch (ex) {
     const e = ex as AxiosError<{ errors: { message: string }[] | undefined }>;
     logger.info(e.message);
 
-    if (
-      e.response &&
-      e.response.data &&
-      Array.isArray(e.response.data.errors)
-    ) {
+    if (e.response?.data) {
       logger.info(e.config);
       logger.info(e.response.headers);
       logger.info(e.response.data);
+
+      const errorMessages = e.response.data.errors
+        ?.map(error => error.message)
+        .join(', ');
+
+      const stringifiedResponseData = JSON.stringify(e.response.data, null, 2);
+
       throw new HandledError(
-        e.response.data.errors.map(error => error.message).join(', ')
+        dedent(`Unexpected response from Github:
+
+        ${errorMessages ? errorMessages : stringifiedResponseData}`)
       );
     }
 

@@ -36,7 +36,9 @@ describe('getOptions', () => {
     expect(axiosHeadSpy).toHaveBeenCalledTimes(1);
     expect(axiosHeadSpy).toHaveBeenCalledWith(
       'https://api.github.com/repos/elastic/kibana',
-      { auth: { password: 'myAccessToken', username: 'sqren' } }
+      {
+        auth: { password: 'myAccessToken', username: 'sqren' }
+      }
     );
   });
 

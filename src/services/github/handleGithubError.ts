@@ -3,7 +3,7 @@ import { GithubApiError } from './GithubApiTypes';
 import { logger } from '../logger';
 
 export function handleGithubError(e: GithubApiError) {
-  if (e.response && e.response.data) {
+  if (e.response?.data) {
     logger.info(formatObject(e.config));
     logger.info(formatObject(e.response.headers));
     logger.info(formatObject(e.response.data));

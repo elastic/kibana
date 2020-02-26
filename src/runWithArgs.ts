@@ -2,6 +2,7 @@ import { getOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import { HandledError } from './services/HandledError';
 import { initLogger } from './services/logger';
+import { getLogfilePath } from './services/env';
 
 export async function runWithArgs(args: string[]) {
   const logger = initLogger();
@@ -13,7 +14,10 @@ export async function runWithArgs(args: string[]) {
     if (e instanceof HandledError) {
       console.error(e.message);
     } else {
-      console.error(e);
+      console.error(
+        `An unknown error occurred. Please check the logs for addtional details: ${getLogfilePath()}`
+      );
+      logger.info(e);
     }
 
     // wait exiting until logs have been flushed to disc

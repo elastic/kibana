@@ -21,7 +21,9 @@ describe('config', () => {
     });
 
     it("should create config if it doesn't exist", () => {
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(
+        fs.writeFile
+      ).toHaveBeenCalledWith(
         '/myHomeDir/.backport/config.json',
         expect.any(String),
         { flag: 'wx', mode: 384 }

@@ -15,7 +15,9 @@ describe('addRemote', () => {
       'elastic'
     );
 
-    return expect(spy).toHaveBeenCalledWith(
+    return expect(
+      spy
+    ).toHaveBeenCalledWith(
       'git remote add elastic https://myAccessToken@github.com/elastic/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );
@@ -33,7 +35,9 @@ describe('addRemote', () => {
       'sqren'
     );
 
-    return expect(spy).toHaveBeenCalledWith(
+    return expect(
+      spy
+    ).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );
@@ -51,7 +55,9 @@ describe('addRemote', () => {
       'sqren'
     );
 
-    return expect(spy).toHaveBeenCalledWith(
+    return expect(
+      spy
+    ).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.my-company.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );

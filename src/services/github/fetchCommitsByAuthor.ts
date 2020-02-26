@@ -1,4 +1,3 @@
-import get from 'lodash.get';
 import { BackportOptions } from '../../options/options';
 import { CommitChoice } from './Commit';
 import { fetchAuthorId } from './fetchAuthorId';
@@ -130,7 +129,7 @@ export async function fetchCommitsByAuthor(
     const sha = historyNode.oid;
     const firstMessageLine = getFirstCommitMessageLine(historyNode.message);
     const pullNumber =
-      get(associatedPullRequest, 'node.number') ||
+      associatedPullRequest?.node.number ||
       getPullNumberFromMessage(firstMessageLine);
 
     const message = getFormattedCommitMessage({

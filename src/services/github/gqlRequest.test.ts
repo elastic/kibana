@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { HandledError } from '../HandledError';
 import { gqlRequest } from './gqlRequest';
+import dedent from 'dedent';
 
 describe('gqlRequest', () => {
   describe('when request succeeds', () => {
@@ -64,7 +65,13 @@ describe('gqlRequest', () => {
             foo: 'bar'
           }
         })
-      ).rejects.toThrowError(new HandledError('some error, some other error'));
+      ).rejects.toThrowError(
+        new HandledError(
+          dedent(`Unexpected response from Github:
+
+          some error, some other error`)
+        )
+      );
     });
   });
 });
