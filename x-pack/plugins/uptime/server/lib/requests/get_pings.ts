@@ -10,7 +10,6 @@ import {
   Ping,
   HttpBody,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetPingsParams {
   /** @member dateRangeStart timestamp bounds */
@@ -37,6 +36,7 @@ export interface GetPingsParams {
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
   callES,
+  dynamicSettings,
   dateRangeStart,
   dateRangeEnd,
   monitorId,
@@ -61,7 +61,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
   }
   const queryContext = { bool: { filter } };
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings,
     body: {
       query: {
         ...queryContext,

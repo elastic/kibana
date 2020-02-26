@@ -6,7 +6,6 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -22,6 +21,7 @@ export interface GetLatestMonitorParams {
 // Get The monitor latest state sorted by timestamp with date range
 export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Ping> = async ({
   callES,
+  dynamicSettings,
   dateStart,
   dateEnd,
   monitorId,
@@ -29,7 +29,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   // TODO: Write tests for this function
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         bool: {

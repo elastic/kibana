@@ -70,6 +70,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
+      'heartbeat-8*',
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       sort: 'asc',

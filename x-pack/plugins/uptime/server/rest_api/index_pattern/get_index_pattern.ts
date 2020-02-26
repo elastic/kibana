@@ -14,11 +14,11 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
   options: {
     tags: ['access:uptime'],
   },
-  handler: async ({ callES }, _context, _request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, _request, response): Promise<any> => {
     try {
       return response.ok({
         body: {
-          ...(await libs.requests.getIndexPattern(callES)),
+          ...(await libs.requests.getIndexPattern({callES, dynamicSettings})),
         },
       });
     } catch (e) {

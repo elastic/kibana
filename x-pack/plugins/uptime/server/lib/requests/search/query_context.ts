@@ -6,12 +6,12 @@
 
 import moment from 'moment';
 import { APICaller } from 'src/core/server';
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 
 export class QueryContext {
   callES: APICaller;
+  heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -22,6 +22,7 @@ export class QueryContext {
 
   constructor(
     database: any,
+    heartbeatIndices: string,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -30,6 +31,7 @@ export class QueryContext {
     statusFilter?: string
   ) {
     this.callES = database;
+    this.heartbeatIndices = heartbeatIndices;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.pagination = pagination;
@@ -39,12 +41,12 @@ export class QueryContext {
   }
 
   async search(params: any): Promise<any> {
-    params.index = INDEX_NAMES.HEARTBEAT;
+    params.index = this.heartbeatIndices;
     return this.callES('search', params);
   }
 
   async count(params: any): Promise<any> {
-    params.index = INDEX_NAMES.HEARTBEAT;
+    params.index = this.heartbeatIndices;
     return this.callES('count', params);
   }
 
@@ -135,6 +137,7 @@ export class QueryContext {
   clone(): QueryContext {
     return new QueryContext(
       this.callES,
+      this.heartbeatIndices,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.pagination,

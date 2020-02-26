@@ -36,7 +36,7 @@ type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
-  getIndexPattern: ESQ<any, {}>;
+  getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
   getMonitor: ESQ<GetMonitorParams, Ping>;
   getMonitorCharts: ESQ<GetMonitorChartsParams, MonitorChart>;

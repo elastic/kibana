@@ -6,6 +6,7 @@
 
 import { RequestHandlerContext, CallAPIOptions } from 'src/core/server';
 import { UMServerLibs } from '../lib/lib';
+import { DynamicSettings } from 'x-pack/legacy/plugins/uptime/common/runtime_types';
 
 export type UMContext = RequestHandlerContext & {
   APICaller: (

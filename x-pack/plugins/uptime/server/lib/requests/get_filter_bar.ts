@@ -7,7 +7,6 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { OverviewFilters } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { generateFilterAggs } from './generate_filter_aggs';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetFilterBarParams {
   /** @param dateRangeStart timestamp bounds */
@@ -67,6 +66,7 @@ export const extractFilterAggsResults = (
 
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
   callES,
+  dynamicSettings,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -83,7 +83,7 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
   );
   const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 0,
       query: {

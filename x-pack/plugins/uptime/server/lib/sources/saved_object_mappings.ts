@@ -5,7 +5,7 @@
  */
 
 export interface UMDynamicSettingsType {
-  heartbeatIndexName: string;
+  heartbeatIndices: string;
 }
 
 const type = 'uptime-dynamic-settings';
