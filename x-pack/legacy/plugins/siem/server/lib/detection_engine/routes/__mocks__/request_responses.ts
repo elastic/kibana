@@ -246,6 +246,13 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
+export const ruleStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+    query: { ids: ['someId'] },
+  });
+
 export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
   method: 'POST',
   url: `${DETECTION_ENGINE_RULES_URL}/_import`,
