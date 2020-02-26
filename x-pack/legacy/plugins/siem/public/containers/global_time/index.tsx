@@ -52,7 +52,7 @@ export const useGlobalTime = () => {
     return () => {
       deleteAllQuery({ id: 'global' });
     };
-  }, [isInitializing , deleteAllQuery]);
+  }, [isInitializing, deleteAllQuery]);
 
   return {
     isInitializing,
