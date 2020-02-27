@@ -26,7 +26,6 @@ export interface ChromiumDriverOptions {
 }
 
 interface WaitForSelectorOpts {
-  silent?: boolean;
   timeout: number;
 }
 
@@ -215,36 +214,13 @@ export class HeadlessChromiumDriver {
 
   public async waitForSelector(
     selector: string,
-    opts: WaitForSelectorOpts = { timeout: 10000 },
+    opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
     logger: LevelLogger
   ): Promise<ElementHandle<Element>> {
-    const { silent = false, timeout } = opts;
+    const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
-
-    let resp;
-    try {
-      resp = await this.page.waitFor(selector, { timeout });
-    } catch (err) {
-      if (!silent) {
-        // Provide some troubleshooting info to see if we're on the login page,
-        // "Kibana could not load correctly", etc
-        logger.error(
-          `waitForSelector ${selector} failed after ${opts.timeout}ms on ${this.page.url()}`
-        );
-        const pageText = await this.evaluate(
-          {
-            fn: () => document.querySelector('body')!.innerText,
-            args: [],
-          },
-          context,
-          logger
-        );
-        logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
-      }
-      throw err;
-    }
-
+    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
     logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
