@@ -75,16 +75,6 @@ describe('create_rules', () => {
         statusCode: 500,
       });
     });
-
-    test.skip('catches error if transformation fails', async () => {
-      // @ts-ignore
-      clients.alertsClient.create.mockResolvedValue(null);
-      const response = await server.inject(getCreateRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
-        statusCode: 500,
-      });
-    });
   });
 
   describe('request validation', () => {

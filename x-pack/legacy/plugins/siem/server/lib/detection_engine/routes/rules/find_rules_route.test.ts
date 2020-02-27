@@ -41,13 +41,6 @@ describe('find_rules', () => {
       expect(response.notFound).toHaveBeenCalled();
     });
 
-    test.skip('catches error if transformation fails', async () => {
-      const response = await server.inject(getFindRequest(), context);
-      expect(response.internalError).toHaveBeenCalledWith({
-        body: 'Internal error transforming',
-      });
-    });
-
     test('catches error if search throws error', async () => {
       clients.alertsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
