@@ -40,6 +40,35 @@ interface AlertExpressionPopoverProps {
   value: string;
 }
 
+interface AlertNumberFieldProps {
+  disabled: boolean;
+  fieldValue: number;
+  setFieldValue: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const AlertFieldNumber = ({ disabled, fieldValue, setFieldValue }: AlertNumberFieldProps) => {
+  const [isInvalid, setIsInvalid] = useState<boolean>(false);
+
+  return (
+    <EuiFieldNumber
+      compressed
+      min={1}
+      onChange={e => {
+        const num = parseInt(e.target.value, 10);
+        if (isNaN(num) || num < 1) {
+          setIsInvalid(true);
+        } else {
+          if (!isNaN(num) && num > 0) setIsInvalid(false);
+          setFieldValue(num);
+        }
+      }}
+      disabled={disabled}
+      value={fieldValue}
+      isInvalid={isInvalid}
+    />
+  );
+};
+
 const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   content,
   description,
@@ -83,29 +112,31 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     {
       key: 's',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
-        defaultMessage: 'Seconds',
+        defaultMessage: 'seconds',
       }),
     },
     {
       checked: 'on',
       key: 'm',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.minutes', {
-        defaultMessage: 'Minutes',
+        defaultMessage: 'minutes',
       }),
     },
     {
       key: 'h',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
-        defaultMessage: 'Hours',
+        defaultMessage: 'hours',
       }),
     },
     {
       key: 'd',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
-        defaultMessage: 'Hours',
+        defaultMessage: 'days',
       }),
     },
   ]);
+  // const [renotifyChecked, setRenotifyChecked] = useState<boolean>(true);
+  // const [renotifyInterval, setRenotifyInterval] = useState<number>(15);
 
   const { setAlertParams } = props;
 
@@ -136,22 +167,16 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   return (
     <>
       <KueryBar autocomplete={props.autocomplete} />
-
+      <EuiSpacer size="s" />
       <AlertExpressionPopover
         content={
-          <EuiFieldNumber
-            compressed
-            value={numTimes}
-            onChange={e => setNumTimes(parseInt(e.target.value, 10))}
-          />
+          <AlertFieldNumber disabled={false} fieldValue={numTimes} setFieldValue={setNumTimes} />
         }
         id="ping-count"
         description="any monitor is down >"
         value={`${numTimes} times`}
       />
-
       <EuiSpacer size="xs" />
-
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <AlertExpressionPopover
@@ -159,11 +184,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
             description="within"
             value={`last ${numMins}`}
             content={
-              <EuiFieldNumber
-                compressed
-                value={numMins}
-                onChange={e => setNumMins(parseInt(e.target.value, 10))}
-              />
+              <AlertFieldNumber disabled={false} fieldValue={numMins} setFieldValue={setNumMins} />
             }
           />
         </EuiFlexItem>
@@ -212,23 +233,20 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="xs" />
-
       {locations.length === 0 && (
         <EuiExpression color="secondary" description="in" isActive={false} value="all locations" />
       )}
-
       {locations.length > 0 && (
         <AlertExpressionPopover
           id="locations"
-          description="in"
+          description="from"
           value={
             locations.length === 0 || allLabels
-              ? 'all locations'
+              ? 'any location'
               : locations
-                  .filter(l => l.checked === 'on')
-                  .map(l => l.label)
+                  .filter(({ checked }) => checked === 'on')
+                  .map(({ label }) => label)
                   .sort()
                   .reduce((acc, cur) => {
                     if (acc === '') {
@@ -261,3 +279,42 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     </>
   );
 };
+
+// <EuiSpacer size="l" />
+
+// <AlertExpressionPopover
+//   id="renotify-interval"
+//   description="renotify every"
+//   value={`${renotifyInterval} minutes`}
+//   content={
+//     <>
+//       {/* <EuiFlexGroup gutterSize="m">
+//         <EuiFlexItem grow={false}> */}
+//       <EuiSwitch
+//         label="Renotify every"
+//         checked={renotifyChecked}
+//         onChange={e => setRenotifyChecked(e.target.checked)}
+//       />
+//       {/* </EuiFlexItem>
+//         <EuiFlexItem> */}
+//       <EuiSpacer size="s" />
+//       <AlertFieldNumber
+//         disabled={!renotifyChecked}
+//         fieldName="renotifyInterval"
+//         fieldValue={renotifyInterval}
+//         setFieldValue={setRenotifyInterval}
+//         setAlertParams={setAlertParams}
+//       />
+//       {/* <EuiFieldNumber
+//         compressed
+//         fullWidth={false}
+//         min={1}
+//         disabled={!renotifyChecked}
+//         value={renotifyInterval}
+//         onChange={e => setRenotifyInterval(parseInt(e.target.value, 10))}
+//       /> */}
+//       {/* </EuiFlexItem>
+//       </EuiFlexGroup> */}
+
+//   </>
+// }
