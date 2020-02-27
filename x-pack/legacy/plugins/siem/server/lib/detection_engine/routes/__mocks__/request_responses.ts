@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../../../plugins/actions/server';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
