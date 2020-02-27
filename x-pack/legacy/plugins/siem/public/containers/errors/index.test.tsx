@@ -5,8 +5,7 @@
  */
 
 import { reTryOneTimeOnErrorHandler, errorLinkHandler } from '.';
-import { ServerError } from 'apollo-link-http-common';
-import { Operation } from 'apollo-link';
+import { ServerError, Operation } from '@apollo/client';
 import { GraphQLError } from 'graphql';
 import * as store from '../../store';
 import { onError } from 'apollo-link-error';
