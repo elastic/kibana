@@ -272,7 +272,8 @@ describe('#stop', () => {
     expect(mockDataClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
+  it('stops pollEsNodeVersions even if there are active subscriptions', async done => {
+    expect.assertions(2);
     const mockAdminClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
     const mockDataClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
 
@@ -284,12 +285,13 @@ describe('#stop', () => {
 
     const setupContract = await elasticsearchService.setup(deps);
 
-    setupContract.esNodesCompatibility$.subscribe(() => {});
-    await delay(10);
-    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+    setupContract.esNodesCompatibility$.subscribe(async () => {
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
 
-    await elasticsearchService.stop();
-    await delay(100);
-    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      await elasticsearchService.stop();
+      await delay(100);
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      done();
+    });
   });
 });
