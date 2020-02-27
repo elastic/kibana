@@ -34,6 +34,10 @@ export const hoveredContentStyle = css`
       : darken(0.05, props.theme.eui.euiColorHighlight)};
 `;
 
+export const pinnedContentStyle = css`
+  background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+`;
+
 interface CharacterDimensions {
   height: number;
   width: number;

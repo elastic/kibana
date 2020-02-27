@@ -9,11 +9,9 @@ import { EuiButtonIcon, EuiPopover, EuiButtonEmpty, EuiTitle } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
 import { euiStyled } from '../../../../../observability/public';
 
 interface LogEntryActionsColumnProps {
-  isHighlighted: boolean;
   isHovered: boolean;
   onViewDetails: () => void;
   onViewInContext: () => void;
@@ -23,7 +21,6 @@ interface LogEntryActionsColumnProps {
 }
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
-  isHighlighted,
   isHovered,
   onViewDetails,
   onViewInContext,
@@ -48,7 +45,7 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   );
 
   return (
-    <LogEntryActionsColumnWrapper isHighlighted={isHighlighted} isHovered={isHovered}>
+    <LogEntryActionsColumnWrapper>
       {isHovered ? (
         <AbsoluteWrapper>
           <EuiPopover button={button} isOpen={hasMenuOpen} closePopover={closeMenu}>
@@ -84,19 +81,11 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   );
 };
 
-type LogEntryActionsColumnWrapperProps = Pick<
-  LogEntryActionsColumnProps,
-  'isHighlighted' | 'isHovered'
->;
-
-const LogEntryActionsColumnWrapper = euiStyled(LogEntryColumnContent)<
-  LogEntryActionsColumnWrapperProps
->`
+const LogEntryActionsColumnWrapper = euiStyled(LogEntryColumnContent)`
   user-select: none;
   position: relative;
-
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;
+
 const AbsoluteWrapper = euiStyled.div`
   position: absolute;
   top: 5px;

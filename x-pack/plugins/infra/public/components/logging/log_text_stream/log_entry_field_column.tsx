@@ -5,7 +5,6 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
 import { euiStyled, css } from '../../../../../observability/public';
@@ -22,7 +21,6 @@ interface LogEntryFieldColumnProps {
   columnValue: LogEntryColumn;
   highlights: LogEntryHighlightColumn[];
   isActiveHighlight: boolean;
-  isHighlighted: boolean;
   isWrapped: boolean;
 }
 
@@ -30,7 +28,6 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   columnValue,
   highlights: [firstHighlight], // we only support one highlight for now
   isActiveHighlight,
-  isHighlighted,
   isWrapped,
 }) => {
   const value = useMemo(() => (isFieldColumn(columnValue) ? JSON.parse(columnValue.value) : null), [
@@ -56,19 +53,8 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
     )
   );
 
-  return (
-    <FieldColumnContent isHighlighted={isHighlighted} isWrapped={isWrapped}>
-      {formattedValue}
-    </FieldColumnContent>
-  );
+  return <FieldColumnContent isWrapped={isWrapped}>{formattedValue}</FieldColumnContent>;
 };
-
-const hoveredContentStyle = css`
-  background-color: ${props =>
-    props.theme.darkMode
-      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
-      : darken(0.05, props.theme.eui.euiColorHighlight)};
-`;
 
 const wrappedContentStyle = css`
   overflow: visible;
@@ -92,13 +78,11 @@ const CommaSeparatedLi = euiStyled.li`
 `;
 
 interface LogEntryColumnContentProps {
-  isHighlighted: boolean;
   isWrapped?: boolean;
 }
 
 const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
   text-overflow: ellipsis;
 
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
   ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;

@@ -18,18 +18,16 @@ import {
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogEntryColumn;
   highlights: LogEntryHighlightColumn[];
   isActiveHighlight: boolean;
-  isHighlighted: boolean;
   isWrapped: boolean;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isWrapped }) => {
+  ({ columnValue, highlights, isActiveHighlight, isWrapped }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -38,11 +36,7 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
       [columnValue, highlights, isActiveHighlight]
     );
 
-    return (
-      <MessageColumnContent isHighlighted={isHighlighted} isWrapped={isWrapped}>
-        {message}
-      </MessageColumnContent>
-    );
+    return <MessageColumnContent isWrapped={isWrapped}>{message}</MessageColumnContent>;
   }
 );
 
@@ -58,14 +52,11 @@ const unwrappedContentStyle = css`
 `;
 
 interface MessageColumnContentProps {
-  isHighlighted: boolean;
   isWrapped?: boolean;
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
-
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
   ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;
 

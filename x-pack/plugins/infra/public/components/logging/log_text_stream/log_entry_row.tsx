@@ -26,7 +26,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle, hoveredContentStyle } from './text_styles';
+import { monospaceTextStyle, hoveredContentStyle, pinnedContentStyle } from './text_styles';
 import { LogEntryActionsColumn } from './log_entry_actions_column';
 
 interface LogEntryRowProps {
@@ -121,6 +121,7 @@ export const LogEntryRow = ({
       onMouseEnter={setItemIsHovered}
       onMouseLeave={setItemIsNotHovered}
       scale={scale}
+      isHighlighted={isHighlighted}
     >
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
@@ -134,7 +135,7 @@ export const LogEntryRow = ({
               {...columnWidth}
             >
               {isTimestampColumn(column) ? (
-                <LogEntryTimestampColumn isHighlighted={isHighlighted} time={column.timestamp} />
+                <LogEntryTimestampColumn time={column.timestamp} />
               ) : null}
             </LogEntryColumn>
           );
@@ -152,7 +153,6 @@ export const LogEntryRow = ({
                 <LogEntryMessageColumn
                   columnValue={column}
                   highlights={highlightsByColumnId[column.columnId] || []}
-                  isHighlighted={isHighlighted}
                   isActiveHighlight={isActiveHighlight}
                   isWrapped={wrap}
                 />
@@ -174,7 +174,6 @@ export const LogEntryRow = ({
                   columnValue={column}
                   highlights={highlightsByColumnId[column.columnId] || []}
                   isActiveHighlight={isActiveHighlight}
-                  isHighlighted={isHighlighted}
                   isWrapped={wrap}
                 />
               ) : null}
@@ -192,7 +191,6 @@ export const LogEntryRow = ({
           openFlyout={openFlyout}
         /> */}
         <LogEntryActionsColumn
-          isHighlighted={isHighlighted}
           isHovered={isHovered}
           onViewDetails={openFlyout}
           onViewInContext={() => window.alert('Not implemented')}
@@ -206,6 +204,7 @@ export const LogEntryRow = ({
 };
 
 interface LogEntryRowWrapperProps {
+  isHighlighted: boolean;
   scale: TextScale;
 }
 
@@ -221,6 +220,7 @@ const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   overflow: hidden;
 
   ${props => monospaceTextStyle(props.scale)};
+  ${props => (props.isHighlighted ? pinnedContentStyle : '')}
 
   &:hover {
     ${hoveredContentStyle}
