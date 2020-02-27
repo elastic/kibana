@@ -62,6 +62,26 @@ class VisImpl extends EventEmitter {
     };
   }
 
+  initializeDefaultsFromSchemas(configStates, schemas) {
+    // Set the defaults for any schema which has them. If the defaults
+    // for some reason has more then the max only set the max number
+    // of defaults (not sure why a someone define more...
+    // but whatever). Also if a schema.name is already set then don't
+    // set anything.
+    const newConfigs = [];
+    _(schemas)
+      .filter(schema => {
+        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
+      })
+      .each(schema => {
+        if (!configStates.find(agg => agg.schema && agg.schema === schema.name)) {
+          const defaults = schema.defaults.slice(0, schema.max);
+          defaults.forEach(d => newConfigs.push(d));
+        }
+      });
+    return newConfigs;
+  }
+
   setCurrentState(state) {
     this.title = state.title || '';
     const type = state.type || this.type;
@@ -83,11 +103,9 @@ class VisImpl extends EventEmitter {
     updateVisualizationConfig(state.params, this.params);
 
     if (state.aggs || !this.aggs) {
-      this.aggs = createAggConfigs(
-        this.indexPattern,
-        state.aggs ? state.aggs.aggs || state.aggs : [],
-        this.type.schemas.all
-      );
+      let configStates = state.aggs ? state.aggs.aggs || state.aggs : [];
+      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all);
+      this.aggs = createAggConfigs(this.indexPattern, configStates);
     }
   }
 
