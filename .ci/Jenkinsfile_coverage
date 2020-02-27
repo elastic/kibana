@@ -114,9 +114,8 @@ src/dev/code_coverage/cc_app/public/initial_data.js
 
                   """,
                   "### About to Upload Code Coverage Static Site"
-                )x
-//                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
-                kibanaPipeline.uploadCoverageStaticSite_PROD(TIME_STAMP)
+                )
+                kibanaCoverage.uploadCoverageStaticSite_PROD(TIME_STAMP)
               }
 
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
