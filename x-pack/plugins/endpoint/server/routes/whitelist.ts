@@ -7,9 +7,9 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
+import { i18n } from '@kbn/i18n';
 import { EndpointAppContext } from '../types';
 import { WhitelistRule } from '../../common/types';
-import { i18n } from '@kbn/i18n';
 
 const whitelistIdx = 'whitelist-index'; // TODO: change this
 
@@ -68,7 +68,7 @@ async function handleWhitelistPost(context, req, res) {
     Object.keys(whitelistAttributeMap).forEach(k => {
       if (req.body[k]) {
         newRules.push({
-          comment: req.body.comment || "",
+          comment: req.body.comment || '',
           eventTypes: [], // TODO grab the alert and get eventTypes from alert details API
           whitelistRuleType: 'simple',
           whitelistRule: {
@@ -81,13 +81,13 @@ async function handleWhitelistPost(context, req, res) {
     });
 
     // Don't index an empty list if no rules could be created from the request
-    if(newRules.length === 0) {
-      return res.badRequest({"error": "no whitelist rules could be created from request."});
+    if (newRules.length === 0) {
+      return res.badRequest({ error: 'no whitelist rules could be created from request.' });
     }
 
     const errors = await addWhitelistRule(context, newRules); // TODO handle
     if (errors) {
-      return res.internalError({"error": "unable to create whitelist rule."});
+      return res.internalError({ error: 'unable to create whitelist rule.' });
     } else {
       return res.ok({ body: newRules });
     }

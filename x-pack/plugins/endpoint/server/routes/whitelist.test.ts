@@ -24,9 +24,8 @@ import { registerWhitelistRoutes } from './whitelist';
 import { EndpointConfigSchema } from '../config';
 import * as data from '../test_data/all_whitelist_data.json';
 
-
 // A fake elasticsearch error message
-const mockElasticSearchError = "This is some error that you would expect from elasticsearch";
+const mockElasticSearchError = 'This is some error that you would expect from elasticsearch';
 
 describe('test whitelist route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -49,19 +48,19 @@ describe('test whitelist route', () => {
   });
 
   it('should create a whitelist rule from a POST request', async () => {
-    const expectedComment = "Hi this is a comment on a whitelist rule";
-    const expectedPath = "/some/path/to/a/file";
+    const expectedComment = 'Hi this is a comment on a whitelist rule';
+    const expectedPath = '/some/path/to/a/file';
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
       body: {
-        "alert_id": "1234",
-        "comment": expectedComment,
-        "file_path": expectedPath
+        alert_id: '1234',
+        comment: expectedComment,
+        file_path: expectedPath,
       },
-      method: 'post'
+      method: 'post',
     });
 
-    const response = {errors: null}
+    const response = { errors: null };
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
@@ -87,28 +86,32 @@ describe('test whitelist route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const resp = mockResponse.ok.mock.calls[0][0]?.body as WhitelistRule;
+
+    // Excpect that one rule was created and that it is well formed
     expect(resp.length).toEqual(1);
     const rule: WhitelistRule = resp[0];
     expect(rule.comment).toEqual(expectedComment);
     expect(rule.whitelistRule.value).toEqual(expectedPath);
-    expect(rule.whitelistRule.applyTo).toEqual("malware.file.path");
+    expect(rule.whitelistRule.applyTo).toEqual('malware.file.path');
   });
 
   it('should handle elasticsearch failing while creating a whitelist rule', async () => {
-    const expectedComment = "Hi this is a comment on a whitelist rule";
-    const expectedPath = "/some/path/to/a/file";
+    const expectedComment = 'Hi this is a comment on a whitelist rule';
+    const expectedPath = '/some/path/to/a/file';
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
       body: {
-        "alert_id": "1234",
-        "comment": expectedComment,
-        "file_path": expectedPath
+        alert_id: '1234',
+        comment: expectedComment,
+        file_path: expectedPath,
       },
-      method: 'post'
+      method: 'post',
     });
 
     // The elasticsearch call will reject
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.reject({"errors": mockElasticSearchError}));
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.reject({ errors: mockElasticSearchError })
+    );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
     )!;
@@ -137,23 +140,24 @@ describe('test whitelist route', () => {
     expect(mockResponse.internalError.mock.calls[0][0].body.errors).toEqual(mockElasticSearchError);
   });
 
-
   it('should create multiple whitelist rules from a POST request', async () => {
-    const expectedComment = "Hi this is a comment on a whitelist rule";
-    const expectedPath = "/some/path/to/a/file";
+    const expectedComment = 'Hi this is a comment on a whitelist rule';
+    const expectedPath = '/some/path/to/a/file';
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
       body: {
-        "alert_id": "1234",
-        "sha256": "43958234958234952345",
-        "signer": "Microsoft",
-        "comment": expectedComment,
-        "file_path": expectedPath
+        alert_id: '1234',
+        sha256: '43958234958234952345',
+        signer: 'Microsoft',
+        comment: expectedComment,
+        file_path: expectedPath,
       },
-      method: 'post'
+      method: 'post',
     });
 
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve({"errors": null}));
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.resolve({ errors: null })
+    );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
     )!;
@@ -184,20 +188,22 @@ describe('test whitelist route', () => {
   });
 
   it('should not create whitelist rules if the given fields are not supported', async () => {
-    const expectedComment = "Hi this is a comment on a whitelist rule";
+    const expectedComment = 'Hi this is a comment on a whitelist rule';
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
       body: {
-        "alert_id": "1234",
-        "madeupfield": "blahblah",
-        "singer": "no one",
-        "comment": expectedComment,
-        "path": "somewhere"
+        alert_id: '1234',
+        madeupfield: 'blahblah',
+        singer: 'no one',
+        comment: expectedComment,
+        path: 'somewhere',
       },
-      method: 'post'
+      method: 'post',
     });
 
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve({"errors": null}));
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.resolve({ errors: null })
+    );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
     )!;
@@ -228,10 +234,12 @@ describe('test whitelist route', () => {
   it('should list created whitelist entries from a GET request', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
-      method: 'get'
+      method: 'get',
     });
 
-    const response: SearchResponse<WhitelistRule> = (data as unknown) as SearchResponse<WhitelistRule>;
+    const response: SearchResponse<WhitelistRule> = (data as unknown) as SearchResponse<
+      WhitelistRule
+    >;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
@@ -256,10 +264,12 @@ describe('test whitelist route', () => {
   it('should handle elasticsearch failing while trying to list whitelist entries', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/whitelist',
-      method: 'get'
+      method: 'get',
     });
 
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.reject({"errors": mockElasticSearchError}));
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.reject({ errors: mockElasticSearchError })
+    );
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
     )!;
