@@ -39,6 +39,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 99;
 `;
 
 export const Create = React.memo(() => {
@@ -76,8 +77,8 @@ export const Create = React.memo(() => {
             'data-test-subj': 'caseTitle',
             euiFieldProps: {
               fullWidth: false,
+              disabled: isLoading,
             },
-            isDisabled: isLoading,
           }}
         />
         <Container>
@@ -89,8 +90,8 @@ export const Create = React.memo(() => {
               euiFieldProps: {
                 fullWidth: true,
                 placeholder: '',
+                isDisabled: isLoading,
               },
-              isDisabled: isLoading,
             }}
           />
         </Container>
@@ -100,8 +101,8 @@ export const Create = React.memo(() => {
             component={MarkdownEditorForm}
             componentProps={{
               idAria: 'caseDescription',
-              isDisabled: isLoading,
               dataTestSubj: 'caseDescription',
+              isDisabled: isLoading,
             }}
           />
         </ContainerBig>

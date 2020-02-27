@@ -101,7 +101,7 @@ export const MarkdownEditor = React.memo<{
         ),
       },
     ],
-    [content, placeholder]
+    [content, isDisabled, placeholder]
   );
   return (
     <Container>

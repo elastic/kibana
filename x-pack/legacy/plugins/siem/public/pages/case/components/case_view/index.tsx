@@ -49,6 +49,10 @@ const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
 `;
 
+const MyEuiFlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
+`;
+
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade};
@@ -239,11 +243,11 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   }
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
+      <MyEuiFlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </MyEuiFlexGroup>
     );
   }
 
