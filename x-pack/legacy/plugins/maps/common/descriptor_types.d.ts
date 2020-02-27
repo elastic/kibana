@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from './constants';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
 
 export type SourceDescriptor =
   | XYZTMSSourceDescriptor
@@ -64,7 +64,7 @@ export type ESSearchSourceDescriptor = ESSourceDescriptor & {
   filterByMapBounds: boolean;
   tooltipProperties: string[];
   sortField: string;
-  sortOrder: string;
+  sortOrder: SORT_ORDER;
   useTopHits: boolean;
   topHitsSplitField: string;
   topHitsSize: number;
