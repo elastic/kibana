@@ -17,6 +17,15 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPublicPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPublicPluginStart {}
+
+export interface AppPluginDependencies {
+  data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+}

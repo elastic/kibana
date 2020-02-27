@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateDemoPluginStart {}
