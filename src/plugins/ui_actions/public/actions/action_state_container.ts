@@ -21,7 +21,6 @@ import { createStateContainer, StateContainer } from '../../../kibana_utils/comm
 
 export interface ActionState<Config extends object> {
   readonly name: string;
-  readonly order: number;
   readonly config: Config;
 }
 
@@ -38,7 +37,6 @@ export type ActionStateContainer<Config extends object> = StateContainer<
 
 export const defaultState: ActionState<object> = {
   name: '',
-  order: 0,
   config: {},
 };
 
