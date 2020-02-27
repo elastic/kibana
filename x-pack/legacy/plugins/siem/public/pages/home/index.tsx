@@ -68,6 +68,8 @@ export const HomePage: React.FC = () => {
     windowHeight,
   });
 
+  const currentLocation = useLocation();
+
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
