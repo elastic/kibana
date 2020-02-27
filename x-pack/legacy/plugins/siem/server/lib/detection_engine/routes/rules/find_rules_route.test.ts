@@ -70,7 +70,7 @@ describe('find_rules', () => {
       jest.spyOn(utils, 'transformFindAlerts').mockReturnValue(null);
       const { payload, statusCode } = await server.inject(getFindRequest());
       expect(statusCode).toBe(500);
-      expect(JSON.parse(payload).message).toBe('unknown data type, error transforming alert');
+      expect(JSON.parse(payload).message).toBe('Internal error transforming');
     });
 
     test('catch error when findRules function throws error', async () => {
