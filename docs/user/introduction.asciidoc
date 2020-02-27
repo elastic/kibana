@@ -29,26 +29,25 @@ image::images/intro-kibana.png[]
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
 and processes the data, with {kib} sitting on top.
 
-To get data into {kib}, you can:
+From the home page, {kib} provides these options for getting data in:
 
-* Add a <<add-sample-data, sample data set>> and take {kib} for a test drive without loading data yourself.
-* Follow one of our built-in tutorials to set up a data flow between your app and the Elastic Stack.
+* <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
+* Set up a data flow between your app and the Elastic Stack using our built-in tutorials.
 (If a tutorial doesn’t exist for your data, go to the
 {beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
 in the {beats} family.)
+* Import log data using the file upload feature.
+* {ref}/getting-started-index.html[Index your data] in Elasticsearch.
 +
 [role="screenshot"]
-image::images/intro-data-tutorial.png[]
+image::images/intro-data-tutorial.png[Ways to get data in from the home page]
 
-* Use the upload file feature and upload your own data.
-* Use the {es} {ref}/docs-bulk.html[bulk] API to load your own data.
 
-{kib} requires an
+{kib} uses an
 <<index-patterns, index pattern>> to tell it which {es} indices to explore.
 If you add sample data or run a built-in tutorial, you get an index pattern for free,
-and are good to start exploring. If you load your own data, you can create an index
-pattern in <<management, Management>>.
-
+and are good to start exploring. If you load your own data, you can create
+an index pattern in <<management, Management>>.
 
 [float]
 [[explore-and-query]]
