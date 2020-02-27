@@ -171,7 +171,7 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
-    const getIsEmptyInReadonlyModeOrUserHasNoPermissions = () => {
+    const shouldShowUnauthorizedEmptyState = () => {
       const readonlyMode =
         !dashboardStateManager.getPanels().length &&
         !getShouldShowEditHelp() &&
@@ -248,7 +248,7 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
-      const isEmptyInReadonlyMode = getIsEmptyInReadonlyModeOrUserHasNoPermissions();
+      const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -305,7 +305,7 @@ export class DashboardAppController {
           dashboardContainer.renderEmpty = () => {
             const shouldShowEditHelp = getShouldShowEditHelp();
             const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyModeOrUserHasNoPermissions();
+            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
               <DashboardEmptyScreen
