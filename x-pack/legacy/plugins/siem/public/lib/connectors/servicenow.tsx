@@ -22,6 +22,7 @@ import {
 import * as i18n from './translations';
 
 import { ServiceNowActionConnector } from './types';
+import { isUrlInvalid } from './validators';
 
 import logo from './logos/servicenow.svg';
 
@@ -45,6 +46,10 @@ export function getActionType(): ActionTypeModel {
 
       if (!action.config.apiUrl) {
         errors.apiUrl.push(i18n.SERVICENOW_API_URL_REQUIRED);
+      }
+
+      if (isUrlInvalid(action.config.apiUrl)) {
+        errors.apiUrl.push(i18n.SERVICENOW_API_URL_INVALID);
       }
 
       if (!action.secrets.username) {
