@@ -27,9 +27,8 @@ export const alertListData = (state: AlertListState) => state.alerts;
  * Returns the alert list pagination data from state
  */
 export const alertListPagination = createStructuredSelector({
-  pageIndex: (state: AlertListState) => state.request_page_index,
-  pageSize: (state: AlertListState) => state.request_page_size,
-  resultFromIndex: (state: AlertListState) => state.result_from_index,
+  pageIndex: (state: AlertListState) => state.pageIndex,
+  pageSize: (state: AlertListState) => state.pageSize,
   total: (state: AlertListState) => state.total,
 });
 

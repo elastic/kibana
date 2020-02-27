@@ -31,7 +31,7 @@ export const readRules = async ({
         return null;
       }
     } catch (err) {
-      if (err.output.statusCode === 404) {
+      if (err?.output?.statusCode === 404) {
         return null;
       } else {
         // throw non-404 as they would be 500 or other internal errors
