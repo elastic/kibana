@@ -9,8 +9,7 @@ import { RequestHandlerContext } from 'src/core/server';
 export interface FieldsAdapter {
   getIndexFields(
     requestContext: RequestHandlerContext,
-    indices: string,
-    timefield: string
+    indices: string
   ): Promise<IndexFieldDescriptor[]>;
 }
 
