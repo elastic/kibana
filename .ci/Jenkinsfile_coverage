@@ -100,7 +100,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   popd
 
                   # copy built app over to it's final resting place :)
-                  cp -R src/dev/code_coverage/cc_app/build src/dev/code_coverage/live_coverage_app
+                  cp -R src/dev/code_coverage/cc_app/build src/dev/code_coverage/live_cc_app
 
                   # NOW!!! ... we need to upload the summary folders, underneath the time stamp dir in gcp.
 
