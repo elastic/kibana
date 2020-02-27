@@ -6,12 +6,9 @@
 
 import { format as formatUrl } from 'url';
 import fetch from 'node-fetch';
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
-import { HttpLink } from 'apollo-link-http';
+import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
 
 interface SiemGraphQLClientFactoryOptions {
   username?: string;
@@ -44,11 +41,7 @@ export function SiemGraphQLClientFactoryProvider({ getService }: FtrProviderCont
     });
 
     return new ApolloClient({
-      cache: new InMemoryCache({
-        fragmentMatcher: new IntrospectionFragmentMatcher({
-          introspectionQueryResultData,
-        }),
-      }),
+      cache: new InMemoryCache({}),
       link: httpLink,
     });
   };
