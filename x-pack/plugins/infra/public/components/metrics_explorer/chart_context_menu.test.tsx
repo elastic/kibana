@@ -152,8 +152,6 @@ describe('MetricsExplorerChartContextMenu', () => {
     test('createNodeDetailLink()', () => {
       const fromDateStrig = '2019-01-01T11:00:00Z';
       const toDateStrig = '2019-01-01T12:00:00Z';
-      const to = DateMath.parse(toDateStrig, { roundUp: true })!;
-      const from = DateMath.parse(fromDateStrig)!;
       const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
       expect(link).toStrictEqual({
         pathname: 'link-to/host-detail/example-01',
