@@ -153,6 +153,10 @@ export class Server {
       metrics: metricsSetup,
     };
 
+    if (this.env.cliArgs.dryRunMigration) {
+      return coreSetup;
+    }
+
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
     const renderingSetup = await this.rendering.setup({
@@ -174,20 +178,21 @@ export class Server {
   public async start() {
     this.log.debug('starting server');
     const savedObjectsStart = await this.savedObjects.start({});
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    if (this.env.cliArgs.dryRunMigration) {
+      return this.coreStart;
+    }
+
+    const pluginsStart = await this.plugins.start(this.coreStart);
 
     await this.legacy.start({
       core: {
