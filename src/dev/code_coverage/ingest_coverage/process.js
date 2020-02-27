@@ -25,7 +25,7 @@ import { ingest } from './ingest';
 import {
   staticSite,
   statsAndstaticSiteUrl,
-  addCoverageSummaryPath,
+  addJsonSummaryPath,
   testRunner,
   addTimeStamp,
   distro,
@@ -49,21 +49,21 @@ const prokStatsTimeStampBuildId = pipe(
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
 
-export default ({ coverageSummaryPath }, log) => {
+export default ({ jsonSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
 
   validateRoot(KIBANA_ROOT, log);
 
-  const addCoverageSummaryPathAndDistro = pipe(addCoverageSummaryPath(coverageSummaryPath), distro);
-  const objStream = jsonStream(coverageSummaryPath).on('done', noop);
+  const addjsonSummaryPathAndDistro = pipe(addJsonSummaryPath(jsonSummaryPath), distro);
+  const objStream = jsonStream(jsonSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
       map(prokStatsTimeStampBuildId),
       map(coveredFilePath),
-      map(ciRunUrl(log)),
-      map(addCoverageSummaryPathAndDistro),
+      map(ciRunUrl),
+      map(addjsonSummaryPathAndDistro),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
     )

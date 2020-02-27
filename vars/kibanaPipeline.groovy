@@ -216,7 +216,7 @@ def uploadCoverageStaticSite_PROD(timestamp) {
   uploadWithVault(uploadPrefix, 'src/dev/code_coverage/live_coverage_app')
 
   def dataUploadPrefix = uploadPrefix + 'live_coverage_app/'
-  uploadCoverageStaticSiteData(dataUploadPrefix)
+  uploadCoverageHtml(dataUploadPrefix)
 }
 
 def uploadWithVault(prefix, x) {
@@ -229,12 +229,14 @@ def uploadWithVault(prefix, x) {
   }
 }
 
-def uploadCoverageStaticSiteData(prefix) {
-  [
+def uploadCoverageHtml(prefix) {
+  def coverageHtmlPaths = [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
     'target/kibana-coverage/mocha-combined',
-  ].each { x ->
+  ]
+
+  coverageHtmlPaths.each { x ->
     uploadWithVault(prefix, x)
   }
 }

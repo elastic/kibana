@@ -20,4 +20,4 @@
 import oboe from 'oboe';
 import { createReadStream } from 'fs';
 
-export default coverageSummaryPath => oboe(createReadStream(coverageSummaryPath));
+export default jsonSummaryPath => oboe(createReadStream(jsonSummaryPath));

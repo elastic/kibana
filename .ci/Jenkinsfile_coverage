@@ -110,12 +110,12 @@ src/dev/code_coverage/cc_app/public/initial_data.js
                 )
                 kibanaPipeline.bash(
                   """
-                  echo "### About to upload the static site per this TIME_STAMP: ${TIME_STAMP}"
+                  echo "### Canonical TIME_STAMP for the build and ingestion: ${TIME_STAMP}"
 
                   """,
-                  "### Upload Code Coverage Static Site"
-                )
-                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
+                  "### About to Upload Code Coverage Static Site"
+                )x
+//                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
                 kibanaPipeline.uploadCoverageStaticSite_PROD(TIME_STAMP)
               }
 
