@@ -18,41 +18,14 @@
  */
 
 import { Action } from './actions/action';
-import { Trigger } from './triggers/trigger';
+import { TriggerInternal } from './triggers/trigger_internal';
 
-export { Action } from './actions';
-export { Trigger } from './triggers/trigger';
-
-export type ExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
-
-export type GetActionsCompatibleWithTrigger = <C>(
-  triggerId: string,
-  context: C
-) => Promise<Action[]>;
-
-export interface UiActionsApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: ExecuteTriggerActions;
-  getTrigger: (id: string) => Trigger;
-  getTriggerActions: (id: string) => Action[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<Action<C>>>;
-  registerAction: (action: Action) => void;
-  registerTrigger: (trigger: Trigger) => void;
-}
-
-export interface UiActionsDependencies {
-  actions: ActionRegistry;
-  triggers: TriggerRegistry;
-}
-
-export interface UiActionsDependenciesInternal extends UiActionsDependencies {
-  api: Readonly<Partial<UiActionsApi>>;
-}
-
-export type UiActionsApiPure = {
-  [K in keyof UiActionsApi]: (deps: UiActionsDependenciesInternal) => UiActionsApi[K];
-};
-
-export type TriggerRegistry = Map<string, Trigger>;
+export type TriggerRegistry = Map<string, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, Action>;
+export type TriggerToActionsRegistry = Map<string, string[]>;
+
+export type TriggerId = string;
+
+export interface TriggerContextMapping {
+  [key: string]: object;
+}

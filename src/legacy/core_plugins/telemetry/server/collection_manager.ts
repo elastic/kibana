@@ -21,6 +21,7 @@ import { encryptTelemetry } from './collectors';
 import { CallCluster } from '../../elasticsearch';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
 import { Cluster } from '../../elasticsearch';
+import { ESLicense } from './telemetry_collection/get_local_license';
 
 export type EncryptedStatsGetterConfig = { unencrypted: false } & {
   server: any;
@@ -42,26 +43,42 @@ export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   callCluster: CallCluster;
   server: any;
-  start: string;
-  end: string;
+  start: string | number;
+  end: string | number;
+}
+
+export interface BasicStatsPayload {
+  timestamp: string;
+  cluster_uuid: string;
+  cluster_name: string;
+  version: string;
+  cluster_stats: object;
+  collection?: string;
+  stack_stats: object;
 }
 
 export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
 export type ClusterDetailsGetter = (config: StatsCollectionConfig) => Promise<ClusterDetails[]>;
-export type StatsGetter = (
+export type StatsGetter<T extends BasicStatsPayload = BasicStatsPayload> = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig
-) => Promise<any[]>;
+) => Promise<T[]>;
+export type LicenseGetter = (
+  clustersDetails: ClusterDetails[],
+  config: StatsCollectionConfig
+) => Promise<{ [clusterUuid: string]: ESLicense | undefined }>;
 
-interface CollectionConfig {
+interface CollectionConfig<T extends BasicStatsPayload> {
   title: string;
   priority: number;
   esCluster: string | Cluster;
-  statsGetter: StatsGetter;
+  statsGetter: StatsGetter<T>;
   clusterDetailsGetter: ClusterDetailsGetter;
+  licenseGetter: LicenseGetter;
 }
 interface Collection {
   statsGetter: StatsGetter;
+  licenseGetter: LicenseGetter;
   clusterDetailsGetter: ClusterDetailsGetter;
   esCluster: string | Cluster;
   title: string;
@@ -71,8 +88,15 @@ export class TelemetryCollectionManager {
   private usageGetterMethodPriority = -1;
   private collections: Collection[] = [];
 
-  public setCollection = (collectionConfig: CollectionConfig) => {
-    const { title, priority, esCluster, statsGetter, clusterDetailsGetter } = collectionConfig;
+  public setCollection = <T extends BasicStatsPayload>(collectionConfig: CollectionConfig<T>) => {
+    const {
+      title,
+      priority,
+      esCluster,
+      statsGetter,
+      clusterDetailsGetter,
+      licenseGetter,
+    } = collectionConfig;
 
     if (typeof priority !== 'number') {
       throw new Error('priority must be set.');
@@ -89,10 +113,14 @@ export class TelemetryCollectionManager {
         throw Error('esCluster name must be set for the getCluster method.');
       }
       if (!clusterDetailsGetter) {
-        throw Error('Cluser UUIds method is not set.');
+        throw Error('Cluster UUIds method is not set.');
+      }
+      if (!licenseGetter) {
+        throw Error('License getter method not set.');
       }
 
       this.collections.unshift({
+        licenseGetter,
         statsGetter,
         clusterDetailsGetter,
         esCluster,
@@ -143,7 +171,19 @@ export class TelemetryCollectionManager {
       return;
     }
 
-    return await collection.statsGetter(clustersDetails, statsCollectionConfig);
+    const [stats, licenses] = await Promise.all([
+      collection.statsGetter(clustersDetails, statsCollectionConfig),
+      collection.licenseGetter(clustersDetails, statsCollectionConfig),
+    ]);
+
+    return stats.map(stat => {
+      const license = licenses[stat.cluster_uuid];
+      return {
+        ...(license ? { license } : {}),
+        ...stat,
+        collectionSource: collection.title,
+      };
+    });
   };
 
   public getOptInStats = async (optInStatus: boolean, config: StatsGetterConfig) => {
@@ -195,7 +235,7 @@ export class TelemetryCollectionManager {
         }
       } catch (err) {
         statsCollectionConfig.server.log(
-          ['debu', 'telemetry', 'collection'],
+          ['debug', 'telemetry', 'collection'],
           `Failed to collect any usage with registered collections.`
         );
         // swallow error to try next collection;

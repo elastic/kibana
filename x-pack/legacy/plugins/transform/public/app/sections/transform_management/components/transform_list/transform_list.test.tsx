@@ -12,6 +12,8 @@ import { TransformList } from './transform_list';
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(

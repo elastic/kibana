@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, uniq, compact } from 'lodash';
+import { defaultsDeep, uniq, compact, get } from 'lodash';
 
 import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
+import { parseElasticsearchConfig } from '../es_client/parse_elasticsearch_config';
+import { hasMonitoringCluster } from '../es_client/instantiate_client';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -32,6 +34,8 @@ export class BulkUploader {
       throw new Error('interval number of milliseconds is required');
     }
 
+    this._hasDirectConnectionToMonitoringCluster = false;
+    this._productionClusterUuid = null;
     this._timer = null;
     // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
     // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
@@ -47,6 +51,19 @@ export class BulkUploader {
     this._cluster = elasticsearch.createClient('admin', {
       plugins: [monitoringBulk],
     });
+
+    const directConfig = parseElasticsearchConfig(config, 'monitoring.elasticsearch');
+    if (hasMonitoringCluster(directConfig)) {
+      this._log.info(`Detected direct connection to monitoring cluster`);
+      this._hasDirectConnectionToMonitoringCluster = true;
+      this._cluster = elasticsearchPlugin.createCluster('monitoring-direct', directConfig);
+      elasticsearchPlugin
+        .getCluster('admin')
+        .callWithInternalUser('info')
+        .then(data => {
+          this._productionClusterUuid = get(data, 'cluster_uuid');
+        });
+    }
 
     this._getKibanaInfoForStats = () => getKibanaInfoForStats(kibanaStats);
   }
@@ -131,7 +148,6 @@ export class BulkUploader {
 
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
-
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
@@ -162,7 +178,14 @@ export class BulkUploader {
   }
 
   async _onPayload(payload) {
-    return await sendBulkPayload(this._cluster, this._interval, payload);
+    return await sendBulkPayload(
+      this._cluster,
+      this._interval,
+      payload,
+      this._log,
+      this._hasDirectConnectionToMonitoringCluster,
+      this._productionClusterUuid
+    );
   }
 
   /*

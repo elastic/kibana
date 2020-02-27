@@ -33,16 +33,15 @@ const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(MOCK_REPO_DIR));
 
-beforeEach(async () => {
+beforeAll(async () => {
   await del(TMP_DIR);
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
     parents: true,
-    deep: true,
   });
 });
 
-afterEach(async () => {
+afterAll(async () => {
   await del(TMP_DIR);
 });
 
@@ -150,6 +149,36 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/plugins/foo/public/lib.ts,
       <absolute path>/plugins/bar/public/index.ts,
       <absolute path>/plugins/bar/public/lib.ts,
+    ]
+  `);
+});
+
+it('uses cache on second run and exist cleanly', async () => {
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    maxWorkerCount: 1,
+  });
+
+  const msgs = await runOptimizer(config)
+    .pipe(
+      tap(state => {
+        if (state.event?.type === 'worker stdio') {
+          // eslint-disable-next-line no-console
+          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+        }
+      }),
+      toArray()
+    )
+    .toPromise();
+
+  expect(msgs.map(m => m.state.phase)).toMatchInlineSnapshot(`
+    Array [
+      "initializing",
+      "initializing",
+      "initializing",
+      "initialized",
+      "success",
     ]
   `);
 });

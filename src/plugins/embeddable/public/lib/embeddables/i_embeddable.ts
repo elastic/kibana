@@ -29,10 +29,21 @@ export interface EmbeddableInput {
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
   isEmptyState?: boolean;
+
+  /**
+   * Reserved key for `ui_actions` events.
+   */
+  events?: unknown;
+
   /**
    * List of action IDs that this embeddable should not render.
    */
   disabledActions?: string[];
+
+  /**
+   * Whether this embeddable should not execute triggers.
+   */
+  disableTriggers?: boolean;
 }
 
 export interface EmbeddableOutput {

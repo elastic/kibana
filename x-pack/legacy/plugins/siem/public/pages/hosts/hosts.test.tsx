@@ -8,15 +8,14 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { ActionCreator } from 'typescript-fsa';
+import { GraphQLRequest } from '@apollo/client';
+import { MockedProvider } from '@apollo/client/testing';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import '../../mock/match_media';
 import { mocksSource } from '../../containers/source/mock';
 import { wait } from '../../lib/helpers';
 import { apolloClientObservable, TestProviders, mockGlobalState } from '../../mock';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SiemNavigation } from '../../components/navigation';
 import { inputsActions } from '../../store/inputs';
 import { State, createStore } from '../../store';
@@ -34,7 +33,7 @@ jest.mock('../../components/query_bar', () => ({
 }));
 
 let localSource: Array<{
-  request: {};
+  request: GraphQLRequest;
   result: {
     data: {
       source: {
@@ -77,13 +76,6 @@ describe('Hosts - rendering', () => {
     to,
     setQuery: jest.fn(),
     isInitializing: false,
-    setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
-      from: number;
-      id: InputsModelId;
-      to: number;
-    }>,
-    query: { query: '', language: 'kuery' },
-    filters: [],
     hostsPagePath: '',
   };
 
