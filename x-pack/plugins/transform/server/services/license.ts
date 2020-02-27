@@ -16,6 +16,7 @@ import { LicenseType, LICENSE_CHECK_STATE } from '../../../licensing/common/type
 
 export interface LicenseStatus {
   isValid: boolean;
+  isSecurityEnabled: boolean;
   message?: string;
 }
 
@@ -28,6 +29,7 @@ interface SetupSettings {
 export class License {
   private licenseStatus: LicenseStatus = {
     isValid: false,
+    isSecurityEnabled: false,
     message: 'Invalid License',
   };
 
@@ -39,11 +41,23 @@ export class License {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
 
+      const securityFeature = license.getFeature('security');
+      let isSecurityEnabled = false;
+
+      if (
+        securityFeature !== undefined &&
+        securityFeature.isAvailable === true &&
+        securityFeature.isEnabled === true
+      ) {
+        isSecurityEnabled = true;
+      }
+
       if (hasRequiredLicense) {
-        this.licenseStatus = { isValid: true };
+        this.licenseStatus = { isValid: true, isSecurityEnabled };
       } else {
         this.licenseStatus = {
           isValid: false,
+          isSecurityEnabled,
           message: message || defaultErrorMessage,
         };
         if (message) {

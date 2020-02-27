@@ -14,33 +14,11 @@ import { Privileges } from '../../../../../legacy/plugins/transform/public/app/l
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
-// import { Plugins } from '../../shim';
-
-let xpackMainPlugin: any;
-
 export function registerPrivilegesRoute({ router, license, lib }: RouteDependencies) {
   // xpackMainPlugin = plugins.xpack_main;
   router.get(
     { path: addBasePath('privileges'), validate: {} },
     license.guardApiRoute(async (ctx, req, res) => {
-      // const xpackInfo = getXpackMainPlugin() && getXpackMainPlugin().info;
-      const xpackInfo = {
-        feature: (feature: string) => ({
-          isAvailable: () => true,
-          isEnabled: () => true,
-        }),
-        isAvailable: () => true,
-        isEnabled: () => true,
-      };
-      if (!xpackInfo) {
-        // xpackInfo is updated via poll, so it may not be available until polling has begun.
-        // In this rare situation, tell the client the service is temporarily unavailable.
-        return res.customError({
-          statusCode: 503,
-          body: 'Security info unavailable',
-        });
-      }
-
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,
         missingPrivileges: {
@@ -49,8 +27,7 @@ export function registerPrivilegesRoute({ router, license, lib }: RouteDependenc
         },
       };
 
-      const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
-      if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
+      if (license.getStatus().isSecurityEnabled === false) {
         // If security isn't enabled, let the user use app.
         return res.ok({ body: privilegesResult });
       }
@@ -98,10 +75,6 @@ export function registerPrivilegesRoute({ router, license, lib }: RouteDependenc
       return res.ok({ body: privilegesResult });
     })
   );
-}
-
-function getXpackMainPlugin() {
-  return xpackMainPlugin;
 }
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
