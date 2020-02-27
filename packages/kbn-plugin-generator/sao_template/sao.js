@@ -135,8 +135,11 @@ module.exports = function({ name, targetPath }) {
       'eslintrc.js': '.eslintrc.js',
       'i18nrc.json': '.i18nrc.json',
     },
-    data: answers =>
-      Object.assign(
+    data: answers => {
+      const pathToPlugin = answers.customPath
+        ? resolve(answers.customPath, camelCase(name), 'public')
+        : resolve(targetPath, 'public');
+      return Object.assign(
         {
           templateVersion: pkg.version,
           startCase,
@@ -150,13 +153,11 @@ module.exports = function({ name, targetPath }) {
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
           hasScss: !!answers.generateScss,
-          relRoot: relative(
-            resolve(answers.customPath || targetPath, name, 'public'),
-            process.cwd()
-          ),
+          relRoot: relative(pathToPlugin, process.cwd()),
         },
         answers
-      ),
+      );
+    },
     enforceNewFolder: true,
     installDependencies: false,
     async post({ log, answers }) {

@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { chunk, isEmpty } from 'lodash/fp';
+import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { Readable } from 'stream';
 
@@ -16,13 +16,23 @@ import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
-import { getIndex, transformError, createBulkErrorObject, ImportRuleResponse } from '../utils';
+import {
+  getIndex,
+  createBulkErrorObject,
+  ImportRuleResponse,
+  BulkError,
+  isBulkError,
+  isImportRegular,
+  transformError,
+} from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { validate } from './validate';
 import { GetScopedClients } from '../../../../services';
+import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -246,12 +256,30 @@ export const createImportRulesRoute = (
           ];
         }
 
-        const errorsResp = importRuleResponse.filter(resp => !isEmpty(resp.error));
-        return {
+        const errorsResp = importRuleResponse.filter(resp => isBulkError(resp)) as BulkError[];
+        const successes = importRuleResponse.filter(resp => {
+          if (isImportRegular(resp)) {
+            return resp.status_code === 200;
+          } else {
+            return false;
+          }
+        });
+        const importRules: ImportRulesSchema = {
           success: errorsResp.length === 0,
-          success_count: importRuleResponse.filter(resp => resp.status_code === 200).length,
+          success_count: successes.length,
           errors: errorsResp,
         };
+        const [validated, errors] = validate(importRules, importRulesSchema);
+        if (errors != null) {
+          return headers
+            .response({
+              message: errors,
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return validated;
+        }
       } catch (exc) {
         const error = transformError(exc);
         return headers
