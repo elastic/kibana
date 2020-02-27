@@ -215,6 +215,9 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
