@@ -23,6 +23,7 @@ import {
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
 } from '../../../../common/constants';
+import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -70,6 +71,8 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
+
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta || { fieldMeta: {} });
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
@@ -272,7 +275,7 @@ export class VectorStyle extends AbstractStyle {
       }
     }
 
-    const featuresMeta = {
+    const styleMeta = {
       geometryTypes: {
         isPointsOnly: isOnlySingleFeatureType(
           VECTOR_SHAPE_TYPES.POINT,
@@ -290,23 +293,24 @@ export class VectorStyle extends AbstractStyle {
           hasFeatureType
         ),
       },
+      fieldMeta: {},
     };
 
     const dynamicProperties = this.getDynamicPropertiesArray();
     if (dynamicProperties.length === 0 || features.length === 0) {
       // no additional meta data to pull from source data request.
-      return featuresMeta;
+      return styleMeta;
     }
 
     dynamicProperties.forEach(dynamicProperty => {
-      const styleMeta = dynamicProperty.pluckStyleMetaFromFeatures(features);
-      if (styleMeta) {
+      const fieldMeta = dynamicProperty.pluckStyleMetaFromFeatures(features);
+      if (fieldMeta) {
         const name = dynamicProperty.getField().getName();
-        featuresMeta[name] = styleMeta;
+        styleMeta.fieldMeta[name] = fieldMeta;
       }
     });
 
-    return featuresMeta;
+    return styleMeta;
   }
 
   getSourceFieldNames() {
@@ -335,15 +339,15 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getIsPointsOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isPointsOnly', false);
+    return this._styleMeta.isPointsOnly();
   };
 
   _getIsLinesOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isLinesOnly', false);
+    return this._styleMeta.isLinesOnly();
   };
 
   _getIsPolygonsOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isPolygonsOnly', false);
+    return this._styleMeta.isPolygonsOnly();
   };
 
   _getDynamicPropertyByFieldName(fieldName) {
@@ -354,7 +358,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getFieldMeta = fieldName => {
-    const fieldMetaFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
+    const fieldMetaFromLocalFeatures = this._styleMeta.getFieldMetaDescriptor(fieldName);
 
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
@@ -416,10 +420,6 @@ export class VectorStyle extends AbstractStyle {
 
     const formatters = formattersDataRequest.getData();
     return formatters[fieldName];
-  };
-
-  _getStyleMeta = () => {
-    return _.get(this._descriptor, '__styleMeta', {});
   };
 
   _getSymbolId() {
