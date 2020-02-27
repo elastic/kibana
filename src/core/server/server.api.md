@@ -1173,6 +1173,11 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// @public
+export interface MetricsServiceSetup {
+    getOpsMetrics$: () => Observable<OpsMetrics>;
+}
+
 // @public (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
@@ -1222,6 +1227,63 @@ export interface OnPreResponseInfo {
 // @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+}
+
+// @public
+export interface OpsMetrics {
+    concurrent_connections: OpsServerMetrics['concurrent_connections'];
+    os: OpsOsMetrics;
+    process: OpsProcessMetrics;
+    requests: OpsServerMetrics['requests'];
+    response_times: OpsServerMetrics['response_times'];
+}
+
+// @public
+export interface OpsOsMetrics {
+    distro?: string;
+    distroRelease?: string;
+    load: {
+        '1m': number;
+        '5m': number;
+        '15m': number;
+    };
+    memory: {
+        total_in_bytes: number;
+        free_in_bytes: number;
+        used_in_bytes: number;
+    };
+    platform: string;
+    platformRelease: string;
+    uptime_in_millis: number;
+}
+
+// @public
+export interface OpsProcessMetrics {
+    event_loop_delay: number;
+    memory: {
+        heap: {
+            total_in_bytes: number;
+            used_in_bytes: number;
+            size_limit: number;
+        };
+        resident_set_size_in_bytes: number;
+    };
+    pid: number;
+    uptime_in_millis: number;
+}
+
+// @public
+export interface OpsServerMetrics {
+    concurrent_connections: number;
+    requests: {
+        disconnects: number;
+        total: number;
+        statusCodes: Record<number, number>;
+    };
+    response_times: {
+        avg_in_millis: number;
+        max_in_millis: number;
+    };
 }
 
 // @public (undocumented)

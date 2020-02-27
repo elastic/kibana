@@ -29,13 +29,19 @@ export interface MetricsCollector<T> {
 export interface OpsProcessMetrics {
   /** process memory usage */
   memory: {
+    /** heap memory usage */
     heap: {
+      /** total heap available */
       total_in_bytes: number;
+      /** used heap */
       used_in_bytes: number;
+      /** v8 heap size limit */
       size_limit: number;
     };
+    /** node rss */
     resident_set_size_in_bytes: number;
   };
+  /** node event loop delay */
   event_loop_delay: number;
   /** pid of the kibana process */
   pid: number;
@@ -85,13 +91,18 @@ export interface OpsOsMetrics {
 export interface OpsServerMetrics {
   /** server response time stats */
   response_times: {
+    /** average response time */
     avg_in_millis: number;
+    /** maximum response time */
     max_in_millis: number;
   };
   /** server requests stats */
   requests: {
+    /** number of disconnected requests since startup */
     disconnects: number;
+    /** total number of requests handled since startup */
     total: number;
+    /** number of request handled per response status code */
     statusCodes: Record<number, number>;
   };
   /** number of current concurrent connections to the server */

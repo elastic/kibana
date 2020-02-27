@@ -31,6 +31,7 @@ interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
 }
 
+/** @internal */
 export class MetricsService
   implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
   private readonly logger: Logger;

@@ -20,7 +20,24 @@
 import { Observable } from 'rxjs';
 import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
+/**
+ * APIs to retrieves metrics gathered and exposed by the core platform.
+ *
+ * @public
+ */
 export interface MetricsServiceSetup {
+  /**
+   * Retrieve an observable emitting the {@link OpsMetrics} gathered.
+   * The observable will emit a new value based on a fixed interval of time, which is based
+   * on the `opts.interval` configuration property
+   *
+   * @example
+   * ```ts
+   * core.metrics.getOpsMetrics$().subscribe(metrics => {
+   *   // do something with the metrics
+   * })
+   * ```
+   */
   getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -30,7 +47,8 @@ export type InternalMetricsServiceSetup = MetricsServiceSetup;
 export type InternalMetricsServiceStart = MetricsServiceStart;
 
 /**
- * TODO documentation
+ * Regroups metrics gathered by all the collectors.
+ * This contains metrics about the os/runtime, the kibana process and the http server.
  *
  * @public
  */
