@@ -16,6 +16,7 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
@@ -95,6 +96,17 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
                 <FormattedMessage
                   defaultMessage="Edit connector"
                   id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutTitle"
+                />
+                &emsp;
+                <EuiBetaBadge
+                  label="Beta"
+                  tooltipContent={i18n.translate(
+                    'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
+                    {
+                      defaultMessage:
+                        'This module is not GA. Please help us by reporting any bugs.',
+                    }
+                  )}
                 />
               </h3>
             </EuiTitle>
