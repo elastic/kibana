@@ -141,7 +141,7 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
+                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
                   {
                     defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
                   }
