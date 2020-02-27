@@ -10,9 +10,10 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-import serviceNowLogo from '../../../../../lib/connectors/logos/servicenow.svg';
+import { connectors as connectorsDefinition } from '../../../../lib/connectors/config';
 
 const ICON_SIZE = 'm';
+const serviceNowDefinition = connectorsDefinition.get('.servicenow')!;
 
 const EuiIconExtended = styled(EuiIcon)`
   margin-right: 13px;
@@ -33,7 +34,7 @@ const connectors: Array<EuiSuperSelectOption<string>> = [
     value: 'servicenow-connector',
     inputDisplay: (
       <>
-        <EuiIconExtended type={serviceNowLogo} size={ICON_SIZE} />
+        <EuiIconExtended type={serviceNowDefinition.logo} size={ICON_SIZE} />
         <span>{'My ServiceNow connector'}</span>
       </>
     ),
