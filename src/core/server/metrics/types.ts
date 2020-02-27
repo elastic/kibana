@@ -28,8 +28,8 @@ import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors'
 export interface MetricsServiceSetup {
   /**
    * Retrieve an observable emitting the {@link OpsMetrics} gathered.
-   * The observable will emit a new value based on a fixed interval of time, which is based
-   * on the `opts.interval` configuration property
+   * The observable will emit an initial value during core's `start` phase, and a new value every fixed interval of time,
+   * based on the `opts.interval` configuration property.
    *
    * @example
    * ```ts
