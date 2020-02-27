@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+export const PLUGIN_ID = 'stateContainersExampleWithDataServices';
+export const PLUGIN_NAME = 'State containers example - with data services';

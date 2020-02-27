@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+import { PluginInitializerContext } from '../../../src/core/server';
+import { StateDemoServerPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new StateDemoServerPlugin(initializerContext);
+}
+
+export { StateDemoServerPlugin as Plugin };
+export * from '../common';

@@ -17,6 +17,20 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+import { IRouter } from '../../../../src/core/server';
+
+export function defineRoutes(router: IRouter) {
+  router.get(
+    {
+      path: '/api/state_demo/example',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return response.ok({
+        body: {
+          time: new Date().toISOString(),
+        },
+      });
+    }
+  );
+}
