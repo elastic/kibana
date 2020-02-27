@@ -44,7 +44,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     },
     cancel: id => {
       caller('transport.request', {
-        path: `/_async_search/${id}`,
+        path: `_async_search/${id}`,
         method: 'DELETE',
       });
     },

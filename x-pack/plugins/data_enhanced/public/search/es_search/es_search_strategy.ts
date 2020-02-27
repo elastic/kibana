@@ -21,6 +21,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   return {
     search: (request, options) => {
       const params = {
+        waitForCompletion: '1s',
         ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
         ...request.params,
       };
