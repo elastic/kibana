@@ -20,7 +20,7 @@ import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 import { convertToCamelCase, convertAllCasesToCamel } from './utils';
 
-export const getCase = async (caseId: string, includeComments: boolean): Promise<Case> => {
+export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'GET',
     asResponse: true,

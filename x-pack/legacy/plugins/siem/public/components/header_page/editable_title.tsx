@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, ChangeEvent } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -41,26 +41,30 @@ interface Props {
 
 const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
   const [editMode, setEditMode] = useState(false);
-  const [changedTitle, onTitleChange] = useState(title);
+  const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
 
   const onCancel = useCallback(() => setEditMode(false), []);
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
 
-  const onClickSubmit = useCallback(
-    (newTitle: string): void => {
-      if (newTitle !== title) {
-        onSubmit(newTitle);
-      }
-      setEditMode(false);
+  const onClickSubmit = useCallback((): void => {
+    if (changedTitle !== title) {
+      onSubmit(changedTitle);
+    }
+    setEditMode(false);
+  }, [changedTitle, title]);
+
+  const handleOnChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onTitleChange(e.target.value);
     },
-    [changedTitle, title]
+    [onTitleChange]
   );
 
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFieldText
-          onChange={e => onTitleChange(e.target.value)}
+          onChange={handleOnChange}
           value={`${changedTitle}`}
           data-test-subj="editable-title-input-field"
         />
@@ -72,7 +76,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
             data-test-subj="editable-title-submit-btn"
             fill
             iconType="save"
-            onClick={() => onClickSubmit(changedTitle as string)}
+            onClick={onClickSubmit}
             size="s"
           >
             {i18n.SAVE}

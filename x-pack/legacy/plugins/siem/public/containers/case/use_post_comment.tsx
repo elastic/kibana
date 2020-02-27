@@ -81,8 +81,7 @@ export const usePostComment = (
     const postComment = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const dataWithoutIsNew = state.data;
-        delete dataWithoutIsNew.isNew;
+        const { isNew, ...dataWithoutIsNew } = state.data;
         const response = await createComment(dataWithoutIsNew, state.caseId);
         dispatch({ type: FETCH_SUCCESS, payload: response });
       } catch (error) {

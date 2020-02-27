@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
@@ -74,44 +74,47 @@ export const MarkdownEditor = React.memo<{
   useEffect(() => {
     onChange(content);
   }, [content]);
-  const tabs = [
-    {
-      id: fieldName,
-      name: i18n.MARKDOWN,
-      content: formHook ? (
-        <CommonUseField
-          path={fieldName}
-          onChange={e => setContent(e as string)}
-          componentProps={{
-            idAria: `case${fieldName}`,
-            'data-test-subj': `case${fieldName}`,
-            spellcheck: false,
-            euiFieldProps: { placeholder: placeholder ? placeholder : '' },
-          }}
-        />
-      ) : (
-        <TextArea
-          onChange={e => {
-            setContent(e.target.value);
-          }}
-          aria-label={`case${fieldName}`}
-          fullWidth={true}
-          placeholder={placeholder ? placeholder : ''}
-          spellCheck={false}
-          value={content}
-        />
-      ),
-    },
-    {
-      id: 'preview',
-      name: i18n.PREVIEW,
-      content: (
-        <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
-          <Markdown raw={content} />
-        </MarkdownContainer>
-      ),
-    },
-  ];
+  const tabs = useMemo(
+    () => [
+      {
+        id: fieldName,
+        name: i18n.MARKDOWN,
+        content: formHook ? (
+          <CommonUseField
+            path={fieldName}
+            onChange={e => setContent(e as string)}
+            componentProps={{
+              idAria: `case${fieldName}`,
+              'data-test-subj': `case${fieldName}`,
+              spellcheck: false,
+              euiFieldProps: { placeholder: placeholder ?? '' },
+            }}
+          />
+        ) : (
+          <TextArea
+            onChange={e => {
+              setContent(e.target.value);
+            }}
+            aria-label={`case${fieldName}`}
+            fullWidth={true}
+            placeholder={placeholder ?? ''}
+            spellCheck={false}
+            value={content}
+          />
+        ),
+      },
+      {
+        id: 'preview',
+        name: i18n.PREVIEW,
+        content: (
+          <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
+            <Markdown raw={content} />
+          </MarkdownContainer>
+        ),
+      },
+    ],
+    [content, fieldName, placeholder]
+  );
   return (
     <Container>
       <Tabs
