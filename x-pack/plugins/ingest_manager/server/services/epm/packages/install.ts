@@ -6,43 +6,51 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AssetReference, Installation, KibanaAssetType } from '../../../types';
+import { AssetReference, Installation, KibanaAssetType, CallESAsCurrentUser } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation } from './index';
+import { installTemplates } from '../elasticsearch/template/install';
+import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
+  callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const registryPackageInfo = await Registry.fetchInfo(pkgkey);
 
-  const installIndexPatternsPromise = installIndexPatterns(savedObjectsClient, pkgkey);
-
-  const installAssetsPromise = installAssets({
+  const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgkey,
   });
+  const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
+  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
+  // index patterns are not associated with a particular so we do not save them in the package saved object state
+  await installIndexPatterns(savedObjectsClient, pkgkey);
 
-  const res = await Promise.all([installIndexPatternsPromise, installAssetsPromise]);
-  // save the response of assets that were installed and return
-  const toSave = res[1];
+  const res = await Promise.all([
+    installKibanaAssetsPromise,
+    installPipelinePromises,
+    installTemplatePromises,
+  ]);
 
+  const toSave = res.flat();
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     toSave,
   });
-
   return toSave;
 }
 
 // the function which how to install each of the various asset types
 // TODO: make it an exhaustive list
 // e.g. switch statement with cases for each enum key returning `never` for default case
-export async function installAssets(options: {
+export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
 }) {
@@ -74,7 +82,6 @@ export async function saveInstallationReferences(options: {
   };
 
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
-
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     { installed: toInstall },

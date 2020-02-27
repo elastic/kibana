@@ -25,7 +25,7 @@ export async function removeInstallation(options: {
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgkey);
 
   // recreate or delete index patterns when a package is uninstalled
-  const indexPatternPromise = installIndexPatterns(savedObjectsClient);
+  await installIndexPatterns(savedObjectsClient);
 
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
@@ -38,7 +38,7 @@ export async function removeInstallation(options: {
       deleteTemplate(callCluster, id);
     }
   });
-  await Promise.all([...deletePromises, indexPatternPromise]);
+  await Promise.all([...deletePromises]);
 
   // successful delete's in SO client return {}. return something more useful
   return installedObjects;

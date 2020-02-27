@@ -127,9 +127,11 @@ export const installPackageHandler: RequestHandler<TypeOf<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
+      callCluster,
     });
     const body: InstallPackageResponse = {
       response: res,
