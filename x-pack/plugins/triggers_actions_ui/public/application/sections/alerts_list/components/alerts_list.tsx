@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -389,7 +390,10 @@ export const AlertsList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
       {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
+        !alertTypesState.isLoading &&
+        !alertsState.isLoading &&
         emptyPrompt}
+      {(alertTypesState.isLoading || alertsState.isLoading) && <EuiLoadingSpinner size="xl" />}
       <AlertsContextProvider
         value={{
           addFlyoutVisible: alertFlyoutVisible,
