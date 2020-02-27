@@ -86,6 +86,7 @@ export class ReportInfoButton extends Component<Props, State> {
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const priority = info.priority ? info.priority.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
+    const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : NA;
 
     const jobInfoParts: JobInfoMap = {
       datetimes: [
@@ -173,6 +174,10 @@ export class ReportInfoButton extends Component<Props, State> {
           description: USES_HEADLESS_JOB_TYPES.includes(jobType)
             ? info.browser_type || UNKNOWN
             : NA,
+        },
+        {
+          title: 'Errors',
+          description: warnings,
         },
       ],
     };
