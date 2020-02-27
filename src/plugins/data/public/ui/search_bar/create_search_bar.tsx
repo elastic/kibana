@@ -125,7 +125,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       query: '',
       language: core.uiSettings.get('search:queryLanguage'),
     };
-    const [query, setQuery] = useState<Query>(defaultQuery);
+    const [query, setQuery] = useState<Query>(props.query || defaultQuery);
 
     useEffect(() => {
       if (props.query !== queryRef.current) {
