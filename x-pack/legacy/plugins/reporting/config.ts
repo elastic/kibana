@@ -34,13 +34,13 @@ export async function config(Joi: any) {
       timeouts: Joi.object({
         openUrl: Joi.number()
           .integer()
-          .default(25000),
+          .default(30000),
         waitForElements: Joi.number()
           .integer()
-          .default(18000),
+          .default(30000),
         renderComplete: Joi.number()
           .integer()
-          .default(18000),
+          .default(30000),
       }).default(),
       networkPolicy: Joi.object({
         enabled: Joi.boolean().default(true),
