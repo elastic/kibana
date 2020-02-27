@@ -24,7 +24,7 @@ import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { mount } from 'enzyme';
 import { PercentilesEditor } from './percentiles';
 
-describe('FieldParamEditor component', () => {
+describe('PercentilesEditor component', () => {
   let setValue: jest.Mock;
   let setValidity: jest.Mock;
   let setTouched: jest.Mock;
