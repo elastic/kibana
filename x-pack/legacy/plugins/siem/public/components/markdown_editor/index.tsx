@@ -131,7 +131,7 @@ export const MarkdownEditor = React.memo<{
             {i18n.MARKDOWN_SYNTAX_HELP}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{footerContentRight && footerContentRight}</EuiFlexItem>
+        {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
       </Footer>
     </Container>
   );
