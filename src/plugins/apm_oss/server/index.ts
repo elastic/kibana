@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../core/server';
-import { APMOSSPlugin } from './plugin';
+import { APMOSSPlugin, APMOSSPluginSetup } from './plugin';
 
 export const config = {
   schema: schema.object({
@@ -38,4 +39,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
-export { APMOSSPlugin as Plugin };
+export { APMOSSPlugin as Plugin, APMOSSPluginSetup };
