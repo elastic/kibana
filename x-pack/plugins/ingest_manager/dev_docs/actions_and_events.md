@@ -5,7 +5,7 @@ Agent is using `actions` and `events` to comunicate with fleet during checkin.
 ## Actions
 
 Action are returned to the agent during the checkin [see](./api/agents_checkin)
-Agent should aknowledge actions they received using `POST /agents/{agentId}/acks` API.
+Agent should aknowledge actions they received using `POST /api/ingest_manager/fleet/agents/{agentId}/acks` API.
 
 ### POLICY_CHANGE
 
