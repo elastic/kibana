@@ -7,7 +7,7 @@
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
 import { SlmPolicy } from '../../common/types';
-import { DEFAULT_POLICY_SCHEDULE } from '../../public/app/constants';
+import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const dateNow = new Date();
 const randomModifiedDateMillis = new Date().setDate(dateNow.getDate() - 1);

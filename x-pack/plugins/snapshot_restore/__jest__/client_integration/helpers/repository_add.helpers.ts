@@ -7,7 +7,7 @@
 
 import { registerTestBed, TestBed } from '../../../../../test_utils';
 import { RepositoryType } from '../../../common/types';
-import { RepositoryAdd } from '../../../public/app/sections/repository_add';
+import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithProviders } from './providers';
 
 const initTestBed = registerTestBed<RepositoryAddTestSubjects>(WithProviders(RepositoryAdd), {

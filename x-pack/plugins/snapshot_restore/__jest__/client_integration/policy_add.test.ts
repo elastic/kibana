@@ -9,7 +9,7 @@ import * as fixtures from '../../test/fixtures';
 
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
-import { DEFAULT_POLICY_SCHEDULE } from '../../public/app/constants';
+import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const { setup } = pageHelpers.policyAdd;
 

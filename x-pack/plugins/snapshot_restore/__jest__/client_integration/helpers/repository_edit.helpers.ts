@@ -6,7 +6,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { RepositoryEdit } from '../../../public/app/sections/repository_edit';
+import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithProviders } from './providers';
 import { REPOSITORY_NAME } from './constant';
 

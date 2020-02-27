@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { INVALID_NAME_CHARS } from '../../public/app/services/validation/validate_repository';
+import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';

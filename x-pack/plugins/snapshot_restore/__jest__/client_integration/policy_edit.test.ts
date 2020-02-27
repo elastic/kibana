@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { PolicyForm } from '../../public/app/components/policy_form';
+import { PolicyForm } from '../../public/application/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 

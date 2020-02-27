@@ -6,7 +6,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { PolicyAdd } from '../../../public/app/sections/policy_add';
+import { PolicyAdd } from '../../../public/application/sections/policy_add';
 import { WithProviders } from './providers';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 

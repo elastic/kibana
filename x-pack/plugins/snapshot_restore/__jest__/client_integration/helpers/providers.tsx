@@ -7,7 +7,7 @@
 
 import React, { ComponentClass, FunctionComponent } from 'react';
 import { createShim } from '../../../public/shim';
-import { setAppDependencies } from '../../../public/app/index';
+import { setAppDependencies } from '../../../public/application/index';
 
 const { core, plugins } = createShim();
 const appDependencies = {

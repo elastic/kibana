@@ -7,15 +7,15 @@ import { unmountComponentAtNode } from 'react-dom';
 
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
-import { AppCore, AppPlugins } from './app/types';
+import { AppCore, AppPlugins } from './application/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
-import { breadcrumbService, docTitleService } from './app/services/navigation';
-import { documentationLinksService } from './app/services/documentation';
-import { httpService } from './app/services/http';
-import { textService } from './app/services/text';
-import { uiMetricService } from './app/services/ui_metric';
+import { breadcrumbService, docTitleService } from './application/services/navigation';
+import { documentationLinksService } from './application/services/documentation';
+import { httpService } from './application/services/http';
+import { textService } from './application/services/text';
+import { uiMetricService } from './application/services/ui_metric';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 

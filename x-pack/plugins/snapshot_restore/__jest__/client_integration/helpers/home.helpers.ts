@@ -13,8 +13,8 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../test_utils';
-import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
-import { BASE_PATH } from '../../../public/app/constants';
+import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
+import { BASE_PATH } from '../../../public/application/constants';
 import { WithProviders } from './providers';
 
 const testBedConfig: TestBedConfig = {

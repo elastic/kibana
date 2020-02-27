@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RestoreSettings } from '../../../../common/types';
-import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../../app/constants';
+import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../constants';
 import { textService } from '../text';
 
 export interface RestoreValidation {
