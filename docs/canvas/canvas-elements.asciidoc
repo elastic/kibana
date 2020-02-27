@@ -2,34 +2,38 @@
 [[element-intro]]
 == Design your workpad
 
-With elements, you can combine images, text, charts, and more to tell a story about your data. You can create your own elements and connect them to your data sources, add saved objects that you created outside of Canvas, and add your own images.
+Create a story about your data by adding elements to your workpad that include images, text, charts, and more.
 
 [float]
-[[add-canvas-element]]
-=== Create elements
+[[add-canvas-elements]]
+=== Add elements
 
-Create the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data. By default, most of the elements you create use demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element.
+You can create your own elements and connect them to your data sources, add saved objects that you created outside of Canvas, and add your own images.
 
-To create an element, click *Add element*, then select the element you want to use.
+[float]
+[[create-canvas-element]]
+==== Create an element
 
+. Click *Add element*, then select the element you want to use.
++
 [role="screenshot"]
 image::images/canvas-element-select.gif[Canvas elements]
 
-Play around with the default settings and see what the element can do. When you're finished, connect the element to your data by selecting *Data*, then clicking *Change your data source*. Canvas supports the following data sources:
+. To familiarize yourself with the element, use the preconfigured data demo data.
++
+By default, most of the elements you create use demo data until you change the data source. The demo data includes a small data set you can use to experiment with your element.
 
-* *{es} SQL* - Access your data in {es} using SQL syntax. For information about SQL syntax, refer to {ref}/sql-spec.html[SQL language].
+. To connect the element to your data, select *Data*, then select one of the following data sources:
 
-* *{es} raw data* - Access your raw data in {es} without the use of aggregations. Use {es} raw data when you have low volume datasets, or to plot exact, non-aggregated values.
+* *{es} SQL* &mdash; Access your data in {es} using SQL syntax. For information about SQL syntax, refer to {ref}/sql-spec.html[SQL language].
 
-* *Timelion* - Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
+* *{es} raw data* &mdash; Access your raw data in {es} without the use of aggregations. Use {es} raw data when you have low volume datasets, or to plot exact, non-aggregated values.
 
-When you're ready to save your element, select the element, then click the *Save as new element* icon. To save a group of elements, press and hold Shift, then select the elements you want to save.
+* *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
 [float]
-[[canvas-embed-objects]]
-=== Add saved objects
-
-Add objects that you created outside of Canvas to your workpad. For example, add an Elastic Map to showcase your geospatial data.
+[[canvas-add-object]]
+==== Add a saved object
 
 . Click *Embed object*.
 
@@ -38,28 +42,28 @@ Add objects that you created outside of Canvas to your workpad. For example, add
 [role="screenshot"]
 image::images/canvas-map-embed.gif[]
 
+. To use the customization options, click the panel menu, then select one of the following options:
+
+* *Edit map* &mdash; Opens <<maps,Maps>> so that you can edit the original map.
+
+* *Customize panel* &mdash; Specifies the object title options.
+
+* *Inspect* &mdash; Allows you to drill down into the element data.
+
+* *Customize time range* &mdash; Exposes a time filter dedicated to the map.
+
 [float]
-[[canvas-time-range]]
-==== Customize time ranges
-
-Configure the maps on your workpad for a specific time range.
-
-From the panel menu, select *Customize time range* to expose a time filter dedicated to the map.
-
-[role="screenshot"]
-image::images/canvas_map-time-filter.gif[]
-
-[float]
-[[canvas-manage-assets]]
-=== Add your own images
-
-Add a personal touch to your workpad by using your company icons, logos, graphics, and more.
+[[canvas-add-image]]
+==== Add your own image
 
 . Click *Manage assets*.
 
 . On the *Manage workpad assets* window, drag and drop your images.
 
 . To add the image to the workpad, click the *Create image element* icon.
+
+//[role="screenshot"]
+//image::images/canvas-add-asset.gif[]
 
 [float]
 [[move-canvas-elements]]
@@ -84,32 +88,8 @@ Move, resize, customize, and delete elements to meet your design needs.
 * To delete, select the element. Click the *Element options* icon, then select *Delete*.
 
 [float]
-[[configure-auto-refresh-interval]]
-=== Change the auto-refresh interval
-
-Increase or decrease how often the data refreshes on your workpad.
-
-. In the top left corner, click the *Control settings* icon.
-
-. Under *Change auto-refresh interval*, select the interval you want to use.
-+
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
-
-TIP: To manually refresh the data, click the *Refresh data* icon.
-
-[float]
-[[zoom-in-out]]
-=== Use the zoom options
-
-In the upper left corner, click the *Zoom controls* icon, then select one of the options.
-
-[role="screenshot"]
-image::images/canvas-zoom-controls.png[Zoom controls]
-
-[float]
 [[data-display]]
-=== Format the elements
+=== Format elements
 
 Each element has its own display options to fit your design needs.
 
@@ -147,14 +127,11 @@ text.align: center;
 . Click *Apply stylesheet*.
 
 [float]
-[[add-more-pages]]
-=== Add pages
+[[save-elements]]
+=== Save elements
 
-Add more pages when you've run out of room, or if you'd like to separate your ideas across several pages.
+To use the elements across all workpads, save the elements.
 
-. Click *Page 1*, then click *+*.
+When you're ready to save your element, select the element, then click the *Save as new element* icon. To save a group of elements, press and hold Shift, then select the elements you want to save.
 
-. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown.
-+
-[role="screenshot"]
-image::images/canvas-add-pages.gif[Add pages]
+To access your saved elements, click *Add element*, then select *My elements*.

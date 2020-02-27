@@ -91,3 +91,40 @@ background-color: #3990e6;
 --------------------------------------------------
 
 . Click *Apply stylesheet*.
+
+[float]
+[[configure-auto-refresh-interval]]
+== Change the auto-refresh interval
+
+Increase or decrease how often the data refreshes on your workpad.
+
+. In the top left corner, click the *Control settings* icon.
+
+. Under *Change auto-refresh interval*, select the interval you want to use.
++
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
+
+TIP: To manually refresh the data, click the *Refresh data* icon.
+
+[float]
+[[zoom-in-out]]
+=== Use the zoom options
+
+In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+
+[role="screenshot"]
+image::images/canvas-zoom-controls.png[Zoom controls]
+
+[float]
+[[add-more-pages]]
+=== Add pages
+
+Add more pages when you've run out of room, or if you'd like to separate your ideas across several pages.
+
+. Click *Page 1*, then click *+*.
+
+. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown.
++
+[role="screenshot"]
+image::images/canvas-add-pages.gif[Add pages]
