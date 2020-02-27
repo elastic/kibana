@@ -70,13 +70,16 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
 
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
-      loadTestFile(require.resolve('./_region_map'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
+      if (!isOss) {
+        loadTestFile(require.resolve('./_tile_map'));
+        loadTestFile(require.resolve('./_region_map'));
+      }
     });
 
     describe('', function() {
@@ -90,9 +93,6 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       loadTestFile(require.resolve('./_tsvb_markdown'));
       loadTestFile(require.resolve('./_tsvb_table'));
       loadTestFile(require.resolve('./_vega_chart'));
-      if (!isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-      }
     });
   });
 }

@@ -29,7 +29,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
@@ -37,16 +36,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
-      await security.testUser.setRoles([
-        // 'superuser',
-        'kibana_user',
-        'kibana_sample_admin',
-        'machine_learning_user',
-      ]);
+      await security.testUser.setRoles(['kibana_user', 'kibana_sample_admin']);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await kibanaServer.uiSettings.replace({
-        // pageNavigation: 'individual',
-      });
     });
 
     after(async () => {
