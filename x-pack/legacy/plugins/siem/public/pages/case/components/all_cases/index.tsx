@@ -13,6 +13,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
@@ -31,7 +32,7 @@ import {
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
 import { getCreateCaseUrl } from '../../../../components/link_to';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
@@ -44,9 +45,10 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const [
-    { data, isLoading, queryParams, filterOptions },
-    setQueryParams,
+    { data, isLoading, queryParams, filterOptions, selectedCases },
     setFilters,
+    setQueryParams,
+    setSelectedCases,
   ] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
@@ -92,10 +94,13 @@ export const AllCases = React.memo(() => {
   const sorting: EuiTableSortingType<Case> = {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
-
-  const selection: EuiTableSelectionType<Case> = {
-    onSelectionChange: (selectedItems) => console.log('on selection change', selectedItems)
-  }
+  const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
+    () => ({
+      selectable: (item: Case) => true,
+      onSelectionChange: setSelectedCases,
+    }),
+    [selectedCases]
+  );
 
   return (
     <Panel loading={isLoading}>
@@ -121,7 +126,7 @@ export const AllCases = React.memo(() => {
           </UtilityBar>
           <EuiBasicTable
             columns={memoizedGetCasesColumns}
-            isSelectable={true}
+            isSelectable
             itemId="id"
             items={data.cases}
             noItemsMessage={
@@ -138,7 +143,7 @@ export const AllCases = React.memo(() => {
             }
             onChange={tableOnChangeCallback}
             pagination={memoizedPagination}
-            selection={selection}
+            selection={euiBasicTableSelectionProps}
             sorting={sorting}
           />
         </>

@@ -14,8 +14,9 @@ import {
   FETCH_SUCCESS,
   UPDATE_QUERY_PARAMS,
   UPDATE_FILTER_OPTIONS,
+  UPDATE_TABLE_SELECTIONS,
 } from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
+import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
 import { getTypedPayload } from './utils';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
@@ -28,11 +29,12 @@ export interface UseGetCasesState {
   isError: boolean;
   queryParams: QueryParams;
   filterOptions: FilterOptions;
+  selectedCases: Case[];
 }
 
 export interface Action {
   type: string;
-  payload?: AllCases | Partial<QueryParams> | FilterOptions;
+  payload?: AllCases | Partial<QueryParams> | FilterOptions | Case[];
 }
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
   switch (action.type) {
@@ -68,6 +70,11 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         ...state,
         filterOptions: getTypedPayload<FilterOptions>(action.payload),
       };
+    case UPDATE_TABLE_SELECTIONS:
+      return {
+        ...state,
+        selectedCases: getTypedPayload<Case[]>(action.payload),
+      };
     default:
       throw new Error();
   }
@@ -81,8 +88,9 @@ const initialData: AllCases = {
 };
 export const useGetCases = (): [
   UseGetCasesState,
+  Dispatch<SetStateAction<FilterOptions>>,
   Dispatch<SetStateAction<Partial<QueryParams>>>,
-  Dispatch<SetStateAction<FilterOptions>>
+  Dispatch<SetStateAction<Case[]>>
 ] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
@@ -98,10 +106,16 @@ export const useGetCases = (): [
       sortField: SortFieldCase.createdAt,
       sortOrder: 'desc',
     },
+    selectedCases: [],
   });
   const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
   const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
+  const [selectedCases, setSelectedCases] = useState<Case[]>(state.selectedCases);
   const [, dispatchToaster] = useStateToaster();
+
+  useEffect(() => {
+    dispatch({ type: UPDATE_TABLE_SELECTIONS, payload: selectedCases });
+  }, [selectedCases]);
 
   useEffect(() => {
     if (!isEqual(queryParams, state.queryParams)) {
@@ -142,5 +156,5 @@ export const useGetCases = (): [
       didCancel = true;
     };
   }, [state.queryParams, state.filterOptions]);
-  return [state, setQueryParams, setFilters];
+  return [state, setFilters, setQueryParams, setSelectedCases];
 };
