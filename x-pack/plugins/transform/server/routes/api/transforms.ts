@@ -21,7 +21,8 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError } from './error_utils';
-import { transformAuditMessagesProvider } from './transform_audit_messages';
+import { schemaTransformId, SchemaTransformId } from './schema';
+import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -35,17 +36,8 @@ interface StopOptions {
   waitForCompletion?: boolean;
 }
 
-interface SchemaTransformId {
-  transformId: string;
-}
-
-const schemaTransformId = {
-  params: schema.object({
-    transformId: schema.string(),
-  }),
-};
-
-export function registerTransformsRoutes({ router, license }: RouteDependencies) {
+export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
+  const { router, license } = routeDependencies;
   router.get(
     { path: addBasePath('transforms'), validate: {} },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -118,10 +110,7 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
       }
     })
   );
-  router.get(
-    { path: addBasePath('transforms/{transformId}/messages'), validate: schemaTransformId },
-    license.guardApiRoute(getTransformMessagesHandler)
-  );
+  registerTransformsAuditMessagesRoutes(routeDependencies);
   router.put(
     {
       path: addBasePath('transforms/{transformId}'),
@@ -369,16 +358,3 @@ async function stopTransforms(
   }
   return results;
 }
-
-const getTransformMessagesHandler: RequestHandler = async (ctx, req, res) => {
-  const { getTransformAuditMessages } = transformAuditMessagesProvider(
-    ctx.transform!.dataClient.callAsCurrentUser
-  );
-  const { transformId } = req.params as SchemaTransformId;
-
-  try {
-    return res.ok({ body: await getTransformAuditMessages(transformId) });
-  } catch (e) {
-    return res.customError(wrapError(wrapEsError(e)));
-  }
-};
