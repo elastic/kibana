@@ -51,7 +51,16 @@ classDiagram
     enabled
     package
     output_id
-    inputs
+    // Inputs
+    inputs.type
+    inputs.enabled
+    inputs.processors
+    // Inputs streams
+    inputs.streams.id
+    inputs.streams.enabled
+    inputs.streams.dataset
+    inputs.streams.processors
+    inputs.streams.config
 	}
 
   class enrollment_api_keys {
