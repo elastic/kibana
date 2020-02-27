@@ -38,6 +38,16 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
+const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'server.xsrf.whitelist')) {
+    log(
+      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist].' +
+        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
+    );
+  }
+  return settings;
+};
+
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
@@ -177,4 +187,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
+  xsrfDeprecation,
 ];
