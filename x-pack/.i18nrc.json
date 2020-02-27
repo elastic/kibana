@@ -16,7 +16,7 @@
     "xpack.fileUpload": "legacy/plugins/file_upload",
     "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
     "xpack.grokDebugger": "legacy/plugins/grokdebugger",
-    "xpack.idxMgmt": "legacy/plugins/index_management",
+    "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",
     "xpack.ingestManager": "plugins/ingest_manager",
@@ -40,7 +40,7 @@
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.transform": "legacy/plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
-    "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
+    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
     "xpack.watcher": "plugins/watcher"
   },

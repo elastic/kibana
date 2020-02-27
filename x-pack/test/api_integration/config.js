@@ -28,6 +28,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         '--xpack.endpoint.enabled=true',
         '--xpack.ingestManager.enabled=true',
         '--xpack.ingestManager.fleet.enabled=true',
+        '--xpack.endpoint.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
       ],
     },
     esTestCluster: {

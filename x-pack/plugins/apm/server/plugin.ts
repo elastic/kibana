@@ -19,6 +19,7 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { LicensingPluginSetup } from '../../licensing/public';
 
 export interface LegacySetup {
   server: Server;
@@ -44,6 +45,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     plugins: {
       apm_oss: APMOSSPlugin extends Plugin<infer TSetup> ? TSetup : never;
       home: HomeServerPluginSetup;
+      licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
     }
