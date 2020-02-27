@@ -5,6 +5,7 @@
  */
 import { Logger } from 'src/core/server';
 import {
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -42,15 +43,10 @@ export class License {
       const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
 
       const securityFeature = license.getFeature('security');
-      let isSecurityEnabled = false;
-
-      if (
+      const isSecurityEnabled =
         securityFeature !== undefined &&
         securityFeature.isAvailable === true &&
-        securityFeature.isEnabled === true
-      ) {
-        isSecurityEnabled = true;
-      }
+        securityFeature.isEnabled === true;
 
       if (hasRequiredLicense) {
         this.licenseStatus = { isValid: true, isSecurityEnabled };
@@ -67,14 +63,14 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler) {
+  guardApiRoute(handler: RequestHandler<unknown, unknown, any, any>) {
     const license = this;
 
     return function licenseCheck(
       ctx: RequestHandlerContext,
       request: KibanaRequest,
       response: KibanaResponseFactory
-    ) {
+    ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();
 
       if (!licenseStatus.isValid) {

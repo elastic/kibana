@@ -6,7 +6,7 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
-import { AuditMessage } from '../../../common/types/messages';
+import { AuditMessage } from '../../../../../legacy/plugins/transform/common/types/messages';
 
 const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;

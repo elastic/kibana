@@ -15,7 +15,6 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
 export function registerPrivilegesRoute({ router, license, lib }: RouteDependencies) {
-  // xpackMainPlugin = plugins.xpack_main;
   router.get(
     { path: addBasePath('privileges'), validate: {} },
     license.guardApiRoute(async (ctx, req, res) => {

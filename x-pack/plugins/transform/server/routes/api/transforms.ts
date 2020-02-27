@@ -166,7 +166,12 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
     })
   );
   router.post(
-    { path: addBasePath('transforms/_preview'), validate: {} },
+    {
+      path: addBasePath('transforms/_preview'),
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+    },
     license.guardApiRoute(previewTransformHandler)
   );
   router.post(
@@ -178,8 +183,21 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
     license.guardApiRoute(stopTransformsHandler)
   );
   router.post(
-    { path: addBasePath('es_search'), validate: {} },
-    license.guardApiRoute(esSearchHandler)
+    {
+      path: addBasePath('es_search'),
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      try {
+        return res.ok({
+          body: await ctx.transform!.dataClient.callAsCurrentUser('search', req.body),
+        });
+      } catch (e) {
+        return res.customError(wrapError(wrapEsError(e)));
+      }
+    })
   );
 }
 
@@ -232,13 +250,15 @@ async function deleteTransforms(
   return results;
 }
 
-const previewTransformHandler: RequestHandler = async (ctx, req) => {
+const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
   try {
-    return await ctx.transform!.dataClient.callAsCurrentUser('transform.getTransformsPreview', {
-      body: req.body,
+    return res.ok({
+      body: await ctx.transform!.dataClient.callAsCurrentUser('transform.getTransformsPreview', {
+        body: req.body,
+      }),
     });
   } catch (e) {
-    return wrapEsError(e);
+    return res.customError(wrapError(wrapEsError(e)));
   }
 };
 
@@ -329,23 +349,15 @@ async function stopTransforms(
   return results;
 }
 
-const getTransformMessagesHandler: RequestHandler = async (ctx, req) => {
+const getTransformMessagesHandler: RequestHandler = async (ctx, req, res) => {
   const { getTransformAuditMessages } = transformAuditMessagesProvider(
     ctx.transform!.dataClient.callAsCurrentUser
   );
   const { transformId } = req.params as SchemaTransformId;
 
   try {
-    return await getTransformAuditMessages(transformId);
+    return res.ok({ body: await getTransformAuditMessages(transformId) });
   } catch (e) {
-    return wrapEsError(e);
-  }
-};
-
-const esSearchHandler: RequestHandler = async (ctx, req) => {
-  try {
-    return await ctx.transform!.dataClient.callAsCurrentUser('search', req.body as any);
-  } catch (e) {
-    return { error: wrapEsError(e) };
+    return res.customError(wrapError(wrapEsError(e)));
   }
 };
