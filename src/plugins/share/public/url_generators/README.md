@@ -13,7 +13,7 @@ Owners: Kibana App Arch team.
 If you are registering a new generator, don't forget to add a mapping of id to state
 
 ```ts
-declare module '../../url_generators/public' {
+declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [MY_GENERATOR]: MyState;
   }

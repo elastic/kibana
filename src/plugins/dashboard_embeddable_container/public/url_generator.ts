@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import url from 'url';
 import { TimeRange, Filter, Query } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../url_generators/public';
+import { UrlGeneratorsDefinition } from '../../share/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -46,15 +45,7 @@ export const createDirectAccessDashboardLinkGenerator = (
     const startServices = await getStartServices();
     const useHash = state.useHash || startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    // const parsedUrl = url.parse(window.location.href);
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
-
-    // const dashboardAppUrl = url.format({
-    //   protocol: parsedUrl.protocol,
-    //   host: parsedUrl.host,
-    //   pathname: `${appBasePath}`,
-    //   hash,
-    // });
 
     const appStateUrl = setStateToKbnUrl(
       STATE_STORAGE_KEY,

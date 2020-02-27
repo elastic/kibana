@@ -17,8 +17,7 @@
  * under the License.
  */
 import url from 'url';
-import { UrlGeneratorState } from '../../../src/plugins/url_generators/public';
-import { UrlGeneratorsDefinition } from '../../../src/plugins/url_generators/public';
+import { UrlGeneratorState, UrlGeneratorsDefinition } from '../../../src/plugins/share/public';
 
 /**
  * The name of the latest variable can always stay the same so code that

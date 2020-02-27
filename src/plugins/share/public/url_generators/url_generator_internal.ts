@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorsStart } from './plugin';
+import { UrlGeneratorsStart } from './url_generator_service';
 import {
   UrlGeneratorStateMapping,
   UrlGeneratorId,
@@ -33,7 +33,7 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
   ) {
     if (spec.isDeprecated && !spec.migrate) {
       throw new Error(
-        i18n.translate('urlGenerators.error.noMigrationFnProvided', {
+        i18n.translate('share.urlGenerators.error.noMigrationFnProvided', {
           defaultMessage:
             'If the access link generator is marked as deprecated, you must provide a migration function.',
         })
@@ -42,7 +42,7 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
 
     if (!spec.isDeprecated && spec.migrate) {
       throw new Error(
-        i18n.translate('urlGenerators.error.migrationFnGivenNotDeprecated', {
+        i18n.translate('share.urlGenerators.error.migrationFnGivenNotDeprecated', {
           defaultMessage:
             'If you provide a migration function, you must mark this generator as deprecated',
         })
@@ -51,7 +51,7 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
 
     if (!spec.createUrl && !spec.isDeprecated) {
       throw new Error(
-        i18n.translate('urlGenerators.error.noCreateUrlFnProvided', {
+        i18n.translate('share.urlGenerators.error.noCreateUrlFnProvided', {
           defaultMessage:
             'This generator is not marked as deprecated. Please provide a createUrl fn.',
         })
@@ -60,7 +60,7 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
 
     if (spec.createUrl && spec.isDeprecated) {
       throw new Error(
-        i18n.translate('urlGenerators.error.createUrlFnProvided', {
+        i18n.translate('share.urlGenerators.error.createUrlFnProvided', {
           defaultMessage: 'This generator is marked as deprecated. Do not supply a createUrl fn.',
         })
       );
@@ -86,7 +86,7 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
       migrate: async (state: UrlGeneratorStateMapping[Id]['State']) => {
         if (!this.spec.isDeprecated) {
           throw new Error(
-            i18n.translate('urlGenerators.error.migrateCalledNotDeprecated', {
+            i18n.translate('share.urlGenerators.error.migrateCalledNotDeprecated', {
               defaultMessage: 'You cannot call migrate on a non-deprecated generator.',
             })
           );

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';
 import { UrlGeneratorInternal } from './url_generator_internal';
@@ -31,12 +31,12 @@ export interface UrlGeneratorsSetup {
   registerUrlGenerator: <Id extends UrlGeneratorId>(generator: UrlGeneratorsDefinition<Id>) => void;
 }
 
-export class UrlGeneratorsPlugin implements Plugin<UrlGeneratorsSetup, UrlGeneratorsStart> {
+export class UrlGeneratorsService implements Plugin<UrlGeneratorsSetup, UrlGeneratorsStart> {
   // Unfortunate use of any here, but I haven't figured out how to type this any better without
   // getting warnings.
   private urlGenerators: Map<string, UrlGeneratorInternal<any>> = new Map();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup) {
     const setup: UrlGeneratorsSetup = {

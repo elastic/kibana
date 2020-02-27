@@ -32,14 +32,14 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { UrlGeneratorsStart } from '../../../src/plugins/url_generators/public';
+import { UrlGeneratorsService } from '../../../src/plugins/share/public';
 import {
   HELLO_URL_GENERATOR,
   HELLO_URL_GENERATOR_V1,
 } from '../../url_generators_examples/public/url_generator';
 
 interface Props {
-  getLinkGenerator: UrlGeneratorsStart['getUrlGenerator'];
+  getLinkGenerator: UrlGeneratorsService['getUrlGenerator'];
 }
 
 interface MigratedLink {

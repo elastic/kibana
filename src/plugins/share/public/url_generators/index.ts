@@ -17,20 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { UrlGeneratorsPlugin } from './plugin';
+export * from './url_generator_service';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new UrlGeneratorsPlugin(initializerContext);
-}
+export * from './url_generator_definition';
 
-export { UrlGeneratorsSetup, UrlGeneratorsStart } from './plugin';
-
-export {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorStateMapping,
-  UrlGeneratorsDefinition,
-} from './url_generator_definition';
-
-export { UrlGeneratorContract } from './url_generator_contract';
+export * from './url_generator_contract';

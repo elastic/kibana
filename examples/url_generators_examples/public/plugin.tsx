@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { SharePluginStart, SharePluginSetup } from '../../../src/plugins/share/public';
 import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
-import { UrlGeneratorsStart, UrlGeneratorsSetup } from '../../../src/plugins/url_generators/public';
 import {
   HelloLinkGeneratorState,
   createHelloPageLinkGenerator,
@@ -28,7 +28,7 @@ import {
   helloPageLinkGeneratorV1,
 } from './url_generator';
 
-declare module '../../../src/plugins/url_generators/public' {
+declare module '../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
     [HELLO_URL_GENERATOR_V1]: LegacyHelloLinkGeneratorState;
     [HELLO_URL_GENERATOR]: HelloLinkGeneratorState;
@@ -36,17 +36,17 @@ declare module '../../../src/plugins/url_generators/public' {
 }
 
 interface StartDeps {
-  urlGenerators: UrlGeneratorsStart;
+  share: SharePluginStart;
 }
 
 interface SetupDeps {
-  urlGenerators: UrlGeneratorsSetup;
+  share: SharePluginSetup;
 }
 
 const APP_ID = 'urlGeneratorsExamples';
 
 export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { urlGenerators }: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, { share: { urlGenerators } }: SetupDeps) {
     urlGenerators.registerUrlGenerator(
       createHelloPageLinkGenerator(async () => ({
         appBasePath: (await core.getStartServices())[0].application.getUrlForApp(APP_ID),

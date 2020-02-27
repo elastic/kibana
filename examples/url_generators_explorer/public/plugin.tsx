@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { SharePluginStart } from 'src/plugins/share/public';
 import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
-import { UrlGeneratorsStart } from '../../../src/plugins/url_generators/public';
 
 interface StartDeps {
-  urlGenerators: UrlGeneratorsStart;
+  share: SharePluginStart;
 }
 
 export class AccessLinksExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
@@ -34,7 +34,7 @@ export class AccessLinksExplorerPlugin implements Plugin<void, void, {}, StartDe
         const { renderApp } = await import('./app');
         return renderApp(
           {
-            getLinkGenerator: depsStart.urlGenerators.getUrlGenerator,
+            getLinkGenerator: depsStart.share.urlGenerators.getUrlGenerator,
           },
           params
         );

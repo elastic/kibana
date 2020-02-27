@@ -161,7 +161,7 @@ function buildDashboardUrlFromSettings(settings) {
           query = queryFromEntityFieldNames;
         }
 
-        const generator = npStart.plugins.urlGenerators.getUrlGenerator(
+        const generator = npStart.plugins.share.urlGenerators.getUrlGenerator(
           DASHBOARD_APP_URL_GENERATOR
         );
 

@@ -1,7 +1,0 @@
-{
-  "id": "urlGenerators",
-  "version": "kibana",
-  "requiredPlugins": [],
-  "server": false,
-  "ui": true
-}

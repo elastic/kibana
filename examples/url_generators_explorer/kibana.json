@@ -5,6 +5,6 @@
   "configPath": ["url_generators_explorer"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["urlGenerators", "urlGeneratorsExamples"],
+  "requiredPlugins": ["share", "urlGeneratorsExamples"],
   "optionalPlugins": []
 }

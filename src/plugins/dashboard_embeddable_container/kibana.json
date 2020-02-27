@@ -6,7 +6,7 @@
     "embeddable",
     "inspector",
     "uiActions",
-    "urlGenerators"
+    "share"
   ],
   "server": false,
   "ui": true

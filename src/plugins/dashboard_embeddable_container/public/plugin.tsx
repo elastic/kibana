@@ -21,7 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { UrlGeneratorsSetup } from '../../url_generators/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
@@ -38,7 +38,7 @@ import {
   createDirectAccessDashboardLinkGenerator,
 } from './url_generator';
 
-declare module '../../url_generators/public' {
+declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
   }
@@ -47,7 +47,7 @@ declare module '../../url_generators/public' {
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   uiActions: UiActionsSetup;
-  urlGenerators: UrlGeneratorsSetup;
+  share: SharePluginSetup;
 }
 
 interface StartDependencies {
@@ -65,7 +65,7 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public setup(
     core: CoreSetup,
-    { urlGenerators, embeddable, uiActions }: SetupDependencies
+    { share: { urlGenerators }, embeddable, uiActions }: SetupDependencies
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);

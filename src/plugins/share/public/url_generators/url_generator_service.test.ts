@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { UrlGeneratorsPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
+import { UrlGeneratorsService } from './url_generator_service';
+import { coreMock } from '../../../../core/public/mocks';
 
-const initializerContext = coreMock.createPluginInitializerContext();
+const service = new UrlGeneratorsService();
 
-const plugin = new UrlGeneratorsPlugin(initializerContext);
-
-const setup = plugin.setup(coreMock.createSetup());
-const start = plugin.start(coreMock.createStart());
+const setup = service.setup(coreMock.createSetup());
+const start = service.start(coreMock.createStart());
 
 test('Asking for a generator that does not exist throws an error', () => {
   expect(() => start.getUrlGenerator('noexist')).toThrowError();
