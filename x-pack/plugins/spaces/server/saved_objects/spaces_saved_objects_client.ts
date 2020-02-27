@@ -42,7 +42,7 @@ const throwErrorIfNamespaceSpecified = (options: any) => {
 export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
-  private readonly typeRegistry: ISavedObjectTypeRegistry;
+  private readonly types: string[];
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
@@ -50,7 +50,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
-    this.typeRegistry = typeRegistry;
+    this.types = typeRegistry.getAllTypes().map(t => t.name);
     this.errors = baseClient.errors;
   }
 
@@ -138,10 +138,9 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.find<T>({
       ...options,
-      type: (options.type
-        ? coerceToArray(options.type)
-        : this.typeRegistry.getAllTypes().map(t => t.name)
-      ).filter(type => type !== 'space'),
+      type: (options.type ? coerceToArray(options.type) : this.types).filter(
+        type => type !== 'space'
+      ),
       namespace: spaceIdToNamespace(this.spaceId),
     });
   }

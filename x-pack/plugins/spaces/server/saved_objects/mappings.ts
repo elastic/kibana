@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SpacesSavedObjectMappings = Object.freeze({
+import { deepFreeze } from '../../../../../src/core/utils';
+
+export const SpacesSavedObjectMappings = deepFreeze({
   properties: {
     name: {
       type: 'text',
