@@ -251,23 +251,26 @@ export const ruleStatusRequest = () =>
     query: { ids: ['someId'] },
   });
 
-export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const getImportRulesRequest = (payload?: Buffer) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    headers: {
+      'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+    },
+    body: payload,
+  });
 
-export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const getImportRulesRequestOverwriteTrue = (payload?: Buffer) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    headers: {
+      'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+    },
+    body: payload,
+    query: { overwrite: true },
+  });
 
 export const getDeleteRequest = () =>
   requestMock.create({
