@@ -235,9 +235,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
 
-    if (plugins.taskManager) {
-      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-    }
+    scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
       execute: createExecuteFunction({

@@ -214,9 +214,7 @@ export class AlertingPlugin {
       getBasePath: this.getBasePath,
     });
 
-    if (plugins.taskManager) {
-      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
-    }
+    scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),

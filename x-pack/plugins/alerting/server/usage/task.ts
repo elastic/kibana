@@ -59,7 +59,7 @@ function registerAlertingTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
-      timeout: '1m',
+      timeout: '5m',
       createTaskRunner: telemetryTaskRunner(
         logger,
         savedObjectsRepository,

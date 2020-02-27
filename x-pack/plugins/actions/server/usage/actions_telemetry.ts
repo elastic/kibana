@@ -54,6 +54,7 @@ export async function getTotalCountByActionTypes(
   return totalByActionType;
 }
 
+// TODO: Replace executions count telemetry with eventLog, when it will write to index
 export async function getExecutions(taskManager: TaskManagerStartContract) {
   const result = await taskManager.fetch({
     query: {

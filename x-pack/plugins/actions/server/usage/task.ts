@@ -58,7 +58,7 @@ function registerActionsTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
-      timeout: '1m',
+      timeout: '5m',
       createTaskRunner: telemetryTaskRunner(
         logger,
         savedObjectsRepository,

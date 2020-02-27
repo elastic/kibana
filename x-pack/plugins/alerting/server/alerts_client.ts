@@ -173,27 +173,27 @@ export class AlertsClient {
       ...options,
       references,
     });
-    // if (data.enabled) {
-    let scheduledTask;
-    try {
-      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
-    } catch (e) {
-      // Cleanup data, something went wrong scheduling the task
+    if (data.enabled) {
+      let scheduledTask;
       try {
-        await this.savedObjectsClient.delete('alert', createdAlert.id);
-      } catch (err) {
-        // Skip the cleanup error and throw the task manager error to avoid confusion
-        this.logger.error(
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
-        );
+        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
+      } catch (e) {
+        // Cleanup data, something went wrong scheduling the task
+        try {
+          await this.savedObjectsClient.delete('alert', createdAlert.id);
+        } catch (err) {
+          // Skip the cleanup error and throw the task manager error to avoid confusion
+          this.logger.error(
+            `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          );
+        }
+        throw e;
       }
-      throw e;
+      await this.savedObjectsClient.update('alert', createdAlert.id, {
+        scheduledTaskId: scheduledTask.id,
+      });
+      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    await this.savedObjectsClient.update('alert', createdAlert.id, {
-      scheduledTaskId: scheduledTask.id,
-    });
-    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
-    // }
     return this.getAlertFromRaw(
       createdAlert.id,
       createdAlert.attributes,
