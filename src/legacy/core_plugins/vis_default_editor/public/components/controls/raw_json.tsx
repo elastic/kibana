@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { isValidJson } from '../../legacy_imports';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function RawJsonParamEditor({
@@ -34,6 +33,8 @@ function RawJsonParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
+  const [isFormValid, setFormValidity] = useState(false);
+
   const label = (
     <>
       <FormattedMessage id="visDefaultEditor.controls.jsonInputLabel" defaultMessage="JSON input" />{' '}
@@ -47,21 +48,19 @@ function RawJsonParamEditor({
       />
     </>
   );
-  const isValid = isValidJson(value);
 
   const onChange = (newValue: string) => {
     setValue(newValue);
-    setValidity(isValidJson(newValue));
   };
 
   useEffect(() => {
-    setValidity(isValid);
-  }, [isValid]);
+    setValidity(isFormValid);
+  }, [isFormValid]);
 
   return (
     <EuiFormRow
       label={label}
-      isInvalid={showValidation ? !isValid : false}
+      isInvalid={showValidation ? !isFormValid : false}
       fullWidth={true}
       compressed
     >
@@ -72,6 +71,9 @@ function RawJsonParamEditor({
         width="100%"
         height="250px"
         value={value}
+        onValidate={(annotations: any[]) => {
+          setFormValidity(!annotations || annotations.length === 0);
+        }}
         setOptions={{
           fontSize: '14px',
         }}
