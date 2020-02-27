@@ -20,21 +20,20 @@
 import React from "react";
 import CoverageItem from './coverage_item';
 
-const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
+const renderItem = testRunnerTypes =>  (x, i) => {
   return (
       <CoverageItem
         item={x}
         key={i}
-        currentJobNumber={currentJobNumber}
         testRunnerTypes={testRunnerTypes}
       />
   );
 };
 
-export default function HistoricalList({testRunnerTypes, historicalItems, currentJobNumber }) {
+export default function HistoricalList({testRunnerTypes, historicalItems}) {
   const renderWithRunners = renderItem(testRunnerTypes);
   const renderRunnersWithItem = (item, index) =>
-    renderWithRunners(currentJobNumber)(item, index);
+    renderWithRunners(item, index);
 
   return (
     <div className="font-bold text-xl mb-2 flex-horizontal-center">

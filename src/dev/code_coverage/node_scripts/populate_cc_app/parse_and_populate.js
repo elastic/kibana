@@ -25,9 +25,9 @@ import { resolve } from 'path';
 import { pipe, pretty } from './utils';
 import * as rawData from '../../cc_app/public/initial_data_raw.js';
 
-export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
+export const parseAndPopulate = srcFile => destFile => log => {
   const logV = verbose(log);
-  logV({ 'buildNumber': buildNumber, 'srcFile': srcFile, 'destFile': destFile });
+  logV({ 'srcFile': srcFile, 'destFile': destFile });
   const [resolvedSrcFile, resolvedDestFile] = resolvePaths(srcFile, destFile);
   logV({ 'resolvedSrcFile': resolvedSrcFile, 'resolvedDestFile': resolvedDestFile });
 
@@ -42,17 +42,16 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log, resolvedDestFile, buildNumber));
+    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log, resolvedDestFile));
 
 };
 
 function onComplete (initData) {
   const flushInitData = pipe(pretty, flush);
-  return function mutateInitialData (xs, log, destFile, currentJobNumber) {
+  return function mutateInitialData (xs, log, destFile) {
     initData.historicalItems = normalize(xs);
-    initData.currentJobNumber = currentJobNumber;
 
-    const constructCurrentFrom = currentItem(currentJobNumber, log);
+    const constructCurrentFrom = currentItem(log);
     const prefix = 'gs://elastic-bekitzur-kibana-coverage-live/jobs/elastic+kibana+code-coverage/';
 
 
@@ -76,8 +75,8 @@ function currentJobTimeStamp(log) {
   return process.env.TIME_STAMP || HARD_CODED_TS;
 }
 
-function currentItem(currentBuildNumber, log) {
-  return prefix => `${prefix}${currentBuildNumber}/${currentJobTimeStamp(log)}/`;
+function currentItem(log) {
+  return prefix => `${prefix}${currentJobTimeStamp(log)}/`;
 }
 
 function normalize(xs) {
@@ -92,7 +91,7 @@ function normalize(xs) {
 }
 
 function flush (initData) {
-  return function flushInner (destFile) {
+  return destFile => {
     const fill = boilerplate(initData);
     console.log(`\n### fill: \n${fill}`);
     fs.writeFileSync(destFile, fill, { encoding: 'utf8' });
@@ -115,27 +114,25 @@ function isInBrowser() {
 `;
 }
 
-function onLineRead (xs) {
-  return function pushOntoHistoricalItems (x) {
-    xs.push(x);
-  };
+function onLineRead(xs) {
+  return x => xs.push(x);
 }
 
-function dedupe (obj) {
+function dedupe(obj) {
   return obj.default.default;
 }
 
-function resolvePaths (...xs) {
+function resolvePaths(...xs) {
   return xs.map(x => resolve(kibanaRoot(), x));
 }
 
-function kibanaRoot () {
+function kibanaRoot() {
   const KIBANA_ROOT_PATH = '../../../../..';
   return resolve(__dirname, KIBANA_ROOT_PATH);
 }
 
-function verbose (log) {
-  return function verboseInner (obj) {
-    return Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
-  };
+function verbose(log) {
+  return obj =>
+    Object.entries(obj)
+      .forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
 }

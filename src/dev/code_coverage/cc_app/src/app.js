@@ -28,7 +28,6 @@ export default function App({
   buildStats,
   historicalItems,
   currentJobTimeStamp,
-  currentJobNumber,
   currentItem,
 }) {
   const { url } = buildStats;
@@ -39,7 +38,6 @@ export default function App({
         <div>
           <CoverageItem
             item={currentItem}
-            currentJobNumber={currentJobNumber}
             testRunnerTypes={testRunnerTypes}
             isCurrent={true}
             currentJobTimeStamp={currentJobTimeStamp}
@@ -48,7 +46,6 @@ export default function App({
         <HistoricalList
           testRunnerTypes={testRunnerTypes}
           historicalItems={historicalItems}
-          currentJobNumber={currentJobNumber}
         />
       </div>
       <Footer />

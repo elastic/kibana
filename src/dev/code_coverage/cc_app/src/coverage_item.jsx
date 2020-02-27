@@ -2,9 +2,8 @@ import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
 import { left, right } from './utils/either';
 
-export default function CoverageItem({item, currentJobNumber, currentJobTimeStamp, testRunnerTypes, isCurrent}) {
+export default function CoverageItem({item, currentJobTimeStamp, testRunnerTypes, isCurrent}) {
   if (isCurrent) {
-    console.log(`\n### currentJobNumber: \n\t${currentJobNumber}`);
     console.log(`\n### currentJobTimeStamp: \n\t${currentJobTimeStamp}`);
   }
   const classes = 'max-w-sm rounded overflow-hidden shadow-lg shadow-2xl';

@@ -80,7 +80,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
                   # Bootstrap the CC App
-                  . src/dev/code_coverage/shell_scripts/query_app_initial_data.sh ${BUILD_NUMBER} 100
+                  . src/dev/code_coverage/shell_scripts/query_app_initial_data.sh
 
                   # Check the bootstrapping
                   cat src/dev/code_coverage/shell_scripts/bootstrapped.dat || echo "!!! bootstrapped.dat NOT FOUND?"
@@ -88,9 +88,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   ls -la src/dev/code_coverage/shell_scripts
 
                   # Populate the CC App with bootstrapped dat file
-                  node src/dev/code_coverage/node_scripts/populate_cc_app/index.js ${BUILD_NUMBER} \
-src/dev/code_coverage/shell_scripts/bootstrapped.dat \
-src/dev/code_coverage/cc_app/public/initial_data.js
+                  node src/dev/code_coverage/node_scripts/populate_cc_app/index.js bootstrapped.dat src/dev/code_coverage/cc_app/public/initial_data.js
 
                   # Check the population
                   cat src/dev/code_coverage/cc_app/public/initial_data.js || echo "!!! initial_data.js NOT FOUND?"
@@ -104,7 +102,7 @@ src/dev/code_coverage/cc_app/public/initial_data.js
                   # copy built app over to it's final resting place :)
                   cp -R src/dev/code_coverage/cc_app/build src/dev/code_coverage/live_coverage_app
 
-                  # NOW!!! ... we need to upload the summary folders up, underneath the time stamp dir in gcp.
+                  # NOW!!! ... we need to upload the summary folders, underneath the time stamp dir in gcp.
 
 
                 """,

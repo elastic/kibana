@@ -21,19 +21,14 @@ export default function TestRunnerItem ({historicalItem, testRunnerItem}) {
   );
 }
 
-function timestamp(historicalItem) {
-  return [.../coverage\/\d*\/(\d*-.*Z)/gm.exec(historicalItem)][1];
+const findTimeStampRe = () => /coverage\/(\d*-.*Z)/gm;
+function timestamp(item) {
+  return [...findTimeStampRe().exec(item)][1];
 }
 
 function href(type) {
-  const storeBucket = 'elastic-bekitzur-kibana-coverage-live';
-  const prefix = `https://storage.googleapis.com/${storeBucket}/jobs/elastic%2Bkibana%2Bcode-coverage`;
+  const prefix = `https://kibana-coverage.elastic.dev/jobs/elastic%2Bkibana%2Bcode-coverage`;
   const postfix = `${type}-combined/index.html`;
 
-  return historicalItem => `${prefix}/${jobNum(historicalItem)}/${timestamp(historicalItem)}/${postfix}`;
+  return item => `${prefix}/${timestamp(item)}/${postfix}`;
 }
-
-function jobNum(historicalItem) {
-  return [.../coverage\/(\d*)\/\d*-.*Z/gm.exec(historicalItem)][1];
-}
-

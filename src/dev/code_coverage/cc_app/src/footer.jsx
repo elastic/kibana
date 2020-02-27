@@ -26,10 +26,3 @@ export default function Footer () {
     </header>
   );
 }
-
-function gcpLink () {
-  return `
-https://console.cloud.google.com/storage/browser/kibana-ci-artifacts/
-jobs/elastic+kibana+code-coverage/254/2020-01-29T21-23-03Z/?authuser=1
-`;
-}

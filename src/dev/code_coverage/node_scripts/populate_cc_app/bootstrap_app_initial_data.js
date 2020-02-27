@@ -22,9 +22,11 @@ import { parseAndPopulate } from './parse_and_populate';
 
 const description = 'Populate the initial data for the code coverage static site.';
 
-const exec = buildNumber => srcFile => destFile => ({ log }) =>
-  parseAndPopulate(buildNumber)(srcFile)(destFile)(log);
+const exec = srcFile => destFile => ({ log }) => {
+  const processSrcAndDest = parseAndPopulate(srcFile)(destFile);
+  return processSrcAndDest(log);
+}
 
 
-export const populate = (buildNumber, srcFile, destFile) =>
-  run(exec(buildNumber)(srcFile)(destFile), { description });
+export const populate = (srcFile, destFile) =>
+  run(exec(srcFile)(destFile), { description });
