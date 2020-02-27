@@ -50,24 +50,22 @@ export function createReindexWorker({
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {
   if (e instanceof ReindexError) {
-    if (e.symbol) {
-      switch ((e as ReindexError).symbol) {
-        case AccessForbidden:
-          return kibanaResponseFactory.forbidden({ body: e.message });
-        case IndexNotFound:
-          return kibanaResponseFactory.notFound({ body: e.message });
-        case CannotCreateIndex:
-        case ReindexTaskCannotBeDeleted:
-          return kibanaResponseFactory.internalError({ body: e.message });
-        case ReindexTaskFailed:
-          // Bad data
-          return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
-        case ReindexAlreadyInProgress:
-        case MultipleReindexJobsFound:
-          return kibanaResponseFactory.badRequest({ body: e.message });
-        default:
-        // nothing matched
-      }
+    switch (e.symbol) {
+      case AccessForbidden:
+        return kibanaResponseFactory.forbidden({ body: e.message });
+      case IndexNotFound:
+        return kibanaResponseFactory.notFound({ body: e.message });
+      case CannotCreateIndex:
+      case ReindexTaskCannotBeDeleted:
+        return kibanaResponseFactory.internalError({ body: e.message });
+      case ReindexTaskFailed:
+        // Bad data
+        return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
+      case ReindexAlreadyInProgress:
+      case MultipleReindexJobsFound:
+        return kibanaResponseFactory.badRequest({ body: e.message });
+      default:
+      // nothing matched
     }
   }
   return kibanaResponseFactory.internalError({ body: e });
