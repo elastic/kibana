@@ -1,0 +1,49 @@
+{
+    "took" : 1,
+    "timed_out" : false,
+    "_shards" : {
+      "total" : 1,
+      "successful" : 1,
+      "skipped" : 0,
+      "failed" : 0
+    },
+    "hits" : {
+      "total" : {
+        "value" : 2,
+        "relation" : "eq"
+      },
+      "max_score" : 1.0,
+      "hits" : [
+        {
+          "_index" : "whitelist-index",
+          "_id" : "Kfg_iHAB-gfa6svCx2sL",
+          "_score" : 1.0,
+          "_source" : {
+            "comment" : "this was a false positive",
+            "eventTypes" : [ ],
+            "whitelistRuleType" : "simple",
+            "whitelistRule" : {
+              "type" : "equality",
+              "value" : "somfe_path",
+              "applyTo" : "malware.file.path"
+            }
+          }
+        },
+        {
+          "_index" : "whitelist-index",
+          "_id" : "Kvg_iHAB-gfa6svCx2sM",
+          "_score" : 1.0,
+          "_source" : {
+            "comment" : "this was a false positive as well.",
+            "eventTypes" : [ ],
+            "whitelistRuleType" : "simple",
+            "whitelistRule" : {
+              "type" : "equality",
+              "value" : "123asdfadfasfdthiasdfasdfsasdfasdfisnewer",
+              "applyTo" : "malware.file.hashes.sha256"
+            }
+          }
+        }
+      ]
+    }
+  }

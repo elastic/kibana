@@ -9,8 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointAppContext } from '../types';
 import { WhitelistRule } from '../../common/types';
+import { i18n } from '@kbn/i18n';
 
-const whitelistIdx = 'whitelist-index';  // TODO: change this
+const whitelistIdx = 'whitelist-index'; // TODO: change this
 
 /**
  * Registers the whitelist routes for the API
@@ -33,14 +34,8 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
           alert_id: schema.string({
-            minLength: 36, // https://tools.ietf.org/html/rfc4122#section-3
+            minLength: 36, // TODO alert id format?
             maxLength: 36,
-            validate(value) {
-              // Must be a UUID
-              if (!validateUUID(value)) {
-                return INVALID_UUID;
-              }
-            },
           }),
           file_path: schema.maybe(schema.string()),
           signer: schema.maybe(schema.string()),
@@ -48,7 +43,7 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
           dismiss: schema.boolean({ defaultValue: false }), // Boolean determining if we dismiss all alerts that match this
         }),
       },
-      options: { authRequired: false }, // Change me
+      options: { authRequired: true },
     },
     handleWhitelistPost
   );
@@ -73,6 +68,7 @@ async function handleWhitelistPost(context, req, res) {
     Object.keys(whitelistAttributeMap).forEach(k => {
       if (req.body[k]) {
         newRules.push({
+          comment: req.body.comment || "",
           eventTypes: [], // TODO grab the alert and get eventTypes from alert details API
           whitelistRuleType: 'simple',
           whitelistRule: {
@@ -83,8 +79,18 @@ async function handleWhitelistPost(context, req, res) {
         });
       }
     });
+
+    // Don't index an empty list if no rules could be created from the request
+    if(newRules.length === 0) {
+      return res.badRequest({"error": "no whitelist rules could be created from request."});
+    }
+
     const errors = await addWhitelistRule(context, newRules); // TODO handle
-    return res.ok({ body: newRules });
+    if (errors) {
+      return res.internalError({"error": "unable to create whitelist rule."});
+    } else {
+      return res.ok({ body: newRules });
+    }
   } catch (err) {
     return res.internalError({ body: err });
   }
@@ -107,7 +113,7 @@ async function handleWhitelistGet(context, req, res) {
  * @param ctx App context
  * @param whitelistRules List of whitelist rules to apply
  */
-async function addWhitelistRule(ctx, whitelistRules: Array<WhitelistRule>): Promise<boolean> {
+async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<boolean> {
   let body = '';
   whitelistRules.forEach(rule => {
     body = body.concat(`{ "index" : {} }\n ${JSON.stringify(rule)}\n`);
@@ -121,7 +127,7 @@ async function addWhitelistRule(ctx, whitelistRules: Array<WhitelistRule>): Prom
   if (errors) {
     // TODO log errors
   }
-  return errors
+  return errors;
 }
 
 /**
