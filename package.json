@@ -111,6 +111,8 @@
       "**/grunt-*",
       "**/grunt-*/**",
       "**/apollo-*",
+      "**/@apollo/*",
+      "**/@apollo/*/**",
       "x-pack/typescript"
     ]
   },
