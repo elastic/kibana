@@ -17,29 +17,14 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
-import { configSchema } from '../../config';
+import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { ConfigSchema } from '../config';
 
-export class ConfigManager {
-  private esShardTimeout: number = 0;
-  private graphiteUrls: string[] = [];
-
-  constructor(config: PluginInitializerContext['config']) {
-    config.create<TypeOf<typeof configSchema>>().subscribe(configUpdate => {
-      this.graphiteUrls = configUpdate.graphiteUrls || [];
-    });
-
-    config.legacy.globalConfig$.subscribe(configUpdate => {
-      this.esShardTimeout = configUpdate.elasticsearch.shardTimeout.asMilliseconds();
-    });
-  }
-
-  getEsShardTimeout() {
-    return this.esShardTimeout;
-  }
-
-  getGraphiteUrls() {
-    return this.graphiteUrls;
-  }
-}
+export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) => ({
+  setup() {},
+  start(core: CoreStart) {
+    if (initializerContext.config.get().ui.enabled === false) {
+      core.chrome.navLinks.update('timelion', { hidden: true });
+    }
+  },
+});

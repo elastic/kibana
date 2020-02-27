@@ -26,7 +26,7 @@ import {
   RecursiveReadonly,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
-import { ConfigSchema } from './config';
+import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
 import { validateEsRoute } from './routes/validate_es';
@@ -48,7 +48,7 @@ export class Plugin {
 
   public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
+      .create<TypeOf<typeof configSchema>>()
       .pipe(first())
       .toPromise();
 

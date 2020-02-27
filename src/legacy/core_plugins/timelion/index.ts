@@ -62,14 +62,6 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars(server) {
-        const config = server.config();
-
-        return {
-          timelionUiEnabled: config.get('timelion.ui.enabled'),
-          kbnIndex: config.get('kibana.index'),
-        };
-      },
       mappings: require('./mappings.json'),
       uiSettingDefaults: {
         'timelion:showTutorial': {
