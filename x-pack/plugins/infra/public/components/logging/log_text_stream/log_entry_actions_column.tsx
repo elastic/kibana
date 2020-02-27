@@ -92,11 +92,10 @@ type LogEntryActionsColumnWrapperProps = Pick<
 const LogEntryActionsColumnWrapper = euiStyled(LogEntryColumnContent)<
   LogEntryActionsColumnWrapperProps
 >`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   user-select: none;
   position: relative;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;
 const AbsoluteWrapper = euiStyled.div`
   position: absolute;

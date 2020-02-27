@@ -26,7 +26,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle } from './text_styles';
+import { monospaceTextStyle, hoveredContentStyle } from './text_styles';
 import { LogEntryActionsColumn } from './log_entry_actions_column';
 
 interface LogEntryRowProps {
@@ -134,11 +134,7 @@ export const LogEntryRow = ({
               {...columnWidth}
             >
               {isTimestampColumn(column) ? (
-                <LogEntryTimestampColumn
-                  isHighlighted={isHighlighted}
-                  isHovered={isHovered}
-                  time={column.timestamp}
-                />
+                <LogEntryTimestampColumn isHighlighted={isHighlighted} time={column.timestamp} />
               ) : null}
             </LogEntryColumn>
           );
@@ -158,7 +154,6 @@ export const LogEntryRow = ({
                   highlights={highlightsByColumnId[column.columnId] || []}
                   isHighlighted={isHighlighted}
                   isActiveHighlight={isActiveHighlight}
-                  isHovered={isHovered}
                   isWrapped={wrap}
                 />
               ) : null}
@@ -180,7 +175,6 @@ export const LogEntryRow = ({
                   highlights={highlightsByColumnId[column.columnId] || []}
                   isActiveHighlight={isActiveHighlight}
                   isHighlighted={isHighlighted}
-                  isHovered={isHovered}
                   isWrapped={wrap}
                 />
               ) : null}
@@ -227,4 +221,8 @@ const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   overflow: hidden;
 
   ${props => monospaceTextStyle(props.scale)};
+
+  &:hover {
+    ${hoveredContentStyle}
+  }
 `;

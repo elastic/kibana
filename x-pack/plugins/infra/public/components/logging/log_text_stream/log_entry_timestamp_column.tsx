@@ -13,18 +13,15 @@ import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryTimestampColumnProps {
   isHighlighted: boolean;
-  isHovered: boolean;
   time: number;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
-  ({ isHighlighted, isHovered, time }) => {
+  ({ isHighlighted, time }) => {
     const formattedTime = useFormattedTime(time, { format: 'time' });
 
     return (
-      <TimestampColumnContent isHovered={isHovered} isHighlighted={isHighlighted}>
-        {formattedTime}
-      </TimestampColumnContent>
+      <TimestampColumnContent isHighlighted={isHighlighted}>{formattedTime}</TimestampColumnContent>
     );
   }
 );
@@ -42,7 +39,6 @@ const hoveredContentStyle = css`
 `;
 
 interface TimestampColumnContentProps {
-  isHovered: boolean;
   isHighlighted: boolean;
 }
 
@@ -52,5 +48,5 @@ const TimestampColumnContent = euiStyled(LogEntryColumnContent)<TimestampColumnC
   text-overflow: clip;
   white-space: pre;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;
