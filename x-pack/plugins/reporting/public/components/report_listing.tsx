@@ -6,10 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import { get } from 'lodash';
-
+import moment from 'moment';
 import React, { Component } from 'react';
+import { Subscription } from 'rxjs';
+
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -21,8 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ToastsSetup } from '../../';
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../../../licensing/public';
+import { ToastsSetup, ApplicationStart } from '../../';
+import { LicensingPluginSetup, LICENSE_CHECK_STATE, ILicense } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
 import { JobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
@@ -47,12 +48,11 @@ interface Job {
 }
 
 interface Props {
-  redirect: (url: string) => void;
   intl: InjectedIntl;
-  // @TODO: Get right types here
-  toasts: ToastsSetup;
   jobQueueClient: JobQueueClient;
   license$: LicensingPluginSetup['license$'];
+  redirect: ApplicationStart['navigateToApp'];
+  toasts: ToastsSetup;
 }
 
 interface State {
@@ -99,9 +99,10 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
 ]);
 
 class ReportListingUi extends Component<Props, State> {
+  private isInitialJobsFetch: boolean;
+  private licenseSubscription?: Subscription;
   private mounted?: boolean;
   private poller?: any;
-  private isInitialJobsFetch: boolean;
 
   constructor(props: Props) {
     super(props);
@@ -117,18 +118,6 @@ class ReportListingUi extends Component<Props, State> {
     };
 
     this.isInitialJobsFetch = true;
-
-    this.props.license$.subscribe(license => {
-      const { state, message } = license.check('reporting', 'basic');
-      const enableLinks = state === LICENSE_CHECK_STATE.Valid;
-      const showLinks = enableLinks && license.getFeature('csv').isAvailable;
-
-      this.setState({
-        enableLinks,
-        showLinks,
-        badLicenseMessage: message || '',
-      });
-    });
   }
 
   public render() {
@@ -156,6 +145,10 @@ class ReportListingUi extends Component<Props, State> {
   public componentWillUnmount() {
     this.mounted = false;
     this.poller.stop();
+
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+    }
   }
 
   public componentDidMount() {
@@ -172,7 +165,20 @@ class ReportListingUi extends Component<Props, State> {
         JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.intervalErrorMultiplier,
     });
     this.poller.start();
+    this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
   }
+
+  private licenseHandler = (license: ILicense) => {
+    const { state, message } = license.check('reporting', 'basic');
+    const enableLinks = state === LICENSE_CHECK_STATE.Valid;
+    const showLinks = enableLinks;
+
+    this.setState({
+      enableLinks,
+      showLinks,
+      badLicenseMessage: message || '',
+    });
+  };
 
   private renderTable() {
     const { intl } = this.props;
