@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { first, shareReplay } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -36,7 +36,7 @@ export class MetricsService
   private readonly logger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
-  private metrics$ = new Subject<OpsMetrics>();
+  private metrics$ = new ReplaySubject<OpsMetrics>(1);
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
@@ -45,14 +45,14 @@ export class MetricsService
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     this.metricsCollector = new OpsMetricsCollector(http.server);
 
-    const metricsObservable = this.metrics$.asObservable().pipe(shareReplay(1));
+    const metricsObservable = this.metrics$.pipe(shareReplay(1));
 
     return {
       getOpsMetrics$: () => metricsObservable,
     };
   }
 
-  public async start(setupDeps: MetricsServiceSetupDeps): Promise<InternalMetricsServiceStart> {
+  public async start(): Promise<InternalMetricsServiceStart> {
     if (!this.metricsCollector) {
       throw new Error('#setup() needs to be run first');
     }
@@ -61,7 +61,8 @@ export class MetricsService
       .pipe(first())
       .toPromise();
 
-    this.refreshMetrics();
+    await this.refreshMetrics();
+
     this.collectInterval = setInterval(() => {
       this.refreshMetrics();
     }, config.interval);

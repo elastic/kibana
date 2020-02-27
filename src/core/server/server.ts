@@ -199,6 +199,7 @@ export class Server {
 
     await this.http.start();
     await this.rendering.start();
+    await this.metrics.start();
 
     return this.coreStart;
   }
@@ -213,6 +214,7 @@ export class Server {
     await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
+    await this.metrics.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {

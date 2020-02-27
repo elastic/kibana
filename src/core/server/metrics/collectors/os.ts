@@ -35,7 +35,6 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
         '5m': load[1],
         '15m': load[2],
       },
-
       memory: {
         total_in_bytes: os.totalmem(),
         free_in_bytes: os.freemem(),
