@@ -956,6 +956,9 @@ tr:hover .c3:focus::before {
                   "query": Object {
                     "filterManager": [MockFunction],
                     "savedQueries": [MockFunction],
+                    "state$": Observable {
+                      "_isScalar": false,
+                    },
                     "timefilter": Object {
                       "history": Object {
                         "add": [MockFunction],
@@ -974,8 +977,10 @@ tr:hover .c3:focus::before {
                         "getEnabledUpdated$": [MockFunction],
                         "getFetch$": [MockFunction],
                         "getRefreshInterval": [MockFunction],
+                        "getRefreshIntervalDefaults": [MockFunction],
                         "getRefreshIntervalUpdate$": [MockFunction],
                         "getTime": [MockFunction],
+                        "getTimeDefaults": [MockFunction],
                         "getTimeUpdate$": [MockFunction],
                         "isAutoRefreshSelectorEnabled": [MockFunction],
                         "isTimeRangeSelectorEnabled": [MockFunction],
