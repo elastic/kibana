@@ -76,11 +76,6 @@ export interface ActionDefinition<
    */
   readonly type?: string;
 
-  /**
-   * @deprecated
-   *
-   * Do not use this, use `execute` method instead.
-   */
   getHref?(context: Context): string | undefined;
 
   /**
