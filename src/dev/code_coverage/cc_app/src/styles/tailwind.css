@@ -13281,32 +13281,10 @@ video {
 
 .App-footer {
   background-color: #06d9d6;
-  /*min-height: 100vh;*/
-  display: -webkit-box;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-          flex-direction: column;
-  -webkit-box-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-          justify-content: center;
-  font-size: calc(10px + 2vmin);
 }
 
 .App-header {
   background-color: #06d9d6;
-  /*min-height: 100vh;*/
-  display: -webkit-box;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-          flex-direction: column;
-  -webkit-box-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-          justify-content: center;
-  font-size: calc(10px + 2vmin);
 }
 
 @-webkit-keyframes App-logo-spin {

@@ -20,7 +20,7 @@
 import React from 'react';
 import Header from './header';
 import HistoricalList from './historical_list';
-import Footer from './footer';
+// import Footer from './footer';
 import CoverageItem from './coverage_item';
 
 export default function App({
@@ -50,7 +50,7 @@ export default function App({
           historicalItems={historicalItems}
         />
       </div>
-      <Footer />
+      {/*<Footer />*/}
     </div>
   );
 }
