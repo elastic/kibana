@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { Screenshot, ElementsPositionAndAttribute } from './types';
@@ -12,7 +13,15 @@ const getAsyncDurationLogger = (logger: LevelLogger) => {
   return async (description: string, promise: Promise<any>) => {
     const start = Date.now();
     const result = await promise;
-    logger.debug(`${description} took ${Date.now() - start}ms`);
+    logger.debug(
+      i18n.translate('xpack.reporting.screencapture.asyncTook', {
+        defaultMessage: '{description} took {}ms',
+        values: {
+          description,
+          took: Date.now() - start,
+        },
+      })
+    );
     return result;
   };
 };
@@ -45,7 +54,14 @@ export const getScreenshots = async (
     });
   }
 
-  logger.info(`screenshots taken: ${screenshots.length}`);
+  logger.info(
+    i18n.translate('xpack.reporting.screencapture.screenshotsTaken', {
+      defaultMessage: `screenshots taken: {numScreenhots}`,
+      values: {
+        numScreenhots: screenshots.length,
+      },
+    })
+  );
 
   return screenshots;
 };

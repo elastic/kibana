@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ConditionalHeaders, ServerFacade } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
@@ -29,6 +30,11 @@ export const openUrl = async (
       logger
     );
   } catch (err) {
-    throw new Error('An error occurred when trying to load Kibana. ' + err); // FIXME i18n
+    throw new Error(
+      i18n.translate('xpack.reporting.screencapture.couldntLoadKibana', {
+        defaultMessage: 'An error occurred when trying to load Kibana: {error}',
+        values: { error: err },
+      })
+    );
   }
 };

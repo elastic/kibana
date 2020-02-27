@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
 import { LevelLogger } from '../../../../server/lib';
@@ -18,7 +19,11 @@ export const injectCustomCss = async (
   layout: Layout,
   logger: LevelLogger
 ): Promise<void> => {
-  logger.debug('injecting custom css');
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.injectingCss', {
+      defaultMessage: 'injecting custom css',
+    })
+  );
 
   const filePath = layout.getCssOverridesPath();
   const buffer = await fsp.readFile(filePath);
@@ -38,7 +43,11 @@ export const injectCustomCss = async (
     );
   } catch (err) {
     throw new Error(
-      'An error occurred when trying to inject the screencapture styles into Kibana. ' + err
-    ); // FIXME i18n
+      i18n.translate('xpack.reporting.screencapture.injectCss', {
+        defaultMessage:
+          'An error occurred when trying to inject the screencapture styles into Kibana: {error}',
+        values: { error: err },
+      })
+    );
   }
 };

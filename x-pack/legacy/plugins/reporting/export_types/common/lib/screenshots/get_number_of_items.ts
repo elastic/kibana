@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade } from '../../../../types';
@@ -20,7 +21,12 @@ export const getNumberOfItems = async (
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
 
-  logger.debug('determining how many rendered items to wait for');
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.logWaitingForElements', {
+      defaultMessage: 'waiting for elements or items count attribute; or not found to interrupt',
+    })
+  );
+
   try {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
@@ -54,7 +60,11 @@ export const getNumberOfItems = async (
     );
   } catch (err) {
     throw new Error(
-      'An error occurred when trying to read the page for visualizations metadata. ' + err
+      i18n.translate('xpack.reporting.screencapture.readVisualizationsError', {
+        defaultMessage:
+          'An error occurred when trying to read the page for visualizations metadata: {error}',
+        values: { error: err },
+      })
     );
     itemsCount = 1;
   }

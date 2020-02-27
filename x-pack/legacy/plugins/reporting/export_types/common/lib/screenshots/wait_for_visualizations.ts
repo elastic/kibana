@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ServerFacade } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
@@ -31,10 +32,14 @@ export const waitForVisualizations = async (
   const config = server.config();
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
-  logger.info('waiting for elements or items count attribute; or not found to interrupt');
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.waitingForRenderedElements', {
+      defaultMessage: `waiting for {itemsCount} rendered elements to be in the DOM`,
+      values: { itemsCount },
+    })
+  );
+
   try {
-    // wait for each visualization dom element to fire the render complete event
-    logger.info(`waiting for ${itemsCount} rendered elements to be in the DOM`);
     await browser.waitFor(
       {
         fn: getCompletedItemsCount,
@@ -46,10 +51,14 @@ export const waitForVisualizations = async (
       logger
     );
 
-    logger.info(`found ${itemsCount} rendered elements in the DOM`);
+    logger.debug(`found ${itemsCount} rendered elements in the DOM`);
   } catch (err) {
     throw new Error(
-      'An error occurred when trying to wait for visualizations to finish rendering. ' + err
+      i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
+        defaultMessage:
+          'An error occurred when trying to wait for visualizations to finish rendering: {error} ',
+        values: { error: err },
+      })
     );
   }
 };

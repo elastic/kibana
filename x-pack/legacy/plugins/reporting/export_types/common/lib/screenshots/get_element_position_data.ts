@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LayoutInstance } from '../../layouts/layout';
 import { AttributesMap, ElementsPositionAndAttribute } from './types';
@@ -59,7 +60,10 @@ export const getElementPositionAndAttributes = async (
 
     if (!elementsPositionAndAttributes || elementsPositionAndAttributes.length === 0) {
       throw new Error(
-        `No shared items containers of '${screenshotSelector}' were found on the page. It's possible there are no visualizations at this Kibana URL.`
+        i18n.translate('xpack.reporting.screencapture.noElements', {
+          defaultMessage: `No shared items containers of {selector} were found on the page. It's possible there are no visualizations at this Kibana URL.`,
+          values: { selector: screenshotSelector },
+        })
       );
     }
   } catch (err) {
