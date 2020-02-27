@@ -90,7 +90,6 @@ export async function installPipelinesForDataset({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataset,
-      packageName,
       packageVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
@@ -183,13 +182,15 @@ const getNameAndExtension = (
 export const getPipelineNameForInstallation = ({
   pipelineName,
   dataset,
-  packageName,
   packageVersion,
 }: {
   pipelineName: string;
   dataset: Dataset;
-  packageName: string;
   packageVersion: string;
 }): string => {
-  return `${dataset.type}-${dataset.name}-${packageVersion}-${pipelineName}`;
+  const isPipelineEntry = pipelineName === dataset.ingest_pipeline ? true : false;
+  // if this is the pipeline entry, don't add a suffix
+  return `${dataset.type}-${dataset.name}-${packageVersion}${
+    isPipelineEntry ? '' : `-${pipelineName}`
+  }`;
 };
