@@ -18,7 +18,6 @@ import { elasticsearchJsPlugin } from './client/elasticsearch_transform';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License } from './services';
-import { isEsError } from './lib/is_es_error';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -70,9 +69,6 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.apiRoutes.setup({
       router,
       license: this.license,
-      lib: {
-        isEsError,
-      },
     });
 
     // Can access via new platform router's handler function 'context' parameter - context.transform.client

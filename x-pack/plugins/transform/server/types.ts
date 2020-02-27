@@ -7,7 +7,6 @@
 import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { License } from './services';
-import { isEsError } from './lib/is_es_error';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -16,7 +15,4 @@ export interface Dependencies {
 export interface RouteDependencies {
   router: IRouter;
   license: License;
-  lib: {
-    isEsError: typeof isEsError;
-  };
 }

@@ -14,9 +14,3 @@ export const plugin = (ctx: PluginInitializerContext) => new TransformServerPlug
 export const config = {
   schema: configSchema,
 };
-
-/** @public */
-export { Dependencies } from './types';
-// export { IndexMgmtSetup } from './plugin';
-// export { Index } from './types';
-export { TransformConfig } from './config';
