@@ -45,7 +45,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
   });
 
-  it('getMonitorChartsData will provide expected filters when a location is specified', async () => {
+  it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
