@@ -19,7 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../core/server';
-import { APMOSSPlugin, APMOSSPluginSetup } from './plugin';
+import { APMOSSPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
@@ -39,4 +39,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
-export { APMOSSPlugin as Plugin, APMOSSPluginSetup };
+export { APMOSSPluginSetup } from './plugin';
