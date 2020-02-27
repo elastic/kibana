@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,7 +57,6 @@ function FieldParamEditor({
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption: IndexPatternField = get(options, '0.target');
-
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
