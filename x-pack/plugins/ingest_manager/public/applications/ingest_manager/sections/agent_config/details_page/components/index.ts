@@ -6,4 +6,4 @@
 export { AssignDatasourcesFlyout } from './assign_datasources';
 export { DatasourcesTable } from './datasources_table';
 export { DonutChart } from './donut_chart';
-export { EditPolicyFlyout } from './edit_policy';
+export { EditConfigFlyout } from './edit_config';

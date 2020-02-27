@@ -33,18 +33,13 @@ import {
   ShellEnrollmentInstructions,
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
-import { AgentConfig } from '../../../../types';
 import { useCore, useConfig } from '../../../../hooks';
 
 interface RouterProps {
   onClose: () => void;
-  policies: AgentConfig[];
 }
 
-export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
-  onClose,
-  policies,
-}) => {
+export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({ onClose }) => {
   const core = useCore();
   const config = useConfig();
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
@@ -89,7 +84,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
     </EuiFlyoutHeader>
   );
 
-  const policyOptions = enrollmentApiKeys.data
+  const configOptions = enrollmentApiKeys.data
     ? enrollmentApiKeys.data.list.map(key => ({
         value: key.id,
         text: key.name,
@@ -97,7 +92,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
     : [];
 
   const [apiKeyListVisible, setApiKeyListVisble] = useState(false);
-  const renderedPolicySelect = (
+  const renderedConfigSelect = (
     <>
       <EuiFormRow
         label={
@@ -108,7 +103,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
         }
       >
         <EuiSelect
-          options={policyOptions}
+          options={configOptions}
           value={selectedApiKeyId || undefined}
           onChange={e => setSelectedApiKeyId(e.target.value)}
         />
@@ -199,7 +194,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
 
   const body = (
     <EuiFlyoutBody>
-      {renderedPolicySelect}
+      {renderedConfigSelect}
       <EuiHorizontalRule margin="xl" />
       {renderedInstructions}
     </EuiFlyoutBody>

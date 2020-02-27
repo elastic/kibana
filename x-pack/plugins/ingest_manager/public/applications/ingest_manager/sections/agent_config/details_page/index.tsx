@@ -20,11 +20,11 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { Redirect, useRouteMatch } from 'react-router-dom';
-import { PolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import {
   DatasourcesTable,
   DonutChart,
-  EditPolicyFlyout,
+  EditConfigFlyout,
   AssignDatasourcesFlyout,
 } from './components';
 import { sendRequest, useCore, useGetOneAgentConfig } from '../../../hooks';
@@ -56,7 +56,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const [selectedDatasources, setSelectedDatasources] = useState<string[]>([]);
 
   // Flyout states
-  const [isEditPolicyFlyoutOpen, setIsEditPolicyFlyoutOpen] = useState<boolean>(false);
+  const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
   const [isDatasourcesFlyoutOpen, setIsDatasourcesFlyoutOpen] = useState<boolean>(false);
 
   const refreshData = () => {
@@ -77,7 +77,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     if (unassignError) {
       core.notifications.toasts.addDanger(
         i18n.translate(
-          'xpack.ingestManager.policyDetails.unassignDatasources.errorNotificationTitle',
+          'xpack.ingestManager.configDetails.unassignDatasources.errorNotificationTitle',
           {
             defaultMessage:
               'Error unassigning {count, plural, one {data source} other {# data sources}}',
@@ -90,7 +90,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     } else {
       core.notifications.toasts.addSuccess(
         i18n.translate(
-          'xpack.ingestManager.policyDetails.unassignDatasources.successNotificationTitle',
+          'xpack.ingestManager.configDetails.unassignDatasources.successNotificationTitle',
           {
             defaultMessage:
               'Successfully unassigned {count, plural, one {data source} other {# data sources}}',
@@ -117,8 +117,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     return (
       <WithHeaderLayout>
         <EuiCallOut
-          title={i18n.translate('xpack.ingestManager.policyDetails.unexceptedErrorTitle', {
-            defaultMessage: 'An error happened while loading the policy',
+          title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
+            defaultMessage: 'An error happened while loading the config',
           })}
           color="danger"
           iconType="alert"
@@ -135,8 +135,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     return (
       <WithHeaderLayout>
         <FormattedMessage
-          id="xpack.ingestManager.policyDetails.policyNotFoundErrorTitle"
-          defaultMessage="Policy '{id}' not found"
+          id="xpack.ingestManager.configDetails.configNotFoundErrorTitle"
+          defaultMessage="Config '{id}' not found"
           values={{
             id: configId,
           }}
@@ -146,7 +146,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   }
 
   return (
-    <PolicyRefreshContext.Provider value={{ refresh: refreshAgentConfig }}>
+    <ConfigRefreshContext.Provider value={{ refresh: refreshAgentConfig }}>
       <AgentStatusRefreshContext.Provider value={{ refresh: refreshAgentStatus }}>
         <WithHeaderLayout
           leftColumn={
@@ -159,8 +159,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                         <h1>
                           {agentConfig.name || (
                             <FormattedMessage
-                              id="xpack.ingestManager.policyDetails.policyDetailsTitle"
-                              defaultMessage="Policy '{id}'"
+                              id="xpack.ingestManager.configDetails.configDetailsTitle"
+                              defaultMessage="Config '{id}'"
                               values={{
                                 id: configId,
                               }}
@@ -185,27 +185,27 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiButton onClick={() => setIsEditPolicyFlyoutOpen(true)} iconType="pencil">
+                      <EuiButton onClick={() => setIsEditConfigFlyoutOpen(true)} iconType="pencil">
                         <FormattedMessage
-                          id="xpack.ingestManager.policyDetails.editPolicyButtonLabel"
-                          defaultMessage="Edit policy"
+                          id="xpack.ingestManager.configDetails.editConfigButtonLabel"
+                          defaultMessage="Edit config"
                         />
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <AgentConfigDeleteProvider>
-                        {deletePoliciesPrompt => (
+                        {deleteConfigsPrompt => (
                           <EuiButtonEmpty
                             color="danger"
                             onClick={() => {
-                              deletePoliciesPrompt([configId], () => {
+                              deleteConfigsPrompt([configId], () => {
                                 setRedirectToAgentConfigsList(true);
                               });
                             }}
                             disabled={configId === DEFAULT_AGENT_CONFIG_ID}
                           >
                             <FormattedMessage
-                              id="xpack.ingestManager.policyDetails.deletePolicyButtonLabel"
+                              id="xpack.ingestManager.configDetails.deleteConfigButtonLabel"
                               defaultMessage="Delete"
                             />
                           </EuiButtonEmpty>
@@ -219,10 +219,10 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             </React.Fragment>
           }
         >
-          {isEditPolicyFlyoutOpen ? (
-            <EditPolicyFlyout
+          {isEditConfigFlyoutOpen ? (
+            <EditConfigFlyout
               onClose={() => {
-                setIsEditPolicyFlyoutOpen(false);
+                setIsEditConfigFlyoutOpen(false);
                 refreshData();
               }}
               agentConfig={agentConfig}
@@ -230,7 +230,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           ) : null}
           {isDatasourcesFlyoutOpen ? (
             <AssignDatasourcesFlyout
-              policyId={agentConfig.id}
+              configId={agentConfig.id}
               // @ts-ignore
               existingDatasources={(agentConfig.datasources || []).map((ds: any) => ds.id)}
               onClose={() => {
@@ -242,7 +242,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           <EuiTitle size="m">
             <h3>
               <FormattedMessage
-                id="xpack.ingestManager.policyDetails.agentsSummaryTitle"
+                id="xpack.ingestManager.configDetails.agentsSummaryTitle"
                 defaultMessage="Enrolled agents"
               />
             </h3>
@@ -252,7 +252,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             <Loading />
           ) : agentStatusError ? (
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.agentStatusNotFoundErrorTitle"
+              id="xpack.ingestManager.configDetails.agentStatusNotFoundErrorTitle"
               defaultMessage="Unable to load enrolled agents status"
             />
           ) : (
@@ -261,7 +261,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 <EuiTitle size="xs">
                   <h5>
                     <FormattedMessage
-                      id="xpack.ingestManager.policyDetails.agentsTotalTitle"
+                      id="xpack.ingestManager.configDetails.agentsTotalTitle"
                       defaultMessage="Total"
                     />
                   </h5>
@@ -276,7 +276,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                     {/* TODO: Make this link to filtered agents list and change to real agent count */}
                     <ConnectedLink color="primary" path={`/fleet/agents`}>
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.viewAgentsLinkText"
+                        id="xpack.ingestManager.configDetails.viewAgentsLinkText"
                         defaultMessage="View agents"
                       />
                     </ConnectedLink>
@@ -287,7 +287,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 <EuiTitle size="xs">
                   <h5>
                     <FormattedMessage
-                      id="xpack.ingestManager.policyDetails.eventsTitle"
+                      id="xpack.ingestManager.configDetails.eventsTitle"
                       defaultMessage="Events"
                     />
                   </h5>
@@ -304,7 +304,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 <EuiTitle size="xs">
                   <h5>
                     <FormattedMessage
-                      id="xpack.ingestManager.policyDetails.agentsStatusTitle"
+                      id="xpack.ingestManager.configDetails.agentsStatusTitle"
                       defaultMessage="Status"
                     />
                   </h5>
@@ -332,7 +332,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiHealth color="success">
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.onlineAgentsCountText"
+                        id="xpack.ingestManager.configDetails.onlineAgentsCountText"
                         defaultMessage="{count} online"
                         values={{
                           count: agentStatus.online,
@@ -342,7 +342,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                     <EuiSpacer size="s" />
                     <EuiHealth color="subdued">
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.offlineAgentsCountText"
+                        id="xpack.ingestManager.configDetails.offlineAgentsCountText"
                         defaultMessage="{count} offline"
                         values={{
                           count: agentStatus.offline,
@@ -352,7 +352,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                     <EuiSpacer size="s" />
                     <EuiHealth color="danger">
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.errorAgentsCountText"
+                        id="xpack.ingestManager.configDetails.errorAgentsCountText"
                         defaultMessage="{count} error"
                         values={{
                           count: agentStatus.error,
@@ -368,7 +368,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           <EuiTitle size="m">
             <h3>
               <FormattedMessage
-                id="xpack.ingestManager.policyDetails.datasourcesTableTitle"
+                id="xpack.ingestManager.configDetails.datasourcesTableTitle"
                 defaultMessage="Assigned data sources"
               />
             </h3>
@@ -382,8 +382,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                   title={
                     <h2>
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.noDatasourcesPrompt"
-                        defaultMessage="Policy has no data sources"
+                        id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
+                        defaultMessage="Config has no data sources"
                       />
                     </h2>
                   }
@@ -394,7 +394,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                       onClick={() => setIsDatasourcesFlyoutOpen(true)}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.assignDatasourcesButtonText"
+                        id="xpack.ingestManager.configDetails.assignDatasourcesButtonText"
                         defaultMessage="Assign data sources"
                       />
                     </EuiButton>
@@ -410,7 +410,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                   onClick={() => setIsDatasourcesFlyoutOpen(true)}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.policyDetails.assignDatasourcesButtonText"
+                    id="xpack.ingestManager.configDetails.assignDatasourcesButtonText"
                     defaultMessage="Assign data sources"
                   />
                 </EuiButton>,
@@ -424,7 +424,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                       onClick={unassignSelectedDatasources}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.policyDetails.unassignDatasourcesButtonLabel"
+                        id="xpack.ingestManager.configDetails.unassignDatasourcesButtonLabel"
                         defaultMessage="Unassign {count, plural, one {# data source} other {# data sources}}"
                         values={{
                           count: selectedDatasources.length,
@@ -446,6 +446,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           />
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
-    </PolicyRefreshContext.Provider>
+    </ConfigRefreshContext.Provider>
   );
 };

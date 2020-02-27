@@ -13,14 +13,14 @@ interface ValidationResults {
   [key: string]: JSX.Element[];
 }
 
-export const policyFormValidation = (policy: Partial<AgentConfig>): ValidationResults => {
+export const configFormValidation = (config: Partial<AgentConfig>): ValidationResults => {
   const errors: ValidationResults = {};
 
-  if (!policy.name?.trim()) {
+  if (!config.name?.trim()) {
     errors.name = [
       <FormattedMessage
-        id="xpack.ingestManager.policyForm.nameRequiredErrorMessage"
-        defaultMessage="Policy name is required"
+        id="xpack.ingestManager.configForm.nameRequiredErrorMessage"
+        defaultMessage="Config name is required"
       />,
     ];
   }
@@ -29,14 +29,14 @@ export const policyFormValidation = (policy: Partial<AgentConfig>): ValidationRe
 };
 
 interface Props {
-  policy: Partial<AgentConfig>;
-  updatePolicy: (u: Partial<AgentConfig>) => void;
+  config: Partial<AgentConfig>;
+  updateConfig: (u: Partial<AgentConfig>) => void;
   validation: ValidationResults;
 }
 
-export const PolicyForm: React.FunctionComponent<Props> = ({
-  policy,
-  updatePolicy,
+export const ConfigForm: React.FunctionComponent<Props> = ({
+  config,
+  updateConfig,
   validation,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
@@ -45,7 +45,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       name: 'name',
       label: (
         <FormattedMessage
-          id="xpack.ingestManager.policyForm.nameFieldLabel"
+          id="xpack.ingestManager.configForm.nameFieldLabel"
           defaultMessage="Name"
         />
       ),
@@ -54,7 +54,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       name: 'description',
       label: (
         <FormattedMessage
-          id="xpack.ingestManager.policyForm.descriptionFieldLabel"
+          id="xpack.ingestManager.configForm.descriptionFieldLabel"
           defaultMessage="Description"
         />
       ),
@@ -63,7 +63,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       name: 'namespace',
       label: (
         <FormattedMessage
-          id="xpack.ingestManager.policyForm.namespaceFieldLabel"
+          id="xpack.ingestManager.configForm.namespaceFieldLabel"
           defaultMessage="Namespace"
         />
       ),
@@ -81,8 +81,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
             isInvalid={Boolean(touchedFields[name] && validation[name])}
           >
             <EuiFieldText
-              value={policy[name]}
-              onChange={e => updatePolicy({ [name]: e.target.value })}
+              value={config[name]}
+              onChange={e => updateConfig({ [name]: e.target.value })}
               isInvalid={Boolean(touchedFields[name] && validation[name])}
               onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
             />

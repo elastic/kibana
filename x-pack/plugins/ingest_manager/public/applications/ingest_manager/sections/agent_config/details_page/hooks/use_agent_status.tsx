@@ -6,9 +6,9 @@
 import React from 'react';
 import { useRequest } from '../../../../hooks';
 
-export function useGetAgentStatus(policyId: string) {
+export function useGetAgentStatus(configId: string) {
   const agentStatusRequest = useRequest({
-    path: `/api/ingest_manager/fleet/policy/${policyId}/agent-status`,
+    path: `/api/ingest_manager/fleet/config/${configId}/agent-status`,
     method: 'get',
   });
 

@@ -31,9 +31,9 @@ export const EnrollmentApiKeysTable: React.FunctionComponent<{
       width: '300px',
     },
     {
-      field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.apiKeysList.policyColumnTitle', {
-        defaultMessage: 'Policy',
+      field: 'config_id',
+      name: i18n.translate('xpack.ingestManager.apiKeysList.configColumnTitle', {
+        defaultMessage: 'Config',
       }),
       width: '100px',
     },

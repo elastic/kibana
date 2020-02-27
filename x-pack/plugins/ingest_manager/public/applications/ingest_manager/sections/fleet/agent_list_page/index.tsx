@@ -43,30 +43,30 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
 
-  // Policies state (for filtering)
-  const [isPoliciesFilterOpen, setIsPoliciesFilterOpen] = useState<boolean>(false);
-  const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
+  // Configs state (for filtering)
+  const [isConfigsFilterOpen, setIsConfigsFilterOpen] = useState<boolean>(false);
+  const [selectedConfigs, setSelectedConfigs] = useState<string[]>([]);
 
-  // Add a policy id to current search
-  const addPolicyFilter = (policyId: string) => {
-    setSelectedPolicies([...selectedPolicies, policyId]);
+  // Add a config id to current search
+  const addConfigFilter = (configId: string) => {
+    setSelectedConfigs([...selectedConfigs, configId]);
   };
 
-  // Remove a policy id from current search
-  const removePolicyFilter = (policyId: string) => {
-    setSelectedPolicies(selectedPolicies.filter(policy => policy !== policyId));
+  // Remove a config id from current search
+  const removeConfigFilter = (configId: string) => {
+    setSelectedConfigs(selectedConfigs.filter(config => config !== configId));
   };
 
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
   let kuery = search.trim();
-  if (selectedPolicies.length) {
+  if (selectedConfigs.length) {
     if (kuery) {
       kuery = `(${kuery}) and`;
     }
-    kuery = `${kuery} agents.policy_id : (${selectedPolicies
-      .map(policy => `"${policy}"`)
+    kuery = `${kuery} agents.config_id : (${selectedConfigs
+      .map(config => `"${config}"`)
       .join(' or ')})`;
   }
 
@@ -143,19 +143,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
+      field: 'config_id',
+      name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
         defaultMessage: 'Agent Config',
       }),
       truncateText: true,
-      render: (policyId: string) => {
-        const policyName = agentConfigs.find(p => p.id === policyId)?.name;
-        return policyName ? (
-          <ConnectedLink color="primary" path={`/configs/${policyId}`}>
-            {policyName}
+      render: (configId: string) => {
+        const configName = agentConfigs.find(p => p.id === configId)?.name;
+        return configName ? (
+          <ConnectedLink color="primary" path={`/configs/${configId}`}>
+            {configName}
           </ConnectedLink>
         ) : (
-          <EuiTextColor color="subdued">{policyId}</EuiTextColor>
+          <EuiTextColor color="subdued">{configId}</EuiTextColor>
         );
       },
     },
@@ -248,10 +248,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ]}
     >
       {isEnrollmentFlyoutOpen ? (
-        <AgentEnrollmentFlyout
-          policies={agentConfigs}
-          onClose={() => setIsEnrollmentFlyoutOpen(false)}
-        />
+        <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
       ) : null}
       <EuiTitle size="l">
         <h1>
@@ -346,32 +343,35 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   button={
                     <EuiFilterButton
                       iconType="arrowDown"
-                      onClick={() => setIsPoliciesFilterOpen(!isPoliciesFilterOpen)}
-                      isSelected={isPoliciesFilterOpen}
-                      hasActiveFilters={selectedPolicies.length > 0}
+                      onClick={() => setIsConfigsFilterOpen(!isConfigsFilterOpen)}
+                      isSelected={isConfigsFilterOpen}
+                      hasActiveFilters={selectedConfigs.length > 0}
                       disabled={isAgentConfigsLoading}
                     >
-                      Policies
+                      <FormattedMessage
+                        id="xpack.ingestManager.agentList.configFilterText"
+                        defaultMessage="Configs"
+                      />
                     </EuiFilterButton>
                   }
-                  isOpen={isPoliciesFilterOpen}
-                  closePopover={() => setIsPoliciesFilterOpen(false)}
+                  isOpen={isConfigsFilterOpen}
+                  closePopover={() => setIsConfigsFilterOpen(false)}
                   panelPaddingSize="none"
                 >
                   <div className="euiFilterSelect__items">
-                    {agentConfigs.map((policy, index) => (
+                    {agentConfigs.map((config, index) => (
                       <EuiFilterSelectItem
-                        checked={selectedPolicies.includes(policy.id) ? 'on' : undefined}
+                        checked={selectedConfigs.includes(config.id) ? 'on' : undefined}
                         key={index}
                         onClick={() => {
-                          if (selectedPolicies.includes(policy.id)) {
-                            removePolicyFilter(policy.id);
+                          if (selectedConfigs.includes(config.id)) {
+                            removeConfigFilter(config.id);
                           } else {
-                            addPolicyFilter(policy.id);
+                            addConfigFilter(config.id);
                           }
                         }}
                       >
-                        {policy.name}
+                        {config.name}
                       </EuiFilterSelectItem>
                     ))}
                   </div>
@@ -402,7 +402,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               id="xpack.ingestManager.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
             />
-          ) : !search.trim() && selectedPolicies.length === 0 && totalAgents === 0 ? (
+          ) : !search.trim() && selectedConfigs.length === 0 && totalAgents === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage

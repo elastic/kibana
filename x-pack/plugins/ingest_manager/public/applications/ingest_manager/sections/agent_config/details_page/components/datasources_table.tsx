@@ -10,7 +10,7 @@ import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink, EuiBadge } from '@ela
 import { Datasource } from '../../../../types';
 import { useCore } from '../../../../hooks';
 
-type DatasourceWithPolicy = Datasource & { policies?: string[] };
+type DatasourceWithConfig = Datasource & { configs?: string[] };
 
 interface InMemoryDatasource {
   id: string;
@@ -20,12 +20,12 @@ interface InMemoryDatasource {
   packageTitle?: string;
   packageVersion?: string;
   packageDescription?: string;
-  policies: number;
+  configs: number;
 }
 
 interface Props {
-  datasources?: DatasourceWithPolicy[];
-  withPoliciesCount?: boolean;
+  datasources?: DatasourceWithConfig[];
+  withConfigsCount?: boolean;
   loading?: EuiInMemoryTableProps<InMemoryDatasource>['loading'];
   message?: EuiInMemoryTableProps<InMemoryDatasource>['message'];
   search?: EuiInMemoryTableProps<InMemoryDatasource>['search'];
@@ -34,37 +34,37 @@ interface Props {
 }
 
 export const DatasourcesTable: React.FunctionComponent<Props> = (
-  { datasources: originalDatasources, withPoliciesCount, ...rest } = {
+  { datasources: originalDatasources, withConfigsCount, ...rest } = {
     datasources: [],
-    withPoliciesCount: false,
+    withConfigsCount: false,
   }
 ) => {
   const core = useCore();
 
   // Flatten some values so that they can be searched via in-memory table search
   const datasources =
-    originalDatasources?.map(({ id, name, streams, package: datasourcePackage, policies }) => ({
+    originalDatasources?.map(({ id, name, inputs, package: datasourcePackage, configs }) => ({
       id,
       name,
-      streams: streams?.length || 0,
+      streams: inputs.reduce((streamsCount, input) => streamsCount + input.streams.length, 0),
       packageName: datasourcePackage?.name,
       packageTitle: datasourcePackage?.title,
       packageVersion: datasourcePackage?.version,
       packageDescription: datasourcePackage?.description,
-      policies: policies?.length || 0,
+      configs: configs?.length || 0,
     })) || [];
 
   const columns: EuiInMemoryTableProps<InMemoryDatasource>['columns'] = [
     {
       field: 'name',
-      name: i18n.translate('xpack.ingestManager.policyDetails.datasourcesTable.nameColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.configDetails.datasourcesTable.nameColumnTitle', {
         defaultMessage: 'Name',
       }),
     },
     {
       field: 'packageTitle',
       name: i18n.translate(
-        'xpack.ingestManager.policyDetails.datasourcesTable.packageNameColumnTitle',
+        'xpack.ingestManager.configDetails.datasourcesTable.packageNameColumnTitle',
         {
           defaultMessage: 'Package',
         }
@@ -73,7 +73,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     {
       field: 'packageVersion',
       name: i18n.translate(
-        'xpack.ingestManager.policyDetails.datasourcesTable.packageVersionColumnTitle',
+        'xpack.ingestManager.configDetails.datasourcesTable.packageVersionColumnTitle',
         {
           defaultMessage: 'Version',
         }
@@ -82,7 +82,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     {
       field: 'streams',
       name: i18n.translate(
-        'xpack.ingestManager.policyDetails.datasourcesTable.streamsCountColumnTitle',
+        'xpack.ingestManager.configDetails.datasourcesTable.streamsCountColumnTitle',
         {
           defaultMessage: 'Streams',
         }
@@ -90,7 +90,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     },
     {
       name: i18n.translate(
-        'xpack.ingestManager.policyDetails.datasourcesTable.actionsColumnTitle',
+        'xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle',
         {
           defaultMessage: 'Actions',
         }
@@ -108,7 +108,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
                 }${core.http.basePath.get()}/app/epm#/detail/${packageName}-${packageVersion}`}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.datasourcesTable.viewActionLinkText"
+                  id="xpack.ingestManager.configDetails.datasourcesTable.viewActionLinkText"
                   defaultMessage="view"
                 />
               </EuiLink>
@@ -120,25 +120,25 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     },
   ];
 
-  if (withPoliciesCount) {
+  if (withConfigsCount) {
     columns.splice(columns.length - 1, 0, {
-      field: 'policies',
+      field: 'configs',
       name: i18n.translate(
-        'xpack.ingestManager.policyDetails.datasourcesTable.policiesColumnTitle',
+        'xpack.ingestManager.configDetails.datasourcesTable.configsColumnTitle',
         {
-          defaultMessage: 'Policies',
+          defaultMessage: 'Configs',
         }
       ),
-      render: (policies: number) => {
-        return policies === 0 ? (
+      render: (configs: number) => {
+        return configs === 0 ? (
           <EuiBadge>
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.datasourcesTable.unassignedLabelText"
+              id="xpack.ingestManager.configDetails.datasourcesTable.unassignedLabelText"
               defaultMessage="Unassigned"
             />
           </EuiBadge>
         ) : (
-          policies
+          configs
         );
       },
     });

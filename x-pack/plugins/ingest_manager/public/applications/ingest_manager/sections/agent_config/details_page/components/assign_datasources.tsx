@@ -24,13 +24,13 @@ import { useRequest, useCore, sendRequest } from '../../../../hooks';
 import { Datasource } from '../../../../types';
 
 interface Props {
-  policyId: string;
+  configId: string;
   existingDatasources: string[];
   onClose: () => void;
 }
 
 export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
-  policyId,
+  configId,
   existingDatasources,
   onClose,
 }) => {
@@ -53,7 +53,7 @@ export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
     },
   });
 
-  // Filter out data sources already assigned to policy
+  // Filter out data sources already assigned to config
   const datasources: Datasource[] =
     datasourcesData?.items?.filter((ds: Datasource) => {
       return !existingDatasources.includes(ds.id);
@@ -62,7 +62,7 @@ export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
   const assignSelectedDatasources = async () => {
     setIsLoading(true);
     const { error } = await sendRequest({
-      path: `/api/ingest_manager/agent_configs/${policyId}/addDatasources`,
+      path: `/api/ingest_manager/agent_configs/${configId}/addDatasources`,
       method: 'post',
       body: {
         datasources: selectedDatasources,
@@ -161,7 +161,7 @@ export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
           body={
             <FormattedMessage
               id="xpack.ingestManager.assignDatasources.allDatasourcesAssignedPrompt"
-              defaultMessage="You have assigned all available data sources to this policy"
+              defaultMessage="You have assigned all available data sources to this config"
             />
           }
           actions={InstallDatasourcesButton}
@@ -176,7 +176,7 @@ export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
     <EuiFlyoutBody>
       <DatasourcesTable
         datasources={datasources}
-        withPoliciesCount={true}
+        withConfigsCount={true}
         loading={isDatasourcesLoading}
         message={getTableMessage()}
         search={{
@@ -188,7 +188,7 @@ export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
           filters: [
             {
               type: 'field_value_toggle',
-              field: 'policies',
+              field: 'configs',
               value: 0,
               name: i18n.translate(
                 'xpack.ingestManager.assignDatasources.unassignedFilterButtonLabel',

@@ -5,26 +5,26 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForPolicyId } from './api_keys';
+import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './api_keys';
 import { updateAgentsForPolicyId, unenrollForPolicyId } from './agents';
 
 export async function agentConfigUpdateEventHandler(
   soClient: SavedObjectsClientContract,
   action: string,
-  policyId: string
+  configId: string
 ) {
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, {
-      policyId,
+      configId,
     });
   }
 
   if (action === 'updated') {
-    await updateAgentsForPolicyId(soClient, policyId);
+    await updateAgentsForPolicyId(soClient, configId);
   }
 
   if (action === 'deleted') {
-    await unenrollForPolicyId(soClient, policyId);
-    await deleteEnrollmentApiKeyForPolicyId(soClient, policyId);
+    await unenrollForPolicyId(soClient, configId);
+    await deleteEnrollmentApiKeyForConfigId(soClient, configId);
   }
 }

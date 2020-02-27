@@ -55,9 +55,9 @@ export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContrac
   await soClient.delete(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id);
 }
 
-export async function deleteEnrollmentApiKeyForPolicyId(
+export async function deleteEnrollmentApiKeyForConfigId(
   soClient: SavedObjectsClientContract,
-  policyId: string
+  configId: string
 ) {
   let hasMore = true;
   let page = 1;
@@ -65,7 +65,7 @@ export async function deleteEnrollmentApiKeyForPolicyId(
     const { items } = await listEnrollmentApiKeys(soClient, {
       page: page++,
       perPage: 100,
-      kuery: `enrollment_api_keys.policy_id:${policyId}`,
+      kuery: `enrollment_api_keys.config_id:${configId}`,
     });
 
     if (items.length === 0) {
@@ -83,11 +83,11 @@ export async function generateEnrollmentAPIKey(
   data: {
     name?: string;
     expiration?: string;
-    policyId?: string;
+    configId?: string;
   }
 ) {
   const id = uuid.v4();
-  const { name: providedKeyName, policyId = 'default' } = data;
+  const { name: providedKeyName, configId = 'default' } = data;
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
@@ -105,7 +105,7 @@ export async function generateEnrollmentAPIKey(
       api_key_id: key.id,
       api_key: apiKey,
       name,
-      policy_id: policyId,
+      config_id: configId,
     })
   );
 }

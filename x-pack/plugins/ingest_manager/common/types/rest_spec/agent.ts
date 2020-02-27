@@ -124,8 +124,8 @@ export interface UpdateAgentRequest {
   };
 }
 
-export interface GetAgentStatusForPolicy {
+export interface GetAgentStatusForConfig {
   params: {
-    policyId: string;
+    configId: string;
   };
 }

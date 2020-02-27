@@ -37,27 +37,27 @@ export async function agentCheckin(
   const actions = filterActionsForCheckin(agent);
 
   // Generate new agent config if config is updated
-  if (isNewAgentConfig(agent) && agent.policy_id) {
-    const policy = await agentConfigService.getFullPolicy(soClient, agent.policy_id);
-    if (policy) {
+  if (isNewAgentConfig(agent) && agent.config_id) {
+    const config = await agentConfigService.getFullConfig(soClient, agent.config_id);
+    if (config) {
       // Assign output API keys
       // We currently only support default ouput
       if (!agent.default_api_key) {
         updateData.default_api_key = await APIKeysService.generateOutputApiKey('default', agent.id);
       }
-      // Mutate the policy to set the api token for this agent
-      policy.outputs.default.api_token = agent.default_api_key || updateData.default_api_key;
+      // Mutate the config to set the api token for this agent
+      config.outputs.default.api_token = agent.default_api_key || updateData.default_api_key;
 
-      const policyChangeAction: AgentAction = {
+      const configChangeAction: AgentAction = {
         id: uuid.v4(),
-        type: 'POLICY_CHANGE',
+        type: 'CONFIG_CHANGE',
         created_at: new Date().toISOString(),
         data: JSON.stringify({
-          policy,
+          config,
         }),
         sent_at: undefined,
       };
-      actions.push(policyChangeAction);
+      actions.push(configChangeAction);
       // persist new action
       updateData.actions = actions;
     }
@@ -87,7 +87,7 @@ async function processEventsForCheckin(
   const updatedErrorEvents = [...agent.current_error_events];
   for (const event of events) {
     // @ts-ignore
-    event.policy_id = agent.policy_id;
+    event.config_id = agent.config_id;
 
     if (isActionEvent(event)) {
       acknowledgedActionIds.push(event.action_id as string);

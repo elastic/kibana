@@ -11,10 +11,6 @@ export enum OutputType {
 export interface NewOutput {
   name: string;
   type: OutputType;
-  username?: string;
-  password?: string;
-  index_name?: string;
-  ingest_pipeline?: string;
   hosts?: string[];
   ca_sha256?: string;
   api_key?: string;

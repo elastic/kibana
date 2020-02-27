@@ -11,7 +11,7 @@ export const EnrollmentAPIKeySchema = schema.object({
   api_key: schema.string(),
   name: schema.maybe(schema.string()),
   active: schema.boolean(),
-  policy_id: schema.maybe(schema.string()),
+  config_id: schema.maybe(schema.string()),
 });
 
 export const EnrollmentAPIKeySOAttributesSchema = schema.object({
@@ -19,7 +19,7 @@ export const EnrollmentAPIKeySOAttributesSchema = schema.object({
   api_key: schema.string(),
   name: schema.maybe(schema.string()),
   active: schema.boolean(),
-  policy_id: schema.maybe(schema.string()),
+  config_id: schema.maybe(schema.string()),
   // ASK: Is this allowUnknown? How do we type this with config-schema?
   // [k: string]: schema.any(), // allow to use it as saved object attributes type
 });

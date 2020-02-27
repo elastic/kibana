@@ -121,7 +121,7 @@
             "local_metadata": {
               "type": "text"
             },
-            "policy_id": {
+            "config_id": {
               "type": "keyword"
             },
             "shared_id": {
@@ -456,7 +456,7 @@
             "name": {
               "type": "keyword"
             },
-            "policy_id": {
+            "config_id": {
               "type": "keyword"
             },
             "type": {

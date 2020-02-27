@@ -24,7 +24,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
-  GetAgentStatusForPolicySchema,
+  GetAgentStatusForConfigSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -274,7 +274,7 @@ export const postAgentEnrollHandler: RequestHandler<
     const agent = await AgentService.enroll(
       soClient,
       request.body.type,
-      res.enrollmentAPIKey.policy_id as string,
+      res.enrollmentAPIKey.config_id as string,
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
@@ -402,12 +402,12 @@ export const postAgentsUnenrollHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForPolicyHandler: RequestHandler<TypeOf<
-  typeof GetAgentStatusForPolicySchema.params
+export const getAgentStatusForConfigHandler: RequestHandler<TypeOf<
+  typeof GetAgentStatusForConfigSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const result = await AgentService.getAgentsStatusForPolicy(soClient, request.params.policyId);
+    const result = await AgentService.getAgentStatusForConfig(soClient, request.params.configId);
 
     const body = { result, success: true };
 

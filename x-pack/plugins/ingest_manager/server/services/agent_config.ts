@@ -259,34 +259,34 @@ class AgentConfigService {
     );
   }
 
-  public async getFullPolicy(
+  public async getFullConfig(
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<any | null> {
-    let policy;
+    let config;
 
     try {
-      policy = await this.get(soClient, id);
+      config = await this.get(soClient, id);
     } catch (err) {
       if (!err.isBoom || err.output.statusCode !== 404) {
         throw err;
       }
     }
 
-    if (!policy) {
+    if (!config) {
       return null;
     }
 
-    const agentPolicy = {
-      id: policy.id,
+    const agentConfig = {
+      id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
         ...[await outputService.get(soClient, 'default')].reduce(
-          (outputs, { config, ...output }) => {
+          (outputs, { config: outputConfig, ...output }) => {
             outputs[output.id] = {
               ...output,
               type: output.type as any,
-              ...config,
+              ...outputConfig,
             };
             return outputs;
           },
@@ -294,12 +294,12 @@ class AgentConfigService {
         ),
       },
       streams:
-        policy.datasources && policy.datasources.length
-          ? this.storedDatasourceToAgentStreams(policy.datasources)
+        config.datasources && config.datasources.length
+          ? this.storedDatasourceToAgentStreams(config.datasources)
           : [],
     };
 
-    return agentPolicy;
+    return agentConfig;
   }
 }
 
