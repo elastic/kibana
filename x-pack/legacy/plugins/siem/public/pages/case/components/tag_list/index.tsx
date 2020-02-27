@@ -51,7 +51,7 @@ export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) 
       onSubmit(newData.tags);
       setIsEditTags(false);
     }
-  }, [form]);
+  }, [form, onSubmit]);
 
   return (
     <EuiText>
@@ -65,7 +65,7 @@ export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) 
             <EuiButtonIcon
               aria-label={'tags'}
               iconType={'pencil'}
-              onClick={() => setIsEditTags(true)}
+              onClick={setIsEditTags.bind(null, true)}
             />
           </EuiFlexItem>
         )}
@@ -105,7 +105,11 @@ export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) 
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={() => setIsEditTags(false)} size="s">
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    onClick={setIsEditTags.bind(null, false)}
+                    size="s"
+                  >
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

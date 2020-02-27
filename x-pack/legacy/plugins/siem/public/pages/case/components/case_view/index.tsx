@@ -108,7 +108,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           return null;
       }
     },
-    [dispatchUpdateCaseProperty, data.title]
+    [dispatchUpdateCaseProperty, data.state]
   );
 
   // TO DO refactor each of these const's into their own components
@@ -130,11 +130,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
   ];
 
-  const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [data.title]);
+  const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const toggleStateCase = useCallback(
-    e => onUpdateField('state', e.target.checked ? 'closed' : 'open'),
-    []
+    e => onUpdateField('state', e.target.checked ? 'open' : 'closed'),
+    [onUpdateField]
   );
+  const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
+
   return (
     <>
       <MyWrapper>
@@ -219,7 +221,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
               <TagList
                 data-test-subj="case-view-tag-list"
                 tags={data.tags}
-                onSubmit={newTags => onUpdateField('tags', newTags)}
+                onSubmit={onSubmitTags}
                 isLoading={isLoading && updateKey === 'tags'}
               />
             </EuiFlexItem>

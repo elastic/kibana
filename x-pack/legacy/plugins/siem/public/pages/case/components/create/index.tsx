@@ -57,7 +57,7 @@ export const Create = React.memo(() => {
     } else if (isValid && data.description) {
       setFormData({ ...data, ...newData, isNew: true } as NewCase);
     }
-  }, [form]);
+  }, [form, data]);
 
   if (newCase && newCase.caseId) {
     return <Redirect to={`/${SiemPageName.case}/${newCase.caseId}`} />;

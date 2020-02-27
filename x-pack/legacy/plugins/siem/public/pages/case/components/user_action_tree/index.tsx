@@ -133,7 +133,7 @@ export const UserActionTree = React.memo(
                   <EuiFlexItem grow={false}>
                     <p>
                       <strong>{`${comment.createdBy.username}`}</strong>
-                      {` ${i18n.ADDED_COMMENT} `}{' '}
+                      {` ${i18n.ADDED_COMMENT} `}
                       <FormattedRelativePreferenceLabel
                         value={comment.createdAt}
                         preferenceLabel={`${i18n.ON} `}
