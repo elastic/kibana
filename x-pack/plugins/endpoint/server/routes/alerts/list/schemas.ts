@@ -34,6 +34,7 @@ export const alertListReqSchema = schema.object(
         maxSize: 2,
       })
     ),
+    empty_string_is_undefined: schema.boolean({ defaultValue: false }),
     sort: schema.maybe(schema.string()),
     order: schema.maybe(
       schema.string({
@@ -109,18 +110,6 @@ export const alertListReqSchema = schema.object(
         return i18n.translate('xpack.endpoint.alerts.errors.before_cannot_be_used_with_after', {
           defaultMessage: '[before] cannot be used with [after]',
         });
-      }
-      if (
-        value.before !== undefined &&
-        value.sort !== undefined &&
-        value.sort !== EndpointAppConstants.ALERT_LIST_DEFAULT_SORT
-      ) {
-        return i18n.translate(
-          'xpack.endpoint.alerts.errors.before_cannot_be_used_with_custom_sort',
-          {
-            defaultMessage: '[before] cannot be used with custom sort',
-          }
-        );
       }
     },
   }

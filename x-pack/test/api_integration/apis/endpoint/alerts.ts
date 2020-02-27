@@ -131,13 +131,27 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(0);
       });
 
-      it('alerts api should return 400 when using `before` by custom sort parameter', async () => {
-        await supertest
+      it('alerts api should return data using `before` by custom sort parameter', async () => {
+        const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&before=2180&before=8362fcde-0b10-476f-97a8-8d6a43865226`
           )
           .set('kbn-xsrf', 'xxx')
-          .expect(400);
+          .expect(200);
+        expect(body.alerts.length).to.eql(4);
+        expect(body.alerts[3].thread.id).to.eql(2824);
+      });
+
+      it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&${nextPrevPrefixOrder}&sort=thread.id&empty_string_is_undefined=true&before=&before=0b07c8a7-3b23-4458-9884-ee44243c2590`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(25);
+        expect(body.alerts[0].thread?.id).to.eql(1636);
+        expect(body.alerts[24].thread?.id).to.eql(undefined);
       });
 
       it('alerts api should return data using `after` by custom sort parameter', async () => {
@@ -149,6 +163,18 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.alerts.length).to.eql(10);
         expect(body.alerts[0].thread.id).to.eql(1912);
+      });
+
+      it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&after=&after=32b62494-7c7e-4976-bfce-623bbfd177c0&empty_string_is_undefined=true`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(6);
+        expect(body.alerts[0].thread?.id).to.eql(undefined);
+        expect(body.alerts[5].thread?.id).to.eql(undefined);
       });
 
       it('alerts api should filter results of alert data using rison-encoded filters', async () => {

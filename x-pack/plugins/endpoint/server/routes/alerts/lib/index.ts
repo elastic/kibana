@@ -18,10 +18,7 @@ import {
 export { Pagination } from './pagination';
 
 function reverseSortDirection(order: Direction): Direction {
-  if (order === Direction.asc) {
-    return Direction.desc;
-  }
-  return Direction.asc;
+  return order === Direction.asc ? Direction.desc : Direction.asc;
 }
 
 function buildQuery(query: AlertSearchQuery): JsonObject {
@@ -80,6 +77,7 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     {
       [query.sort]: {
         order: query.order,
+        missing: '_last',
       },
     },
     // Secondary sort for tie-breaking
@@ -94,6 +92,7 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     // Reverse sort order for search_before functionality
     const newDirection = reverseSortDirection(query.order);
     sort[0][query.sort].order = newDirection;
+    sort[0][query.sort].missing = newDirection === Direction.asc ? '_first' : '_last';
     sort[1]['event.id'].order = newDirection;
   }
 

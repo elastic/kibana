@@ -40,6 +40,7 @@ export interface AlertSearchQuery {
   order: Direction;
   searchAfter?: SearchCursor;
   searchBefore?: SearchCursor;
+  emptyStringIsUndefined: boolean;
 }
 
 /**
