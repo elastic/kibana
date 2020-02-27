@@ -6,8 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import useResizeObserver from 'use-resize-observer';
+import { MockedProvider } from '@apollo/client/testing';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -31,7 +31,7 @@ const testFlyoutHeight = 980;
 jest.mock('../../lib/kibana');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {
