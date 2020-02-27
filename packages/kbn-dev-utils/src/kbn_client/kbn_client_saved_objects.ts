@@ -57,8 +57,27 @@ interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
   id: string;
 }
 
+interface MigrateResponse {
+  success: boolean;
+  result: Array<{ status: string }>;
+}
+
 export class KbnClientSavedObjects {
   constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}
+
+  /**
+   * Run the saved objects migration
+   */
+  public async migrate() {
+    this.log.debug('Migrating saved objects');
+
+    return await this.requester.request<MigrateResponse>({
+      description: 'migrate saved objects',
+      path: uriencode`/internal/saved_objects/_migrate`,
+      method: 'POST',
+      body: {},
+    });
+  }
 
   /**
    * Get an object

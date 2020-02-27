@@ -24,7 +24,6 @@ export interface MlDependencies extends AppMountParameters {
   security: SecurityPluginSetup;
   __LEGACY: {
     XSRF: string;
-    APP_URL: string;
   };
 }
 
@@ -48,7 +47,6 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
     XSRF: deps.__LEGACY.XSRF,
-    APP_URL: deps.__LEGACY.APP_URL,
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
