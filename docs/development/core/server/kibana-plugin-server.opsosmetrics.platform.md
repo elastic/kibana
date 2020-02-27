@@ -9,5 +9,5 @@ The os platform
 <b>Signature:</b>
 
 ```typescript
-platform: string;
+platform: NodeJS.Platform;
 ```

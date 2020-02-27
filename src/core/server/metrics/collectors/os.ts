@@ -18,9 +18,11 @@
  */
 
 import os from 'os';
-import getos, { LinuxOs } from 'getos';
+import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
 import { OpsOsMetrics, MetricsCollector } from './types';
+
+const getos = promisify(getosAsync);
 
 export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   public async collect(): Promise<OpsOsMetrics> {
@@ -45,7 +47,7 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
 
     if (platform === 'linux') {
       try {
-        const distro = (await promisify(getos)()) as LinuxOs;
+        const distro = (await getos()) as LinuxOs;
         metrics.distro = distro.dist;
         metrics.distroRelease = `${distro.dist}-${distro.release}`;
       } catch (e) {

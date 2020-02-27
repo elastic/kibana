@@ -20,7 +20,7 @@ export interface OpsOsMetrics
 |  [distroRelease](./kibana-plugin-server.opsosmetrics.distrorelease.md) | <code>string</code> | The os distrib release, prefixed by the os distrib. Only present for linux platforms |
 |  [load](./kibana-plugin-server.opsosmetrics.load.md) | <code>{</code><br/><code>        '1m': number;</code><br/><code>        '5m': number;</code><br/><code>        '15m': number;</code><br/><code>    }</code> | cpu load metrics |
 |  [memory](./kibana-plugin-server.opsosmetrics.memory.md) | <code>{</code><br/><code>        total_in_bytes: number;</code><br/><code>        free_in_bytes: number;</code><br/><code>        used_in_bytes: number;</code><br/><code>    }</code> | system memory usage metrics |
-|  [platform](./kibana-plugin-server.opsosmetrics.platform.md) | <code>string</code> | The os platform |
+|  [platform](./kibana-plugin-server.opsosmetrics.platform.md) | <code>NodeJS.Platform</code> | The os platform |
 |  [platformRelease](./kibana-plugin-server.opsosmetrics.platformrelease.md) | <code>string</code> | The os platform release, prefixed by the platform name |
 |  [uptime\_in\_millis](./kibana-plugin-server.opsosmetrics.uptime_in_millis.md) | <code>number</code> | the OS uptime |
 

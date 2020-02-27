@@ -22,7 +22,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const opsConfig = {
   path: 'ops',
   schema: schema.object({
-    interval: schema.number({ defaultValue: 5000 }),
+    interval: schema.duration({ defaultValue: '5s' }),
   }),
 };
 

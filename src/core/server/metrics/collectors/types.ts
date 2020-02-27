@@ -55,7 +55,7 @@ export interface OpsProcessMetrics {
  */
 export interface OpsOsMetrics {
   /** The os platform */
-  platform: string;
+  platform: NodeJS.Platform;
   /** The os platform release, prefixed by the platform name */
   platformRelease: string;
   /** The os distrib. Only present for linux platforms */

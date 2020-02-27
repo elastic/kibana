@@ -66,7 +66,7 @@ export class MetricsService
 
     this.collectInterval = setInterval(() => {
       this.refreshMetrics();
-    }, config.interval);
+    }, config.interval.asMilliseconds());
 
     return {};
   }
@@ -81,5 +81,6 @@ export class MetricsService
     if (this.collectInterval) {
       clearInterval(this.collectInterval);
     }
+    this.metrics$.complete();
   }
 }

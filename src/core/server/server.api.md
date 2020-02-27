@@ -1252,7 +1252,7 @@ export interface OpsOsMetrics {
         free_in_bytes: number;
         used_in_bytes: number;
     };
-    platform: string;
+    platform: NodeJS.Platform;
     platformRelease: string;
     uptime_in_millis: number;
 }

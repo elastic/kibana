@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment from 'moment';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -35,7 +36,9 @@ describe('MetricsService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
 
-    const configService = configServiceMock.create({ atPath: { interval: testInterval } });
+    const configService = configServiceMock.create({
+      atPath: { interval: moment.duration(testInterval) },
+    });
     const coreContext = mockCoreContext.create({ configService });
     metricsService = new MetricsService(coreContext);
   });
@@ -96,7 +99,7 @@ describe('MetricsService', () => {
 
   describe('#stop', () => {
     it('stops the metrics interval', async () => {
-      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
       await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
@@ -107,6 +110,25 @@ describe('MetricsService', () => {
       await metricsService.stop();
       jest.advanceTimersByTime(10 * testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
+
+      getOpsMetrics$().subscribe({ complete: () => {} });
+    });
+
+    it('completes the metrics observable', async () => {
+      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
+      await metricsService.start();
+
+      let completed = false;
+
+      getOpsMetrics$().subscribe({
+        complete: () => {
+          completed = true;
+        },
+      });
+
+      await metricsService.stop();
+
+      expect(completed).toEqual(true);
     });
   });
 });

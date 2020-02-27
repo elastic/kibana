@@ -105,7 +105,7 @@ describe('ServerMetricsCollector', () => {
     expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
   });
 
-  it.skip('collect connection count', async () => {
+  it('collect connection count', async () => {
     const waitSubject = new Subject();
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
@@ -117,12 +117,12 @@ describe('ServerMetricsCollector', () => {
     let metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
 
-    sendGet('/');
+    sendGet('/').end(() => null);
     await delay(20);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(1);
 
-    sendGet('/');
+    sendGet('/').end(() => null);
     await delay(20);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(2);
