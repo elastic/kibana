@@ -65,10 +65,9 @@ const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
     label: createMetricLabel(metric),
     axis_position: 'right',
     chart_type: 'line',
-    color: encodeURIComponent(
+    color:
       (metric.color && colorTransformer(metric.color)) ||
-        colorTransformer(MetricsExplorerColor.color0)
-    ),
+      colorTransformer(MetricsExplorerColor.color0),
     fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
     formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
     value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
