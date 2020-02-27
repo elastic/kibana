@@ -21,10 +21,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
     if (action.type === 'userChangedSelectedEvent') {
       if (context?.services.http) {
         api.dispatch({ type: 'appRequestedResolverData' });
-        // const uniquePid = action.payload.selectedEvent?.endgame.unique_pid;
-        // const legacyEndpointID = action.payload.selectedEvent?.agent.id;
-        const uniquePid = '3096';
-        const legacyEndpointID = '5f78bf8f-ddee-4890-ad61-6b5182309639';
+        const uniquePid = action.payload.selectedEvent?.endgame.unique_pid;
+        const legacyEndpointID = action.payload.selectedEvent?.agent.id;
         const [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
           context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
             query: { legacyEndpointID },
