@@ -13,10 +13,12 @@ import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError, getDuplicates } from './utils';
+import { getDuplicates } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (
   config: LegacyServices['config'],
@@ -128,13 +130,13 @@ export const createCreateRulesBulkRoute = (
                 references,
                 version,
               });
-              return transformOrBulkError(ruleIdOrUuid, createdRule);
+              return transformValidateBulkError(ruleIdOrUuid, createdRule);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }
           })
       );
-      return [
+      const rulesBulk = [
         ...rules,
         ...dupes.map(ruleId =>
           createBulkErrorObject({
@@ -144,6 +146,17 @@ export const createCreateRulesBulkRoute = (
           })
         ),
       ];
+      const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
+      if (errors != null) {
+        return headers
+          .response({
+            message: errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validated;
+      }
     },
   };
 };
