@@ -49,7 +49,7 @@ export interface LegacyAPI {
 export class Plugin {
   private readonly logger: Logger;
 
-  private featureRegistry!: FeatureRegistry;
+  private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -67,8 +67,6 @@ export class Plugin {
     core: CoreSetup,
     { timelion }: { timelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    this.featureRegistry = new FeatureRegistry();
-
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
@@ -96,9 +94,9 @@ export class Plugin {
 
   public start(): RecursiveReadonly<PluginStartContract> {
     this.logger.debug('Starting plugin');
-    return {
+    return deepFreeze({
       getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
-    };
+    });
   }
 
   public stop() {
