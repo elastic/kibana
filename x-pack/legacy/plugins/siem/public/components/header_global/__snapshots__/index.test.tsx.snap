@@ -38,7 +38,7 @@ exports[`HeaderGlobal it renders 1`] = `
                   "disabled": false,
                   "href": "#/link-to/case",
                   "id": "case",
-                  "name": "Case",
+                  "name": "Cases",
                   "urlKey": "case",
                 },
                 "detections": Object {

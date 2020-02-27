@@ -37,7 +37,7 @@ export const AddComment = React.memo<{
     } else if (isValid && data.comment) {
       setFormData({ ...data, ...newData, isNew: true } as NewComment);
     }
-  }, [form]);
+  }, [form, data]);
 
   return (
     <>
