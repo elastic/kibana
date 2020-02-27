@@ -74,7 +74,7 @@ describe('read_signals', () => {
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       jest.spyOn(utils, 'transform').mockReturnValue(null);
       const { payload, statusCode } = await server.inject(getReadRequest());
-      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(JSON.parse(payload).message).toBe('Internal error transforming');
       expect(statusCode).toBe(500);
     });
 
