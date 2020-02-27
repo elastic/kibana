@@ -123,7 +123,13 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
     license.guardApiRoute(getTransformMessagesHandler)
   );
   router.put(
-    { path: addBasePath('transforms/{transformId}'), validate: schemaTransformId },
+    {
+      path: addBasePath('transforms/{transformId}'),
+      validate: {
+        ...schemaTransformId,
+        body: schema.maybe(schema.any()),
+      },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { transformId } = req.params as SchemaTransformId;
 
@@ -152,7 +158,12 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
     })
   );
   router.post(
-    { path: addBasePath('delete_transforms'), validate: {} },
+    {
+      path: addBasePath('delete_transforms'),
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const transformsInfo = req.body as TransformEndpointRequest[];
 
@@ -175,11 +186,21 @@ export function registerTransformsRoutes({ router, license }: RouteDependencies)
     license.guardApiRoute(previewTransformHandler)
   );
   router.post(
-    { path: addBasePath('start_transforms'), validate: {} },
+    {
+      path: addBasePath('start_transforms'),
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+    },
     license.guardApiRoute(startTransformsHandler)
   );
   router.post(
-    { path: addBasePath('stop_transforms'), validate: {} },
+    {
+      path: addBasePath('stop_transforms'),
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+    },
     license.guardApiRoute(stopTransformsHandler)
   );
   router.post(
