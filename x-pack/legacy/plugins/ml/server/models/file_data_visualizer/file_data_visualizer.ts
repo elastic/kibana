@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { RequestHandlerContext } from 'kibana/server';
+import { FindFileStructureResponse } from '../../../common/types/file_datavisualizer';
 
 export type InputData = any[];
 
@@ -20,31 +21,7 @@ export type FormattedOverrides = InputOverrides & {
 };
 
 export interface AnalysisResult {
-  results: {
-    charset: string;
-    has_header_row: boolean;
-    has_byte_order_marker: boolean;
-    format: string;
-    field_stats: {
-      [fieldName: string]: {
-        count: number;
-        cardinality: number;
-        top_hits: Array<{ count: number; value: any }>;
-      };
-    };
-    sample_start: string;
-    num_messages_analyzed: number;
-    mappings: {
-      [fieldName: string]: {
-        type: string;
-      };
-    };
-    quote: string;
-    delimiter: string;
-    need_client_timezone: boolean;
-    num_lines_analyzed: number;
-    column_names: string[];
-  };
+  results: FindFileStructureResponse;
   overrides?: FormattedOverrides;
 }
 

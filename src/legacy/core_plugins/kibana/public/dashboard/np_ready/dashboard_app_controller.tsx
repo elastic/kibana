@@ -26,22 +26,23 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
-import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
+import { migrateLegacyQuery, subscribeWithScope } from '../legacy_imports';
 import {
+  connectToQueryState,
   esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
   SavedQuery,
-  syncAppFilters,
-  syncQuery,
+  syncQueryStateWithUrl,
 } from '../../../../../../plugins/data/public';
 import {
+  getSavedObjectFinder,
   SaveResult,
   showSaveModal,
-  getSavedObjectFinder,
 } from '../../../../../../plugins/saved_objects/public';
 
 import {
@@ -128,9 +129,9 @@ export class DashboardAppController {
     // starts syncing `_g` portion of url with query services
     // note: dashboard_state_manager.ts syncs `_a` portion of url
     const {
-      stop: stopSyncingGlobalStateWithUrl,
+      stop: stopSyncingQueryServiceStateWithUrl,
       hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQuery(queryService, kbnUrlStateStorage);
+    } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
 
@@ -147,11 +148,20 @@ export class DashboardAppController {
       history,
     });
 
-    const stopSyncingAppFilters = syncAppFilters(filterManager, {
-      set: filters => dashboardStateManager.setFilters(filters),
-      get: () => dashboardStateManager.appState.filters,
-      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
-    });
+    // sync initial app filters from state to filterManager
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    // setup syncing of app filters between appState and filterManager
+    const stopSyncingAppFilters = connectToQueryState(
+      queryService,
+      {
+        set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
+        get: () => ({ filters: dashboardStateManager.appState.filters }),
+        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+      },
+      {
+        filters: esFilters.FilterStateStore.APP_STATE,
+      }
+    );
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -898,7 +908,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      stopSyncingGlobalStateWithUrl();
+      stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();

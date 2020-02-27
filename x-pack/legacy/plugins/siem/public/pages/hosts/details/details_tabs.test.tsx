@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
@@ -17,15 +16,6 @@ import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
-
-jest.mock('../../../containers/source', () => ({
-  indicesExistOrDataTemporarilyUnavailable: () => true,
-  WithSource: ({
-    children,
-  }: {
-    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
-  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
-}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -37,7 +27,7 @@ jest.mock('../../../components/query_bar', () => ({
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('body', () => {
@@ -46,7 +36,7 @@ describe('body', () => {
     allHosts: 'HostsQueryTabBody',
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
-    events: 'EventsQueryTabBody',
+    events: 'Memo(EventsQueryTabBodyComponent)',
     alerts: 'HostAlertsQueryTabBody',
   };
 

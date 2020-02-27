@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { has, snakeCase } from 'lodash/fp';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacyServices } from '../../../types';
 
@@ -44,7 +45,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
 };
 
 export interface BulkError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: {
     status_code: number;
     message: string;
@@ -53,31 +55,70 @@ export interface BulkError {
 
 export const createBulkErrorObject = ({
   ruleId,
+  id,
   statusCode,
   message,
 }: {
-  ruleId: string;
+  ruleId?: string;
+  id?: string;
   statusCode: number;
   message: string;
 }): BulkError => {
-  return {
-    rule_id: ruleId,
-    error: {
-      status_code: statusCode,
-      message,
-    },
-  };
+  if (id != null && ruleId != null) {
+    return {
+      id,
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (id != null) {
+    return {
+      id,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (ruleId != null) {
+    return {
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else {
+    return {
+      rule_id: '(unknown id)',
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  }
 };
 
-export interface ImportRuleResponse {
+export interface ImportRegular {
   rule_id: string;
-  status_code?: number;
+  status_code: number;
   message?: string;
-  error?: {
-    status_code: number;
-    message: string;
-  };
 }
+
+export type ImportRuleResponse = ImportRegular | BulkError;
+
+export const isBulkError = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is BulkError => {
+  return has('error', importRuleResponse);
+};
+
+export const isImportRegular = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is ImportRegular => {
+  return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
+};
 
 export interface ImportSuccessError {
   success: boolean;
@@ -179,4 +220,15 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
   const spaceId = getSpaceId();
 
   return `${signalsIndex}-${spaceId}`;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
+  return Object.keys(obj).reduce((acc, item) => {
+    const newKey = snakeCase(item);
+    return { ...acc, [newKey]: obj[item] };
+  }, {});
 };

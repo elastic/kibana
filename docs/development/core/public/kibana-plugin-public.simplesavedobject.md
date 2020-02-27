@@ -11,7 +11,7 @@ It provides basic functionality for creating/saving/deleting saved objects, but 
 <b>Signature:</b>
 
 ```typescript
-export declare class SimpleSavedObject<T extends SavedObjectAttributes> 
+export declare class SimpleSavedObject<T = unknown> 
 ```
 
 ## Constructors
