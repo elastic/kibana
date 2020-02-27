@@ -11,13 +11,15 @@ import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public'
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 import { useHistory } from '../utils/history_context';
 
+type Search = Record<string, string>;
+
 export interface LinkDescriptor {
   // When an app isn't provided (for external linking) the history instance will
   // be used to ensure either metrics or logs is used.
   app?: string;
   pathname?: string;
   hash?: string;
-  search?: Record<string, string>;
+  search?: Search;
 }
 
 interface LinkProps {
@@ -80,7 +82,7 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   };
 };
 
-const encodeSearch = (search: LinkDescriptor['search']) => {
+const encodeSearch = (search: Search) => {
   return stringify(urlUtils.encodeQuery(search), { sort: false, encode: false });
 };
 
