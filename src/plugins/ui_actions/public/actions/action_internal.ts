@@ -43,7 +43,6 @@ export class ActionInternal<A extends AnyActionDefinition>
 
   public readonly state = createActionStateContainer({
     name: '',
-    order: this.definition.order || 0,
     config: this.definition.defaultConfig || {},
   });
 
