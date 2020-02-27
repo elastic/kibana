@@ -9,6 +9,7 @@ import {
   typicalPayload,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
+  getResult,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, responseMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
@@ -21,7 +22,8 @@ describe('patch_rules_bulk', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.alertsClient.update.mockResolvedValue(getResult()); // update succeeds
 
     patchRulesBulkRoute(server.router);
   });
