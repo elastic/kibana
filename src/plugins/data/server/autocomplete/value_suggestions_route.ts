@@ -23,6 +23,7 @@ import { IRouter } from 'kibana/server';
 
 import { IFieldType, Filter } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { getRequestAbortedSignal } from '../lib';
 
 export function registerValueSuggestionsRoute(router: IRouter) {
   router.post(
@@ -50,6 +51,7 @@ export function registerValueSuggestionsRoute(router: IRouter) {
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
       const { dataClient } = context.core.elasticsearch;
+      const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
         timeout: await uiSettings.get<number>('kibana.autocompleteTimeout'),
@@ -62,7 +64,7 @@ export function registerValueSuggestionsRoute(router: IRouter) {
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
-        const result = await dataClient.callAsCurrentUser('search', { index, body });
+        const result = await dataClient.callAsCurrentUser('search', { index, body }, { signal });
 
         const buckets: any[] =
           get(result, 'aggregations.suggestions.buckets') ||

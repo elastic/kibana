@@ -6,9 +6,14 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { EndpointMetadata } from '../../../common/types';
+import {
+  EndpointMetadata,
+  AlertData,
+  AlertResultList,
+  Immutable,
+  ImmutableArray,
+} from '../../../common/types';
 import { AppAction } from './store/action';
-import { AlertResultList, Immutable } from '../../../common/types';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -85,9 +90,23 @@ export interface EndpointAppLocation {
 }
 
 export type AlertListData = AlertResultList;
-export type AlertListState = Immutable<AlertResultList> & {
+
+export interface AlertListState {
+  /** Array of alert items. */
+  alerts: ImmutableArray<AlertData>;
+
+  /** The total number of alerts on the page. */
+  total: number;
+
+  /** Number of alerts per page. */
+  pageSize: number;
+
+  /** Page number, starting at 0. */
+  pageIndex: number;
+
+  /** Current location object from React Router history. */
   readonly location?: Immutable<EndpointAppLocation>;
-};
+}
 
 /**
  * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
