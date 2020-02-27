@@ -5,7 +5,11 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { SnapshotGroupBy, SnapshotMetricInput } from '../../../../common/http_api/snapshot_api';
+import {
+  SnapshotGroupBy,
+  SnapshotMetricInput,
+  SnapshotCustomMetricInput,
+} from '../../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 
@@ -20,3 +24,6 @@ export const changeBoundsOverride = actionCreator<InfraWaffleMapBounds>('CHANGE_
 export const changeAutoBounds = actionCreator<boolean>('CHANGE_AUTO_BOUNDS');
 export const changeAccount = actionCreator<string>('CHANGE_ACCOUNT');
 export const changeRegion = actionCreator<string>('CHANGE_REGION');
+export const changeCustomMetrics = actionCreator<SnapshotCustomMetricInput[]>(
+  'CHANGE_CUSTOM_METRICS'
+);

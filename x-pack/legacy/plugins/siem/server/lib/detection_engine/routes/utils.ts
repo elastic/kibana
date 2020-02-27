@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { snakeCase } from 'lodash/fp';
+import { has, snakeCase } from 'lodash/fp';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacyServices } from '../../../types';
 
@@ -100,16 +100,25 @@ export const createBulkErrorObject = ({
   }
 };
 
-export interface ImportRuleResponse {
-  rule_id?: string;
-  id?: string;
-  status_code?: number;
+export interface ImportRegular {
+  rule_id: string;
+  status_code: number;
   message?: string;
-  error?: {
-    status_code: number;
-    message: string;
-  };
 }
+
+export type ImportRuleResponse = ImportRegular | BulkError;
+
+export const isBulkError = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is BulkError => {
+  return has('error', importRuleResponse);
+};
+
+export const isImportRegular = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is ImportRegular => {
+  return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
+};
 
 export interface ImportSuccessError {
   success: boolean;
@@ -215,6 +224,9 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };

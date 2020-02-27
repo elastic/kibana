@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields';
-
 export interface ISourceDescriptor {
   id: string;
   type: string;
 }
 
+export interface IXYZTMSSourceDescriptor extends ISourceDescriptor {
+  urlTemplate: string;
+}
+
 export interface ILayerDescriptor {
   sourceDescriptor: ISourceDescriptor;
   id: string;
+  label?: string;
 }
