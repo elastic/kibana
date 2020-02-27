@@ -26,7 +26,7 @@ export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';
 
-export type TriggerId = typeof DEFAULT_TRIGGER | keyof TriggerContextMapping;
+export type TriggerId = keyof TriggerContextMapping;
 
 export type TriggerContext = BaseContext;
 export type BaseContext = object | undefined | string | number;
