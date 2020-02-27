@@ -32,8 +32,6 @@ import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../../../plugins/data/public/services';
 
-jest.mock('ui/new_platform');
-
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
