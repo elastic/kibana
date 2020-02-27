@@ -23,7 +23,7 @@ import { deserializeAggConfig } from '../../search/expressions/utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
 
-interface EventData {
+export interface EventData {
   table: Pick<KibanaDatatable, 'rows' | 'columns'>;
   column: number;
   row: number;
@@ -113,9 +113,8 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
   return filter;
 };
 
-const createFiltersFromEvent = async (event: any) => {
+const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean) => {
   const filters: Filter[] = [];
-  const dataPoints: EventData[] = event.data || [event];
 
   await Promise.all(
     dataPoints
@@ -125,7 +124,7 @@ const createFiltersFromEvent = async (event: any) => {
         const filter: Filter[] = (await createFilter(table, column, row)) || [];
         if (filter) {
           filter.forEach(f => {
-            if (event.negate) {
+            if (negate) {
               f = esFilters.toggleFilterNegated(f);
             }
             filters.push(f);

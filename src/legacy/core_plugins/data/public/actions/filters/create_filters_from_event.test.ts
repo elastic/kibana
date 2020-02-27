@@ -22,9 +22,18 @@ import {
   FieldFormatsGetConfigFn,
   esFilters,
 } from '../../../../../../plugins/data/public';
-import { createFiltersFromEvent } from './create_filters_from_event';
+import { createFiltersFromEvent, EventData } from './create_filters_from_event';
 
 jest.mock('ui/new_platform');
+
+const mockField = {
+  name: 'bytes',
+  indexPattern: {
+    id: 'logstash-*',
+  },
+  filterable: true,
+  format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+};
 
 jest.mock('../../../../../../plugins/data/public/services', () => ({
   getIndexPatterns: () => {
@@ -32,14 +41,10 @@ jest.mock('../../../../../../plugins/data/public/services', () => ({
       get: async () => {
         return {
           id: 'logstash-*',
-          fields: [
-            {
-              name: 'bytes',
-              format: {
-                getConverterFor: () => '',
-              },
-            },
-          ],
+          fields: {
+            getByName: () => mockField,
+            filter: () => [mockField],
+          },
         };
       },
     };
@@ -47,66 +52,59 @@ jest.mock('../../../../../../plugins/data/public/services', () => ({
 }));
 
 describe('createFiltersFromEvent', () => {
-  let baseEvent: any;
+  let dataPoints: EventData[];
 
   beforeEach(() => {
-    baseEvent = {
-      data: [
-        {
-          table: {
-            columns: [
-              {
-                id: '1-1',
-                meta: {
-                  type: 'histogram',
-                  indexPatternId: 'logstash-1',
-                  aggConfigParams: {
-                    field: {
-                      name: 'bytes',
-                      filterable: true,
-                      indexPattern: {
-                        id: 'logstash-*',
-                      },
-                      format: new fieldFormats.BytesFormat(
-                        {},
-                        (() => {}) as FieldFormatsGetConfigFn
-                      ),
-                    },
-                    interval: 30,
-                    otherBucket: true,
-                  },
+    dataPoints = [
+      {
+        table: {
+          columns: [
+            {
+              name: 'test',
+              id: '1-1',
+              meta: {
+                type: 'histogram',
+                indexPatternId: 'logstash-*',
+                aggConfigParams: {
+                  field: 'bytes',
+                  interval: 30,
+                  otherBucket: true,
                 },
               },
-            ],
-            rows: [
-              {
-                '1-1': '2048',
-              },
-            ],
-          },
-          column: 0,
-          row: 0,
-          value: 'test',
+            },
+          ],
+          rows: [
+            {
+              '1-1': '2048',
+            },
+          ],
         },
-      ],
-    };
+        column: 0,
+        row: 0,
+        value: 'test',
+      },
+    ];
   });
 
   test('ignores event when value for rows is not provided', async () => {
-    baseEvent.data[0].table.rows[0]['1-1'] = null;
-    const filters = await createFiltersFromEvent(baseEvent);
+    dataPoints[0].table.rows[0]['1-1'] = null;
+    const filters = await createFiltersFromEvent(dataPoints);
+
     expect(filters.length).toEqual(0);
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    baseEvent.data[0].table.columns[0].meta.type = 'terms';
-    const filters = await createFiltersFromEvent(baseEvent);
+    if (dataPoints[0].table.columns[0].meta) {
+      dataPoints[0].table.columns[0].meta.type = 'terms';
+    }
+    const filters = await createFiltersFromEvent(dataPoints);
+
     expect(filters.length).toEqual(1);
     expect(filters[0].query.match_phrase.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {
-    const filters = await createFiltersFromEvent(baseEvent);
+    const filters = await createFiltersFromEvent(dataPoints);
 
     expect(filters.length).toEqual(1);
 
