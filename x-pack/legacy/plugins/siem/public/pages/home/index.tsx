@@ -74,6 +74,8 @@ export const HomePageComponent = () => {
 
   const { browserFields, indexPattern, contentAvailable } = useWithSource();
 
+  const currentLocation = useLocation();
+
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal contentAvailable />
