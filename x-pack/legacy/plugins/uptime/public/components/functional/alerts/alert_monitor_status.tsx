@@ -198,7 +198,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                     // the selectable component is very general, so some features require additional computation like this
                     activeOptionIndex: timerangeUnitOptions.reduce(
                       (acc, { checked }, ind) => (checked === 'on' ? ind : acc),
-                      0
+                      // if we pass -1 the component doesn't highlight any item. This shouldn't happen but
+                      // the behavior will be acceptable in this case.
+                      -1
                     ),
                     showIcons: true,
                   }}
