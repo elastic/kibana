@@ -32,6 +32,11 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
   };
 }
 
+interface RouterProps {
+  basename: string;
+  store: Store;
+}
+
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
   <Provider store={store}>
     <I18nProvider>
