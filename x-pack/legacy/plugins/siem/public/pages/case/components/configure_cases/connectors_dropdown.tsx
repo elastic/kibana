@@ -11,7 +11,38 @@ interface Props {
   connectors: Array<EuiSuperSelectOption<string>>;
 }
 
-const ConnectorsDropdownComponent: React.FC<Props> = ({ connectors }) => {
+import serviceNowLogo from '../../../../../lib/connectors/logos/servicenow.svg';
+
+const ICON_SIZE = 'm';
+
+const EuiIconExtended = styled(EuiIcon)`
+  margin-right: 13px;
+`;
+
+const connectors: Array<EuiSuperSelectOption<string>> = [
+  {
+    value: 'no-connector',
+    inputDisplay: (
+      <>
+        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+        <span>{i18n.NO_CONNECTOR}</span>
+      </>
+    ),
+    'data-test-subj': 'no-connector',
+  },
+  {
+    value: 'servicenow-connector',
+    inputDisplay: (
+      <>
+        <EuiIconExtended type={serviceNowLogo} size={ICON_SIZE} />
+        <span>{'My ServiceNow connector'}</span>
+      </>
+    ),
+    'data-test-subj': 'servicenow-connector',
+  },
+];
+
+const ConnectorsDropdownComponent: React.FC = () => {
   const [selectedConnector, setSelectedConnector] = useState(connectors[0].value);
 
   return (
