@@ -53,26 +53,13 @@ import { registerRoutes } from './routes';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The
- * SavedObjectsServiceSetup API exposes methods for creating and registering
- * Saved Object client wrappers.
+ * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
+ * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
  *
  * @remarks
- * Note: The Saved Object setup API's should only be used for creating and
- * registering client wrappers. Constructing a Saved Objects client or
- * repository for use within your own plugin won't have any of the registered
- * wrappers applied and is considered an anti-pattern. Use the Saved Objects
- * client from the
- * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
- * method or the {@link RequestHandlerContext | route handler context} instead.
- *
  * When plugins access the Saved Objects client, a new client is created using
  * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`. To create a factory or wrapper,
- * plugins will have to construct a Saved Objects client. First create a
- * repository by calling `scopedRepository` or `internalRepository` and then
- * use this repository as the argument to the {@link SavedObjectsClient}
- * constructor.
+ * registered through `addClientWrapper`.
  *
  * @example
  * ```ts
@@ -83,6 +70,18 @@ import { registerRoutes } from './routes';
  *     core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
  *       return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
  *     })
+ *   }
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+ * import { mySoType } from './saved_objects'
+ *
+ * export class Plugin() {
+ *   setup: (core: CoreSetup) => {
+ *     core.savedObjects.registerType(mySoType);
  *   }
  * }
  * ```
@@ -104,14 +103,60 @@ export interface SavedObjectsServiceSetup {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ) => void;
+
+  /**
+   * Register a {@link SavedObjectsType | savedObjects type} definition.
+   *
+   * See the {@link SavedObjectsTypeMappingDefinition | mappings format} and
+   * {@link SavedObjectMigrationMap | migration format} for more details about these.
+   *
+   * @example
+   * ```ts
+   * // src/plugins/my_plugin/server/saved_objects/my_type.ts
+   * import { SavedObjectsType } from 'src/core/server';
+   * import * as migrations from './migrations';
+   *
+   * export const myType: SavedObjectsType = {
+   *   name: 'MyType',
+   *   hidden: false,
+   *   namespaceAgnostic: true,
+   *   mappings: {
+   *     properties: {
+   *       textField: {
+   *         type: 'text',
+   *       },
+   *       boolField: {
+   *         type: 'boolean',
+   *       },
+   *     },
+   *   },
+   *   migrations: {
+   *     '2.0.0': migrations.migrateToV2,
+   *     '2.1.0': migrations.migrateToV2_1
+   *   },
+   * };
+   *
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType(myType);
+   *   }
+   * }
+   * ```
+   *
+   * @remarks The type definition is an aggregation of the legacy savedObjects `schema`, `mappings` and `migration` concepts.
+   * This API is the single entry point to register saved object types in the new platform.
+   */
+  registerType: (type: SavedObjectsType) => void;
 }
 
 /**
  * @internal
  */
-export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
-  registerType: (type: SavedObjectsType) => void;
-}
+export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -159,6 +204,11 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
+   * {@link SavedObjectsType | saved object types}
+   */
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -170,10 +220,6 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
    * @deprecated Exposed only for injecting into Legacy
    */
   clientProvider: ISavedObjectsClientProvider;
-  /**
-   * @deprecated Exposed only for injecting into Legacy
-   */
-  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -359,6 +405,7 @@ export class SavedObjectsService
         const repository = repositoryFactory.createScopedRepository(request);
         return new SavedObjectsClient(repository);
       },
+      typeRegistry: this.typeRegistry,
     });
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
@@ -371,11 +418,11 @@ export class SavedObjectsService
     return {
       migrator,
       clientProvider,
-      typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 

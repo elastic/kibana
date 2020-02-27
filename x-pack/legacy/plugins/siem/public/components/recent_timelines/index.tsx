@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { useApolloClient } from '@apollo/client';
 import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
@@ -27,14 +27,14 @@ export interface MeApiResponse {
 }
 
 interface OwnProps {
-  apolloClient: ApolloClient<{}>;
   filterBy: FilterMode;
 }
 
 export type Props = OwnProps & PropsFromRedux;
 
 const StatefulRecentTimelinesComponent = React.memo<Props>(
-  ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
+  ({ filterBy, updateIsLoading, updateTimeline }) => {
+    const apolloClient = useApolloClient();
     const actionDispatcher = updateIsLoading as ActionCreator<{ id: string; isLoading: boolean }>;
     const onOpenTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
