@@ -34,8 +34,6 @@ export { PersistedState } from 'ui/persisted_state';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
-// @ts-ignore
-export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
@@ -43,8 +41,7 @@ export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
-export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
+export { VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/';
 export {
   configureAppAngularModule,
   ensureDefaultIndexPattern,
