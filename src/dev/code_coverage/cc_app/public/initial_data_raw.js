@@ -19,10 +19,9 @@ const initialData = {
   historicalItems: [],
 };
 
-
 if (!isInBrowser()) {
-  module.exports.default = {}
-  module.exports.default = initialData
+  module.exports.default = {};
+  module.exports.default = initialData;
 } else {
   window.initialData = initialData;
 }

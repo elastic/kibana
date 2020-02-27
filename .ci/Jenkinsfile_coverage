@@ -115,7 +115,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   """,
                   "### About to Upload Code Coverage Static Site"
                 )
-                kibanaCoverage.uploadCoverageStaticSite_PROD(TIME_STAMP)
+                kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
               }
 
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
