@@ -35,8 +35,16 @@ tryInit()
   .map(boot);
 
 function boot(testRunnerTypes) {
-  const { buildStats, historicalItems, currentJobTimeStamp, currentItem, currentCiRunUrl } = initialData;
+  const {
+    buildStats,
+    historicalItems,
+    currentJobTimeStamp,
+    currentItem,
+    currentCiRunUrl,
+  } = initialData;
+
   initPrint(initialData);
+
   ReactDOM.render(
     <App
       testRunnerTypes={testRunnerTypes}

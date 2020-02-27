@@ -35,7 +35,7 @@ export default function App({
   return (
     <div>
       <Header url={url} />
-      <div className="bg-gray-400">
+      <div>
         <div>
           <CoverageItem
             item={currentItem}
@@ -45,10 +45,7 @@ export default function App({
             currentCiRunUrl={currentCiRunUrl}
           />
         </div>
-        <HistoricalList
-          testRunnerTypes={testRunnerTypes}
-          historicalItems={historicalItems}
-        />
+        <HistoricalList testRunnerTypes={testRunnerTypes} historicalItems={historicalItems} />
       </div>
       {/*<Footer />*/}
     </div>
