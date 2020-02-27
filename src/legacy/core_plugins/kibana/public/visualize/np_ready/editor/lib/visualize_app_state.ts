@@ -82,6 +82,11 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
         linked: false,
       }),
       updateVisState: state => newVisState => ({ ...state, vis: toObject(newVisState) }),
+      updateFromSavedQuery: state => savedQuery => ({
+        ...state,
+        savedQuery: savedQuery.id,
+        query: savedQuery.attributes.query,
+      }),
     }
   );
 

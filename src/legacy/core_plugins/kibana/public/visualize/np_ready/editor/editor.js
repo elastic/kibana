@@ -332,7 +332,7 @@ function VisualizeAppController(
     }
   );
 
-  function updateSavedQuery(savedQueryId) {
+  const updateSavedQueryFromUrl = savedQueryId => {
     if (!savedQueryId) {
       delete $scope.savedQuery;
 
@@ -348,7 +348,7 @@ function VisualizeAppController(
         $scope.savedQuery = savedQuery;
       });
     });
-  }
+  };
 
   function init() {
     if (vis.indexPattern) {
@@ -410,7 +410,7 @@ function VisualizeAppController(
         stateContainer.transitions.set('query', newQuery);
       }
       persistOnChange(state);
-      updateSavedQuery(state.savedQuery);
+      updateSavedQueryFromUrl(state.savedQuery);
 
       // if the browser history was changed manually we need to reflect changes in the editor
       if (!_.isEqual(vis.getState(), state.vis)) {
@@ -429,7 +429,7 @@ function VisualizeAppController(
     };
 
     // update the query if savedQuery is stored
-    updateSavedQuery(initialState.savedQuery);
+    updateSavedQueryFromUrl(initialState.savedQuery);
 
     const subscriptions = new Subscription();
 
@@ -519,14 +519,6 @@ function VisualizeAppController(
     });
   };
 
-  $scope.onQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = { ...savedQuery };
-  };
-
   $scope.onClearSavedQuery = () => {
     delete $scope.savedQuery;
     stateContainer.transitions.removeSavedQuery(defaultQuery);
@@ -534,7 +526,7 @@ function VisualizeAppController(
   };
 
   const updateStateFromSavedQuery = savedQuery => {
-    stateContainer.transitions.set('query', savedQuery.attributes.query);
+    stateContainer.transitions.updateFromSavedQuery(savedQuery);
 
     const savedQueryFilters = savedQuery.attributes.filters || [];
     const globalFilters = filterManager.getGlobalFilters();
@@ -551,12 +543,10 @@ function VisualizeAppController(
     }
   };
 
-  $scope.$watch('savedQuery', newSavedQuery => {
-    if (!newSavedQuery) return;
-    stateContainer.transitions.set('savedQuery', newSavedQuery.id);
-
-    updateStateFromSavedQuery(newSavedQuery);
-  });
+  $scope.updateSavedQuery = savedQuery => {
+    $scope.savedQuery = savedQuery;
+    updateStateFromSavedQuery(savedQuery);
+  };
 
   /**
    * Called when the user clicks "Save" button.
