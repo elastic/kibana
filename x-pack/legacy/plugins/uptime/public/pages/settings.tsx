@@ -195,10 +195,10 @@ const mapStateToProps = (state: AppState) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  loadDynamicSettings: (): DispatchProps => {
-    return dispatch(getDynamicSettings({}));
+  loadDynamicSettings: (settings: DynamicSettings) => {
+    return  dispatch(getDynamicSettings());
   },
-  saveDynamicSettings: (settings: DynamicSettings): DispatchProps => {
+  saveDynamicSettings: (settings: DynamicSettings) => {
     return dispatch(setDynamicSettings(settings));
   },
 });
