@@ -13,7 +13,7 @@ import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../public/app/hooks/use_api_types';
+} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 

@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { License } from './services';
 
 export interface Dependencies {

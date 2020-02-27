@@ -14,7 +14,7 @@ import { Privileges } from '../../../../../legacy/plugins/transform/public/app/l
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
-export function registerPrivilegesRoute({ router, license, lib }: RouteDependencies) {
+export function registerPrivilegesRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('privileges'), validate: {} },
     license.guardApiRoute(async (ctx, req, res) => {
