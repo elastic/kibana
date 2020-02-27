@@ -34,6 +34,13 @@ export const SERVICENOW_API_URL_REQUIRED = i18n.translate(
   }
 );
 
+export const SERVICENOW_API_URL_INVALID = i18n.translate(
+  'xpack.siem.case.connectors.servicenow.invalidApiUrlTextField',
+  {
+    defaultMessage: 'URL is invalid',
+  }
+);
+
 export const SERVICENOW_USERNAME_LABEL = i18n.translate(
   'xpack.siem.case.connectors.servicenow.usernameTextFieldLabel',
   {
