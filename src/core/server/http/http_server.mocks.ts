@@ -29,6 +29,7 @@ import {
   RouteMethod,
   KibanaResponseFactory,
   RouteValidationSpec,
+  KibanaRouteState,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
@@ -43,6 +44,7 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  kibanaRouteState?: KibanaRouteState;
   validation?: {
     params?: RouteValidationSpec<P>;
     query?: RouteValidationSpec<Q>;
@@ -60,11 +62,13 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   socket = new Socket(),
   routeTags,
   validation = {},
+  kibanaRouteState = { xsrfRequired: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
   return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
+      app: kibanaRouteState,
       headers,
       params,
       query,
@@ -105,6 +109,7 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   return merge(
     {},
     {
+      app: { xsrfRequired: true } as any,
       headers: {},
       path: '/',
       route: { settings: {} },
