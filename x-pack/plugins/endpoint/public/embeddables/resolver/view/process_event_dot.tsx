@@ -108,20 +108,21 @@ export const ProcessEventDot = styled(
             y={labelYOffset(magFactorX) + labelYHeight(magFactorX) / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize="3"
+            fontSize="3.75"
             fontWeight="bold"
             fill={NamedColors.empty}
             paintOrder="stroke"
             tabIndex={-1}
+            style={{ letterSpacing: '-0.02px'}}
           >
             {event.data_buffer.process_name}
           </text> 
           <text
-            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) + 10.5}
+            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) + 13}
             y={labelYOffset(magFactorX) - 1}
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize="2.25"
+            fontSize="2.67"
             fill={NamedColors.activeNoWarning}
             paintOrder="stroke"
             fontWeight="bold"
