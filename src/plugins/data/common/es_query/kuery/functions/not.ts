@@ -17,30 +17,26 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import * as literal from '../node_types/literal';
+import * as ast from '../ast';
+import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(fieldName) {
+export function buildNodeParams(child: KueryNode) {
   return {
-    arguments: [literal.buildNode(fieldName)],
+    arguments: [child],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config, context = {}) {
-  const {
-    arguments: [fieldNameArg],
-  } = node;
-  const fullFieldNameArg = {
-    ...fieldNameArg,
-    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
-  };
-  const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
-  const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
+) {
+  const [argument] = node.arguments;
 
-  if (field && field.scripted) {
-    throw new Error(`Exists query does not support scripted fields`);
-  }
   return {
-    exists: { field: fieldName },
+    bool: {
+      must_not: ast.toElasticsearchQuery(argument, indexPattern, config, context),
+    },
   };
 }
