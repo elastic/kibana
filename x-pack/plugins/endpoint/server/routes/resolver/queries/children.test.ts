@@ -8,7 +8,7 @@ import { EndpointAppConstants } from '../../../../common/types';
 
 describe('children events query', () => {
   it('generates the correct legacy queries', () => {
-    const timestamp = new Date().getTime().toString();
+    const timestamp = new Date().getTime();
     expect(
       new ChildrenQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
     ).toStrictEqual({
@@ -47,7 +47,7 @@ describe('children events query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    const timestamp = new Date().getTime().toString();
+    const timestamp = new Date().getTime();
 
     expect(
       new ChildrenQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')

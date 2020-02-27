@@ -19,6 +19,8 @@ export interface EndpointPluginStartDependencies {} // eslint-disable-line @type
 
 export interface EndpointPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
+  overlays: CoreStart['overlays'] | undefined;
+  notifications: CoreStart['notifications'] | undefined;
 }
 
 export class EndpointPlugin

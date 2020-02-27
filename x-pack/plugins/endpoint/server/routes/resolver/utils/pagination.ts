@@ -11,12 +11,12 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 
 export interface PaginationParams {
   size: number;
-  timestamp?: string;
+  timestamp?: number;
   eventID?: string;
 }
 
 interface PaginationCursor {
-  timestamp: string;
+  timestamp: number;
   eventID: string;
 }
 
@@ -83,7 +83,7 @@ export function paginatedResults(
   // results will be at least 1 because of length check at the top of the function
   const next = results[results.length - 1];
   const cursor = {
-    timestamp: String(next['@timestamp']),
+    timestamp: next['@timestamp'],
     eventID: extractEventID(next),
   };
 
