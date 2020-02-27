@@ -1,6 +1,6 @@
 def withWorkers(machineName, preWorkerClosure = {}, inParallel = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-96', true) {
+    jobRunner('tests-64', true) {
       withGcsArtifactUpload(machineName, {
         withPostBuildReporting {
           doSetup()
