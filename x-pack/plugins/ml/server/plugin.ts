@@ -6,7 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } from 'src/core/server';
-import { LicenseCheckResult, PLUGIN_ID, PluginsSetup } from './types';
+import { LicenseCheckResult, PluginsSetup, RouteInitialization } from './types';
+import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { VALID_FULL_LICENSE_MODES } from '../../../legacy/plugins/ml/common/constants/license';
 
 // @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
@@ -61,14 +63,14 @@ export class MlServerPlugin {
     let sampleLinksInitialized = false;
 
     plugins.features.registerFeature({
-      id: 'ml',
+      id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
       icon: 'machineLearningApp',
-      navLinkId: 'ml',
-      app: ['ml', 'kibana'],
-      catalogue: ['ml'],
+      navLinkId: PLUGIN_ID,
+      app: [PLUGIN_ID, 'kibana'],
+      catalogue: [PLUGIN_ID],
       privileges: {},
       reserved: {
         privilege: {
@@ -86,25 +88,22 @@ export class MlServerPlugin {
     });
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
-    const mlClient = coreSetup.elasticsearch.createClient('ml', {
+    const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
       plugins: [elasticsearchJsPlugin],
     });
 
-    coreSetup.http.registerRouteHandlerContext('ml', (context, request) => {
+    coreSetup.http.registerRouteHandlerContext(PLUGIN_ID, (context, request) => {
       return {
         mlClient: mlClient.asScoped(request),
       };
     });
 
-    const routeInit = {
+    const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       getLicenseCheckResults: () => this.licenseCheckResults,
     };
 
-    annotationRoutes({
-      ...routeInit,
-      securityPlugin: plugins.security,
-    });
+    annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
     dataFrameAnalyticsRoutes(routeInit);
@@ -119,9 +118,8 @@ export class MlServerPlugin {
     jobServiceRoutes(routeInit);
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
-    jobValidationRoutes({ ...routeInit, version: this.version });
-    systemRoutes({
-      ...routeInit,
+    jobValidationRoutes(routeInit, this.version);
+    systemRoutes(routeInit, {
       spacesPlugin: plugins.spaces,
       cloud: plugins.cloud,
     });
@@ -153,7 +151,7 @@ export class MlServerPlugin {
         if (isEnabled === true && plugins.home) {
           if (
             this.licenseCheckResults.type &&
-            ['platinum', 'trial'].includes(this.licenseCheckResults.type)
+            VALID_FULL_LICENSE_MODES.includes(this.licenseCheckResults.type)
           ) {
             addLinksToSampleDatasets({
               addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,

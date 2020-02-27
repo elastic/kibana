@@ -6,12 +6,12 @@
 
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ router, getLicenseCheckResults }: any) {
+export function notificationRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *

@@ -7,7 +7,7 @@
 import { RequestHandlerContext } from 'src/core/server';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import {
   getCardinalityOfFieldsSchema,
   getTimeFieldRangeSchema,
@@ -29,7 +29,7 @@ function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ router, getLicenseCheckResults }: any) {
+export function fieldsService({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *

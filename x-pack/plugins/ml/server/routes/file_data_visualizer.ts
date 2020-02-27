@@ -19,7 +19,7 @@ import {
 } from '../models/file_data_visualizer';
 
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
@@ -43,7 +43,7 @@ function importData(
 /**
  * Routes for the file data visualizer.
  */
-export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: any) {
+export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
    *

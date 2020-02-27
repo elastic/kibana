@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
@@ -16,7 +16,7 @@ import {
 /**
  * Routes for the anomaly detectors
  */
-export function jobRoutes({ router, getLicenseCheckResults }: any) {
+export function jobRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *

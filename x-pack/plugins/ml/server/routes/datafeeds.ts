@@ -7,13 +7,13 @@
 import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import { startDatafeedSchema, datafeedConfigSchema } from './schemas/datafeeds_schema';
 
 /**
  * Routes for datafeed service
  */
-export function dataFeedRoutes({ router, getLicenseCheckResults }: any) {
+export function dataFeedRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DatafeedService
    *

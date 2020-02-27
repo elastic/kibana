@@ -8,7 +8,7 @@ import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import { createFilterSchema, updateFilterSchema } from './schemas/filters_schema';
 import { FilterManager, FormFilter } from '../models/filter';
 
@@ -44,7 +44,7 @@ function deleteFilter(context: RequestHandlerContext, filterId: string) {
   return mgr.deleteFilter(filterId);
 }
 
-export function filtersRoutes({ router, getLicenseCheckResults }: any) {
+export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *

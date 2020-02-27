@@ -13,7 +13,7 @@ import {
   dataVisualizerOverallStatsSchema,
 } from './schemas/data_visualizer_schema';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 
 function getOverallStats(
   context: RequestHandlerContext,
@@ -68,7 +68,7 @@ function getStatsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, getLicenseCheckResults }: any) {
+export function dataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataVisualizer
    *

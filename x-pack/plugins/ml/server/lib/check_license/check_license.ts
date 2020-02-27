@@ -5,7 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LICENSE_TYPE } from '../../../../../legacy/plugins/ml/common/constants/license';
+import {
+  LICENSE_TYPE,
+  VALID_FULL_LICENSE_MODES,
+} from '../../../../../legacy/plugins/ml/common/constants/license';
 import { LicenseCheckResult } from '../../types';
 
 interface Response {
@@ -46,8 +49,6 @@ export function checkLicense(licenseCheckResult: LicenseCheckResult): Response {
       }),
     };
   }
-
-  const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];
 
   const isLicenseModeValid =
     licenseCheckResult.type && VALID_FULL_LICENSE_MODES.includes(licenseCheckResult.type);

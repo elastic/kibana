@@ -8,7 +8,7 @@ import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -74,7 +74,7 @@ function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) 
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ router, getLicenseCheckResults }: any) {
+export function resultsServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup ResultsService
    *

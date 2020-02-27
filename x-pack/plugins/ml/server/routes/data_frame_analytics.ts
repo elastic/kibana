@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsEvaluateSchema,
@@ -18,7 +18,7 @@ import {
 /**
  * Routes for the data frame analytics
  */
-export function dataFrameAnalyticsRoutes({ router, getLicenseCheckResults }: any) {
+export function dataFrameAnalyticsRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataFrameAnalytics
    *

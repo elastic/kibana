@@ -6,11 +6,12 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { IRouter } from 'src/core/server';
+import { CloudSetup } from '../../cloud/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
-
-export const PLUGIN_ID = 'ml';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -21,12 +22,22 @@ export interface LicenseCheckResult {
   type?: string;
 }
 
+export interface SystemRouteDeps {
+  cloud: CloudSetup;
+  spacesPlugin: SpacesPluginSetup;
+}
+
 export interface PluginsSetup {
-  cloud: any;
+  cloud: CloudSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  security: any;
+  security: SecurityPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
+}
+
+export interface RouteInitialization {
+  router: IRouter;
+  getLicenseCheckResults: () => LicenseCheckResult;
 }

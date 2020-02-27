@@ -9,11 +9,12 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
+import { SecurityPluginSetup } from '../../../security/server';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-// import { RouteInitialization } from '../new_platform/plugin';
+import { RouteInitialization } from '../types';
 import {
   deleteAnnotationSchema,
   getAnnotationsSchema,
@@ -34,7 +35,10 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
 /**
  * Routes for annotations
  */
-export function annotationRoutes({ router, securityPlugin, getLicenseCheckResults }: any) {
+export function annotationRoutes(
+  { router, getLicenseCheckResults }: RouteInitialization,
+  securityPlugin: SecurityPluginSetup
+) {
   /**
    * @apiGroup Annotations
    *
@@ -99,6 +103,7 @@ export function annotationRoutes({ router, securityPlugin, getLicenseCheckResult
 
         const { indexAnnotation } = annotationServiceProvider(context);
         const user = securityPlugin.authc.getCurrentUser(request) || {};
+        // @ts-ignore username doesn't exist on {}
         const resp = await indexAnnotation(request.body, user.username || ANNOTATION_USER_UNKNOWN);
 
         return response.ok({

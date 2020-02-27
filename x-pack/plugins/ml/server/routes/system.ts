@@ -13,15 +13,15 @@ import { mlLog } from '../client/log';
 import { privilegesProvider } from '../lib/check_privileges';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
-import { LicenseCheckResult } from '../types';
+import { RouteInitialization, SystemRouteDeps } from '../types';
 
 /**
  * System routes
  */
-export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, cloud }: any) {
-  let cachedLicenseCheckResult: LicenseCheckResult;
-  // const { isSecurityDisabled } = getLicenseCheckResults();
-
+export function systemRoutes(
+  { getLicenseCheckResults, router }: RouteInitialization,
+  { spacesPlugin, cloud }: SystemRouteDeps
+) {
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
     const resp = await context.ml!.mlClient.callAsInternalUser('nodes.info', {
@@ -116,34 +116,28 @@ export function systemRoutes({ getLicenseCheckResults, router, spacesPlugin, clo
         }),
       },
     },
-    licensePreRoutingFactory(
-      () => {
-        cachedLicenseCheckResult = getLicenseCheckResults();
-        return cachedLicenseCheckResult;
-      },
-      async (context, request, response) => {
-        try {
-          const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
-          // if spaces is disabled force isMlEnabledInSpace to be true
-          const { isMlEnabledInSpace } =
-            spacesPlugin !== undefined
-              ? spacesUtilsProvider(spacesPlugin, (request as unknown) as Request)
-              : { isMlEnabledInSpace: async () => true };
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+      try {
+        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
+        // if spaces is disabled force isMlEnabledInSpace to be true
+        const { isMlEnabledInSpace } =
+          spacesPlugin !== undefined
+            ? spacesUtilsProvider(spacesPlugin, (request as unknown) as Request)
+            : { isMlEnabledInSpace: async () => true };
 
-          const { getPrivileges } = privilegesProvider(
-            context.ml!.mlClient.callAsCurrentUser,
-            cachedLicenseCheckResult,
-            isMlEnabledInSpace,
-            ignoreSpaces
-          );
-          return response.ok({
-            body: await getPrivileges(),
-          });
-        } catch (error) {
-          return response.customError(wrapError(error));
-        }
+        const { getPrivileges } = privilegesProvider(
+          context.ml!.mlClient.callAsCurrentUser,
+          getLicenseCheckResults(),
+          isMlEnabledInSpace,
+          ignoreSpaces
+        );
+        return response.ok({
+          body: await getPrivileges(),
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
       }
-    )
+    })
   );
 
   /**
