@@ -17,3 +17,8 @@ export interface ServiceNowActionConnector {
   config: ServiceNowConfig;
   secrets: ServiceNowSecrets;
 }
+
+export interface Connector {
+  actionTypeId: string;
+  logo: string;
+}
