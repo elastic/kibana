@@ -38,9 +38,7 @@ describe('ActionInternal', () => {
 
       expect(serialized).toMatchObject({
         id: 'test-action',
-        state: {
-          order: 0,
-        },
+        state: expect.any(Object),
       });
     });
 
@@ -60,7 +58,6 @@ describe('ActionInternal', () => {
         type: 'ACTION_TYPE',
         state: {
           name: 'qux',
-          order: 11,
           config: {
             foo: 'bar',
           },
