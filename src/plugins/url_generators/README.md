@@ -99,9 +99,10 @@ Consumers of this service can use the ids and state to create URL strings:
   const link = await generator.createUrl(savedLink.state);
 ```
 
-As a consumer, you should not persist the url string. As soon as you do, you
-have lost your migration options. Instead you should store the id and the state object. This will
-let you recreate the migrated url later.
+**As a consumer, you should not persist the url string!**
+
+As soon as you do, you have lost your migration options. Instead you should store the id
+and the state object. This will let you recreate the migrated url later.
 
 ### Examples
 
