@@ -21,8 +21,7 @@ You might also be interested in the
 https://www.elastic.co/webinars/getting-started-kibana[Getting Started with Kibana]
 video tutorial.
 
-If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
-on Elastic Cloud, you can access Kibana with a single click.
+If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
 --
 
 include::{kib-repo-dir}/getting-started/add-sample-data.asciidoc[]
