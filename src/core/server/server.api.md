@@ -1397,6 +1397,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean;
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    xsrfRequired?: boolean;
 }
 
 // @public
