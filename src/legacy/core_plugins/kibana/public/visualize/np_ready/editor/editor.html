@@ -1,14 +1,5 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
 
-  <linked-search
-    ng-show="isVisible"
-    ng-if="vis.type.requiresSearch && linked"
-    saved-search-id="savedVis.savedSearch.id"
-    saved-search-title="savedVis.savedSearch.title"
-    unlink="unlink"
-  >
-  </linked-search>
-
   <!--
     Local nav.
     Most visualizations have all search bar components enabled

@@ -20,7 +20,7 @@
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
-import { AppMountContext, I18nStart } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
   GlobalStateProvider,
@@ -40,7 +40,6 @@ import {
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
 import { VisualizeKibanaServices } from '../kibana_services';
-import { createLinkedSearchComponent } from './components/linked_search';
 
 let angularModuleInstance: IModule | null = null;
 
@@ -92,7 +91,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalKbnUrlModule();
   createLocalStateModule();
   createLocalTopNavModule(navigation);
-  createLocalLinkedSearchModule(core.i18n.Context);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -101,7 +99,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/Private',
     'app/visualize/TopNav',
     'app/visualize/State',
-    'app/visualize/LinkedSearch',
   ]);
   return visualizeAngularModule;
 }
@@ -160,10 +157,4 @@ function createLocalI18nModule() {
     .provider('i18n', I18nProvider)
     .filter('i18n', i18nFilter)
     .directive('i18nId', i18nDirective);
-}
-
-function createLocalLinkedSearchModule(I18nContext: I18nStart['Context']) {
-  angular
-    .module('app/visualize/LinkedSearch', ['react'])
-    .directive('linkedSearch', createLinkedSearchComponent(I18nContext));
 }
