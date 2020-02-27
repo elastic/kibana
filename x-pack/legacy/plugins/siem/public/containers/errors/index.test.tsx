@@ -8,10 +8,10 @@ import { reTryOneTimeOnErrorHandler, errorLinkHandler } from '.';
 import { ServerError, Operation } from '@apollo/client';
 import { GraphQLError } from 'graphql';
 import * as store from '../../store';
-import { onError } from 'apollo-link-error';
+import { onError } from '@apollo/link-error';
 
 const mockDispatch = jest.fn();
-jest.mock('apollo-link-error');
+jest.mock('@apollo/link-error');
 jest.mock('../../store');
 // @ts-ignore
 store.getStore.mockReturnValue({ dispatch: mockDispatch });
