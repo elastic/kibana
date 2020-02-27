@@ -2037,15 +2037,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
   integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
 
-"@elastic/numeral@2.3.3":
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
-  integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
-
-"@elastic/numeral@2.3.5":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.5.tgz#fcaeac57ddc55cd4b7f0b9c7e070c242dd5d0600"
-  integrity sha512-lJVZHPuI2csrfwDIEdKedFqNIF+5YsyqvX2soAqhu49iKOd9n7tifLRn30vP6D7oKd+6HsiGfPzT0nzdJWsexQ==
+"@elastic/numeral@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.4.0.tgz#883197b7f4bf3c2dd994f53b274769ddfa2bf79a"
+  integrity sha512-uGBKGCNghTgUZPHClji/00v+AKt5nidPTGOIbcT+lbTPVxNB6QPpPLGWtXyrg3QZAxobPM/LAZB1mAqtJeq44Q==
 
 "@elastic/request-crypto@^1.0.2":
   version "1.0.2"
@@ -5683,6 +5678,13 @@
     strip-ansi "^4.0.0"
     text-table "^0.2.0"
     webpack-log "^1.1.2"
+
+"@welldone-software/why-did-you-render@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@welldone-software/why-did-you-render/-/why-did-you-render-4.0.0.tgz#cc98c996f5a06ea55bd07dc99ba4b4d68af93332"
+  integrity sha512-PjqriZ8Ak9biP2+kOcIrg+NwsFwWVhGV03Hm+ns84YBCArn+hWBKM9rMBEU6e62I1qyrYF2/G9yktNpEmfWfJA==
+  dependencies:
+    lodash "^4"
 
 "@wry/context@^0.4.0":
   version "0.4.1"
@@ -19767,7 +19769,7 @@ lodash.uniqby@^4.7.0:
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
   integrity sha1-2ZwHpmnp5tJOE2Lf4mbGdhavEwI=
 
-lodash@4.17.11, lodash@4.17.15, lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
+lodash@4.17.11, lodash@4.17.15, lodash@>4.17.4, lodash@^4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
