@@ -86,7 +86,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalPrivateModule();
   createLocalPromiseModule();
   createLocalKbnUrlModule();
-  createLocalStateModule();
   createLocalTopNavModule(navigation);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
@@ -98,19 +97,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/Promise',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalStateModule() {
-  angular
-    .module('app/visualize/State', [
-      'app/visualize/Private',
-      'app/visualize/Config',
-      'app/visualize/KbnUrl',
-      'app/visualize/Promise',
-    ])
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
 }
 
 function createLocalKbnUrlModule() {

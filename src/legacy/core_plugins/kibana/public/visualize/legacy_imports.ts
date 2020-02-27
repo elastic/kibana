@@ -27,7 +27,6 @@
 export { PersistedState } from 'ui/persisted_state';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
-// @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
