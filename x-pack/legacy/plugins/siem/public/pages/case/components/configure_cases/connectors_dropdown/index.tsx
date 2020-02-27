@@ -26,7 +26,6 @@ const connectors: Array<EuiSuperSelectOption<string>> = [
       </>
     ),
     'data-test-subj': 'no-connector',
-    disabled: false,
   },
   {
     value: 'servicenow-connector',
@@ -37,7 +36,6 @@ const connectors: Array<EuiSuperSelectOption<string>> = [
       </>
     ),
     'data-test-subj': 'servicenow-connector',
-    disabled: false,
   },
 ];
 
