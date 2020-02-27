@@ -21,8 +21,6 @@ import { BaseParamType } from './base';
 import { JsonParamType } from './json';
 import { IAggConfig } from '../agg_config';
 
-jest.mock('ui/new_platform');
-
 describe('JSON', function() {
   const paramName = 'json_test';
   let aggConfig: IAggConfig;
