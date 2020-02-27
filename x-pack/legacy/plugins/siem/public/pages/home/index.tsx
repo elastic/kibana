@@ -21,6 +21,7 @@ import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning'
 import { UseUrlState } from '../../components/url_state';
 import { useWithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { useShowTimeline } from '../../utils/timeline/use_show_timeline';
 import { NotFoundPage } from '../404';
 import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
@@ -74,7 +75,7 @@ export const HomePageComponent = () => {
 
   const { browserFields, indexPattern, contentAvailable } = useWithSource();
 
-  const currentLocation = useLocation();
+  const [showTimeline] = useShowTimeline();
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
@@ -83,7 +84,7 @@ export const HomePageComponent = () => {
       <Main data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          {contentAvailable && (
+          {contentAvailable && showTimeline && (
             <>
               <AutoSaveWarningMsg />
               <Flyout
