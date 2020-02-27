@@ -23,6 +23,7 @@ import {
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
 } from '../../../../common/constants';
+import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -70,6 +71,8 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
+
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta || {});
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
@@ -335,15 +338,15 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getIsPointsOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isPointsOnly', false);
+    return this._styleMeta.isPointsOnly();
   };
 
   _getIsLinesOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isLinesOnly', false);
+    return this._styleMeta.isLinesOnly();
   };
 
   _getIsPolygonsOnly = () => {
-    return _.get(this._getStyleMeta(), 'geometryTypes.isPolygonsOnly', false);
+    return this._styleMeta.isPolygonsOnly();
   };
 
   _getDynamicPropertyByFieldName(fieldName) {
@@ -354,7 +357,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getFieldMeta = fieldName => {
-    const fieldMetaFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
+    const fieldMetaFromLocalFeatures = this._styleMeta.getFieldMetaDescriptor(fieldName);
 
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
@@ -416,10 +419,6 @@ export class VectorStyle extends AbstractStyle {
 
     const formatters = formattersDataRequest.getData();
     return formatters[fieldName];
-  };
-
-  _getStyleMeta = () => {
-    return _.get(this._descriptor, '__styleMeta', {});
   };
 
   _getSymbolId() {

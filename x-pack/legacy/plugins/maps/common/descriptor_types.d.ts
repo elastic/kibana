@@ -31,3 +31,27 @@ export interface ILayerDescriptor {
   id: string;
   label?: string;
 }
+
+interface IFieldMetaDescriptor {
+  [key: string]: string | number | unknown;
+}
+
+interface IRangeFieldMetaDescriptor extends IFieldMetaDescriptor {
+  min: number;
+  max: number;
+  delta: number;
+}
+
+interface ICategoryFieldMetaDescriptor extends IFieldMetaDescriptor {
+  categories: unknown[];
+}
+
+interface IGeometryTypesDescriptor {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  isPolygonsOnly: boolean;
+}
+interface IStyleMetaDescriptor {
+  geometryTypes?: IGeometryTypesDescriptor;
+  [key: string]: IRangeFieldMetaDescriptor | ICategoryFieldMetaDescriptor | unknown;
+}
