@@ -18,6 +18,8 @@ import styled, { css } from 'styled-components';
 import { Markdown } from '../markdown';
 import * as i18n from './translations';
 import { Field, getUseField } from '../../shared_imports';
+import { MARKDOWN_HELP_LINK } from './constants';
+
 const CommonUseField = getUseField({ component: Field });
 
 const TextArea = styled(EuiTextArea)`
@@ -125,7 +127,7 @@ export const MarkdownEditor = React.memo<{
       />
       <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiLink href="https://www.markdownguide.org/cheat-sheet/" external target="_blank">
+          <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
             {i18n.MARKDOWN_SYNTAX_HELP}
           </EuiLink>
         </EuiFlexItem>
