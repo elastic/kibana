@@ -17,27 +17,4 @@
  * under the License.
  */
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedSearchClass } from './_saved_search';
-
-export function createSavedSearchesLoader(services: SavedObjectKibanaServices) {
-  const SavedSearchClass = createSavedSearchClass(services);
-  const savedSearchLoader = new SavedObjectLoader(
-    SavedSearchClass,
-    services.savedObjectsClient,
-    services.chrome
-  );
-  // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
-  savedSearchLoader.loaderProperties = {
-    name: 'searches',
-    noun: 'Saved Search',
-    nouns: 'saved searches',
-  };
-
-  savedSearchLoader.urlFor = (id: string) => `#/discover/${encodeURIComponent(id)}`;
-
-  return savedSearchLoader;
-}
+export { createSavedSearchesLoader } from './saved_searches/saved_searches';
