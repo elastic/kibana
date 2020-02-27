@@ -42,14 +42,14 @@ import {
   syncStates,
   getStateFromKbnUrl,
   BaseState,
-} from '../../../src/plugins/kibana_utils/public';
-import { useUrlTracker } from '../../../src/plugins/kibana_react/public';
+} from '../../../../src/plugins/kibana_utils/public';
+import { useUrlTracker } from '../../../../src/plugins/kibana_react/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+} from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
 
 interface GlobalState {
   text: string;

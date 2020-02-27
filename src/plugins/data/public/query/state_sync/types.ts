@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export { connectToQueryState } from './connect_to_query_state';
-export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+import { Filter, RefreshInterval, TimeRange } from '../../../common';
+
+/**
+ * All query state service state
+ */
+export interface QueryState {
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: Filter[];
+}
+
+type QueryStateChangePartial = {
+  [P in keyof QueryState]?: boolean;
+};
+
+export interface QueryStateChange extends QueryStateChangePartial {
+  appFilters?: boolean; // specifies if app filters change
+  globalFilters?: boolean; // specifies if global filters change
+}
