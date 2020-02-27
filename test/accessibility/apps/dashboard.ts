@@ -163,7 +163,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('');
     });
 
-    it('Open flight dashboard', async () => {
+	// Blocked by https://github.com/elastic/kibana/issues/38980
+    it.skip('Open flight dashboard', async () => {
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
       await a11y.testAppSnapshot();
     });
