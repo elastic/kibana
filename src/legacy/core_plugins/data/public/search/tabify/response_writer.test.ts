@@ -19,13 +19,15 @@
 
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, AggGroupNames, Schemas, BUCKET_TYPES } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
+import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 import { TabbedResponseWriterOptions } from './types';
 
-jest.mock('ui/new_platform');
-
 describe('TabbedAggResponseWriter class', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
   let responseWriter: TabbedAggResponseWriter;
 
   const typesRegistry = mockAggTypesRegistry();

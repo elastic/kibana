@@ -22,8 +22,6 @@ import { TabbedAggColumn } from './types';
 import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
 import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
 
-jest.mock('ui/new_platform');
-
 describe('get columns', () => {
   beforeEach(() => {
     mockDataServices();
