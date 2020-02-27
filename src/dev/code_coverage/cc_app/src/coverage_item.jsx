@@ -1,8 +1,7 @@
 import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
-import { left, right } from './utils/either';
 
-export default function CoverageItem({item, currentJobTimeStamp, testRunnerTypes, isCurrent}) {
+export default function CoverageItem({item, currentJobTimeStamp, testRunnerTypes, isCurrent, currentCiRunUrl}) {
   if (isCurrent) {
     console.log(`\n### currentJobTimeStamp: \n\t${currentJobTimeStamp}`);
   }
@@ -11,9 +10,7 @@ export default function CoverageItem({item, currentJobTimeStamp, testRunnerTypes
     <div className="flex-horizontal-center font-bold text-xl mb-2">
       <div className={(isCurrent) ? `${classes} App-current` : classes}>
           <div className="px-6 py-4 bg-white">
-            <div className="font-bold text-xl mb-2">
-              {anchor(isCurrent, item)}
-            </div>
+            {isCurrent ? ciRunLabel(isCurrent, currentCiRunUrl) : undefined}
             <div className="text-gray-700 text-base ">
               <TestRunnerItemList historicalItem={item} testRunnerTypes={testRunnerTypes} />
             </div>
@@ -23,18 +20,22 @@ export default function CoverageItem({item, currentJobTimeStamp, testRunnerTypes
   );
 }
 
-function anchor(isCurrent, item) {
+function ciRunLabel(isCurrent, currentCiRunUrl) {
+  return (
+    <div className="font-bold text-xl mb-2">
+      {isCurrent ? anchor(currentCiRunUrl) : undefined}
+    </div>
+  );
+}
+
+function anchor(currentCiRunUrl) {
   return (<a
     className="App-link"
-    href={href(item)}
+    href={currentCiRunUrl}
     target="_blank"
     rel="noopener noreferrer"
   >
-    {isCurrent ? 'Current Job' : 'Past Job'}
+    Current Job
   </a>);
 }
 
-function href(x) {
-  return ['https://console.cloud.google.com/storage/browser/', x.replace('gs://', '')]
-    .join('');
-}

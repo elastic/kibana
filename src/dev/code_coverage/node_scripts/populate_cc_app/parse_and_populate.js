@@ -57,6 +57,7 @@ function onComplete (initData) {
 
     initData.currentJobTimeStamp = currentJobTimeStamp(log);
     initData.currentItem = `${constructCurrentFrom(prefix)}`;
+    initData.currentCiRunUrl = process.env.CI_RUN_URL || 'CI_RUN_URL Not Provided';
 
 
     flushInitData(initData)(destFile);

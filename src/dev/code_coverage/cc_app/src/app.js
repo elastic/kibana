@@ -28,6 +28,7 @@ export default function App({
   buildStats,
   historicalItems,
   currentJobTimeStamp,
+  currentCiRunUrl,
   currentItem,
 }) {
   const { url } = buildStats;
@@ -41,6 +42,7 @@ export default function App({
             testRunnerTypes={testRunnerTypes}
             isCurrent={true}
             currentJobTimeStamp={currentJobTimeStamp}
+            currentCiRunUrl={currentCiRunUrl}
           />
         </div>
         <HistoricalList

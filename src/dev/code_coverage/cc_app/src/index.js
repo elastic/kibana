@@ -35,7 +35,7 @@ tryInit()
   .map(boot);
 
 function boot(testRunnerTypes) {
-  const { buildStats, historicalItems, currentJobTimeStamp, currentItem } = initialData;
+  const { buildStats, historicalItems, currentJobTimeStamp, currentItem, currentCiRunUrl } = initialData;
   initPrint(initialData);
   ReactDOM.render(
     <App
@@ -44,6 +44,7 @@ function boot(testRunnerTypes) {
       historicalItems={historicalItems}
       currentJobTimeStamp={currentJobTimeStamp}
       currentItem={currentItem}
+      currentCiRunUrl={currentCiRunUrl}
     />,
     rootEl()
   );

@@ -6,7 +6,7 @@ export default function TestRunnerItemList ({historicalItem, testRunnerTypes}) {
   return (
     <div className="App-TestRunner-List">
       <ul>
-        Test Runners
+        <span className="flex justify-center text-black">Test Runners</span>
         {testRunnerTypes.map(renderWithHistorical)}
       </ul>
     </div>
