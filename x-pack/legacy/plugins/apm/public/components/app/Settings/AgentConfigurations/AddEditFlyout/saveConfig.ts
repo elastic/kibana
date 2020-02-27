@@ -27,8 +27,8 @@ export async function saveConfig({
   sampleRate,
   captureBody,
   transactionMaxSpans,
-  configurationId,
   agentName,
+  isExistingConfig,
   toasts,
   trackApmEvent
 }: {
@@ -38,8 +38,8 @@ export async function saveConfig({
   sampleRate: string;
   captureBody: string;
   transactionMaxSpans: string;
-  configurationId?: string;
   agentName?: string;
+  isExistingConfig: boolean;
   toasts: NotificationsStart['toasts'];
   trackApmEvent: UiTracker;
 }) {
@@ -64,24 +64,14 @@ export async function saveConfig({
       settings
     };
 
-    if (configurationId) {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/{configurationId}',
-        method: 'PUT',
-        params: {
-          path: { configurationId },
-          body: configuration
-        }
-      });
-    } else {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/new',
-        method: 'POST',
-        params: {
-          body: configuration
-        }
-      });
-    }
+    await callApmApi({
+      pathname: '/api/apm/settings/agent-configuration',
+      method: 'PUT',
+      params: {
+        query: { overwrite: isExistingConfig },
+        body: configuration
+      }
+    });
 
     toasts.addSuccess({
       title: i18n.translate(

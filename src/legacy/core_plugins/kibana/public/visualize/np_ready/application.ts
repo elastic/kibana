@@ -23,19 +23,19 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-  EventsProvider,
   GlobalStateProvider,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   IPrivate,
-  PersistedState,
   PrivateProvider,
   PromiseServiceCreator,
   StateManagementConfigProvider,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
@@ -90,7 +90,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
   createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
@@ -98,7 +97,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/Config',
     'app/visualize/I18n',
     'app/visualize/Private',
-    'app/visualize/PersistedState',
     'app/visualize/TopNav',
     'app/visualize/State',
   ]);
@@ -112,23 +110,9 @@ function createLocalStateModule() {
       'app/visualize/Config',
       'app/visualize/KbnUrl',
       'app/visualize/Promise',
-      'app/visualize/PersistedState',
     ])
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('app/visualize/PersistedState', ['app/visualize/Private', 'app/visualize/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
     });
 }
 
