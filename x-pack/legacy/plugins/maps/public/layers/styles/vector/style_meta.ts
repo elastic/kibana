@@ -19,11 +19,11 @@ export class StyleMeta {
   getGeometryTypes(): IGeometryTypesDescriptor {
     return this._descriptor.geometryTypes
       ? this._descriptor.geometryTypes
-      : ({
+      : {
           isPointsOnly: false,
           isLinesOnly: false,
           isPolygonsOnly: false,
-        });
+        };
   }
 
   getFieldMetaDescriptor(field: string): IFieldMetaDescriptor | unknown {
