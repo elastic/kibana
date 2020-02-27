@@ -40,6 +40,15 @@ export const AlertDetailsOverview = memo(() => {
     );
   }, [alertDetailsData]);
 
+  const dateFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
   // TODO fix this style
   const TokenPrivileges = useMemo(() => {
     const privileges: Array<{ title: string; description: string }> = [];
@@ -49,20 +58,11 @@ export const AlertDetailsOverview = memo(() => {
     return (
       <>
         <EuiAccordion id="accordion4" buttonContent="Privileges">
-          <EuiDescriptionList type="column" listItems={privileges} style={{ maxWidth: '400px' }} />
+          <EuiDescriptionList type="column" listItems={privileges} />
         </EuiAccordion>
       </>
     );
   }, [alertDetailsData.process.token.privileges]);
-
-  const dateFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
 
   const alertDetailsColumns = useMemo(() => {
     return [
@@ -282,56 +282,25 @@ export const AlertDetailsOverview = memo(() => {
         paddingSize="l"
         initialIsOpen={true}
       >
-        <EuiDescriptionList
-          type="column"
-          listItems={alertDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+        <EuiDescriptionList type="column" listItems={alertDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
 
-      <EuiAccordion
-        id="alertDetailsHostAccordion"
-        buttonContent="Host"
-        paddingSize="l"
-        initialIsOpen={true}
-      >
-        <EuiDescriptionList
-          type="column"
-          listItems={hostDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+      <EuiAccordion id="alertDetailsHostAccordion" buttonContent="Host" paddingSize="l">
+        <EuiDescriptionList type="column" listItems={hostDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
 
-      <EuiAccordion
-        id="alertDetailsHashAccordion"
-        buttonContent="Hash"
-        paddingSize="l"
-        initialIsOpen={true}
-      >
-        <EuiDescriptionList
-          type="column"
-          listItems={hashDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+      <EuiAccordion id="alertDetailsHashAccordion" buttonContent="Hash" paddingSize="l">
+        <EuiDescriptionList type="column" listItems={hashDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
 
-      <EuiAccordion
-        id="alertDetailsFileAccordion"
-        buttonContent="File"
-        paddingSize="l"
-        initialIsOpen={true}
-      >
-        <EuiDescriptionList
-          type="column"
-          listItems={fileDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+      <EuiAccordion id="alertDetailsFileAccordion" buttonContent="File" paddingSize="l">
+        <EuiDescriptionList type="column" listItems={fileDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
@@ -340,13 +309,8 @@ export const AlertDetailsOverview = memo(() => {
         id="alertDetailsSourceProcessAccordion"
         buttonContent="Source Process"
         paddingSize="l"
-        initialIsOpen={true}
       >
-        <EuiDescriptionList
-          type="column"
-          listItems={sourceProcessDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+        <EuiDescriptionList type="column" listItems={sourceProcessDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
@@ -355,13 +319,8 @@ export const AlertDetailsOverview = memo(() => {
         id="alertDetailsSourceProcessTokenAccordion"
         buttonContent="Source Process Token"
         paddingSize="l"
-        initialIsOpen={true}
       >
-        <EuiDescriptionList
-          type="column"
-          listItems={sourceProcessTokenDetailsColumns}
-          style={{ maxWidth: '400px' }}
-        />
+        <EuiDescriptionList type="column" listItems={sourceProcessTokenDetailsColumns} />
       </EuiAccordion>
     </>
   );

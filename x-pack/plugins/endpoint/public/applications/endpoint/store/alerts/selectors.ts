@@ -23,7 +23,7 @@ const createStructuredSelector: CreateStructuredSelector = createStructuredSelec
  */
 export const alertListData = (state: AlertListState) => state.alerts;
 
-export const selectedAlertDetailsData = (state: AlertListState) => state.alert_details;
+export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
 /**
  * Returns the alert list pagination data from state

@@ -20,9 +20,9 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreSta
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
     if (action.type === 'userChangedUrl' && isOnAlertPage(state) && hasSelectedAlert(state)) {
-      const { selected_alert } = uiQueryParams(state);
+      const uiParams = uiQueryParams(state);
       const response: AlertData = await coreStart.http.get(
-        `/api/endpoint/alerts/${selected_alert}`
+        `/api/endpoint/alerts/${uiParams.selected_alert}`
       );
       api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });
     }
