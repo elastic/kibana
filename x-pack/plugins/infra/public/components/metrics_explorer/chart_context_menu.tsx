@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useContext } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,14 +19,13 @@ import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
-  MetricsExplorerOptionsContainer,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
-import { AlertFlyout } from '../alerting/alert_flyout';
+import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 export interface Props {
   options: MetricsExplorerOptions;
@@ -200,8 +199,8 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
         panelPaddingSize="none"
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
+        <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
       </EuiPopover>
-      <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
     </>
   );
 };

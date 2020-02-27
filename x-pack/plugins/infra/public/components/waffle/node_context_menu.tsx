@@ -25,7 +25,7 @@ import {
   SectionLink,
 } from '../../../../observability/public';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
-import { AlertFlyout } from '../alerting/alert_flyout';
+import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -198,7 +198,6 @@ export const NodeContextMenu: React.FC<Props> = ({
               isDisabled={uptimeMenuItem.isDisabled}
             />
             <SectionLink {...alertMenuItem} />
-            <AlertFlyout visible={flyoutVisible} setVisible={setFlyoutVisible} />
           </SectionLinks>
         </Section>
       </div>

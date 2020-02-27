@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
 import { MetricExpression } from './expression';
-import { validateExampleAlertType } from './validation';
+import { validateExampleAlertType } from '../validation';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
 
-export function getAlertType(fields: IFieldType[]): AlertTypeModel {
+export function getAlertType(): AlertTypeModel {
   return {
-    id: 'example',
-    name: 'Alert Trigger',
+    id: METRIC_THRESHOLD_ALERT_TYPE_ID,
+    name: 'Threshold Alert',
     iconClass: 'bell',
     alertParamsExpression: MetricExpression,
     validate: validateExampleAlertType,

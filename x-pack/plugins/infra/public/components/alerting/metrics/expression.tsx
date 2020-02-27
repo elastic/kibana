@@ -5,20 +5,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonIcon } from '@elastic/eui';
 import {
   WhenExpression,
   OfExpression,
   ThresholdExpression,
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../triggers_actions_ui/public/common';
+} from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../triggers_actions_ui/public/types';
+import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../triggers_actions_ui/public/application/context/alerts_context';
+import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AGGREGATION_TYPES } from '../../../../triggers_actions_ui/public/common/constants';
+import { AGGREGATION_TYPES } from '../../../../../triggers_actions_ui/public/common/constants';
 
 interface MetricExpressionParams {
   aggType?: string;
@@ -31,7 +31,7 @@ interface MetricExpressionParams {
 
 interface Props {
   errors: IErrorObject;
-  alertParams: { expressions: MetricExpressionParams[] };
+  alertParams: { criteria: MetricExpressionParams[] };
   alertContext: AlertsContextValue;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -44,23 +44,32 @@ export const MetricExpression: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors } = props;
 
   const expressions = useMemo<MetricExpressionParams[]>(() => {
-    return alertParams.expressions || [{}];
-  }, [alertParams.expressions]);
+    return alertParams.criteria || [{}];
+  }, [alertParams.criteria]);
 
   const updateParams = useCallback(
     (id, e: MetricExpressionParams) => {
-      const exp = alertParams.expressions ? alertParams.expressions.slice() : [];
+      const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
       exp[id] = { ...exp[id], ...e };
-      setAlertParams('expressions', exp);
+      setAlertParams('criteria', exp);
     },
-    [setAlertParams, alertParams.expressions]
+    [setAlertParams, alertParams.criteria]
   );
 
   const addExpression = useCallback(() => {
-    const exp = alertParams.expressions ? alertParams.expressions.slice() : [];
+    const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
     exp.push({});
-    setAlertParams('expressions', exp);
-  }, [setAlertParams, alertParams.expressions]);
+    setAlertParams('criteria', exp);
+  }, [setAlertParams, alertParams.criteria]);
+
+  const removeExpression = useCallback(
+    (id: number) => {
+      const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
+      exp.splice(id, 1);
+      setAlertParams('criteria', exp);
+    },
+    [setAlertParams, alertParams.criteria]
+  );
 
   return (
     <>
@@ -68,6 +77,7 @@ export const MetricExpression: React.FC<Props> = props => {
       {expressions.map((e, idx) => {
         return (
           <ExpressionRow
+            remove={removeExpression}
             key={idx} // idx's don't usually make good key's but here the index has semantic meaning
             expressionId={idx}
             setAlertParams={updateParams}
@@ -84,10 +94,11 @@ interface ExpressionRowProps {
   expressionId: number;
   expression: MetricExpressionParams;
   errors: any;
+  remove(id: number): void;
   setAlertParams(id: number, params: MetricExpressionParams): void;
 }
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
-  const { setAlertParams, expression, errors, expressionId } = props;
+  const { setAlertParams, expression, errors, expressionId, remove } = props;
   const {
     aggType = 'count',
     metric,
@@ -142,42 +153,49 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   return (
     <>
       <EuiFlexGroup gutterSize="s" wrap>
-        <EuiFlexItem grow={false}>
-          <WhenExpression
-            customAggTypesOptions={aggregationType}
-            aggType={aggType}
-            onChangeSelectedAggType={updateAggType}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup gutterSize="s" wrap>
+            <EuiFlexItem grow={false}>
+              <WhenExpression
+                customAggTypesOptions={aggregationType}
+                aggType={aggType}
+                onChangeSelectedAggType={updateAggType}
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <OfExpression
-            aggField={metric}
-            fields={[{ normalizedType: 'number', name: 'system.cpu.user.pct' }]} // can be some data from server API
-            aggType={aggType}
-            errors={errors}
-            onChangeSelectedAggField={updateMetric}
-          />
-        </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OfExpression
+                aggField={metric}
+                fields={[{ normalizedType: 'number', name: 'system.cpu.user.pct' }]} // can be some data from server API
+                aggType={aggType}
+                errors={errors}
+                onChangeSelectedAggField={updateMetric}
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <ThresholdExpression
-            thresholdComparator={comparator || '>'}
-            threshold={threshold}
-            onChangeSelectedThresholdComparator={updateComparator}
-            onChangeSelectedThreshold={updateThreshold}
-            errors={errors}
-          />
-        </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ThresholdExpression
+                thresholdComparator={comparator || '>'}
+                threshold={threshold}
+                onChangeSelectedThresholdComparator={updateComparator}
+                onChangeSelectedThreshold={updateThreshold}
+                errors={errors}
+              />
+            </EuiFlexItem>
 
+            <EuiFlexItem grow={false}>
+              <ForLastExpression
+                timeWindowSize={timeSize}
+                timeWindowUnit={timeUnit}
+                errors={{ timeWindowSize: [] }}
+                onChangeWindowSize={updateTimeSize}
+                onChangeWindowUnit={updateTimeUnit}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ForLastExpression
-            timeWindowSize={timeSize}
-            timeWindowUnit={timeUnit}
-            errors={{ timeWindowSize: [] }}
-            onChangeWindowSize={updateTimeSize}
-            onChangeWindowUnit={updateTimeUnit}
-          />
+          <EuiButtonIcon color={'danger'} iconType={'trash'} onClick={() => remove(expressionId)} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

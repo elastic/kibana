@@ -252,11 +252,13 @@ export const AlertForm = ({
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
-      toastNotifications!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
-          defaultMessage: 'Unable to add action, because default action group is not defined',
-        }),
-      });
+      if (toastNotifications) {
+        toastNotifications!.addDanger({
+          title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+            defaultMessage: 'Unable to add action, because default action group is not defined',
+          }),
+        });
+      }
       return;
     }
     setIsAddActionPanelOpen(false);
