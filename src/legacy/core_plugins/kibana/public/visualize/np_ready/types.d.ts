@@ -26,7 +26,7 @@ import {
 } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { VisState, Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject, PersistedState } from '../legacy_imports';
 
 export type PureVisState = ReturnType<Vis['getCurrentState']>;
