@@ -262,7 +262,7 @@ class AgentConfigService {
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<any | null> {
+  ): Promise<AgentConfig | null> {
     let config;
 
     try {
@@ -277,7 +277,7 @@ class AgentConfigService {
       return null;
     }
 
-    const agentConfig = {
+    const agentConfig: AgentConfig = {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
