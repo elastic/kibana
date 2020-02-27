@@ -26,18 +26,18 @@ const ConnectorsDropdownComponent: React.FC = () => {
           <span>{i18n.NO_CONNECTOR}</span>
         </>
       ),
-      'data-test-subj': 'my-servicenow-connector',
+      'data-test-subj': 'no-connector',
       disabled: false,
     },
     {
-      value: 'my-servicenow-connector',
+      value: 'servicenow-connector',
       inputDisplay: (
         <>
           <EuiIconExtended type="logoWebhook" size={ICON_SIZE} />
           <span>{'My ServiceNow connector'}</span>
         </>
       ),
-      'data-test-subj': 'my-servicenow-connector',
+      'data-test-subj': 'servicenow-connector',
       disabled: false,
     },
   ];
