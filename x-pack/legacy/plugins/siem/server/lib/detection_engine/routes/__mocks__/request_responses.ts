@@ -307,17 +307,26 @@ export const getSetSignalStatusByQueryRequest = () =>
     body: typicalSetStatusSignalByQueryPayload(),
   });
 
-export const getSignalsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQuery() },
-});
+export const getSignalsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQuery(),
+  });
 
-export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQueryAggs() },
-});
+export const getSignalsAggsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQueryAggs(),
+  });
+
+export const getSignalsAggsAndQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
+  });
 
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',

@@ -4,43 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
-
 import { querySignalsRoute } from './query_signals_route';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
+  getSignalsAggsAndQueryRequest,
 } from '../__mocks__/request_responses';
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { requestContextMock, responseMock, serverMock } from '../__mocks__';
 
 describe('query for signal', () => {
-  let server = createMockServer();
-  let config = createMockConfig();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    config = createMockConfig();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    // clients.clusterClient.callAsCurrentUser.mockResolvedValue(true); // TODO: what is the return value of a successful query?
 
-    getClients.mockResolvedValue(clients);
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true);
-
-    querySignalsRoute(server.route, config, getClients);
+    querySignalsRoute(server.router);
   });
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      const { statusCode } = await server.inject(getSignalsQueryRequest());
+      const response = await server.inject(getSignalsQueryRequest(), context);
 
-      expect(statusCode).toBe(200);
+      expect(response.ok).toHaveBeenCalled();
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({ body: typicalSignalsQuery() })
@@ -48,9 +39,9 @@ describe('query for signal', () => {
     });
 
     test('returns 200 when using single agg', async () => {
-      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+      const response = await server.inject(getSignalsAggsQueryRequest(), context);
 
-      expect(statusCode).toBe(200);
+      expect(response.ok).toHaveBeenCalled();
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({ body: typicalSignalsQueryAggs() })
@@ -58,11 +49,9 @@ describe('query for signal', () => {
     });
 
     test('returns 200 when using aggs and query together', async () => {
-      const request = getSignalsQueryRequest();
-      request.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      const { statusCode } = await server.inject(request);
+      const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
 
-      expect(statusCode).toBe(200);
+      expect(response.ok).toHaveBeenCalled();
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({
@@ -74,66 +63,53 @@ describe('query for signal', () => {
       );
     });
 
-    test('returns 400 when missing aggs and query', async () => {
-      const allTogether = getSignalsQueryRequest();
-      allTogether.payload = {};
-      const { statusCode } = await server.inject(allTogether);
-      expect(statusCode).toBe(400);
-    });
-  });
-
-  describe('validation', () => {
-    test('returns 200 if query present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-        payload: typicalSignalsQuery(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 200 if aggs is present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-        payload: typicalSignalsQueryAggs(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 200 if aggs and query are present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-        payload: { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() },
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 400 if aggs and query are NOT present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-        payload: {},
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
-    });
-    test('catches error if deleteRules throws error', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-        payload: { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() },
-      };
+    test('catches error if query throws error', async () => {
       clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const { payload, statusCode } = await server.inject(request);
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(getSignalsAggsQueryRequest(), context);
+      expect(response.customError).toHaveBeenCalledWith({
+        body: 'Test error',
+        statusCode: 500,
+      });
+    });
+  });
+
+  describe('request validation', () => {
+    test('allows when query present', async () => {
+      const response = responseMock.create();
+      const body = typicalSignalsQuery();
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    test('allows when aggs present', async () => {
+      const response = responseMock.create();
+      const body = typicalSignalsQueryAggs();
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    test('allows when aggs and query present', async () => {
+      const response = responseMock.create();
+      const body = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    test('rejects when missing aggs and query', async () => {
+      const response = responseMock.create();
+      const body = {};
+      // @ts-ignore ambiguous validation types
+      server.getRoute().config.validate.body(body, response);
+
+      expect(response.badRequest).toHaveBeenCalled();
     });
   });
 });
