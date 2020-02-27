@@ -10,7 +10,7 @@ import {
   ElasticsearchServiceSetup,
   SavedObjectsClient,
   kibanaResponseFactory,
-} from 'src/core/server';
+} from '../../../../../src/core/server';
 import { ReindexStatus } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
