@@ -110,6 +110,7 @@
       "**/@types/*/**",
       "**/grunt-*",
       "**/grunt-*/**",
+      "**/apollo-server-core",
       "x-pack/typescript"
     ]
   },

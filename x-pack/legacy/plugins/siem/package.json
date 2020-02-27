@@ -34,6 +34,7 @@
     "@kamilkisiela/graphql-tools": "^4.0.6",
     "apollo-link": "^1.2.13",
     "apollo-link-error": "^2.0.0-beta.0",
+    "apollo-server-core": "^1.3.6",
     "graphql": "^14.6.0",
     "lodash": "^4.17.15",
     "react-beautiful-dnd": "^12.2.0",
