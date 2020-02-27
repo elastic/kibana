@@ -332,6 +332,24 @@ function VisualizeAppController(
     }
   );
 
+  function updateSavedQuery(savedQueryId) {
+    if (!savedQueryId) {
+      delete $scope.savedQuery;
+
+      return;
+    }
+
+    if ($scope.savedQuery && $scope.savedQuery.id === savedQueryId) {
+      return;
+    }
+
+    savedQueryService.getSavedQuery(savedQueryId).then(savedQuery => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+      });
+    });
+  }
+
   function init() {
     if (vis.indexPattern) {
       $scope.indexPattern = vis.indexPattern;
@@ -392,6 +410,7 @@ function VisualizeAppController(
         stateContainer.transitions.set('query', newQuery);
       }
       persistOnChange(state);
+      updateSavedQuery(state.savedQuery);
 
       // if the browser history was changed manually we need to reflect changes in the editor
       if (!_.isEqual(vis.getState(), state.vis)) {
@@ -408,6 +427,9 @@ function VisualizeAppController(
       $scope.timeRange = timefilter.getTime();
       $scope.$broadcast('render');
     };
+
+    // update the query if savedQuery is stored
+    updateSavedQuery(initialState.savedQuery);
 
     const subscriptions = new Subscription();
 
@@ -528,15 +550,6 @@ function VisualizeAppController(
       }
     }
   };
-
-  // update the query if savedQuery is stored
-  if (stateContainer.getState().savedQuery) {
-    savedQueryService.getSavedQuery(stateContainer.getState().savedQuery).then(savedQuery => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-      });
-    });
-  }
 
   $scope.$watch('savedQuery', newSavedQuery => {
     if (!newSavedQuery) return;
