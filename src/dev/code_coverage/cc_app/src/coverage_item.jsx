@@ -30,23 +30,8 @@ function anchor(isCurrent, item) {
     target="_blank"
     rel="noopener noreferrer"
   >
-    {isCurrent ? 'Current Job' : 'Past Job'} - {title(item)}
+    {isCurrent ? 'Current Job' : 'Past Job'}
   </a>);
-}
-
-const dropPrefix = x => [`gs://${x}/jobs/elastic+kibana+code-coverage/`, ''];
-const dropPostfix = () => [/(\d.*)\/\d.*$/, '$1'];
-const maybeReplace = (item, storeUrlBase) => item.includes(`gs://${storeUrlBase}`) ? right(item) : left(item);
-
-function title (item) {
-  const storeUrlBase = 'elastic-bekitzur-kibana-coverage-live';
-  return maybeReplace(item, storeUrlBase)
-    .fold(
-      () => item,
-      () => item
-        .replace(...dropPrefix(storeUrlBase))
-        .replace(...dropPostfix())
-    );
 }
 
 function href(x) {
