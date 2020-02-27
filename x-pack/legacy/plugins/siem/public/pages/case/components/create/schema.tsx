@@ -21,7 +21,6 @@ export const schema: FormSchema = {
     ],
   },
   description: {
-    type: FIELD_TYPES.TEXTAREA,
     label: i18n.DESCRIPTION,
     validations: [
       {

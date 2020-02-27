@@ -160,7 +160,6 @@ export const UserActionTree = React.memo(
               children:
                 comment.commentId === editCommentId ? (
                   <MarkdownEditor
-                    fieldName="comment"
                     footerContentRight={renderButtons({
                       cancelAction: () => setEditCommentId(''),
                       saveAction: () => {
@@ -219,7 +218,6 @@ export const UserActionTree = React.memo(
             ),
             children: isEditDescription ? (
               <MarkdownEditor
-                fieldName="description"
                 footerContentRight={renderButtons({
                   cancelAction: () => setIsEditDescription(false),
                   saveAction: () => {

@@ -17,10 +17,7 @@ import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
 import * as i18n from './translations';
-import { Field, getUseField } from '../../shared_imports';
 import { MARKDOWN_HELP_LINK } from './constants';
-
-const CommonUseField = getUseField({ component: Field });
 
 const TextArea = styled(EuiTextArea)`
   width: 100%;
@@ -65,13 +62,12 @@ const MarkdownContainer = styled(EuiPanel)`
 
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
-  fieldName: 'comment' | 'description';
   placeholder?: string;
   footerContentRight?: React.ReactNode;
-  formHook?: boolean;
   initialContent: string;
+  isDisabled?: boolean;
   onChange: (description: string) => void;
-}>(({ fieldName, placeholder, footerContentRight, formHook = false, initialContent, onChange }) => {
+}>(({ placeholder, footerContentRight, initialContent, isDisabled = false, onChange }) => {
   const [content, setContent] = useState(initialContent);
   useEffect(() => {
     onChange(content);
@@ -79,26 +75,16 @@ export const MarkdownEditor = React.memo<{
   const tabs = useMemo(
     () => [
       {
-        id: fieldName,
+        id: 'comment',
         name: i18n.MARKDOWN,
-        content: formHook ? (
-          <CommonUseField
-            path={fieldName}
-            onChange={e => setContent(e as string)}
-            componentProps={{
-              idAria: `case${fieldName}`,
-              'data-test-subj': `case${fieldName}`,
-              spellcheck: false,
-              euiFieldProps: { placeholder: placeholder ?? '' },
-            }}
-          />
-        ) : (
+        content: (
           <TextArea
             onChange={e => {
               setContent(e.target.value);
             }}
-            aria-label={`case${fieldName}`}
+            aria-label={`markdown-editor-comment`}
             fullWidth={true}
+            disabled={isDisabled}
             placeholder={placeholder ?? ''}
             spellCheck={false}
             value={content}
@@ -115,16 +101,11 @@ export const MarkdownEditor = React.memo<{
         ),
       },
     ],
-    [content, fieldName, placeholder]
+    [content, placeholder]
   );
   return (
     <Container>
-      <Tabs
-        data-test-subj={`new-${fieldName}-tabs`}
-        size="s"
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-      />
+      <Tabs data-test-subj={`markdown-tabs`} size="s" tabs={tabs} initialSelectedTab={tabs[0]} />
       <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">

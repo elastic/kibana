@@ -6,12 +6,12 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
-import { Form, useForm } from '../../../../shared_imports';
+import { Form, useForm, UseField } from '../../../../shared_imports';
 import { NewComment } from '../../../../containers/case/types';
 import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
-import { MarkdownEditor } from '../../../../components/markdown_editor';
+import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -30,7 +30,6 @@ export const AddComment = React.memo<{
   });
 
   const onSubmit = useCallback(async () => {
-    // @XavierM this is weird, why is it isValid when returning an {} w my schema??
     const { isValid, data: newData } = await form.submit();
     if (isValid && newData.comment) {
       setFormData({ ...newData, isNew: true } as NewComment);
@@ -43,23 +42,26 @@ export const AddComment = React.memo<{
     <>
       {isLoading && <MySpinner size="xl" />}
       <Form form={form}>
-        <MarkdownEditor
-          fieldName="comment"
-          placeholder={i18n.ADD_COMMENT_HELP_TEXT}
-          footerContentRight={
-            <EuiButton
-              iconType="plusInCircle"
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              onClick={onSubmit}
-              size="s"
-            >
-              {i18n.ADD_COMMENT}
-            </EuiButton>
-          }
-          formHook={true}
-          initialContent={data.comment}
-          onChange={comment => setFormData({ ...data, comment })}
+        <UseField
+          path="comment"
+          component={MarkdownEditorForm}
+          componentProps={{
+            idAria: 'caseComment',
+            isDisabled: isLoading,
+            dataTestSubj: 'caseComment',
+            placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+            footerContentRight: (
+              <EuiButton
+                iconType="plusInCircle"
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                onClick={onSubmit}
+                size="s"
+              >
+                {i18n.ADD_COMMENT}
+              </EuiButton>
+            ),
+          }}
         />
       </Form>
       {newComment &&

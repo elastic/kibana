@@ -14,13 +14,13 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
-import { Field, Form, getUseField, useForm } from '../../../../shared_imports';
+import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
 import { NewCase } from '../../../../containers/case/types';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
-import { MarkdownEditor } from '../../../../components/markdown_editor';
+import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -51,7 +51,6 @@ export const Create = React.memo(() => {
   });
 
   const onSubmit = useCallback(async () => {
-    // @XavierM this is weird, why is it isValid when returning w missing keys from schema??
     const { isValid, data: newData } = await form.submit();
     if (isValid && newData.description) {
       setFormData({ ...newData, isNew: true } as NewCase);
@@ -96,11 +95,14 @@ export const Create = React.memo(() => {
           />
         </Container>
         <ContainerBig>
-          <MarkdownEditor
-            fieldName="description"
-            formHook={true}
-            initialContent={data.description}
-            onChange={description => setFormData({ ...data, description })}
+          <UseField
+            path="description"
+            component={MarkdownEditorForm}
+            componentProps={{
+              idAria: 'caseDescription',
+              isDisabled: isLoading,
+              dataTestSubj: 'caseDescription',
+            }}
           />
         </ContainerBig>
       </Form>

@@ -131,7 +131,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   ];
 
   const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [data.title]);
-
+  const toggleStateCase = useCallback(
+    e => onUpdateField('state', e.target.checked ? 'closed' : 'open'),
+    []
+  );
   return (
     <>
       <MyWrapper>
@@ -186,9 +189,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     isLoading={isLoading && updateKey === 'state'}
                     isSelected={data.state === 'open'}
                     label={data.state === 'open' ? 'Close case' : 'Reopen case'}
-                    onChange={() =>
-                      onUpdateField('state', data.state === 'open' ? 'closed' : 'open')
-                    }
+                    onChange={toggleStateCase}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
