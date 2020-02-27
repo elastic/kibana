@@ -258,6 +258,7 @@ export function createFieldChooserDirective($location, config, $route) {
         } else {
           delete field.details;
         }
+        return field.details;
       };
 
       function getFields() {

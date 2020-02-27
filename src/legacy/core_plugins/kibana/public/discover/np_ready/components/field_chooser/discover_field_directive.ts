@@ -23,6 +23,7 @@ export function createDiscoverFieldDirective(reactDirective: any) {
     ['field', { watchDepth: 'reference' }],
     ['onAddField', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
+    ['onShowDetails', { watchDepth: 'reference' }],
     ['onRemoveField', { watchDepth: 'collection' }],
   ]);
 }

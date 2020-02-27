@@ -35,11 +35,15 @@ export function TextTruncate(props: Props) {
 
   if (expandable) {
     return (
-      <EuiToolTip position="right" title={props.value}>
+      <EuiToolTip position="right" title={props.value} anchorClassName="eui-textTruncate">
         <>{props.children}</>
       </EuiToolTip>
     );
   }
 
-  return <span ref={wrapper}>{props.children}</span>;
+  return (
+    <span ref={wrapper} className="eui-textTruncate">
+      {props.children}
+    </span>
+  );
 }

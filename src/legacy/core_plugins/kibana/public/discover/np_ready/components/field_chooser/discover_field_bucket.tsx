@@ -20,7 +20,6 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
-import { TextTruncate } from './lib/text_truncate';
 import { getBucketAriaLabel } from './lib/get_bucket_aria_label';
 import { Field } from './discover_field_details';
 
@@ -44,12 +43,10 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem aria-label={getBucketAriaLabel(bucket)} style={{ overflow: 'hidden' }}>
-          <div className="eui-textTruncate">
-            <TextTruncate value={bucket.display}>
-              <EuiText size="xs">{bucket.display === '' ? emptyTxt : bucket.display}</EuiText>
-            </TextTruncate>
-          </div>
+        <EuiFlexItem aria-label={getBucketAriaLabel(bucket)} className="eui-textTruncate">
+          <EuiText size="xs" className="eui-textTruncate">
+            {bucket.display === '' ? emptyTxt : bucket.display}
+          </EuiText>
         </EuiFlexItem>
         {field.filterable && (
           <EuiFlexItem grow={false}>

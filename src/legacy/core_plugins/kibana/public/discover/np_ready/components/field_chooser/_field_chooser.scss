@@ -12,6 +12,38 @@
   color: $euiColorDarkShade;
 }
 
+.dscSidebarField {
+  padding-bottom: $euiSizeS;
+  display: flex;
+  align-items: flex-start;
+  max-width: 100%;
+
+  .dscSidebarField__name {
+    margin-left: $euiSizeS;
+    flex-grow: 1;
+  }
+
+  .dscSidebarField__infoIcon {
+    flex-shrink: 0;
+  }
+
+  .dscSidebarField__fieldIcon {
+    margin-top: $euiSizeXS / 2;
+    margin-right: $euiSizeXS / 2;
+  }
+
+  .dscSidebarField__infoIcon {
+    visibility: hidden;
+  }
+
+  &:hover,
+  &:focus {
+    .dscSidebarField__infoIcon {
+      visibility: visible;
+    }
+  }
+}
+
 
 /*
   Fixes EUI known issue https://github.com/elastic/eui/issues/1749
