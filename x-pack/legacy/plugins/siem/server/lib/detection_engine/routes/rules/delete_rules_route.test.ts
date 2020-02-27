@@ -89,7 +89,7 @@ describe('delete_rules', () => {
       clients.savedObjectsClient.delete.mockResolvedValue({});
       jest.spyOn(utils, 'transform').mockReturnValue(null);
       const { payload, statusCode } = await server.inject(getDeleteRequest());
-      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(JSON.parse(payload).message).toBe('Internal error transforming');
       expect(statusCode).toBe(500);
     });
 
