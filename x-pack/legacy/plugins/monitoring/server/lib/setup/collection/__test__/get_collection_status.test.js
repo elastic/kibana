@@ -6,11 +6,11 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { getCollectionStatus } from '../';
+import { getCollectionStatus } from '..';
 import { getIndexPatterns } from '../../../cluster/get_index_patterns';
 
 const liveClusterUuid = 'a12';
-const mockReq = (searchResult = {}) => {
+const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions = true) => {
   return {
     server: {
       newPlatform: {
@@ -40,6 +40,14 @@ const mockReq = (searchResult = {}) => {
         },
       },
       plugins: {
+        xpack_main: {
+          info: {
+            isAvailable: () => true,
+            feature: () => ({
+              isEnabled: () => securityEnabled,
+            }),
+          },
+        },
         elasticsearch: {
           getCluster() {
             return {
@@ -50,6 +58,13 @@ const mockReq = (searchResult = {}) => {
                   params.path === '/_cluster/state/cluster_uuid'
                 ) {
                   return Promise.resolve({ cluster_uuid: liveClusterUuid });
+                }
+                if (
+                  type === 'transport.request' &&
+                  params &&
+                  params.path === '/_security/user/_has_privileges'
+                ) {
+                  return Promise.resolve({ has_all_requested: userHasPermissions });
                 }
                 if (type === 'transport.request' && params && params.path === '/_nodes') {
                   return Promise.resolve({ nodes: {} });
@@ -218,24 +233,24 @@ describe('getCollectionStatus', () => {
   });
 
   it('should detect products based on other indices', async () => {
-    const req = mockReq(
-      {},
-      {
-        responses: [
-          { hits: { total: { value: 1 } } },
-          { hits: { total: { value: 1 } } },
-          { hits: { total: { value: 1 } } },
-          { hits: { total: { value: 1 } } },
-          { hits: { total: { value: 1 } } },
-        ],
-      }
-    );
-
+    const req = mockReq({ hits: { total: { value: 1 } } });
     const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
 
     expect(result.kibana.detected.doesExist).to.be(true);
     expect(result.elasticsearch.detected.doesExist).to.be(true);
     expect(result.beats.detected.mightExist).to.be(true);
     expect(result.logstash.detected.mightExist).to.be(true);
+  });
+
+  it('should work properly when security is disabled', async () => {
+    const req = mockReq({ hits: { total: { value: 1 } } }, false);
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    expect(result.kibana.detected.doesExist).to.be(true);
+  });
+
+  it('should not work if the user does not have the necessary permissions', async () => {
+    const req = mockReq({ hits: { total: { value: 1 } } }, true, false);
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    expect(result._meta.hasPermissions).to.be(false);
   });
 });
