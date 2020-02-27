@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { readFileSync } from 'fs';
 import { MonitoringConfig } from '../config';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../../../../../src/core/utils';
 
-// const KEY = 'monitoring.ui.elasticsearch';
+const KEY = 'ui.elasticsearch';
 
 /*
  * Parse a config object's Elasticsearch configuration, reading any
@@ -17,8 +18,8 @@ import { readPkcs12Keystore, readPkcs12Truststore } from '../../../../../src/cor
  * TODO: this code can be removed when this plugin is migrated to the Kibana Platform,
  * at that point the ElasticsearchClient and ElasticsearchConfig should be used instead
  */
-export const parseElasticsearchConfig = (config: any, configKey: string = KEY) => {
-  const es = config.get(configKey);
+export const parseElasticsearchConfig = (config: MonitoringConfig, configKey: string = KEY) => {
+  const es = get(config, configKey) as any;
   if (!es) {
     return {};
   }

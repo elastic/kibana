@@ -122,7 +122,7 @@ export class Plugin {
 
     return {
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.setupLegacy(legacyAPI, core, monitoringCore, plugins, cluster);
+        this.setupLegacy(legacyAPI, core, monitoringCore, config, plugins, cluster);
       },
     };
   }
@@ -157,10 +157,13 @@ export class Plugin {
     legacyApi: LegacyAPI,
     core: CoreSetup,
     monitoringCore: MonitoringCore,
+    config: MonitoringConfig,
     plugins: PluginsSetup,
     cluster: ICustomClusterClient
   ) {
-    const config = monitoringCore.config ? monitoringCore.config() : { get: () => null };
+    const legacyConfigWrapper = monitoringCore.config
+      ? monitoringCore.config()
+      : { get: () => null };
     const log = this.getLogger(LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG);
 
     // Initialize telemetry
@@ -170,13 +173,13 @@ export class Plugin {
       elasticsearchPlugin: legacyApi.elasticsearch,
       interval: legacyApi.opsInterval,
       log,
-      config,
+      config: legacyConfigWrapper,
       getOSInfo: legacyApi.getOSInfo,
       hapiServer: legacyApi.hapiServer,
     });
 
     // If collection is enabled, create the bulk uploader
-    const kibanaCollectionEnabled = config.get('monitoring.kibana.collection.enabled');
+    const kibanaCollectionEnabled = config.kibana.collection.enabled;
     if (kibanaCollectionEnabled) {
       // Start kibana internal collection
       const serverInfo = core.http.getServerInfo();

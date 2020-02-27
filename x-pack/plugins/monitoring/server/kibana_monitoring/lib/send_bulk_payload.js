@@ -56,7 +56,7 @@ export async function sendBulkPayload(
       );
     }
     const formattedPayload = formatForNormalBulkEndpoint(payload, productionClusterUuid);
-    return await cluster.callWithInternalUser('bulk', {
+    return await cluster.callAsInternalUser('bulk', {
       body: formattedPayload,
     });
   }

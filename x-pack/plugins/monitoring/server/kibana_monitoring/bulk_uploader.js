@@ -29,7 +29,7 @@ import { hasMonitoringCluster } from '../es_client/instantiate_client';
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ log, interval, elasticsearch, kibanaStats }) {
+  constructor({ config, log, interval, elasticsearch, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -52,17 +52,14 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    const directConfig = parseElasticsearchConfig(config, 'monitoring.elasticsearch');
+    const directConfig = parseElasticsearchConfig(config, 'elasticsearch');
     if (hasMonitoringCluster(directConfig)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearchPlugin.createCluster('monitoring-direct', directConfig);
-      elasticsearchPlugin
-        .getCluster('admin')
-        .callWithInternalUser('info')
-        .then(data => {
-          this._productionClusterUuid = get(data, 'cluster_uuid');
-        });
+      this._cluster = elasticsearch.createClient('monitoring-direct', directConfig);
+      elasticsearch.adminClient.callAsInternalUser('info').then(data => {
+        this._productionClusterUuid = get(data, 'cluster_uuid');
+      });
     }
 
     this._getKibanaInfoForStats = () => getKibanaInfoForStats(kibanaStats);

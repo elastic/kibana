@@ -13,6 +13,87 @@ const DEFAULT_API_VERSION = 'master';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  elasticsearch: schema.object({
+    logFetchCount: schema.number({ defaultValue: 10 }),
+    sniffOnStart: schema.boolean({ defaultValue: false }),
+    sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
+      defaultValue: false,
+    }),
+    sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
+    hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
+      defaultValue: 'http://localhost:9200',
+    }),
+    preserveHost: schema.boolean({ defaultValue: true }),
+    username: schema.maybe(
+      schema.conditional(
+        schema.contextRef('dist'),
+        false,
+        schema.string({
+          validate: () => {},
+        }),
+        schema.string()
+      )
+    ),
+    password: schema.maybe(schema.string()),
+    requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+      defaultValue: ['authorization'],
+    }),
+    customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+    // TODO: NP
+    // shardTimeout: schema.duration({ defaultValue: '30s' }),
+    // requestTimeout: schema.duration({ defaultValue: '30s' }),
+    // pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+    // startupTimeout: schema.duration({ defaultValue: '5s' }),
+    logQueries: schema.boolean({ defaultValue: false }),
+    ssl: schema.object(
+      {
+        verificationMode: schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        ),
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        ),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+        keyPassphrase: schema.maybe(schema.string()),
+        keystore: schema.object({
+          path: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        }),
+        truststore: schema.object({
+          path: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        }),
+        alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
+      },
+      {
+        validate: rawConfig => {
+          if (rawConfig.key && rawConfig.keystore.path) {
+            return 'cannot use [key] when [keystore.path] is specified';
+          }
+          if (rawConfig.certificate && rawConfig.keystore.path) {
+            return 'cannot use [certificate] when [keystore.path] is specified';
+          }
+        },
+      }
+    ),
+    apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
+    healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+    ignoreVersionMismatch: schema.conditional(
+      schema.contextRef('dev'),
+      false,
+      schema.boolean({
+        validate: rawValue => {
+          if (rawValue === true) {
+            return '"ignoreVersionMismatch" can only be set to true in development mode';
+          }
+        },
+        defaultValue: false,
+      }),
+      schema.boolean({ defaultValue: false })
+    ),
+  }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     ccs: schema.object({
