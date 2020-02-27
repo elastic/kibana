@@ -11,8 +11,26 @@ import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server';
+import {
+  ElasticsearchErrorHelpers,
+  IClusterClient,
+  ScopeableRequest,
+} from '../../../../../../src/core/server';
+import { AuthenticationResult } from '../authentication_result';
+import { DeauthenticationResult } from '../deauthentication_result';
 import { TokenAuthenticationProvider } from './token';
+
+function expectAuthenticateCall(
+  mockClusterClient: jest.Mocked<IClusterClient>,
+  scopeableRequest: ScopeableRequest
+) {
+  expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+  expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
+
+  const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+}
 
 describe('TokenAuthenticationProvider', () => {
   let provider: TokenAuthenticationProvider;
@@ -40,24 +58,19 @@ describe('TokenAuthenticationProvider', () => {
         refresh_token: tokenPair.refreshToken,
       });
 
-      const authenticationResult = await provider.login(request, credentials);
+      await expect(provider.login(request, credentials)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'token' },
+          { authHeaders: { authorization }, state: tokenPair }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: 'password', ...credentials },
       });
-
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
-      expect(authenticationResult.state).toEqual(tokenPair);
-      expect(authenticationResult.authHeaders).toEqual({ authorization });
     });
 
     it('fails if token cannot be generated during login attempt', async () => {
@@ -67,7 +80,9 @@ describe('TokenAuthenticationProvider', () => {
       const authenticationError = new Error('Invalid credentials');
       mockOptions.client.callAsInternalUser.mockRejectedValue(authenticationError);
 
-      const authenticationResult = await provider.login(request, credentials);
+      await expect(provider.login(request, credentials)).resolves.toEqual(
+        AuthenticationResult.failed(authenticationError)
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
 
@@ -77,10 +92,6 @@ describe('TokenAuthenticationProvider', () => {
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
     });
 
     it('fails if user cannot be retrieved during login attempt', async () => {
@@ -99,14 +110,11 @@ describe('TokenAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.login(request, credentials);
+      await expect(provider.login(request, credentials)).resolves.toEqual(
+        AuthenticationResult.failed(authenticationError)
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
@@ -114,10 +122,6 @@ describe('TokenAuthenticationProvider', () => {
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
     });
   });
 
@@ -127,11 +131,12 @@ describe('TokenAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-token' },
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle authentication via `authorization` header even if state contains valid credentials.', async () => {
@@ -139,36 +144,37 @@ describe('TokenAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-token' },
       });
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'foo',
-        refreshToken: 'bar',
-      });
+      await expect(
+        provider.authenticate(request, { accessToken: 'foo', refreshToken: 'bar' })
+      ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not redirect AJAX requests that can not be authenticated to the login page.', async () => {
       // Add `kbn-xsrf` header to make `can_redirect_request` think that it's AJAX request and
       // avoid triggering of redirect logic.
-      const authenticationResult = await provider.authenticate(
-        httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } }),
-        null
-      );
-
-      expect(authenticationResult.notHandled()).toBe(true);
+      await expect(
+        provider.authenticate(
+          httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } }),
+          null
+        )
+      ).resolves.toEqual(AuthenticationResult.notHandled());
     });
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
-      const authenticationResult = await provider.authenticate(
-        httpServerMock.createKibanaRequest({ path: '/s/foo/some-path # that needs to be encoded' }),
-        null
-      );
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+      await expect(
+        provider.authenticate(
+          httpServerMock.createKibanaRequest({
+            path: '/s/foo/some-path # that needs to be encoded',
+          }),
+          null
+        )
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        )
       );
     });
 
@@ -182,19 +188,15 @@ describe('TokenAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'token' },
+          { authHeaders: { authorization } }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.authHeaders).toEqual({ authorization });
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
@@ -226,15 +228,19 @@ describe('TokenAuthenticationProvider', () => {
         refreshToken: 'newbar',
       });
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'token' },
+          {
+            authHeaders: { authorization: 'Bearer newfoo' },
+            state: { accessToken: 'newfoo', refreshToken: 'newbar' },
+          }
+        )
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
-      expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
-      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
@@ -248,20 +254,13 @@ describe('TokenAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(authenticationError)
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
     });
 
     it('fails if token refresh is rejected with unknown error', async () => {
@@ -278,23 +277,16 @@ describe('TokenAuthenticationProvider', () => {
       const refreshError = new errors.InternalServerError('failed to refresh token');
       mockOptions.tokens.refresh.mockRejectedValue(refreshError);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(refreshError)
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(refreshError);
     });
 
     it('redirects non-AJAX requests to /login and clears session if token cannot be refreshed', async () => {
@@ -310,26 +302,18 @@ describe('TokenAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.redirectTo('/base-path/login?next=%2Fbase-path%2Fsome-path', {
+          state: null,
+        })
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fsome-path'
-      );
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toEqual(null);
-      expect(authenticationResult.error).toBeUndefined();
     });
 
     it('does not redirect AJAX requests if token token cannot be refreshed', async () => {
@@ -348,25 +332,18 @@ describe('TokenAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { 'kbn-xsrf': 'xsrf', authorization },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
     });
 
     it('fails if new access token is rejected after successful refresh', async () => {
@@ -397,16 +374,14 @@ describe('TokenAuthenticationProvider', () => {
         refreshToken: 'newbar',
       });
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(authenticationError)
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
     });
   });
 
@@ -414,11 +389,13 @@ describe('TokenAuthenticationProvider', () => {
     it('returns `redirected` if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      let deauthenticateResult = await provider.logout(request);
-      expect(deauthenticateResult.redirected()).toBe(true);
+      await expect(provider.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+      );
 
-      deauthenticateResult = await provider.logout(request, null);
-      expect(deauthenticateResult.redirected()).toBe(true);
+      await expect(provider.logout(request, null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+      );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
@@ -430,13 +407,12 @@ describe('TokenAuthenticationProvider', () => {
       const failureReason = new Error('failed to delete token');
       mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.logout(request, tokenPair);
+      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
+        DeauthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('redirects to /login if tokens are invalidated successfully', async () => {
@@ -445,13 +421,12 @@ describe('TokenAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      const authenticationResult = await provider.logout(request, tokenPair);
+      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+      );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
     });
 
     it('redirects to /login with optional search parameters if tokens are invalidated successfully', async () => {
@@ -460,13 +435,12 @@ describe('TokenAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      const authenticationResult = await provider.logout(request, tokenPair);
+      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/base-path/login?yep=nope')
+      );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?yep=nope');
     });
   });
 });

@@ -11,8 +11,26 @@ import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server';
+import {
+  ElasticsearchErrorHelpers,
+  IClusterClient,
+  ScopeableRequest,
+} from '../../../../../../src/core/server';
+import { AuthenticationResult } from '../authentication_result';
+import { DeauthenticationResult } from '../deauthentication_result';
 import { KerberosAuthenticationProvider } from './kerberos';
+
+function expectAuthenticateCall(
+  mockClusterClient: jest.Mocked<IClusterClient>,
+  scopeableRequest: ScopeableRequest
+) {
+  expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+  expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
+
+  const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+}
 
 describe('KerberosAuthenticationProvider', () => {
   let provider: KerberosAuthenticationProvider;
@@ -28,12 +46,13 @@ describe('KerberosAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-token' },
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle authentication via `authorization` header with non-negotiate scheme even if state contains a valid token.', async () => {
@@ -45,12 +64,13 @@ describe('KerberosAuthenticationProvider', () => {
         refreshToken: 'some-valid-refresh-token',
       };
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
@@ -60,16 +80,13 @@ describe('KerberosAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue({});
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
-
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle requests if backend does not support Kerberos.', async () => {
@@ -81,78 +98,71 @@ describe('KerberosAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
-
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if state is present, but backend does not support Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'token', refreshToken: 'refresh-token' };
 
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
-      );
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(
-          new (errors.AuthenticationException as any)('Unauthorized', {
-            body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-          })
-        )
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (errors.AuthenticationException as any)('Unauthorized', {
+          body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+        })
       );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
     it('fails if request authentication is failed with non-401 error.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
 
+      const failureReason = new errors.ServiceUnavailable();
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(new errors.ServiceUnavailable());
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('status', 503);
-      expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+      });
     });
 
     it('gets a token pair in exchange to SPNEGO one and stores it in the state.', async () => {
@@ -169,28 +179,25 @@ describe('KerberosAuthenticationProvider', () => {
         refresh_token: 'some-refresh-token',
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'kerberos' },
+          {
+            authHeaders: { authorization: 'Bearer some-token' },
+            state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
+          }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: 'Bearer some-token' },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
-      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
-      expect(authenticationResult.authResponseHeaders).toBeUndefined();
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'some-token',
-        refreshToken: 'some-refresh-token',
-      });
     });
 
     it('requests auth response header if token pair is complemented with Kerberos response token.', async () => {
@@ -208,30 +215,26 @@ describe('KerberosAuthenticationProvider', () => {
         kerberos_authentication_response_token: 'response-token',
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'kerberos' },
+          {
+            authHeaders: { authorization: 'Bearer some-token' },
+            authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
+            state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
+          }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: 'Bearer some-token' },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
-      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
-      expect(authenticationResult.authResponseHeaders).toEqual({
-        'WWW-Authenticate': 'Negotiate response-token',
-      });
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'some-token',
-        refreshToken: 'some-refresh-token',
-      });
     });
 
     it('fails with `Negotiate response-token` if cannot complete context with a response token.', async () => {
@@ -246,18 +249,17 @@ describe('KerberosAuthenticationProvider', () => {
       );
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.unauthorized(), {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
+        })
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(Boom.unauthorized());
-      expect(authenticationResult.authResponseHeaders).toEqual({
-        'WWW-Authenticate': 'Negotiate response-token',
-      });
     });
 
     it('fails with `Negotiate` if cannot create context using provided SPNEGO token.', async () => {
@@ -272,18 +274,17 @@ describe('KerberosAuthenticationProvider', () => {
       );
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.unauthorized(), {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(Boom.unauthorized());
-      expect(authenticationResult.authResponseHeaders).toEqual({
-        'WWW-Authenticate': 'Negotiate',
-      });
     });
 
     it('fails if could not retrieve an access token in exchange to SPNEGO one.', async () => {
@@ -294,16 +295,15 @@ describe('KerberosAuthenticationProvider', () => {
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('fails if could not retrieve user using the new access token.', async () => {
@@ -320,23 +320,19 @@ describe('KerberosAuthenticationProvider', () => {
         refresh_token: 'some-refresh-token',
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: 'Bearer some-token' },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -352,18 +348,16 @@ describe('KerberosAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'kerberos' },
+          { authHeaders: { authorization } }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({ headers: { authorization } });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
-      expect(authenticationResult.state).toBeUndefined();
     });
 
     it('succeeds with valid session even if requiring a token refresh', async () => {
@@ -394,15 +388,19 @@ describe('KerberosAuthenticationProvider', () => {
         refreshToken: 'newbar',
       });
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'kerberos' },
+          {
+            authHeaders: { authorization: 'Bearer newfoo' },
+            state: { accessToken: 'newfoo', refreshToken: 'newbar' },
+          }
+        )
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
-      expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
@@ -418,46 +416,43 @@ describe('KerberosAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: `Bearer ${tokenPair.accessToken}` },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+
       expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('fails with `Negotiate` challenge if both access and refresh tokens from the state are expired and backend supports Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'some-valid-refresh-token' };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(
-          new (errors.AuthenticationException as any)('Unauthorized', {
-            body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-          })
-        )
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (errors.AuthenticationException as any)('Unauthorized', {
+          body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+        })
       );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
   });
 
@@ -465,11 +460,11 @@ describe('KerberosAuthenticationProvider', () => {
     it('returns `notHandled` if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      let deauthenticateResult = await provider.logout(request);
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
-      deauthenticateResult = await provider.logout(request, null);
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      await expect(provider.logout(request, null)).resolves.toEqual(
+        DeauthenticationResult.notHandled()
+      );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
@@ -481,13 +476,12 @@ describe('KerberosAuthenticationProvider', () => {
       const failureReason = new Error('failed to delete token');
       mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.logout(request, tokenPair);
+      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
+        DeauthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('redirects to `/logged_out` page if tokens are invalidated successfully.', async () => {
@@ -499,13 +493,12 @@ describe('KerberosAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      const authenticationResult = await provider.logout(request, tokenPair);
+      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+      );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
   });
 });

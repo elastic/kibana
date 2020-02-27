@@ -39,14 +39,14 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    proxyOptions?: Readonly<Partial<HTTPAuthenticationProviderOptions>>
+    httpOptions?: Readonly<Partial<HTTPAuthenticationProviderOptions>>
   ) {
     super(options);
 
     this.supportedSchemes = new Set<string>(
-      (proxyOptions?.schemes ?? []).map(scheme => scheme.toLowerCase())
+      (httpOptions?.schemes ?? []).map(scheme => scheme.toLowerCase())
     );
-    this.autoSchemesEnabled = proxyOptions?.autoSchemesEnabled ?? false;
+    this.autoSchemesEnabled = httpOptions?.autoSchemesEnabled ?? false;
 
     if (this.supportedSchemes.size === 0 && !this.autoSchemesEnabled) {
       throw new Error('Supported schemes should be specified');

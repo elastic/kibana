@@ -8,8 +8,26 @@ import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server';
+import {
+  ElasticsearchErrorHelpers,
+  IClusterClient,
+  ScopeableRequest,
+} from '../../../../../../src/core/server';
+import { AuthenticationResult } from '../authentication_result';
+import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthenticationProvider } from './http';
+
+function expectAuthenticateCall(
+  mockClusterClient: jest.Mocked<IClusterClient>,
+  scopeableRequest: ScopeableRequest
+) {
+  expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+  expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
+
+  const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+}
 
 describe('HTTPAuthenticationProvider', () => {
   let mockOptions: MockAuthenticationProviderOptions;
@@ -43,12 +61,11 @@ describe('HTTPAuthenticationProvider', () => {
         autoSchemesEnabled: true,
         schemes: ['apikey'],
       });
-      const authenticationResult = await provider.login();
+
+      await expect(provider.login()).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-      expect(authenticationResult.notHandled()).toBe(true);
     });
   });
 
@@ -138,33 +155,35 @@ describe('HTTPAuthenticationProvider', () => {
     ];
 
     it('does not handle authentication for requests without `authorization` header.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-
       const provider = new HTTPAuthenticationProvider(mockOptions, {
         enabled: true,
         autoSchemesEnabled: true,
         schemes: ['apikey'],
       });
-      const authenticationResult = await provider.authenticate(request);
+
+      await expect(provider.authenticate(httpServerMock.createKibanaRequest())).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle authentication for requests with empty scheme in `authorization` header.', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization: '' } });
-
       const provider = new HTTPAuthenticationProvider(mockOptions, {
         enabled: true,
         autoSchemesEnabled: true,
         schemes: ['apikey'],
       });
-      const authenticationResult = await provider.authenticate(request);
+
+      await expect(
+        provider.authenticate(
+          httpServerMock.createKibanaRequest({ headers: { authorization: '' } })
+        )
+      ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle authentication via `authorization` header if scheme is not supported.', async () => {
@@ -182,10 +201,12 @@ describe('HTTPAuthenticationProvider', () => {
           autoSchemesEnabled,
           schemes,
         });
-        const authenticationResult = await provider.authenticate(request);
+
+        await expect(provider.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.notHandled()
+        );
 
         expect(request.headers.authorization).toBe(header);
-        expect(authenticationResult.notHandled()).toBe(true);
       }
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
@@ -208,21 +229,13 @@ describe('HTTPAuthenticationProvider', () => {
           autoSchemesEnabled,
           schemes,
         });
-        const authenticationResult = await provider.authenticate(request);
 
-        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-          headers: { authorization: header },
-        });
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-          'shield.authenticate'
+        await expect(provider.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded({ ...user, authentication_provider: 'http' })
         );
 
-        expect(authenticationResult.succeeded()).toBe(true);
-        expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'http' });
-        expect(authenticationResult.state).toBeUndefined();
-        expect(authenticationResult.authHeaders).toBeUndefined();
+        expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
         expect(request.headers.authorization).toBe(header);
       }
     });
@@ -243,20 +256,13 @@ describe('HTTPAuthenticationProvider', () => {
           autoSchemesEnabled,
           schemes,
         });
-        const authenticationResult = await provider.authenticate(request);
 
-        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-          headers: { authorization: header },
-        });
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-          'shield.authenticate'
+        await expect(provider.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.failed(failureReason)
         );
 
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toBe(failureReason);
-        expect(authenticationResult.authResponseHeaders).toBeUndefined();
+        expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
         expect(request.headers.authorization).toBe(header);
       }
     });
@@ -269,12 +275,11 @@ describe('HTTPAuthenticationProvider', () => {
         autoSchemesEnabled: true,
         schemes: ['apikey'],
       });
-      const authenticationResult = await provider.logout();
+
+      await expect(provider.logout()).resolves.toEqual(DeauthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-      expect(authenticationResult.notHandled()).toBe(true);
     });
   });
 });

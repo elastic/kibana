@@ -10,8 +10,27 @@ import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import { ElasticsearchErrorHelpers, KibanaRequest } from '../../../../../../src/core/server';
+import {
+  ElasticsearchErrorHelpers,
+  IClusterClient,
+  KibanaRequest,
+  ScopeableRequest,
+} from '../../../../../../src/core/server';
+import { AuthenticationResult } from '../authentication_result';
+import { DeauthenticationResult } from '../deauthentication_result';
 import { OIDCAuthenticationProvider, OIDCAuthenticationFlow, ProviderLoginAttempt } from './oidc';
+
+function expectAuthenticateCall(
+  mockClusterClient: jest.Mocked<IClusterClient>,
+  scopeableRequest: ScopeableRequest
+) {
+  expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+  expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
+
+  const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+}
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
@@ -51,29 +70,26 @@ describe('OIDCAuthenticationProvider', () => {
           '&login_hint=loginhint',
       });
 
-      const authenticationResult = await provider.login(request, {
-        flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
-        iss: 'theissuer',
-        loginHint: 'loginhint',
-      });
+      await expect(
+        provider.login(request, {
+          flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+          iss: 'theissuer',
+          loginHint: 'loginhint',
+        })
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+          { state: { state: 'statevalue', nonce: 'noncevalue', nextURL: '/base-path/' } }
+        )
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { iss: 'theissuer', login_hint: 'loginhint' },
-      });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        'https://op-host/path/login?response_type=code' +
-          '&scope=openid%20profile%20email' +
-          '&client_id=s6BhdRkqt3' +
-          '&state=statevalue' +
-          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
-          '&login_hint=loginhint'
-      );
-      expect(authenticationResult.state).toEqual({
-        state: 'statevalue',
-        nonce: 'noncevalue',
-        nextURL: '/base-path/',
       });
     });
 
@@ -92,11 +108,17 @@ describe('OIDCAuthenticationProvider', () => {
           refresh_token: 'some-refresh-token',
         });
 
-        const authenticationResult = await provider.login(request, attempt, {
-          state: 'statevalue',
-          nonce: 'noncevalue',
-          nextURL: '/base-path/some-path',
-        });
+        await expect(
+          provider.login(request, attempt, {
+            state: 'statevalue',
+            nonce: 'noncevalue',
+            nextURL: '/base-path/some-path',
+          })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/base-path/some-path', {
+            state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
+          })
+        );
 
         expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.oidcAuthenticate',
@@ -109,58 +131,52 @@ describe('OIDCAuthenticationProvider', () => {
             },
           }
         );
-
-        expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/base-path/some-path');
-        expect(authenticationResult.state).toEqual({
-          accessToken: 'some-token',
-          refreshToken: 'some-refresh-token',
-        });
       });
 
       it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
         const { request, attempt } = getMocks();
 
-        const authenticationResult = await provider.login(request, attempt, {
-          nextURL: '/base-path/some-path',
-        });
-
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toEqual(
-          Boom.badRequest(
-            'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+        await expect(
+          provider.login(request, attempt, { nextURL: '/base-path/some-path' })
+        ).resolves.toEqual(
+          AuthenticationResult.failed(
+            Boom.badRequest(
+              'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+            )
           )
         );
+
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       });
 
       it('fails if authentication response is presented but session state does not contain redirect URL.', async () => {
         const { request, attempt } = getMocks();
 
-        const authenticationResult = await provider.login(request, attempt, {
-          state: 'statevalue',
-          nonce: 'noncevalue',
-        });
-
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toEqual(
-          Boom.badRequest(
-            'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+        await expect(
+          provider.login(request, attempt, { state: 'statevalue', nonce: 'noncevalue' })
+        ).resolves.toEqual(
+          AuthenticationResult.failed(
+            Boom.badRequest(
+              'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+            )
           )
         );
+
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       });
 
       it('fails if session state is not presented.', async () => {
         const { request, attempt } = getMocks();
 
-        const authenticationResult = await provider.login(request, attempt, {});
+        await expect(provider.login(request, attempt, {})).resolves.toEqual(
+          AuthenticationResult.failed(
+            Boom.badRequest(
+              'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+            )
+          )
+        );
 
         expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-        expect(authenticationResult.failed()).toBe(true);
       });
 
       it('fails if authentication response is not valid.', async () => {
@@ -171,11 +187,13 @@ describe('OIDCAuthenticationProvider', () => {
         );
         mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-        const authenticationResult = await provider.login(request, attempt, {
-          state: 'statevalue',
-          nonce: 'noncevalue',
-          nextURL: '/base-path/some-path',
-        });
+        await expect(
+          provider.login(request, attempt, {
+            state: 'statevalue',
+            nonce: 'noncevalue',
+            nextURL: '/base-path/some-path',
+          })
+        ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
         expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.oidcAuthenticate',
@@ -188,9 +206,6 @@ describe('OIDCAuthenticationProvider', () => {
             },
           }
         );
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toBe(failureReason);
       });
     }
 
@@ -226,10 +241,9 @@ describe('OIDCAuthenticationProvider', () => {
   describe('`authenticate` method', () => {
     it('does not handle AJAX request that can not be authenticated.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-
-      const authenticationResult = await provider.authenticate(request, null);
-
-      expect(authenticationResult.notHandled()).toBe(true);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
     });
 
     it('redirects non-AJAX request that can not be authenticated to the OpenId Connect Provider.', async () => {
@@ -246,24 +260,25 @@ describe('OIDCAuthenticationProvider', () => {
           '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
       });
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+          {
+            state: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              nextURL: '/base-path/s/foo/some-path',
+            },
+          }
+        )
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
-      });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        'https://op-host/path/login?response_type=code' +
-          '&scope=openid%20profile%20email' +
-          '&client_id=s6BhdRkqt3' +
-          '&state=statevalue' +
-          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
-      );
-      expect(authenticationResult.state).toEqual({
-        state: 'statevalue',
-        nonce: 'noncevalue',
-        nextURL: '/base-path/s/foo/some-path',
       });
     });
 
@@ -273,14 +288,13 @@ describe('OIDCAuthenticationProvider', () => {
       const failureReason = new Error('Realm is misconfigured!');
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.authenticate(request, null);
+      await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
       });
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -296,20 +310,16 @@ describe('OIDCAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'oidc' },
+          { authHeaders: { authorization } }
+        )
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
-      expect(authenticationResult.state).toBeUndefined();
     });
 
     it('does not handle authentication via `authorization` header.', async () => {
@@ -317,11 +327,12 @@ describe('OIDCAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-token' },
       });
 
-      const authenticationResult = await provider.authenticate(request);
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle authentication via `authorization` header even if state contains a valid token.', async () => {
@@ -329,14 +340,15 @@ describe('OIDCAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-token' },
       });
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
+      await expect(
+        provider.authenticate(request, {
+          accessToken: 'some-valid-token',
+          refreshToken: 'some-valid-refresh-token',
+        })
+      ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
@@ -352,18 +364,13 @@ describe('OIDCAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
@@ -394,21 +401,20 @@ describe('OIDCAuthenticationProvider', () => {
         refreshToken: 'new-refresh-token',
       });
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'oidc' },
+          {
+            authHeaders: { authorization: 'Bearer new-access-token' },
+            state: { accessToken: 'new-access-token', refreshToken: 'new-refresh-token' },
+          }
+        )
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toEqual({
-        authorization: 'Bearer new-access-token',
-      });
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
-      });
     });
 
     it('fails if token from the state is expired and refresh attempt failed too.', async () => {
@@ -428,21 +434,16 @@ describe('OIDCAuthenticationProvider', () => {
       };
       mockOptions.tokens.refresh.mockRejectedValue(refreshFailureReason);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(refreshFailureReason as any)
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
-        headers: { authorization },
-      });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(refreshFailureReason);
     });
 
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
@@ -469,7 +470,22 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+          {
+            state: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              nextURL: '/base-path/s/foo/some-path',
+            },
+          }
+        )
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
@@ -483,20 +499,6 @@ describe('OIDCAuthenticationProvider', () => {
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
-      });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        'https://op-host/path/login?response_type=code' +
-          '&scope=openid%20profile%20email' +
-          '&client_id=s6BhdRkqt3' +
-          '&state=statevalue' +
-          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
-      );
-      expect(authenticationResult.state).toEqual({
-        state: 'statevalue',
-        nonce: 'noncevalue',
-        nextURL: '/base-path/s/foo/some-path',
       });
     });
 
@@ -513,23 +515,18 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      const authenticationResult = await provider.authenticate(request, tokenPair);
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
-      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+      expectAuthenticateCall(mockOptions.client, {
         headers: { 'kbn-xsrf': 'xsrf', authorization },
       });
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
     });
   });
 
@@ -537,14 +534,17 @@ describe('OIDCAuthenticationProvider', () => {
     it('returns `notHandled` if state is not presented or does not include access token.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      let deauthenticateResult = await provider.logout(request, {});
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      await expect(provider.logout(request, undefined as any)).resolves.toEqual(
+        DeauthenticationResult.notHandled()
+      );
 
-      deauthenticateResult = await provider.logout(request, {});
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      await expect(provider.logout(request, {})).resolves.toEqual(
+        DeauthenticationResult.notHandled()
+      );
 
-      deauthenticateResult = await provider.logout(request, { nonce: 'x' });
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      await expect(provider.logout(request, { nonce: 'x' })).resolves.toEqual(
+        DeauthenticationResult.notHandled()
+      );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
@@ -557,18 +557,14 @@ describe('OIDCAuthenticationProvider', () => {
       const failureReason = new Error('Realm is misconfigured!');
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      const authenticationResult = await provider.logout(request, {
-        accessToken,
-        refreshToken,
-      });
+      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
+        DeauthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('redirects to /logged_out if `redirect` field in OpenID Connect logout response is null.', async () => {
@@ -578,18 +574,14 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
-      const authenticationResult = await provider.logout(request, {
-        accessToken,
-        refreshToken,
-      });
+      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects user to the OpenID Connect Provider if RP initiated SLO is supported.', async () => {
@@ -601,17 +593,14 @@ describe('OIDCAuthenticationProvider', () => {
         redirect: 'http://fake-idp/logout&id_token_hint=thehint',
       });
 
-      const authenticationResult = await provider.logout(request, {
-        accessToken,
-        refreshToken,
-      });
+      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
+        DeauthenticationResult.redirectTo('http://fake-idp/logout&id_token_hint=thehint')
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('http://fake-idp/logout&id_token_hint=thehint');
     });
   });
 });
