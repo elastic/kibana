@@ -13,11 +13,14 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
+
 import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createUpdateRulesBulkRoute = (
   config: LegacyServices['config'],
@@ -120,7 +123,7 @@ export const createUpdateRulesBulkRoute = (
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -129,7 +132,17 @@ export const createUpdateRulesBulkRoute = (
           }
         })
       );
-      return rules;
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return headers
+          .response({
+            message: errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validated;
+      }
     },
   };
 };

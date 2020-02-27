@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -14,6 +13,7 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   AuthenticationsEdges,
   GetAuthenticationsQuery,
+  GetAuthenticationsQueryComponent,
   PageInfoPaginated,
 } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
@@ -21,8 +21,6 @@ import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-
-import { authenticationsQuery } from './index.gql_query';
 
 const ID = 'authenticationQuery';
 
@@ -39,7 +37,7 @@ export interface AuthenticationArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: AuthenticationArgs) => React.ReactNode;
+  children: (args: AuthenticationArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 
@@ -83,8 +81,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
     };
     return (
-      <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
-        query={authenticationsQuery}
+      <GetAuthenticationsQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -126,7 +123,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.Authentications.totalCount', data),
           });
         }}
-      </Query>
+      </GetAuthenticationsQueryComponent>
     );
   }
 }
