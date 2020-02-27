@@ -402,4 +402,12 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
   }
+
+  /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
+  }
 }

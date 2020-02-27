@@ -11,9 +11,7 @@ import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {
-  enabled: boolean;
-  autoSchemesEnabled: boolean;
-  schemes: string[];
+  supportedSchemes: Set<string>;
 }
 
 /**
@@ -31,26 +29,16 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly supportedSchemes: Set<string>;
 
-  /**
-   * Indicates whether we should allow schemes that other providers use to authenticate with
-   * Elasticsearch.
-   */
-  private readonly autoSchemesEnabled: boolean;
-
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    httpOptions?: Readonly<Partial<HTTPAuthenticationProviderOptions>>
+    httpOptions: Readonly<HTTPAuthenticationProviderOptions>
   ) {
     super(options);
 
-    this.supportedSchemes = new Set<string>(
-      (httpOptions?.schemes ?? []).map(scheme => scheme.toLowerCase())
-    );
-    this.autoSchemesEnabled = httpOptions?.autoSchemesEnabled ?? false;
-
-    if (this.supportedSchemes.size === 0 && !this.autoSchemesEnabled) {
+    if ((httpOptions?.supportedSchemes?.size ?? 0) === 0) {
       throw new Error('Supported schemes should be specified');
     }
+    this.supportedSchemes = httpOptions.supportedSchemes;
   }
 
   /**
@@ -74,7 +62,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    if (!this.isSchemeSupported(authenticationScheme)) {
+    if (!this.supportedSchemes.has(authenticationScheme)) {
       this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
     }
@@ -102,31 +90,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Checks whether specified scheme should be supported by the provider based on the explicitly
-   * specified schemes in Kibana configuration or currently enabled authentication providers (if
-   * `xpack.security.authc.http.autoSchemesEnabled` is set to `true`).
-   * @param scheme
+   * Returns `null` since provider doesn't attach any additional `Authorization` HTTP headers to
+   * successfully authenticated requests to Elasticsearch.
    */
-  private isSchemeSupported(scheme: string) {
-    const isSchemeSupported = this.supportedSchemes.has(scheme);
-    if (isSchemeSupported || !this.autoSchemesEnabled) {
-      return isSchemeSupported;
-    }
-
-    if (scheme === 'basic') {
-      return this.options.isProviderEnabled('basic');
-    }
-
-    if (scheme === 'bearer') {
-      return (
-        this.options.isProviderEnabled('saml') ||
-        this.options.isProviderEnabled('oidc') ||
-        this.options.isProviderEnabled('pki') ||
-        this.options.isProviderEnabled('kerberos') ||
-        this.options.isProviderEnabled('token')
-      );
-    }
-
-    return false;
+  public getHTTPAuthenticationScheme() {
+    return null;
   }
 }

@@ -1099,4 +1099,8 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('`getHTTPAuthenticationScheme` method', () => {
+    expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
+  });
 });

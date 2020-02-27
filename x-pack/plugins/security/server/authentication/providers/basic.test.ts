@@ -188,4 +188,8 @@ describe('BasicAuthenticationProvider', () => {
       );
     });
   });
+
+  it('`getHTTPAuthenticationScheme` method', () => {
+    expect(provider.getHTTPAuthenticationScheme()).toBe('basic');
+  });
 });

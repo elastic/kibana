@@ -102,6 +102,14 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
+  }
+
+  /**
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.

@@ -240,6 +240,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
+  }
+
+  /**
    * Validates whether request payload contains `SAMLResponse` parameter that can be exchanged
    * to a proper access token. If state is presented and includes request id then it means
    * that login attempt has been initiated by Kibana itself and request id must be sent to

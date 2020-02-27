@@ -95,6 +95,14 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
+  }
+
+  /**
    * Tries to authenticate request with `Negotiate ***` Authorization header by passing it to the Elasticsearch backend to
    * get an access token in exchange.
    * @param request Request instance.

@@ -39,31 +39,22 @@ export const ConfigSchema = schema.object(
       lifespan: schema.nullable(schema.duration()),
     }),
     secureCookies: schema.boolean({ defaultValue: false }),
-    authc: schema.object(
-      {
-        providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-        oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
-        saml: providerOptionsSchema(
-          'saml',
-          schema.object({
-            realm: schema.string(),
-            maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
-          })
-        ),
-        http: schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-          autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-          schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
-        }),
-      },
-      {
-        validate(value) {
-          if (value.providers.includes('http')) {
-            return '`http` authentication provider cannot be specified in `xpack.security.authc.providers`. Use `xpack.security.authc.http.enabled` instead.';
-          }
-        },
-      }
-    ),
+    authc: schema.object({
+      providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
+      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
+      saml: providerOptionsSchema(
+        'saml',
+        schema.object({
+          realm: schema.string(),
+          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        })
+      ),
+      http: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+        schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      }),
+    }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
   { allowUnknowns: true }
@@ -98,11 +89,6 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         }
       } else if (!secureCookies) {
         secureCookies = true;
-      }
-
-      // For the BWC reasons we always include HTTP authentication provider unless it's explicitly disabled.
-      if (config.authc.http.enabled) {
-        config.authc.providers.push('http');
       }
 
       return {

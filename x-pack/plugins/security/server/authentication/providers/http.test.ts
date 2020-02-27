@@ -38,28 +38,21 @@ describe('HTTPAuthenticationProvider', () => {
   it('throws if `schemes` are not specified', () => {
     const providerOptions = mockAuthenticationProviderOptions();
 
-    expect(() => new HTTPAuthenticationProvider(providerOptions)).toThrowError(
+    expect(() => new HTTPAuthenticationProvider(providerOptions, undefined as any)).toThrowError(
       'Supported schemes should be specified'
     );
-    expect(() => new HTTPAuthenticationProvider(providerOptions, {})).toThrowError(
+    expect(() => new HTTPAuthenticationProvider(providerOptions, {} as any)).toThrowError(
       'Supported schemes should be specified'
     );
-    expect(() => new HTTPAuthenticationProvider(providerOptions, { schemes: [] })).toThrowError(
-      'Supported schemes should be specified'
-    );
-
     expect(
-      () =>
-        new HTTPAuthenticationProvider(providerOptions, { schemes: [], autoSchemesEnabled: false })
+      () => new HTTPAuthenticationProvider(providerOptions, { supportedSchemes: new Set() })
     ).toThrowError('Supported schemes should be specified');
   });
 
   describe('`login` method', () => {
     it('does not handle login', async () => {
       const provider = new HTTPAuthenticationProvider(mockOptions, {
-        enabled: true,
-        autoSchemesEnabled: true,
-        schemes: ['apikey'],
+        supportedSchemes: new Set(['apikey']),
       });
 
       await expect(provider.login()).resolves.toEqual(AuthenticationResult.notHandled());
@@ -70,95 +63,9 @@ describe('HTTPAuthenticationProvider', () => {
   });
 
   describe('`authenticate` method', () => {
-    const testCasesToNotHandle = [
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['basic'],
-        header: 'Bearer xxx',
-      },
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['bearer'],
-        header: 'Basic xxx',
-      },
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['basic', 'apikey'],
-        header: 'Bearer xxx',
-      },
-      {
-        autoSchemesEnabled: true,
-        isProviderEnabled: () => false,
-        schemes: ['basic', 'apikey'],
-        header: 'Bearer xxx',
-      },
-      {
-        autoSchemesEnabled: true,
-        isProviderEnabled: (provider: string) => provider === 'basic',
-        schemes: ['basic'],
-        header: 'Bearer xxx',
-      },
-      {
-        autoSchemesEnabled: true,
-        isProviderEnabled: () => true,
-        schemes: [],
-        header: 'ApiKey xxx',
-      },
-    ];
-
-    const testCasesToHandle = [
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['basic'],
-        header: 'Basic xxx',
-      },
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['bearer'],
-        header: 'Bearer xxx',
-      },
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['basic', 'apikey'],
-        header: 'ApiKey xxx',
-      },
-      {
-        autoSchemesEnabled: false,
-        isProviderEnabled: () => false,
-        schemes: ['some-weird-scheme'],
-        header: 'some-weird-scheme xxx',
-      },
-      ...['saml', 'oidc', 'pki', 'kerberos', 'token'].map(bearerProviderType => ({
-        autoSchemesEnabled: true,
-        isProviderEnabled: (providerType: string) => providerType === bearerProviderType,
-        schemes: ['apikey'],
-        header: 'Bearer xxx',
-      })),
-      {
-        autoSchemesEnabled: true,
-        isProviderEnabled: (provider: string) => provider === 'basic',
-        schemes: ['apikey'],
-        header: 'Basic xxx',
-      },
-      {
-        autoSchemesEnabled: true,
-        isProviderEnabled: () => true,
-        schemes: [],
-        header: 'Bearer xxx',
-      },
-    ];
-
     it('does not handle authentication for requests without `authorization` header.', async () => {
       const provider = new HTTPAuthenticationProvider(mockOptions, {
-        enabled: true,
-        autoSchemesEnabled: true,
-        schemes: ['apikey'],
+        supportedSchemes: new Set(['apikey']),
       });
 
       await expect(provider.authenticate(httpServerMock.createKibanaRequest())).resolves.toEqual(
@@ -171,9 +78,7 @@ describe('HTTPAuthenticationProvider', () => {
 
     it('does not handle authentication for requests with empty scheme in `authorization` header.', async () => {
       const provider = new HTTPAuthenticationProvider(mockOptions, {
-        enabled: true,
-        autoSchemesEnabled: true,
-        schemes: ['apikey'],
+        supportedSchemes: new Set(['apikey']),
       });
 
       await expect(
@@ -187,19 +92,16 @@ describe('HTTPAuthenticationProvider', () => {
     });
 
     it('does not handle authentication via `authorization` header if scheme is not supported.', async () => {
-      for (const {
-        isProviderEnabled,
-        autoSchemesEnabled,
-        schemes,
-        header,
-      } of testCasesToNotHandle) {
+      for (const { schemes, header } of [
+        { schemes: ['basic'], header: 'Bearer xxx' },
+        { schemes: ['bearer'], header: 'Basic xxx' },
+        { schemes: ['basic', 'apikey'], header: 'Bearer xxx' },
+        { schemes: ['basic', 'bearer'], header: 'ApiKey xxx' },
+      ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        mockOptions.isProviderEnabled.mockImplementation(isProviderEnabled);
         const provider = new HTTPAuthenticationProvider(mockOptions, {
-          enabled: true,
-          autoSchemesEnabled,
-          schemes,
+          supportedSchemes: new Set(schemes),
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
@@ -215,7 +117,13 @@ describe('HTTPAuthenticationProvider', () => {
 
     it('succeeds if authentication via `authorization` header with supported scheme succeeds.', async () => {
       const user = mockAuthenticatedUser();
-      for (const { isProviderEnabled, autoSchemesEnabled, schemes, header } of testCasesToHandle) {
+      for (const { schemes, header } of [
+        { schemes: ['basic'], header: 'Basic xxx' },
+        { schemes: ['bearer'], header: 'Bearer xxx' },
+        { schemes: ['basic', 'apikey'], header: 'ApiKey xxx' },
+        { schemes: ['some-weird-scheme'], header: 'some-weird-scheme xxx' },
+        { schemes: ['apikey', 'bearer'], header: 'Bearer xxx' },
+      ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -223,11 +131,8 @@ describe('HTTPAuthenticationProvider', () => {
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 
-        mockOptions.isProviderEnabled.mockImplementation(isProviderEnabled);
         const provider = new HTTPAuthenticationProvider(mockOptions, {
-          enabled: true,
-          autoSchemesEnabled,
-          schemes,
+          supportedSchemes: new Set(schemes),
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
@@ -242,7 +147,13 @@ describe('HTTPAuthenticationProvider', () => {
 
     it('fails if authentication via `authorization` header with supported scheme fails.', async () => {
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      for (const { isProviderEnabled, autoSchemesEnabled, schemes, header } of testCasesToHandle) {
+      for (const { schemes, header } of [
+        { schemes: ['basic'], header: 'Basic xxx' },
+        { schemes: ['bearer'], header: 'Bearer xxx' },
+        { schemes: ['basic', 'apikey'], header: 'ApiKey xxx' },
+        { schemes: ['some-weird-scheme'], header: 'some-weird-scheme xxx' },
+        { schemes: ['apikey', 'bearer'], header: 'Bearer xxx' },
+      ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -250,11 +161,8 @@ describe('HTTPAuthenticationProvider', () => {
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 
-        mockOptions.isProviderEnabled.mockImplementation(isProviderEnabled);
         const provider = new HTTPAuthenticationProvider(mockOptions, {
-          enabled: true,
-          autoSchemesEnabled,
-          schemes,
+          supportedSchemes: new Set(schemes),
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
@@ -271,9 +179,7 @@ describe('HTTPAuthenticationProvider', () => {
   describe('`logout` method', () => {
     it('does not handle logout', async () => {
       const provider = new HTTPAuthenticationProvider(mockOptions, {
-        enabled: true,
-        autoSchemesEnabled: true,
-        schemes: ['apikey'],
+        supportedSchemes: new Set(['apikey']),
       });
 
       await expect(provider.logout()).resolves.toEqual(DeauthenticationResult.notHandled());
@@ -281,5 +187,12 @@ describe('HTTPAuthenticationProvider', () => {
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
+  });
+
+  it('`getHTTPAuthenticationScheme` method', () => {
+    const provider = new HTTPAuthenticationProvider(mockOptions, {
+      supportedSchemes: new Set(['apikey']),
+    });
+    expect(provider.getHTTPAuthenticationScheme()).toBeNull();
   });
 });

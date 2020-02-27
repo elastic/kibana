@@ -518,4 +518,8 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({ accessToken: 'foo' });
     });
   });
+
+  it('`getHTTPAuthenticationScheme` method', () => {
+    expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
+  });
 });

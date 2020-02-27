@@ -23,6 +23,5 @@ export function mockAuthenticationProviderOptions() {
     logger: loggingServiceMock.create().get(),
     basePath,
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
-    isProviderEnabled: jest.fn(),
   };
 }

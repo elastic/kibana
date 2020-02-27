@@ -25,7 +25,6 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
-  isProviderEnabled: (provider: string) => boolean;
 }
 
 /**
@@ -84,6 +83,13 @@ export abstract class BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider that needs to be invalidated.
    */
   abstract logout(request: KibanaRequest, state?: unknown): Promise<DeauthenticationResult>;
+
+  /**
+   * Returns HTTP authentication scheme that provider uses within `Authorization` HTTP header that
+   * it attaches to all successfully authenticated requests to Elasticsearch or `null` in case
+   * provider doesn't attach any additional `Authorization` HTTP headers.
+   */
+  abstract getHTTPAuthenticationScheme(): string | null;
 
   /**
    * Queries Elasticsearch `_authenticate` endpoint to authenticate request and retrieve the user

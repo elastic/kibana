@@ -603,4 +603,8 @@ describe('OIDCAuthenticationProvider', () => {
       });
     });
   });
+
+  it('`getHTTPAuthenticationScheme` method', () => {
+    expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
+  });
 });

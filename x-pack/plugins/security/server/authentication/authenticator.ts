@@ -106,7 +106,6 @@ const providerMap = new Map<
   [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
   [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
   [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
-  [HTTPAuthenticationProvider.type, HTTPAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {
@@ -221,6 +220,17 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+
+    // For the BWC reasons we always include HTTP authentication provider unless it's explicitly disabled.
+    if (this.options.config.authc.http.enabled) {
+      this.setupHTTPAuthenticationProvider(
+        Object.freeze({
+          ...providerCommonOptions,
+          logger: options.loggers.get(HTTPAuthenticationProvider.type),
+        })
+      );
+    }
+
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
     this.idleTimeout = this.options.config.session.idleTimeout;
@@ -396,6 +406,33 @@ export class Authenticator {
    */
   isProviderEnabled(providerType: string) {
     return this.providers.has(providerType);
+  }
+
+  /**
+   * Initializes HTTP Authentication provider and appends it to the end of the list of enabled
+   * authentication providers.
+   * @param options Common provider options.
+   */
+  private setupHTTPAuthenticationProvider(options: AuthenticationProviderOptions) {
+    const supportedSchemes = new Set(
+      this.options.config.authc.http.schemes.map(scheme => scheme.toLowerCase())
+    );
+
+    // If `autoSchemesEnabled` is set we should allow schemes that other providers use to
+    // authenticate requests with Elasticsearch.
+    if (this.options.config.authc.http.autoSchemesEnabled) {
+      for (const provider of this.providers.values()) {
+        const supportedScheme = provider.getHTTPAuthenticationScheme();
+        if (supportedScheme) {
+          supportedSchemes.add(supportedScheme.toLowerCase());
+        }
+      }
+    }
+
+    this.providers.set(
+      HTTPAuthenticationProvider.type,
+      new HTTPAuthenticationProvider(options, { supportedSchemes })
+    );
   }
 
   /**

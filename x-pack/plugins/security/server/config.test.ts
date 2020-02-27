@@ -101,20 +101,6 @@ describe('config schema', () => {
     );
   });
 
-  it('should throw error if `http` provider is explicitly set in xpack.security.authc.providers', () => {
-    expect(() =>
-      ConfigSchema.validate({ authc: { providers: ['http'] } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authc]: \`http\` authentication provider cannot be specified in \`xpack.security.authc.providers\`. Use \`xpack.security.authc.http.enabled\` instead."`
-    );
-
-    expect(() =>
-      ConfigSchema.validate({ authc: { providers: ['basic', 'http'] } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authc]: \`http\` authentication provider cannot be specified in \`xpack.security.authc.providers\`. Use \`xpack.security.authc.http.enabled\` instead."`
-    );
-  });
-
   describe('authc.oidc', () => {
     it(`returns a validation error when authc.providers is "['oidc']" and realm is unspecified`, async () => {
       expect(() =>
@@ -367,41 +353,5 @@ describe('createConfig$()', () => {
     expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
-  });
-
-  it('should include `http` authentication provider by default', async () => {
-    let config = (await mockAndCreateConfig(true, {})).config;
-    expect(config.authc.providers).toEqual(['basic', 'http']);
-
-    config = (
-      await mockAndCreateConfig(true, { authc: { providers: ['saml'], saml: { realm: 'saml1' } } })
-    ).config;
-    expect(config.authc.providers).toEqual(['saml', 'http']);
-
-    config = (
-      await mockAndCreateConfig(true, {
-        authc: { providers: ['saml', 'basic'], saml: { realm: 'saml1' } },
-      })
-    ).config;
-    expect(config.authc.providers).toEqual(['saml', 'basic', 'http']);
-  });
-
-  it('should not include `http` authentication provider if it is disabled', async () => {
-    let config = (await mockAndCreateConfig(true, { authc: { http: { enabled: false } } })).config;
-    expect(config.authc.providers).toEqual(['basic']);
-
-    config = (
-      await mockAndCreateConfig(true, {
-        authc: { providers: ['saml'], saml: { realm: 'saml1' }, http: { enabled: false } },
-      })
-    ).config;
-    expect(config.authc.providers).toEqual(['saml']);
-
-    config = (
-      await mockAndCreateConfig(true, {
-        authc: { providers: ['saml', 'basic'], saml: { realm: 'saml1' }, http: { enabled: false } },
-      })
-    ).config;
-    expect(config.authc.providers).toEqual(['saml', 'basic']);
   });
 });
