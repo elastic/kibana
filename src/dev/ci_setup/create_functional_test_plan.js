@@ -122,7 +122,7 @@ const getTestsTransformed = async (config, overrides = {}) => {
       let totalDuration = 0;
       while (totalDuration < 60 * 12 && byConfig.length > 0) {
         const suite =
-          totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 12
+          totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 9
             ? byConfig.shift()
             : byConfig.pop();
 
