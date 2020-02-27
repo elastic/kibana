@@ -228,8 +228,12 @@ export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidatio
   return ok(value as T); // TODO: infer type from our schema
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+export const convertToSnakeCase = <T extends Record<string, unknown>>(
+  obj: T
+): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
