@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
