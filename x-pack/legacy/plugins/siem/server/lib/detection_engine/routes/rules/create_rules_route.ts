@@ -13,10 +13,10 @@ import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { RuleAlertParamsRest } from '../../types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { buildRouteValidation, transformError } from '../utils';
-import { transform } from './utils';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -122,13 +122,11 @@ export const createRulesRoute = (router: IRouter): void => {
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
-        if (transformed == null) {
-          return response.internalError({
-            body: 'Internal error transforming rules',
-          });
+        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        if (errors != null) {
+          return response.internalError({ body: errors });
         } else {
-          return response.ok({ body: transformed });
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

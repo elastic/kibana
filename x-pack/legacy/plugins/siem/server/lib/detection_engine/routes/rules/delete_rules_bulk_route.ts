@@ -7,7 +7,9 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError, buildRouteValidation } from '../utils';
 import {
   IRuleSavedAttributesSavedObjectAttributes,
@@ -59,7 +61,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
               ruleStatuses.saved_objects.forEach(async obj =>
                 savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
               );
-              return transformOrBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
+              return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -68,7 +70,12 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
           }
         })
       );
-      return response.ok({ body: rules });
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return response.internalError({ body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
     }
   );
 };

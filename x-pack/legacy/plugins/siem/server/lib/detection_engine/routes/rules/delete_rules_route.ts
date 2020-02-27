@@ -8,7 +8,8 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transform } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { buildRouteValidation, transformError } from '../utils';
 import {
   DeleteRuleRequestParams,
@@ -57,13 +58,11 @@ export const deleteRulesRoute = (router: IRouter) => {
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return response.internalError({
-              body: 'Internal error transforming rules',
-            });
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return response.internalError({ body: errors });
           } else {
-            return response.ok({ body: transformed });
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });

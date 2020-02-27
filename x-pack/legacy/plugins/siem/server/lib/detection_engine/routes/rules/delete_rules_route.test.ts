@@ -66,7 +66,7 @@ describe('delete_rules', () => {
       clients.alertsClient.create.mockResolvedValue(null);
       const response = await server.inject(getDeleteRequest(), context);
       expect(response.internalError).toHaveBeenCalledWith({
-        body: 'Internal error transforming rules',
+        body: 'Internal error transforming',
       });
     });
 

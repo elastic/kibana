@@ -10,9 +10,11 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   PatchRuleAlertParamsRest,
 } from '../../rules/types';
-import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError, buildRouteValidation } from '../utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -110,7 +112,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -119,7 +121,13 @@ export const patchRulesBulkRoute = (router: IRouter) => {
           }
         })
       );
-      return response.ok({ body: rules });
+
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return response.internalError({ body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
     }
   );
 };

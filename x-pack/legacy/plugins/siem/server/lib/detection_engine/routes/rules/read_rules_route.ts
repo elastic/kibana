@@ -6,9 +6,9 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError, transform } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { buildRouteValidation, transformError } from '../utils';
-
 import { readRules } from '../../rules/read_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import {
@@ -54,13 +54,11 @@ export const readRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformedOrError = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformedOrError == null) {
-            return response.internalError({
-              body: 'Internal error transforming rules',
-            });
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return response.internalError({ body: errors });
           } else {
-            return response.ok({ body: transformedOrError });
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });

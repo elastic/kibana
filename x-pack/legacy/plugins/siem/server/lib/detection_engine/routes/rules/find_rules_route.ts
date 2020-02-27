@@ -12,8 +12,8 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { transformFindAlerts } from './utils';
-import { transformError, buildRouteValidation } from '../utils';
+import { transformValidateFindAlerts } from './validate';
+import { buildRouteValidation, transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const findRulesRoute = (router: IRouter) => {
@@ -60,14 +60,11 @@ export const findRulesRoute = (router: IRouter) => {
             return results;
           })
         );
-        const transformed = transformFindAlerts(rules, ruleStatuses);
-        if (transformed == null) {
-          return response.internalError({
-            body: 'unknown data type, error transforming alert',
-          });
+        const [validated, errors] = transformValidateFindAlerts(rules, ruleStatuses);
+        if (errors != null) {
+          return response.internalError({ body: errors });
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return response.ok({ body: transformed as any });
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

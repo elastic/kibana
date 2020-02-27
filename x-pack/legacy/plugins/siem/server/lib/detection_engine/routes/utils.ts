@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { snakeCase } from 'lodash/fp';
+import { has, snakeCase } from 'lodash/fp';
 
 import { RouteValidationFunction } from '../../../../../../../../src/core/server';
 
@@ -102,16 +102,25 @@ export const createBulkErrorObject = ({
   }
 };
 
-export interface ImportRuleResponse {
-  rule_id?: string;
-  id?: string;
-  status_code?: number;
+export interface ImportRegular {
+  rule_id: string;
+  status_code: number;
   message?: string;
-  error?: {
-    status_code: number;
-    message: string;
-  };
 }
+
+export type ImportRuleResponse = ImportRegular | BulkError;
+
+export const isBulkError = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is BulkError => {
+  return has('error', importRuleResponse);
+};
+
+export const isImportRegular = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is ImportRegular => {
+  return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
+};
 
 export interface ImportSuccessError {
   success: boolean;

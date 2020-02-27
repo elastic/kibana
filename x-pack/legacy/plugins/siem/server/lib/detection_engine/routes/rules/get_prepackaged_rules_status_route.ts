@@ -12,6 +12,11 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import {
+  PrePackagedRulesStatusSchema,
+  prePackagedRulesStatusSchema,
+} from '../schemas/response/prepackaged_rules_status_schema';
+import { validate } from './validate';
 
 export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
   router.get(
@@ -42,14 +47,18 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
-        return response.ok({
-          body: {
-            rules_custom_installed: customRules.total,
-            rules_installed: prepackagedRules.length,
-            rules_not_installed: rulesToInstall.length,
-            rules_not_updated: rulesToUpdate.length,
-          },
-        });
+        const prepackagedRulesStatus: PrePackagedRulesStatusSchema = {
+          rules_custom_installed: customRules.total,
+          rules_installed: prepackagedRules.length,
+          rules_not_installed: rulesToInstall.length,
+          rules_not_updated: rulesToUpdate.length,
+        };
+        const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
+        if (errors != null) {
+          return response.internalError({ body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
         const error = transformError(err);
         return response.customError({

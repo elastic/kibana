@@ -14,6 +14,11 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import {
+  PrePackagedRulesSchema,
+  prePackagedRulesSchema,
+} from '../schemas/response/prepackaged_rules_schema';
+import { validate } from './validate';
 
 export const addPrepackedRulesRoute = (router: IRouter) => {
   router.put(
@@ -64,9 +69,16 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
           rulesToUpdate,
           signalsIndex
         );
-        return response.ok({
-          body: { rules_installed: rulesToInstall.length, rules_updated: rulesToUpdate.length },
-        });
+        const prepackagedRulesOutput: PrePackagedRulesSchema = {
+          rules_installed: rulesToInstall.length,
+          rules_updated: rulesToUpdate.length,
+        };
+        const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
+        if (errors != null) {
+          return response.internalError({ body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
         const error = transformError(err);
         return response.customError({

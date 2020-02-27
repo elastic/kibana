@@ -21,13 +21,14 @@ import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import {
   KibanaRequest,
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
+  RouteValidationSpec,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
@@ -43,9 +44,9 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   socket?: Socket;
   routeTags?: string[];
   validation?: {
-    params?: Type<P>;
-    query?: Type<Q>;
-    body?: Type<B>;
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+    body?: RouteValidationSpec<B>;
   };
 }
 

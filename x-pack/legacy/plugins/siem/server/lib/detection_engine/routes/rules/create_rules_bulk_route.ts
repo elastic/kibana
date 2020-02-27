@@ -11,10 +11,12 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError, getDuplicates } from './utils';
+import { getDuplicates } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { transformBulkError, createBulkErrorObject, buildRouteValidation } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createRulesBulkRoute = (router: IRouter) => {
   router.post(
@@ -122,25 +124,28 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 references,
                 version,
               });
-              return transformOrBulkError(ruleIdOrUuid, createdRule);
+              return transformValidateBulkError(ruleIdOrUuid, createdRule);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }
           })
       );
-
-      return response.ok({
-        body: [
-          ...rules,
-          ...dupes.map(ruleId =>
-            createBulkErrorObject({
-              ruleId,
-              statusCode: 409,
-              message: `rule_id: "${ruleId}" already exists`,
-            })
-          ),
-        ],
-      });
+      const rulesBulk = [
+        ...rules,
+        ...dupes.map(ruleId =>
+          createBulkErrorObject({
+            ruleId,
+            statusCode: 409,
+            message: `rule_id: "${ruleId}" already exists`,
+          })
+        ),
+      ];
+      const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
+      if (errors != null) {
+        return response.internalError({ body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
     }
   );
 };

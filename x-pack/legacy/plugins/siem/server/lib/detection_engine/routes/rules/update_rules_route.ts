@@ -11,8 +11,9 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { getIdError, transform } from './utils';
 import { buildRouteValidation, transformError } from '../utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 
@@ -111,13 +112,11 @@ export const updateRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return response.internalError({
-              body: 'Internal error transforming rules',
-            });
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return response.internalError({ body: errors });
           } else {
-            return response.ok({ body: transformed });
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });

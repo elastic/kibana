@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chunk, isEmpty } from 'lodash/fp';
+import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
 import { IRouter } from '../../../../../../../../../src/core/server';
@@ -16,16 +16,21 @@ import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
+  buildRouteValidation,
   createBulkErrorObject,
   ImportRuleResponse,
-  buildRouteValidation,
+  BulkError,
+  isBulkError,
+  isImportRegular,
   transformError,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
+import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { validate } from './validate';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -238,14 +243,25 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
           ];
         }
 
-        const errorsResp = importRuleResponse.filter(resp => !isEmpty(resp.error));
-        return response.ok({
-          body: {
-            success: errorsResp.length === 0,
-            success_count: importRuleResponse.filter(resp => resp.status_code === 200).length,
-            errors: errorsResp,
-          },
+        const errorsResp = importRuleResponse.filter(resp => isBulkError(resp)) as BulkError[];
+        const successes = importRuleResponse.filter(resp => {
+          if (isImportRegular(resp)) {
+            return resp.status_code === 200;
+          } else {
+            return false;
+          }
         });
+        const importRules: ImportRulesSchema = {
+          success: errorsResp.length === 0,
+          success_count: successes.length,
+          errors: errorsResp,
+        };
+        const [validated, errors] = validate(importRules, importRulesSchema);
+        if (errors != null) {
+          return response.internalError({ body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
         const error = transformError(err);
         return response.customError({

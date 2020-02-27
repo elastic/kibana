@@ -42,11 +42,9 @@ describe('find_rules', () => {
     });
 
     test.skip('catches error if transformation fails', async () => {
-      // @ts-ignore
-      clients.alertsClient.create.mockResolvedValue(null);
       const response = await server.inject(getFindRequest(), context);
       expect(response.internalError).toHaveBeenCalledWith({
-        body: 'Internal error transforming rules',
+        body: 'Internal error transforming',
       });
     });
 

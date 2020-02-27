@@ -32,14 +32,12 @@ describe('read_signals', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getReadRequest(), context);
-
       expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getReadRequest(), context);
-
       expect(response.notFound).toHaveBeenCalled();
     });
 
