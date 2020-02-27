@@ -12,9 +12,9 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
+  KIBANA_STATS_TYPE_MONITORING,
 } from '../../../../common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
-// import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
@@ -265,10 +265,7 @@ async function getLiveKibanaInstance(usageCollection) {
   if (!usageCollection) {
     return null;
   }
-  // TODO: NP
-  return null;
-  const KIBANA_STATS_TYPE = 'foo';
-  const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
+  const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE_MONITORING);
   if (!(await kibanaStatsCollector.isReady())) {
     return null;
   }
