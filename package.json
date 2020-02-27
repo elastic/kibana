@@ -85,6 +85,7 @@
     "**/@types/hoist-non-react-statics": "^3.3.1",
     "**/deepmerge": "^4.2.2",
     "**/fast-deep-equal": "^3.1.1",
+    "**/graphql-toolkit/lodash": "^4.17.13",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/image-diff/gm/debug": "^2.6.9",
