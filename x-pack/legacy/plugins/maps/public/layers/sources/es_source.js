@@ -14,7 +14,6 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
-import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
@@ -151,27 +150,18 @@ export class AbstractESSource extends AbstractVectorSource {
       { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
       0
     );
-    const geoField = await this._getGeoField();
-    const indexPattern = await this.getIndexPattern();
-
-    const geoBoundsAgg = [
-      {
-        type: 'geo_bounds',
-        enabled: true,
-        params: {
-          field: geoField,
+    searchSource.setField('aggs', {
+      fitToBounds: {
+        geo_bounds: {
+          field: this._descriptor.geoField,
         },
-        schema: 'metric',
       },
-    ];
-
-    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
-    searchSource.setField('aggs', aggConfigs.toDsl());
+    });
 
     let esBounds;
     try {
       const esResp = await searchSource.fetch();
-      esBounds = _.get(esResp, 'aggregations.1.bounds');
+      esBounds = _.get(esResp, 'aggregations.fitToBounds.bounds');
     } catch (error) {
       esBounds = {
         top_left: {
