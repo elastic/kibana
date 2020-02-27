@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Plugin as SnapshotRestorePlugin } from './plugin';
-import { createShim } from './shim';
+import './application/index.scss';
+import { SnapshotRestoreUIPlugin } from './plugin';
 
-const { core, plugins } = createShim();
-const snapshotRestorePlugin = new SnapshotRestorePlugin();
-snapshotRestorePlugin.start(core, plugins);
+/** @public */
+export const plugin = () => {
+  return new SnapshotRestoreUIPlugin();
+};

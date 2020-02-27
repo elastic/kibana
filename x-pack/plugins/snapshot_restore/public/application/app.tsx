@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
@@ -19,19 +20,12 @@ import {
   PolicyAdd,
   PolicyEdit,
 } from './sections';
-import { useAppDependencies } from './index';
+import { useConfig } from './app_context';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-      chrome,
-    },
-  } = useAppDependencies();
+  const { slmUiEnabled } = useConfig();
   const { apiError } = useContext(AuthorizationContext);
-
-  const slmUiEnabled = chrome.getInjected('slmUiEnabled');
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
 

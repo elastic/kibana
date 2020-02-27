@@ -6,7 +6,7 @@
 import { unmountComponentAtNode } from 'react-dom';
 
 import { PLUGIN } from '../common/constants';
-import { CLIENT_BASE_PATH, renderReact } from './app';
+import { CLIENT_BASE_PATH, renderReact } from './application';
 import { AppCore, AppPlugins } from './application/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
@@ -19,7 +19,7 @@ import { uiMetricService } from './application/services/ui_metric';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
-export class Plugin {
+export class SnapshotRestoreUIPlugin {
   public start(core: Core, plugins: Plugins): void {
     const { i18n, routing, http, chrome, notification, documentation, docTitle } = core;
     const { management, uiMetric } = plugins;
