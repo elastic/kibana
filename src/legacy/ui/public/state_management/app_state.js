@@ -29,7 +29,7 @@
 
 import { uiModules } from '../modules';
 import { StateProvider } from './state';
-import { PersistedState } from '../persisted_state';
+import { PersistedState } from '../../../../plugins/visualizations/public';
 import { createLegacyClass } from '../utils/legacy_class';
 
 const urlParam = '_a';
