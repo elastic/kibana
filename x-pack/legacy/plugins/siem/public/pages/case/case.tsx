@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CaseHeaderPage } from './components/case_header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { AllCases } from './components/all_cases';
@@ -25,9 +25,7 @@ export const CasesPage = React.memo(() => (
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton href={getConfigureCasesUrl()} iconType="gear">
-              {i18n.CONFIGURE_CASES_BUTTON}
-            </EuiButton>
+            <EuiButtonIcon href={getConfigureCasesUrl()} iconType="gear" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
