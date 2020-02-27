@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import useResizeObserver from 'use-resize-observer';
+import { MockedProvider } from '@apollo/client/testing';
+import { act } from '@testing-library/react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { wait } from '../../lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../mock';
@@ -28,7 +29,7 @@ mockUseFetchIndexPatterns.mockImplementation(() => [
 ]);
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const from = 1566943856794;
@@ -51,7 +52,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -77,7 +78,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { Exception } from '../../../../../typings/es_schemas/raw/ErrorRaw';
+import { Exception } from '../../../../../../../../plugins/apm/typings/es_schemas/raw/error_raw';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { CauseStacktrace } from '../../../shared/Stacktrace/CauseStacktrace';
 

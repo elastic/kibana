@@ -7,14 +7,14 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { Query } from 'react-apollo';
-import { compose } from 'redux';
+import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
+  GetTimelineQueryComponent,
   PageInfo,
   SortField,
   TimelineEdges,
@@ -25,7 +25,8 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { EventType } from '../../store/timeline/model';
-import { timelineQuery } from './index.gql_query';
+import { timelineActions } from '../../store/timeline';
+import { SIGNALS_PAGE_TIMELINE_ID } from '../../pages/detection_engine/components/signals';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -40,7 +41,7 @@ export interface TimelineArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
+  children?: (args: TimelineArgs) => React.ReactElement;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
@@ -68,6 +69,7 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
+      clearSignalsState,
       eventType = 'raw',
       id,
       indexPattern,
@@ -97,14 +99,18 @@ class TimelineQueryComponent extends QueryTemplate<
       defaultIndex,
       inspect: isInspected,
     };
+
     return (
-      <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
-        query={timelineQuery}
+      <GetTimelineQueryComponent
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
+          this.setRefetch(refetch);
+          this.setExecuteBeforeRefetch(clearSignalsState);
+          this.setExecuteBeforeFetchMore(clearSignalsState);
+
           const timelineEdges = getOr([], 'source.Timeline.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
@@ -138,7 +144,7 @@ class TimelineQueryComponent extends QueryTemplate<
           return children!({
             id,
             inspect: getOr(null, 'source.Timeline.inspect', data),
-            refetch,
+            refetch: this.wrappedRefetch,
             loading,
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
             pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
@@ -147,7 +153,7 @@ class TimelineQueryComponent extends QueryTemplate<
             getUpdatedAt: this.getUpdatedAt,
           });
         }}
-      </Query>
+      </GetTimelineQueryComponent>
     );
   }
 
@@ -168,7 +174,16 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  clearSignalsState: ({ id }: { id?: string }) => {
+    if (id != null && id === SIGNALS_PAGE_TIMELINE_ID) {
+      dispatch(timelineActions.clearEventsLoading({ id }));
+      dispatch(timelineActions.clearEventsDeleted({ id }));
+    }
+  },
+});
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

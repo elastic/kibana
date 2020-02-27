@@ -14,12 +14,15 @@ import {
   typicalPayload,
   getReadBulkRequest,
   getEmptyIndex,
+  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { BulkError } from '../utils';
 import { OutputRuleAlertRest } from '../../types';
+import * as createRules from '../../rules/create_rules';
+import * as readRules from '../../rules/read_rules';
 
 describe('create_rules_bulk', () => {
   let server = createMockServer();
@@ -29,10 +32,14 @@ describe('create_rules_bulk', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
+
     getClients.mockResolvedValue(clients);
 
     createRulesBulkRoute(server.route, config, getClients);
@@ -44,8 +51,12 @@ describe('create_rules_bulk', () => {
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.create.mockResolvedValue(createActionResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getReadBulkRequest());
+      jest.spyOn(createRules, 'createRules').mockImplementation(async () => {
+        return getResult();
+      });
+      const { payload, statusCode } = await server.inject(getReadBulkRequest());
       expect(statusCode).toBe(200);
+      expect(JSON.parse(payload).error).toBeUndefined();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
@@ -149,6 +160,24 @@ describe('create_rules_bulk', () => {
     expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
   });
 
+  test('returns 409 if duplicate rule_ids found in rule saved objects', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
+      return getResult();
+    });
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
+  });
+
   test('returns one error object in response when duplicate rule_ids found in request payload', async () => {
     clients.alertsClient.find.mockResolvedValue(getFindResult());
     clients.alertsClient.get.mockResolvedValue(getResult());
@@ -162,5 +191,23 @@ describe('create_rules_bulk', () => {
     const { payload } = await server.inject(request);
     const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
     expect(output.length).toBe(1);
+  });
+
+  test('catches error if createRules throws error', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    jest.spyOn(createRules, 'createRules').mockImplementation(async () => {
+      throw new Error('Test error');
+    });
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output[0].error.message).toBe('Test error');
   });
 });

@@ -27,9 +27,11 @@ import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
 import { InfraStaticSourceConfiguration } from './lib/sources/types';
+import { registerAlertTypes } from './lib/alerting';
 
 export const config = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     query: schema.object({
       partitionSize: schema.number({ defaultValue: 75 }),
       partitionFactor: schema.number({ defaultValue: 1.2 }),
@@ -145,6 +147,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
+    registerAlertTypes(plugins.alerting);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

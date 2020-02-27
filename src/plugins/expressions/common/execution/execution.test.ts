@@ -18,20 +18,28 @@
  */
 
 import { Execution } from './execution';
-import { parseExpression } from '../ast';
+import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../../public';
 import { ExecutionContract } from './execution_contract';
 
+beforeAll(() => {
+  if (typeof performance === 'undefined') {
+    (global as any).performance = { now: Date.now };
+  }
+});
+
 const createExecution = (
   expression: string = 'foo bar=123',
-  context: Record<string, unknown> = {}
+  context: Record<string, unknown> = {},
+  debug: boolean = false
 ) => {
   const executor = createUnitTestExecutor();
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
     context,
+    debug,
   });
   return execution;
 };
@@ -336,16 +344,18 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
+      jest.useFakeTimers();
       const execution = createExecution('sleep 20');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 5));
+      jest.advanceTimersByTime(5);
       expect(execution.state.get().state).toBe('pending');
+      jest.useRealTimers();
     });
 
     test('execution state is "result" when execution successfully completes', async () => {
       const execution = createExecution('sleep 1');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 30));
+      await execution.result;
       expect(execution.state.get().state).toBe('result');
     });
 
@@ -401,6 +411,248 @@ describe('Execution', () => {
         error: {
           message: '[var_set] > var_set requires an "name" argument',
         },
+      });
+    });
+  });
+
+  describe('debug mode', () => {
+    test('can execute expression in debug mode', async () => {
+      const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+      execution.start(-1);
+      const result = await execution.result;
+
+      expect(result).toEqual({
+        type: 'num',
+        value: 5,
+      });
+    });
+
+    test('can execute expression with sub-expression in debug mode', async () => {
+      const execution = createExecution(
+        'add val={var_set name=foo value=5 | var name=foo} | add val=10',
+        {},
+        true
+      );
+      execution.start(0);
+      const result = await execution.result;
+
+      expect(result).toEqual({
+        type: 'num',
+        value: 15,
+      });
+    });
+
+    describe('when functions succeed', () => {
+      test('sets "success" flag on all functions to true', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        for (const node of execution.state.get().ast.chain) {
+          expect(node.debug?.success).toBe(true);
+        }
+      });
+
+      test('stores "fn" reference to the function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        for (const node of execution.state.get().ast.chain) {
+          expect(node.debug?.fn.name).toBe('add');
+        }
+      });
+
+      test('saves duration it took to execute each function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        for (const node of execution.state.get().ast.chain) {
+          expect(typeof node.debug?.duration).toBe('number');
+          expect(node.debug?.duration).toBeLessThan(100);
+          expect(node.debug?.duration).toBeGreaterThanOrEqual(0);
+        }
+      });
+
+      test('sets duration to 10 milliseconds when function executes 10 milliseconds', async () => {
+        const execution = createExecution('sleep 10', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        const node = execution.state.get().ast.chain[0];
+        expect(typeof node.debug?.duration).toBe('number');
+        expect(node.debug?.duration).toBeLessThan(50);
+        expect(node.debug?.duration).toBeGreaterThanOrEqual(5);
+      });
+
+      test('adds .debug field in expression AST on each executed function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        for (const node of execution.state.get().ast.chain) {
+          expect(typeof node.debug).toBe('object');
+          expect(!!node.debug).toBe(true);
+        }
+      });
+
+      test('stores input of each function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        const { chain } = execution.state.get().ast;
+
+        expect(chain[0].debug!.input).toBe(-1);
+        expect(chain[1].debug!.input).toEqual({
+          type: 'num',
+          value: 0,
+        });
+        expect(chain[2].debug!.input).toEqual({
+          type: 'num',
+          value: 2,
+        });
+      });
+
+      test('stores output of each function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        const { chain } = execution.state.get().ast;
+
+        expect(chain[0].debug!.output).toEqual({
+          type: 'num',
+          value: 0,
+        });
+        expect(chain[1].debug!.output).toEqual({
+          type: 'num',
+          value: 2,
+        });
+        expect(chain[2].debug!.output).toEqual({
+          type: 'num',
+          value: 5,
+        });
+      });
+
+      test('stores resolved arguments of a function', async () => {
+        const execution = createExecution(
+          'add val={var_set name=foo value=5 | var name=foo} | add val=10',
+          {},
+          true
+        );
+        execution.start(-1);
+        await execution.result;
+
+        const { chain } = execution.state.get().ast;
+
+        expect(chain[0].debug!.args).toEqual({
+          val: 5,
+        });
+
+        expect((chain[0].arguments.val[0] as ExpressionAstExpression).chain[0].debug!.args).toEqual(
+          {
+            name: 'foo',
+            value: 5,
+          }
+        );
+      });
+
+      test('store debug information about sub-expressions', async () => {
+        const execution = createExecution(
+          'add val={var_set name=foo value=5 | var name=foo} | add val=10',
+          {},
+          true
+        );
+        execution.start(0);
+        await execution.result;
+
+        const { chain } = execution.state.get().ast.chain[0].arguments
+          .val[0] as ExpressionAstExpression;
+
+        expect(typeof chain[0].debug).toBe('object');
+        expect(typeof chain[1].debug).toBe('object');
+        expect(!!chain[0].debug).toBe(true);
+        expect(!!chain[1].debug).toBe(true);
+
+        expect(chain[0].debug!.input).toBe(0);
+        expect(chain[0].debug!.output).toBe(0);
+        expect(chain[1].debug!.input).toBe(0);
+        expect(chain[1].debug!.output).toBe(5);
+      });
+    });
+
+    describe('when expression throws', () => {
+      const executor = createUnitTestExecutor();
+      executor.registerFunction({
+        name: 'throws',
+        args: {},
+        help: '',
+        fn: () => {
+          throw new Error('foo');
+        },
+      });
+
+      test('stores debug information up until the function that throws', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node1 = execution.state.get().ast.chain[0];
+        const node2 = execution.state.get().ast.chain[1];
+        const node3 = execution.state.get().ast.chain[2];
+
+        expect(typeof node1.debug).toBe('object');
+        expect(typeof node2.debug).toBe('object');
+        expect(typeof node3.debug).toBe('undefined');
+      });
+
+      test('stores error thrown in debug information', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node2 = execution.state.get().ast.chain[1];
+
+        expect(node2.debug?.error).toMatchObject({
+          type: 'error',
+          error: {
+            message: '[throws] > foo',
+          },
+        });
+        expect(node2.debug?.rawError).toBeInstanceOf(Error);
+        expect(node2.debug?.rawError).toEqual(new Error('foo'));
+      });
+
+      test('sets .debug object to expected shape', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node2 = execution.state.get().ast.chain[1];
+
+        expect(node2.debug).toMatchObject({
+          success: false,
+          fn: expect.any(Object),
+          input: expect.any(Object),
+          args: expect.any(Object),
+          error: expect.any(Object),
+          rawError: expect.any(Error),
+          duration: expect.any(Number),
+        });
       });
     });
   });

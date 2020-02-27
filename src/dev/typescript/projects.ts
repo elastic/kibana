@@ -19,7 +19,6 @@
 
 import glob from 'glob';
 import { resolve } from 'path';
-
 import { REPO_ROOT } from '../constants';
 import { Project } from './project';
 
@@ -31,7 +30,7 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/siem/cypress/tsconfig.json'), {
     name: 'siem/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/apm/cypress/tsconfig.json'), {
+  new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),
