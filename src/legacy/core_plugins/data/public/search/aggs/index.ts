@@ -46,7 +46,7 @@ export { convertDateRangeToString } from './buckets/date_range';
 export { convertIPRangeToString } from './buckets/ip_range';
 export { aggTypeFilters, propFilter } from './filter';
 export { OptionedParamType } from './param_types/optioned';
-export { isValidJson, isValidInterval } from './utils';
+export { isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
