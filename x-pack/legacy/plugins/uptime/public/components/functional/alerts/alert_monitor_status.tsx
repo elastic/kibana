@@ -193,7 +193,15 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                     }
                   }}
                   singleSelection={true}
-                  listProps={{ showIcons: true }}
+                  listProps={{
+                    // this code tells the selectable which item should be highlighted as "active".
+                    // the selectable component is very general, so some features require additional computation like this
+                    activeOptionIndex: timerangeUnitOptions.reduce(
+                      (acc, { checked }, ind) => (checked === 'on' ? ind : acc),
+                      0
+                    ),
+                    showIcons: true,
+                  }}
                 >
                   {list => list}
                 </EuiSelectable>
