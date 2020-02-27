@@ -57,7 +57,7 @@ export const ProcessEventDot = styled(
         transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
 
-      const markerBaseSize = 15;
+      const markerBaseSize = 20;
       const markerSize = (magFactor: number) => {
         return markerBaseSize * (1 / magFactor);
       };
@@ -87,23 +87,20 @@ export const ProcessEventDot = styled(
           />
           <use
             role="presentation"
-            xlinkHref={
-              magFactorX >= 1.75
-                ? `#${SymbolIds.processNodeWithHorizontalRule}`
-                : `#${SymbolIds.processNode}`
-            }
-            x={markerPosition(magFactorX) + markerSize(magFactorX) -2}
+            xlinkHref={`#${SymbolIds.processNode}`}
+            x={markerPosition(magFactorX) + .7 * markerSize(magFactorX)}
             y={markerPosition(magFactorX) + .25 * markerSize(magFactorX)}
-            width="31"
+            width="50"
             height="10"
             opacity="1"
           />
           <text
-            x="0"
-            y={magFactorX >= 1.75 ? '-6' : '-7.5'}
+            x={markerPosition(magFactorX) + .7 * markerSize(magFactorX) + 50/2}
+            y={markerPosition(magFactorX) + .25 * markerSize(magFactorX) + 5}
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
+            fontWeight="bold"
             fill={NamedColors.empty}
             paintOrder="stroke"
             tabIndex={-1}

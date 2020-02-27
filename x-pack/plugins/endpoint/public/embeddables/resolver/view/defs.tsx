@@ -102,6 +102,8 @@ const PaintServers = memo(() => (
       <stop offset="0%" stopColor={NamedColors.runningProcessStart} stopOpacity="1" />
       <stop offset="100%" stopColor={NamedColors.runningProcessEnd} stopOpacity="1" />
     </linearGradient>
+    <linearGradient id="linear-gradient" x1="-382.33074" y1="265.24689" x2="-381.88086" y2="264.46019" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#006bb4"/><stop offset="1" stopColor="#017d73"/>
+    </linearGradient>
   </>
 ));
 
@@ -129,10 +131,10 @@ const SymbolsAndShapes = memo(() => (
     </symbol>
     <symbol
       id={SymbolIds.processNodeWithHorizontalRule}
-      viewBox="-10 0 128.6889 29.31389"
-      preserveAspectRatio="xMidYMid meet"
+      viewBox="-10 0 188.6889 29.31389"
+      preserveAspectRatio="xMinYMin slice"
     >
-      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
+      <rect x=".97904" y=".89113" width="156.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
       <line x1="1.425" x2="108.5" y1="10" y2="10" stroke={NamedColors.ok} strokeWidth="0.449" />
     </symbol>
 
@@ -148,7 +150,7 @@ const SymbolsAndShapes = memo(() => (
       </g>
     </symbol>
 
-    <symbol id={SymbolIds.runningProcessCube} viewBox="0 0 66 73">
+    <symbol id={SymbolIds.runningProcessCube+'off'} viewBox="0 0 66 73">
       <filter id="filter-3" x="-37.5%" y="-34.9%" width="175%" height="169.8%">
         <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="shadowSpreadOuter1"/>
         <feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"/>
@@ -175,6 +177,23 @@ const SymbolsAndShapes = memo(() => (
       </g>
       <polygon id="Path_1_" opacity="0.2518" points="33.4 61.3 33.9 37.6 11.4 24.3 11.4 48.6"/>
       <polygon id="Path_2_" opacity="0.1389" fill="#FFFFFF" points="55.4 24.3 33.4 11.3 11.4 24.3 33.9 37.6"/>
+    </symbol>
+    <symbol id={SymbolIds.runningProcessCube} viewBox="0 0 88 100">
+        <title>Running Process</title>
+        <g id="_2.19-Style" data-name="2.19-Style">
+          <g id="Dark-Resolver-_-LP">
+            <g id="Running-Process">
+              <polygon id="Path-4-Copy-11" points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" fill="#1d1e24" />
+              <polygon id="Path-Copy-16" points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}}/>
+              <polygon id="Path-4" points="27 41.077 44.089 31 61 41.077 61 60.128 44.089 70 27 60.128 27 41.077" fill="#fff" />
+              <polygon id="Path-11" points="44 31 61 41.077 61 60.128 44 50 44 31" fill="#d8d8d8" />
+              <polygon id="Path-12" points="27 60.128 27 41.077 44 31 44 50 27 60.128" fill="#959595" />
+              <polygon id="Path-4-Copy-12" points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.74744" fill="url(#linear-gradient)" style={{isolation: 'isolate'}} />
+              <polygon id="Path-Copy-17" points="88 25.839 44.23 0 0 25.839 44 50 88 25.839" fill="#fff" opacity="0.13893" style={{isolation: 'isolate'}} />
+              <polygon id="Path-Copy-16-2" data-name="Path-Copy-16" points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
+            </g>
+        </g>
+      </g>
     </symbol>
   </>
 ));
