@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
-import { WithSource } from '../../containers/source';
+import { useWithSource } from '../../containers/source';
 import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
@@ -33,6 +33,8 @@ export interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
+
+const EMPTY_INDEX_TO_ADD: string[] = [];
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -75,7 +77,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       ) {
         return [signalIndexName];
       }
-      return [];
+      return EMPTY_INDEX_TO_ADD;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
@@ -163,42 +165,40 @@ const StatefulTimelineComponent = React.memo<Props>(
       }
     }, []);
 
+    const { indexPattern, browserFields } = useWithSource(indexToAdd);
+
     return (
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indexPattern, browserFields }) => (
-          <Timeline
-            browserFields={browserFields}
-            columns={columns}
-            dataProviders={dataProviders!}
-            end={end}
-            eventType={eventType}
-            filters={filters}
-            flyoutHeaderHeight={flyoutHeaderHeight}
-            flyoutHeight={flyoutHeight}
-            id={id}
-            indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            kqlQueryExpression={kqlQueryExpression}
-            loadingIndexName={loading}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onDataProviderEdited={onDataProviderEditedLocal}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
-          />
-        )}
-      </WithSource>
+      <Timeline
+        browserFields={browserFields}
+        columns={columns}
+        dataProviders={dataProviders!}
+        end={end}
+        eventType={eventType}
+        filters={filters}
+        flyoutHeaderHeight={flyoutHeaderHeight}
+        flyoutHeight={flyoutHeight}
+        id={id}
+        indexPattern={indexPattern}
+        indexToAdd={indexToAdd}
+        isLive={isLive}
+        itemsPerPage={itemsPerPage!}
+        itemsPerPageOptions={itemsPerPageOptions!}
+        kqlMode={kqlMode}
+        kqlQueryExpression={kqlQueryExpression}
+        loadingIndexName={loading}
+        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onDataProviderEdited={onDataProviderEditedLocal}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        show={show!}
+        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+        sort={sort!}
+        start={start}
+        toggleColumn={toggleColumn}
+      />
     );
   },
   (prevProps, nextProps) => {
@@ -215,11 +215,11 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
-      isEqual(prevProps.columns, nextProps.columns) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      isEqual(prevProps.sort, nextProps.sort)
+      deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
+      deepEqual(prevProps.sort, nextProps.sort)
     );
   }
 );
