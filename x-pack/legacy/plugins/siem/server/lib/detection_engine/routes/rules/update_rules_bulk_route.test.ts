@@ -57,6 +57,21 @@ describe('update_rules_bulk', () => {
       const response = await server.inject(getUpdateBulkRequest(), context);
       expect(response.notFound).toHaveBeenCalled();
     });
+
+    test('returns an error if update throws', async () => {
+      clients.alertsClient.update.mockImplementation(() => {
+        throw new Error('Test error');
+      });
+
+      const expected: BulkError[] = [
+        {
+          error: { message: 'Test error', status_code: 500 },
+          rule_id: 'rule-1',
+        },
+      ];
+      const response = await server.inject(getUpdateBulkRequest(), context);
+      expect(response.ok).toHaveBeenCalledWith({ body: expected });
+    });
   });
 
   describe('request validation', () => {
