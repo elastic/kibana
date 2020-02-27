@@ -29,6 +29,11 @@ import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
 
+const CLUSTER_NAME_PARTS = [
+  process.env.JOB ? `job-${process.env.JOB}-` : '',
+  process.env.CI_WORKER_NUMBER ? `worker-${process.env.CI_WORKER_NUMBER}-` : '',
+].filter(Boolean);
+
 export function createLegacyEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
@@ -40,9 +45,11 @@ export function createLegacyEsTestCluster(options = {}) {
     dataArchive,
     esArgs: customEsArgs,
     esEnvVars,
-    clusterName = 'es-test-cluster',
+    clusterName: customClusterName = 'es-test-cluster',
     ssl,
   } = options;
+
+  const clusterName = [...CLUSTER_NAME_PARTS, customClusterName].join('-');
 
   const esArgs = [
     `cluster.name=${clusterName}`,
