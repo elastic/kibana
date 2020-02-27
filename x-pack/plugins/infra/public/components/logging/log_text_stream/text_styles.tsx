@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { darken, transparentize } from 'polished';
 import React, { useMemo, useState, useCallback } from 'react';
 
 import { euiStyled, css } from '../../../../../observability/public';
@@ -27,14 +26,7 @@ export const monospaceTextStyle = (scale: TextScale) => css`
   line-height: ${props => props.theme.eui.euiLineHeight};
 `;
 
-export const hoveredContentStyle = css`
-  background-color: ${props =>
-    props.theme.darkMode
-      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
-      : darken(0.05, props.theme.eui.euiColorHighlight)};
-`;
-
-export const pinnedContentStyle = css`
+export const focusContentStyle = css`
   background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
 `;
 

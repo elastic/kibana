@@ -26,7 +26,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle, hoveredContentStyle, pinnedContentStyle } from './text_styles';
+import { monospaceTextStyle, focusContentStyle } from './text_styles';
 import { LogEntryActionsColumn } from './log_entry_actions_column';
 
 interface LogEntryRowProps {
@@ -220,9 +220,9 @@ const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   overflow: hidden;
 
   ${props => monospaceTextStyle(props.scale)};
-  ${props => (props.isHighlighted ? pinnedContentStyle : '')}
+  ${props => (props.isHighlighted ? focusContentStyle : '')}
 
   &:hover {
-    ${hoveredContentStyle}
+    ${focusContentStyle}
   }
 `;
