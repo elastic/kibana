@@ -18,45 +18,42 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
-import {
-  DirectAccessLinksStart,
-  DirectAccessLinksSetup,
-} from '../../../src/plugins/direct_access_links/public';
+import { UrlGeneratorsStart, UrlGeneratorsSetup } from '../../../src/plugins/url_generators/public';
 import {
   HelloLinkGeneratorState,
   createHelloPageLinkGenerator,
   LegacyHelloLinkGeneratorState,
-  HELLO_LINK_GENERATOR_V1,
-  HELLO_LINK_GENERATOR,
+  HELLO_URL_GENERATOR_V1,
+  HELLO_URL_GENERATOR,
   helloPageLinkGeneratorV1,
-} from './direct_access_link_generator';
+} from './url_generator';
 
-declare module '../../../src/plugins/direct_access_links/public' {
-  export interface DirectAccessLinkGeneratorStateMapping {
-    [HELLO_LINK_GENERATOR_V1]: LegacyHelloLinkGeneratorState;
-    [HELLO_LINK_GENERATOR]: HelloLinkGeneratorState;
+declare module '../../../src/plugins/url_generators/public' {
+  export interface UrlGeneratorStateMapping {
+    [HELLO_URL_GENERATOR_V1]: LegacyHelloLinkGeneratorState;
+    [HELLO_URL_GENERATOR]: HelloLinkGeneratorState;
   }
 }
 
 interface StartDeps {
-  directAccessLinks: DirectAccessLinksStart;
+  urlGenerators: UrlGeneratorsStart;
 }
 
 interface SetupDeps {
-  directAccessLinks: DirectAccessLinksSetup;
+  urlGenerators: UrlGeneratorsSetup;
 }
 
-const APP_ID = 'accessLinksExamples';
+const APP_ID = 'urlGeneratorsExamples';
 
 export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { directAccessLinks }: SetupDeps) {
-    directAccessLinks.registerAccessLinkGenerator(
+  public setup(core: CoreSetup<StartDeps>, { urlGenerators }: SetupDeps) {
+    urlGenerators.registerUrlGenerator(
       createHelloPageLinkGenerator(async () => ({
         appBasePath: (await core.getStartServices())[0].application.getUrlForApp(APP_ID),
       }))
     );
 
-    directAccessLinks.registerAccessLinkGenerator(helloPageLinkGeneratorV1);
+    urlGenerators.registerUrlGenerator(helloPageLinkGeneratorV1);
 
     core.application.register({
       id: APP_ID,

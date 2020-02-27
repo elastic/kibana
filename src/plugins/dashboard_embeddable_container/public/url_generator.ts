@@ -20,12 +20,12 @@
 import url from 'url';
 import { TimeRange, Filter, Query } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { DirectAccessLinkSpec } from '../../direct_access_links/public';
+import { UrlGeneratorsDefinition } from '../../url_generators/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export const DASHBOARD_APP_LINK_GENERATOR = 'DASHBOARD_APP_LINK_GENERATOR';
+export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
 export interface DashboardAppLinkGeneratorState {
   State: {
@@ -40,21 +40,21 @@ export interface DashboardAppLinkGeneratorState {
 
 export const createDirectAccessDashboardLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
-): DirectAccessLinkSpec<typeof DASHBOARD_APP_LINK_GENERATOR> => ({
-  id: DASHBOARD_APP_LINK_GENERATOR,
+): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
+  id: DASHBOARD_APP_URL_GENERATOR,
   createUrl: async state => {
     const startServices = await getStartServices();
     const useHash = state.useHash || startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    const parsedUrl = url.parse(window.location.href);
+    // const parsedUrl = url.parse(window.location.href);
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
-    const dashboardAppUrl = url.format({
-      protocol: parsedUrl.protocol,
-      host: parsedUrl.host,
-      pathname: `${appBasePath}`,
-      hash,
-    });
+    // const dashboardAppUrl = url.format({
+    //   protocol: parsedUrl.protocol,
+    //   host: parsedUrl.host,
+    //   pathname: `${appBasePath}`,
+    //   hash,
+    // });
 
     const appStateUrl = setStateToKbnUrl(
       STATE_STORAGE_KEY,
@@ -63,7 +63,7 @@ export const createDirectAccessDashboardLinkGenerator = (
         filters: state.filters,
       },
       { useHash },
-      dashboardAppUrl
+      `${appBasePath}#/${hash}`
     );
 
     return setStateToKbnUrl(

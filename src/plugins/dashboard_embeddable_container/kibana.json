@@ -6,7 +6,7 @@
     "embeddable",
     "inspector",
     "uiActions",
-    "directAccessLinks"
+    "urlGenerators"
   ],
   "server": false,
   "ui": true

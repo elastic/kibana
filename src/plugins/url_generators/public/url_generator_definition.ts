@@ -17,9 +17,9 @@
  * under the License.
  */
 
-export type DirectAccessLinkGeneratorId = string;
+export type UrlGeneratorId = string;
 
-export interface DirectAccessLinkGeneratorState<
+export interface UrlGeneratorState<
   S extends {},
   I extends string | undefined = undefined,
   MS extends {} | undefined = undefined
@@ -29,23 +29,23 @@ export interface DirectAccessLinkGeneratorState<
   MigratedState?: MS;
 }
 
-export interface DirectAccessLinkGeneratorStateMapping {
+export interface UrlGeneratorStateMapping {
   // The `any` here is quite unfortunate.  Using `object` actually gives no type errors in my IDE
   // but running `node scripts/type_check` will cause an error:
-  // examples/access_links_examples/public/direct_access_link_generator.ts:77:66 -
+  // examples/url_generators_examples/public/url_generator.ts:77:66 -
   // error TS2339: Property 'name' does not exist on type 'object'.  However it's correctly
   // typed when I edit that file.
-  [key: string]: DirectAccessLinkGeneratorState<any, string | undefined, object | undefined>;
+  [key: string]: UrlGeneratorState<any, string | undefined, object | undefined>;
 }
 
-export interface DirectAccessLinkSpec<Id extends DirectAccessLinkGeneratorId> {
+export interface UrlGeneratorsDefinition<Id extends UrlGeneratorId> {
   id: Id;
-  createUrl?: (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => Promise<string>;
+  createUrl?: (state: UrlGeneratorStateMapping[Id]['State']) => Promise<string>;
   isDeprecated?: boolean;
   migrate?: (
-    state: DirectAccessLinkGeneratorStateMapping[Id]['State']
+    state: UrlGeneratorStateMapping[Id]['State']
   ) => Promise<{
-    state: DirectAccessLinkGeneratorStateMapping[Id]['MigratedState'];
-    id: DirectAccessLinkGeneratorStateMapping[Id]['MigratedId'];
+    state: UrlGeneratorStateMapping[Id]['MigratedState'];
+    id: UrlGeneratorStateMapping[Id]['MigratedId'];
   }>;
 }

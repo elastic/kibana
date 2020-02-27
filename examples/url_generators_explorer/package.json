@@ -1,7 +1,7 @@
 {
-  "name": "access_links_examples",
+  "name": "url_generators_explorer",
   "version": "1.0.0",
-  "main": "target/examples/access_links_examples",
+  "main": "target/examples/url_generators_explorer",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

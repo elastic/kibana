@@ -15,7 +15,7 @@
     "charts": "src/plugins/charts",
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",
-    "directAccessLinks": "src/plugins/direct_access_links",
+    "urlGenerators": "src/plugins/url_generators",
     "expressions": "src/plugins/expressions",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspector": "src/plugins/inspector",

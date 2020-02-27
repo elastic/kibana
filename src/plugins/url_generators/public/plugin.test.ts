@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { DirectAccessLinksPlugin } from './plugin';
-import { coreMock } from '../../../../src/core/public/mocks';
+import { UrlGeneratorsPlugin } from './plugin';
+import { coreMock } from '../../../core/public/mocks';
 
 const initializerContext = coreMock.createPluginInitializerContext();
 
-const plugin = new DirectAccessLinksPlugin(initializerContext);
+const plugin = new UrlGeneratorsPlugin(initializerContext);
 
 const setup = plugin.setup(coreMock.createSetup());
 const start = plugin.start(coreMock.createStart());
 
 test('Asking for a generator that does not exist throws an error', () => {
-  expect(() => start.getAccessLinkGenerator('noexist')).toThrowError();
+  expect(() => start.getUrlGenerator('noexist')).toThrowError();
 });
 
 test('Registering and retrieving a generator', async () => {
-  setup.registerAccessLinkGenerator({
+  setup.registerUrlGenerator({
     id: 'TEST_GENERATOR',
     createUrl: () => Promise.resolve('myurl'),
   });
-  const generator = start.getAccessLinkGenerator('TEST_GENERATOR');
+  const generator = start.getUrlGenerator('TEST_GENERATOR');
   expect(generator).toMatchInlineSnapshot(`
     Object {
       "createUrl": [Function],
@@ -53,7 +53,7 @@ test('Registering and retrieving a generator', async () => {
 
 test('Registering a generator with a createUrl function that is deprecated throws an error', () => {
   expect(() =>
-    setup.registerAccessLinkGenerator({
+    setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
       migrate: () => Promise.resolve({ id: '', state: {} }),
       createUrl: () => Promise.resolve('myurl'),
@@ -66,7 +66,7 @@ test('Registering a generator with a createUrl function that is deprecated throw
 
 test('Registering a deprecated generator with no migration function throws an error', () => {
   expect(() =>
-    setup.registerAccessLinkGenerator({
+    setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
       isDeprecated: true,
     })
@@ -79,7 +79,7 @@ test('Registering a deprecated generator with no migration function throws an er
 
 test('Registering a generator with no functions throws an error', () => {
   expect(() =>
-    setup.registerAccessLinkGenerator({
+    setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
     })
   ).toThrowError(
@@ -89,7 +89,7 @@ test('Registering a generator with no functions throws an error', () => {
 
 test('Registering a generator with a migrate function that is not deprecated throws an error', () => {
   expect(() =>
-    setup.registerAccessLinkGenerator({
+    setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
       migrate: () => Promise.resolve({ id: '', state: {} }),
       isDeprecated: false,
@@ -101,7 +101,7 @@ test('Registering a generator with a migrate function that is not deprecated thr
 
 test('Registering a generator with a migrate function and a createUrl fn throws an error', () => {
   expect(() =>
-    setup.registerAccessLinkGenerator({
+    setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
       createUrl: () => Promise.resolve('myurl'),
       migrate: () => Promise.resolve({ id: '', state: {} }),
@@ -110,18 +110,18 @@ test('Registering a generator with a migrate function and a createUrl fn throws 
 });
 
 test('Generator returns migrated url', async () => {
-  setup.registerAccessLinkGenerator({
+  setup.registerUrlGenerator({
     id: 'v1',
     migrate: (state: { bar: string }) => Promise.resolve({ id: 'v2', state: { foo: state.bar } }),
     isDeprecated: true,
   });
-  setup.registerAccessLinkGenerator({
+  setup.registerUrlGenerator({
     id: 'v2',
     createUrl: (state: { foo: string }) => Promise.resolve(`www.${state.foo}.com`),
     isDeprecated: false,
   });
 
-  const generator = start.getAccessLinkGenerator('v1');
+  const generator = start.getUrlGenerator('v1');
   expect(generator.isDeprecated).toBe(true);
   expect(await generator.migrate({ bar: 'hi' })).toEqual({ id: 'v2', state: { foo: 'hi' } });
   expect(await generator.createUrl({ bar: 'hi' })).toEqual('www.hi.com');

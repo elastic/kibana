@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createDirectAccessDashboardLinkGenerator } from './direct_access_link_generator';
+import { createDirectAccessDashboardLinkGenerator } from './url_generator';
 
 const APP_BASE_PATH: string = 'xyz/app/kibana';
 
@@ -26,7 +26,7 @@ test('creates a link to a saved dashboard', async () => {
     Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
   );
   const url = await generator.createUrl!({});
-  expect(url).toMatchInlineSnapshot(`"http://localhost/xyz/app/kibana#dashboard?_a=()&_g=()"`);
+  expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard?_a=()&_g=()"`);
 });
 
 test('creates a link with global time range set up', async () => {
@@ -37,7 +37,7 @@ test('creates a link with global time range set up', async () => {
     timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
   });
   expect(url).toMatchInlineSnapshot(
-    `"http://localhost/xyz/app/kibana#dashboard?_a=()&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
+    `"xyz/app/kibana#/dashboard?_a=()&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
   );
 });
 
@@ -61,6 +61,6 @@ test('creates a link with filters, time range and query to a saved object', asyn
     query: { query: 'bye', language: 'kuery' },
   });
   expect(url).toMatchInlineSnapshot(
-    `"http://localhost/xyz/app/kibana#dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
+    `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
   );
 });

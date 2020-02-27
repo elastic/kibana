@@ -18,23 +18,23 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
-import { DirectAccessLinksStart } from '../../../src/plugins/direct_access_links/public';
+import { UrlGeneratorsStart } from '../../../src/plugins/url_generators/public';
 
 interface StartDeps {
-  directAccessLinks: DirectAccessLinksStart;
+  urlGenerators: UrlGeneratorsStart;
 }
 
 export class AccessLinksExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
   public setup(core: CoreSetup<StartDeps>) {
     core.application.register({
-      id: 'accessLinksExplorer',
+      id: 'urlGeneratorsExplorer',
       title: 'Access links explorer',
       async mount(params: AppMountParameters) {
         const depsStart = (await core.getStartServices())[1];
         const { renderApp } = await import('./app');
         return renderApp(
           {
-            getLinkGenerator: depsStart.directAccessLinks.getAccessLinkGenerator,
+            getLinkGenerator: depsStart.urlGenerators.getUrlGenerator,
           },
           params
         );

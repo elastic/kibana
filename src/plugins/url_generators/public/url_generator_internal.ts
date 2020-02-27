@@ -18,22 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DirectAccessLinksStart } from './plugin';
+import { UrlGeneratorsStart } from './plugin';
 import {
-  DirectAccessLinkGeneratorStateMapping,
-  DirectAccessLinkGeneratorId,
-  DirectAccessLinkSpec,
-} from './direct_access_link_generator_spec';
-import { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
+  UrlGeneratorStateMapping,
+  UrlGeneratorId,
+  UrlGeneratorsDefinition,
+} from './url_generator_definition';
+import { UrlGeneratorContract } from './url_generator_contract';
 
-export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGeneratorId> {
+export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
   constructor(
-    private spec: DirectAccessLinkSpec<Id>,
-    private getGenerator: DirectAccessLinksStart['getAccessLinkGenerator']
+    private spec: UrlGeneratorsDefinition<Id>,
+    private getGenerator: UrlGeneratorsStart['getUrlGenerator']
   ) {
     if (spec.isDeprecated && !spec.migrate) {
       throw new Error(
-        i18n.translate('directAccessLinks.error.noMigrationFnProvided', {
+        i18n.translate('urlGenerators.error.noMigrationFnProvided', {
           defaultMessage:
             'If the access link generator is marked as deprecated, you must provide a migration function.',
         })
@@ -42,7 +42,7 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
 
     if (!spec.isDeprecated && spec.migrate) {
       throw new Error(
-        i18n.translate('directAccessLinks.error.migrationFnGivenNotDeprecated', {
+        i18n.translate('urlGenerators.error.migrationFnGivenNotDeprecated', {
           defaultMessage:
             'If you provide a migration function, you must mark this generator as deprecated',
         })
@@ -51,7 +51,7 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
 
     if (!spec.createUrl && !spec.isDeprecated) {
       throw new Error(
-        i18n.translate('directAccessLinks.error.noCreateUrlFnProvided', {
+        i18n.translate('urlGenerators.error.noCreateUrlFnProvided', {
           defaultMessage:
             'This generator is not marked as deprecated. Please provide a createUrl fn.',
         })
@@ -60,17 +60,17 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
 
     if (spec.createUrl && spec.isDeprecated) {
       throw new Error(
-        i18n.translate('directAccessLinks.error.createUrlFnProvided', {
+        i18n.translate('urlGenerators.error.createUrlFnProvided', {
           defaultMessage: 'This generator is marked as deprecated. Do not supply a createUrl fn.',
         })
       );
     }
   }
 
-  getPublicContract(): DirectAccessLinkGeneratorContract<Id> {
+  getPublicContract(): UrlGeneratorContract<Id> {
     return {
       id: this.spec.id,
-      createUrl: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {
+      createUrl: async (state: UrlGeneratorStateMapping[Id]['State']) => {
         if (this.spec.migrate && !this.spec.createUrl) {
           const { id, state: newState } = await this.spec.migrate(state);
 
@@ -83,10 +83,10 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
         return this.spec.createUrl!(state);
       },
       isDeprecated: !!this.spec.isDeprecated,
-      migrate: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {
+      migrate: async (state: UrlGeneratorStateMapping[Id]['State']) => {
         if (!this.spec.isDeprecated) {
           throw new Error(
-            i18n.translate('directAccessLinks.error.migrateCalledNotDeprecated', {
+            i18n.translate('urlGenerators.error.migrateCalledNotDeprecated', {
               defaultMessage: 'You cannot call migrate on a non-deprecated generator.',
             })
           );

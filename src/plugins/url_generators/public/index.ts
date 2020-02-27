@@ -18,19 +18,19 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { DirectAccessLinksPlugin } from './plugin';
+import { UrlGeneratorsPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DirectAccessLinksPlugin(initializerContext);
+  return new UrlGeneratorsPlugin(initializerContext);
 }
 
-export { DirectAccessLinksSetup, DirectAccessLinksStart } from './plugin';
+export { UrlGeneratorsSetup, UrlGeneratorsStart } from './plugin';
 
 export {
-  DirectAccessLinkGeneratorId,
-  DirectAccessLinkGeneratorState,
-  DirectAccessLinkGeneratorStateMapping,
-  DirectAccessLinkSpec,
-} from './direct_access_link_generator_spec';
+  UrlGeneratorId,
+  UrlGeneratorState,
+  UrlGeneratorStateMapping,
+  UrlGeneratorsDefinition,
+} from './url_generator_definition';
 
-export { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
+export { UrlGeneratorContract } from './url_generator_contract';

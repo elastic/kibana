@@ -17,8 +17,8 @@
  * under the License.
  */
 import url from 'url';
-import { DirectAccessLinkGeneratorState } from '../../../src/plugins/direct_access_links/public';
-import { DirectAccessLinkSpec } from '../../../src/plugins/direct_access_links/public';
+import { UrlGeneratorState } from '../../../src/plugins/url_generators/public';
+import { UrlGeneratorsDefinition } from '../../../src/plugins/url_generators/public';
 
 /**
  * The name of the latest variable can always stay the same so code that
@@ -26,19 +26,19 @@ import { DirectAccessLinkSpec } from '../../../src/plugins/direct_access_links/p
  * Typescript will warn the developer if incorrect state is being passed
  * down.
  */
-export const HELLO_LINK_GENERATOR = 'HELLO_LINK_GENERATOR_V2';
+export const HELLO_URL_GENERATOR = 'HELLO_URL_GENERATOR_V2';
 
 export interface HelloLinkState {
   firstName: string;
   lastName: string;
 }
 
-export type HelloLinkGeneratorState = DirectAccessLinkGeneratorState<HelloLinkState>;
+export type HelloLinkGeneratorState = UrlGeneratorState<HelloLinkState>;
 
 export const createHelloPageLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string }>
-): DirectAccessLinkSpec<typeof HELLO_LINK_GENERATOR> => ({
-  id: HELLO_LINK_GENERATOR,
+): UrlGeneratorsDefinition<typeof HELLO_URL_GENERATOR> => ({
+  id: HELLO_URL_GENERATOR,
   createUrl: async state => {
     const startServices = await getStartServices();
     const appBasePath = startServices.appBasePath;
@@ -58,22 +58,22 @@ export const createHelloPageLinkGenerator = (
 /**
  * The name of this legacy generator id changes, but the *value* stays the same.
  */
-export const HELLO_LINK_GENERATOR_V1 = 'HELLO_LINK_GENERATOR';
+export const HELLO_URL_GENERATOR_V1 = 'HELLO_URL_GENERATOR';
 
 export interface HelloLinkStateV1 {
   name: string;
 }
 
-export type LegacyHelloLinkGeneratorState = DirectAccessLinkGeneratorState<
+export type LegacyHelloLinkGeneratorState = UrlGeneratorState<
   HelloLinkStateV1,
-  typeof HELLO_LINK_GENERATOR,
+  typeof HELLO_URL_GENERATOR,
   HelloLinkState
 >;
 
-export const helloPageLinkGeneratorV1: DirectAccessLinkSpec<typeof HELLO_LINK_GENERATOR_V1> = {
-  id: HELLO_LINK_GENERATOR_V1,
+export const helloPageLinkGeneratorV1: UrlGeneratorsDefinition<typeof HELLO_URL_GENERATOR_V1> = {
+  id: HELLO_URL_GENERATOR_V1,
   isDeprecated: true,
   migrate: async state => {
-    return { id: HELLO_LINK_GENERATOR, state: { firstName: state.name, lastName: '' } };
+    return { id: HELLO_URL_GENERATOR, state: { firstName: state.name, lastName: '' } };
   },
 };

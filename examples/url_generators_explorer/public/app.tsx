@@ -32,14 +32,14 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { DirectAccessLinksStart } from '../../../src/plugins/direct_access_links/public';
+import { UrlGeneratorsStart } from '../../../src/plugins/url_generators/public';
 import {
-  HELLO_LINK_GENERATOR,
-  HELLO_LINK_GENERATOR_V1,
-} from '../../access_links_examples/public/direct_access_link_generator';
+  HELLO_URL_GENERATOR,
+  HELLO_URL_GENERATOR_V1,
+} from '../../url_generators_examples/public/url_generator';
 
 interface Props {
-  getLinkGenerator: DirectAccessLinksStart['getAccessLinkGenerator'];
+  getLinkGenerator: UrlGeneratorsStart['getUrlGenerator'];
 }
 
 interface MigratedLink {
@@ -60,14 +60,14 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
    */
   const [persistedLinks, setPersistedLinks] = useState([
     {
-      id: HELLO_LINK_GENERATOR_V1,
+      id: HELLO_URL_GENERATOR_V1,
       linkText: 'Say hello to Mary',
       state: {
         name: 'Mary',
       },
     },
     {
-      id: HELLO_LINK_GENERATOR,
+      id: HELLO_URL_GENERATOR,
       linkText: 'Say hello to George',
       state: {
         firstName: 'George',
@@ -119,7 +119,7 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
                 setPersistedLinks([
                   ...persistedLinks,
                   {
-                    id: HELLO_LINK_GENERATOR,
+                    id: HELLO_URL_GENERATOR,
                     state: { firstName, lastName },
                     linkText: `Say hello to ${firstName} ${lastName}`,
                   },

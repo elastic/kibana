@@ -10,7 +10,7 @@ import rison from 'rison-node';
 import url from 'url';
 
 import { npStart } from 'ui/new_platform';
-import { DASHBOARD_APP_LINK_GENERATOR } from '../../../../../../../../../src/plugins/dashboard_embeddable_container/public';
+import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../../src/plugins/dashboard_embeddable_container/public';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
@@ -161,8 +161,8 @@ function buildDashboardUrlFromSettings(settings) {
           query = queryFromEntityFieldNames;
         }
 
-        const generator = npStart.plugins.directAccessLinks.getAccessLinkGenerator(
-          DASHBOARD_APP_LINK_GENERATOR
+        const generator = npStart.plugins.urlGenerators.getUrlGenerator(
+          DASHBOARD_APP_URL_GENERATOR
         );
 
         return generator

@@ -21,7 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { DirectAccessLinksSetup } from '../../direct_access_links/public';
+import { UrlGeneratorsSetup } from '../../url_generators/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
@@ -34,20 +34,20 @@ import {
 } from '../../../plugins/kibana_react/public';
 import {
   DashboardAppLinkGeneratorState,
-  DASHBOARD_APP_LINK_GENERATOR,
+  DASHBOARD_APP_URL_GENERATOR,
   createDirectAccessDashboardLinkGenerator,
-} from './direct_access_link_generator';
+} from './url_generator';
 
-declare module '../../direct_access_links/public' {
-  export interface DirectAccessLinkGeneratorStateMapping {
-    [DASHBOARD_APP_LINK_GENERATOR]: DashboardAppLinkGeneratorState;
+declare module '../../url_generators/public' {
+  export interface UrlGeneratorStateMapping {
+    [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
   }
 }
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   uiActions: UiActionsSetup;
-  directAccessLinks: DirectAccessLinksSetup;
+  urlGenerators: UrlGeneratorsSetup;
 }
 
 interface StartDependencies {
@@ -65,14 +65,14 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public setup(
     core: CoreSetup,
-    { directAccessLinks, embeddable, uiActions }: SetupDependencies
+    { urlGenerators, embeddable, uiActions }: SetupDependencies
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
 
-    directAccessLinks.registerAccessLinkGenerator(
+    urlGenerators.registerUrlGenerator(
       createDirectAccessDashboardLinkGenerator(async () => ({
         appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
         useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),

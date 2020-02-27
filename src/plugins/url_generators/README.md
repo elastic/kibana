@@ -1,4 +1,4 @@
-## Direct Access Link Services
+## URL Generator Services
 
 Developers who maintain pages in Kibana that other developers may want to link to
 can register a direct access link generator. This provides backward compatibility support
@@ -13,8 +13,8 @@ Owners: Kibana App Arch team.
 If you are registering a new generator, don't forget to add a mapping of id to state
 
 ```ts
-declare module '../../direct_access_links/public' {
-  export interface DirectAccessLinkGeneratorStateMapping {
+declare module '../../url_generators/public' {
+  export interface UrlGeneratorStateMapping {
     [MY_GENERATOR]: MyState;
   }
 }
@@ -34,7 +34,7 @@ export const MY_GENERATOR = 'MY_GENERATOR';
 export const MyState {
   foo: string;
 }
-export interface DirectAccessLinkGeneratorStateMapping {
+export interface UrlGeneratorStateMapping {
   [MY_GENERATOR]: MyState;
 }
 ```
@@ -55,7 +55,7 @@ Second release:
   export const MyState {
     bar: string;
   }
-  export interface DirectAccessLinkGeneratorStateMapping {
+  export interface UrlGeneratorStateMapping {
     [MY_LEGACY_GENERATOR_V1]: MyLegacyState;
     [MY_GENERATOR]: MyState;
   }
@@ -63,7 +63,7 @@ Second release:
 
 ### Examples
 
-Working examples of registered link generators can be found in `examples/access_link_examples` folder. Run these
+Working examples of registered link generators can be found in `examples/url_generator_examples` folder. Run these
 examples via
 
 ```
@@ -76,7 +76,7 @@ Consumers of this service can use the ids and state to create URL strings:
 
 ```ts
   const { id, state } = getLinkData();
-  const generator = directAccessLinkPluginStart.getLinkGenerator(id);
+  const generator = urlGeneratorPluginStart.getLinkGenerator(id);
   if (generator.isDeprecated) {
     // Consumers have a few options here.
 
@@ -105,7 +105,7 @@ let you recreate the migrated url later.
 
 ### Examples
 
-Working examples of consuming registered link generators can be found in `examples/access_link_explorer` folder. Run these
+Working examples of consuming registered link generators can be found in `examples/url_generator_explorer` folder. Run these
 via
 
 ```

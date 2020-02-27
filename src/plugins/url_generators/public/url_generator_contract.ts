@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import {
-  DirectAccessLinkGeneratorId,
-  DirectAccessLinkGeneratorStateMapping,
-} from './direct_access_link_generator_spec';
+import { UrlGeneratorId, UrlGeneratorStateMapping } from './url_generator_definition';
 
-export interface DirectAccessLinkGeneratorContract<Id extends DirectAccessLinkGeneratorId> {
+export interface UrlGeneratorContract<Id extends UrlGeneratorId> {
   id: Id;
-  createUrl(state: DirectAccessLinkGeneratorStateMapping[Id]['State']): Promise<string>;
+  createUrl(state: UrlGeneratorStateMapping[Id]['State']): Promise<string>;
   isDeprecated: boolean;
   migrate(
-    state: DirectAccessLinkGeneratorStateMapping[Id]['State']
+    state: UrlGeneratorStateMapping[Id]['State']
   ): Promise<{
-    state: DirectAccessLinkGeneratorStateMapping[Id]['MigratedState'];
-    id: DirectAccessLinkGeneratorStateMapping[Id]['MigratedId'];
+    state: UrlGeneratorStateMapping[Id]['MigratedState'];
+    id: UrlGeneratorStateMapping[Id]['MigratedId'];
   }>;
 }

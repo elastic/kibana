@@ -19,41 +19,33 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  DirectAccessLinkGeneratorId,
-  DirectAccessLinkSpec,
-} from './direct_access_link_generator_spec';
-import { DirectAccessLinkGeneratorInternal } from './direct_access_link_generator_internal';
-import { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
+import { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';
+import { UrlGeneratorInternal } from './url_generator_internal';
+import { UrlGeneratorContract } from './url_generator_contract';
 
-export interface DirectAccessLinksStart {
-  getAccessLinkGenerator: (
-    urlGeneratorId: DirectAccessLinkGeneratorId
-  ) => DirectAccessLinkGeneratorContract<DirectAccessLinkGeneratorId>;
+export interface UrlGeneratorsStart {
+  getUrlGenerator: (urlGeneratorId: UrlGeneratorId) => UrlGeneratorContract<UrlGeneratorId>;
 }
 
-export interface DirectAccessLinksSetup {
-  registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
-    generator: DirectAccessLinkSpec<Id>
-  ) => void;
+export interface UrlGeneratorsSetup {
+  registerUrlGenerator: <Id extends UrlGeneratorId>(generator: UrlGeneratorsDefinition<Id>) => void;
 }
 
-export class DirectAccessLinksPlugin
-  implements Plugin<DirectAccessLinksSetup, DirectAccessLinksStart> {
+export class UrlGeneratorsPlugin implements Plugin<UrlGeneratorsSetup, UrlGeneratorsStart> {
   // Unfortunate use of any here, but I haven't figured out how to type this any better without
   // getting warnings.
-  private accessLinkGenerators: Map<string, DirectAccessLinkGeneratorInternal<any>> = new Map();
+  private urlGenerators: Map<string, UrlGeneratorInternal<any>> = new Map();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    const setup: DirectAccessLinksSetup = {
-      registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
-        generatorOptions: DirectAccessLinkSpec<Id>
+    const setup: UrlGeneratorsSetup = {
+      registerUrlGenerator: <Id extends UrlGeneratorId>(
+        generatorOptions: UrlGeneratorsDefinition<Id>
       ) => {
-        this.accessLinkGenerators.set(
+        this.urlGenerators.set(
           generatorOptions.id,
-          new DirectAccessLinkGeneratorInternal<Id>(generatorOptions, this.getAccessLinkGenerator)
+          new UrlGeneratorInternal<Id>(generatorOptions, this.getUrlGenerator)
         );
       },
     };
@@ -61,19 +53,19 @@ export class DirectAccessLinksPlugin
   }
 
   public start(core: CoreStart) {
-    const start: DirectAccessLinksStart = {
-      getAccessLinkGenerator: this.getAccessLinkGenerator,
+    const start: UrlGeneratorsStart = {
+      getUrlGenerator: this.getUrlGenerator,
     };
     return start;
   }
 
   public stop() {}
 
-  private readonly getAccessLinkGenerator = (id: DirectAccessLinkGeneratorId) => {
-    const generator = this.accessLinkGenerators.get(id);
+  private readonly getUrlGenerator = (id: UrlGeneratorId) => {
+    const generator = this.urlGenerators.get(id);
     if (!generator) {
       throw new Error(
-        i18n.translate('directAccessLinks.errors.noGeneratorWithId', {
+        i18n.translate('urlGenerators.errors.noGeneratorWithId', {
           defaultMessage: 'No generator found with id {id}',
           values: { id },
         })

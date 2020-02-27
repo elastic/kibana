@@ -32,4 +32,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { DashboardEmbeddableContainerPublicPlugin as Plugin };
 
-export { DASHBOARD_APP_LINK_GENERATOR } from './direct_access_link_generator';
+export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
