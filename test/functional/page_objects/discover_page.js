@@ -247,12 +247,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getAllFieldNames() {
-      const items = await find.allByCssSelector('.sidebar-item');
+      const items = await find.allByCssSelector('.dscSidebarItem');
       return await Promise.all(items.map(item => item.getVisibleText()));
     }
 
     async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await find.byCssSelector('.dscFieldChooser__section');
       return await sidebar.getAttribute('clientWidth');
     }
 

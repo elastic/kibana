@@ -1,6 +1,8 @@
-<section class="dscFieldChooser__section" aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
+<section
+  class="dscFieldChooser__section"
+  aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}"
+>
   <div class="dscFieldChooser__sectionStatic">
-
     <discover-index-pattern-select
       selected-index-pattern="selectedIndexPattern"
       set-index-pattern="setIndexPattern"
@@ -8,11 +10,7 @@
     >
     </discover-index-pattern-select>
     <form>
-      <discover-field-search
-        on-change="setFilterValue"
-        value="filter.vals.name"
-        types="fieldTypes"
-      >
+      <discover-field-search on-change="setFilterValue" value="filter.vals.name" types="fieldTypes">
       </discover-field-search>
     </form>
   </div>
@@ -25,6 +23,7 @@
         tabindex="0"
         i18n-id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
         i18n-default-message="Selected fields"
+        data-test-subj="discover-sidebar-list-header"
       ></h3>
       <ul class="dscFieldList dscFieldList--selected" aria-labelledby="selected_fields">
         <discover-field
@@ -43,10 +42,11 @@
         tabindex="0"
         i18n-id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
         i18n-default-message="Available fields"
+        data-test-subj="discover-sidebar-list-header"
+        ng-if="fields.length"
       ></h3>
     </div>
     <div class="euiFlexGroup euiFlexGroup--gutterMedium" ng-if="fields.length">
-
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
         <button
           ng-click="$parent.showFields = !$parent.showFields"
@@ -65,7 +65,8 @@
     <ul
       ng-show="(popularFields | filter:filter.isFieldFilteredAndNotDisplayed).length > 0"
       ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }"
-      class="dscFieldList dscFieldList--popular">
+      class="dscFieldList dscFieldList--popular"
+    >
       <li>
         <h6
           i18n-id="kbn.discover.fieldChooser.filter.popularTitle"
@@ -85,7 +86,8 @@
 
     <ul
       ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
-      class="dscFieldList dscFieldList--unpopular">
+      class="dscFieldList dscFieldList--unpopular"
+    >
       <discover-field
         ng-repeat="field in unpopularFields | filter:filter.isFieldFilteredAndNotDisplayed"
         field="field"
@@ -97,5 +99,4 @@
       </discover-field>
     </ul>
   </div>
-
 </section>

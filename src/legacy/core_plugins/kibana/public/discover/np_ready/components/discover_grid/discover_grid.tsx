@@ -137,7 +137,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
   onAddColumn,
 }: Props) {
   const actionColumnId = 'uniqueString'; // TODO should be guaranteed unique...
-  const lowestPageSize = 50;
+  const lowestPageSize = 500;
   const timeString = i18n.translate('kbn.discover.timeLabel', {
     defaultMessage: 'Time',
   });
@@ -338,7 +338,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
           ...pagination,
           onChangeItemsPerPage,
           onChangePage,
-          pageSizeOptions: [lowestPageSize, 100, 500],
+          pageSizeOptions: [lowestPageSize],
         }}
         toolbarVisibility={{
           showColumnSelector: false,

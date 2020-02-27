@@ -138,7 +138,7 @@ describe('discover field chooser directives', function() {
 
   describe('Field listing', function() {
     it('should have Selected Fields, Fields and Popular Fields sections', function() {
-      const headers = $elem.find('.sidebar-list-header');
+      const headers = $elem.find('[data-test-subj="discover-sidebar-list-header"]');
       expect(headers.length).to.be(3);
     });
 
@@ -168,7 +168,9 @@ describe('discover field chooser directives', function() {
     it('should show the popular fields header if there are popular fields', function() {
       const section = getSections($elem);
       expect(section.popular.hasClass('ng-hide')).to.be(false);
-      expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be.above(0);
+      expect(
+        section.popular.find('li:not([data-test-subj="discover-sidebar-list-header"])').length
+      ).to.be.above(0);
     });
 
     it('should not show the popular fields if there are not any', function() {
@@ -190,7 +192,9 @@ describe('discover field chooser directives', function() {
 
       $scope.$digest();
       expect(section.popular.hasClass('ng-hide')).to.be(true);
-      expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
+      expect(
+        section.popular.find('li:not([data-test-subj="discover-sidebar-list-header"])').length
+      ).to.be(0);
     });
 
     it('should move the field into selected when it is added to the columns array', function() {
