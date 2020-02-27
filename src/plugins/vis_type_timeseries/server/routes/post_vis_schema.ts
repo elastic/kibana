@@ -150,7 +150,7 @@ const seriesItems = Joi.object({
       query: stringRequired,
       language: stringOptionalNullable,
     }).optional(),
-    stringOptionalNullable
+    Joi.string().valid('')
   ),
   formatter: stringRequired,
   hide_in_legend: numberIntegerOptional,
