@@ -28,12 +28,13 @@ import {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
+  RouteValidationSpec,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
-interface RequestFixtureOptions {
+interface RequestFixtureOptions<P = any, Q = any, B = any> {
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -43,9 +44,14 @@ interface RequestFixtureOptions {
   socket?: Socket;
   routeTags?: string[];
   routeAuthRequired?: false;
+  validation?: {
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+    body?: RouteValidationSpec<B>;
+  };
 }
 
-function createKibanaRequestMock({
+function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -55,10 +61,11 @@ function createKibanaRequestMock({
   socket = new Socket(),
   routeTags,
   routeAuthRequired,
-}: RequestFixtureOptions = {}) {
+  validation = {},
+}: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
-  return KibanaRequest.from(
+  return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
       headers,
       params,
@@ -80,9 +87,9 @@ function createKibanaRequestMock({
       },
     }),
     {
-      params: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
-      query: schema.object({}, { allowUnknowns: true }),
+      params: validation.params || schema.any(),
+      body: validation.body || schema.any(),
+      query: validation.query || schema.any(),
     }
   );
 }
