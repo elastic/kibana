@@ -37,13 +37,15 @@ require('ui/autoload/all');
 import 'ui/directives/input_focus';
 import './directives/saved_object_finder';
 import 'ui/directives/listen';
-import 'ui/kbn_top_nav';
 import './directives/saved_object_save_as_checkbox';
 import '../../data/public/legacy';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
 import { createSavedVisLoader, TypesService } from '../../visualizations/public';
+
+import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
+loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');

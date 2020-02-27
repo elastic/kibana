@@ -10,11 +10,13 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError } from '../utils';
 import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
@@ -58,7 +60,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
               ruleStatuses.saved_objects.forEach(async obj =>
                 savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
               );
-              return transformOrBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
+              return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -67,7 +69,17 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
           }
         })
       );
-      return rules;
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return headers
+          .response({
+            message: errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validated;
+      }
     },
   };
 };
