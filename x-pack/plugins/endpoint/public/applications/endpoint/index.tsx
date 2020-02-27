@@ -16,6 +16,7 @@ import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
 import { PolicyList } from './view/policy';
+import { HeaderNavigation } from './components/header_nav';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -31,67 +32,12 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
   };
 }
 
-interface RouterProps {
-  basename: string;
-  store: Store;
-}
-
-interface NavTabs {
-  name: string;
-  display: string;
-  exact: boolean;
-  to: string;
-}
-const navTabs: NavTabs[] = [
-  {
-    name: 'home',
-    display: 'Home',
-    exact: true,
-    to: '/',
-  },
-  {
-    name: 'management',
-    display: 'Management',
-    exact: false,
-    to: '/management',
-  },
-  {
-    name: 'alerts',
-    display: 'Alerts',
-    exact: false,
-    to: '/alerts',
-  },
-  {
-    name: 'policies',
-    display: 'Policies',
-    exact: false,
-    to: '/policy',
-  },
-];
-
-function renderNavTabs(tabs: NavTabs[]) {
-  return tabs.map((tab, index) => {
-    return (
-      <NavLink
-        data-testid={`${tab.name}Link`}
-        exact={tab.exact}
-        to={tab.to}
-        key={index}
-        className="euiTab"
-        activeClassName="euiTab-isSelected"
-      >
-        <span className="euiTab__content">{tab.display}</span>
-      </NavLink>
-    );
-  });
-}
-
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
   <Provider store={store}>
     <I18nProvider>
       <BrowserRouter basename={basename}>
-        <div className="euiTabs">{renderNavTabs(navTabs)}</div>
         <RouteCapture>
+          <HeaderNavigation />
           <Switch>
             <Route
               exact
