@@ -12,7 +12,7 @@
   "exclude": [
     "test/**/*",
     "legacy/plugins/siem/cypress/**/*",
-    "legacy/plugins/apm/cypress/**/*",
+    "legacy/plugins/apm/e2e/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {
@@ -36,7 +36,7 @@
         "x-pack/test_utils/*"
       ],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "fixtures/*": ["src/fixtures/*"]
+      "fixtures/*": ["src/fixtures/*"],
     },
     "types": [
       "node",

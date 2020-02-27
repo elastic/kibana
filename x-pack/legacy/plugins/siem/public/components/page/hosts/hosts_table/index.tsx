@@ -5,9 +5,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { connect, ConnectedProps } from 'react-redux';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -37,37 +35,12 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
-}
-
-interface HostsTableReduxProps {
-  activePage: number;
-  direction: Direction;
-  limit: number;
-  sortField: HostsFields;
-}
-
-interface HostsTableDispatchProps {
-  updateHostsSort: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    sort: HostsSortField;
-  }>;
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    limit: number;
-    tableType: hostsModel.HostsTableType;
-  }>;
 }
 
 export type HostsTableColumns = [
@@ -77,7 +50,7 @@ export type HostsTableColumns = [
   Columns<OsFields['version']>
 ];
 
-type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
+type HostsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -102,7 +75,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     direction,
     fakeTotalCount,
     id,
-    indexPattern,
     isInspect,
     limit,
     loading,
@@ -217,10 +189,16 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateHostsSort: hostsActions.updateHostsSort,
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(HostsTableComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const HostsTable = connector(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';

@@ -77,6 +77,7 @@ export default function(kibana) {
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -87,6 +88,7 @@ export default function(kibana) {
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -113,7 +115,7 @@ export default function(kibana) {
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,

@@ -7,6 +7,8 @@
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
+
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
@@ -16,29 +18,10 @@ import { Sort } from '../sort';
 import { DraggingContainer } from './common/dragging_container';
 
 import { Header } from './header';
-import { ColumnId } from '../column_id';
-
-export type ColumnHeaderType = 'not-filtered' | 'text-filter';
-
-/** The specification of a column header */
-export interface ColumnHeader {
-  aggregatable?: boolean;
-  category?: string;
-  columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
-  format?: string;
-  id: ColumnId;
-  label?: string;
-  linkField?: string;
-  placeholder?: string;
-  type?: string;
-  width: number;
-}
 
 interface ColumneHeaderProps {
   draggableIndex: number;
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onColumnResized: OnColumnResized;

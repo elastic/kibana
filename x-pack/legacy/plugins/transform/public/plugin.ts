@@ -15,7 +15,7 @@ import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
-import { createSavedSearchesLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/saved_searches';
+import { createSavedSearchesLoader } from '../../../../../src/plugins/discover/public';
 
 const REACT_ROOT_ID = 'transformReactRoot';
 const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
@@ -35,12 +35,13 @@ export class Plugin {
       savedObjects,
       overlays,
     } = core;
-    const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
+    const { data, management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
-    const AppDependencies = {
+    const appDependencies = {
       core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects, overlays },
       plugins: {
+        data,
         management: { sections: management.sections },
         savedSearches: coreSavedSearches,
       },
@@ -113,7 +114,7 @@ export class Plugin {
           unmountReactApp();
           const elem = document.getElementById(REACT_ROOT_ID);
           if (elem) {
-            renderReact(elem, AppDependencies);
+            renderReact(elem, appDependencies);
           }
         });
       },

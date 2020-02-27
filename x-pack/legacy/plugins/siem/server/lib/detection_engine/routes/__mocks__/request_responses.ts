@@ -20,6 +20,7 @@ import {
 import { ShardsResponse } from '../../../types';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { TEST_BOUNDARY } from './utils';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -50,7 +51,6 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   tags: [],
   version: 1,
   false_positives: [],
-  saved_id: 'some-id',
   max_signals: 100,
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
@@ -224,6 +224,24 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
+export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
+export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
   url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
@@ -293,7 +311,6 @@ export const getResult = (): RuleAlertType => ({
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     outputIndex: '.siem-signals',
-    savedId: 'some-id',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
     meta: { someMeta: 'someField' },
@@ -408,11 +425,52 @@ export const getMockPrivileges = () => ({
   has_encryption_key: true,
 });
 
-export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
   page: 1,
   per_page: 1,
   total: 0,
   saved_objects: [],
+});
+
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 6,
+  total: 2,
+  saved_objects: [
+    {
+      type: 'my-type',
+      id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
+      attributes: {
+        alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+        statusDate: '2020-02-18T15:26:49.783Z',
+        status: 'succeeded',
+        lastFailureAt: null,
+        lastSuccessAt: '2020-02-18T15:26:49.783Z',
+        lastFailureMessage: null,
+        lastSuccessMessage: 'succeeded',
+      },
+      references: [],
+      updated_at: '2020-02-18T15:26:51.333Z',
+      version: 'WzQ2LDFd',
+    },
+    {
+      type: 'my-type',
+      id: '91246bd0-5261-11ea-9650-33b954270f67',
+      attributes: {
+        alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+        statusDate: '2020-02-18T15:15:58.806Z',
+        status: 'failed',
+        lastFailureAt: '2020-02-18T15:15:58.806Z',
+        lastSuccessAt: '2020-02-13T20:31:59.855Z',
+        lastFailureMessage:
+          'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+        lastSuccessMessage: 'succeeded',
+      },
+      references: [],
+      updated_at: '2020-02-18T15:15:58.860Z',
+      version: 'WzMyLDFd',
+    },
+  ],
 });
 
 export const getIndexName = () => 'index-name';
