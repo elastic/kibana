@@ -43,7 +43,7 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
-    esArgs: customEsArgs,
+    esArgs: customEsArgs = [],
     esEnvVars,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
