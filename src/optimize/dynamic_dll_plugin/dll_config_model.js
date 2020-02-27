@@ -83,6 +83,14 @@ function generateDLL(config) {
               include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
               exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             },
+            // TODO: remove when we drop support for IE11
+            // We need because query-string is distributed without
+            // any kind of transpilation
+            // More info: https://github.com/elastic/kibana/issues/58684
+            {
+              test: /\.js$/,
+              include: /[\/\\]node_modules[\/\\]query-string[\/\\]/,
+            },
           ],
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
