@@ -38,14 +38,20 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
-    esArgs,
+    esArgs: customEsArgs,
+    esEnvVars,
+    clusterName = 'es-test-cluster',
     ssl,
   } = options;
 
-  const randomHash = Math.random()
-    .toString(36)
-    .substring(2);
-  const clusterName = `test-${randomHash}`;
+  const esArgs = [
+    `cluster.name=${clusterName}`,
+    `http.port=${port}`,
+    'discovery.type=single-node',
+    `transport.port=${esTestConfig.getTransportPort()}`,
+    ...customEsArgs,
+  ];
+
   const config = {
     version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
@@ -55,7 +61,6 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath,
     esArgs,
   };
-  const transportPort = esTestConfig.getTransportPort();
 
   const cluster = new Cluster({ log, ssl });
 
@@ -67,7 +72,7 @@ export function createLegacyEsTestCluster(options = {}) {
       return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = [], esEnvVars) {
+    async start() {
       let installPath;
 
       if (esFrom === 'source') {
@@ -86,13 +91,7 @@ export function createLegacyEsTestCluster(options = {}) {
 
       await cluster.start(installPath, {
         password: config.password,
-        esArgs: [
-          `cluster.name=${clusterName}`,
-          `http.port=${port}`,
-          'discovery.type=single-node',
-          `transport.port=${transportPort}`,
-          ...esArgs,
-        ],
+        esArgs,
         esEnvVars,
       });
     }
