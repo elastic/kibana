@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry> => {
+const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
+  Pick<SavedObjectTypeRegistry, 'registerType'>> => {
   const mock = {
     registerType: jest.fn(),
     getType: jest.fn(),
