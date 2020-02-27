@@ -306,6 +306,10 @@ export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.sc
   defaultMessage: 'Schedule rule',
 });
 
+export const RULE_ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.ruleActionsTitle', {
+  defaultMessage: 'Rule actions',
+});
+
 export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
   defaultMessage: 'Definition',
 });
@@ -316,6 +320,10 @@ export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutT
 
 export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
   defaultMessage: 'Schedule',
+});
+
+export const ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.stepActionsTitle', {
+  defaultMessage: 'Actions',
 });
 
 export const OPTIONAL_FIELD = i18n.translate(

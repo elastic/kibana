@@ -31,10 +31,17 @@ import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepRuleActions } from '../components/step_rule_actions';
 import { formatRule } from '../create/helpers';
 import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
-import { RuleStep, DefineStepRule, AboutStepRule, ScheduleStepRule } from '../types';
+import {
+  RuleStep,
+  DefineStepRule,
+  AboutStepRule,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
 import * as i18n from './translations';
 
 interface StepRuleForm {
@@ -48,6 +55,10 @@ interface DefineStepRuleForm extends StepRuleForm {
 }
 interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
+}
+
+interface ActionsStepRuleForm extends StepRuleForm {
+  data: ActionsStepRule | null;
 }
 
 const EditRulePageComponent: FC = () => {
@@ -79,11 +90,16 @@ const EditRulePageComponent: FC = () => {
     data: null,
     isValid: false,
   });
+  const [myActionsRuleForm, setMyActionsRuleForm] = useState<ActionsStepRuleForm>({
+    data: null,
+    isValid: false,
+  });
   const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>();
   const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
+    [RuleStep.ruleActions]: null,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
@@ -162,6 +178,27 @@ const EditRulePageComponent: FC = () => {
           </>
         ),
       },
+      {
+        id: RuleStep.ruleActions,
+        name: ruleI18n.ACTIONS,
+        content: (
+          <>
+            <EuiSpacer />
+            <StepPanel loading={loading || initLoading} title={ruleI18n.ACTIONS}>
+              {myActionsRuleForm.data != null && (
+                <StepRuleActions
+                  isReadOnlyView={false}
+                  isLoading={isLoading}
+                  isUpdateView
+                  defaultValues={myActionsRuleForm.data}
+                  setForm={setStepsForm}
+                />
+              )}
+              <EuiSpacer />
+            </StepPanel>
+          </>
+        ),
+      },
     ],
     [
       loading,
@@ -170,6 +207,7 @@ const EditRulePageComponent: FC = () => {
       myAboutRuleForm,
       myDefineRuleForm,
       myScheduleRuleForm,
+      myActionsRuleForm,
       setStepsForm,
       stepsForm,
     ]
@@ -206,20 +244,34 @@ const EditRulePageComponent: FC = () => {
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
             : myScheduleRuleForm.data) as ScheduleStepRule,
+          (activeFormId === RuleStep.ruleActions
+            ? activeForm.data
+            : myActionsRuleForm.data) as ScheduleStepRule,
           ruleId
         )
       );
     } else {
       setTabHasError(invalidForms);
     }
-  }, [stepsForm, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, selectedTab, ruleId]);
+  }, [
+    stepsForm,
+    myAboutRuleForm,
+    myDefineRuleForm,
+    myScheduleRuleForm,
+    myActionsRuleForm,
+    selectedTab,
+    ruleId,
+  ]);
 
   useEffect(() => {
     if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule,
+      });
       setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
       setMyDefineRuleForm({ data: defineRuleData, isValid: true });
       setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
     }
   }, [rule]);
 
@@ -255,10 +307,13 @@ const EditRulePageComponent: FC = () => {
 
   useEffect(() => {
     if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule,
+      });
       setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
       setMyDefineRuleForm({ data: defineRuleData, isValid: true });
       setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
     }
   }, [rule]);
 

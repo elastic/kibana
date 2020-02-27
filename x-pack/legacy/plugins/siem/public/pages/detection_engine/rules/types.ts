@@ -26,6 +26,7 @@ export enum RuleStep {
   defineRule = 'define-rule',
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
+  ruleActions = 'rule-actions',
 }
 export type RuleStatusType = 'passive' | 'active' | 'valid';
 
@@ -70,6 +71,12 @@ export interface ScheduleStepRule extends StepRuleData {
   interval: string;
   from: string;
   to?: string;
+}
+
+export interface ActionsStepRule extends StepRuleData {
+  interval: string;
+  // @ts-ignore
+  actions: any[];
 }
 
 export interface DefineStepRuleJson {

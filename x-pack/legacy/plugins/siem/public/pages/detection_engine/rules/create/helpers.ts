@@ -101,6 +101,7 @@ export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
+  actionsData: ScheduleStepRule,
   ruleId?: string
 ): NewRule => {
   const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';

@@ -12,12 +12,19 @@ import { useLocation } from 'react-router-dom';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../shared_imports';
-import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
+import {
+  AboutStepRule,
+  DefineStepRule,
+  IMitreEnterpriseAttack,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from './types';
 
 interface GetStepsData {
   aboutRuleData: AboutStepRule | null;
   defineRuleData: DefineStepRule | null;
   scheduleRuleData: ScheduleStepRule | null;
+  ruleActionsData: ActionsStepRule | null;
 }
 
 export const getStepsData = ({
@@ -76,7 +83,10 @@ export const getStepsData = ({
         }
       : null;
 
-  return { aboutRuleData, defineRuleData, scheduleRuleData };
+  const ruleActionsData: ActionsStepRule | null =
+    rule != null ? { isNew: false, actions: rule.actions, interval } : null;
+
+  return { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData };
 };
 
 export const useQuery = () => new URLSearchParams(useLocation().search);

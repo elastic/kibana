@@ -21,6 +21,7 @@ import { FormData, FormHook } from '../../../shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepRuleActions } from '../components/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import { redirectToDetections } from '../helpers';
@@ -79,20 +80,24 @@ const CreateRulePageComponent: React.FC = () => {
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
+    [RuleStep.ruleActions]: null,
   });
   const stepsData = useRef<Record<RuleStep, RuleStepData>>({
     [RuleStep.defineRule]: { isValid: false, data: {} },
     [RuleStep.aboutRule]: { isValid: false, data: {} },
     [RuleStep.scheduleRule]: { isValid: false, data: {} },
+    [RuleStep.ruleActions]: { isValid: false, data: {} },
   });
   const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
+    [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const userHasNoPermissions =
@@ -256,7 +261,7 @@ const CreateRulePageComponent: React.FC = () => {
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <MyEuiPanel zindex={3}>
+        <MyEuiPanel zindex={4}>
           <StepDefineRuleAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -291,7 +296,7 @@ const CreateRulePageComponent: React.FC = () => {
           </StepDefineRuleAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zindex={2}>
+        <MyEuiPanel zindex={3}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -324,7 +329,7 @@ const CreateRulePageComponent: React.FC = () => {
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zindex={1}>
+        <MyEuiPanel zindex={2}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
@@ -352,6 +357,41 @@ const CreateRulePageComponent: React.FC = () => {
               }
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
+              isLoading={isLoading || loading}
+              setForm={setStepsForm}
+              setStepData={setStepData}
+            />
+          </EuiAccordion>
+        </MyEuiPanel>
+        <EuiSpacer size="l" />
+        <MyEuiPanel zindex={1}>
+          <EuiAccordion
+            initialIsOpen={false}
+            id={RuleStep.ruleActions}
+            buttonContent={scheduleRuleButton}
+            paddingSize="xs"
+            ref={ruleActionsRef}
+            onToggle={manageAccordions.bind(null, RuleStep.ruleActions)}
+            extraAction={
+              stepsData.current[RuleStep.ruleActions].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.ruleActions)}
+                >
+                  {i18n.EDIT_RULE}
+                </EuiButtonEmpty>
+              )
+            }
+          >
+            <EuiHorizontalRule margin="m" />
+            <StepRuleActions
+              addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.ruleActions].data as ActionsStepRule) ?? null
+              }
+              descriptionDirection="row"
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
