@@ -4,28 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
+import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
 
-import introspectionQueryResultData from '../../graphql/introspection.json';
 import { CoreStart } from '../../plugin';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
 export function compose(core: CoreStart): AppFrontendLibs {
-  const cache = new InMemoryCache({
-    dataIdFromObject: () => null,
-    fragmentMatcher: new IntrospectionFragmentMatcher({
-      introspectionQueryResultData,
-    }),
-  });
   const basePath = core.http.basePath.get();
 
   const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',
-    cache,
-    link: ApolloLink.from(getLinks(cache, basePath)),
+    cache: new InMemoryCache({
+      typePolicies: {
+        TimelineItem: {
+          keyFields: ['_id', '_index', 'data'],
+        },
+      },
+    }),
+    link: ApolloLink.from(getLinks(basePath)),
   });
 
   const libs: AppFrontendLibs = {
