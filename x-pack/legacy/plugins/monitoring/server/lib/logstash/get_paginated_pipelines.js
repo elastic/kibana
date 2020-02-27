@@ -125,7 +125,14 @@ async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throug
 }
 
 async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric) {
-  const metricSeriesData = await getMetrics(req, lsIndexPattern, [nodesCountMetric], [], {}, 2);
+  const metricSeriesData = await getMetrics(
+    req,
+    lsIndexPattern,
+    [nodesCountMetric],
+    [],
+    { pageOfPipelines: pipelines },
+    2
+  );
   const { data } = metricSeriesData[nodesCountMetric][0] || [[]];
   const pipelinesMap = data.pop()[1] || {};
   pipelines.forEach(pipeline => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
