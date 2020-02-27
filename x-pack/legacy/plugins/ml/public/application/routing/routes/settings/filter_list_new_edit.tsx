@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
+import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
@@ -76,6 +77,8 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     checkGetJobsPrivilege,
     checkMlNodesAvailable,
   });
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canCreateFilter = checkPermission('canCreateFilter');
   const canDeleteFilter = checkPermission('canDeleteFilter');

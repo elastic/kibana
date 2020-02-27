@@ -580,13 +580,32 @@ describe('#start()', () => {
 
     it('creates URLs with path parameter', async () => {
       service.setup(setupDeps);
-
       const { getUrlForApp } = await service.start(startDeps);
 
       expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
+    });
+
+    it('does not append trailing slash if hash is provided in path parameter', async () => {
+      service.setup(setupDeps);
+      const { getUrlForApp } = await service.start(startDeps);
+
+      expect(getUrlForApp('app1', { path: '#basic-hash' })).toBe('/base-path/app/app1#basic-hash');
+      expect(getUrlForApp('app1', { path: '#/hash/router/path' })).toBe(
+        '/base-path/app/app1#/hash/router/path'
+      );
+    });
+
+    it('creates absolute URLs when `absolute` parameter is true', async () => {
+      service.setup(setupDeps);
+      const { getUrlForApp } = await service.start(startDeps);
+
+      expect(getUrlForApp('app1', { absolute: true })).toBe('http://localhost/base-path/app/app1');
+      expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
+        'http://localhost/base-path/app/app2/deep/link'
+      );
     });
   });
 
@@ -635,6 +654,26 @@ describe('#start()', () => {
         '/custom/path/deep/link/to/location/2',
         undefined
       );
+    });
+
+    it('appends a path if specified with hash', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('myTestApp', { path: '#basic-hash' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp#basic-hash', undefined);
+
+      await navigateToApp('myTestApp', { path: '#/hash/router/path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp#/hash/router/path', undefined);
+
+      await navigateToApp('app2', { path: '#basic-hash' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/path#basic-hash', undefined);
+
+      await navigateToApp('app2', { path: '#/hash/router/path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/path#/hash/router/path', undefined);
     });
 
     it('includes state if specified', async () => {

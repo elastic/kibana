@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../../legacy/plugins/alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -12,8 +12,8 @@ export default function(kibana: any) {
     require: ['alerting'],
     name: 'alerts',
     init(server: any) {
-      createNoopAlertType(server.plugins.alerting.setup);
-      createAlwaysFiringAlertType(server.plugins.alerting.setup);
+      createNoopAlertType(server.newPlatform.setup.plugins.alerting);
+      createAlwaysFiringAlertType(server.newPlatform.setup.plugins.alerting);
     },
   });
 }
@@ -22,7 +22,8 @@ function createNoopAlertType(setupContract: any) {
   const noopAlertType: AlertType = {
     id: 'test.noop',
     name: 'Test: Noop',
-    actionGroups: ['default'],
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    defaultActionGroupId: 'default',
     async executor() {},
   };
   setupContract.registerType(noopAlertType);
@@ -33,7 +34,10 @@ function createAlwaysFiringAlertType(setupContract: any) {
   const alwaysFiringAlertType: any = {
     id: 'test.always-firing',
     name: 'Always Firing',
-    actionGroups: ['default', 'other'],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'other', name: 'Other' },
+    ],
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
 

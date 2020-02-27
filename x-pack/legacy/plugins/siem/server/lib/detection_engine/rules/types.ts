@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server';
+import { LegacyRequest } from '../../../types';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-import { RequestFacade } from '../../../types';
-import { Alert } from '../../../../../alerting/server/types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
@@ -39,19 +39,19 @@ export interface FindParamsRest {
   filter: string;
 }
 
-export interface PatchRulesRequest extends RequestFacade {
+export interface PatchRulesRequest extends LegacyRequest {
   payload: PatchRuleAlertParamsRest;
 }
 
-export interface BulkPatchRulesRequest extends RequestFacade {
+export interface BulkPatchRulesRequest extends LegacyRequest {
   payload: PatchRuleAlertParamsRest[];
 }
 
-export interface UpdateRulesRequest extends RequestFacade {
+export interface UpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest;
 }
 
-export interface BulkUpdateRulesRequest extends RequestFacade {
+export interface BulkUpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest[];
 }
 
@@ -99,11 +99,11 @@ export interface IRuleStatusFindType {
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
 
-export interface RulesRequest extends RequestFacade {
+export interface RulesRequest extends LegacyRequest {
   payload: RuleAlertParamsRest;
 }
 
-export interface BulkRulesRequest extends RequestFacade {
+export interface BulkRulesRequest extends LegacyRequest {
   payload: RuleAlertParamsRest[];
 }
 
@@ -112,12 +112,12 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface ImportRulesRequest extends Omit<LegacyRequest, 'query'> {
   query: { overwrite: boolean };
   payload: { file: HapiReadableStream };
 }
 
-export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
   payload: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {
     file_name: string;
@@ -125,11 +125,11 @@ export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
-export type QueryRequest = Omit<RequestFacade, 'query'> & {
+export type QueryRequest = Omit<LegacyRequest, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };
 
-export interface QueryBulkRequest extends RequestFacade {
+export interface QueryBulkRequest extends LegacyRequest {
   payload: Array<QueryRequest['query']>;
 }
 
@@ -143,7 +143,7 @@ export interface FindRuleParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface FindRulesRequest extends Omit<LegacyRequest, 'query'> {
   query: {
     per_page: number;
     page: number;
@@ -155,7 +155,7 @@ export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
-export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
+export interface FindRulesStatusesRequest extends Omit<LegacyRequest, 'query'> {
   query: {
     ids: string[];
   };
@@ -189,16 +189,12 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
-  return obj.every(rule => isAlertType(rule));
+export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+  return partialAlert.every(rule => isAlertType(rule));
 };
 
-export const isAlertType = (obj: unknown): obj is RuleAlertType => {
-  return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
+export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+  return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
 export const isRuleStatusSavedObjectType = (

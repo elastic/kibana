@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ActionGroup } from '../../alerting/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -10,7 +11,7 @@ import {
   AlertAction,
   AlertTaskState,
   RawAlertInstance,
-} from '../../../legacy/plugins/alerting/common';
+} from '../../../plugins/alerting/common';
 export { Alert, AlertAction, AlertTaskState, RawAlertInstance };
 export { ActionType };
 
@@ -73,9 +74,12 @@ export interface ActionConnectorTableItem extends ActionConnector {
 export interface AlertType {
   id: string;
   name: string;
-  actionGroups: string[];
+  actionGroups: ActionGroup[];
   actionVariables: string[];
+  defaultActionGroupId: ActionGroup['id'];
 }
+
+export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
 
 export type AlertWithoutId = Omit<Alert, 'id'>;
 

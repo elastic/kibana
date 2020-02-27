@@ -20,7 +20,15 @@
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
 import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { demoSearchStrategyProvider } from './demo_search_strategy';
-import { DEMO_SEARCH_STRATEGY, IDemoRequest, IDemoResponse } from '../common';
+import {
+  DEMO_SEARCH_STRATEGY,
+  IDemoRequest,
+  IDemoResponse,
+  ASYNC_DEMO_SEARCH_STRATEGY,
+  IAsyncDemoRequest,
+  IAsyncDemoResponse,
+} from '../common';
+import { asyncDemoSearchStrategyProvider } from './async_demo_search_strategy';
 
 interface IDemoSearchExplorerDeps {
   data: DataPluginSetup;
@@ -38,10 +46,12 @@ interface IDemoSearchExplorerDeps {
 declare module '../../../src/plugins/data/server' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
+    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoRequest;
   }
 
   export interface IResponseTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoResponse;
+    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoResponse;
   }
 }
 
@@ -53,6 +63,11 @@ export class DemoDataPlugin implements Plugin<void, void, IDemoSearchExplorerDep
       this.initializerContext.opaqueId,
       DEMO_SEARCH_STRATEGY,
       demoSearchStrategyProvider
+    );
+    deps.data.search.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ASYNC_DEMO_SEARCH_STRATEGY,
+      asyncDemoSearchStrategyProvider
     );
   }
 

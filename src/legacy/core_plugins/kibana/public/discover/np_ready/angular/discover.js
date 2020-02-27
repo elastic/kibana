@@ -60,7 +60,6 @@ import {
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
-import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,
@@ -71,6 +70,7 @@ const {
   timefilter,
   toastNotifications,
   uiSettings,
+  visualizations,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -556,8 +556,9 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield:
-      indexPatternsUtils.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield: indexPatternsUtils.isDefault($scope.indexPattern)
+      ? $scope.indexPattern.timeFieldName
+      : undefined,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
@@ -990,7 +991,10 @@ function discoverController(
       },
     };
 
-    $scope.vis = new Vis($scope.searchSource.getField('index'), visSavedObject.visState);
+    $scope.vis = new visualizations.Vis(
+      $scope.searchSource.getField('index'),
+      visSavedObject.visState
+    );
     visSavedObject.vis = $scope.vis;
 
     $scope.searchSource.onRequestStart((searchSource, options) => {

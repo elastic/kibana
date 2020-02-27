@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
@@ -50,7 +50,7 @@ describe('NetworkHttp Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkHttpTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
   });
 

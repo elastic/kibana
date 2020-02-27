@@ -6,15 +6,20 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
 import {
   transformError,
   transformBulkError,
   BulkError,
   createSuccessObject,
+  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  convertToSnakeCase,
 } from './utils';
+import { createMockConfig } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -290,6 +295,49 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('getIndex', () => {
+    let mockConfig = createMockConfig();
+
+    beforeEach(() => {
+      mockConfig = () => ({
+        get: jest.fn(() => 'mockSignalsIndex'),
+        has: jest.fn(),
+      });
+    });
+
+    it('appends the space id to the configured index', () => {
+      const getSpaceId = jest.fn(() => 'myspace');
+      const index = getIndex(getSpaceId, mockConfig);
+
+      expect(index).toEqual('mockSignalsIndex-myspace');
+    });
+  });
+
+  describe('convertToSnakeCase', () => {
+    it('converts camelCase to snakeCase', () => {
+      const values = { myTestCamelCaseKey: 'something' };
+      expect(convertToSnakeCase(values)).toEqual({ my_test_camel_case_key: 'something' });
+    });
+    it('returns empty object when object is empty', () => {
+      const values = {};
+      expect(convertToSnakeCase(values)).toEqual({});
+    });
+    it('returns null when passed in undefined', () => {
+      // Array accessors can result in undefined but
+      // this is not represented in typescript for some reason,
+      // https://github.com/Microsoft/TypeScript/issues/11122
+      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+        page: 0,
+        per_page: 5,
+        total: 0,
+        saved_objects: [],
+      };
+      expect(
+        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+      ).toEqual(null);
     });
   });
 });

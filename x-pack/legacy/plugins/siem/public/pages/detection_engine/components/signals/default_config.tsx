@@ -7,18 +7,18 @@
 /* eslint-disable react/display-name */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from '@apollo/client';
 import React from 'react';
 
 import { Filter } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { TimelineAction, TimelineActionProps } from '../../../../components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../../../../components/timeline/body/helpers';
-import { SubsetTimelineModel, timelineDefaults } from '../../../../store/timeline/model';
+} from '../../../../components/timeline/body/constants';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 import { FILTER_OPEN } from './signals_filter_group';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
@@ -85,7 +85,7 @@ export const buildSignalsRuleIdFilter = (ruleId: string): Filter[] => [
   },
 ];
 
-export const signalsHeaders: ColumnHeader[] = [
+export const signalsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
@@ -191,7 +191,7 @@ export const getSignalsActions = ({
   status,
   updateTimelineIsLoading,
 }: {
-  apolloClient?: ApolloClient<{}>;
+  apolloClient?: ApolloClient<object>;
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;

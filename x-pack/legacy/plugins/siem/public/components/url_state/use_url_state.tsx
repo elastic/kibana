@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, difference, isEmpty } from 'lodash/fp';
+import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
+import { useApolloClient } from '@apollo/client';
+import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
   getQueryStringFromLocation,
@@ -77,7 +78,7 @@ export const useUrlStateHooks = ({
           const updatedUrlStateString =
             getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
             newUrlStateString;
-          if (isInitializing || !isEqual(updatedUrlStateString, newUrlStateString)) {
+          if (isInitializing || !deepEqual(updatedUrlStateString, newUrlStateString)) {
             urlStateToUpdate = [
               ...urlStateToUpdate,
               {
@@ -157,7 +158,7 @@ export const useUrlStateHooks = ({
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(type);
       setIsInitializing(false);
-    } else if (!isEqual(urlState, prevProps.urlState) && !isInitializing) {
+    } else if (!deepEqual(urlState, prevProps.urlState) && !isInitializing) {
       let mySearch = search;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (

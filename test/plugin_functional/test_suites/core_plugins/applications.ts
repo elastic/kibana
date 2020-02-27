@@ -28,6 +28,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -48,6 +49,14 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       search,
     });
 
+  /** Use retry logic to make URL assertions less flaky */
+  const waitForUrlToBe = (pathname?: string, search?: string) => {
+    const expectedUrl = getKibanaUrl(pathname, search);
+    return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
+      return (await browser.getCurrentUrl()) === expectedUrl;
+    });
+  };
+
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToApp('foo');
@@ -60,29 +69,36 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     it('navigates to its own pages', async () => {
       // Go to page A
       await testSubjects.click('fooNavPageA');
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
+      await waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
 
       // Go to home page
       await testSubjects.click('fooNavHome');
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/'));
+      await waitForUrlToBe('/app/foo');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('can use the back button to navigate within an app', async () => {
       await browser.goBack();
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
+      await waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
+    });
+
+    it('navigates to app root when navlink is clicked', async () => {
+      await appsMenu.clickLink('Foo');
+      await waitForUrlToBe('/app/foo');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('fooAppHome');
     });
 
     it('navigates to other apps', async () => {
       await testSubjects.click('fooNavBarPageB');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('barAppPageB');
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/bar/page-b', 'query=here'));
+      await waitForUrlToBe('/app/bar/page-b', 'query=here');
     });
 
     it('preserves query parameters across apps', async () => {
@@ -92,9 +108,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
+      await waitForUrlToBe('/app/foo');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppPageA');
+      await testSubjects.existOrFail('fooAppHome');
     });
 
     it('chromeless applications are not visible in apps list', async () => {
@@ -122,7 +138,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
 
     it('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Stack Management');
+      await appsMenu.clickLink('Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });

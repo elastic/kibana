@@ -5,10 +5,10 @@
  */
 
 import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Filter,
@@ -29,7 +29,7 @@ import { convertKueryToElasticSearchQuery } from '../../../../../lib/keury';
 import { useKibana } from '../../../../../lib/kibana';
 import { TimelineModel } from '../../../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {
@@ -99,7 +99,7 @@ export const QueryBarDefineRule = ({
             const newFilters = filterManager.getFilters();
             const { filters } = field.value as FieldValueQueryBar;
 
-            if (!isEqual(filters, newFilters)) {
+            if (!deepEqual(filters, newFilters)) {
               field.setValue({ ...(field.value as FieldValueQueryBar), filters: newFilters });
             }
           }
@@ -117,10 +117,10 @@ export const QueryBarDefineRule = ({
     let isSubscribed = true;
     async function updateFilterQueryFromValue() {
       const { filters, query, saved_id: savedId } = field.value as FieldValueQueryBar;
-      if (!isEqual(query, queryDraft)) {
+      if (!deepEqual(query, queryDraft)) {
         setQueryDraft(query);
       }
-      if (!isEqual(filters, filterManager.getFilters())) {
+      if (!deepEqual(filters, filterManager.getFilters())) {
         filterManager.setFilters(filters);
       }
       if (
@@ -148,7 +148,7 @@ export const QueryBarDefineRule = ({
   const onSubmitQuery = useCallback(
     (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
       const { query } = field.value as FieldValueQueryBar;
-      if (!isEqual(query, newQuery)) {
+      if (!deepEqual(query, newQuery)) {
         field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
       }
     },
@@ -158,7 +158,7 @@ export const QueryBarDefineRule = ({
   const onChangedQuery = useCallback(
     (newQuery: Query) => {
       const { query } = field.value as FieldValueQueryBar;
-      if (!isEqual(query, newQuery)) {
+      if (!deepEqual(query, newQuery)) {
         field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
       }
     },

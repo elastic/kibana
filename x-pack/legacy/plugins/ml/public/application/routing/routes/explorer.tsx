@@ -29,7 +29,7 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
-import { useMlKibana } from '../../contexts/kibana';
+import { useTimefilter } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -70,8 +70,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
-  const { services } = useMlKibana();
-  const { timefilter } = services.data.query.timefilter;
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 
@@ -111,9 +110,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-
     const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);

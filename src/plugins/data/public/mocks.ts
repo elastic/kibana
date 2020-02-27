@@ -49,6 +49,8 @@ const fieldFormatsMock: IFieldFormatsRegistry = {
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
+  deserialize: jest.fn(),
+  getTypeWithoutMetaParams: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
@@ -96,7 +98,14 @@ const createStartContract = (): Start => {
         msearch: jest.fn(),
       },
     },
-    indexPatterns: {} as IndexPatternsContract,
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+    } as unknown) as IndexPatternsContract,
   };
   return startContract;
 };
