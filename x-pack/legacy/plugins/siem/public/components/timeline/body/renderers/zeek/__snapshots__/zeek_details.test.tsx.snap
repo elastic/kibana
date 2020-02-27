@@ -956,6 +956,9 @@ tr:hover .c3:focus::before {
                   "query": Object {
                     "filterManager": [MockFunction],
                     "savedQueries": [MockFunction],
+                    "state$": Observable {
+                      "_isScalar": false,
+                    },
                     "timefilter": Object {
                       "history": Object {
                         "add": [MockFunction],
@@ -974,8 +977,10 @@ tr:hover .c3:focus::before {
                         "getEnabledUpdated$": [MockFunction],
                         "getFetch$": [MockFunction],
                         "getRefreshInterval": [MockFunction],
+                        "getRefreshIntervalDefaults": [MockFunction],
                         "getRefreshIntervalUpdate$": [MockFunction],
                         "getTime": [MockFunction],
+                        "getTimeDefaults": [MockFunction],
                         "getTimeUpdate$": [MockFunction],
                         "isAutoRefreshSelectorEnabled": [MockFunction],
                         "isTimeRangeSelectorEnabled": [MockFunction],
@@ -1299,86 +1304,791 @@ tr:hover .c3:focus::before {
             <ApolloProvider
               client={
                 ApolloClient {
-                  "__operations_cache__": Map {},
                   "cache": InMemoryCache {
                     "addTypename": true,
-                    "cacheKeyRoot": KeyTrie {
-                      "weakness": true,
-                    },
                     "config": Object {
                       "addTypename": true,
                       "dataIdFromObject": [Function],
-                      "fragmentMatcher": HeuristicFragmentMatcher {},
-                      "freezeResults": false,
                       "resultCaching": true,
+                      "typePolicies": Object {},
                     },
-                    "data": DepTrackingCache {
+                    "data": Root {
                       "data": Object {},
-                      "depend": [Function],
+                      "getFieldValue": [Function],
+                      "group": CacheGroup {
+                        "caching": true,
+                        "d": [Function],
+                        "keyMaker": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                      },
+                      "policies": Policies {
+                        "config": Object {
+                          "dataIdFromObject": [Function],
+                          "possibleTypes": undefined,
+                          "typePolicies": Object {},
+                        },
+                        "rootIdsByTypename": Object {
+                          "Mutation": "ROOT_MUTATION",
+                          "Query": "ROOT_QUERY",
+                          "Subscription": "ROOT_SUBSCRIPTION",
+                        },
+                        "rootTypenamesById": Object {
+                          "ROOT_MUTATION": "Mutation",
+                          "ROOT_QUERY": "Query",
+                          "ROOT_SUBSCRIPTION": "Subscription",
+                        },
+                        "storageTrie": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                        "typePolicies": Object {},
+                        "usingPossibleTypes": false,
+                      },
+                      "refs": Object {},
+                      "rootIds": Object {},
+                      "sharedLayerGroup": CacheGroup {
+                        "caching": true,
+                        "d": [Function],
+                        "keyMaker": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                      },
+                      "toReference": [Function],
                     },
+                    "getFragmentDoc": [Function],
                     "maybeBroadcastWatch": [Function],
-                    "optimisticData": DepTrackingCache {
+                    "optimisticData": Root {
                       "data": Object {},
-                      "depend": [Function],
+                      "getFieldValue": [Function],
+                      "group": CacheGroup {
+                        "caching": true,
+                        "d": [Function],
+                        "keyMaker": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                      },
+                      "policies": Policies {
+                        "config": Object {
+                          "dataIdFromObject": [Function],
+                          "possibleTypes": undefined,
+                          "typePolicies": Object {},
+                        },
+                        "rootIdsByTypename": Object {
+                          "Mutation": "ROOT_MUTATION",
+                          "Query": "ROOT_QUERY",
+                          "Subscription": "ROOT_SUBSCRIPTION",
+                        },
+                        "rootTypenamesById": Object {
+                          "ROOT_MUTATION": "Mutation",
+                          "ROOT_QUERY": "Query",
+                          "ROOT_SUBSCRIPTION": "Subscription",
+                        },
+                        "storageTrie": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                        "typePolicies": Object {},
+                        "usingPossibleTypes": false,
+                      },
+                      "refs": Object {},
+                      "rootIds": Object {},
+                      "sharedLayerGroup": CacheGroup {
+                        "caching": true,
+                        "d": [Function],
+                        "keyMaker": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                      },
+                      "toReference": [Function],
                     },
-                    "silenceBroadcast": false,
+                    "policies": Policies {
+                      "config": Object {
+                        "dataIdFromObject": [Function],
+                        "possibleTypes": undefined,
+                        "typePolicies": Object {},
+                      },
+                      "rootIdsByTypename": Object {
+                        "Mutation": "ROOT_MUTATION",
+                        "Query": "ROOT_QUERY",
+                        "Subscription": "ROOT_SUBSCRIPTION",
+                      },
+                      "rootTypenamesById": Object {
+                        "ROOT_MUTATION": "Mutation",
+                        "ROOT_QUERY": "Query",
+                        "ROOT_SUBSCRIPTION": "Subscription",
+                      },
+                      "storageTrie": KeyTrie {
+                        "makeData": [Function],
+                        "weakness": true,
+                      },
+                      "typePolicies": Object {},
+                      "usingPossibleTypes": false,
+                    },
                     "storeReader": StoreReader {
+                      "config": Object {
+                        "addTypename": true,
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                      },
                       "executeSelectionSet": [Function],
-                      "executeStoreQuery": [Function],
                       "executeSubSelectedArray": [Function],
-                      "freezeResults": false,
                     },
-                    "storeWriter": StoreWriter {},
+                    "storeWriter": StoreWriter {
+                      "policies": Policies {
+                        "config": Object {
+                          "dataIdFromObject": [Function],
+                          "possibleTypes": undefined,
+                          "typePolicies": Object {},
+                        },
+                        "rootIdsByTypename": Object {
+                          "Mutation": "ROOT_MUTATION",
+                          "Query": "ROOT_QUERY",
+                          "Subscription": "ROOT_SUBSCRIPTION",
+                        },
+                        "rootTypenamesById": Object {
+                          "ROOT_MUTATION": "Mutation",
+                          "ROOT_QUERY": "Query",
+                          "ROOT_SUBSCRIPTION": "Subscription",
+                        },
+                        "storageTrie": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                        "typePolicies": Object {},
+                        "usingPossibleTypes": false,
+                      },
+                    },
+                    "txCount": 0,
                     "typenameDocumentCache": Map {},
+                    "varDep": [Function],
                     "watches": Set {},
                   },
+                  "clearStoreCallbacks": Array [],
                   "defaultOptions": Object {},
                   "disableNetworkFetches": false,
                   "link": ApolloLink {
                     "request": [Function],
                   },
-                  "mutate": [Function],
-                  "query": [Function],
-                  "queryDeduplication": true,
-                  "reFetchObservableQueries": [Function],
-                  "resetStore": [Function],
-                  "resetStoreCallbacks": Array [],
-                  "ssrMode": false,
-                  "store": DataStore {
+                  "localState": LocalState {
                     "cache": InMemoryCache {
                       "addTypename": true,
-                      "cacheKeyRoot": KeyTrie {
-                        "weakness": true,
-                      },
                       "config": Object {
                         "addTypename": true,
                         "dataIdFromObject": [Function],
-                        "fragmentMatcher": HeuristicFragmentMatcher {},
-                        "freezeResults": false,
                         "resultCaching": true,
+                        "typePolicies": Object {},
                       },
-                      "data": DepTrackingCache {
+                      "data": Root {
                         "data": Object {},
-                        "depend": [Function],
+                        "getFieldValue": [Function],
+                        "group": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                        "refs": Object {},
+                        "rootIds": Object {},
+                        "sharedLayerGroup": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "toReference": [Function],
                       },
+                      "getFragmentDoc": [Function],
                       "maybeBroadcastWatch": [Function],
-                      "optimisticData": DepTrackingCache {
+                      "optimisticData": Root {
                         "data": Object {},
-                        "depend": [Function],
+                        "getFieldValue": [Function],
+                        "group": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                        "refs": Object {},
+                        "rootIds": Object {},
+                        "sharedLayerGroup": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "toReference": [Function],
                       },
-                      "silenceBroadcast": false,
+                      "policies": Policies {
+                        "config": Object {
+                          "dataIdFromObject": [Function],
+                          "possibleTypes": undefined,
+                          "typePolicies": Object {},
+                        },
+                        "rootIdsByTypename": Object {
+                          "Mutation": "ROOT_MUTATION",
+                          "Query": "ROOT_QUERY",
+                          "Subscription": "ROOT_SUBSCRIPTION",
+                        },
+                        "rootTypenamesById": Object {
+                          "ROOT_MUTATION": "Mutation",
+                          "ROOT_QUERY": "Query",
+                          "ROOT_SUBSCRIPTION": "Subscription",
+                        },
+                        "storageTrie": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                        "typePolicies": Object {},
+                        "usingPossibleTypes": false,
+                      },
                       "storeReader": StoreReader {
+                        "config": Object {
+                          "addTypename": true,
+                          "policies": Policies {
+                            "config": Object {
+                              "dataIdFromObject": [Function],
+                              "possibleTypes": undefined,
+                              "typePolicies": Object {},
+                            },
+                            "rootIdsByTypename": Object {
+                              "Mutation": "ROOT_MUTATION",
+                              "Query": "ROOT_QUERY",
+                              "Subscription": "ROOT_SUBSCRIPTION",
+                            },
+                            "rootTypenamesById": Object {
+                              "ROOT_MUTATION": "Mutation",
+                              "ROOT_QUERY": "Query",
+                              "ROOT_SUBSCRIPTION": "Subscription",
+                            },
+                            "storageTrie": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                            "typePolicies": Object {},
+                            "usingPossibleTypes": false,
+                          },
+                        },
                         "executeSelectionSet": [Function],
-                        "executeStoreQuery": [Function],
                         "executeSubSelectedArray": [Function],
-                        "freezeResults": false,
                       },
-                      "storeWriter": StoreWriter {},
+                      "storeWriter": StoreWriter {
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                      },
+                      "txCount": 0,
                       "typenameDocumentCache": Map {},
+                      "varDep": [Function],
                       "watches": Set {},
                     },
+                    "client": [Circular],
                   },
-                  "version": "2.3.8",
+                  "mutate": [Function],
+                  "query": [Function],
+                  "queryDeduplication": true,
+                  "queryManager": QueryManager {
+                    "assumeImmutableResults": false,
+                    "cache": InMemoryCache {
+                      "addTypename": true,
+                      "config": Object {
+                        "addTypename": true,
+                        "dataIdFromObject": [Function],
+                        "resultCaching": true,
+                        "typePolicies": Object {},
+                      },
+                      "data": Root {
+                        "data": Object {},
+                        "getFieldValue": [Function],
+                        "group": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                        "refs": Object {},
+                        "rootIds": Object {},
+                        "sharedLayerGroup": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "toReference": [Function],
+                      },
+                      "getFragmentDoc": [Function],
+                      "maybeBroadcastWatch": [Function],
+                      "optimisticData": Root {
+                        "data": Object {},
+                        "getFieldValue": [Function],
+                        "group": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                        "refs": Object {},
+                        "rootIds": Object {},
+                        "sharedLayerGroup": CacheGroup {
+                          "caching": true,
+                          "d": [Function],
+                          "keyMaker": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                        },
+                        "toReference": [Function],
+                      },
+                      "policies": Policies {
+                        "config": Object {
+                          "dataIdFromObject": [Function],
+                          "possibleTypes": undefined,
+                          "typePolicies": Object {},
+                        },
+                        "rootIdsByTypename": Object {
+                          "Mutation": "ROOT_MUTATION",
+                          "Query": "ROOT_QUERY",
+                          "Subscription": "ROOT_SUBSCRIPTION",
+                        },
+                        "rootTypenamesById": Object {
+                          "ROOT_MUTATION": "Mutation",
+                          "ROOT_QUERY": "Query",
+                          "ROOT_SUBSCRIPTION": "Subscription",
+                        },
+                        "storageTrie": KeyTrie {
+                          "makeData": [Function],
+                          "weakness": true,
+                        },
+                        "typePolicies": Object {},
+                        "usingPossibleTypes": false,
+                      },
+                      "storeReader": StoreReader {
+                        "config": Object {
+                          "addTypename": true,
+                          "policies": Policies {
+                            "config": Object {
+                              "dataIdFromObject": [Function],
+                              "possibleTypes": undefined,
+                              "typePolicies": Object {},
+                            },
+                            "rootIdsByTypename": Object {
+                              "Mutation": "ROOT_MUTATION",
+                              "Query": "ROOT_QUERY",
+                              "Subscription": "ROOT_SUBSCRIPTION",
+                            },
+                            "rootTypenamesById": Object {
+                              "ROOT_MUTATION": "Mutation",
+                              "ROOT_QUERY": "Query",
+                              "ROOT_SUBSCRIPTION": "Subscription",
+                            },
+                            "storageTrie": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                            "typePolicies": Object {},
+                            "usingPossibleTypes": false,
+                          },
+                        },
+                        "executeSelectionSet": [Function],
+                        "executeSubSelectedArray": [Function],
+                      },
+                      "storeWriter": StoreWriter {
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                      },
+                      "txCount": 0,
+                      "typenameDocumentCache": Map {},
+                      "varDep": [Function],
+                      "watches": Set {},
+                    },
+                    "clientAwareness": Object {
+                      "name": undefined,
+                      "version": undefined,
+                    },
+                    "fetchQueryRejectFns": Map {},
+                    "idCounter": 1,
+                    "inFlightLinkObservables": Map {},
+                    "link": ApolloLink {
+                      "request": [Function],
+                    },
+                    "localState": LocalState {
+                      "cache": InMemoryCache {
+                        "addTypename": true,
+                        "config": Object {
+                          "addTypename": true,
+                          "dataIdFromObject": [Function],
+                          "resultCaching": true,
+                          "typePolicies": Object {},
+                        },
+                        "data": Root {
+                          "data": Object {},
+                          "getFieldValue": [Function],
+                          "group": CacheGroup {
+                            "caching": true,
+                            "d": [Function],
+                            "keyMaker": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                          },
+                          "policies": Policies {
+                            "config": Object {
+                              "dataIdFromObject": [Function],
+                              "possibleTypes": undefined,
+                              "typePolicies": Object {},
+                            },
+                            "rootIdsByTypename": Object {
+                              "Mutation": "ROOT_MUTATION",
+                              "Query": "ROOT_QUERY",
+                              "Subscription": "ROOT_SUBSCRIPTION",
+                            },
+                            "rootTypenamesById": Object {
+                              "ROOT_MUTATION": "Mutation",
+                              "ROOT_QUERY": "Query",
+                              "ROOT_SUBSCRIPTION": "Subscription",
+                            },
+                            "storageTrie": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                            "typePolicies": Object {},
+                            "usingPossibleTypes": false,
+                          },
+                          "refs": Object {},
+                          "rootIds": Object {},
+                          "sharedLayerGroup": CacheGroup {
+                            "caching": true,
+                            "d": [Function],
+                            "keyMaker": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                          },
+                          "toReference": [Function],
+                        },
+                        "getFragmentDoc": [Function],
+                        "maybeBroadcastWatch": [Function],
+                        "optimisticData": Root {
+                          "data": Object {},
+                          "getFieldValue": [Function],
+                          "group": CacheGroup {
+                            "caching": true,
+                            "d": [Function],
+                            "keyMaker": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                          },
+                          "policies": Policies {
+                            "config": Object {
+                              "dataIdFromObject": [Function],
+                              "possibleTypes": undefined,
+                              "typePolicies": Object {},
+                            },
+                            "rootIdsByTypename": Object {
+                              "Mutation": "ROOT_MUTATION",
+                              "Query": "ROOT_QUERY",
+                              "Subscription": "ROOT_SUBSCRIPTION",
+                            },
+                            "rootTypenamesById": Object {
+                              "ROOT_MUTATION": "Mutation",
+                              "ROOT_QUERY": "Query",
+                              "ROOT_SUBSCRIPTION": "Subscription",
+                            },
+                            "storageTrie": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                            "typePolicies": Object {},
+                            "usingPossibleTypes": false,
+                          },
+                          "refs": Object {},
+                          "rootIds": Object {},
+                          "sharedLayerGroup": CacheGroup {
+                            "caching": true,
+                            "d": [Function],
+                            "keyMaker": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                          },
+                          "toReference": [Function],
+                        },
+                        "policies": Policies {
+                          "config": Object {
+                            "dataIdFromObject": [Function],
+                            "possibleTypes": undefined,
+                            "typePolicies": Object {},
+                          },
+                          "rootIdsByTypename": Object {
+                            "Mutation": "ROOT_MUTATION",
+                            "Query": "ROOT_QUERY",
+                            "Subscription": "ROOT_SUBSCRIPTION",
+                          },
+                          "rootTypenamesById": Object {
+                            "ROOT_MUTATION": "Mutation",
+                            "ROOT_QUERY": "Query",
+                            "ROOT_SUBSCRIPTION": "Subscription",
+                          },
+                          "storageTrie": KeyTrie {
+                            "makeData": [Function],
+                            "weakness": true,
+                          },
+                          "typePolicies": Object {},
+                          "usingPossibleTypes": false,
+                        },
+                        "storeReader": StoreReader {
+                          "config": Object {
+                            "addTypename": true,
+                            "policies": Policies {
+                              "config": Object {
+                                "dataIdFromObject": [Function],
+                                "possibleTypes": undefined,
+                                "typePolicies": Object {},
+                              },
+                              "rootIdsByTypename": Object {
+                                "Mutation": "ROOT_MUTATION",
+                                "Query": "ROOT_QUERY",
+                                "Subscription": "ROOT_SUBSCRIPTION",
+                              },
+                              "rootTypenamesById": Object {
+                                "ROOT_MUTATION": "Mutation",
+                                "ROOT_QUERY": "Query",
+                                "ROOT_SUBSCRIPTION": "Subscription",
+                              },
+                              "storageTrie": KeyTrie {
+                                "makeData": [Function],
+                                "weakness": true,
+                              },
+                              "typePolicies": Object {},
+                              "usingPossibleTypes": false,
+                            },
+                          },
+                          "executeSelectionSet": [Function],
+                          "executeSubSelectedArray": [Function],
+                        },
+                        "storeWriter": StoreWriter {
+                          "policies": Policies {
+                            "config": Object {
+                              "dataIdFromObject": [Function],
+                              "possibleTypes": undefined,
+                              "typePolicies": Object {},
+                            },
+                            "rootIdsByTypename": Object {
+                              "Mutation": "ROOT_MUTATION",
+                              "Query": "ROOT_QUERY",
+                              "Subscription": "ROOT_SUBSCRIPTION",
+                            },
+                            "rootTypenamesById": Object {
+                              "ROOT_MUTATION": "Mutation",
+                              "ROOT_QUERY": "Query",
+                              "ROOT_SUBSCRIPTION": "Subscription",
+                            },
+                            "storageTrie": KeyTrie {
+                              "makeData": [Function],
+                              "weakness": true,
+                            },
+                            "typePolicies": Object {},
+                            "usingPossibleTypes": false,
+                          },
+                        },
+                        "txCount": 0,
+                        "typenameDocumentCache": Map {},
+                        "varDep": [Function],
+                        "watches": Set {},
+                      },
+                      "client": [Circular],
+                    },
+                    "mutationStore": MutationStore {
+                      "store": Object {},
+                    },
+                    "onBroadcast": [Function],
+                    "pollingInfoByQueryId": Map {},
+                    "queries": Map {},
+                    "queryDeduplication": true,
+                    "queryStore": QueryStore {
+                      "store": Object {},
+                    },
+                    "ssrMode": false,
+                    "transformCache": WeakMap {},
+                  },
+                  "reFetchObservableQueries": [Function],
+                  "resetStore": [Function],
+                  "resetStoreCallbacks": Array [],
+                  "typeDefs": undefined,
+                  "version": "local",
                   "watchQuery": [Function],
                 }
               }
