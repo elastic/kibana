@@ -9,16 +9,14 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
-import { useAppDependencies } from '../../../../../index';
+import { useServices } from '../../../../../app_context';
 
 interface Props {
   state: any;
 }
 
 export const SnapshotState: React.FC<Props> = ({ state }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
+  const { i18n } = useServices();
 
   const stateMap: any = {
     [SNAPSHOT_STATE.IN_PROGRESS]: {

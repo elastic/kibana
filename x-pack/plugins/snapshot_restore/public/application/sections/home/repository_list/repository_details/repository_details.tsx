@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,7 +25,7 @@ import {
 
 import 'brace/theme/textmate';
 
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
   useLoadRepository,
@@ -60,11 +61,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   onClose,
   onRepositoryDeleted,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);

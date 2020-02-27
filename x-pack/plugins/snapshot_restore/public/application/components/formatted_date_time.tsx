@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { useAppDependencies } from '../index';
+import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
 
 interface Props {
   epochMs: number;
@@ -13,12 +13,6 @@ interface Props {
 }
 
 export const FormattedDateTime: React.FunctionComponent<Props> = ({ epochMs, type }) => {
-  const {
-    core: {
-      i18n: { FormattedDate, FormattedTime },
-    },
-  } = useAppDependencies();
-
   const date = new Date(epochMs);
   const formattedDate = <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
   const formattedTime = <FormattedTime value={date} timeZoneName="short" />;

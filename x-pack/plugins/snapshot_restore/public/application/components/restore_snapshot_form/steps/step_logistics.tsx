@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -22,7 +23,7 @@ import {
 import { Option } from '@elastic/eui/src/components/selectable/types';
 import { RestoreSettings } from '../../../../../common/types';
 import { documentationLinksService } from '../../../services/documentation';
-import { useAppDependencies } from '../../../index';
+import { useServices } from '../../../app_context';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
@@ -31,10 +32,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   updateRestoreSettings,
   errors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const {
     indices: snapshotIndices,
     includeGlobalState: snapshotIncludeGlobalState,

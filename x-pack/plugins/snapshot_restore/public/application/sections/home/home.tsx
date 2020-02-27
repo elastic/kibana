@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import {
@@ -21,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
-import { useAppDependencies } from '../../index';
+import { useConfig } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -40,14 +41,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-      chrome,
-    },
-  } = useAppDependencies();
-
-  const slmUiEnabled = chrome.getInjected('slmUiEnabled');
+  const { slmUiEnabled } = useConfig();
 
   const tabs: Array<{
     id: Section;

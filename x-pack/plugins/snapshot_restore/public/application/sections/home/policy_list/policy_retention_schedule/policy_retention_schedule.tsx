@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +21,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import {
   RetentionSettingsUpdateModalProvider,
   UpdateRetentionSettings,
@@ -43,13 +44,9 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
   isLoading,
   error,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
+  const { i18n } = useServices();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
-  const { FormattedMessage } = i18n;
 
   const renderRetentionPanel = (cronSchedule: string) => (
     <>

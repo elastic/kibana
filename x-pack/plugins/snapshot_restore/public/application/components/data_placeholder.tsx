@@ -6,17 +6,15 @@
 
 import React from 'react';
 
-import { useAppDependencies } from '../index';
+import { useServices } from '../app_context';
 
 interface Props {
   data: any;
   children: React.ReactNode;
 }
 
-export const DataPlaceholder: React.FC<Props> = ({ data, children }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
+export const DataPlaceholder = ({ data, children }: Props) => {
+  const { i18n } = useServices();
 
   if (data != null) {
     return children;

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect, useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -11,7 +12,7 @@ import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError, SectionLoading, Error } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
-import { useAppDependencies } from '../../index';
+import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';
 
@@ -25,10 +26,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   },
   history,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const section = 'repositories' as Section;
 
   // Set breadcrumb and page title

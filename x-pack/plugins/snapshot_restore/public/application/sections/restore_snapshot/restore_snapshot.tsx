@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { BASE_PATH } from '../../constants';
 import { SectionError, SectionLoading, RestoreSnapshotForm, Error } from '../../components';
-import { useAppDependencies } from '../../index';
+import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
 
@@ -25,10 +26,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   },
   history,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
 
   // Set breadcrumb and page title
   useEffect(() => {

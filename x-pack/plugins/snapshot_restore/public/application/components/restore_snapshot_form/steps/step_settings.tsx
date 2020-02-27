@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCode,
@@ -21,7 +22,7 @@ import {
 import { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { documentationLinksService } from '../../../services/documentation';
-import { useAppDependencies } from '../../../index';
+import { useServices } from '../../../app_context';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
@@ -29,10 +30,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   updateRestoreSettings,
   errors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { indexSettings, ignoreIndexSettings } = restoreSettings;
 
   // State for index setting toggles

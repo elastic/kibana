@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
-
 import { SectionError, SectionLoading, PolicyForm, Error } from '../../components';
 import { BASE_PATH } from '../../constants';
-import { useAppDependencies } from '../../index';
+import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
 
@@ -27,10 +27,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   history,
   location: { pathname },
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
 
   // Set breadcrumb and page title
   useEffect(() => {

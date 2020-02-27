@@ -5,18 +5,13 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 interface Props {
   indices: string[] | string | undefined;
 }
 
-import { useAppDependencies } from '../index';
-
 export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
   const displayIndices = indices
     ? typeof indices === 'string'

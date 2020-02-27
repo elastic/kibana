@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -14,7 +15,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FSRepository, Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { textService } from '../../../services/text';
 
@@ -32,10 +32,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
   updateRepositorySettings,
   settingErrors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const {
     settings: {
       location,

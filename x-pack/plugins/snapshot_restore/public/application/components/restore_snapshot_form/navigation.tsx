@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { EuiStepsHorizontal } from '@elastic/eui';
-import { useAppDependencies } from '../../index';
+import { useServices } from '../../app_context';
 
 interface Props {
   currentStep: number;
@@ -18,9 +18,7 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
   maxCompletedStep,
   updateCurrentStep,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
+  const { i18n } = useServices();
 
   const steps = [
     {

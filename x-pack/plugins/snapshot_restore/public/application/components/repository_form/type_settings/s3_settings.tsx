@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -13,8 +14,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+
 import { Repository, S3Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { textService } from '../../../services/text';
 
@@ -32,11 +33,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
   updateRepositorySettings,
   settingErrors,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
   const {
     settings: {
       bucket,

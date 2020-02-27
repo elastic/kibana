@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -20,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
+import { useServices } from '../../../../../app_context';
 import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
@@ -29,10 +30,7 @@ interface Props {
 }
 
 export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
 
   const {
     version,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -23,7 +23,7 @@ import {
 import { Option } from '@elastic/eui/src/components/selectable/types';
 import { SlmPolicyPayload, SnapshotConfig } from '../../../../../common/types';
 import { documentationLinksService } from '../../../services/documentation';
-import { useAppDependencies } from '../../../index';
+import { useServices } from '../../../app_context';
 import { StepProps } from './';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
@@ -32,10 +32,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   updatePolicy,
   errors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { config = {}, isManagedPolicy } = policy;
 
   const updatePolicyConfig = (updatedFields: Partial<SlmPolicyPayload['config']>): void => {

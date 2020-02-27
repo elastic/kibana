@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBasicTable,
   EuiProgress,
@@ -15,8 +16,9 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';
 
 interface Props {
@@ -24,10 +26,7 @@ interface Props {
 }
 
 export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
 
   const Progress = ({
     total,

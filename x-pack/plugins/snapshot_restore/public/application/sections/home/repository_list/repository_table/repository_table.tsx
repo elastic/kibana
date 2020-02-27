@@ -5,6 +5,7 @@
  */
 
 import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -18,7 +19,7 @@ import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
@@ -39,10 +40,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 

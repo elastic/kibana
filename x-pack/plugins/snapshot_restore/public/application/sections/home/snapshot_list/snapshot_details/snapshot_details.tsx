@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
 import {
@@ -28,7 +29,7 @@ import {
   SnapshotDeleteProvider,
   Error,
 } from '../../../../components';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
@@ -60,10 +61,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   onClose,
   onSnapshotDeleted,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 

@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -17,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ReadonlyRepository, Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
@@ -34,11 +34,6 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
   updateRepositorySettings,
   settingErrors,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
   const {
     settings: { url },
   } = repository;

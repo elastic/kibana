@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,7 +22,7 @@ import {
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import {
   FormattedDateTime,
   PolicyExecuteProvider,
@@ -46,10 +47,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -26,7 +26,6 @@ import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../cons
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { documentationLinksService } from '../../../services/documentation';
-import { useAppDependencies } from '../../../index';
 import { SectionLoading, SectionError } from '../../';
 import { StepProps } from './';
 
@@ -37,11 +36,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   currentUrl,
   errors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
-
   // Load repositories for repository dropdown field
   const {
     error: errorLoadingRepositories,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
-import { useAppDependencies } from '../../../index';
+import { useServices } from '../../../app_context';
 import { StepProps } from './';
 import { CollapsibleIndicesList } from '../../collapsible_indices_list';
 
@@ -27,10 +28,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
   updateCurrentStep,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { name, snapshotName, schedule, repository, config, retention } = policy;
   const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
     indices: undefined,

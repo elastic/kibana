@@ -5,14 +5,14 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-
 import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
-import { useAppDependencies } from '../../../index';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
@@ -32,12 +32,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   },
   history,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     error,
     isLoading,

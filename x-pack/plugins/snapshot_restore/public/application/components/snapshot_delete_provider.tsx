@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiConfirmModal,
   EuiOverlayMask,
@@ -13,7 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useAppDependencies } from '../index';
+
+import { useServices, useToastNotifications } from '../app_context';
 import { deleteSnapshots } from '../services/http';
 
 interface Props {
@@ -30,13 +32,9 @@ type OnSuccessCallback = (
 ) => void;
 
 export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
-  const {
-    core: {
-      i18n,
-      notification: { toastNotifications },
-    },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
+  const toastNotifications = useToastNotifications();
+
   const [snapshotIds, setSnapshotIds] = useState<Array<{ snapshot: string; repository: string }>>(
     []
   );

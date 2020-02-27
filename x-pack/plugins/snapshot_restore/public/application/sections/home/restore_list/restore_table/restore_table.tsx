@@ -5,12 +5,14 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+
 import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { FormattedDateTime } from '../../../../components';
 import { ShardsTable } from './shards_table';
@@ -20,10 +22,7 @@ interface Props {
 }
 
 export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { trackUiMetric } = uiMetricService;
 
   // Track restores to show based on sort and pagination state

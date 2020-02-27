@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -18,7 +18,6 @@ import {
 
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
-import { useAppDependencies } from '../../../../../index';
 import {
   DataPlaceholder,
   FormattedDateTime,
@@ -32,12 +31,6 @@ interface Props {
 }
 
 export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     versionId,
     version,

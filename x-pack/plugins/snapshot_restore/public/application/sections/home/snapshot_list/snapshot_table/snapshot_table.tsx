@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiInMemoryTable,
@@ -17,7 +18,7 @@ import {
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
@@ -57,10 +58,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositoryFilter,
   policyFilter,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
   const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeEditor,
   EuiFlexGroup,
@@ -19,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';
 
@@ -28,11 +28,6 @@ interface Props {
 }
 
 export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
-
   const { lastSuccess, lastFailure, nextExecutionMillis, name, repository } = policy;
 
   const renderLastSuccess = () => {

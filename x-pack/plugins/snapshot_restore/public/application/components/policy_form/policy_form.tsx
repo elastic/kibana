@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -12,10 +13,10 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
-import { useAppDependencies } from '../../index';
 import {
   PolicyStepLogistics,
   PolicyStepSettings,
@@ -47,12 +48,6 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   onCancel,
   onSave,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   // Step state
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -19,7 +19,6 @@ import {
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
 import { documentationLinksService } from '../../../services/documentation';
-import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
 import { textService } from '../../../services/text';
 
@@ -34,11 +33,6 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
   updatePolicy,
   errors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
-
   const { retention = {} } = policy;
 
   const updatePolicyRetention = (updatedFields: Partial<SlmPolicyPayload['retention']>): void => {

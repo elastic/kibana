@@ -5,8 +5,10 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { useAppDependencies } from '../index';
+
+import { useServices, useToastNotifications } from '../app_context';
 import { executePolicy as executePolicyRequest } from '../services/http';
 
 interface Props {
@@ -18,13 +20,9 @@ export type ExecutePolicy = (name: string, onSuccess?: OnSuccessCallback) => voi
 type OnSuccessCallback = () => void;
 
 export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children }) => {
-  const {
-    core: {
-      i18n,
-      notification: { toastNotifications },
-    },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
+  const toastNotifications = useToastNotifications();
+
   const [policyName, setPolicyName] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
-import { useAppDependencies } from '../../../../index';
+import { useServices } from '../../../../app_context';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
@@ -63,11 +64,8 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
+  const { i18n } = useServices();
 
-  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
   const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);

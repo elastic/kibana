@@ -5,22 +5,17 @@
  */
 
 import React, { Fragment } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { HDFSRepository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
+import { useServices } from '../../../../../app_context';
 
 interface Props {
   repository: HDFSRepository;
 }
 
 export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const { settings } = repository;
   const {
     uri,

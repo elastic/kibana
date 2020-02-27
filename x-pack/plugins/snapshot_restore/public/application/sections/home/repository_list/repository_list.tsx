@@ -5,13 +5,14 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
-import { useAppDependencies } from '../../../index';
+import { useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
@@ -29,12 +30,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   },
   history,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     error,
     isLoading,

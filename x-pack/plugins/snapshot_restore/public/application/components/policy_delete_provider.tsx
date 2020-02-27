@@ -5,8 +5,10 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { useAppDependencies } from '../index';
+
+import { useServices, useToastNotifications } from '../app_context';
 import { deletePolicies } from '../services/http';
 
 interface Props {
@@ -18,13 +20,9 @@ export type DeletePolicy = (names: string[], onSuccess?: OnSuccessCallback) => v
 type OnSuccessCallback = (policiesDeleted: string[]) => void;
 
 export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
-  const {
-    core: {
-      i18n,
-      notification: { toastNotifications },
-    },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
+  const toastNotifications = useToastNotifications();
+
   const [policyNames, setPolicyNames] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);

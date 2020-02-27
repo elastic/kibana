@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-
-import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Repository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
-
 import 'brace/theme/textmate';
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import { Repository } from '../../../../../../../common/types';
 
 interface Props {
   repository: Repository;
@@ -19,12 +18,6 @@ interface Props {
 export const DefaultDetails: React.FunctionComponent<Props> = ({
   repository: { name, settings },
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   return (
     <Fragment>
       <EuiTitle size="s">

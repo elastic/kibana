@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -21,7 +22,8 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { useAppDependencies } from '../index';
+
+import { useServices, useToastNotifications } from '../app_context';
 import { documentationLinksService } from '../services/documentation';
 import { CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
@@ -41,13 +43,8 @@ type OnSuccessCallback = () => void;
 export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props> = ({
   children,
 }) => {
-  const {
-    core: {
-      i18n,
-      notification: { toastNotifications },
-    },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
+  const { i18n } = useServices();
+  const toastNotifications = useToastNotifications();
 
   const [retentionSchedule, setRetentionSchedule] = useState<string>(DEFAULT_RETENTION_SCHEDULE);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
@@ -19,6 +20,7 @@ export interface AppDependencies {
   };
   services: {
     httpService: HttpService;
+    i18n: typeof i18n;
   };
   config: {
     slmUiEnabled: boolean;
@@ -50,3 +52,12 @@ export const useServices = () => useAppContext().services;
 export const useCore = () => useAppContext().core;
 
 export const useConfig = () => useAppContext().config;
+
+export const useToastNotifications = () => {
+  const {
+    core: {
+      notifications: { toasts: toastNotifications },
+    },
+  } = useAppContext();
+  return toastNotifications;
+};

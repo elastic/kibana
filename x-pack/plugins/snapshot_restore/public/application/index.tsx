@@ -21,6 +21,10 @@ const AppWithRouter = () => (
 );
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
+  const {
+    i18n: { Context: I18nContext },
+  } = dependencies.core;
+
   render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter />

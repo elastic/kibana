@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiEmptyPrompt,
   EuiPopover,
@@ -20,7 +21,6 @@ import {
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
-import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToSnapshots } from '../../../services/navigation';
@@ -40,12 +40,6 @@ const INTERVAL_OPTIONS: number[] = [
   FIVE_MINUTES_MS,
 ];
 export const RestoreList: React.FunctionComponent = () => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   // State for tracking interval picker
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);

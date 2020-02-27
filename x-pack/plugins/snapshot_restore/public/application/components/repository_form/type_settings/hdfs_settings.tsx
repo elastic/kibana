@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCode,
   EuiCodeEditor,
@@ -15,8 +16,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { textService } from '../../../services/text';
 
@@ -34,11 +35,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
   updateRepositorySettings,
   settingErrors,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
   const {
     settings: {
       delegateType,
