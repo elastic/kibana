@@ -556,8 +556,9 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield:
-      indexPatternsUtils.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield: indexPatternsUtils.isDefault($scope.indexPattern)
+      ? $scope.indexPattern.timeFieldName
+      : undefined,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };

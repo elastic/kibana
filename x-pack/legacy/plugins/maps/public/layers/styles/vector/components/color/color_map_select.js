@@ -105,6 +105,7 @@ export class ColorMapSelect extends Component {
           onChange={this._onColorMapSelect}
           valueOfSelected={valueOfSelected}
           hasDividers={true}
+          compressed
         />
         {this._renderColorStopsInput()}
       </Fragment>
