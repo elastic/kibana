@@ -109,6 +109,15 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   authRequired?: boolean;
 
   /**
+   * Defines xsrf protection for a route:
+   * - true. Requires an incoming request to contain `kbn-xsrf` header.
+   * - false. Disables xsrf protection.
+   *
+   * Set to true by default
+   */
+  xsrfRequired?: boolean;
+
+  /**
    * Additional metadata tag strings to attach to the route.
    */
   tags?: readonly string[];

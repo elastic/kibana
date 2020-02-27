@@ -27,7 +27,7 @@ import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_p
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 
-import { IRouter } from './router';
+import { IRouter, KibanaRouteState } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -148,8 +148,10 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {} } = route.options;
+        const { authRequired = true, tags, body = {}, xsrfRequired = true } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
+        const kibanaRouteState: KibanaRouteState = { xsrfRequired };
+
         this.server.route({
           handler: route.handler,
           method: route.method,
@@ -157,6 +159,7 @@ export class HttpServer {
           options: {
             // Enforcing the comparison with true because plugins could overwrite the auth strategy by doing `options: { authRequired: authStrategy as any }`
             auth: authRequired === true ? undefined : false,
+            app: kibanaRouteState,
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default

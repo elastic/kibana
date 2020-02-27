@@ -24,6 +24,7 @@ export {
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
+  KibanaRouteState,
   isRealRequest,
   LegacyRequest,
   ensureRawRequest,

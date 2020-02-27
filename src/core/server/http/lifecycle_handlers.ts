@@ -31,7 +31,11 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   const { whitelist, disableProtection } = config.xsrf;
 
   return (request, response, toolkit) => {
-    if (disableProtection || whitelist.includes(request.route.path)) {
+    if (
+      disableProtection ||
+      whitelist.includes(request.route.path) ||
+      request.route.options.xsrfRequired === false
+    ) {
       return toolkit.next();
     }
 
