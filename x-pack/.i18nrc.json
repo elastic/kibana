@@ -36,7 +36,7 @@
     "xpack.security": ["legacy/plugins/security", "plugins/security"],
     "xpack.server": "legacy/server",
     "xpack.siem": "legacy/plugins/siem",
-    "xpack.snapshotRestore": "legacy/plugins/snapshot_restore",
+    "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": ["legacy/plugins/spaces", "plugins/spaces"],
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.transform": ["legacy/plugins/transform", "plugins/transform"],
