@@ -25,12 +25,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  // const security = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
+      await security.testUser.setRoles(['kibana_user', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -108,13 +109,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
-        // await security.testUser.setRoles(['kibana_user', 'kibana_sample_admin']);
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await security.testUser.setRoles(['kibana_user', 'kibana_sample_admin']);
       });
       after(async () => {
+        await security.testUser.restoreDefaults();
         await esArchiver.unload('kibana_sample_data_flights');
       });
 
