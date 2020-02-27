@@ -71,12 +71,12 @@ export default function({ getService }: FtrProviderContext) {
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            policy_id: 'policy1',
+            config_id: 'policy1',
           })
           .expect(200);
 
         expect(apiResponse.success).to.eql(true);
-        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
+        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'config_id');
       });
     });
   });

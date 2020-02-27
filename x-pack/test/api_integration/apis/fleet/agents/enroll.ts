@@ -104,7 +104,7 @@ export default function(providerContext: FtrProviderContext) {
         })
         .expect(200);
       expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys('id', 'active', 'access_api_key', 'type', 'policy_id');
+      expect(apiResponse.item).to.have.keys('id', 'active', 'access_api_key', 'type', 'config_id');
     });
   });
 }
