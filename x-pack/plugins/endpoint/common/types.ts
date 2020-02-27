@@ -96,6 +96,38 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
+export interface OSFields {
+  full: string;
+  name: string;
+  version: string;
+  variant: string;
+}
+
+export interface HostFields {
+  id: string;
+  hostname: string;
+  ip: string[];
+  mac: string[];
+  os: OSFields;
+}
+
+export interface HashFields {
+  md5: string;
+  sha1: string;
+  sha256: string;
+  imphash?: string;
+}
+
+export interface MalwareClassificationFields {
+  score: number;
+}
+
+export interface PrivilegesFields {
+  description: string;
+  name: string;
+  enabled: boolean;
+}
+
 /**
  * Describes an Alert Event.
  * Should be in line with ECS schema.
@@ -109,23 +141,42 @@ export type AlertEvent = Immutable<{
   event: {
     id: string;
     action: string;
+    category: string;
+    kind: string;
+  };
+  process: {
+    pid: number;
+    ppid: number;
+    entity_id: string;
+    parent: {
+      entity_id: string;
+    };
+    name: string;
+    hash: HashFields;
+    executable: string;
+    malware_classification: MalwareClassificationFields;
+    token: {
+      domain: string;
+      user: string;
+      sid: string;
+      integrity_level: number;
+      privileges: PrivilegesFields[];
+    };
   };
   file_classification: {
-    malware_classification: {
-      score: number;
-    };
+    malware_classification: MalwareClassificationFields;
+    signature_signer: string;
   };
-  process?: {
-    unique_pid: number;
-    pid: number;
+  file: {
+    owner: string;
+    path: string;
+    accessed: string;
+    mtime: string;
+    created: string;
+    size: number;
+    hash: HashFields;
   };
-  host: {
-    hostname: string;
-    ip: string;
-    os: {
-      name: string;
-    };
-  };
+  host: HostFields;
   thread: {};
   endpoint?: {};
   endgame?: {};
@@ -161,18 +212,7 @@ export interface EndpointMetadata {
     id: string;
     name: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-      variant: string;
-    };
-  };
+  host: HostFields;
 }
 
 /**

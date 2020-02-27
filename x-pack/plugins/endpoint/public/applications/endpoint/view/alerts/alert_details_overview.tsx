@@ -14,6 +14,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { FormattedDate } from 'react-intl';
+import { i18n } from '@kbn/i18n';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../../store/alerts/selectors';
 
@@ -23,6 +24,7 @@ export const AlertDetailsOverview = memo(() => {
     return null;
   }
 
+  // TODO decide which version to keep
   const AlertDetailsDate = useMemo(() => {
     const date = new Date(alertDetailsData['@timestamp']);
     return (
@@ -38,15 +40,39 @@ export const AlertDetailsOverview = memo(() => {
     );
   }, [alertDetailsData]);
 
+  // TODO fix this style
+  const TokenPrivileges = useMemo(() => {
+    const privileges: Array<{ title: string; description: string }> = [];
+    alertDetailsData.process.token.privileges.map(({ name, description }) => {
+      privileges.push({ title: name, description });
+    });
+    return (
+      <>
+        <EuiAccordion id="accordion4" buttonContent="Privileges">
+          <EuiDescriptionList type="column" listItems={privileges} style={{ maxWidth: '400px' }} />
+        </EuiAccordion>
+      </>
+    );
+  }, [alertDetailsData.process.token.privileges]);
+
+  const dateFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
   const alertDetailsColumns = useMemo(() => {
     return [
       {
         title: 'Alert Type',
-        description: 'TODO',
+        description: alertDetailsData.event.category,
       },
       {
         title: 'Event Type',
-        description: alertDetailsData.event.action,
+        description: alertDetailsData.event.kind,
       },
       {
         title: 'Status',
@@ -58,7 +84,7 @@ export const AlertDetailsOverview = memo(() => {
       },
       {
         title: 'Date Created',
-        description: AlertDetailsDate,
+        description: dateFormatter.format(new Date(alertDetailsData['@timestamp'])),
       },
       {
         title: 'MalwareScore',
@@ -77,7 +103,7 @@ export const AlertDetailsOverview = memo(() => {
         description: 'TODO',
       },
     ];
-  }, [AlertDetailsDate, alertDetailsData]);
+  }, [alertDetailsData, dateFormatter]);
 
   const hostDetailsColumns = useMemo(() => {
     return [
@@ -108,18 +134,18 @@ export const AlertDetailsOverview = memo(() => {
     return [
       {
         title: 'MD5',
-        description: 'TODO',
+        description: alertDetailsData.file.hash.md5,
       },
       {
         title: 'SHA1',
-        description: 'TODO',
+        description: alertDetailsData.file.hash.sha1,
       },
       {
         title: 'SHA256',
-        description: 'TODO',
+        description: alertDetailsData.file.hash.sha256,
       },
     ];
-  }, []);
+  }, [alertDetailsData]);
 
   const fileDetailsColumns = useMemo(() => {
     return [
@@ -129,68 +155,68 @@ export const AlertDetailsOverview = memo(() => {
       },
       {
         title: 'File Path',
-        description: 'TODO',
+        description: alertDetailsData.file.path,
       },
       {
         title: 'File Size',
-        description: 'TODO',
+        description: alertDetailsData.file.size,
       },
       {
         title: 'File Created',
-        description: 'TODO',
+        description: dateFormatter.format(new Date(alertDetailsData.file.created)),
       },
       {
         title: 'File Modified',
-        description: 'TODO',
+        description: dateFormatter.format(new Date(alertDetailsData.file.mtime)),
       },
       {
         title: 'File Accessed',
-        description: 'TODO',
+        description: dateFormatter.format(new Date(alertDetailsData.file.accessed)),
       },
       {
         title: 'Signer',
-        description: 'TODO',
+        description: alertDetailsData.file_classification.signature_signer,
       },
       {
         title: 'Owner',
-        description: 'TODO',
+        description: alertDetailsData.file.owner,
       },
     ];
-  }, []);
+  }, [alertDetailsData, dateFormatter]);
 
   const sourceProcessDetailsColumns = useMemo(() => {
     return [
       {
         title: 'Process ID',
-        description: 'TODO',
+        description: alertDetailsData.process.pid, // TODO: Change me
       },
       {
         title: 'Process Name',
-        description: 'TODO',
+        description: alertDetailsData.process.name,
       },
       {
         title: 'Process Path',
-        description: 'TODO',
+        description: alertDetailsData.process.executable,
       },
       {
         title: 'MD5',
-        description: 'TODO',
+        description: alertDetailsData.process.hash.md5,
       },
       {
         title: 'SHA1',
-        description: 'TODO',
+        description: alertDetailsData.process.hash.sha1,
       },
       {
         title: 'SHA256',
-        description: 'TODO',
+        description: alertDetailsData.process.hash.sha256,
       },
       {
         title: 'MalwareScore',
-        description: 'TODO',
+        description: alertDetailsData.process.malware_classification.score,
       },
       {
         title: 'Parent Process ID',
-        description: 'TODO',
+        description: alertDetailsData.process.ppid, // TODO: Change me
       },
       {
         title: 'Signer',
@@ -198,31 +224,35 @@ export const AlertDetailsOverview = memo(() => {
       },
       {
         title: 'Username',
-        description: 'TODO',
+        description: alertDetailsData.process.token.user, // TODO: Not sure about this
       },
       {
         title: 'Domain',
-        description: 'TODO',
+        description: alertDetailsData.process.token.domain,
       },
     ];
-  }, []);
+  }, [alertDetailsData]);
 
   const sourceProcessTokenDetailsColumns = useMemo(() => {
     return [
       {
         title: 'SID',
-        description: 'TODO',
+        description: alertDetailsData.process.token.sid,
       },
       {
         title: 'Integrity Level',
-        description: 'TODO',
+        description: alertDetailsData.process.token.integrity_level,
       },
       {
         title: 'Privileges',
-        description: 'TODO',
+        description: TokenPrivileges,
       },
     ];
-  }, []);
+  }, [
+    TokenPrivileges,
+    alertDetailsData.process.token.integrity_level,
+    alertDetailsData.process.token.sid,
+  ]);
 
   return (
     <>
