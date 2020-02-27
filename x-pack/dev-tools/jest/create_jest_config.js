@@ -41,7 +41,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `<rootDir>/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
     ],
-    testMatch: ['**/*.test.{js,ts,tsx}'],
+    testMatch: ['**/remote_clusters_edit.test.{js,ts,tsx}'],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',
