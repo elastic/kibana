@@ -13,6 +13,8 @@ import {
   NotificationsStart,
 } from '../../../src/core/public';
 
+export { ToastsSetup, HttpSetup } from 'src/core/public';
+
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 
@@ -57,3 +59,13 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
