@@ -17,105 +17,20 @@
  * under the License.
  */
 
-import { parsePath } from './parse_path';
+import { parseFilePath, parseDirPath } from './parse_path';
 
-it('figures out root and directories from all known formats', () => {
-  expect(parsePath('c:\\foo\\bar\\baz.json')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz.json",
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('c:\\foo\\bar\\baz')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz",
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('c:\\foo\\bar\\baz\\')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz",
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('c:\\foo')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [],
-      "filename": "foo",
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('c:\\')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [],
-      "filename": undefined,
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('c:/foo/bar/baz.json')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz.json",
-      "root": "c:",
-    }
-  `);
-  expect(parsePath('/foo/bar/baz.json')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz.json",
-      "root": "/",
-    }
-  `);
-  expect(parsePath('/foo/bar/baz')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz",
-      "root": "/",
-    }
-  `);
-  expect(parsePath('/foo')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [],
-      "filename": "foo",
-      "root": "/",
-    }
-  `);
-  expect(parsePath('/')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [],
-      "filename": undefined,
-      "root": "/",
-    }
-  `);
-  expect(parsePath('/foo/bar/baz/')).toMatchInlineSnapshot(`
-    Object {
-      "dirs": Array [
-        "foo",
-        "bar",
-      ],
-      "filename": "baz",
-      "root": "/",
-    }
-  `);
+const DIRS = ['/', '/foo/bar/baz/', 'c:\\', 'c:\\foo\\bar\\baz\\'];
+const AMBIGUOUS = ['/foo', '/foo/bar/baz', 'c:\\foo', 'c:\\foo\\bar\\baz'];
+const FILES = ['/foo/bar/baz.json', 'c:/foo/bar/baz.json', 'c:\\foo\\bar\\baz.json'];
+
+describe('parseFilePath()', () => {
+  it.each([...FILES, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseFilePath(path)).toMatchSnapshot();
+  });
+});
+
+describe('parseDirPath()', () => {
+  it.each([...DIRS, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseDirPath(path)).toMatchSnapshot();
+  });
 });

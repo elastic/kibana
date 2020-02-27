@@ -23,7 +23,16 @@ import normalizePath from 'normalize-path';
  * Parse an absolute path, supporting normalized paths from webpack,
  * into a list of directories and root
  */
-export function parsePath(path: string) {
+export function parseDirPath(path: string) {
+  const filePath = parseFilePath(path);
+  return {
+    ...filePath,
+    dirs: [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
+    filename: undefined,
+  };
+}
+
+export function parseFilePath(path: string) {
   const normalized = normalizePath(path);
   const [root, ...others] = normalized.split('/');
   return {

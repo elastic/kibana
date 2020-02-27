@@ -30,7 +30,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import * as SharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig } from '../common';
-import { parsePath } from './parse_path';
+import { parseDirPath } from './parse_path';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -136,7 +136,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                       }
 
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && parsePath(base).dirs.includes('legacy')) {
+                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',

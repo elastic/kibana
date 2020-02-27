@@ -30,7 +30,7 @@ import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
-import { parsePath } from './parse_path';
+import { parseFilePath } from './parse_path';
 import {
   isExternalModule,
   isNormalModule,
@@ -109,7 +109,7 @@ const observeCompiler = (
 
       for (const module of normalModules) {
         const path = getModulePath(module);
-        const parsedPath = parsePath(path);
+        const parsedPath = parseFilePath(path);
 
         if (!parsedPath.dirs.includes('node_modules')) {
           referencedFiles.add(path);
