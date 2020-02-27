@@ -18,10 +18,13 @@ import {
   EuiTitle,
   EuiBadge,
   EuiLoadingSpinner,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
-import { FormattedDate } from 'react-intl';
+import { FormattedDate, FormattedMessage } from 'react-intl';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
@@ -225,22 +228,36 @@ export const AlertIndex = memo(() => {
       <EuiPage data-test-subj="alertListPage" data-testid="alertListPage">
         <EuiPageBody>
           <EuiPageContent>
-            <EuiDataGrid
-              aria-label="Alert List"
-              rowCount={total}
-              columns={columns}
-              columnVisibility={useMemo(
-                () => ({
-                  visibleColumns,
-                  setVisibleColumns,
-                }),
-                [setVisibleColumns, visibleColumns]
-              )}
-              renderCellValue={renderCellValue}
-              pagination={pagination}
-              data-test-subj="alertListGrid"
-              data-testid="alertListGrid"
-            />
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.endpoint.alertList.viewTitle"
+                      defaultMessage="Alerts"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+              <EuiDataGrid
+                aria-label="Alert List"
+                rowCount={total}
+                columns={columns}
+                columnVisibility={useMemo(
+                  () => ({
+                    visibleColumns,
+                    setVisibleColumns,
+                  }),
+                  [setVisibleColumns, visibleColumns]
+                )}
+                renderCellValue={renderCellValue}
+                pagination={pagination}
+                data-test-subj="alertListGrid"
+                data-testid="alertListGrid"
+              />
+            </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

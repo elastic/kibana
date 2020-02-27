@@ -26,6 +26,7 @@ export const mockAlertResultList: (options?: {
   const alerts = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     alerts.push({
+      // TODO: Update this data to the new type
       '@timestamp': 1542341895000,
       id: 'xDUYMHABAJk0XnHd8rrd',
       agent: {

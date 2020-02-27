@@ -67,39 +67,57 @@ export const AlertDetailsOverview = memo(() => {
   const alertDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'Alert Type',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.alertType', {
+          defaultMessage: 'Alert Type',
+        }),
         description: alertDetailsData.event.category,
       },
       {
-        title: 'Event Type',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.eventType', {
+          defaultMessage: 'Event Type',
+        }),
         description: alertDetailsData.event.kind,
       },
       {
-        title: 'Status',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.status', {
+          defaultMessage: 'Status',
+        }),
         description: 'TODO',
       },
       {
-        title: 'Severity',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.severity', {
+          defaultMessage: 'Severity',
+        }),
         description: 'TODO',
       },
       {
-        title: 'Date Created',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.dateCreated', {
+          defaultMessage: 'Date Created',
+        }),
         description: dateFormatter.format(new Date(alertDetailsData['@timestamp'])),
       },
       {
-        title: 'MalwareScore',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.malwareScore', {
+          defaultMessage: 'MalwareScore',
+        }),
         description: alertDetailsData.file_classification.malware_classification.score,
       },
       {
-        title: 'File Name',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileName', {
+          defaultMessage: 'File Name',
+        }),
         description: 'TODO',
       },
       {
-        title: 'File Status',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileStatus', {
+          defaultMessage: 'File Status',
+        }),
         description: 'TODO',
       },
       {
-        title: 'File Type',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileType', {
+          defaultMessage: 'File Type',
+        }),
         description: 'TODO',
       },
     ];
@@ -108,23 +126,33 @@ export const AlertDetailsOverview = memo(() => {
   const hostDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'Host Name',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostName', {
+          defaultMessage: 'Host Name',
+        }),
         description: alertDetailsData.host.hostname,
       },
       {
-        title: 'Host IP',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIP', {
+          defaultMessage: 'Host IP',
+        }),
         description: alertDetailsData.host.ip,
       },
       {
-        title: 'Status',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.status', {
+          defaultMessage: 'Status',
+        }),
         description: 'TODO',
       },
       {
-        title: 'OS',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.os', {
+          defaultMessage: 'OS',
+        }),
         description: alertDetailsData.host.os.name,
       },
       {
-        title: 'Alert Count',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.alertCount', {
+          defaultMessage: 'Alert Count',
+        }),
         description: 'TODO',
       },
     ];
@@ -133,15 +161,21 @@ export const AlertDetailsOverview = memo(() => {
   const hashDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'MD5',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.md5', {
+          defaultMessage: 'MD5',
+        }),
         description: alertDetailsData.file.hash.md5,
       },
       {
-        title: 'SHA1',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.sha1', {
+          defaultMessage: 'SHA1',
+        }),
         description: alertDetailsData.file.hash.sha1,
       },
       {
-        title: 'SHA256',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.sha256', {
+          defaultMessage: 'SHA256',
+        }),
         description: alertDetailsData.file.hash.sha256,
       },
     ];
@@ -150,35 +184,51 @@ export const AlertDetailsOverview = memo(() => {
   const fileDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'File Name',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileName', {
+          defaultMessage: 'File Name',
+        }),
         description: 'TODO',
       },
       {
-        title: 'File Path',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.filePath', {
+          defaultMessage: 'File Path',
+        }),
         description: alertDetailsData.file.path,
       },
       {
-        title: 'File Size',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileSize', {
+          defaultMessage: 'File Size',
+        }),
         description: alertDetailsData.file.size,
       },
       {
-        title: 'File Created',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileCreated', {
+          defaultMessage: 'File Created',
+        }),
         description: dateFormatter.format(new Date(alertDetailsData.file.created)),
       },
       {
-        title: 'File Modified',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileModified', {
+          defaultMessage: 'File Modified',
+        }),
         description: dateFormatter.format(new Date(alertDetailsData.file.mtime)),
       },
       {
-        title: 'File Accessed',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileAccessed', {
+          defaultMessage: 'File Accessed',
+        }),
         description: dateFormatter.format(new Date(alertDetailsData.file.accessed)),
       },
       {
-        title: 'Signer',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.signer', {
+          defaultMessage: 'Signer',
+        }),
         description: alertDetailsData.file_classification.signature_signer,
       },
       {
-        title: 'Owner',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.owner', {
+          defaultMessage: 'Owner',
+        }),
         description: alertDetailsData.file.owner,
       },
     ];
@@ -187,47 +237,69 @@ export const AlertDetailsOverview = memo(() => {
   const sourceProcessDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'Process ID',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.processID', {
+          defaultMessage: 'Process ID',
+        }),
         description: alertDetailsData.process.pid, // TODO: Change me
       },
       {
-        title: 'Process Name',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.processName', {
+          defaultMessage: 'Process Name',
+        }),
         description: alertDetailsData.process.name,
       },
       {
-        title: 'Process Path',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.processPath', {
+          defaultMessage: 'Process Path',
+        }),
         description: alertDetailsData.process.executable,
       },
       {
-        title: 'MD5',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.md5', {
+          defaultMessage: 'MD5',
+        }),
         description: alertDetailsData.process.hash.md5,
       },
       {
-        title: 'SHA1',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.sha1', {
+          defaultMessage: 'SHA1',
+        }),
         description: alertDetailsData.process.hash.sha1,
       },
       {
-        title: 'SHA256',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.sha256', {
+          defaultMessage: 'SHA256',
+        }),
         description: alertDetailsData.process.hash.sha256,
       },
       {
-        title: 'MalwareScore',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.malwareScore', {
+          defaultMessage: 'MalwareScore',
+        }),
         description: alertDetailsData.process.malware_classification.score,
       },
       {
-        title: 'Parent Process ID',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.parentProcessID', {
+          defaultMessage: 'Parent Process ID',
+        }),
         description: alertDetailsData.process.ppid, // TODO: Change me
       },
       {
-        title: 'Signer',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.signer', {
+          defaultMessage: 'signer',
+        }),
         description: 'TODO',
       },
       {
-        title: 'Username',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.username', {
+          defaultMessage: 'Username',
+        }),
         description: alertDetailsData.process.token.user, // TODO: Not sure about this
       },
       {
-        title: 'Domain',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.domain', {
+          defaultMessage: 'Domain',
+        }),
         description: alertDetailsData.process.token.domain,
       },
     ];
@@ -236,15 +308,21 @@ export const AlertDetailsOverview = memo(() => {
   const sourceProcessTokenDetailsColumns = useMemo(() => {
     return [
       {
-        title: 'SID',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.sid', {
+          defaultMessage: 'SID',
+        }),
         description: alertDetailsData.process.token.sid,
       },
       {
-        title: 'Integrity Level',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.integrityLevel', {
+          defaultMessage: 'Integrity Level',
+        }),
         description: alertDetailsData.process.token.integrity_level,
       },
       {
-        title: 'Privileges',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.privileges', {
+          defaultMessage: 'Privileges',
+        }),
         description: TokenPrivileges,
       },
     ];
@@ -278,7 +356,12 @@ export const AlertDetailsOverview = memo(() => {
       {/* Start of Alert Details overview component TODO: delete this comment eventually */}
       <EuiAccordion
         id="alertDetailsAlertAccordion"
-        buttonContent="Alert"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.alert',
+          {
+            defaultMessage: 'Alert',
+          }
+        )}
         paddingSize="l"
         initialIsOpen={true}
       >
@@ -287,19 +370,46 @@ export const AlertDetailsOverview = memo(() => {
 
       <EuiSpacer />
 
-      <EuiAccordion id="alertDetailsHostAccordion" buttonContent="Host" paddingSize="l">
+      <EuiAccordion
+        id="alertDetailsHostAccordion"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.host',
+          {
+            defaultMessage: 'Host',
+          }
+        )}
+        paddingSize="l"
+      >
         <EuiDescriptionList type="column" listItems={hostDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
 
-      <EuiAccordion id="alertDetailsHashAccordion" buttonContent="Hash" paddingSize="l">
+      <EuiAccordion
+        id="alertDetailsHashAccordion"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.hash',
+          {
+            defaultMessage: 'Hash',
+          }
+        )}
+        paddingSize="l"
+      >
         <EuiDescriptionList type="column" listItems={hashDetailsColumns} />
       </EuiAccordion>
 
       <EuiSpacer />
 
-      <EuiAccordion id="alertDetailsFileAccordion" buttonContent="File" paddingSize="l">
+      <EuiAccordion
+        id="alertDetailsFileAccordion"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.file',
+          {
+            defaultMessage: 'File',
+          }
+        )}
+        paddingSize="l"
+      >
         <EuiDescriptionList type="column" listItems={fileDetailsColumns} />
       </EuiAccordion>
 
@@ -307,7 +417,12 @@ export const AlertDetailsOverview = memo(() => {
 
       <EuiAccordion
         id="alertDetailsSourceProcessAccordion"
-        buttonContent="Source Process"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcess',
+          {
+            defaultMessage: 'Source Process',
+          }
+        )}
         paddingSize="l"
       >
         <EuiDescriptionList type="column" listItems={sourceProcessDetailsColumns} />
@@ -317,7 +432,12 @@ export const AlertDetailsOverview = memo(() => {
 
       <EuiAccordion
         id="alertDetailsSourceProcessTokenAccordion"
-        buttonContent="Source Process Token"
+        buttonContent={i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcessToken',
+          {
+            defaultMessage: 'Source Process Token',
+          }
+        )}
         paddingSize="l"
       >
         <EuiDescriptionList type="column" listItems={sourceProcessTokenDetailsColumns} />
