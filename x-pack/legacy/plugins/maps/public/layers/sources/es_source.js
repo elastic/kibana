@@ -14,11 +14,10 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
-import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, AGG_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
@@ -151,27 +150,18 @@ export class AbstractESSource extends AbstractVectorSource {
       { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
       0
     );
-    const geoField = await this._getGeoField();
-    const indexPattern = await this.getIndexPattern();
-
-    const geoBoundsAgg = [
-      {
-        type: 'geo_bounds',
-        enabled: true,
-        params: {
-          field: geoField,
+    searchSource.setField('aggs', {
+      fitToBounds: {
+        geo_bounds: {
+          field: this._descriptor.geoField,
         },
-        schema: 'metric',
       },
-    ];
-
-    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
-    searchSource.setField('aggs', aggConfigs.toDsl());
+    });
 
     let esBounds;
     try {
       const esResp = await searchSource.fetch();
-      esBounds = _.get(esResp, 'aggregations.1.bounds');
+      esBounds = _.get(esResp, 'aggregations.fitToBounds.bounds');
     } catch (error) {
       esBounds = {
         top_left: {
@@ -270,7 +260,7 @@ export class AbstractESSource extends AbstractVectorSource {
     // Do not use field formatters for counting metrics
     if (
       metricField &&
-      (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)
+      (metricField.type === AGG_TYPE.COUNT || metricField.type === AGG_TYPE.UNIQUE_COUNT)
     ) {
       return null;
     }
@@ -347,13 +337,16 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   getValueSuggestions = async (fieldName, query) => {
-    if (!fieldName) {
+    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
+    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
+    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
+    if (!realFieldName) {
       return [];
     }
 
     try {
       const indexPattern = await this.getIndexPattern();
-      const field = indexPattern.fields.getByName(fieldName);
+      const field = indexPattern.fields.getByName(realFieldName);
       return await autocompleteService.getValueSuggestions({
         indexPattern,
         field,

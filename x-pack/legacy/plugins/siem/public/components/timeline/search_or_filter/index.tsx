@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
 
 import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
@@ -152,15 +153,15 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
       prevProps.refreshInterval === nextProps.refreshInterval &&
       prevProps.timelineId === nextProps.timelineId &&
-      isEqual(prevProps.browserFields, nextProps.browserFields) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.filterQuery, nextProps.filterQuery) &&
-      isEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
-      isEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-      isEqual(prevProps.kqlMode, nextProps.kqlMode) &&
-      isEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
+      deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
+      deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
+      deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+      deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
+      deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
+      deepEqual(prevProps.timelineId, nextProps.timelineId)
     );
   }
 );
@@ -227,7 +228,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
