@@ -22,12 +22,13 @@ import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
 import { searchStartMock } from '../../mocks';
 import { setSearchServiceShim } from '../../../services';
 import {
-  setUiSettings,
-  setQueryService,
-  setIndexPatterns,
   setFieldFormats,
-  setSearchService,
+  setIndexPatterns,
+  setNotifications,
   setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../plugins/data/public/services';
 
@@ -43,10 +44,11 @@ export function mockDataServices() {
   const searchShim = searchStartMock();
 
   setSearchServiceShim(searchShim);
-  setUiSettings(core.uiSettings);
-  setQueryService(data.query);
-  setIndexPatterns(data.indexPatterns);
   setFieldFormats(data.fieldFormats);
-  setSearchService(data.search);
+  setIndexPatterns(data.indexPatterns);
+  setNotifications(core.notifications);
   setOverlays(core.overlays);
+  setQueryService(data.query);
+  setSearchService(data.search);
+  setUiSettings(core.uiSettings);
 }
