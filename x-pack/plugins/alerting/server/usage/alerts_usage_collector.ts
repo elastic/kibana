@@ -29,6 +29,22 @@ export function createAlertsUsageCollector(
         return {
           count_total: 0,
           count_active_total: 0,
+          count_disabled_total: 0,
+          throttle_time: {
+            min: 0,
+            avg: 0,
+            max: 0,
+          },
+          schedule_time: {
+            min: 0,
+            avg: 0,
+            max: 0,
+          },
+          connectors_per_alert: {
+            min: 0,
+            avg: 0,
+            max: 0,
+          },
           executions_total: 0,
           count_active_by_type: {},
           count_by_type: {},

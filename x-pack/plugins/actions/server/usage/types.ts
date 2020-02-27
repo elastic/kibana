@@ -12,11 +12,3 @@ export interface ActionsUsage {
   count_active_by_type: Record<string, number>;
   executions_by_type: Record<string, number>;
 }
-
-export interface ActionsTelemetry {
-  excutions_count_by_type: Record<string, number>;
-}
-
-export interface ActionsTelemetrySavedObject {
-  attributes: ActionsTelemetry;
-}

@@ -14,8 +14,7 @@ import {
 import { AlertTypeRegistry } from '../alert_type_registry';
 
 import {
-  getTotalCount,
-  getInUseTotalCount,
+  getTotalCountAggregations,
   getTotalInUseCountByAlertTypes,
   getExecutionsCount,
   getTotalCountByAlertTypes,
@@ -94,8 +93,7 @@ export function telemetryTaskRunner(
     return {
       async run() {
         return Promise.all([
-          getTotalCount(savedObjectsRepository),
-          getInUseTotalCount(savedObjectsRepository),
+          getTotalCountAggregations(savedObjectsRepository),
           getExecutionsCount(taskManager),
           getTotalInUseCountByAlertTypes(savedObjectsRepository, alertTypeRegistry),
           getTotalCountByAlertTypes(savedObjectsRepository, alertTypeRegistry),
@@ -103,8 +101,7 @@ export function telemetryTaskRunner(
         ])
           .then(
             ([
-              countTotal,
-              countActiveTotal,
+              totalCountAggregations,
               executionsTotal,
               countActiveByType,
               countByType,
@@ -113,8 +110,7 @@ export function telemetryTaskRunner(
               return {
                 state: {
                   runs: (state.runs || 0) + 1,
-                  count_total: countTotal,
-                  count_active_total: countActiveTotal,
+                  ...totalCountAggregations,
                   executions_total: executionsTotal,
                   count_active_by_type: countActiveByType,
                   count_by_type: countByType,

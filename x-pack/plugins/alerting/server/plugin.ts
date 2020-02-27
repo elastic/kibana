@@ -166,17 +166,6 @@ export class AlertingPlugin {
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
 
-    this.alertTypeRegistry.register({
-      id: 'test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroupId: 'default',
-      name: 'Test',
-      async executor(): Promise<any> {
-        return {
-          expiredCheckDateMS: 'actions',
-        };
-      },
-    });
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     };
