@@ -14,8 +14,4 @@ export const config = {
   schema: configSchema,
 };
 
-export const MAX_INTERVALS = 200;
-export const MAX_GROUPS = 1000;
-export const DEFAULT_GROUPS = 100;
-
 export { IService } from './types';

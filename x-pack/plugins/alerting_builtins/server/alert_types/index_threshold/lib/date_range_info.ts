@@ -6,7 +6,7 @@
 
 import { times } from 'lodash';
 import { parseDuration } from '../../../../../alerting/server';
-import { MAX_INTERVALS } from '../../../index';
+import { MAX_INTERVALS } from '../index';
 
 // dates as numbers are epoch millis
 // dates as strings are ISO

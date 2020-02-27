@@ -9,6 +9,11 @@ import { timeSeriesQuery } from './lib/time_series_query';
 import { getAlertType } from './alert_type';
 import { createTimeSeriesQueryRoute } from './routes';
 
+// future enhancement: make these configurable?
+export const MAX_INTERVALS = 200;
+export const MAX_GROUPS = 1000;
+export const DEFAULT_GROUPS = 100;
+
 export function getService() {
   return {
     timeSeriesQuery,

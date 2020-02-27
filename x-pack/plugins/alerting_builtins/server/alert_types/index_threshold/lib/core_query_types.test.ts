@@ -8,7 +8,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 
-import { MAX_GROUPS } from '../../../index';
+import { MAX_GROUPS } from '../index';
 
 const DefaultParams: Record<string, any> = {
   index: 'index-name',

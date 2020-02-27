@@ -8,7 +8,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { MAX_GROUPS } from '../../../index';
+import { MAX_GROUPS } from '../index';
 import { parseDuration } from '../../../../../alerting/server';
 
 export const CoreQueryParamsSchemaProperties = {

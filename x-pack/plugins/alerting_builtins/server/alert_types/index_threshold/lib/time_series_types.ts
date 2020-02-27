@@ -11,7 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import { parseDuration } from '../../../../../alerting/server';
-import { MAX_INTERVALS } from '../../../index';
+import { MAX_INTERVALS } from '../index';
 
 // The result is an object with a key for every field value aggregated
 // via the `aggField` property.  If `aggField` is not specified, the

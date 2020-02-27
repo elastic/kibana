@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_GROUPS } from '../../../index';
+import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 import { Logger, CallCluster } from '../../../types';
 
