@@ -20,7 +20,7 @@ interface Response {
 export function checkLicense(licenseCheckResult: LicenseCheckResult): Response {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Machine Learning UI
-  if (!licenseCheckResult.isAvailable) {
+  if (licenseCheckResult === undefined || !licenseCheckResult.isAvailable) {
     return {
       isAvailable: false,
       showLinks: true,

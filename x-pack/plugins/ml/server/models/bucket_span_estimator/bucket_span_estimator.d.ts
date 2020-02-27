@@ -5,7 +5,7 @@
  */
 
 import { APICaller } from 'src/core/server';
-import { BucketSpanEstimatorData } from '../../../public/application/services/ml_api_service';
+import { BucketSpanEstimatorData } from '../../../../../legacy/plugins/ml/public/application/services/ml_api_service';
 
 export function estimateBucketSpanFactory(
   callAsCurrentUser: APICaller,

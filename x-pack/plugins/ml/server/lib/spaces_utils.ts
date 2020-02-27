@@ -5,8 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { Space } from '../../../../../plugins/spaces/server';
-import { SpacesPluginSetup } from '../../../../../plugins/spaces/server';
+import { Space, SpacesPluginSetup } from '../../../spaces/server';
 
 interface GetActiveSpaceResponse {
   valid: boolean;

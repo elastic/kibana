@@ -55,10 +55,9 @@ describe('ml_telemetry', () => {
   });
 
   describe('incrementFileDataVisualizerIndexCreationCount', () => {
-    let savedObjects: any;
-    let internalRepository: any;
+    let savedObjectsClient: any;
 
-    function createInternalRepositoryInstance(
+    function createSavedObjectsClientInstance(
       telemetryEnabled?: boolean,
       indexCreationCount?: number
     ) {
@@ -93,42 +92,39 @@ describe('ml_telemetry', () => {
     }
 
     function mockInit(telemetryEnabled?: boolean, indexCreationCount?: number): void {
-      internalRepository = createInternalRepositoryInstance(telemetryEnabled, indexCreationCount);
-      savedObjects = {
-        createInternalRepository: jest.fn(() => internalRepository),
-      };
+      savedObjectsClient = createSavedObjectsClientInstance(telemetryEnabled, indexCreationCount);
     }
 
     it('should not increment if telemetry status cannot be determined', async () => {
       mockInit();
-      await incrementFileDataVisualizerIndexCreationCount(savedObjects);
+      await incrementFileDataVisualizerIndexCreationCount(savedObjectsClient);
 
-      expect(internalRepository.create.mock.calls).toHaveLength(0);
+      expect(savedObjectsClient.create.mock.calls).toHaveLength(0);
     });
 
     it('should not increment if telemetry status is disabled', async () => {
       mockInit(false);
-      await incrementFileDataVisualizerIndexCreationCount(savedObjects);
+      await incrementFileDataVisualizerIndexCreationCount(savedObjectsClient);
 
-      expect(internalRepository.create.mock.calls).toHaveLength(0);
+      expect(savedObjectsClient.create.mock.calls).toHaveLength(0);
     });
 
     it('should initialize index_creation_count with 1', async () => {
       mockInit(true);
-      await incrementFileDataVisualizerIndexCreationCount(savedObjects);
+      await incrementFileDataVisualizerIndexCreationCount(savedObjectsClient);
 
-      expect(internalRepository.create.mock.calls[0][0]).toBe('ml-telemetry');
-      expect(internalRepository.create.mock.calls[0][1]).toEqual({
+      expect(savedObjectsClient.create.mock.calls[0][0]).toBe('ml-telemetry');
+      expect(savedObjectsClient.create.mock.calls[0][1]).toEqual({
         file_data_visualizer: { index_creation_count: 1 },
       });
     });
 
     it('should increment index_creation_count to 2', async () => {
       mockInit(true, 1);
-      await incrementFileDataVisualizerIndexCreationCount(savedObjects);
+      await incrementFileDataVisualizerIndexCreationCount(savedObjectsClient);
 
-      expect(internalRepository.create.mock.calls[0][0]).toBe('ml-telemetry');
-      expect(internalRepository.create.mock.calls[0][1]).toEqual({
+      expect(savedObjectsClient.create.mock.calls[0][0]).toBe('ml-telemetry');
+      expect(savedObjectsClient.create.mock.calls[0][1]).toEqual({
         file_data_visualizer: { index_creation_count: 2 },
       });
     });

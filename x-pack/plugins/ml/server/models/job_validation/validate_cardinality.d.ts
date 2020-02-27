@@ -5,7 +5,10 @@
  */
 
 import { APICaller } from 'src/core/server';
-import { Job, Datafeed } from '../../../public/application/jobs/new_job/common/job_creator/configs';
+import {
+  Job,
+  Datafeed,
+} from '../../../../../legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
 
 interface ValidateCardinalityConfig extends Job {
   datafeed_config?: Datafeed;

@@ -139,7 +139,7 @@ export class MlServerPlugin {
         isActive: license.isActive,
         // This `isAvailable` check for the ml plugin returns false for a basic license
         // ML should be available on basic with reduced functionality (only file data visualizer)
-        // TODO: This will need to be updated once cutover is complete.
+        // TODO: This will need to be updated in the second step of this cutover to NP.
         isAvailable: isEnabled,
         isEnabled,
         isSecurityDisabled: securityIsEnabled === false,

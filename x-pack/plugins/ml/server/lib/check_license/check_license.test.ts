@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { set } from 'lodash';
-import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
+import { LicenseCheckResult } from '../../types';
 import { checkLicense } from './check_license';
 
 describe('check_license', () => {
-  let mockLicenseInfo: XPackInfo;
-  beforeEach(() => (mockLicenseInfo = {} as XPackInfo));
+  let mockLicenseInfo: LicenseCheckResult;
+  beforeEach(() => (mockLicenseInfo = {} as LicenseCheckResult));
 
   describe('license information is undefined', () => {
     it('should set isAvailable to false', () => {
@@ -33,7 +33,9 @@ describe('check_license', () => {
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
+    beforeEach(() => {
+      mockLicenseInfo.isAvailable = false;
+    });
 
     it('should set isAvailable to false', () => {
       expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
@@ -54,8 +56,8 @@ describe('check_license', () => {
 
   describe('license information is available', () => {
     beforeEach(() => {
-      mockLicenseInfo.isAvailable = () => true;
-      set(mockLicenseInfo, 'license.getType', () => 'basic');
+      mockLicenseInfo.isAvailable = true;
+      mockLicenseInfo.type = 'basic';
     });
 
     describe('& ML is disabled in Elasticsearch', () => {
@@ -66,7 +68,7 @@ describe('check_license', () => {
           sinon
             .stub()
             .withArgs('ml')
-            .returns({ isEnabled: () => false })
+            .returns({ isEnabled: false })
         );
       });
 
@@ -89,21 +91,17 @@ describe('check_license', () => {
 
     describe('& ML is enabled in Elasticsearch', () => {
       beforeEach(() => {
-        set(
-          mockLicenseInfo,
-          'feature',
-          sinon
-            .stub()
-            .withArgs('ml')
-            .returns({ isEnabled: () => true })
-        );
+        mockLicenseInfo.isEnabled = true;
       });
 
       describe('& license is >= platinum', () => {
-        beforeEach(() => set(mockLicenseInfo, 'license.isOneOf', () => true));
-
+        beforeEach(() => {
+          mockLicenseInfo.type = 'platinum';
+        });
         describe('& license is active', () => {
-          beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
+          beforeEach(() => {
+            mockLicenseInfo.isActive = true;
+          });
 
           it('should set isAvailable to true', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
@@ -123,7 +121,9 @@ describe('check_license', () => {
         });
 
         describe('& license is expired', () => {
-          beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
+          beforeEach(() => {
+            mockLicenseInfo.isActive = false;
+          });
 
           it('should set isAvailable to true', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
@@ -144,10 +144,14 @@ describe('check_license', () => {
       });
 
       describe('& license is basic', () => {
-        beforeEach(() => set(mockLicenseInfo, 'license.isOneOf', () => false));
+        beforeEach(() => {
+          mockLicenseInfo.type = 'basic';
+        });
 
         describe('& license is active', () => {
-          beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
+          beforeEach(() => {
+            mockLicenseInfo.isActive = true;
+          });
 
           it('should set isAvailable to true', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
