@@ -31,6 +31,8 @@
     "DeleteAnomalyDetectorsJob",
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
+    "GetRecords",
+    "GetBuckets",
     "GetOverallBuckets",
     "GetCategories",
     "FileDataVisualizer",
@@ -105,6 +107,9 @@
     "DeleteDatafeed",
     "StartDatafeed",
     "StopDatafeed",
-    "PreviewDatafeed"
+    "PreviewDatafeed",
+    "FieldsService",
+    "GetCardinalityOfFields",
+    "GetTimeFieldRange"
   ]
 }

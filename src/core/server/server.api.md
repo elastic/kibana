@@ -930,6 +930,9 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
+export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'>;
+
+// @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public (undocumented)
@@ -1462,7 +1465,7 @@ export interface RouteValidatorOptions {
 }
 
 // @public (undocumented)
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
@@ -1489,12 +1492,15 @@ export interface SavedObjectAttributes {
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
+// @public
+export interface SavedObjectMigrationContext {
+    log: SavedObjectsMigrationLogger;
+}
+
 // Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "SavedObjectMigrationFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectUnsanitizedDoc"
 //
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
 
 // @public
 export interface SavedObjectMigrationMap {
@@ -1524,7 +1530,7 @@ export interface SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1546,19 +1552,19 @@ export interface SavedObjectsBulkGetObject {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T = unknown> {
     // (undocumented)
     saved_objects: Array<SavedObject<T>>;
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T = unknown> {
     // (undocumented)
     saved_objects: Array<SavedObject<T>>;
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
     type: string;
@@ -1570,7 +1576,7 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkUpdateResponse<T = unknown> {
     // (undocumented)
     saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
@@ -1579,18 +1585,18 @@ export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes 
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
-    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
-    create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
-    find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
-    get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
 // @public
@@ -1619,6 +1625,8 @@ export interface SavedObjectsClientWrapperOptions {
     client: SavedObjectsClientContract;
     // (undocumented)
     request: KibanaRequest;
+    // (undocumented)
+    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
@@ -1772,7 +1780,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
 }
 
 // @public
-export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsFindResponse<T = unknown> {
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1951,10 +1959,10 @@ export interface SavedObjectsRawDoc {
 
 // @public (undocumented)
 export class SavedObjectsRepository {
-    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
-    create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -1962,8 +1970,8 @@ export class SavedObjectsRepository {
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
-    find<T extends SavedObjectAttributes = any>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
-    get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
         id: string;
         type: string;
@@ -1972,7 +1980,7 @@ export class SavedObjectsRepository {
         version: string;
         attributes: any;
     }>;
-    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
     }
 
 // @public
@@ -2013,8 +2021,6 @@ export class SavedObjectsSchema {
 
 // @public
 export class SavedObjectsSerializer {
-    // Warning: (ae-forgotten-export) The symbol "ISavedObjectTypeRegistry" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
@@ -2026,6 +2032,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2035,6 +2042,7 @@ export interface SavedObjectsServiceStart {
     createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+    getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 // @public (undocumented)
@@ -2062,14 +2070,14 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
     // (undocumented)
     attributes: Partial<T>;
     // (undocumented)
     references: SavedObjectReference[] | undefined;
 }
 
-// @internal
+// @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
