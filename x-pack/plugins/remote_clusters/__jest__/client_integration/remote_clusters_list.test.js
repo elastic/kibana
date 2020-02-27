@@ -19,7 +19,8 @@ jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.remoteClustersList;
 
-describe('<RemoteClusterList />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/58681
+describe.skip('<RemoteClusterList />', () => {
   let server;
   let httpRequestsMockHelpers;
 
