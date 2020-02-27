@@ -23,20 +23,28 @@
   position: relative;
   flex-grow: 1;
   display: flex;
+  overflow: hidden;
 }
 
 .dscApp__sidebar {
   flex-grow: 0;
   flex-basis: auto;
   min-width: 250px;
-  padding: 0 $euiSizeS;
+  display: flex;
+  flex-direction: column;
 }
 
 .dscApp__content {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
 }
 
+.dscDiscoverGrid {
+  width: 100%;
+  max-width: 100%;
+}
 .dscHistogram {
   display: flex;
   height: $euiSize * 8;
@@ -52,13 +60,6 @@
   padding-top: $euiSizeS;
 }
 
-.dscFieldList--selected,
-.dscFieldList--unpopular,
-.dscFieldList--popular {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
-}
-
 .dscWrapper {
   padding-right: $euiSizeS;
   padding-left: 21px;
@@ -69,15 +70,16 @@
 .dscWrapper__content {
   padding-top: $euiSizeXS;
   background-color: $euiColorEmptyShade;
-
-  .kbn-table {
-    margin-bottom: 0;
-  }
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
 }
 
 .dscTimechart {
   display: block;
   position: relative;
+  flex-grow: 0;
 
   // SASSTODO: the visualizing component should have an option or a modifier
   .series > rect {
@@ -90,6 +92,7 @@
   display: flex;
   justify-content: space-between;
   padding: 0 $euiSizeS;
+  flex-grow: 0;
 }
 
 .dscResultCount__title {
@@ -124,6 +127,8 @@
 
 .dscTable {
   overflow: auto;
+  flex-grow: 1;
+  display: flex;
 
   // TODO: Delete when old Discover table is removed
   .kbnDocTable__row {
@@ -143,22 +148,24 @@
   padding: 0 !important;
 }
 
-/**
- * 1. Override sidebar-item-title styles.
- */
 .dscSidebarItem {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: 0 !important; /* 1 */
-  padding-bottom: 0 !important; /* 1 */
-  height: $euiSizeXL;
+
+  &:hover {
+    .dscSidebarItem__label {
+      text-decoration: underline;
+    }
+  }
 
   &:hover,
   &:focus {
+    background: $euiColorEmptyShade;
+    @include euiBottomShadowSmall;
+
     .dscSidebarItem__action {
-      opacity: 1;
+      visibility: visible;
     }
   }
 }
@@ -175,6 +182,10 @@
 .dscSidebarItem__label {
   overflow: hidden; /* 1 */
   text-overflow: ellipsis; /* 1 */
+  font-size: $euiFontSizeS;
+  color: $euiColorDarkShade;
+  flex-grow: 1;
+  padding: 0 $euiSizeXS;
 }
 
 /**
@@ -182,10 +193,37 @@
  * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
  */
 .dscSidebarItem__action {
-  opacity: 0; /* 1 */
+  font-size: $euiFontSizeXS;
+  height: $euiSizeXL;
+  padding: 0 $euiSizeXS;
+  visibility: hidden;
+  border-radius: 0 $euiBorderRadius / 2 $euiBorderRadius / 2 0;
 
-  &:focus {
-    opacity: 1; /* 2 */
+  &--add {
+    color: $euiColorPrimary;
+    background: tint($euiColorPrimary, 90%);
+
+    &:focus,
+    &:hover {
+      background: $euiColorPrimary;
+      color: $euiColorGhost;
+    }
+  }
+
+  &--remove {
+    background: tint($euiColorDanger, 90%);
+    color: $euiColorDanger;
+
+    &:focus,
+    &:hover {
+      background: $euiColorDanger;
+      color: $euiColorGhost;
+    }
+  }
+
+  &:focus,
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -245,6 +283,11 @@
 }
 
 .dscResults {
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
+
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;

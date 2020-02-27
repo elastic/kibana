@@ -54,7 +54,7 @@ export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIcon
   });
 
   return (
-    <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup className={className} alignItems="center" responsive={false} gutterSize="s">
       <EuiFlexItem grow={false}>
         <FieldIcon
           type={type}

@@ -20,22 +20,20 @@
   </kbn-top-nav>
 
   <main class="dscApp__frame">
-    <div class="dscApp__sidebar sidebar-container collapsible-sidebar" id="discover-sidebar">
-      <div class="dscFieldChooser">
-        <disc-field-chooser
-          columns="state.columns"
-          hits="rows"
-          field-counts="fieldCounts"
-          index-pattern="searchSource.getField('index')"
-          index-pattern-list="opts.indexPatternList"
-          state="state"
-          on-add-field="addColumn"
-          on-add-filter="filterQuery"
-          on-remove-field="removeColumn"
-        >
-        </disc-field-chooser>
-      </div>
-    </div>
+    <disc-field-chooser
+      columns="state.columns"
+      hits="rows"
+      field-counts="fieldCounts"
+      index-pattern="searchSource.getField('index')"
+      index-pattern-list="opts.indexPatternList"
+      state="state"
+      on-add-field="addColumn"
+      on-add-filter="filterQuery"
+      on-remove-field="removeColumn"
+      class="dscApp__sidebar"
+      id="discover-sidebar"
+    >
+    </disc-field-chooser>
 
     <div class="dscApp__content">
       <discover-unsupported-index-pattern
@@ -175,6 +173,7 @@
               on-filter="filterQuery"
               on-remove-column="removeColumn"
               on-sort="setSortOrder"
+              class="dscDiscoverGrid"
             ></discover-grid>
             <div ng-if="useNewGrid">
               <doc-table

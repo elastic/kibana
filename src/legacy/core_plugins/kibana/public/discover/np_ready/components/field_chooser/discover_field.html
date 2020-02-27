@@ -1,15 +1,12 @@
 <li
-  class="sidebar-item"
   attr-field="{{::field.name}}"
+  class="dscSidebarItem"
 >
-  <div
-    data-test-subj="field-{{::field.name}}"
-    ng-click="onClickToggleDetails($event, field)"
-    kbn-accessible-click
-    class="sidebar-item-title dscSidebarItem"
-  >
     <div class="dscField dscSidebarItem__label">
       <field-name
+        data-test-subj="field-{{::field.name}}"
+        ng-click="onClickToggleDetails($event, field)"
+        kbn-accessible-click
         field="field"
       ></field-name>
     </div>
@@ -17,10 +14,9 @@
     <button
       ng-if="field.name !== '_source'"
       ng-click="toggleDisplay(field)"
-      ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
+      ng-class="::field.display ? 'dscSidebarItem__action--remove' : 'dscSidebarItem__action--add'"
       ng-bind="::addRemoveButtonLabel"
-      class="dscSidebarItem__action kuiButton kuiButton--small"
+      class="dscSidebarItem__action"
       data-test-subj="fieldToggle-{{::field.name}}"
     ></button>
-  </div>
 </li>

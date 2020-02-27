@@ -1,6 +1,28 @@
 .dscFieldChooser {
   padding-left: $euiSize;
   padding-right: $euiSize;
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
+}
+
+.dscFieldChooser__section {
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
+}
+
+.dscFieldChooser__sectionStatic {
+  padding: 0 $euiSize;
+}
+
+.dscFieldChooser__sectionScroll {
+  flex-grow: 1;
+  overflow-x: hidden;
+  @include euiYScrollWithShadows;
+  padding: 0 $euiSize;
 }
 
 .dscFieldChooser__toggle {
@@ -9,9 +31,13 @@
 }
 
 .dscFieldName {
-  color: $euiColorDarkShade;
+  color: $euiColorDarkestShade;
 }
 
+.dscFieldName__displayName {
+  height: $euiSize;
+  display: block;
+}
 /*
   Fixes EUI known issue https://github.com/elastic/eui/issues/1749
 */

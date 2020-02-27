@@ -61,14 +61,13 @@ export function DiscoverIndexPattern({
   }
 
   return (
-    <div className="indexPattern__container">
+    <div>
       <I18nProvider>
         <ChangeIndexPattern
           trigger={{
             label: selected.title,
             title: selected.title,
             'data-test-subj': 'indexPattern-switch-link',
-            className: 'indexPattern__triggerButton',
           }}
           indexPatternId={selected.id}
           indexPatternRefs={options}

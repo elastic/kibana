@@ -64,7 +64,7 @@ export function ChangeIndexPattern({
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
-        {label}
+        <strong>{label}</strong>
       </EuiButtonEmpty>
     );
   };
