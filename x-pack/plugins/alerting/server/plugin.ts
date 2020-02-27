@@ -52,6 +52,7 @@ import {
 } from '../../../plugins/actions/server';
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
+import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -87,11 +88,13 @@ export class AlertingPlugin {
   private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
+  private readonly telemetryLogger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
+    this.telemetryLogger = initializerContext.logger.get('telemetry');
   }
 
   public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
@@ -128,10 +131,18 @@ export class AlertingPlugin {
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
-    if (usageCollection) {
-      core.getStartServices().then(async ([coreStart]: [CoreStart, object]) => {
+    if (usageCollection && plugins.taskManager) {
+      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
         const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
-        registerAlertsUsageCollector(usageCollection, savedObjectsRepository, alertTypeRegistry);
+        registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
+
+        initializeAlertingTelemetry(
+          this.telemetryLogger,
+          savedObjectsRepository,
+          alertTypeRegistry,
+          plugins.taskManager,
+          startPlugins.taskManager
+        );
       });
     }
 
@@ -155,6 +166,17 @@ export class AlertingPlugin {
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
 
+    this.alertTypeRegistry.register({
+      id: 'test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
+      name: 'Test',
+      async executor(): Promise<any> {
+        return {
+          expiredCheckDateMS: 'actions',
+        };
+      },
+    });
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     };
@@ -191,6 +213,10 @@ export class AlertingPlugin {
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });
+
+    if (plugins.taskManager) {
+      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    }
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),

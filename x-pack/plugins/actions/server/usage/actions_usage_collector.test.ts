@@ -14,6 +14,7 @@ import { TaskRunnerFactory, ActionExecutor } from '../lib';
 import { configUtilsMock } from '../actions_config.mock';
 
 const mockTaskManager = taskManagerMock.setup();
+const mockTaskManagerStart = taskManagerMock.start();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(
@@ -38,12 +39,12 @@ describe('registerActionsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerActionsUsageCollector(usageCollectionMock, savedObjects, actionTypeRegistry);
+    registerActionsUsageCollector(usageCollectionMock, mockTaskManagerStart);
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = actions', () => {
-    registerActionsUsageCollector(usageCollectionMock, savedObjects, actionTypeRegistry);
+    registerActionsUsageCollector(usageCollectionMock, mockTaskManagerStart);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');
   });

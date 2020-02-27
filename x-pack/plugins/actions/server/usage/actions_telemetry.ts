@@ -4,61 +4,149 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsTelemetry, ActionsTelemetrySavedObject } from './types';
+import { ISavedObjectsRepository } from 'kibana/server';
+import { TaskManagerStartContract } from '../../../task_manager/server';
+import { ActionTypeRegistry } from '../action_type_registry';
 
-export const ACTIONS_TELEMETRY_DOC_ID = 'actions-telemetry';
-
-export function createActionsTelemetry(
-  executionsByActionType: Record<string, number> = {}
-): ActionsTelemetry {
-  return {
-    excutions_count_by_type: executionsByActionType,
-  };
-}
-// savedObjects
-export function storeActionsTelemetry(
-  savedObjectsClient: any,
-  actionsTelemetry: ActionsTelemetry
-): void {
-  savedObjectsClient.create('actions-telemetry', actionsTelemetry, {
-    id: ACTIONS_TELEMETRY_DOC_ID,
-    overwrite: true,
+export async function getTotalCount(savedObjectsClient: ISavedObjectsRepository) {
+  const findResult = await savedObjectsClient.find({
+    type: 'action',
   });
+
+  return findResult.total;
 }
 
-export async function incrementActionExecutionsCount(
-  savedObjectsClient: any,
+export async function getInUseTotalCount(savedObjectsClient: ISavedObjectsRepository) {
+  const findResult = await savedObjectsClient.find({
+    type: 'alert',
+    fields: ['actions'],
+  });
+
+  if (findResult.total === 0) {
+    return 0;
+  }
+
+  return new Set(
+    findResult.saved_objects.reduce(
+      (actionIds: string[], savedObj: any) =>
+        actionIds.concat(
+          savedObj.references
+            .filter((ref: any) => ref.type === 'action')
+            .map((action: any) => action.id)
+        ),
+      []
+    )
+  ).size;
+}
+
+export async function getTotalCountByActionTypes(
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeRegistry: ActionTypeRegistry
+) {
+  const totalByActionType = actionTypeRegistry
+    .list()
+    .reduce(async (accPromise: any, actionType) => {
+      const acc = await accPromise;
+      const total = await getTotalCountByActionType(savedObjectsClient, actionType.id);
+      return { ...acc, [actionType.name]: total };
+    }, Promise.resolve({}));
+
+  return totalByActionType;
+}
+
+export async function getExecutions(taskManager: TaskManagerStartContract) {
+  const result = await taskManager.fetch({
+    query: {
+      bool: {
+        filter: {
+          bool: {
+            must: {
+              term: {
+                'task.scope': 'actions',
+              },
+            },
+          },
+        },
+      },
+    },
+    size: 10000,
+  });
+  return result.docs;
+}
+
+export async function getExecutionsCount(taskManager: TaskManagerStartContract) {
+  const actionExecutions = await getExecutions(taskManager);
+  return actionExecutions.length;
+}
+
+export async function getTotalCountByActionType(
+  savedObjectsClient: ISavedObjectsRepository,
   actionTypeId: string
-): Promise<void> {
-  try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
-    if (attributes.enabled === false) {
-      return;
-    }
-  } catch (error) {
-    // if we aren't allowed to get the telemetry document,
-    // we assume we couldn't opt in to telemetry and won't increment the index count.
-    return;
+) {
+  const findResult = await savedObjectsClient.find({
+    type: 'action',
+    searchFields: ['actionTypeId'],
+    search: actionTypeId,
+  });
+
+  return findResult.total;
+}
+
+export async function getTotalInUseCountByActionTypes(
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeRegistry: ActionTypeRegistry
+) {
+  const totalByActionType = actionTypeRegistry
+    .list()
+    .reduce(async (accPromise: any, actionType) => {
+      const acc = await accPromise;
+      const total = await getTotalInUseCountByActionType(savedObjectsClient, actionType.id);
+      return { ...acc, [actionType.name]: total };
+    }, Promise.resolve({}));
+
+  return totalByActionType;
+}
+
+export async function getTotalInUseCountByActionType(
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeId: string
+) {
+  const findResult = await savedObjectsClient.find({
+    type: 'alert',
+    fields: ['actions'],
+  });
+
+  if (findResult.total === 0) {
+    return 0;
   }
 
-  let executionsByActionTypes = {};
+  return new Set(
+    findResult.saved_objects.reduce((actionIds: string[], savedObj: any) => {
+      const refs = savedObj.attributes.actions
+        .filter((ref: any) => ref.actionTypeId === actionTypeId)
+        .map((action: any) => action.actionRef);
+      const ids = savedObj.references
+        .filter((reference: any) => refs.includes(reference.name))
+        .map((action: any) => action.id);
+      return actionIds.concat(ids);
+    }, [])
+  ).size;
+}
 
-  try {
-    const { attributes } = (await savedObjectsClient.get(
-      'actions-telemetry',
-      ACTIONS_TELEMETRY_DOC_ID
-    )) as ActionsTelemetrySavedObject;
-    const executionsByActionType = attributes.excutions_count_by_type[actionTypeId]
-      ? attributes.excutions_count_by_type[actionTypeId]
-      : 0;
-    executionsByActionTypes = {
-      ...attributes.excutions_count_by_type,
-      [actionTypeId]: executionsByActionType + 1,
-    };
-  } catch (e) {
-    /* silently fail, this will happen if the saved object doesn't exist yet. */
-  }
-
-  const actionsTelemetry = createActionsTelemetry(executionsByActionTypes);
-  storeActionsTelemetry(savedObjectsClient, actionsTelemetry);
+export async function getExecutionsCountByActionTypes(
+  taskManager: TaskManagerStartContract,
+  actionTypeRegistry: ActionTypeRegistry
+) {
+  const actionExecutions = await getExecutions(taskManager);
+  const totalByActionType = actionTypeRegistry.list().reduce(
+    (res: any, actionType) => ({
+      ...res,
+      [actionType.name]:
+        actionExecutions.filter(execution => execution.taskType === `actions:${actionType.id}`)
+          .length ?? 0,
+    }),
+    {}
+  );
+  return totalByActionType;
+  return {};
 }

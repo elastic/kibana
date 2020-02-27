@@ -51,6 +51,7 @@ import {
 } from './routes';
 import { LicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -94,6 +95,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private spaces?: SpacesServiceSetup;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
+  private readonly telemetryLogger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config
@@ -109,6 +111,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       .toPromise();
 
     this.logger = initContext.logger.get('actions');
+    this.telemetryLogger = initContext.logger.get('telemetry');
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
@@ -169,9 +172,17 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart]: [CoreStart, object]) => {
+      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
         const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
-        registerActionsUsageCollector(usageCollection, savedObjectsRepository, actionTypeRegistry);
+        registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
+
+        initializeActionsTelemetry(
+          this.telemetryLogger,
+          savedObjectsRepository,
+          actionTypeRegistry,
+          plugins.taskManager,
+          startPlugins.taskManager
+        );
       });
     }
 
@@ -223,6 +234,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       spaceIdToNamespace: this.spaceIdToNamespace,
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
+
+    if (plugins.taskManager) {
+      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+    }
 
     return {
       execute: createExecuteFunction({
