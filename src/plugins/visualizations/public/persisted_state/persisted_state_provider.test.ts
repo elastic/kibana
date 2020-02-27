@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { PersistedStateError } from './errors';
 import { PersistedState } from './persisted_state';
 
 describe('Persisted State Provider', () => {
@@ -47,7 +46,7 @@ describe('Persisted State Provider', () => {
     });
 
     test('should throw if given an invalid value', () => {
-      expect(() => new PersistedState('bananas')).toThrow(PersistedStateError);
+      expect(() => new PersistedState('bananas')).toThrow(Error);
     });
   });
 
@@ -224,13 +223,13 @@ describe('Persisted State Provider', () => {
   describe('internal state tracking', () => {
     test('should be an empty object', () => {
       const persistedState = new PersistedState();
-      expect(persistedState._defaultState).toEqual({});
+      expect(persistedState).toHaveProperty('_defaultState', {});
     });
 
     test('should store the default state value', () => {
       const val = { one: 1, two: 2 };
       const persistedState = new PersistedState(val);
-      expect(persistedState._defaultState).toEqual(val);
+      expect(persistedState).toHaveProperty('_defaultState', val);
     });
 
     test('should keep track of changes', () => {
@@ -238,8 +237,8 @@ describe('Persisted State Provider', () => {
       const persistedState = new PersistedState(val);
 
       persistedState.set('two', 22);
-      expect(persistedState._defaultState).toEqual(val);
-      expect(persistedState._changedState).toEqual({ two: 22 });
+      expect(persistedState).toHaveProperty('_defaultState', val);
+      expect(persistedState).toHaveProperty('_changedState', { two: 22 });
     });
   });
 
