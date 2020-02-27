@@ -108,7 +108,6 @@ export const EnrollmentInstructions: React.FunctionComponent<Props> = ({ selecte
                     </>
                   ) : (
                     <>
-                      <Loading />
                       <FormattedMessage
                         id="xpack.ingestManager.agentEnrollment.newAgentsMessage"
                         defaultMessage="{count, plural, one {# new agent} other {# new agents}}."

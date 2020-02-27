@@ -4,14 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiFieldText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useEnrollmentApiKeys, CreateApiKeyButton } from '../enrollment_api_keys';
+import { useEnrollmentApiKeys } from '../enrollment_api_keys';
 import { AgentConfig } from '../../../../../types';
+import { useInput, useCore, sendRequest } from '../../../../../hooks';
+import { enrollmentAPIKeyRouteService } from '../../../../../services';
 
 interface Props {
   onKeyChange: (keyId: string | null) => void;
   agentConfigs: AgentConfig[];
+}
+
+function useCreateApiKeyForm(configId: string | null, onSuccess: (keyId: string) => void) {
+  const { notifications } = useCore();
+  const [isLoading, setIsLoading] = useState(false);
+  const apiKeyNameInput = useInput('');
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await sendRequest({
+        method: 'post',
+        path: enrollmentAPIKeyRouteService.getCreatePath(),
+        body: JSON.stringify({
+          name: apiKeyNameInput.value,
+          config_id: configId,
+        }),
+      });
+      apiKeyNameInput.clear();
+      setIsLoading(false);
+      onSuccess(res.data.item.id);
+    } catch (err) {
+      notifications.toasts.addError(err as Error, {
+        title: 'Error',
+      });
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    onSubmit,
+    apiKeyNameInput,
+  };
 }
 
 export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, agentConfigs }) => {
@@ -33,7 +80,7 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
     }
 
     return enrollmentAPIKeysRequest.data.list.filter(
-      key => key.policy_id === selectedState.agentConfigId
+      key => key.config_id === selectedState.agentConfigId
     );
   }, [enrollmentAPIKeysRequest.data, selectedState.agentConfigId]);
 
@@ -49,6 +96,16 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredEnrollmentAPIKeys, selectedState.enrollmentAPIKeyId, selectedState.agentConfigId]);
+
+  const [showAPIKeyForm, setShowAPIKeyForm] = useState(false);
+  const apiKeyForm = useCreateApiKeyForm(selectedState.agentConfigId, async (keyId: string) => {
+    const res = await enrollmentAPIKeysRequest.refresh();
+    setSelectedState({
+      ...selectedState,
+      enrollmentAPIKeyId: res.data?.list.find(key => key.id === keyId)?.id ?? null,
+    });
+    setShowAPIKeyForm(false);
+  });
 
   return (
     <>
@@ -94,28 +151,52 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
             }
             labelAppend={
               <EuiText size="xs">
-                <CreateApiKeyButton
-                  onChange={async () => {
-                    await enrollmentAPIKeysRequest.refresh();
-                  }}
-                />
+                <EuiLink onClick={() => setShowAPIKeyForm(!showAPIKeyForm)} color="primary">
+                  {showAPIKeyForm ? (
+                    <FormattedMessage
+                      id="xpack.ingestManager.enrollmentApiKeyList.useExistingsButton"
+                      defaultMessage="Use existing keys"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.ingestManager.enrollmentApiKeyList.createNewButton"
+                      defaultMessage="Create a new key"
+                    />
+                  )}
+                </EuiLink>
               </EuiText>
             }
           >
-            <EuiSelect
-              options={filteredEnrollmentAPIKeys.map(key => ({
-                value: key.id,
-                text: key.name,
-              }))}
-              value={selectedState.enrollmentAPIKeyId || undefined}
-              onChange={e => {
-                setSelectedState({
-                  ...selectedState,
-                  enrollmentAPIKeyId: e.target.value,
-                });
-                onKeyChange(selectedState.enrollmentAPIKeyId);
-              }}
-            />
+            {showAPIKeyForm ? (
+              <form onSubmit={apiKeyForm.onSubmit}>
+                <EuiFieldText
+                  isLoading={apiKeyForm.isLoading}
+                  disabled={apiKeyForm.isLoading}
+                  {...apiKeyForm.apiKeyNameInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.ingestManager.enrollmentApiKeyForm.namePlaceholder',
+                    {
+                      defaultMessage: 'Choose a name',
+                    }
+                  )}
+                />
+              </form>
+            ) : (
+              <EuiSelect
+                options={filteredEnrollmentAPIKeys.map(key => ({
+                  value: key.id,
+                  text: key.name,
+                }))}
+                value={selectedState.enrollmentAPIKeyId || undefined}
+                onChange={e => {
+                  setSelectedState({
+                    ...selectedState,
+                    enrollmentAPIKeyId: e.target.value,
+                  });
+                  onKeyChange(selectedState.enrollmentAPIKeyId);
+                }}
+              />
+            )}
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

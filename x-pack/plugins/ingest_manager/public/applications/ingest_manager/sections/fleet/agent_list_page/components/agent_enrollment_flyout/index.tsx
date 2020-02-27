@@ -4,7 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlyoutFooter,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../../types';
 import { APIKeySelection } from './key_selection';
@@ -41,6 +52,26 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         <EuiSpacer size="l" />
         <EnrollmentInstructions selectedAPIKeyId={selectedAPIKeyId} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <FormattedMessage
+                id="xpack.ingestManager.agentEnrollment.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onClose}>
+              <FormattedMessage
+                id="xpack.ingestManager.agentEnrollment.continueButtonLabel"
+                defaultMessage="Continue"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
