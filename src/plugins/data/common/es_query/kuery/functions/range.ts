@@ -20,18 +20,20 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getRangeScript } from '../../filters';
+import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
+import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
-export function buildNodeParams(fieldName, params) {
-  params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
+export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
+  const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
   const fieldNameArg =
     typeof fieldName === 'string'
       ? ast.fromLiteralExpression(fieldName)
       : nodeTypes.literal.buildNode(fieldName);
-  const args = _.map(params, (value, key) => {
+
+  const args = _.map(paramsToMap, (value: number | string, key: string) => {
     return nodeTypes.namedArg.buildNode(key, value);
   });
 
@@ -40,16 +42,23 @@ export function buildNodeParams(fieldName, params) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
+) {
   const [fieldNameArg, ...args] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
-    context.nested ? context.nested.path : undefined
+    context?.nested ? context.nested.path : undefined
   );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
-  const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
+  const queryParams = _.mapValues(namedArgs, (arg: KueryNode) => {
+    return ast.toElasticsearchQuery(arg);
+  });
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -58,25 +67,26 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toElasticsearchQuery(fullFieldNameArg),
+      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
+      type: '',
     });
   }
 
-  const queries = fields.map(field => {
-    const wrapWithNestedQuery = query => {
+  const queries = fields!.map((field: IFieldType) => {
+    const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
-        !fullFieldNameArg.type === 'wildcard' ||
+        !(fullFieldNameArg.type === 'wildcard') ||
         !_.get(field, 'subType.nested') ||
-        context.nested
+        context!.nested
       ) {
         return query;
       } else {
         return {
           nested: {
-            path: field.subType.nested.path,
+            path: field.subType!.nested!.path,
             query,
             score_mode: 'none',
           },
@@ -90,7 +100,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
       };
     } else if (field.type === 'date') {
       const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
+        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
         : {};
       return wrapWithNestedQuery({
         range: {
@@ -116,14 +126,14 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
   };
 }
 
-function extractArguments(args) {
+function extractArguments(args: any) {
   if ((args.gt && args.gte) || (args.lt && args.lte)) {
     throw new Error('range ends cannot be both inclusive and exclusive');
   }
 
   const unnamedArgOrder = ['gte', 'lte', 'format'];
 
-  return args.reduce((acc, arg, index) => {
+  return args.reduce((acc: any, arg: any, index: number) => {
     if (arg.type === 'namedArg') {
       acc[arg.name] = arg.value;
     } else {

@@ -22,13 +22,14 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
+import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
 import * as ast from '../ast';
 
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 
-export function buildNodeParams(fieldName, value, isPhrase = false) {
+export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean = false) {
   if (isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
@@ -47,14 +48,19 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config: Record<string, any> = {},
+  context: Record<string, any> = {}
+) {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
-    context.nested ? context.nested.path : undefined
+    context?.nested ? context.nested.path : undefined
   );
   const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
@@ -85,14 +91,15 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toElasticsearchQuery(fullFieldNameArg),
+      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
+      type: '',
     });
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
-    (fullFieldNameArg.type === 'wildcard' && fieldName === '*') ||
+    (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
     (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
@@ -100,20 +107,20 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
     return { match_all: {} };
   }
 
-  const queries = fields.reduce((accumulator, field) => {
-    const wrapWithNestedQuery = query => {
+  const queries = fields!.reduce((accumulator: any, field: IFieldType) => {
+    const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
         !(fullFieldNameArg.type === 'wildcard') ||
         !get(field, 'subType.nested') ||
-        context.nested
+        context?.nested
       ) {
         return query;
       } else {
         return {
           nested: {
-            path: field.subType.nested.path,
+            path: field.subType!.nested!.path,
             query,
             score_mode: 'none',
           },
@@ -158,7 +165,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
       const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
+        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
         : {};
       return [
         ...accumulator,
@@ -187,7 +194,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
 
   return {
     bool: {
-      should: queries,
+      should: queries || [],
       minimum_should_match: 1,
     },
   };
