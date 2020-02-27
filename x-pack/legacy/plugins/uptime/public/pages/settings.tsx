@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiToast,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
@@ -25,63 +26,64 @@ import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
 import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings } from '../../common/runtime_types';
+import { DynamicSettings, defaultDynamicSettings } from '../../common/runtime_types';
 
 interface Props {
   dynamicSettingsState: DynamicSettingsState;
 }
 
 interface DispatchProps {
-  loadDynamicSettings: typeof getDynamicSettings;
-  saveDynamicSettings: typeof setDynamicSettings;
+  dispatchGetDynamicSettings: typeof getDynamicSettings;
+  dispatchSetDynamicSettings: typeof setDynamicSettings;
 }
-
-const fieldValidators: { [key: string]: (v: any) => string | null } = {
-  heartbeatIndices: v => (v && v.match(/^\S+$/) ? null : 'May not be blank'),
-};
 
 export const SettingsPageComponent = ({
   dynamicSettingsState: dss,
-  loadDynamicSettings,
-  saveDynamicSettings,
+  dispatchGetDynamicSettings,
+  dispatchSetDynamicSettings,
 }: Props & DispatchProps) => {
   useEffect(() => {
-    loadDynamicSettings({});
-  }, [loadDynamicSettings]);
+    dispatchGetDynamicSettings('');
+  }, [dispatchGetDynamicSettings]);
 
-  const [formFields, setFormFields] = useState<{ [key: string]: any }>(dss.settings || {});
-  if (dss.settings && Object.entries(formFields).length === 0) {
+  const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
+
+  if (dss.loadError) {
+    // eslint-disable-next-line no-console
+    console.error('Could not load settings', dss.loadError);
+    return (
+      <EuiToast color="danger" iconType="alert" title="Could not load settings">
+        {dss.loadError.name} - {dss.loadError.message}
+      </EuiToast>
+    );
+  }
+
+  if (!dss.loadError && formFields == null && dss.settings) {
     setFormFields({ ...dss.settings });
   }
 
-  let isFormValid: boolean = true;
-  const fieldErrors: { [key: string]: string } = {};
-  // don't validate if no data loaded
-  if (Object.entries(formFields).length > 0) {
-    for (const field in fieldValidators) {
-      if (fieldValidators.hasOwnProperty(field)) {
-        const validator = fieldValidators[field];
-        const error = validator(formFields[field]);
-        if (error) {
-          isFormValid = false;
-          fieldErrors[field] = error;
-        }
-      }
-    }
-  }
+  const fieldErrors = formFields && {
+    heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : 'May not be blank',
+  };
+  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
-  const onChangeFormField = (field: string, value: any) => {
-    formFields[field] = value;
-    setFormFields({ ...formFields });
+  const onChangeFormField = (field: keyof DynamicSettings, value: any) => {
+    if (formFields) {
+      formFields[field] = value;
+      setFormFields({ ...formFields });
+    }
   };
 
   const onApply = () => {
-    // @ts-ignore figure out this cast later
-    saveDynamicSettings(formFields);
+    if (formFields) {
+      dispatchSetDynamicSettings(formFields);
+    }
   };
 
   const resetForm = () => {
-    setFormFields({ ...dss.settings });
+    if (formFields && dss.settings) {
+      setFormFields({ ...dss.settings });
+    }
   };
 
   const isFormDirty = dss.settings ? !isEqual(dss.settings, formFields) : true;
@@ -116,20 +118,18 @@ export const SettingsPageComponent = ({
         >
           <EuiFormRow
             describedByIds={['heartbeatIndices']}
-            error={fieldErrors.heartbeatIndices}
+            error={fieldErrors?.heartbeatIndices}
             fullWidth
             helpText={
               <FormattedMessage
                 id="xpack.uptime.sourceConfiguration.heartbeatIndicesRecommendedValue"
                 defaultMessage="The recommended value is {defaultValue}"
                 values={{
-                  // TODO: make this a constant somewhere shared
-                  defaultValue: <EuiCode>heartbeat-8*</EuiCode>,
+                  defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
                 }}
               />
             }
-            // TODO handle what's invalid
-            isInvalid={!!fieldErrors.heartbeatIndices}
+            isInvalid={!!fieldErrors?.heartbeatIndices}
             label={
               <FormattedMessage
                 id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
@@ -142,7 +142,7 @@ export const SettingsPageComponent = ({
               fullWidth
               disabled={dss.loading}
               isLoading={dss.loading}
-              value={formFields.heartbeatIndices || ''}
+              value={formFields?.heartbeatIndices || ''}
               onChange={(event: any) =>
                 onChangeFormField('heartbeatIndices', event.currentTarget.value)
               }
@@ -195,10 +195,10 @@ const mapStateToProps = (state: AppState) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  loadDynamicSettings: (settings: DynamicSettings) => {
-    return dispatch(getDynamicSettings());
+  dispatchGetDynamicSettings: () => {
+    return dispatch(getDynamicSettings({}));
   },
-  saveDynamicSettings: (settings: DynamicSettings) => {
+  dispatchSetDynamicSettings: (settings: DynamicSettings) => {
     return dispatch(setDynamicSettings(settings));
   },
 });

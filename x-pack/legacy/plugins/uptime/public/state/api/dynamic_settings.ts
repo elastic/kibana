@@ -24,7 +24,7 @@ type SaveApiRequest = BaseApiRequest & {
 
 const plainApiPath = '/api/uptime/dynamic_settings';
 
-export const fetchDynamicSettings = async ({
+export const getDynamicSettings = async ({
   basePath,
 }: BaseApiRequest): Promise<DynamicSettings> => {
   const url = getApiPath(plainApiPath, basePath);
@@ -41,7 +41,7 @@ export const fetchDynamicSettings = async ({
   throw new Error('`getDynamicSettings` response did not correspond to expected type');
 };
 
-export const saveDynamicSettings = async ({
+export const setDynamicSettings = async ({
   basePath,
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {

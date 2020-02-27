@@ -16,6 +16,7 @@ import { DynamicSettings } from '../../../common/runtime_types';
 
 export interface DynamicSettingsState {
   settings?: DynamicSettings;
+  loadError?: Error;
   saveError?: Error;
   loading: boolean;
 }
@@ -36,10 +37,10 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
         settings: action.payload,
       };
     },
-    [String(getDynamicSettingsFail)]: (state, action: Action<DynamicSettings>) => {
+    [String(getDynamicSettingsFail)]: (state, action: Action<Error>) => {
       return {
         loading: false,
-        settings: action.payload,
+        loadError: action.payload,
       };
     },
     [String(setDynamicSettings)]: state => ({

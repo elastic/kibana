@@ -15,14 +15,17 @@ import {
   setDynamicSettingsFail,
   setDynamicSettings,
 } from '../actions/dynamic_settings';
-import { fetchDynamicSettings, saveDynamicSettings } from '../api';
+import {
+  getDynamicSettings as getDynamicSettingsAPI,
+  setDynamicSettings as setDynamicSettingsAPI,
+} from '../api';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { getBasePath } from '../selectors';
 
 export function* fetchDynamicSettingsEffect() {
   yield takeLatest(
     String(getDynamicSettings),
-    fetchEffectFactory(fetchDynamicSettings, getDynamicSettingsSuccess, getDynamicSettingsFail)
+    fetchEffectFactory(getDynamicSettingsAPI, getDynamicSettingsSuccess, getDynamicSettingsFail)
   );
 }
 
@@ -36,7 +39,7 @@ export function* setDynamicSettingsEffect() {
         return;
       }
       const basePath = yield select(getBasePath);
-      yield call(saveDynamicSettings, { settings: action.payload, basePath });
+      yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
       yield put(setDynamicSettingsSuccess(action.payload));
     } catch (error) {
       yield put(setDynamicSettingsFail(error));
