@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -18,22 +19,30 @@ export interface NavTabs {
 export const navTabs: NavTabs[] = [
   {
     id: 'home',
-    name: 'Home',
+    name: i18n.translate('xpack.endpoint.headerNav.home', {
+      defaultMessage: 'Home',
+    }),
     href: '/',
   },
   {
     id: 'management',
-    name: 'Management',
+    name: i18n.translate('xpack.endpoint.headerNav.management', {
+      defaultMessage: 'Management',
+    }),
     href: '/management',
   },
   {
     id: 'alerts',
-    name: 'Alerts',
+    name: i18n.translate('xpack.endpoint.headerNav.alerts', {
+      defaultMessage: 'Alerts',
+    }),
     href: '/alerts',
   },
   {
     id: 'policies',
-    name: 'Policies',
+    name: i18n.translate('xpack.endpoint.headerNav.policies', {
+      defaultMessage: 'Policies',
+    }),
     href: '/policy',
   },
 ];
