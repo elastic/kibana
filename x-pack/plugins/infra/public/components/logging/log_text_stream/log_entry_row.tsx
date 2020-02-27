@@ -54,7 +54,16 @@ export const LogEntryRow = ({
   scale,
   wrap,
 }: LogEntryRowProps) => {
+  const [hasMenuOpen, setMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  const openMenu = useCallback(() => {
+    setMenuOpen(true);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+  }, []);
 
   const setItemIsHovered = useCallback(() => {
     setIsHovered(true);
@@ -62,7 +71,8 @@ export const LogEntryRow = ({
 
   const setItemIsNotHovered = useCallback(() => {
     setIsHovered(false);
-  }, []);
+    closeMenu();
+  }, [closeMenu]);
 
   const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
     openFlyoutWithItem,
@@ -187,7 +197,15 @@ export const LogEntryRow = ({
           isHovered={isHovered}
           openFlyout={openFlyout}
         /> */}
-        <LogEntryActionsColumn isHighlighted={isHighlighted} isHovered={isHovered} />
+        <LogEntryActionsColumn
+          isHighlighted={isHighlighted}
+          isHovered={isHovered}
+          onViewDetails={openFlyout}
+          onViewInContext={() => window.alert('Not implemented')}
+          hasMenuOpen={hasMenuOpen}
+          openMenu={openMenu}
+          closeMenu={closeMenu}
+        />
       </LogEntryColumn>
     </LogEntryRowWrapper>
   );
