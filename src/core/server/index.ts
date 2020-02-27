@@ -206,6 +206,7 @@ export {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,

@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function migrateToKibana660(doc: Record<string, any>) {
-  if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
-    doc.attributes.disabledFeatures = [];
-  }
-  return doc;
-}
+export { SpacesSavedObjectsService } from './saved_objects_service';

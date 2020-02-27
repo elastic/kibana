@@ -4,12 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { spacesServiceMock } from '../../spaces_service/spaces_service.mock';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { SavedObjectTypeRegistry } from 'src/core/server';
 
-const types = ['foo', 'bar', 'space'];
+const typeRegistry = new SavedObjectTypeRegistry();
+typeRegistry.registerType({
+  name: 'foo',
+  namespaceAgnostic: false,
+  hidden: false,
+  mappings: { properties: {} },
+});
+
+typeRegistry.registerType({
+  name: 'bar',
+  namespaceAgnostic: false,
+  hidden: false,
+  mappings: { properties: {} },
+});
+
+typeRegistry.registerType({
+  name: 'space',
+  namespaceAgnostic: true,
+  hidden: true,
+  mappings: { properties: {} },
+});
 
 const createMockRequest = () => ({});
 
@@ -44,7 +65,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -63,7 +84,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
         const type = Symbol();
         const id = Symbol();
@@ -89,7 +110,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -110,7 +131,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const objects = [{ type: 'foo' }];
@@ -136,7 +157,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -160,7 +181,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
         const options = Object.freeze({ type: 'foo' });
 
@@ -189,7 +210,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const options = Object.freeze({ type: ['foo', 'bar'] });
@@ -213,7 +234,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -232,7 +253,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const type = Symbol();
@@ -259,7 +280,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -280,7 +301,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const objects = [{ type: 'foo' }];
@@ -306,7 +327,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -326,7 +347,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const type = Symbol();
@@ -358,7 +379,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const actualReturnValue = await client.bulkUpdate([
@@ -390,7 +411,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         await expect(
@@ -410,7 +431,7 @@ const createMockResponse = () => ({
           request,
           baseClient,
           spacesService,
-          types,
+          typeRegistry,
         });
 
         const type = Symbol();

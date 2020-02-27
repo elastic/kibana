@@ -11,10 +11,12 @@ describe('migrateTo660', () => {
     expect(
       migrateToKibana660({
         id: 'space:foo',
+        type: 'space',
         attributes: {},
       })
     ).toEqual({
       id: 'space:foo',
+      type: 'space',
       attributes: {
         disabledFeatures: [],
       },
@@ -26,12 +28,14 @@ describe('migrateTo660', () => {
     expect(
       migrateToKibana660({
         id: 'space:foo',
+        type: 'space',
         attributes: {
           disabledFeatures: ['foo', 'bar', 'baz'],
         },
       })
     ).toEqual({
       id: 'space:foo',
+      type: 'space',
       attributes: {
         disabledFeatures: ['foo', 'bar', 'baz'],
       },

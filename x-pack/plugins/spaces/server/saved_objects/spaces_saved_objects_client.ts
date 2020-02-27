@@ -13,15 +13,16 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  ISavedObjectTypeRegistry,
 } from 'src/core/server';
-import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
-import { spaceIdToNamespace } from '../utils/namespace';
+import { SpacesServiceSetup } from '../spaces_service/spaces_service';
+import { spaceIdToNamespace } from '../lib/utils/namespace';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
   spacesService: SpacesServiceSetup;
-  types: string[];
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 const coerceToArray = (param: string | string[]) => {
@@ -41,15 +42,15 @@ const throwErrorIfNamespaceSpecified = (options: any) => {
 export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
-  private readonly types: string[];
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
-    const { baseClient, request, spacesService, types } = options;
+    const { baseClient, request, spacesService, typeRegistry } = options;
 
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
-    this.types = types;
+    this.typeRegistry = typeRegistry;
     this.errors = baseClient.errors;
   }
 
@@ -137,9 +138,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.find<T>({
       ...options,
-      type: (options.type ? coerceToArray(options.type) : this.types).filter(
-        type => type !== 'space'
-      ),
+      type: (options.type
+        ? coerceToArray(options.type)
+        : this.typeRegistry.getAllTypes().map(t => t.name)
+      ).filter(type => type !== 'space'),
       namespace: spaceIdToNamespace(this.spaceId),
     });
   }
