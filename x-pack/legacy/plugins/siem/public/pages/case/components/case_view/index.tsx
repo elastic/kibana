@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonToggle,
@@ -30,6 +30,7 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
+import { getTypedPayload } from '../../../../containers/case/utils';
 
 interface Props {
   caseId: string;
@@ -66,58 +67,49 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     caseId,
     initialData
   );
-  const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
-  const [isEditTags, setIsEditTags] = useState(false);
-  const [tags, setTags] = useState(data.tags);
 
   const onUpdateField = useCallback(
-    (newUpdateKey: keyof Case, updateValue: string | string[]) => {
+    (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
       switch (newUpdateKey) {
         case 'title':
-          if (updateValue.length > 0) {
+          const titleUpdate = getTypedPayload<string>(updateValue);
+          if (titleUpdate.length > 0) {
             dispatchUpdateCaseProperty({
               updateKey: 'title',
-              updateValue,
+              updateValue: titleUpdate,
             });
           }
           break;
         case 'description':
-          if (updateValue.length > 0) {
+          const descriptionUpdate = getTypedPayload<string>(updateValue);
+          if (descriptionUpdate.length > 0) {
             dispatchUpdateCaseProperty({
               updateKey: 'description',
-              updateValue,
+              updateValue: descriptionUpdate,
             });
           }
           break;
         case 'tags':
-          setTags(updateValue as string[]);
+          const tagsUpdate = getTypedPayload<string[]>(updateValue);
           dispatchUpdateCaseProperty({
             updateKey: 'tags',
-            updateValue,
+            updateValue: tagsUpdate,
           });
-          setIsEditTags(false);
           break;
+        case 'state':
+          const stateUpdate = getTypedPayload<string>(updateValue);
+          if (data.state !== updateValue) {
+            dispatchUpdateCaseProperty({
+              updateKey: 'state',
+              updateValue: stateUpdate,
+            });
+          }
         default:
           return null;
       }
     },
     [dispatchUpdateCaseProperty, data.title]
   );
-
-  const onSetIsCaseOpen = useCallback(() => setIsCaseOpen(!isCaseOpen), [
-    isCaseOpen,
-    setIsCaseOpen,
-  ]);
-
-  useEffect(() => {
-    const caseState = isCaseOpen ? 'open' : 'closed';
-    if (data.state !== caseState) {
-      dispatchUpdateCaseProperty({
-        updateKey: 'state',
-        updateValue: caseState,
-      });
-    }
-  }, [isCaseOpen]);
 
   // TO DO refactor each of these const's into their own components
   const propertyActions = [
@@ -166,7 +158,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       <EuiBadge
-                        color={isCaseOpen ? 'secondary' : 'danger'}
+                        color={data.state === 'open' ? 'secondary' : 'danger'}
                         data-test-subj="case-view-state"
                       >
                         {data.state}
@@ -190,10 +182,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                 <EuiFlexItem>
                   <EuiButtonToggle
                     data-test-subj="toggle-case-state"
-                    label={isCaseOpen ? 'Close case' : 'Reopen case'}
-                    iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
-                    onChange={onSetIsCaseOpen}
-                    isSelected={isCaseOpen}
+                    iconType={data.state === 'open' ? 'checkInCircleFilled' : 'magnet'}
+                    isLoading={isLoading && updateKey === 'state'}
+                    isSelected={data.state === 'open'}
+                    label={data.state === 'open' ? 'Close case' : 'Reopen case'}
+                    onChange={() =>
+                      onUpdateField('state', data.state === 'open' ? 'closed' : 'open')
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -222,14 +217,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
               />
               <TagList
                 data-test-subj="case-view-tag-list"
-                tags={tags}
-                iconAction={{
-                  'aria-label': 'tags',
-                  iconType: 'pencil',
-                  onSubmit: newTags => onUpdateField('tags', newTags),
-                  onClick: isEdit => setIsEditTags(isEdit),
-                }}
-                isEditTags={isEditTags}
+                tags={data.tags}
+                onSubmit={newTags => onUpdateField('tags', newTags)}
                 isLoading={isLoading && updateKey === 'tags'}
               />
             </EuiFlexItem>

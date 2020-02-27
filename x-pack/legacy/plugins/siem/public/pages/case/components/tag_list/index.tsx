@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -22,18 +22,10 @@ import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 
-interface IconAction {
-  'aria-label': string;
-  iconType: string;
-  onClick: (b: boolean) => void;
-  onSubmit: (a: string[]) => void;
-}
-
 interface TagListProps {
-  tags: string[];
-  iconAction?: IconAction;
-  isEditTags?: boolean;
   isLoading: boolean;
+  onSubmit: (a: string[]) => void;
+  tags: string[];
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -45,25 +37,22 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: TagListProps) => {
+export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) => {
   const { form } = useForm({
     defaultValue: { tags },
     options: { stripEmptyFields: false },
     schema,
   });
+  const [isEditTags, setIsEditTags] = useState(false);
 
-  const onSubmit = useCallback(async () => {
+  const onSubmitTags = useCallback(async () => {
     const { isValid, data: newData } = await form.submit();
-    if (isValid && iconAction) {
-      iconAction.onSubmit(newData.tags);
-      iconAction.onClick(false);
+    if (isValid && newData.tags) {
+      onSubmit(newData.tags);
+      setIsEditTags(false);
     }
   }, [form]);
 
-  const onActionClick = useCallback(
-    (cb: (b: boolean) => void, onClickBool: boolean) => cb(onClickBool),
-    [iconAction]
-  );
   return (
     <EuiText>
       <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -71,12 +60,12 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: 
           <h4>{i18n.TAGS}</h4>
         </EuiFlexItem>
         {isLoading && <EuiLoadingSpinner />}
-        {iconAction && !isLoading && (
+        {!isLoading && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label={iconAction['aria-label']}
-              iconType={iconAction.iconType}
-              onClick={() => onActionClick(iconAction.onClick, true)}
+              aria-label={'tags'}
+              iconType={'pencil'}
+              onClick={() => setIsEditTags(true)}
             />
           </EuiFlexItem>
         )}
@@ -91,7 +80,7 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: 
               <EuiBadge color="hollow">{tag}</EuiBadge>
             </EuiFlexItem>
           ))}
-        {isEditTags && iconAction && (
+        {isEditTags && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <Form form={form}>
@@ -111,16 +100,12 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: 
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton color="secondary" fill iconType="save" onClick={onSubmit} size="s">
+                  <EuiButton color="secondary" fill iconType="save" onClick={onSubmitTags} size="s">
                     {i18n.SAVE}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="cross"
-                    onClick={() => onActionClick(iconAction.onClick, false)}
-                    size="s"
-                  >
+                  <EuiButtonEmpty iconType="cross" onClick={() => setIsEditTags(false)} size="s">
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
