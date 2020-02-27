@@ -23,6 +23,8 @@ import * as i18n from './translations';
 
 import { ServiceNowActionConnector } from './types';
 
+import logo from './logos/servicenow.svg';
+
 interface ServiceNowActionParams {
   message: string;
 }
@@ -30,7 +32,7 @@ interface ServiceNowActionParams {
 export function getActionType(): ActionTypeModel {
   return {
     id: '.servicenow',
-    iconClass: 'logoWebhook',
+    iconClass: logo,
     selectMessage: i18n.SERVICENOW_DESC,
     actionTypeTitle: i18n.SERVICENOW_TITLE,
     validateConnector: (action: ServiceNowActionConnector): ValidationResult => {
