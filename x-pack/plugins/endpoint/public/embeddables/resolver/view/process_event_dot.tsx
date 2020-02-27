@@ -51,25 +51,35 @@ export const ProcessEventDot = styled(
 
       const [magFactorX] = projectionMatrix;
 
-      const style = {
+      const nodeViewportStyle = {
         left: `${left}px`,
         top: `${top}px`,
-        transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
+        width: `${360 * magFactorX}px`,
+        height: `${120 * magFactorX}px`,
+        transform: `translateX(-${.172413 * 360 * magFactorX + 10}px) translateY(-${.73684 * 120 * magFactorX}px)`,
       };
 
-      const markerBaseSize = 20;
+      const markerBaseSize = 15;
       const markerSize = (magFactor: number) => {
-        return markerBaseSize * (1 / magFactor);
+        return markerBaseSize;
       };
 
-      const markerPosition = (magFactor: number) => {
-        return -markerBaseSize/2 * (1 / magFactorX);
+      const markerPositionOffset = (magFactor: number) => {
+        return -markerBaseSize/2;
+      };
+
+      const labelYOffset = (magFactor: number) => {
+        return markerPositionOffset(magFactorX) + .25 * markerSize(magFactorX) - .5;
+      };
+
+      const labelYHeight = (magFactor: number) => {
+        return markerSize(magFactorX) / 1.76470
       };
 
       return (
         <svg
           className={className}
-          style={style}
+          style={nodeViewportStyle}
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
           role="treeitem"
@@ -78,25 +88,24 @@ export const ProcessEventDot = styled(
           <use
             role="presentation"
             xlinkHref={`#${SymbolIds.runningProcessCube}`}
-            x={markerPosition(magFactorX)}
-            y={markerPosition(magFactorX)}
+            x={markerPositionOffset(magFactorX)}
+            y={markerPositionOffset(magFactorX)}
             width={markerSize(magFactorX)}
             height={markerSize(magFactorX)}
             opacity="1"
-            style={{ stroke: `${bgColor}`, fill: '#FFFFFF' }}
           />
           <use
             role="presentation"
             xlinkHref={`#${SymbolIds.processNode}`}
-            x={markerPosition(magFactorX) + .7 * markerSize(magFactorX)}
-            y={markerPosition(magFactorX) + .25 * markerSize(magFactorX)}
-            width="50"
-            height="10"
+            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) - .5}
+            y={labelYOffset(magFactorX)}
+            width={(markerSize(magFactorX) / 1.76470) * 5}
+            height={markerSize(magFactorX) / 1.76470}
             opacity="1"
           />
           <text
-            x={markerPosition(magFactorX) + .7 * markerSize(magFactorX) + 50/2}
-            y={markerPosition(magFactorX) + .25 * markerSize(magFactorX) + 5}
+            x={markerPositionOffset(magFactorX) + .7 * markerSize(magFactorX) + 50/2}
+            y={labelYOffset(magFactorX) + labelYHeight(magFactorX) / 2}
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
@@ -106,24 +115,22 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
           >
             {event.data_buffer.process_name}
+          </text> 
+          <text
+            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) + 10.5}
+            y={labelYOffset(magFactorX) - 1}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="2.25"
+            fill={NamedColors.activeNoWarning}
+            paintOrder="stroke"
+            fontWeight="bold"
+            style={{ textTransform: 'uppercase', letterSpacing: '-0.01px'}}
+          >
+            Running Process
           </text>
-
-          {magFactorX >= 1.75 ? (
-            <>
-              <text
-                x="0"
-                y="-9.6"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="1.25"
-                fill={NamedColors.empty}
-                paintOrder="stroke"
-                style={{ textTransform: 'uppercase' }}
-              >
-                Terminated Process
-              </text>
-            </>
-          ) : null}
+            
+         
         </svg>
       );
     }
@@ -131,8 +138,7 @@ export const ProcessEventDot = styled(
 )`
   position: absolute;
   display: block;
-  width: 360px;
-  height: 120px;
+  
   text-align: left;
   font-size: 10px;
   user-select: none;
@@ -141,4 +147,5 @@ export const ProcessEventDot = styled(
   padding: 4px;
   white-space: nowrap;
   contain: strict;
+  will-change: width, height;
 `;

@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { darken, saturate } from 'polished';
+import { darken, saturate, lighten } from 'polished';
 
 import {
   htmlIdGenerator,
@@ -48,7 +48,8 @@ type ResolverColorNames =
   | 'strokeBehindEmpty'
   | 'resolverBackground'
   | 'runningProcessStart'
-  | 'runningProcessEnd';
+  | 'runningProcessEnd'
+  | 'activeNoWarning'
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
@@ -60,6 +61,7 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   resolverBackground: euiColor85Shade,
   runningProcessStart: "#006BB4",
   runningProcessEnd: "#017D73",
+  activeNoWarning: "#0078FF",
 };
 
 const idGenerator = htmlIdGenerator();
@@ -95,14 +97,16 @@ const PaintServers = memo(() => (
       x1="0"
       y1="0"
       x2="1"
-      y2="1"
+      y2="0"
       spreadMethod="reflect"
       gradientUnits="objectBoundingBox"
     >
-      <stop offset="0%" stopColor={NamedColors.runningProcessStart} stopOpacity="1" />
-      <stop offset="100%" stopColor={NamedColors.runningProcessEnd} stopOpacity="1" />
+      <stop offset="0%" stopColor={saturate(.7, lighten(0.05, NamedColors.runningProcessStart))} stopOpacity="1" />
+      <stop offset="100%" stopColor={saturate(.7, lighten(0.05, NamedColors.runningProcessEnd))} stopOpacity="1" />
     </linearGradient>
-    <linearGradient id="linear-gradient" x1="-382.33074" y1="265.24689" x2="-381.88086" y2="264.46019" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#006bb4"/><stop offset="1" stopColor="#017d73"/>
+    <linearGradient id="linear-gradient" x1="-382.33074" y1="265.24689" x2="-381.88086" y2="264.46019" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stopColor={NamedColors.runningProcessStart}/>
+      <stop offset="1" stopColor={NamedColors.runningProcessEnd}/>
     </linearGradient>
   </>
 ));
@@ -124,17 +128,17 @@ const SymbolsAndShapes = memo(() => (
   <>
     <symbol
       id={SymbolIds.processNode}
-      viewBox="-10 0 128.6889 29.31389"
+      viewBox="0 0 144 25"
       preserveAspectRatio="xMidYMid meet"
     >
-      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
+      <rect x="1" y="1" width="142" height="23" fill={`url(#${PaintServerIds.runningProcess})`} strokeWidth="0" paintOrder="normal"/>
     </symbol>
     <symbol
       id={SymbolIds.processNodeWithHorizontalRule}
       viewBox="-10 0 188.6889 29.31389"
       preserveAspectRatio="xMinYMin slice"
     >
-      <rect x=".97904" y=".89113" width="156.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} stroke-width=".88" paintOrder="normal"/>
+      <rect x=".97904" y=".89113" width="156.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.runningProcess})`} strokeWidth=".88" paintOrder="normal"/>
       <line x1="1.425" x2="108.5" y1="10" y2="10" stroke={NamedColors.ok} strokeWidth="0.449" />
     </symbol>
 
@@ -188,9 +192,9 @@ const SymbolsAndShapes = memo(() => (
               <polygon id="Path-4" points="27 41.077 44.089 31 61 41.077 61 60.128 44.089 70 27 60.128 27 41.077" fill="#fff" />
               <polygon id="Path-11" points="44 31 61 41.077 61 60.128 44 50 44 31" fill="#d8d8d8" />
               <polygon id="Path-12" points="27 60.128 27 41.077 44 31 44 50 27 60.128" fill="#959595" />
-              <polygon id="Path-4-Copy-12" points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.74744" fill="url(#linear-gradient)" style={{isolation: 'isolate'}} />
+              <polygon id="Path-4-Copy-12" points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.74744" fill={"url(#linear-gradient)"} style={{isolation: 'isolate'}} />
               <polygon id="Path-Copy-17" points="88 25.839 44.23 0 0 25.839 44 50 88 25.839" fill="#fff" opacity="0.13893" style={{isolation: 'isolate'}} />
-              <polygon id="Path-Copy-16-2" data-name="Path-Copy-16" points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
+              <polygon id="Path-Copy-16-2" points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
             </g>
         </g>
       </g>
