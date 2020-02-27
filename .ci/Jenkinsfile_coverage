@@ -84,10 +84,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 )
                 kibanaPipeline.bash(
                   """
-                  echo "### About to upload the static site per this TIME_STAMP: ${TIME_STAMP}"
+                  echo "### Canonical TIME_STAMP for the build and ingestion: ${TIME_STAMP}"
 
                   """,
-                  "### Upload Code Coverage Static Site"
+                  "### About to Upload Code Coverage Static Site"
                 )x
 //                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
                 kibanaPipeline.uploadCoverageStaticSite_PROD(TIME_STAMP)

@@ -18,7 +18,7 @@
  */
 
 import { left, right } from './either';
-import { always, id } from './utils';
+import { always } from './utils';
 import { XPACK, STATIC_SITE_URL_PROP_NAME } from './constants';
 
 const maybeTotal = x =>
@@ -35,8 +35,8 @@ export const statsAndstaticSiteUrl = (...xs) => {
   };
 };
 
-export const addCoverageSummaryPath = coverageSummaryPath => obj => ({
-  coverageSummaryPath: trimLeftFrom('target', coverageSummaryPath),
+export const addJsonSummaryPath = jsonSummaryPath => obj => ({
+  jsonSummaryPath: trimLeftFrom('target', jsonSummaryPath),
   ...obj,
 });
 
@@ -69,8 +69,8 @@ export const distro = obj => {
 const dropFront = staticSiteUrl =>
   trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
 
-const buildFinalUrl = (urlBase, BUILD_ID, ts, testRunnerType) => trimmed =>
-  `${urlBase}/${BUILD_ID}/${ts}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
+const buildFinalUrl = (urlBase, ts, testRunnerType) => trimmed =>
+  `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
 
 const assignUrl = obj => name => value => {
   obj[name] = value;
@@ -78,17 +78,17 @@ const assignUrl = obj => name => value => {
 };
 
 export const staticSite = urlBase => obj => {
-  const { BUILD_ID, staticSiteUrl, testRunnerType } = obj;
+  const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
 
-  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, BUILD_ID, ts, testRunnerType);
+  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, ts, testRunnerType);
   const assignObj = assignUrl(obj);
-  const assignstaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
+  const assignStaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
 
   return maybeTotal(staticSiteUrl)
     .map(dropFront)
     .map(buildFinalStaticSiteUrl)
-    .fold(always(assignstaticSiteUrl(undefined)), assignstaticSiteUrl);
+    .fold(always(assignStaticSiteUrl(undefined)), assignStaticSiteUrl);
 
 };
 
@@ -103,9 +103,8 @@ export const coveredFilePath = obj => {
     .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
 };
 
-export const ciRunUrl = log => obj => {
+export const ciRunUrl = obj => {
   const ciRunUrl = process.env.CI_RUN_URL || 'CI RUN URL NOT PROVIDED';
-  log.verbose(`\n### ciRunUrl: \n\t${ciRunUrl}`)
 
   return {
     ...obj,
@@ -114,12 +113,12 @@ export const ciRunUrl = log => obj => {
 };
 
 export const testRunner = obj => {
-  const { coverageSummaryPath } = obj;
+  const { jsonSummaryPath } = obj;
 
   let testRunnerType = 'other';
 
   const upperTestRunnerType = x => {
-    if (coverageSummaryPath.includes(x)) {
+    if (jsonSummaryPath.includes(x)) {
       testRunnerType = x.toUpperCase();
       return;
     }
