@@ -95,7 +95,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     name: 'Metric Alert - Threshold',
     validate: {
       params: schema.object({
-        expressions: schema.arrayOf(
+        criteria: schema.arrayOf(
           schema.object({
             threshold: schema.arrayOf(schema.number()),
             comparator: schema.string(),
@@ -111,11 +111,11 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     async executor({ services, params }) {
-      const { expressions } = params as { expressions: MetricExpressionParams[] };
+      const { criteria } = params as { criteria: MetricExpressionParams[] };
       const alertInstance = services.alertInstanceFactory(alertUUID);
 
       const alertResults = await Promise.all(
-        expressions.map(({ threshold, comparator }) =>
+        criteria.map(({ threshold, comparator }) =>
           (async () => {
             const currentValue = await getMetric(services, params as MetricExpressionParams);
             if (typeof currentValue === 'undefined')
