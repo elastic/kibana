@@ -6,15 +6,18 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetOverviewHostQueryComponent, OverviewHostData } from '../../../graphql/types';
+import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
 import { useUiSetting } from '../../../lib/kibana';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
+
+import { overviewHostQuery } from './index.gql_query';
 
 export const ID = 'overviewHostQuery';
 
@@ -27,40 +30,43 @@ export interface OverviewHostArgs {
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
-  children: (args: OverviewHostArgs) => React.ReactElement;
+  children: (args: OverviewHostArgs) => React.ReactNode;
   sourceId: string;
   endDate: number;
   startDate: number;
 }
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <GetOverviewHostQueryComponent
-      fetchPolicy={getDefaultFetchPolicy()}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const overviewHost = getOr({}, `source.OverviewHost`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.OverviewHost.inspect', data),
-          overviewHost,
-          loading,
-          refetch,
-        });
-      }}
-    </GetOverviewHostQueryComponent>
-  )
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    return (
+      <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
+        query={overviewHostQuery}
+        fetchPolicy={getDefaultFetchPolicy()}
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
+        }}
+      >
+        {({ data, loading, refetch }) => {
+          const overviewHost = getOr({}, `source.OverviewHost`, data);
+          return children({
+            id,
+            inspect: getOr(null, 'source.OverviewHost.inspect', data),
+            overviewHost,
+            loading,
+            refetch,
+          });
+        }}
+      </Query>
+    );
+  }
 );
 
 OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
