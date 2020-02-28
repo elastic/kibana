@@ -861,6 +861,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    readonly events: KibanaRequestEvents;
     // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -875,6 +876,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly socket: IKibanaSocket;
     readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestEvents {
+    aborted$: Observable<void>;
+}
 
 // @public
 export interface KibanaRequestRoute<Method extends RouteMethod> {
