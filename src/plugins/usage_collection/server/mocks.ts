@@ -17,20 +17,19 @@
  * under the License.
  */
 
-import { UiStatsMetric } from './ui_stats';
-import { UserAgentMetric } from './user_agent';
-import { ApplicationUsageCurrent } from './application_usage';
+import { loggingServiceMock } from '../../../core/server/mocks';
+import { UsageCollectionSetup } from './plugin';
+import { CollectorSet } from './collector';
 
-export { UiStatsMetric, createUiStatsMetric, UiStatsMetricType } from './ui_stats';
-export { Stats } from './stats';
-export { trackUsageAgent } from './user_agent';
-export { ApplicationUsage, ApplicationUsageCurrent } from './application_usage';
+const createSetupContract = () => {
+  return {
+    ...new CollectorSet({
+      logger: loggingServiceMock.createLogger(),
+      maximumWaitTimeForAllCollectorsInS: 1,
+    }),
+  } as UsageCollectionSetup;
+};
 
-export type Metric = UiStatsMetric | UserAgentMetric | ApplicationUsageCurrent;
-export enum METRIC_TYPE {
-  COUNT = 'count',
-  LOADED = 'loaded',
-  CLICK = 'click',
-  USER_AGENT = 'user_agent',
-  APPLICATION_USAGE = 'application_usage',
-}
+export const usageCollectionPluginMock = {
+  createSetupContract,
+};
