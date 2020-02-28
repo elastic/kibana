@@ -93,14 +93,18 @@ describe('CaseView ', () => {
     );
     expect(
       wrapper
-        .find(`[data-test-subj="user-action-1"] [data-test-subj="user-action-avatar"]`)
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].commentId}-avatar"] [data-test-subj="user-action-avatar"]`
+        )
         .first()
         .prop('name')
     ).toEqual(data.comments[0].createdBy.fullName);
 
     expect(
       wrapper
-        .find(`[data-test-subj="user-action-1"] [data-test-subj="user-action-title"] strong`)
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="user-action-title"] strong`
+        )
         .first()
         .text()
     ).toEqual(data.comments[0].createdBy.username);
@@ -108,7 +112,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `[data-test-subj="user-action-1"] [data-test-subj="user-action-content"] [data-test-subj="markdown"]`
+          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="markdown"]`
         )
         .first()
         .prop('source')

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexItem } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
 import React from 'react';
 
 interface UserActionAvatarProps {

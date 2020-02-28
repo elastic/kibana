@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { MarkdownEditor } from '../../../../components/markdown_editor';

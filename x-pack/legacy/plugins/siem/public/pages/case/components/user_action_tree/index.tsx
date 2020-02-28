@@ -139,7 +139,7 @@ export const UserActionTree = React.memo(
             markdown={
               <UserActionMarkdown
                 id={comment.commentId}
-                content={data.description}
+                content={comment.comment}
                 isEditable={manageMarkdownEditIds.includes(comment.commentId)}
                 onChangeEditable={handleManageMarkdownEditId}
                 onSaveContent={handleSaveComment.bind(null, comment.commentId)}
@@ -150,13 +150,13 @@ export const UserActionTree = React.memo(
           />
         ))}
         <UserActionItem
-          createdAt={data.createdAt}
+          createdAt={new Date().toISOString()}
           id={NewId}
           isEditable={true}
           isLoading={isLoadingIds.includes(NewId)}
           fullName="to be determined"
           markdown={MarkdownNewComment}
-          onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
+          onEdit={handleManageMarkdownEditId.bind(null, NewId)}
           userName="to be determined"
         />
       </UserAction>

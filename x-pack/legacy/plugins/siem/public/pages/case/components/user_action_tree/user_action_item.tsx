@@ -34,29 +34,27 @@ export const UserActionItem = ({
   markdown,
   onEdit,
   userName,
-}: UserActionItemProps) => {
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <UserActionAvatar name={fullName ?? userName} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {isEditable && markdown}
-        {!isEditable && (
-          <EuiPanel className="userAction__panel" paddingSize="none">
-            <UserActionTitle
-              createdAt={createdAt}
-              id={id}
-              isLoading={isLoading}
-              labelAction={labelAction ?? ''}
-              labelTitle={labelTitle ?? ''}
-              userName={userName}
-              onEdit={onEdit}
-            />
-            {markdown}
-          </EuiPanel>
-        )}
-      </EuiFlexItem>
-    </>
-  );
-};
+}: UserActionItemProps) => (
+  <>
+    <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
+      <UserActionAvatar name={fullName ?? userName} />
+    </EuiFlexItem>
+    <EuiFlexItem data-test-subj={`user-action-${id}`}>
+      {isEditable && markdown}
+      {!isEditable && (
+        <EuiPanel className="userAction__panel" paddingSize="none">
+          <UserActionTitle
+            createdAt={createdAt}
+            id={id}
+            isLoading={isLoading}
+            labelAction={labelAction ?? ''}
+            labelTitle={labelTitle ?? ''}
+            userName={userName}
+            onEdit={onEdit}
+          />
+          {markdown}
+        </EuiPanel>
+      )}
+    </EuiFlexItem>
+  </>
+);
