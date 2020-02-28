@@ -68,23 +68,15 @@ describe('connector_add_flyout', () => {
     const wrapper = mountWithIntl(
       <ActionsConnectorsContextProvider
         value={{
-          addFlyoutVisible: true,
-          setAddFlyoutVisibility: state => {},
-          editFlyoutVisible: false,
-          setEditFlyoutVisibility: state => {},
-          actionTypesIndex: {
-            'first-action-type': { id: 'first-action-type', name: 'first', enabled: true },
-            'second-action-type': { id: 'second-action-type', name: 'second', enabled: true },
-          },
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
         }}
       >
-        <ActionTypeMenu
-          onActionTypeChange={onActionTypeChange}
-          actionTypeRegistry={deps.actionTypeRegistry}
-        />
+        <ActionTypeMenu onActionTypeChange={onActionTypeChange} />
       </ActionsConnectorsContextProvider>
     );
 

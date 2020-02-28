@@ -7,7 +7,6 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppDeps } from '../../app';
@@ -75,30 +74,15 @@ describe('connector_add_modal', () => {
 
     const wrapper = deps
       ? mountWithIntl(
-          <ActionsConnectorsContextProvider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: state => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: state => {},
-              actionTypesIndex: {
-                'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
-              },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ConnectorAddModal
-              addModalVisible={true}
-              setAddModalVisibility={() => {}}
-              actionType={actionType}
-              http={deps.http}
-              actionTypeRegistry={deps.actionTypeRegistry}
-              alertTypeRegistry={deps.alertTypeRegistry}
-              toastNotifications={deps.toastNotifications}
-            />
-          </ActionsConnectorsContextProvider>
+          <ConnectorAddModal
+            addModalVisible={true}
+            setAddModalVisibility={() => {}}
+            actionType={actionType}
+            http={deps.http}
+            actionTypeRegistry={deps.actionTypeRegistry}
+            alertTypeRegistry={deps.alertTypeRegistry}
+            toastNotifications={deps.toastNotifications}
+          />
         )
       : undefined;
     expect(wrapper?.find('EuiModalHeader')).toHaveLength(1);

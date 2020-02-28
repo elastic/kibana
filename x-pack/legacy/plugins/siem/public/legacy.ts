@@ -6,10 +6,24 @@
 
 import { npSetup, npStart } from 'ui/new_platform';
 
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
 import { PluginInitializerContext } from '../../../../../src/core/public';
 import { plugin } from './';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-pluginInstance.setup(npSetup.core, npSetup.plugins);
-pluginInstance.start(npStart.core, npStart.plugins);
+pluginInstance.setup(npSetup.core, {
+  ...npSetup.plugins,
+  triggers_actions_ui: ((npSetup.plugins as unknown) as {
+    triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  }).triggers_actions_ui,
+});
+pluginInstance.start(npStart.core, {
+  ...npStart.plugins,
+  triggers_actions_ui: ((npStart.plugins as unknown) as {
+    triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  }).triggers_actions_ui,
+});

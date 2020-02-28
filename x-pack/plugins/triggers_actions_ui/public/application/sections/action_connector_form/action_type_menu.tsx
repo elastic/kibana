@@ -17,12 +17,10 @@ interface Props {
 export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
   const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
       try {
-        setIsLoadingActionTypes(true);
         const actionTypes = await loadActionTypes({ http });
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of actionTypes) {
@@ -38,8 +36,6 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
             ),
           });
         }
-      } finally {
-        setIsLoadingActionTypes(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

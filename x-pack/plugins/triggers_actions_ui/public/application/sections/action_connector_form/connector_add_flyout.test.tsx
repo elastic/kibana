@@ -74,19 +74,15 @@ describe('connector_add_flyout', () => {
       <AppContextProvider appDeps={deps}>
         <ActionsConnectorsContextProvider
           value={{
-            addFlyoutVisible: true,
-            setAddFlyoutVisibility: state => {},
-            editFlyoutVisible: false,
-            setEditFlyoutVisibility: state => {},
-            actionTypesIndex: {
-              'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
-            },
+            http: deps!.http,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            capabilities: deps!.capabilities,
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
           }}
         >
-          <ConnectorAddFlyout />
+          <ConnectorAddFlyout addFlyoutVisible={true} setAddFlyoutVisibility={state => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
