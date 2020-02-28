@@ -10,10 +10,10 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
-import { Plugin as APMOSSPlugin } from '../../../../src/plugins/apm_oss/server';
+import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from '../../../legacy/plugins/apm/server/lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../../../legacy/plugins/apm/server/routes/create_apm_api';
 import { getApmIndices } from '../../../legacy/plugins/apm/server/lib/settings/apm_indices/get_apm_indices';
@@ -33,22 +33,19 @@ export interface APMPluginContract {
 
 export class APMPlugin implements Plugin<APMPluginContract> {
   legacySetup$: AsyncSubject<LegacySetup>;
-  currentConfig: APMConfig;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.legacySetup$ = new AsyncSubject();
-    this.currentConfig = {} as APMConfig;
   }
 
   public async setup(
     core: CoreSetup,
     plugins: {
-      apm_oss: APMOSSPlugin extends Plugin<infer TSetup> ? TSetup : never;
+      apm_oss: APMOSSPluginSetup;
     }
   ) {
     const config$ = this.initContext.config.create<APMXPackConfig>();
     const logger = this.initContext.logger.get('apm');
-
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
@@ -57,15 +54,12 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
     });
 
-    await new Promise(resolve => {
-      mergedConfig$.subscribe(async config => {
-        this.currentConfig = config;
-        await createApmAgentConfigurationIndex({
-          esClient: core.elasticsearch.dataClient,
-          config,
-        });
-        resolve();
-      });
+    const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+
+    // create agent configuration index without blocking setup lifecycle
+    createApmAgentConfigurationIndex({
+      esClient: core.elasticsearch.dataClient,
+      config: currentConfig,
     });
 
     return {
@@ -75,7 +69,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.legacySetup$.complete();
       }),
       getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
-        return getApmIndices({ savedObjectsClient, config: this.currentConfig });
+        return getApmIndices({ savedObjectsClient, config: currentConfig });
       },
     };
   }
