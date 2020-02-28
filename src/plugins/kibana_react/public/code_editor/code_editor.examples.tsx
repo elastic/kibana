@@ -47,6 +47,8 @@ const logs = `[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a 
 storiesOf('CodeEditor', module)
   .addParameters({
     info: {
+      // CodeEditor has no PropTypes set so this table will show up
+      // as blank. I'm just disabling it to reduce confusion
       propTablesExclude: [CodeEditor],
     },
   })
@@ -65,6 +67,25 @@ storiesOf('CodeEditor', module)
     {
       info: {
         text: 'Plaintext Monaco Editor',
+      },
+    }
+  )
+  .add(
+    'dark mode',
+    () => (
+      <div>
+        <CodeEditor
+          languageId="plaintext"
+          height={250}
+          value="Hello!"
+          onChange={action('onChange')}
+          useDarkTheme={true}
+        />
+      </div>
+    ),
+    {
+      info: {
+        text: 'The dark theme is automatically used when dark mode is enabled in Kibana',
       },
     }
   )
