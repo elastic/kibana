@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { waitFor } from './wait_for';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -216,17 +217,4 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
     });
   });
-}
-
-async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolean> {
-  if (retries === 0) {
-    throw new Error(`Maximum number of retries reached`);
-  }
-
-  const res = await cb();
-  if (!res) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return waitFor(cb, retries - 1);
-  }
-  return res;
 }

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { waitFor } from './wait_for';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -142,11 +143,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectForbidden: expect404,
       expectResponse: expect200,
       onExpectationFail: async () => {
-        const res = await es.search({
-          index: '.apm-agent-configuration',
-        });
-
-        log.error(JSON.stringify(res, null, 2));
+        try {
+          const res = await getAgentConfigurations();
+          log.error(`Spec failed but agent configs were found: ${JSON.stringify(res, null, 2)}`);
+        } catch (e) {
+          log.error(`Spec failed and agent configurations were not found: ${e}`);
+        }
       },
     },
   ];
@@ -241,12 +243,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     }
   }
 
+  async function getAgentConfigurations() {
+    return es.search({ index: '.apm-agent-configuration' });
+  }
+
   describe('apm feature controls', () => {
     const config = {
       service: { name: 'test-service' },
       settings: { transaction_sample_rate: 0.5 },
     };
     before(async () => {
+      // ensure agent configuration index exists before running tests
+      await waitFor(async () => {
+        try {
+          await getAgentConfigurations();
+          return true;
+        } catch (e) {
+          log.warning('Could not get agent configurations. Retrying...');
+          return false;
+        }
+      }, 1000);
+
       log.info(`Creating agent configuration`);
       await executeAsAdmin({
         method: 'put',
