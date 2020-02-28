@@ -8,13 +8,13 @@ jest.mock('./lib/post_servicenow', () => ({
   postServiceNow: jest.fn(),
 }));
 
-import { getActionType } from './servicenow';
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { postServiceNow } from './lib/post_servicenow';
-import { createActionTypeRegistry } from './index.test';
-import { configUtilsMock } from '../actions_config.mock';
+import { getActionType } from '.';
+import { ActionType, Services, ActionTypeExecutorOptions } from '../../types';
+import { validateConfig, validateSecrets, validateParams } from '../../lib';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { postServiceNow } from '../lib/post_servicenow';
+import { createActionTypeRegistry } from '../index.test';
+import { configUtilsMock } from '../../actions_config.mock';
 
 const postServiceNowMock = postServiceNow as jest.Mock;
 

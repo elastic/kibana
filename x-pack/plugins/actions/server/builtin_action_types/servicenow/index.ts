@@ -5,79 +5,48 @@
  */
 
 import { curry } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   ActionType,
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
   ExecutorType,
-} from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { postServiceNow } from './lib/post_servicenow';
+} from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { postServiceNow } from '../lib/post_servicenow';
 
-// config definition
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+import * as i18n from './translations';
 
-const ConfigSchemaProps = {
-  apiUrl: schema.string(),
-};
+import { ACTION_TYPE_ID } from './constants';
+import { ConfigType, SecretsType, ParamsType } from './types';
 
-const ConfigSchema = schema.object(ConfigSchemaProps);
+import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ConfigType
 ) {
   if (configObject.apiUrl == null) {
-    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiNullError', {
-      defaultMessage: 'ServiceNow [apiUrl] is required',
-    });
+    return i18n.API_URL_REQUIRED;
   }
   try {
     configurationUtilities.ensureWhitelistedUri(configObject.apiUrl);
   } catch (whitelistError) {
-    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiWhitelistError', {
-      defaultMessage: 'error configuring servicenow action: {message}',
-      values: {
-        message: whitelistError.message,
-      },
-    });
+    return i18n.WHITE_LISTED_ERROR(whitelistError.message);
   }
 }
-// secrets definition
-export type SecretsType = TypeOf<typeof SecretsSchema>;
-const SecretsSchemaProps = {
-  password: schema.string(),
-  username: schema.string(),
-};
-
-const SecretsSchema = schema.object(SecretsSchemaProps);
 
 function validateSecrets(
   configurationUtilities: ActionsConfigurationUtilities,
   secrets: SecretsType
 ) {
   if (secrets.username == null) {
-    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiUserError', {
-      defaultMessage: 'error configuring servicenow action: no secrets [username] provided',
-    });
+    return i18n.NO_USERNAME;
   }
   if (secrets.password == null) {
-    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiPasswordError', {
-      defaultMessage: 'error configuring servicenow action: no secrets [password] provided',
-    });
+    return i18n.NO_PASSWORD;
   }
 }
-
-// params definition
-
-export type ParamsType = TypeOf<typeof ParamsSchema>;
-
-const ParamsSchema = schema.object({
-  comments: schema.maybe(schema.string()),
-  short_description: schema.string(),
-});
 
 // action type definition
 export function getActionType({
@@ -88,10 +57,8 @@ export function getActionType({
   executor?: ExecutorType;
 }): ActionType {
   return {
-    id: '.servicenow',
-    name: i18n.translate('xpack.actions.builtin.servicenowTitle', {
-      defaultMessage: 'ServiceNow',
-    }),
+    id: ACTION_TYPE_ID,
+    name: i18n.NAME,
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
@@ -122,9 +89,7 @@ async function serviceNowExecutor(
   try {
     response = await postServiceNow({ apiUrl: config.apiUrl, data: params, headers, secrets });
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.servicenow.postingErrorMessage', {
-      defaultMessage: 'error posting servicenow event',
-    });
+    const message = i18n.ERROR_POSTING;
     return {
       status: 'error',
       actionId,
@@ -141,12 +106,7 @@ async function serviceNowExecutor(
   }
 
   if (response.status === 429 || response.status >= 500) {
-    const message = i18n.translate('xpack.actions.builtin.servicenow.postingRetryErrorMessage', {
-      defaultMessage: 'error posting servicenow event: http status {status}, retry later',
-      values: {
-        status: response.status,
-      },
-    });
+    const message = i18n.RETRY_POSTING(response.status);
 
     return {
       status: 'error',
@@ -156,12 +116,7 @@ async function serviceNowExecutor(
     };
   }
 
-  const message = i18n.translate('xpack.actions.builtin.servicenow.postingUnexpectedErrorMessage', {
-    defaultMessage: 'error posting servicenow event: unexpected status {status}',
-    values: {
-      status: response.status,
-    },
-  });
+  const message = i18n.UNEXPECTED_STATUS(response.status);
 
   return {
     status: 'error',
