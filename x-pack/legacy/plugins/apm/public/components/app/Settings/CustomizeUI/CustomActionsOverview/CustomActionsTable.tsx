@@ -3,8 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import {
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer
+} from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import { units, px } from '../../../../../style/variables';
 import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { ManagedTable } from '../../../../shared/ManagedTable';
@@ -20,6 +28,8 @@ export const CustomActionsTable = ({
   items = [],
   onCustomActionSelected
 }: Props) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const columns = [
     {
       field: 'label',
@@ -77,14 +87,54 @@ export const CustomActionsTable = ({
     }
   ];
 
+  const filteredItems = items.filter(({ label, url }) => {
+    return (
+      label.toLowerCase().includes(searchTerm) ||
+      url.toLowerCase().includes(searchTerm)
+    );
+  });
+
   return (
-    <ManagedTable
-      noItemsMessage={<LoadingStatePrompt />}
-      items={items}
-      columns={columns}
-      initialPageSize={10}
-      initialSortField="@timestamp"
-      initialSortDirection="desc"
-    />
+    <>
+      <EuiSpacer size="m" />
+      <EuiFieldSearch
+        fullWidth
+        onChange={e => setSearchTerm(e.target.value)}
+        placeholder={i18n.translate('xpack.apm.searchInput.filter', {
+          defaultMessage: 'Filter actions...'
+        })}
+      />
+      <EuiSpacer size="s" />
+      <ManagedTable
+        noItemsMessage={
+          isEmpty(items) ? (
+            <LoadingStatePrompt />
+          ) : (
+            <NoResultFound value={searchTerm} />
+          )
+        }
+        items={filteredItems}
+        columns={columns}
+        initialPageSize={10}
+        initialSortField="@timestamp"
+        initialSortDirection="desc"
+      />
+    </>
   );
 };
+
+const NoResultFound = ({ value }: { value: string }) => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.apm.settings.customizeUI.customActions.table.noResultFound',
+          {
+            defaultMessage: `No results for "{value}".`,
+            values: { value }
+          }
+        )}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
