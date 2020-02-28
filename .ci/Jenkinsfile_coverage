@@ -57,7 +57,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               kibanaPipeline.downloadCoverageArtifacts()
 
               def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-              withEnv(["TIME_STAMP=${timestamp}"]) {
+              withEnv([
+                "TIME_STAMP=${timestamp}",
+                "LIVE_APP_PATH=live_cc_app"
+              ]) {
                 kibanaPipeline.bash(
                   """
                   source src/dev/ci_setup/setup_env.sh
@@ -110,7 +113,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   """,
                   "### About to Upload Code Coverage Static Site"
                 )
-                kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+                kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP, LIVE_APP_PATH)
               }
 
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
