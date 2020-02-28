@@ -65,7 +65,7 @@ export class UrlGeneratorsService implements Plugin<UrlGeneratorsSetup, UrlGener
     const generator = this.urlGenerators.get(id);
     if (!generator) {
       throw new Error(
-        i18n.translate('urlGenerators.errors.noGeneratorWithId', {
+        i18n.translate('share.urlGenerators.errors.noGeneratorWithId', {
           defaultMessage: 'No generator found with id {id}',
           values: { id },
         })
