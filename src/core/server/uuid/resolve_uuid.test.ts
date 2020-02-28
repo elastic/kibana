@@ -97,58 +97,96 @@ describe('resolveInstanceUuid', () => {
   });
 
   describe('when file is present and config property is set', () => {
-    it('writes to file and returns the config uuid if they mismatch', async () => {
-      const uuid = await resolveInstanceUuid(configService, logger);
-      expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
-      expect(writeFile).toHaveBeenCalledWith(
-        join('data-folder', 'uuid'),
-        DEFAULT_CONFIG_UUID,
-        expect.any(Object)
-      );
-      expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
-        ]
-      `);
+    describe('when they mismatch', () => {
+      describe('when syncToFile is true', () => {
+        it('writes to file and returns the config uuid', async () => {
+          const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+          expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+          expect(writeFile).toHaveBeenCalledWith(
+            join('data-folder', 'uuid'),
+            DEFAULT_CONFIG_UUID,
+            expect.any(Object)
+          );
+          expect(logger.debug).toHaveBeenCalledTimes(1);
+          expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
+            ]
+          `);
+        });
+      });
+
+      describe('when syncTofile is false', () => {
+        it('does not write to file and returns the config uuid', async () => {
+          const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: false });
+          expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+          expect(writeFile).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledTimes(1);
+          expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
+          ]
+        `);
+        });
+      });
     });
-    it('does not write to file if they match', async () => {
-      mockReadFile({ uuid: DEFAULT_CONFIG_UUID });
-      const uuid = await resolveInstanceUuid(configService, logger);
-      expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
-      expect(writeFile).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "Kibana instance UUID: CONFIG_UUID",
-        ]
-      `);
+
+    describe('when they match', () => {
+      it('does not write to file', async () => {
+        mockReadFile({ uuid: DEFAULT_CONFIG_UUID });
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+        expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+        expect(writeFile).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledTimes(1);
+        expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Kibana instance UUID: CONFIG_UUID",
+          ]
+        `);
+      });
     });
   });
 
   describe('when file is not present and config property is set', () => {
-    it('writes the uuid to file and returns the config uuid', async () => {
-      mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid(configService, logger);
-      expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
-      expect(writeFile).toHaveBeenCalledWith(
-        join('data-folder', 'uuid'),
-        DEFAULT_CONFIG_UUID,
-        expect.any(Object)
-      );
-      expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "Setting new Kibana instance UUID: CONFIG_UUID",
-        ]
-      `);
+    describe('when syncToFile is true', () => {
+      it('writes the uuid to file and returns the config uuid', async () => {
+        mockReadFile({ error: fileNotFoundError });
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+        expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+        expect(writeFile).toHaveBeenCalledWith(
+          join('data-folder', 'uuid'),
+          DEFAULT_CONFIG_UUID,
+          expect.any(Object)
+        );
+        expect(logger.debug).toHaveBeenCalledTimes(1);
+        expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Setting new Kibana instance UUID: CONFIG_UUID",
+          ]
+        `);
+      });
+    });
+
+    describe('when syncToFile is false', () => {
+      it('does not write the uuid to file and returns the config uuid', async () => {
+        mockReadFile({ error: fileNotFoundError });
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: false });
+        expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+        expect(writeFile).not.toHaveBeenCalledWith();
+        expect(logger.debug).toHaveBeenCalledTimes(1);
+        expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Setting new Kibana instance UUID: CONFIG_UUID",
+          ]
+        `);
+      });
     });
   });
 
   describe('when file is present and config property is not set', () => {
     it('does not write to file and returns the file uuid', async () => {
       configService = getConfigService(undefined);
-      const uuid = await resolveInstanceUuid(configService, logger);
+      const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
       expect(uuid).toEqual(DEFAULT_FILE_UUID);
       expect(writeFile).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -161,22 +199,40 @@ describe('resolveInstanceUuid', () => {
   });
 
   describe('when file is not present and config property is not set', () => {
-    it('generates a new uuid and write it to file', async () => {
-      configService = getConfigService(undefined);
-      mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid(configService, logger);
-      expect(uuid).toEqual('NEW_UUID');
-      expect(writeFile).toHaveBeenCalledWith(
-        join('data-folder', 'uuid'),
-        'NEW_UUID',
-        expect.any(Object)
-      );
-      expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "Setting new Kibana instance UUID: NEW_UUID",
-        ]
-      `);
+    describe('when syncToFile is true', () => {
+      it('generates a new uuid and write it to file', async () => {
+        configService = getConfigService(undefined);
+        mockReadFile({ error: fileNotFoundError });
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+        expect(uuid).toEqual('NEW_UUID');
+        expect(writeFile).toHaveBeenCalledWith(
+          join('data-folder', 'uuid'),
+          'NEW_UUID',
+          expect.any(Object)
+        );
+        expect(logger.debug).toHaveBeenCalledTimes(1);
+        expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Setting new Kibana instance UUID: NEW_UUID",
+          ]
+        `);
+      });
+    });
+
+    describe('when syncToFile is false', () => {
+      it('generates a new uuid and does not write it to file', async () => {
+        configService = getConfigService(undefined);
+        mockReadFile({ error: fileNotFoundError });
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: false });
+        expect(uuid).toEqual('NEW_UUID');
+        expect(writeFile).not.toHaveBeenCalledWith();
+        expect(logger.debug).toHaveBeenCalledTimes(1);
+        expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Setting new Kibana instance UUID: NEW_UUID",
+          ]
+        `);
+      });
     });
   });
 
@@ -184,7 +240,7 @@ describe('resolveInstanceUuid', () => {
     it('throws an explicit error for file read errors', async () => {
       mockReadFile({ error: permissionError });
       await expect(
-        resolveInstanceUuid(configService, logger)
+        resolveInstanceUuid({ configService, logger, syncToFile: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
       );
@@ -192,7 +248,7 @@ describe('resolveInstanceUuid', () => {
     it('throws an explicit error for file write errors', async () => {
       mockWriteFile(isDirectoryError);
       await expect(
-        resolveInstanceUuid(configService, logger)
+        resolveInstanceUuid({ configService, logger, syncToFile: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
       );
