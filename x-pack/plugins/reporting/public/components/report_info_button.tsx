@@ -265,7 +265,7 @@ export class ReportInfoButton extends Component<Props, State> {
           isLoading: false,
           calloutTitle: 'Unable to fetch report info',
           info: null,
-          error: err.message,
+          error: err,
         });
       }
     }
