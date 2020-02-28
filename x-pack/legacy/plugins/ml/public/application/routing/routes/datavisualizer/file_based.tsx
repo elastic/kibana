@@ -16,7 +16,7 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
 

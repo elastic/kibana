@@ -17,7 +17,7 @@ import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
-import { setLicenseCache } from './license/check_license';
+import { setLicenseCache } from './license';
 
 import { MlRouter } from './routing';
 
@@ -53,7 +53,6 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    licensing: deps.licensing,
   });
 
   const licenseSubscription = deps.licensing.license$.subscribe(async license => {

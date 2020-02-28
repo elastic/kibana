@@ -36,7 +36,11 @@ const licencingSubscription = plugins.licensing.license$.subscribe(async license
 });
 
 export function initManagementSection(license: ILicense) {
-  if (license.type !== undefined && VALID_FULL_LICENSE_MODES.includes(license.type)) {
+  if (
+    license.isActive &&
+    license.type !== undefined &&
+    VALID_FULL_LICENSE_MODES.includes(license.type)
+  ) {
     const legacyBasePath = {
       prepend: chrome.addBasePath,
       get: chrome.getBasePath,

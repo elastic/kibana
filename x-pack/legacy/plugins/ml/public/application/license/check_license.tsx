@@ -7,59 +7,60 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { ILicense } from '../../../../../../plugins/licensing/public';
-import { getOverlays, getLicensing } from '../util/dependency_cache';
-import { VALID_FULL_LICENSE_MODES } from '../../../common/constants/license';
+import { ILicense, LICENSE_CHECK_STATE } from '../../../../../../plugins/licensing/public';
+import { getOverlays } from '../util/dependency_cache';
+import { PLUGIN_ID } from '../../../common/constants/app';
 
 let expiredLicenseBannerId: string;
 let license: ILicense | null = null;
+
+const MINIMUM_LICENSE = 'basic';
+const MINIMUM_FULL_LICENSE = 'platinum';
 
 export function setLicenseCache(newLicense: ILicense) {
   license = newLicense;
 }
 
 export async function checkFullLicense() {
-  if (license === null) {
-    // just in case the license hasn't been loaded
-    await loadLicense();
+  if (license === null || license.type === undefined) {
+    // this should never happen
+    console.error('Licensing not initialized'); // eslint-disable-line
+    return redirectToKibana();
   }
 
-  if (license === null || license.type === undefined || license.isAvailable === false) {
-    // ML is not enabled
+  if (isMlEnabled() === false || isReducedLicense() === false) {
+    // ML is not enabled or the license isn't at least basic
     return redirectToKibana();
-  } else if (license.type === 'basic') {
+  }
+
+  if (isFullLicense() === false) {
     // ML is enabled, but only with a basic or gold license
     return redirectToBasic();
-  } else {
-    // ML is enabled
-    if (hasLicenseExpired()) {
-      showExpiredLicenseWarning();
-    }
-    return license;
   }
+
+  // ML is enabled
+  if (hasLicenseExpired()) {
+    showExpiredLicenseWarning();
+  }
+  return license;
 }
 
 export async function checkBasicLicense() {
-  if (license === null) {
-    // just in case the license hasn't been loaded
-    await loadLicense();
-  }
-
-  if (license === null || license.type === undefined || license.isAvailable === false) {
-    // ML is not enabled
+  if (license === null || license.type === undefined) {
+    // this should never happen
+    console.error('Licensing not initialized'); // eslint-disable-line
     return redirectToKibana();
-  } else {
-    // ML is enabled
-    if (hasLicenseExpired()) {
-      showExpiredLicenseWarning();
-    }
-    return license;
   }
-}
 
-async function loadLicense() {
-  const { refresh } = getLicensing();
-  license = await refresh();
+  if (isMlEnabled() === false || isReducedLicense() === false) {
+    // ML is not enabled or the license isn't at least basic
+    return redirectToKibana();
+  }
+
+  // ML is enabled
+  if (hasLicenseExpired()) {
+    showExpiredLicenseWarning();
+  }
   return license;
 }
 
@@ -87,10 +88,20 @@ export function hasLicenseExpired() {
   return license !== null && license.status === 'expired';
 }
 
+export function isMlEnabled() {
+  return license !== null && license.getFeature(PLUGIN_ID).isEnabled;
+}
+
+export function isReducedLicense() {
+  return (
+    license !== null &&
+    license.check(PLUGIN_ID, MINIMUM_LICENSE).state === LICENSE_CHECK_STATE.Valid
+  );
+}
+
 export function isFullLicense() {
   return (
     license !== null &&
-    license.type !== undefined &&
-    VALID_FULL_LICENSE_MODES.includes(license.type)
+    license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid
   );
 }
