@@ -19,10 +19,10 @@
 
 import { isString, isObject } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
-import { IAggConfig } from '../agg_config';
+import { AggConfig } from '../agg_config';
 
 export const isType = (type: string) => {
-  return (agg: IAggConfig): boolean => {
+  return (agg: AggConfig): boolean => {
     const field = agg.params.field;
 
     return field && field.type === type;

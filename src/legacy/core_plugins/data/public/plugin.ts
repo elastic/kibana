@@ -36,7 +36,6 @@ import {
   setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
-import { setSearchServiceShim } from './services';
 import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
 import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
 import {
@@ -113,9 +112,6 @@ export class DataPlugin
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
-    const search = this.search.start(core);
-    setSearchServiceShim(search);
-
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
@@ -127,7 +123,7 @@ export class DataPlugin
     uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
 
     return {
-      search,
+      search: this.search.start(core),
     };
   }
 

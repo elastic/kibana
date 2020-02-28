@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { IAggConfig } from '../agg_config';
+import { AggConfig } from '../agg_config';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 
-export interface IBucketAggConfig extends IAggConfig {
+export interface IBucketAggConfig extends AggConfig {
   type: InstanceType<typeof BucketAggType>;
 }
 
-export interface BucketAggParam<TBucketAggConfig extends IAggConfig>
+export interface BucketAggParam<TBucketAggConfig extends AggConfig>
   extends AggParamType<TBucketAggConfig> {
   scriptable?: boolean;
   filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
@@ -34,12 +34,12 @@ export interface BucketAggParam<TBucketAggConfig extends IAggConfig>
 
 const bucketType = 'buckets';
 
-interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
+interface BucketAggTypeConfig<TBucketAggConfig extends AggConfig>
   extends AggTypeConfig<TBucketAggConfig, BucketAggParam<TBucketAggConfig>> {
-  getKey?: (bucket: any, key: any, agg: IAggConfig) => any;
+  getKey?: (bucket: any, key: any, agg: AggConfig) => any;
 }
 
-export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfig> extends AggType<
+export class BucketAggType<TBucketAggConfig extends AggConfig = IBucketAggConfig> extends AggType<
   TBucketAggConfig,
   BucketAggParam<TBucketAggConfig>
 > {

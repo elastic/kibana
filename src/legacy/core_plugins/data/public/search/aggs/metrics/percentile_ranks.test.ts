@@ -19,16 +19,14 @@
 
 import { IPercentileRanksAggConfig, percentileRanksMetricAgg } from './percentile_ranks';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+
+jest.mock('ui/new_platform');
 
 describe('AggTypesMetricsPercentileRanksProvider class', function() {
   let aggConfigs: IAggConfigs;
 
   beforeEach(() => {
-    mockDataServices();
-
-    const typesRegistry = mockAggTypesRegistry([percentileRanksMetricAgg]);
     const field = {
       name: 'bytes',
     };
@@ -60,7 +58,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
           },
         },
       ],
-      { typesRegistry }
+      null
     );
   });
 

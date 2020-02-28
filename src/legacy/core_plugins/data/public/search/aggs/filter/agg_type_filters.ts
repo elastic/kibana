@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { IndexPattern } from 'src/plugins/data/public';
 import { IAggConfig, IAggType } from '../types';
 

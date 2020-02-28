@@ -25,6 +25,8 @@ import { isMetricAggType } from './metrics/metric_agg_type';
 const bucketAggs = aggTypes.buckets;
 const metricAggs = aggTypes.metrics;
 
+jest.mock('ui/new_platform');
+
 describe('AggTypesComponent', () => {
   describe('bucket aggs', () => {
     it('all extend BucketAggType', () => {

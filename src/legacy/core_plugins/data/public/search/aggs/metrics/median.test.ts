@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { medianMetricAgg } from './median';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+
+jest.mock('ui/new_platform');
 
 describe('AggTypeMetricMedianProvider class', () => {
   let aggConfigs: IAggConfigs;
 
   beforeEach(() => {
-    const typesRegistry = mockAggTypesRegistry([medianMetricAgg]);
     const field = {
       name: 'bytes',
     };
@@ -51,7 +50,7 @@ describe('AggTypeMetricMedianProvider class', () => {
           },
         },
       ],
-      { typesRegistry }
+      null
     );
   });
 
