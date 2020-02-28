@@ -26,7 +26,7 @@
     "xpack.logstash": "legacy/plugins/logstash",
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": "legacy/plugins/maps",
-    "xpack.ml": "legacy/plugins/ml",
+    "xpack.ml": ["plugins/ml", "legacy/plugins/ml"],
     "xpack.monitoring": "legacy/plugins/monitoring",
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
