@@ -5,17 +5,10 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { QuerySourceResolver } from '../sources/resolvers';
-
-export type QueryWhoAmIResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.WhoAmIResolver>,
-  QuerySourceResolver
->;
 
 export const createWhoAmIResolvers = (): {
   Source: {
-    whoAmI: QueryWhoAmIResolver;
+    whoAmI: SourceResolvers['whoAmI'];
   };
 } => ({
   Source: {

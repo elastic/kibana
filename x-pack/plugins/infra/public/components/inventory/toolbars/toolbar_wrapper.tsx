@@ -37,6 +37,8 @@ export const ToolbarWrapper = (props: Props) => {
                 nodeType,
                 accountId,
                 region,
+                customMetrics,
+                changeCustomMetrics,
               }) =>
                 props.children({
                   createDerivedIndexPattern,
@@ -51,6 +53,8 @@ export const ToolbarWrapper = (props: Props) => {
                   nodeType,
                   region,
                   accountId,
+                  customMetrics,
+                  changeCustomMetrics,
                 })
               }
             </WithWaffleOptions>
@@ -146,7 +150,7 @@ export const toGroupByOpt = (field: string) => ({
 
 export const toMetricOpt = (
   metric: SnapshotMetricType
-): { text: string; value: SnapshotMetricType } => {
+): { text: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
     case 'cpu':
       return {
