@@ -64,9 +64,7 @@ export const getAppProviders = (deps: AppDependencies) => {
   const AppDependenciesProvider = setAppDependencies(deps);
 
   return ({ children }: { children: ReactNode }) => (
-    <AuthorizationProvider
-      privilegesEndpoint={deps.core.http.basePath.prepend(`${API_BASE_PATH}privileges`)}
-    >
+    <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
         <HashRouter>
           <AppDependenciesProvider value={deps}>{children}</AppDependenciesProvider>
