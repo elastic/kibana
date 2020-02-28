@@ -5,18 +5,22 @@
  */
 import { textService } from '../text';
 
-class DocTitleService {
-  private changeDocTitle: any = () => {};
+type ChangeDocTitleHandler = (newTitle: string | string[]) => void;
 
-  public init(changeDocTitle: any): void {
-    this.changeDocTitle = changeDocTitle;
+class DocTitleService {
+  private changeDocTitleHandler: ChangeDocTitleHandler = () => {};
+
+  public setup(_changeDocTitleHandler: ChangeDocTitleHandler): void {
+    this.changeDocTitleHandler = _changeDocTitleHandler;
   }
 
   public setTitle(page?: string): void {
     if (!page || page === 'home') {
-      this.changeDocTitle(`${textService.breadcrumbs.home}`);
+      this.changeDocTitleHandler(`${textService.breadcrumbs.home}`);
     } else if (textService.breadcrumbs[page]) {
-      this.changeDocTitle(`${textService.breadcrumbs[page]} - ${textService.breadcrumbs.home}`);
+      this.changeDocTitleHandler(
+        `${textService.breadcrumbs[page]} - ${textService.breadcrumbs.home}`
+      );
     }
   }
 }

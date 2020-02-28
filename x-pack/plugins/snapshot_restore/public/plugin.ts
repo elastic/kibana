@@ -33,7 +33,6 @@ export class SnapshotRestoreUIPlugin {
     // Initialize services
     textService.init(i18n);
     httpService.setup(http);
-    // docTitleService.init(docTitle.change);
 
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN.id,
@@ -43,8 +42,12 @@ export class SnapshotRestoreUIPlugin {
       order: 7,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
-        const { docLinks } = core;
+        const {
+          docLinks,
+          chrome: { docTitle },
+        } = core;
 
+        docTitleService.setup(docTitle.change);
         breadcrumbService.setup(setBreadcrumbs);
         documentationLinksService.setup(docLinks);
 
