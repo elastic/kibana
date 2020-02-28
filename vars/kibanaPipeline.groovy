@@ -347,7 +347,7 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
         print ex.toString()
         continue
       }
-      try {
+      catchErrorClean {
         // retryable("kibana-ciGroup${workerNumber}") {
           def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
           iteration++
@@ -366,16 +366,11 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
           )
         // }
       }
-      catch(ex) {
-        catchError {
-          throw ex
-        }
-      }
 
-      catchError {
+      catchErrorClean {
         def suites = toJSON(readFile(file: testMetadataPath))
         suites.each {
-          catchError {
+          catchErrorClean {
             if (byFile[it.file]) {
               it.previousDuration = byFile[it.file].duration
             }
@@ -383,6 +378,16 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
           }
         }
       }
+    }
+  }
+}
+
+def catchErrorClean(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    catchError {
+      throw ex
     }
   }
 }

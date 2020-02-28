@@ -17,7 +17,7 @@
  * under the License.
  */
 import fs from 'fs';
-import { resolve, sep } from 'path';
+import { dirname, resolve, sep } from 'path';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 
@@ -63,6 +63,8 @@ export class TestTracker {
 
     if (fs.existsSync(getTestMetadataPath())) {
       fs.unlinkSync(getTestMetadataPath());
+    } else {
+      fs.mkdirSync(dirname(getTestMetadataPath()), { recursive: true });
     }
 
     lifecycle.beforeTestSuite.add(suite => {
