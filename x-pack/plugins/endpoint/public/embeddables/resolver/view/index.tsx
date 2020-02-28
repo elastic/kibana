@@ -107,7 +107,7 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
-
+  contain: content;
   background-color: ${bgColor};
 
   .resolver-graph {
