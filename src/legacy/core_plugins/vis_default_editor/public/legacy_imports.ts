@@ -48,5 +48,4 @@ export { isValidJson, isValidInterval } from 'ui/agg_types';
 export { AggParamOption } from 'ui/agg_types';
 export { CidrMask } from 'ui/agg_types';
 
-export { PersistedState } from 'ui/persisted_state';
 export * from 'ui/vis/lib';
