@@ -66,7 +66,7 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
           data-test-subj={`${tab.id}EndpointTab`}
           key={index}
           href={`/app/endpoint${tab.href}`}
-          onClick={(even: MouseEvent) => {
+          onClick={(event: MouseEvent) => {
             event.preventDefault();
             history.push(tab.href);
           }}
