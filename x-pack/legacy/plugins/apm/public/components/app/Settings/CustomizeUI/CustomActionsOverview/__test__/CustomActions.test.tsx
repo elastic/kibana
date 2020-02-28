@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { fireEvent, render, getAllByLabelText } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import { CustomActionsOverview } from '../';
+import * as hooks from '../../../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   MockApmPluginContextWrapper
 } from '../../../../../../utils/testHelpers';
-import * as hooks from '../../../../../../hooks/useFetcher';
 
 describe('CustomActions', () => {
   afterEach(() => jest.restoreAllMocks());
 
-  describe('empty prompt page', () => {
+  describe('empty prompt', () => {
     beforeAll(() => {
       spyOn(hooks, 'useFetcher').and.returnValue({
         data: [],
@@ -38,12 +39,14 @@ describe('CustomActions', () => {
         </MockApmPluginContextWrapper>
       );
       expect(queryByText('Create action')).not.toBeInTheDocument();
-      fireEvent.click(getByText('Create custom action'));
+      act(() => {
+        fireEvent.click(getByText('Create custom action'));
+      });
       expect(queryByText('Create action')).toBeInTheDocument();
     });
   });
 
-  describe('overview page', () => {
+  describe('overview', () => {
     beforeAll(() => {
       spyOn(hooks, 'useFetcher').and.returnValue({
         data: [
@@ -80,7 +83,6 @@ describe('CustomActions', () => {
         'label 2',
         'url 2'
       ]);
-      // expect(queryByText('Create action')).not.toBeInTheDocument();
     });
 
     it('checks if create custom action button is available and working', () => {
@@ -90,21 +92,64 @@ describe('CustomActions', () => {
         </MockApmPluginContextWrapper>
       );
       expect(queryByText('Create action')).not.toBeInTheDocument();
-      fireEvent.click(getByText('Create custom action'));
+      act(() => {
+        fireEvent.click(getByText('Create custom action'));
+      });
       expect(queryByText('Create action')).toBeInTheDocument();
     });
 
     it('opens flyout to edit a custom action', () => {
-      const container = render(
+      const component = render(
         <MockApmPluginContextWrapper>
           <CustomActionsOverview />
         </MockApmPluginContextWrapper>
       );
-      expect(container.queryByText('Create action')).not.toBeInTheDocument();
-      const editButtons = container.getAllByLabelText('Edit');
+      expect(component.queryByText('Create action')).not.toBeInTheDocument();
+      const editButtons = component.getAllByLabelText('Edit');
       expect(editButtons.length).toEqual(2);
-      fireEvent.click(editButtons[0]);
-      expect(container.queryByText('Create action')).toBeInTheDocument();
+      act(() => {
+        fireEvent.click(editButtons[0]);
+      });
+      expect(component.queryByText('Create action')).toBeInTheDocument();
+    });
+  });
+
+  describe('Flyout', () => {
+    const openFlyout = () => {
+      const component = render(
+        <MockApmPluginContextWrapper>
+          <CustomActionsOverview />
+        </MockApmPluginContextWrapper>
+      );
+      expect(component.queryByText('Create action')).not.toBeInTheDocument();
+      act(() => {
+        fireEvent.click(component.getByText('Create custom action'));
+      });
+      expect(component.queryByText('Create action')).toBeInTheDocument();
+      return component;
+    };
+
+    describe('Filters', () => {
+      const addFilterField = (
+        component: ReturnType<typeof openFlyout>,
+        amount: number
+      ) => {
+        for (let i = 1; i <= amount; i++) {
+          fireEvent.click(component.getByText('Add another filter'));
+        }
+      };
+      it('checks if add filter button is disabled after all elements have been added', () => {
+        const component = openFlyout();
+        expect(component.getAllByText('service.name').length).toEqual(1);
+        addFilterField(component, 1);
+        expect(component.getAllByText('service.name').length).toEqual(2);
+        addFilterField(component, 2);
+        expect(component.getAllByText('service.name').length).toEqual(4);
+        // After 4 items, the button is disabled
+        // Even adding a new filter, it still has only 4 items.
+        addFilterField(component, 2);
+        expect(component.getAllByText('service.name').length).toEqual(4);
+      });
     });
   });
 });
