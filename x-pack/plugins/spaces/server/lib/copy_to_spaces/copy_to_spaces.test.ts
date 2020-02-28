@@ -172,7 +172,6 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
-                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,
@@ -192,7 +191,6 @@ describe('copySavedObjectsToSpaces', () => {
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
@@ -225,7 +223,6 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
-                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,
@@ -245,7 +242,6 @@ describe('copySavedObjectsToSpaces', () => {
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
