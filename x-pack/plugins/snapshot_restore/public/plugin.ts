@@ -13,7 +13,7 @@ import { AppDependencies } from './application';
 
 import { breadcrumbService, docTitleService } from './application/services/navigation';
 import { documentationLinksService } from './application/services/documentation';
-import { httpService } from './application/services/http';
+import { httpService, setUiMetricService } from './application/services/http';
 import { textService } from './application/services/text';
 import { UiMetricService } from './application/services';
 import { UIM_APP_NAME } from './application/constants';
@@ -25,6 +25,11 @@ interface PluginsDependencies {
 
 export class SnapshotRestoreUIPlugin {
   private uiMetricService = new UiMetricService(UIM_APP_NAME);
+
+  constructor() {
+    // Temporary hack to provide the service instances in module files in order to avoid a big refactor
+    setUiMetricService(this.uiMetricService);
+  }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
     const { http, getStartServices } = coreSetup;

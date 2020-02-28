@@ -12,7 +12,7 @@ export class HttpService {
     this.client = httpClient;
   }
 
-  public get httpClient(): any {
+  public get httpClient(): HttpSetup {
     if (!this.client) {
       throw new Error('Http service has not be initialized. Client is missing.');
     }
