@@ -6,10 +6,10 @@
 
 jest.mock('./logged_out_page');
 
-import { AppMount } from 'src/core/public';
+import { AppMount, ScopedHistory } from 'src/core/public';
 import { loggedOutApp } from './logged_out_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
 describe('loggedOutApp', () => {
   it('properly registers application', () => {
@@ -42,7 +42,12 @@ describe('loggedOutApp', () => {
     loggedOutApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({ element: containerMock, appBasePath: '', onAppLeave: jest.fn() });
+    await (mount as AppMount)({
+      element: containerMock,
+      appBasePath: '',
+      onAppLeave: jest.fn(),
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
     const mockRenderApp = jest.requireMock('./logged_out_page').renderLoggedOutPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);

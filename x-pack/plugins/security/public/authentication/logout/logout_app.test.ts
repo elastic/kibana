@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppMount } from 'src/core/public';
+import { AppMount, ScopedHistory } from 'src/core/public';
 import { logoutApp } from './logout_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
 describe('logoutApp', () => {
   beforeAll(() => {
@@ -53,7 +53,12 @@ describe('logoutApp', () => {
     logoutApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({ element: containerMock, appBasePath: '', onAppLeave: jest.fn() });
+    await (mount as AppMount)({
+      element: containerMock,
+      appBasePath: '',
+      onAppLeave: jest.fn(),
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);
     expect(window.location.href).toBe('/mock-base-path/api/security/logout?arg=true');

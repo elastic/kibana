@@ -6,11 +6,11 @@
 
 jest.mock('./account_management_page');
 
-import { AppMount, AppNavLinkStatus } from 'src/core/public';
+import { AppMount, AppNavLinkStatus, ScopedHistory } from 'src/core/public';
 import { UserAPIClient } from '../management';
 import { accountManagementApp } from './account_management_app';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { securityMock } from '../mocks';
 
 describe('accountManagementApp', () => {
@@ -50,7 +50,12 @@ describe('accountManagementApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({ element: containerMock, appBasePath: '', onAppLeave: jest.fn() });
+    await (mount as AppMount)({
+      element: containerMock,
+      appBasePath: '',
+      onAppLeave: jest.fn(),
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([

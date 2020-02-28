@@ -6,10 +6,10 @@
 
 jest.mock('./login_page');
 
-import { AppMount } from 'src/core/public';
+import { AppMount, ScopedHistory } from 'src/core/public';
 import { loginApp } from './login_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
 describe('loginApp', () => {
   it('properly registers application', () => {
@@ -48,7 +48,12 @@ describe('loginApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({ element: containerMock, appBasePath: '', onAppLeave: jest.fn() });
+    await (mount as AppMount)({
+      element: containerMock,
+      appBasePath: '',
+      onAppLeave: jest.fn(),
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
     expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledTimes(1);
     expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledWith('secureCookies');

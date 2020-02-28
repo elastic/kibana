@@ -6,10 +6,10 @@
 
 jest.mock('./overwritten_session_page');
 
-import { AppMount } from 'src/core/public';
+import { AppMount, ScopedHistory } from 'src/core/public';
 import { overwrittenSessionApp } from './overwritten_session_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 import { securityMock } from '../../mocks';
 
 describe('overwrittenSessionApp', () => {
@@ -49,7 +49,12 @@ describe('overwrittenSessionApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({ element: containerMock, appBasePath: '', onAppLeave: jest.fn() });
+    await (mount as AppMount)({
+      element: containerMock,
+      appBasePath: '',
+      onAppLeave: jest.fn(),
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
     const mockRenderApp = jest.requireMock('./overwritten_session_page')
       .renderOverwrittenSessionPage;
