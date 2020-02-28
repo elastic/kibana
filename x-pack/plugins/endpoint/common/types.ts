@@ -86,14 +86,16 @@ export interface AlertData {
   };
   event: {
     action: string;
+    kind: string;
+    category: string;
   };
   endpoint: {
     policy: {
       id: string;
     };
   };
-  file_classification: {
-    malware_classification: {
+  file: {
+    malware_classifier: {
       score: number;
     };
   };
@@ -110,7 +112,6 @@ export interface AlertData {
       entity_id?: string;
     };
   };
-  thread: {};
 }
 
 export interface EndpointMetadata {

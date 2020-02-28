@@ -99,7 +99,7 @@ function randomHostname(): string {
   return `Host-${randomString(10)}`;
 }
 
-export function makeRelatedEvents(
+export function generateRelatedEvents(
   node: EndpointEvent,
   generator: EndpointDocGenerator,
   numRelatedEvents = 10
@@ -134,7 +134,7 @@ export function generateProcessChildren(
   for (let i = 0; i < generations; i++) {
     const newParents: EndpointEvent[] = [];
     parents.forEach(element => {
-      const numChildren = randomN(maxChildrenPerNode);
+      const numChildren = Math.min(1, randomN(maxChildrenPerNode));
       for (let j = 0; j < numChildren; j++) {
         timestamp = new Date(timestamp.getTime() + 1000);
         const child = generator.generateEvent(timestamp, undefined, element.process.entity_id);
@@ -160,7 +160,7 @@ export function generateProcessChildren(
       );
     }
     if (randomN(100) < percentNodesWithRelated) {
-      relatedEvents.concat(makeRelatedEvents(element, generator, relatedEventsPerNode));
+      relatedEvents.concat(generateRelatedEvents(element, generator, relatedEventsPerNode));
     }
   });
   events.concat(terminationEvents);
@@ -168,11 +168,12 @@ export function generateProcessChildren(
   return events;
 }
 
-export function generateResolverEvents(alertAncestors = 3): Array<AlertData | EndpointEvent> {
+export function generateResolverEvents(
+  generator: EndpointDocGenerator,
+  alertAncestors = 3
+): Array<AlertData | EndpointEvent> {
   const events = [];
   const startDate = new Date();
-  const generator = new EndpointDocGenerator();
-  const endpointDoc = generator.generateEndpointMetadata(startDate);
   const root = generator.generateEvent(new Date(startDate.getTime() + 1000));
   events.push(root);
   let ancestor = root;
@@ -194,7 +195,7 @@ export function generateResolverEvents(alertAncestors = 3): Array<AlertData | En
   return events;
 }
 
-class EndpointDocGenerator {
+export class EndpointDocGenerator {
   agentId: string;
   agentName: string;
   hostId: string;
@@ -259,14 +260,16 @@ class EndpointDocGenerator {
       },
       event: {
         action: randomChoice(FILE_OPERATIONS),
+        kind: 'alert',
+        category: 'malware',
       },
       endpoint: {
         policy: {
           id: this.policy.id,
         },
       },
-      file_classification: {
-        malware_classification: {
+      file: {
+        malware_classifier: {
           score: Math.random(),
         },
       },
@@ -283,7 +286,6 @@ class EndpointDocGenerator {
           entity_id: parentEntityID ? parentEntityID : undefined,
         },
       },
-      thread: {},
     };
   }
 
