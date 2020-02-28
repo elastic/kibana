@@ -19,6 +19,7 @@
 import uuid from 'uuid/v4';
 import rison from 'rison-node';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import { AppState } from '../../../angular/context_state';
 import { getServices } from '../../../../kibana_services';
 
 function getMapsAppBaseUrl() {
@@ -48,7 +49,7 @@ export function isFieldVisualizable(field: IFieldType) {
 export function getMapsAppUrl(
   field: IFieldType,
   indexPattern: IIndexPattern,
-  appState: any,
+  appState: AppState,
   columns: string[]
 ) {
   const mapAppParams = new URLSearchParams();
@@ -57,7 +58,10 @@ export function getMapsAppUrl(
   const locationSplit = window.location.href.split('discover?');
   if (locationSplit.length > 1) {
     const discoverParams = new URLSearchParams(locationSplit[1]);
-    mapAppParams.set('_g', discoverParams.get('_g'));
+    const globalStateUrlValue = discoverParams.get('_g');
+    if (globalStateUrlValue) {
+      mapAppParams.set('_g', globalStateUrlValue);
+    }
   }
 
   // Copy filters and query in app state
