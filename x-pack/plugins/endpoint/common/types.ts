@@ -149,6 +149,7 @@ export type AlertEvent = Immutable<{
     ppid: number;
     entity_id: string;
     parent: {
+      pid: number;
       entity_id: string;
     };
     name: string;
@@ -170,9 +171,9 @@ export type AlertEvent = Immutable<{
   file: {
     owner: string;
     path: string;
-    accessed: string;
-    mtime: string;
-    created: string;
+    accessed: number;
+    mtime: number;
+    created: number;
     size: number;
     hash: HashFields;
   };

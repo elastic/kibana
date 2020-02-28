@@ -24,12 +24,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
-import { FormattedDate, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
-import { AlertDetailsOverview } from './alert_details_overview';
+import { AlertDetailsOverview } from './details';
+import { FormattedDate } from './formatted_date';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -123,10 +124,10 @@ export const AlertIndex = memo(() => {
     history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
   }, [history, queryParams]);
 
-  const datesForRows: Map<AlertData, Date> = useMemo(() => {
+  const timestampForRows: Map<AlertData, number> = useMemo(() => {
     return new Map(
       alertListData.map(alertData => {
-        return [alertData, new Date(alertData['@timestamp'])];
+        return [alertData, alertData['@timestamp']];
       })
     );
   }, [alertListData]);
@@ -161,19 +162,9 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'host_name') {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        const date = datesForRows.get(row)!;
-        if (date && isFinite(date.getTime())) {
-          return (
-            <FormattedDate
-              value={date}
-              year="numeric"
-              month="2-digit"
-              day="2-digit"
-              hour="2-digit"
-              minute="2-digit"
-              second="2-digit"
-            />
-          );
+        const timestamp = timestampForRows.get(row)!;
+        if (timestamp) {
+          return <FormattedDate timestamp={timestamp} />;
         } else {
           return (
             <EuiBadge color="warning">
@@ -193,7 +184,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, datesForRows, pageSize, queryParams, total]);
+  }, [alertListData, timestampForRows, pageSize, queryParams, total]);
 
   const pagination = useMemo(() => {
     return {
