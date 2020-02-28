@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum LICENSE_TYPE {
-  BASIC,
-  FULL, // >= platinum
-}
+import { PluginInitializerContext } from 'kibana/server';
+import { MlServerPlugin } from './plugin';
 
-export const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];
+export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);
