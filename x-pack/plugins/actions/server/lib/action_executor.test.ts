@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
-import { LicenseType } from '../../../licensing/common/types';
+import { ActionType } from '../types';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -51,10 +51,10 @@ beforeEach(() => {
 });
 
 test('successfully executes', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -98,10 +98,10 @@ test('successfully executes', async () => {
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -123,10 +123,10 @@ test('provides empty config when config and / or secrets is empty', async () => 
 });
 
 test('throws an error when config is invalid', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     validate: {
       config: schema.object({
         param1: schema.string(),
@@ -156,10 +156,10 @@ test('throws an error when config is invalid', async () => {
 });
 
 test('throws an error when params is invalid', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     validate: {
       params: schema.object({
         param1: schema.string(),
@@ -196,10 +196,10 @@ test('throws an error when failing to load action through savedObjectsClient', a
 });
 
 test('returns an error if actionType is not enabled', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
