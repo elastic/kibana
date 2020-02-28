@@ -8,7 +8,6 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink, Props } from './chart_context_menu';
 import { ReactWrapper, mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
-import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { coreMock } from 'src/core/public/mocks';
