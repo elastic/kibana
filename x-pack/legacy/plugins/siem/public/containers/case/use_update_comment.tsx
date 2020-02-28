@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
@@ -15,9 +15,8 @@ import { getTypedPayload } from './utils';
 
 interface CommetUpdateState {
   data: Comment[];
-  isLoading: boolean;
+  isLoadingIds: string[];
   isError: boolean;
-  isLoadingCommentId: string | null;
 }
 
 interface CommentUpdate {
@@ -35,9 +34,8 @@ const dataFetchReducer = (state: CommetUpdateState, action: Action): CommetUpdat
     case FETCH_INIT:
       return {
         ...state,
-        isLoading: true,
+        isLoadingIds: [...state.isLoadingIds, getTypedPayload<string>(action.payload)],
         isError: false,
-        isLoadingCommentId: getTypedPayload<string>(action.payload),
       };
 
     case FETCH_SUCCESS:
@@ -48,16 +46,16 @@ const dataFetchReducer = (state: CommetUpdateState, action: Action): CommetUpdat
       state.data[foundIndex] = { ...state.data[foundIndex], ...updatePayload.update };
       return {
         ...state,
-        isLoading: false,
-        isLoadingCommentId: null,
+        isLoadingIds: state.isLoadingIds.filter(id => updatePayload.commentId !== id),
         isError: false,
         data: [...state.data],
       };
     case FETCH_FAILURE:
       return {
         ...state,
-        isLoading: false,
-        isLoadingCommentId: null,
+        isLoadingIds: state.isLoadingIds.filter(
+          id => getTypedPayload<string>(action.payload) !== id
+        ),
         isError: true,
       };
     default:
@@ -69,14 +67,14 @@ export const useUpdateComment = (
   comments: Comment[]
 ): [CommetUpdateState, (commentId: string, commentUpdate: string) => void] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isLoadingCommentId: null,
+    isLoadingIds: [],
     isError: false,
     data: comments,
   });
+  const dispatchUpdateComment = useRef<(commentId: string, commentUpdate: string) => void>();
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchUpdateComment = async (commentId: string, commentUpdate: string) => {
+  dispatchUpdateComment.current = async (commentId: string, commentUpdate: string) => {
     dispatch({ type: FETCH_INIT, payload: commentId });
     try {
       const currentComment = state.data.find(comment => comment.commentId === commentId) ?? {
@@ -86,9 +84,9 @@ export const useUpdateComment = (
       dispatch({ type: FETCH_SUCCESS, payload: { update: response, commentId } });
     } catch (error) {
       errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-      dispatch({ type: FETCH_FAILURE });
+      dispatch({ type: FETCH_FAILURE, payload: commentId });
     }
   };
 
-  return [state, dispatchUpdateComment];
+  return [state, dispatchUpdateComment.current];
 };

@@ -5,28 +5,15 @@
  */
 
 import React, { ReactNode, useCallback, useMemo, useState } from 'react';
-import {
-  EuiAvatar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import * as i18n from '../case_view/translations';
-import {
-  FormattedRelativePreferenceDate,
-  FormattedRelativePreferenceLabel,
-} from '../../../../components/formatted_date';
-import { PropertyActions } from '../property_actions';
-import { Markdown } from '../../../../components/markdown';
-import { MarkdownEditor } from '../../../../components/markdown_editor';
-import { AddComment } from '../add_comment';
+
 import { Case } from '../../../../containers/case/types';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
+import { UserActionItem } from './user_action_item';
+import { UserActionMarkdown } from './user_action_markdown';
+import { AddComment } from '../add_comment';
 
 export interface UserActionItem {
   avatarName: string;
@@ -76,211 +63,103 @@ const UserAction = styled(EuiFlexGroup)`
     }
   `}
 `;
-const MySpinner = styled(EuiLoadingSpinner)`
-  .euiLoadingSpinner {
-    margin-top: 1px; // yes it matters!
-  }
-`;
 
-const ContentWrapper = styled.div`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
-  `}
-`;
+const DescriptionId = 'description';
+const NewId = 'newComent';
 
 export const UserActionTree = React.memo(
   ({ data, onUpdateField, isLoadingDescription }: UserActionTreeProps) => {
-    const [
-      { data: comments, isLoading: isLoadingComment, isLoadingCommentId },
-      dispatchUpdateComment,
-    ] = useUpdateComment(data.comments);
-    const [commentUpdate, setCommentUpdate] = useState('');
-    const [description, setDescription] = useState(data.description);
-    const [editCommentId, setEditCommentId] = useState('');
-    const [isEditDescription, setIsEditDescription] = useState(false);
-    const renderButtons = useCallback(({ cancelAction, saveAction }) => {
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={cancelAction} iconType="cross">
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }, []);
-    const renderUserActions = useMemo(() => {
-      const userActions: UserActionItem[] = comments.reduce(
-        (acc, comment, key) => {
-          return [
-            ...acc,
-            {
-              avatarName: comment.createdBy.fullName
-                ? comment.createdBy.fullName
-                : comment.createdBy.username,
-              title: (
-                <EuiFlexGroup
-                  alignItems="baseline"
-                  gutterSize="none"
-                  justifyContent="spaceBetween"
-                  key={`${comment.commentId}.${key}`}
-                >
-                  <EuiFlexItem grow={false}>
-                    <p>
-                      <strong>{`${comment.createdBy.username}`}</strong>
-                      {` ${i18n.ADDED_COMMENT} `}
-                      <FormattedRelativePreferenceLabel
-                        value={comment.createdAt}
-                        preferenceLabel={`${i18n.ON} `}
-                      />
-                      <FormattedRelativePreferenceDate value={comment.createdAt} />
-                    </p>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isLoadingCommentId === comment.commentId && <MySpinner />}
-                    {(!isLoadingComment || isLoadingCommentId !== comment.commentId) && (
-                      <PropertyActions
-                        propertyActions={[
-                          {
-                            iconType: 'documentEdit',
-                            label: i18n.EDIT_COMMENT,
-                            onClick: () => setEditCommentId(comment.commentId),
-                          },
-                        ]}
-                      />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-              children:
-                comment.commentId === editCommentId ? (
-                  <MarkdownEditor
-                    footerContentRight={renderButtons({
-                      cancelAction: () => setEditCommentId(''),
-                      saveAction: () => {
-                        // TO DO
-                        if (commentUpdate !== comment.comment) {
-                          dispatchUpdateComment(comment.commentId, commentUpdate);
-                        }
-                        setEditCommentId('');
-                      },
-                    })}
-                    initialContent={comment.comment}
-                    onChange={updatedComment => {
-                      setCommentUpdate(updatedComment);
-                    }}
-                  />
-                ) : (
-                  <ContentWrapper key={`${comment.commentId}.${key}`}>
-                    <Markdown raw={comment.comment} data-test-subj="case-view-comment" />
-                  </ContentWrapper>
-                ),
-              skipPanel: comment.commentId === editCommentId,
-            },
-          ];
-        },
-        [
-          {
-            avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
-            title: (
-              <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <p>
-                    <strong>{`${data.createdBy.username}`}</strong>
-                    {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-                    <FormattedRelativePreferenceLabel
-                      value={data.createdAt}
-                      preferenceLabel={`${i18n.ON} `}
-                    />
-                    <FormattedRelativePreferenceDate value={data.createdAt} />
-                  </p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {isLoadingDescription && <EuiLoadingSpinner />}
-                  {!isLoadingDescription && (
-                    <PropertyActions
-                      propertyActions={[
-                        {
-                          iconType: 'documentEdit',
-                          label: i18n.EDIT_DESCRIPTION,
-                          onClick: () => setIsEditDescription(true),
-                        },
-                      ]}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            children: isEditDescription ? (
-              <MarkdownEditor
-                footerContentRight={renderButtons({
-                  cancelAction: () => setIsEditDescription(false),
-                  saveAction: () => {
-                    if (description !== data.description) {
-                      onUpdateField('description', description);
-                    }
-                    setIsEditDescription(false);
-                  },
-                })}
-                initialContent={data.description}
-                onChange={updatedDescription => setDescription(updatedDescription)}
-              />
-            ) : (
-              <ContentWrapper>
-                <Markdown raw={data.description} data-test-subj="case-view-description" />
-              </ContentWrapper>
-            ),
-            skipPanel: isEditDescription,
-          },
-        ]
-      );
-      return [
-        ...userActions,
-        {
-          avatarName: 'getcurrentuser todo',
-          children: <AddComment caseId={data.caseId} />,
-          skipPanel: true,
-        },
-      ];
-    }, [data.version, isEditDescription, editCommentId, description, commentUpdate, comments]);
+    const [{ data: comments, isLoadingIds }, dispatchUpdateComment] = useUpdateComment(
+      data.comments
+    );
+
+    const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
+    const handleManageMarkdownEditId = useCallback(
+      (id: string) => {
+        if (!manageMarkdownEditIds.includes(id)) {
+          setManangeMardownEditIds([...manageMarkdownEditIds, id]);
+        } else {
+          setManangeMardownEditIds(manageMarkdownEditIds.filter(myId => id !== myId));
+        }
+      },
+      [manageMarkdownEditIds]
+    );
+
+    const handleSaveComment = useCallback(
+      (id: string, content: string) => {
+        handleManageMarkdownEditId(id);
+        dispatchUpdateComment(id, content);
+      },
+      [handleManageMarkdownEditId, dispatchUpdateComment]
+    );
+
+    const MarkdownDescription = useMemo(
+      () => (
+        <UserActionMarkdown
+          id={DescriptionId}
+          content={data.description}
+          isEditable={manageMarkdownEditIds.includes(DescriptionId)}
+          onSaveContent={(content: string) => {
+            handleManageMarkdownEditId(DescriptionId);
+            onUpdateField(DescriptionId, content);
+          }}
+          onChangeEditable={handleManageMarkdownEditId}
+        />
+      ),
+      [data.description, handleManageMarkdownEditId, manageMarkdownEditIds, onUpdateField]
+    );
+
+    const MarkdownNewComment = useMemo(() => <AddComment caseId={data.caseId} />, [data.caseId]);
 
     return (
-      <>
-        {renderUserActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
-          <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
-            <EuiFlexItem grow={false}>
-              <EuiAvatar
-                data-test-subj={`user-action-avatar`}
-                className="userAction__circle"
-                name={avatarName}
+      <UserAction data-test-subj="user-action-description" gutterSize={'none'}>
+        <UserActionItem
+          createdAt={data.createdAt}
+          id={DescriptionId}
+          isEditable={manageMarkdownEditIds.includes(DescriptionId)}
+          isLoading={isLoadingDescription}
+          labelAction={i18n.EDIT_DESCRIPTION}
+          labelTitle={i18n.ADDED_DESCRIPTION}
+          fullName={data.createdBy.fullName ?? data.createdBy.username}
+          markdown={MarkdownDescription}
+          onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
+          userName={data.createdBy.username}
+        />
+        {comments.map(comment => (
+          <UserActionItem
+            key={comment.commentId}
+            createdAt={comment.createdAt}
+            id={comment.commentId}
+            isEditable={manageMarkdownEditIds.includes(comment.commentId)}
+            isLoading={isLoadingIds.includes(comment.commentId)}
+            labelAction={i18n.EDIT_COMMENT}
+            labelTitle={i18n.ADDED_COMMENT}
+            fullName={comment.createdBy.fullName ?? comment.createdBy.username}
+            markdown={
+              <UserActionMarkdown
+                id={comment.commentId}
+                content={data.description}
+                isEditable={manageMarkdownEditIds.includes(comment.commentId)}
+                onChangeEditable={handleManageMarkdownEditId}
+                onSaveContent={handleSaveComment.bind(null, comment.commentId)}
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {skipPanel ? (
-                <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
-              ) : (
-                <EuiPanel className="userAction__panel" paddingSize="none">
-                  {title && (
-                    <EuiText
-                      size="s"
-                      className="userAction__title"
-                      data-test-subj={`user-action-title`}
-                    >
-                      {title}
-                    </EuiText>
-                  )}
-                  {children && <div data-test-subj={`user-action-content`}>{children}</div>}
-                </EuiPanel>
-              )}
-            </EuiFlexItem>
-          </UserAction>
+            }
+            onEdit={handleManageMarkdownEditId.bind(null, comment.commentId)}
+            userName={comment.createdBy.username}
+          />
         ))}
-      </>
+        <UserActionItem
+          createdAt={data.createdAt}
+          id={NewId}
+          isEditable={true}
+          isLoading={isLoadingIds.includes(NewId)}
+          fullName="to be determined"
+          markdown={MarkdownNewComment}
+          onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
+          userName="to be determined"
+        />
+      </UserAction>
     );
   }
 );
