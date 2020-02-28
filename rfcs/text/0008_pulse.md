@@ -71,8 +71,8 @@ We want to reduce the number of `opt-out`s by providing some valuable feedback t
 
 This design is going to be tackled by introducing some common concepts to be used by the main two main components in this architecture:
 
-1. Remote Pulse Service
-2. Local Pulse Service
+1. Remote Pulse Service (RPS)
+2. Local Pulse Service (LPS)
 
 After that, it explains how we invision the architecture and design of each of those components.
 
@@ -87,6 +87,39 @@ This is each stream of data that have common information. Typically each channel
 - **Instructions**  
 These are the messages generated in the form of feedback to the different channels.  
 Typically, channels will follow a bi-directional communication process _(Local <-> Remote)_ but there might be channels that do not generate any kind of instruction _(Local -> Remote)_ and, similarly, some other channels that do not provide any telemetry at all, but allows Pulse to send updates to our products _(Local <- Remote)_.
+
+## Phased implementation
+
+At the moment of writing this document, anyone can push _fake_ telemetry data to our Telemetry cluster. They only need to know the public encryption key, the endpoint and the format of the data, all of that easily retrievable. We take that into consideration when analysing the data we have at the moment and it is a risk we are OK with for now.
+
+But, given that we aim to provide feedback to the users and clusters in the form of instructions, the **Security and Integrity of the information** is critical. We need to come up with a solution that ensures the instructions are created based on data that was uniquely created (signed?) by the source. If we cannot ensure that, we should not allow that piece of information to be used in the generation of the instructions for that cluster and we should mark it so we know it could be maliciously injected when using it in our analysis.
+
+But also, we want to be able to ship the benefits of Pulse on every release. That's why we are thinking on a phased release, starting with limited functionality and evolving to the final complete vision of this product. This RFC suggests the following phased implementation:
+
+1. **Be able to ingest granular data**  
+With the introduction of the **channels**, we can start receiving granular data that will help us all on our analysis. At this point, the same _security_ features as the current telemetry are considered: The payload is encrypted by the Kibana server so no mediator can spoof the data.  
+The same risks as the current telemetry still apply at this point: anyone can _impersonate_ and send the data on behalf of another cluster, making the collected information useless.  
+Because this information cannot be used to generate any instruction, we may not care about the **Deployment Hash ID** at this stage. This means no authentication is required to push data.  
+The works at this point in time will be focused on creating the initial infraestructure, receiving early data and start with the migration of the current telemetry into the new channel-based model. Finally, start exploring the new visualisations we can provide with this new model of data.
+
+2. **Secured ingest channel**  
+In this phase, our efforts will focus on securing the communications and integrity of the data. This includes:
+    - **Generation of the Deployment Hash ID**:  
+    Discussions on whether it should be self-generated and accepted/rejected by the Remote Pulse Service (RPS) or it should be generated and assigned by the RPS because it is the only one that can ensure uniqueness.
+    - **Locally store the Deployment Hash ID as an encrypted saved object**:  
+    This comes back with a caveat: OSS versions will not be able to receive instructions. We will need to maintain a fallback mechanism to the phase 1 logic (it may be a desired scenario because it could happen the encrypted saved objects are not recoverable due to an error in the deployment and we should still be able to apply that fallback).
+    - **Authenticity of the information (Local -> Remote)**:  
+    We need to _sign_ the data in some way the RPS can confirm the information reported as for a _Deployment Hash ID_ comes from the right source.
+    - **Authenticity of the information (Remote -> Local)**:  
+    We need the Local Pulse Service (LPS) to be able to confirm the responses from the RPS data has not been altered by any mediator. It could be done via encryption using a key provided by the LPS. This should be provided to the RPS inside an encrypted payload in the same fashion we currently encrypt the telemetry.
+    - **Integrity of the data in the channels**:  
+    We need to ensure an external plugin cannot push data to channels to avoid malicious corruption of the data. We could achieve this by either making this plugin only available to Kibana-shipped plugins or storing the `pluginID` that is pushing the data to have better control of the source of the data (then an ingest pipeline can reject any source of data that should not be accepted).
+
+    All the suggestions in this phase can be further discussed at that point (maybe in another RFC?).
+
+3. **Instruction handling**  
+This final phase we'll implement the instruction generation and handling at the same time we are adding more **channels**.  
+We can discuss at this point if we want to be able to provide _harmless_ instructions for those deployments that are not _secured_ (i.e.: Cloud cost estimations, User-profiled-based marketing updates, ...).
 
 ## Architecture
 
@@ -109,7 +142,7 @@ This is the service that will receive and store the telemetry from all the _opte
 
 #### Endpoints
 
-The following endpoints will send every payload detailed in below encrypted with a similar mechanism to the current telemetry encryption.
+The following endpoints **will send every payload** detailed in below **encrypted** with a similar mechanism to the current telemetry encryption.
 
 ##### Authenticate
 
@@ -119,13 +152,15 @@ I'd appreciate some insights here to come up with a strong handshake mechanism t
 
 In order to _dereference_ the data, we can store these mappings in a Vault or Secrets provider instead of an index in our ES.
 
+_NB: Not for phase 1_
+
 ##### Opt-In|Out
 
 Similar to the current telemetry, we want to keep track of when the user opts in or out of telemetry. The implementation can be very similar to the current one. But we recently learned we need to add the origin to know what application has telemetry disabled (Kibana, Beats, Enterprise Search, ...). This makes me wonder if we will ever want to provide a granular option for the user to be able to cherry-pick about what channels are sent and which ones should be disabled.
 
 ##### Inject telemetry
 
-In order to minimise the amount of requests, this `POST` should accept bulks of data in the payload (mind the payload size limits if any). It will require authentication based on the `deploymentID` and `token` explained in the [previous endpoint](#authenticate).
+In order to minimise the amount of requests, this `POST` should accept bulks of data in the payload (mind the payload size limits if any). It will require authentication based on the `deploymentID` and `token` explained in the [previous endpoint](#authenticate) (_NB: Not for phase 1_).
 
 The received payload will be pushed to a streaming technology (AWS Firehose, Google Pub/Sub, ...). This way we can maintain a buffer in cases the ingestion of data spikes or we need to stop our ES cluster for any maintenance purposes.
 
@@ -136,6 +171,8 @@ This indexing should also trigger some additional processes like the **generatio
 _NB: We might want to consider some sort of piggy-backing to include the instructions in the response. But for the purpose of this RFC, scalability and separation of concerns, I'd rather keep it for future possible improvements._
 
 ##### Retrieve instructions
+
+_NB: Only after phase 3_
 
 This `GET` endpoint should return the list of instructions generated for that deployment. To control the likely ever-growing list of instructions for each deployment, it will accept a `since` query parameter where the requester can specify the timestamp ever since it was to retrieve the new values.
 
@@ -195,6 +232,32 @@ Similarly to the sending of the telemetry, the instruction polling should happen
 
 Depending on the subscriptions to the channels by the plugins, the polling will happen with different periodicity, similar to the one described in the chapter above.
 
+#### Exposing channels to the plugins
+
+The channels will be exposed to the channels as part of the `coreContext` in the `setup` and `start` lifecycle methods in a fashion like (types to be properly defined when implementing it):
+
+```typescript
+const coreContext: CoreSetup | CoreStart = {
+  ...existingCoreContext,
+  pulse: {
+    sendToChannel: async (channelName: keyof Channels, payload: Channels[channelName]) => void,
+    instructionsFromChannel$: (channelName: keyof Channels) => Observable<ChannelInstructions[channelName]>,
+  },
+}
+```
+
+Plugins will simply need to call `core.pulse.sendToChannel('errors', myUnexpectedErrorIWantToReport)` whenever they want to report any new data to that channel. This will call the channel's handler to store the data.
+
+Similarly, they'll be able to subscribe to channels like:
+
+```typescript
+core.pulse.instructionsFromChannel$('ui_behaviour_tracking')
+  .pipe(filterInstructionsForMyPlugin) // Initially, we won't filter the instructions based on the plugin ID (might not be necessary in all cases)
+  .subscribe(changeTheOrderOfTheComponents);
+```
+
+Internally in those methods we should append the `pluginId` to know who is sending/receiving the info.
+
 # Drawbacks
 
 - Pushing data into telemetry nowadays is as simple as implementing your own `usageCollector`. For consuming, though, the telemetry team needs to update the mappings. But as soon as they do so, the previous data is available. Now we'll be more strict about the mapping. Rejecting any data that does not comply. Changing the structure of the reported data will result in data loss in that channel.
@@ -243,5 +306,5 @@ This telemetry is supposed to be internal only. Only internal developers will be
 
 # Unresolved questions
 
-- Pending to define a proper handshake in the authentication mechanism to reduce the chance of a man-in-the-middle attack or DDoS.
+- Pending to define a proper handshake in the authentication mechanism to reduce the chance of a man-in-the-middle attack or DDoS. => We already have some ideas thanks to @jportner and @kobelb but it will be resolved during the _Phase 2_ design.
 - Opt-in/out per channel?
