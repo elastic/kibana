@@ -135,6 +135,6 @@ export class IndexPatterns {
       this.apiClient,
       indexPatternCache,
       this.notifications
-    ).init();
+    ).init(true);
   };
 }
