@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { connect, MapDispatchToPropsFunction } from 'react-redux';
+import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
@@ -95,7 +95,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
   );
 };
 
-const mapStateToProps = (state: AppState): StateProps => ({
+const mapStateToProps: MapStateToPropsParam<StateProps, {}, AppState> = (state) => ({
   selectedMonitor: selectSelectedMonitor(state),
 });
 
