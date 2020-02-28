@@ -12,8 +12,6 @@ import { App } from './app';
 import { AppProviders } from './app_providers';
 import { AppDependencies } from './app_context';
 
-export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
-
 const AppWithRouter = () => (
   <HashRouter>
     <App />
@@ -21,10 +19,6 @@ const AppWithRouter = () => (
 );
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
-  const {
-    i18n: { Context: I18nContext },
-  } = dependencies.core;
-
   render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter />
@@ -36,3 +30,5 @@ export const renderApp = (elem: Element, dependencies: AppDependencies) => {
     unmountComponentAtNode(elem);
   };
 };
+
+export { AppDependencies };

@@ -17,10 +17,14 @@ export const DataPlaceholder = ({ data, children }: Props) => {
   const { i18n } = useServices();
 
   if (data != null) {
-    return children;
+    return children as any;
   }
 
-  return i18n.translate('xpack.snapshotRestore.dataPlaceholderLabel', {
-    defaultMessage: '-',
-  });
+  return (
+    <>
+      {i18n.translate('xpack.snapshotRestore.dataPlaceholderLabel', {
+        defaultMessage: '-',
+      })}
+    </>
+  );
 };
