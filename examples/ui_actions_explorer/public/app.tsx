@@ -60,7 +60,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
             </EuiText>
             <EuiButton
               data-test-subj="emitHelloWorldTrigger"
-              onClick={() => uiActionsApi.executeTriggerActions(HELLO_WORLD_TRIGGER_ID, {})}
+              onClick={() => uiActionsApi.executeTriggerActions(HELLO_WORLD_TRIGGER_ID, undefined)}
             >
               Say hello world!
             </EuiButton>

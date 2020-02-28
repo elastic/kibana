@@ -5,8 +5,20 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IpDetails, UsersRequestOptions } from '../../lib/ip_details';
 import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+export type QueryIpOverviewResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.IpOverviewResolver>,
+  QuerySourceResolver
+>;
+
+export type QueryUsersResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.UsersResolver>,
+  QuerySourceResolver
+>;
 
 export interface IDetailsResolversDeps {
   ipDetails: IpDetails;
@@ -16,8 +28,8 @@ export const createIpDetailsResolvers = (
   libs: IDetailsResolversDeps
 ): {
   Source: {
-    IpOverview: SourceResolvers['IpOverview'];
-    Users: SourceResolvers['Users'];
+    IpOverview: QueryIpOverviewResolver;
+    Users: QueryUsersResolver;
   };
 } => ({
   Source: {
