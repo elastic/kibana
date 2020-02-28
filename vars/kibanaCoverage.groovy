@@ -1,11 +1,11 @@
 
-def uploadCoverageStaticSite(timestamp) {
+def uploadCoverageStaticSite(timestamp, liveAppPath) {
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${timestamp}/"
 
   uploadWithVault(uploadPrefix, 'src/dev/code_coverage/404.html')
-  uploadWithVault(uploadPrefix, 'src/dev/code_coverage/live_cc_app')
+  uploadWithVault(uploadPrefix, 'src/dev/code_coverage/' + liveAppPath)
 
-  def dataUploadPrefix = uploadPrefix + 'live_cc_app/'
+  def dataUploadPrefix = uploadPrefix + liveAppPath + '/coverage_data/'
   uploadCoverageHtml(dataUploadPrefix)
 }
 
