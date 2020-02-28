@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { TriggerContext, Trigger } from './trigger';
+import { Trigger } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
-import { TriggerId } from '../types';
+import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
  * Internal representation of a trigger kept for consumption only internally
@@ -33,7 +33,7 @@ export class TriggerInternal<T extends TriggerId> {
 
   constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
 
-  public async execute(context: TriggerContext<T>) {
+  public async execute(context: TriggerContextMapping[T]) {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
@@ -51,7 +51,10 @@ export class TriggerInternal<T extends TriggerId> {
     await this.executeMultipleActions(actions, context);
   }
 
-  private async executeSingleAction(action: Action<TriggerContext<T>>, context: TriggerContext<T>) {
+  private async executeSingleAction(
+    action: Action<TriggerContextMapping[T]>,
+    context: TriggerContextMapping[T]
+  ) {
     const href = action.getHref && action.getHref(context);
 
     if (href) {
@@ -63,8 +66,8 @@ export class TriggerInternal<T extends TriggerId> {
   }
 
   private async executeMultipleActions(
-    actions: Array<Action<TriggerContext<T>>>,
-    context: TriggerContext<T>
+    actions: Array<Action<TriggerContextMapping[T]>>,
+    context: TriggerContextMapping[T]
   ) {
     const panel = await buildContextMenuForActions({
       actions,
