@@ -11,6 +11,7 @@ import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
+import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
@@ -178,8 +179,14 @@ export async function getClustersFromRequest(
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
+    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
     logstashes.forEach(logstash => {
       const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
+
+      // withhold LS overview stats until there is at least 1 pipeline
+      if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
+        logstash.stats = {};
+      }
       set(clusters[clusterIndex], 'logstash', logstash.stats);
     });
   }

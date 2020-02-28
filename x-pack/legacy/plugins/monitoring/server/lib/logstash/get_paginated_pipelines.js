@@ -87,8 +87,8 @@ function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMe
       nodesCount: pipeline.metrics[nodesCountMetricKey],
     };
 
-    pipeline.latestThroughput = last(pipeline.metrics.throughput.data)[1];
-    pipeline.latestNodesCount = last(pipeline.metrics.nodesCount.data)[1];
+    pipeline.latestThroughput = (last(pipeline.metrics.throughput.data) || [])[1];
+    pipeline.latestNodesCount = (last(pipeline.metrics.nodesCount.data) || [])[1];
   });
   return processedResponse;
 }
@@ -134,7 +134,10 @@ async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountM
     2
   );
   const { data } = metricSeriesData[nodesCountMetric][0] || [[]];
-  const pipelinesMap = data.pop()[1] || {};
+  const pipelinesMap = (data.pop() || [])[1] || {};
+  if (!Object.keys(pipelinesMap).length) {
+    return;
+  }
   pipelines.forEach(pipeline => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
 }
 
