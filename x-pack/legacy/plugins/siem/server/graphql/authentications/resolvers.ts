@@ -6,14 +6,7 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { Authentications } from '../../lib/authentications';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
-
-type QueryAuthenticationsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AuthenticationsResolver>,
-  QuerySourceResolver
->;
 
 export interface AuthenticationsResolversDeps {
   authentications: Authentications;
@@ -23,7 +16,7 @@ export const createAuthenticationsResolvers = (
   libs: AuthenticationsResolversDeps
 ): {
   Source: {
-    Authentications: QueryAuthenticationsResolver;
+    Authentications: SourceResolvers['Authentications'];
   };
 } => ({
   Source: {

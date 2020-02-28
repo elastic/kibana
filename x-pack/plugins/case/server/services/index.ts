@@ -149,14 +149,8 @@ export class CaseService {
       }
     },
     getUser: async ({ request, response }: GetUserArgs) => {
-      let user;
-      try {
-        this.log.debug(`Attempting to authenticate a user`);
-        user = await authentication!.getCurrentUser(request);
-      } catch (error) {
-        this.log.debug(`Error on GET user: ${error}`);
-        throw error;
-      }
+      this.log.debug(`Attempting to authenticate a user`);
+      const user = authentication!.getCurrentUser(request);
       if (!user) {
         this.log.debug(`Error on GET user: Bad User`);
         throw new Error('Bad User - the user is not authenticated');
