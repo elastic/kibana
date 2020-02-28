@@ -156,10 +156,7 @@ export interface DllFields {
 export type AlertEvent = Immutable<{
   '@timestamp': number;
   agent: {
-    ephemeral_id: string;
     id: string;
-    name: string;
-    type: string;
     version: string;
   };
   event: {
@@ -200,9 +197,12 @@ export type AlertEvent = Immutable<{
       user: string;
       sid: string;
       integrity_level: number;
+      integrity_level_name: string;
       privileges: PrivilegesFields[];
     };
     thread: ThreadFields[];
+    uptime: number;
+    user: string;
   };
   file: {
     owner: string;
