@@ -52,7 +52,8 @@ export const sendRequest = async <D = any>(
   { path, method, body, query }: SendRequestConfig
 ): Promise<SendRequestResponse<D>> => {
   try {
-    const response = await httpClient[method](path, { body, query });
+    const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
+    const response = await httpClient[method](path, { body: stringifiedBody, query });
 
     return {
       data: response.data ? response.data : response,
