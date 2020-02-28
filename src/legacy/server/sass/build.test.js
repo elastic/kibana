@@ -32,7 +32,7 @@ afterEach(async () => {
   await del(TMP);
 });
 
-it('builds light themed SASS', async () => {
+it.skip('builds light themed SASS', async () => {
   const targetPath = resolve(TMP, 'style.css');
   await new Build({
     sourcePath: FIXTURE,
@@ -57,7 +57,7 @@ it('builds light themed SASS', async () => {
   `);
 });
 
-it('builds dark themed SASS', async () => {
+it.skip('builds dark themed SASS', async () => {
   const targetPath = resolve(TMP, 'style.css');
   await new Build({
     sourcePath: FIXTURE,
@@ -82,7 +82,7 @@ it('builds dark themed SASS', async () => {
   `);
 });
 
-it('rewrites url imports', async () => {
+it.skip('rewrites url imports', async () => {
   const targetPath = resolve(TMP, 'style.css');
   await new Build({
     sourcePath: FIXTURE,
