@@ -39,7 +39,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  * to function properly.
  */
 export interface LegacyAPI {
-  serverConfig: { protocol: string; hostname: string; port: number };
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -132,7 +131,6 @@ export class Plugin {
       config,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
     const authz = await setupAuthorization({

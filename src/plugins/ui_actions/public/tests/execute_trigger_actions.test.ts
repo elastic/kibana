@@ -21,6 +21,7 @@ import { Action, createAction } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
+import { TriggerId } from '../types';
 
 jest.mock('../context_menu');
 
@@ -55,7 +56,7 @@ beforeEach(reset);
 test('executes a single action mapped to a trigger', async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
   const action = createTestAction('test1', () => true);
@@ -66,7 +67,7 @@ test('executes a single action mapped to a trigger', async () => {
 
   const context = {};
   const start = doStart();
-  await start.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
   expect(executeFn).toBeCalledTimes(1);
   expect(executeFn).toBeCalledWith(context);
@@ -75,7 +76,7 @@ test('executes a single action mapped to a trigger', async () => {
 test('throws an error if there are no compatible actions to execute', async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
 
@@ -84,7 +85,9 @@ test('throws an error if there are no compatible actions to execute', async () =
 
   const context = {};
   const start = doStart();
-  await expect(start.executeTriggerActions('MY-TRIGGER', context)).rejects.toMatchObject(
+  await expect(
+    start.executeTriggerActions('MY-TRIGGER' as TriggerId, context)
+  ).rejects.toMatchObject(
     new Error('No compatible actions found to execute for trigger [triggerId = MY-TRIGGER].')
   );
 });
@@ -92,7 +95,7 @@ test('throws an error if there are no compatible actions to execute', async () =
 test('does not execute an incompatible action', async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
   const action = createTestAction<{ name: string }>('test1', ({ name }) => name === 'executeme');
@@ -105,7 +108,7 @@ test('does not execute an incompatible action', async () => {
   const context = {
     name: 'executeme',
   };
-  await start.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
   expect(executeFn).toBeCalledTimes(1);
 });
@@ -113,7 +116,7 @@ test('does not execute an incompatible action', async () => {
 test('shows a context menu when more than one action is mapped to a trigger', async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
   const action1 = createTestAction('test1', () => true);
@@ -129,7 +132,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
 
   const start = doStart();
   const context = {};
-  await start.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
   expect(executeFn).toBeCalledTimes(0);
   expect(openContextMenu).toHaveBeenCalledTimes(1);
@@ -138,7 +141,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
 test('passes whole action context to isCompatible()', async () => {
   const { setup, doStart } = uiActions;
   const trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
   const action = createTestAction<{ foo: string }>('test', ({ foo }) => {
@@ -153,5 +156,5 @@ test('passes whole action context to isCompatible()', async () => {
   const start = doStart();
 
   const context = { foo: 'bar' };
-  await start.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 });
