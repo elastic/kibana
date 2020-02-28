@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -18,9 +18,14 @@ import {
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiTextColor,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import styled from 'styled-components';
 import { AgentConfig } from '../../../types';
 import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH, FLEET_PATH } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
@@ -58,6 +63,82 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   >
     {children}
   </WithHeaderLayout>
+);
+
+const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
+  color: ${props => props.theme.eui.textColors.danger};
+`;
+
+const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
+  ({ config, onDelete }) => {
+    const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+
+    const [isOpen, setIsOpen] = useState(false);
+    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+    const isDefaultConfig = config.name === 'default'; // FIXME: need to implement disable for default config
+
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.ingestManager.agentConfigList.actionsMenuText', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen}
+        closePopover={handleCloseMenu}
+      >
+        <EuiContextMenuPanel
+          items={[
+            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${config.id}`}>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigList.viewConfigActionText"
+                defaultMessage="View configuration"
+              />
+            </EuiContextMenuItem>,
+
+            <EuiContextMenuItem icon="plusInCircle" disabled={true}>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
+                defaultMessage="Create data source"
+              />
+            </EuiContextMenuItem>,
+
+            <EuiContextMenuItem icon="copy" disabled={true}>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigList.copyConfigActionText"
+                defaultMessage="Copy configuration"
+              />
+            </EuiContextMenuItem>,
+
+            <AgentConfigDeleteProvider>
+              {deleteAgentConfigsPrompt => {
+                return (
+                  <DangerEuiContextMenuItem
+                    icon="trash"
+                    disabled={isDefaultConfig}
+                    onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentConfigList.deleteConfigActionText"
+                      defaultMessage="Delete Configuration"
+                    />
+                  </DangerEuiContextMenuItem>
+                );
+              }}
+            </AgentConfigDeleteProvider>,
+          ]}
+        />
+      </EuiPopover>
+    );
+  }
 );
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
@@ -157,24 +238,17 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
+        width: '100px',
         actions: [
           {
-            render: ({ id }: AgentConfig) => {
-              return (
-                <EuiLink href={`${DETAILS_URI}${id}`}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentConfigList.viewActionLinkText"
-                    defaultMessage="view"
-                  />
-                </EuiLink>
-              );
-            },
+            render: (config: AgentConfig) => (
+              <RowActions config={config} onDelete={() => sendRequest()} />
+            ),
           },
         ],
-        width: '100px',
       },
     ],
-    [DETAILS_URI, FLEET_URI]
+    [DETAILS_URI, FLEET_URI, sendRequest]
   );
 
   const emptyPrompt = (
@@ -279,6 +353,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable
         loading={isLoading}
+        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
