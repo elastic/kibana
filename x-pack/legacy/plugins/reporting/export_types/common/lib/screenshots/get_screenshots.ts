@@ -15,7 +15,7 @@ const getAsyncDurationLogger = (logger: LevelLogger) => {
     const result = await promise;
     logger.debug(
       i18n.translate('xpack.reporting.screencapture.asyncTook', {
-        defaultMessage: '{description} took {}ms',
+        defaultMessage: '{description} took {took}ms',
         values: {
           description,
           took: Date.now() - start,
