@@ -22,7 +22,6 @@ export interface InitializedKibanaContextValue {
   combinedQuery: any;
   indexPatterns: IndexPatternsContract;
   initialized: true;
-  kbnBaseUrl: string;
   kibanaConfig: IUiSettingsClient;
   currentIndexPattern: IndexPattern;
   currentSavedSearch?: SavedSearch;

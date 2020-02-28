@@ -54,7 +54,7 @@ describe('getMetricFields', () => {
     expect(metrics.length).toBe(2);
 
     expect(metrics[0].getAggType()).toEqual('sum');
-    expect(metrics[0].getESDocFieldName()).toEqual(sumFieldName);
+    expect(metrics[0].getRootName()).toEqual(sumFieldName);
     expect(metrics[0].getName()).toEqual(
       '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField'
     );
