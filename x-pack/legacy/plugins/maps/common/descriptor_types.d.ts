@@ -12,7 +12,7 @@ export type SourceDescriptor =
   | EMSFileSourceDescriptor
   | ESGeoGridSourceDescriptor
   | ESSearchSourceDescriptor
-  | ESPewPewSource
+  | ESPewPewSourceDescriptor
   | ESTermSourceDescriptor
   | KibanaRegionmapSourceDescriptor
   | KibanaTilemapSourceDescriptor
