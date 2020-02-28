@@ -104,8 +104,8 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [method]: types that failed validation:
-- [method.0]: expected value to equal [post] but got [https]
-- [method.1]: expected value to equal [put] but got [https]"
+- [method.0]: expected value to equal [post]
+- [method.1]: expected value to equal [put]"
 `);
   });
 
@@ -141,8 +141,8 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
-- [headers.0]: could not parse record value from [application/json]
-- [headers.1]: expected value to equal [null] but got [application/json]"
+- [headers.0]: could not parse record value from json input
+- [headers.1]: expected value to equal [null]"
 `);
   });
 
