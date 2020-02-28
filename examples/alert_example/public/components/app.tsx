@@ -106,35 +106,25 @@ export const AlertExampleApp = ({
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="alertExample.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
                 <EuiPageContentBody>
                   <EuiText>
                     <p>
                       <FormattedMessage
                         id="alertExample.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
+                        defaultMessage="Test app that registers and creates its own alerts and actions."
                       />
                     </p>
                     <EuiHorizontalRule />
-                    <p>
+                    {/* <p>
                       <FormattedMessage
                         id="alertExample.timestampText"
                         defaultMessage="Last timestamp: {time}"
                         values={{ time: timestamp ? timestamp : 'Unknown' }}
                       />
-                    </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                    </p> */}
+                    {/* <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage id="alertExample.buttonText" defaultMessage="Get data" />
-                    </EuiButton>
+                    </EuiButton> */}
                     <EuiButton
                       type="primary"
                       size="s"
@@ -142,7 +132,7 @@ export const AlertExampleApp = ({
                     >
                       <FormattedMessage
                         id="alertExample.testAlertButtonText"
-                        defaultMessage="Create test alert"
+                        defaultMessage="Invoke alert creation flyout"
                       />
                     </EuiButton>
                   </EuiText>

@@ -19,7 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { getAlertType } from './components/always_fire_alert_type';
+import { getAlertType as AlwaysFire } from './components/always_fire_alert_type';
+import { getAlertType as NoExpression } from './components/no_expression_alert_type';
+import { getAlertType as WeatherAlert } from './components/weather_alert_type';
+import { getAlertType as StockAlert } from './components/stock_alert_type';
+import { getAlertType as FiresOnce } from './components/fires_once_alert_type';
 import {
   AlertExamplePluginSetup,
   AlertExamplePluginStart,
@@ -42,7 +46,11 @@ export class AlertExamplePlugin
 
         const { triggers_actions_ui } = deps;
 
-        triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+        triggers_actions_ui.alertTypeRegistry.register(AlwaysFire());
+        triggers_actions_ui.alertTypeRegistry.register(NoExpression());
+        triggers_actions_ui.alertTypeRegistry.register(WeatherAlert());
+        triggers_actions_ui.alertTypeRegistry.register(StockAlert());
+        triggers_actions_ui.alertTypeRegistry.register(FiresOnce());
 
         // Render the application
         return renderApp(

@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../x-pack/plugins/alerting/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '../../../x-pack/plugins/actions/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public/types';
+import { NoExpression } from './expression';
+import { validateExampleAlertType } from './validation';
 
-export interface AlertExamplePluginSetupDependencies {
-  alerting: AlertingPluginSetupContract;
-  actions: ActionsPluginSetupContract;
+export function getAlertType(): AlertTypeModel {
+  return {
+    id: 'example.fires-once',
+    name: 'Fires Once',
+    iconClass: 'beaker',
+    alertParamsExpression: NoExpression,
+    validate: () => ({ errors: {} }),
+  };
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginStart {}

@@ -3,6 +3,6 @@
   "version": "8.0.0",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "triggers_actions_ui", "charts", "data"],
+  "requiredPlugins": ["navigation", "triggers_actions_ui", "charts", "data", "alerting", "actions"],
   "optionalPlugins": []
 }

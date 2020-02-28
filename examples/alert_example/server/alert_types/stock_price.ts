@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../x-pack/plugins/alerting/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '../../../x-pack/plugins/actions/server';
+export const alertType = {
+  id: 'example.stock',
+  name: 'Stock Price',
+  actionGroups: [{ id: 'default', name: 'default' }],
+  executor,
+};
 
-export interface AlertExamplePluginSetupDependencies {
-  alerting: AlertingPluginSetupContract;
-  actions: ActionsPluginSetupContract;
+async function executor({ services, params, state }) {
+  if (state == null) state = {};
+  if (state.executions == null) state.executions = 0;
+
+  state.executions++;
+  return state;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginStart {}

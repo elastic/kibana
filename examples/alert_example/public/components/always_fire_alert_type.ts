@@ -19,15 +19,15 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public/types';
-import { ExampleExpression } from './expression';
+import { NoExpression } from './expression';
 import { validateExampleAlertType } from './validation';
 
 export function getAlertType(): AlertTypeModel {
   return {
-    id: 'example',
-    name: 'Example Alert Type',
-    iconClass: 'bell',
-    alertParamsExpression: ExampleExpression,
-    validate: validateExampleAlertType,
+    id: 'example.always-firing',
+    name: 'Always Fires',
+    iconClass: 'wrench',
+    alertParamsExpression: NoExpression,
+    validate: () => ({ errors: {} }),
   };
 }

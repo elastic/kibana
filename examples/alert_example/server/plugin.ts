@@ -25,8 +25,18 @@ import {
   Logger,
 } from '../../../src/core/server';
 
-import { AlertExamplePluginSetup, AlertExamplePluginStart } from './types';
+import {
+  AlertExamplePluginSetup,
+  AlertExamplePluginStart,
+  AlertExamplePluginSetupDependencies,
+} from './types';
 import { defineRoutes } from './routes';
+
+import { alertType as AlwaysFiring } from './alert_types/always_firing';
+import { alertType as Weather } from './alert_types/weather';
+import { alertType as StockPrice } from './alert_types/stock_price';
+import { alertType as NoExpression } from './alert_types/no_expression';
+import { alertType as FiresOnce } from './alert_types/fires_once';
 
 export class AlertExamplePlugin
   implements Plugin<AlertExamplePluginSetup, AlertExamplePluginStart> {
@@ -36,9 +46,15 @@ export class AlertExamplePlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: AlertExamplePluginSetupDependencies) {
     this.logger.debug('Alert Example: Setup');
     const router = core.http.createRouter();
+
+    plugins.alerting.registerType(AlwaysFiring);
+    plugins.alerting.registerType(Weather);
+    plugins.alerting.registerType(StockPrice);
+    plugins.alerting.registerType(NoExpression);
+    plugins.alerting.registerType(FiresOnce);
 
     // Register server side APIs
     defineRoutes(router);

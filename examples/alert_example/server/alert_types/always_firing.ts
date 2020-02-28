@@ -17,15 +17,30 @@
  * under the License.
  */
 
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../x-pack/plugins/alerting/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '../../../x-pack/plugins/actions/server';
+export const alertType = {
+  id: 'example.always-firing',
+  name: 'Always firing',
+  actionGroups: [{ id: 'default', name: 'default' }],
+  executor,
+};
 
-export interface AlertExamplePluginSetupDependencies {
-  alerting: AlertingPluginSetupContract;
-  actions: ActionsPluginSetupContract;
+async function executor({ services, params, state }) {
+  if (state == null) state = {};
+  if (state.executions == null) state.executions = 0;
+
+  const context = {
+    date: new Date().toISOString(),
+    count: state.executions,
+  };
+
+  const instanceIds = Array.from({ length: 10 }, (v, k) => k + 1);
+
+  instanceIds.map(instanceId => {
+    services
+      .alertInstanceFactory(instanceId)
+      .scheduleActions('default', { instanceId, ...context });
+  });
+
+  state.executions++;
+  return state;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertExamplePluginStart {}

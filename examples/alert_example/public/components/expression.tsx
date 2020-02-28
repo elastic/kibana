@@ -20,19 +20,190 @@
 import React, { Fragment, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { builtInAggregationTypes } from '../../../../x-pack/plugins/triggers_actions_ui/public/common/constants';
+import {
+  EuiText,
+  EuiLink,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+  EuiFormRow,
+  EuiFieldText,
+} from '@elastic/eui';
 import {
   WhenExpression,
   OfExpression,
+  ThresholdExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../x-pack/plugins/triggers_actions_ui/public/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { builtInAggregationTypes } from '../../../../x-pack/plugins/triggers_actions_ui/public/common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggregationType } from '../../../../x-pack/plugins/triggers_actions_ui/public/common/types';
 
 interface ExampleProps {
   testAggType?: string;
   testAggField?: string;
   errors: { [key: string]: string[] };
 }
+
+interface WeatherProps {
+  location?: string;
+  weather?: string;
+  errors: { [key: string]: string[] };
+}
+
+interface StockProps {
+  alertParams: {
+    stock?: string;
+    price?: number[];
+    thresholdComparator?: string;
+  };
+  setAlertParams: (property: string, value: any) => void;
+  errors: { [key: string]: string[] };
+}
+
+interface CustomProps {
+  param1?: string;
+  param2?: string;
+  errors: { [key: string]: string[] };
+}
+
+export const NoExpression: React.FunctionComponent = () => {
+  return (
+    <Fragment>
+      <EuiTitle size="xxs">
+        <p>This alert type does not need configuration.</p>
+      </EuiTitle>
+    </Fragment>
+  );
+};
+
+export const CustomExpression: React.FunctionComponent<CustomProps> = ({
+  param1,
+  param2,
+  errors,
+}) => {
+  return (
+    <Fragment>
+      <EuiTitle size="xxs">
+        <p>These are fields specific to this alert type, that are not part of the trigger:</p>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFlexGroup gutterSize="s" wrap direction="column">
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            label="Alert type specific text field"
+            helpText="I will populate param1 in the alert type."
+          >
+            <EuiFieldText name="first" />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiSpacer />
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            label="Alert type specific dropdown"
+            labelAppend={
+              <EuiText size="xs">
+                <EuiLink>Link to some help</EuiLink>
+              </EuiText>
+            }
+            helpText="I will populate param2 in the alert type."
+          >
+            <EuiSelect
+              hasNoInitialSelection
+              options={[
+                { value: 'option_one', text: 'Option one' },
+                { value: 'option_two', text: 'Option two' },
+                { value: 'option_three', text: 'Option three' },
+              ]}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};
+
+export const WeatherExpression: React.FunctionComponent = () => {
+  return (
+    <Fragment>
+      <EuiTitle size="xxs">
+        <p>This alert type does not need configuration.</p>
+      </EuiTitle>
+    </Fragment>
+  );
+};
+
+export const stocks: { [key: string]: AggregationType } = {
+  Elastic: {
+    text: 'Elastic',
+    fieldRequired: true,
+    value: 'Elastic',
+    validNormalizedTypes: ['number'],
+  },
+  Microsoft: {
+    text: 'Microsoft',
+    fieldRequired: true,
+    validNormalizedTypes: ['number'],
+    value: 'Microsoft',
+  },
+  Alphabet: {
+    text: 'Alphabet',
+    fieldRequired: true,
+    validNormalizedTypes: ['number'],
+    value: 'Alphabet',
+  },
+  Amazon: {
+    text: 'Amazon',
+    fieldRequired: true,
+    validNormalizedTypes: ['number'],
+    value: 'Amazon',
+  },
+  Tesla: {
+    text: 'Tesla',
+    fieldRequired: true,
+    validNormalizedTypes: ['number'],
+    value: 'Tesla',
+  },
+};
+
+export const StockExpression: React.FunctionComponent<StockProps> = ({
+  alertParams,
+  setAlertParams,
+  errors,
+}) => {
+  const { stock, price, thresholdComparator } = alertParams;
+
+  return (
+    <Fragment>
+      <EuiFlexGroup gutterSize="s" wrap>
+        <EuiFlexItem grow={false}>
+          <WhenExpression
+            aggType={stock ?? 'Elastic'}
+            customAggTypesOptions={stocks}
+            onChangeSelectedAggType={(selectedAggType: string) => {
+              setAlertParams('stock', selectedAggType);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ThresholdExpression
+            thresholdComparator={thresholdComparator ?? '>'}
+            threshold={price ?? [100]}
+            errors={errors}
+            onChangeSelectedThreshold={selectedThresholds =>
+              setAlertParams('price', selectedThresholds)
+            }
+            onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+              setAlertParams('thresholdComparator', selectedThresholdComparator)
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};
 
 export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
   testAggType,
