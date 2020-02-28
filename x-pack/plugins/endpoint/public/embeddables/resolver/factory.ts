@@ -19,7 +19,7 @@ export class ResolverEmbeddableFactory extends EmbeddableFactory {
     return true;
   }
 
-  public async create(initialInput: EmbeddableInput, parent: IContainer) {
+  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     return new ResolverEmbeddable(initialInput, {}, parent);
   }
 

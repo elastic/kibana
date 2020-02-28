@@ -24,13 +24,22 @@ interface UserBroughtProcessIntoView {
   };
 }
 
+/**
+ * Used when the alert list selects an alert and the flyout shows resolver.
+ */
 interface UserChangedSelectedEvent {
   readonly type: 'userChangedSelectedEvent';
   readonly payload: {
+    /**
+     * Optional because they could have unselected the event.
+     */
     selectedEvent?: LegacyEndpointEvent;
   };
 }
 
+/**
+ * Triggered by middleware when the data for resolver needs to be loaded. Used to set state in redux to 'loading'.
+ */
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
 }

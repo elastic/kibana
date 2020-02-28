@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -49,7 +49,7 @@ export const Resolver = styled(
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       dispatch({
         type: 'userChangedSelectedEvent',
         payload: { selectedEvent },

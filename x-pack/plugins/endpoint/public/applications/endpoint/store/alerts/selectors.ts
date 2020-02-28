@@ -15,7 +15,7 @@ import {
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
-import { Immutable, LegacyEndpointEvent, AlertEvent } from '../../../../../common/types';
+import { Immutable, LegacyEndpointEvent } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**

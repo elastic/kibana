@@ -17,6 +17,9 @@ export interface EndpointPluginSetupDependencies {
 
 export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
+/**
+ * Functionality that the endpoint plugin uses from core.
+ */
 export interface EndpointPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   overlays: CoreStart['overlays'] | undefined;
