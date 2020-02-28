@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ACTION_GROUP_IDS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
 
@@ -19,51 +19,50 @@ export interface StatusCheckExecutorParams {
   };
 }
 
-const getResponse = () => ({
-  lastChecked: new Date(),
-});
+const { DOWN_MONITOR } = ACTION_GROUP_DEFINITIONS;
 
-const { DOWN_MONITOR } = ACTION_GROUP_IDS;
+/**
+ * Reduce a composite-key array of status results to a set of unique IDs.
+ * @param items to reduce
+ */
+export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  items.reduce((acc, { monitor_id }) => {
+    acc.add(monitor_id);
+    return acc;
+  }, new Set<string>());
 
 /**
  * Generates a message to include in contexts of alerts.
  * @param monitors the list of monitors to include in the message
  * @param max
  */
-export const contextMessage = (monitors: GetMonitorStatusResult[], max: number): string => {
+export const contextMessage = (monitorIds: string[], max: number): string => {
   const MIN = 2;
   if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
 
-  // get unique monitor IDs
-  const idSet = new Set<string>();
-  for (let i = 0; i < monitors.length; i++) {
-    const id = monitors[i].monitor_id;
-    if (!idSet.has(id)) {
-      idSet.add(id);
-    }
-    if (idSet.size >= max) {
-      break;
-    }
-  }
-
-  const uniqueIds = Array.from(idSet.keys());
-
   // generate the message
   let message;
-  if (monitors.length) message = 'Down monitors:';
+  if (monitorIds.length === 1) message = 'Down monitor:';
+  else if (monitorIds.length) message = 'Down monitors:';
+  // this shouldn't happen because the function should only be called
+  // when > 0 monitors are down
   else message = 'No down monitor IDs received';
 
-  for (let i = 0; i < uniqueIds.length; i++) {
+  for (let i = 0; i < monitorIds.length; i++) {
     if (i === max) {
-      return message + `\n...and ${uniqueIds.length - i} other monitors`;
+      return message + `\n...and ${monitorIds.length - i} other monitors`;
     } else {
-      const id = uniqueIds[i];
+      const id = monitorIds[i];
       message = message + `\n${id}`;
     }
   }
 
   return message;
 };
+
+// Right now the maximum number of monitors shown in the message is hardcoded here.
+// we will probably want to make this a parameter in the future
+const DEFAULT_MAX_MESSAGE_ROWS = 3;
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
   id: 'xpack.uptime.alerts.downMonitor',
@@ -82,8 +81,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
   defaultActionGroupId: DOWN_MONITOR,
   actionGroups: [
     {
-      id: DOWN_MONITOR,
-      name: 'Alert',
+      id: DOWN_MONITOR.id,
+      name: DOWN_MONITOR.name,
     },
   ],
   async executor(options: any) {
@@ -100,16 +99,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
 
     // if no monitors are down for our query, we don't need to trigger an alert
     if (monitorsByLocation.length) {
+      const uniqueIds = uniqueMonitorIds(monitorsByLocation);
       const alertInstance = options.services.alertInstanceFactory(server);
       alertInstance.replaceState({
         monitors: monitorsByLocation,
       });
       alertInstance.scheduleActions(DOWN_MONITOR, {
+        message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
         server,
         monitors: monitorsByLocation,
       });
     }
 
-    return getResponse();
+    // this stateful data is at the cluster level, not an alert instance level,
+    // so any alert of this type will flush/overwrite the state when they return
+    return {};
   },
 });
