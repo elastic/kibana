@@ -28,9 +28,9 @@ export interface SendRequestConfig {
   body?: any;
 }
 
-export interface SendRequestResponse<D = any> {
+export interface SendRequestResponse<D = any, E = Error> {
   data: D | null;
-  error: Error | null;
+  error: E | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -39,18 +39,18 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
-export interface UseRequestResponse<D = any> {
+export interface UseRequestResponse<D = any, E = Error> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: Error | null;
+  error: E | null;
   data: D | null;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D>>;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
 }
 
-export const sendRequest = async <D = any>(
+export const sendRequest = async <D = any, E = Error>(
   httpClient: HttpSetup,
   { path, method, body, query }: SendRequestConfig
-): Promise<SendRequestResponse<D>> => {
+): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
     const response = await httpClient[method](path, { body: stringifiedBody, query });
@@ -67,7 +67,7 @@ export const sendRequest = async <D = any>(
   }
 };
 
-export const useRequest = <D = any>(
+export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
   {
     path,
@@ -78,8 +78,8 @@ export const useRequest = <D = any>(
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-): UseRequestResponse<D> => {
-  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D>>>();
+): UseRequestResponse<D, E> => {
+  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
