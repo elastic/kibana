@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +33,8 @@ function RawJsonParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  const [isFormValid, setFormValidity] = useState(false);
+  const [isFormValid, setFormValidity] = useState(true);
+  const [editorReady, setEditorReady] = useState(false);
 
   const label = (
     <>
@@ -53,9 +54,16 @@ function RawJsonParamEditor({
     setValue(newValue);
   };
 
-  useEffect(() => {
-    setValidity(isFormValid);
-  }, [isFormValid]);
+  const onEditorValidate = (annotations: any[]) => {
+    //The first onValidate returned from EuiCodeEditor is a false positive
+    if (editorReady) {
+      const validity = annotations.length === 0;
+      setFormValidity(validity);
+      setValidity(validity);
+    } else {
+      setEditorReady(true);
+    }
+  };
 
   return (
     <EuiFormRow
@@ -71,9 +79,7 @@ function RawJsonParamEditor({
         width="100%"
         height="250px"
         value={value}
-        onValidate={(annotations: any[]) => {
-          setFormValidity(!annotations || annotations.length === 0);
-        }}
+        onValidate={onEditorValidate}
         setOptions={{
           fontSize: '14px',
         }}
