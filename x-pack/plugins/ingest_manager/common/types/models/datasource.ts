@@ -5,31 +5,23 @@
  */
 
 export interface NewDatasource {
-  name: string;
-  namespace?: string;
-  config_id: string;
-  enabled: boolean;
+  enabled?: boolean;
+  title?: string;
   package?: {
-    assets: Array<{
-      id: string;
-      type: string;
-    }>;
-    description: string;
     name: string;
-    title: string;
     version: string;
   };
-  output_id: string;
+  namespace?: string;
+  use_output: string;
   inputs: Array<{
     type: string;
-    enabled: boolean;
     processors?: string[];
     streams: Array<{
-      id: string;
-      enabled: boolean;
-      dataset: string;
-      processors?: string[];
-      config?: Record<string, any>;
+      id?: string;
+      enabled?: boolean;
+      dataset?: string;
+      metricset?: string;
+      paths?: string[];
     }>;
   }>;
 }

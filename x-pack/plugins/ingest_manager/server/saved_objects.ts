@@ -105,30 +105,20 @@ export const savedObjectMappings = {
   },
   [DATASOURCE_SAVED_OBJECT_TYPE]: {
     properties: {
-      name: { type: 'keyword' },
-      namespace: { type: 'keyword' },
-      config_id: { type: 'keyword' },
       enabled: { type: 'boolean' },
+      title: { type: 'keyword' },
       package: {
         properties: {
-          assets: {
-            properties: {
-              id: { type: 'keyword' },
-              type: { type: 'keyword' },
-            },
-          },
-          description: { type: 'keyword' },
           name: { type: 'keyword' },
-          title: { type: 'keyword' },
           version: { type: 'keyword' },
         },
       },
-      output_id: { type: 'keyword' },
+      namespace: { type: 'keyword' },
+      use_output: { type: 'keyword' },
       inputs: {
         type: 'nested',
         properties: {
           type: { type: 'keyword' },
-          enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
           streams: {
             type: 'nested',
@@ -136,8 +126,8 @@ export const savedObjectMappings = {
               id: { type: 'keyword' },
               enabled: { type: 'boolean' },
               dataset: { type: 'keyword' },
-              processors: { type: 'keyword' },
-              config: { type: 'flattened' },
+              metricset: { type: 'keyword' },
+              paths: { type: 'keyword' },
             },
           },
         },

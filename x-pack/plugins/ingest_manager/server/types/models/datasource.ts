@@ -7,37 +7,27 @@ import { schema } from '@kbn/config-schema';
 export { Datasource, NewDatasource } from '../../../common';
 
 const DatasourceBaseSchema = {
-  name: schema.string(),
-  namespace: schema.maybe(schema.string()),
-  config_id: schema.string(),
-  enabled: schema.boolean(),
+  enabled: schema.maybe(schema.boolean()),
+  title: schema.maybe(schema.string()),
   package: schema.maybe(
     schema.object({
-      assets: schema.arrayOf(
-        schema.object({
-          id: schema.string(),
-          type: schema.string(),
-        })
-      ),
-      description: schema.string(),
       name: schema.string(),
-      title: schema.string(),
       version: schema.string(),
     })
   ),
-  output_id: schema.string(),
+  namespace: schema.maybe(schema.string()),
+  use_output: schema.string(),
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
-      enabled: schema.boolean(),
       processors: schema.maybe(schema.arrayOf(schema.string())),
       streams: schema.arrayOf(
         schema.object({
-          id: schema.string(),
-          enabled: schema.boolean(),
-          dataset: schema.string(),
-          processors: schema.maybe(schema.arrayOf(schema.string())),
-          config: schema.recordOf(schema.string(), schema.any()),
+          id: schema.maybe(schema.string()),
+          enabled: schema.maybe(schema.boolean()),
+          dataset: schema.maybe(schema.string()),
+          metricset: schema.maybe(schema.string()),
+          paths: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
     })
