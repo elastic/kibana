@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { PersistedState } from '../../../ui/public/persisted_state';
 export {
   AggConfigs,
   IAggConfig,
