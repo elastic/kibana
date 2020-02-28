@@ -90,7 +90,9 @@ test('properly validates types according chosen schema', () => {
       context_value_1: 0,
       context_value_2: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [a] but it must have a minimum length of [2]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [1] but it must have a minimum length of [2]."`
+  );
 
   expect(
     type.validate('ab', {
@@ -104,7 +106,9 @@ test('properly validates types according chosen schema', () => {
       context_value_1: 0,
       context_value_2: 1,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [ab] but it must have a maximum length of [1]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [2] but it must have a maximum length of [1]."`
+  );
 
   expect(
     type.validate('a', {
@@ -126,7 +130,9 @@ test('properly validates when compares with Schema', () => {
     type.validate('a', {
       context_value_1: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [a] but it must have a minimum length of [2]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [1] but it must have a minimum length of [2]."`
+  );
 
   expect(
     type.validate('ab', {
@@ -138,7 +144,9 @@ test('properly validates when compares with Schema', () => {
     type.validate('ab', {
       context_value_1: 'b',
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [ab] but it must have a minimum length of [3]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [2] but it must have a minimum length of [3]."`
+  );
 
   expect(
     type.validate('abc', {
@@ -159,7 +167,9 @@ test('properly validates when compares with "null" literal Schema', () => {
     type.validate('a', {
       context_value_1: null,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [a] but it must have a minimum length of [2]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [1] but it must have a minimum length of [2]."`
+  );
 
   expect(
     type.validate('ab', {
@@ -171,7 +181,9 @@ test('properly validates when compares with "null" literal Schema', () => {
     type.validate('ab', {
       context_value_1: 'b',
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"value is [ab] but it must have a minimum length of [3]."`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"value has length [2] but it must have a minimum length of [3]."`
+  );
 
   expect(
     type.validate('abc', {

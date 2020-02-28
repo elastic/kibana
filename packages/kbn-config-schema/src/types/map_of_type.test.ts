@@ -40,7 +40,7 @@ test('properly parse the value if input is a string', () => {
 test('fails if string input cannot be parsed', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse map value from [invalidjson]"`
+    `"could not parse map value from json input"`
   );
 });
 
@@ -169,7 +169,7 @@ test('error preserves full path', () => {
   expect(() =>
     type.validate({ grandParentKey: { parentKey: { a: 'some-value' } } })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[grandParentKey.parentKey.key(\\"a\\")]: value is [a] but it must have a minimum length of [2]."`
+    `"[grandParentKey.parentKey.key(\\"a\\")]: value has length [1] but it must have a minimum length of [2]."`
   );
 
   expect(() =>

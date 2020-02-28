@@ -58,7 +58,7 @@ describe('#min', () => {
 
   test('returns error when smaller number', () => {
     expect(() => schema.number({ min: 4 }).validate(3)).toThrowErrorMatchingInlineSnapshot(
-      `"Value is [3] but it must be equal to or greater than [4]."`
+      `"Value must be equal to or greater than [4]."`
     );
   });
 });
@@ -70,7 +70,7 @@ describe('#max', () => {
 
   test('returns error when larger number', () => {
     expect(() => schema.number({ max: 2 }).validate(3)).toThrowErrorMatchingInlineSnapshot(
-      `"Value is [3] but it must be equal to or lower than [2]."`
+      `"Value must be equal to or lower than [2]."`
     );
   });
 });

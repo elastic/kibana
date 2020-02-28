@@ -43,7 +43,7 @@ test('validates contained type', () => {
   const type = schema.maybe(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"value is [foo] but it must have a maximum length of [1]."`
+    `"value has length [3] but it must have a maximum length of [1]."`
   );
 });
 

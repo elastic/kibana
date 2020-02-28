@@ -96,8 +96,8 @@ test('validates contained type', () => {
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(`
 "types that failed validation:
-- [0]: value is [foo] but it must have a maximum length of [1].
-- [1]: expected value to equal [null] but got [foo]"
+- [0]: value has length [3] but it must have a maximum length of [1].
+- [1]: expected value to equal [null]"
 `);
 });
 
@@ -107,7 +107,7 @@ test('validates basic type', () => {
   expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(`
 "types that failed validation:
 - [0]: expected value of type [string] but got [number]
-- [1]: expected value to equal [null] but got [666]"
+- [1]: expected value to equal [null]"
 `);
 });
 
@@ -131,8 +131,8 @@ test('validates type errors in object', () => {
 
   expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingInlineSnapshot(`
 "[foo]: types that failed validation:
-- [foo.0]: value is [ab] but it must have a maximum length of [1].
-- [foo.1]: expected value to equal [null] but got [ab]"
+- [foo.0]: value has length [2] but it must have a maximum length of [1].
+- [foo.1]: expected value to equal [null]"
 `);
 });
 
@@ -141,7 +141,7 @@ test('includes namespace in failure', () => {
 
   expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(`
 "[foo-namespace]: types that failed validation:
-- [foo-namespace.0]: value is [foo] but it must have a maximum length of [1].
-- [foo-namespace.1]: expected value to equal [null] but got [foo]"
+- [foo-namespace.0]: value has length [3] but it must have a maximum length of [1].
+- [foo-namespace.1]: expected value to equal [null]"
 `);
 });

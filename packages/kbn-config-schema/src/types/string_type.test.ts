@@ -50,13 +50,13 @@ describe('#minLength', () => {
     expect(() =>
       schema.string({ minLength: 4 }).validate('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value is [foo] but it must have a minimum length of [4]."`
+      `"value has length [3] but it must have a minimum length of [4]."`
     );
   });
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ minLength: 2 }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"value is [] but it must have a minimum length of [2]."`
+      `"value has length [0] but it must have a minimum length of [2]."`
     );
   });
 });
@@ -70,7 +70,7 @@ describe('#maxLength', () => {
     expect(() =>
       schema.string({ maxLength: 2 }).validate('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value is [foo] but it must have a maximum length of [2]."`
+      `"value has length [3] but it must have a maximum length of [2]."`
     );
   });
 });
@@ -99,21 +99,21 @@ describe('#hostname', () => {
     const hostNameSchema = schema.string({ hostname: true });
 
     expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingInlineSnapshot(
-      `"value is [host:name] but it must be a valid hostname (see RFC 1123)."`
+      `"value must be a valid hostname (see RFC 1123)."`
     );
     expect(() => hostNameSchema.validate('localhost:5601')).toThrowErrorMatchingInlineSnapshot(
-      `"value is [localhost:5601] but it must be a valid hostname (see RFC 1123)."`
+      `"value must be a valid hostname (see RFC 1123)."`
     );
     expect(() => hostNameSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
-      `"value is [-] but it must be a valid hostname (see RFC 1123)."`
+      `"value must be a valid hostname (see RFC 1123)."`
     );
     expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingInlineSnapshot(
-      `"value is [0:?:0:0:0:0:0:1] but it must be a valid hostname (see RFC 1123)."`
+      `"value must be a valid hostname (see RFC 1123)."`
     );
 
     const tooLongHostName = 'a'.repeat(256);
     expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingInlineSnapshot(
-      `"value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid hostname (see RFC 1123)."`
+      `"value must be a valid hostname (see RFC 1123)."`
     );
   });
 
@@ -127,7 +127,7 @@ describe('#hostname', () => {
     expect(() =>
       schema.string({ hostname: true, maxLength: 3 }).validate('www.example.com')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value is [www.example.com] but it must have a maximum length of [3]."`
+      `"value has length [15] but it must have a maximum length of [3]."`
     );
   });
 });

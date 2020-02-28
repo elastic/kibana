@@ -57,25 +57,21 @@ test('returns error when value is not a URI', () => {
   const uriSchema = schema.uri();
 
   expect(() => uriSchema.validate('3domain.local')).toThrowErrorMatchingInlineSnapshot(
-    `"value is [3domain.local] but it must be a valid URI (see RFC 3986)."`
+    `"value must be a valid URI (see RFC 3986)."`
   );
   expect(() =>
     uriSchema.validate('http://8010:0:0:0:9:500:300C:200A')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"value is [http://8010:0:0:0:9:500:300C:200A] but it must be a valid URI (see RFC 3986)."`
-  );
+  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
   expect(() => uriSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
-    `"value is [-] but it must be a valid URI (see RFC 3986)."`
+    `"value must be a valid URI (see RFC 3986)."`
   );
   expect(() =>
     uriSchema.validate('https://example.com?baz[]=foo&baz[]=bar')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"value is [https://example.com?baz[]=foo&baz[]=bar] but it must be a valid URI (see RFC 3986)."`
-  );
+  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
 
   const tooLongUri = `http://${'a'.repeat(256)}`;
   expect(() => uriSchema.validate(tooLongUri)).toThrowErrorMatchingInlineSnapshot(
-    `"value is [http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid URI (see RFC 3986)."`
+    `"value must be a valid URI (see RFC 3986)."`
   );
 });
 
@@ -91,10 +87,10 @@ describe('#scheme', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
     expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingInlineSnapshot(
-      `"expected URI with scheme [http|https] but got [ftp://elastic.co]."`
+      `"expected URI with scheme [http|https]."`
     );
     expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingInlineSnapshot(
-      `"expected URI with scheme [http|https] but got [file:///kibana.log]."`
+      `"expected URI with scheme [http|https]."`
     );
   });
 });

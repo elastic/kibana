@@ -116,9 +116,7 @@ describe('#min', () => {
       byteSize({
         min: '1kb',
       }).validate('1b')
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Value is [1b] ([1b]) but it must be equal to or greater than [1kb]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`"Value must be equal to or greater than [1kb]"`);
   });
 });
 
@@ -133,7 +131,7 @@ describe('#max', () => {
 
   test('returns error when larger', () => {
     expect(() => byteSize({ max: '1kb' }).validate('1mb')).toThrowErrorMatchingInlineSnapshot(
-      `"Value is [1mb] ([1048576b]) but it must be equal to or less than [1kb]"`
+      `"Value must be equal to or less than [1kb]"`
     );
   });
 });

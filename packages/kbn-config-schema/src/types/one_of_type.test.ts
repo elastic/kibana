@@ -142,7 +142,7 @@ test('fails if not matching literal', () => {
 
   expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(`
 "types that failed validation:
-- [0]: expected value to equal [foo] but got [bar]"
+- [0]: expected value to equal [foo]"
 `);
 });
 
@@ -158,7 +158,7 @@ test('fails if nested union type fail', () => {
  - [0]: expected value of type [boolean] but got [string]
 - [1]: types that failed validation:
  - [0]: types that failed validation:
-  - [0]: could not parse object value from [aaa]
+  - [0]: could not parse object value from json input
   - [1]: expected value of type [number] but got [string]"
 `);
 });
