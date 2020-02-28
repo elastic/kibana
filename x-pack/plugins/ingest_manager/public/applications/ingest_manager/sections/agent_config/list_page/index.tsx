@@ -97,28 +97,28 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${config.id}`}>
+            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${config.id}`} key="viewConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.viewConfigActionText"
                 defaultMessage="View configuration"
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="plusInCircle" disabled={true}>
+            <EuiContextMenuItem icon="plusInCircle" disabled={true} key="createDataSource">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
                 defaultMessage="Create data source"
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="copy" disabled={true}>
+            <EuiContextMenuItem icon="copy" disabled={true} key="copyConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.copyConfigActionText"
                 defaultMessage="Copy configuration"
               />
             </EuiContextMenuItem>,
 
-            <AgentConfigDeleteProvider>
+            <AgentConfigDeleteProvider key="deleteConfig">
               {deleteAgentConfigsPrompt => {
                 return (
                   <DangerEuiContextMenuItem
@@ -158,7 +158,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
 
   // Fetch agent configs
-  const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs();
+  const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+  });
 
   // Base path for config details
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
@@ -174,6 +177,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
+        // FIXME: use version once available - see: https://github.com/elastic/kibana/issues/56750
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" wrap={true} alignItems="baseline">
             <EuiFlexItem grow={false}>
@@ -224,7 +228,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
               values={{ agentCount }}
             />
           );
-          // FIXME: add kuery value to URI to filter list in fleet list
+          // FIXME: add kuery value to URI to filter list in fleet list (probably something like: ?kuery=agents.config_id:config_id_here)
           return agentCount > 0 ? (
             <EuiLink href={`${FLEET_URI}?kuery=tbd`}>{displayValue}</EuiLink>
           ) : (
@@ -412,7 +416,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             pageSize: page.size,
           };
           setPagination(newPagination);
-          sendRequest(); // todo: fix this to send pagination options
         }}
       />
     </AgentConfigListPageLayout>
