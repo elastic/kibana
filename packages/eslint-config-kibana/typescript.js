@@ -24,7 +24,7 @@ module.exports = {
       settings: {
         'import/resolver': {
           node: {
-            extensions: ['.mjs', '.js', '.json', '.ts', '.tsx'],
+            extensions: ['.js', '.json', '.ts', '.tsx'],
           },
         },
         react: {

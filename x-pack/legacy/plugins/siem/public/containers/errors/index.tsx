@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { onError, ErrorLink } from 'apollo-link-error';
+import { onError, ErrorLink } from '@apollo/link-error';
 import { get, throttle, noop } from 'lodash/fp';
 
 import uuid from 'uuid';
