@@ -18,11 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
 
 export const countMetricAgg = new MetricAggType({
   name: METRIC_TYPES.COUNT,
@@ -36,7 +35,7 @@ export const countMetricAgg = new MetricAggType({
     });
   },
   getFormat() {
-    const fieldFormatsService = getFieldFormats();
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
     return fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
   },

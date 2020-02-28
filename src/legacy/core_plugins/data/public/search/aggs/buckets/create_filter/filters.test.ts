@@ -16,21 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { filtersBucketAgg } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+
+jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
-
-    const typesRegistry = mockAggTypesRegistry([filtersBucketAgg]);
-
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -59,7 +52,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        null
       );
     };
     it('should return a filters filter', () => {

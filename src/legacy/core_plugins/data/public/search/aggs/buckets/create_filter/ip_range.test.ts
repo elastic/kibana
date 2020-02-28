@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { ipRangeBucketAgg } from '../ip_range';
 import { createFilterIpRange } from './ip_range';
-import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
-import { mockAggTypesRegistry } from '../../test_helpers';
+import { AggConfigs } from '../../agg_configs';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 
+jest.mock('ui/new_platform');
+
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
-    const typesRegistry = mockAggTypesRegistry([ipRangeBucketAgg]);
-    const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
+    const getAggConfigs = (aggs: Array<Record<string, any>>) => {
       const field = {
         name: 'ip',
         format: fieldFormats.IpFormat,
@@ -43,7 +42,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry });
+      return new AggConfigs(indexPattern, aggs, null);
     };
 
     it('should return a range filter for ip_range agg', () => {

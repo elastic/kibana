@@ -19,6 +19,7 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { initParams } from './agg_params';
 
 import { AggConfig } from './agg_config';
@@ -31,8 +32,6 @@ import {
   IFieldFormat,
   ISearchSource,
 } from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../plugins/data/public/services';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -66,7 +65,7 @@ export interface AggTypeConfig<
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
-  const fieldFormatsService = getFieldFormats();
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
   return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };

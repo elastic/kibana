@@ -18,16 +18,11 @@
  */
 
 import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { IndexPattern } from '../../../../../plugins/data/public';
 import {
   aggTypes,
   AggType,
-  AggTypesRegistry,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
   AggConfig,
   AggConfigs,
-  CreateAggConfigParams,
   FieldParamType,
   MetricAggType,
   aggTypeFieldFilters,
@@ -37,28 +32,20 @@ import {
 } from './aggs';
 
 interface AggsSetup {
-  types: AggTypesRegistrySetup;
+  types: typeof aggTypes;
 }
 
-interface AggsStartLegacy {
+interface AggsStart {
+  types: typeof aggTypes;
   AggConfig: typeof AggConfig;
+  AggConfigs: typeof AggConfigs;
   AggType: typeof AggType;
   aggTypeFieldFilters: typeof aggTypeFieldFilters;
   FieldParamType: typeof FieldParamType;
   MetricAggType: typeof MetricAggType;
   parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  setBounds: typeof setBounds;
   siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
-}
-
-interface AggsStart {
-  createAggConfigs: (
-    indexPattern: IndexPattern,
-    configStates?: CreateAggConfigParams[],
-    schemas?: Record<string, any>
-  ) => InstanceType<typeof AggConfigs>;
-  types: AggTypesRegistryStart;
-  __LEGACY: AggsStartLegacy;
+  setBounds: typeof setBounds;
 }
 
 export interface SearchSetup {
@@ -76,41 +63,28 @@ export interface SearchStart {
  * it will move into the existing search service in src/plugins/data/public/search
  */
 export class SearchService {
-  private readonly aggTypesRegistry = new AggTypesRegistry();
-
   public setup(core: CoreSetup): SearchSetup {
-    const aggTypesSetup = this.aggTypesRegistry.setup();
-    aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
-
     return {
       aggs: {
-        types: aggTypesSetup,
+        types: aggTypes, // TODO convert to registry
+        // TODO add other items as needed
       },
     };
   }
 
   public start(core: CoreStart): SearchStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
-        createAggConfigs: (indexPattern, configStates = [], schemas) => {
-          return new AggConfigs(indexPattern, configStates, {
-            schemas,
-            typesRegistry: aggTypesStart,
-          });
-        },
-        types: aggTypesStart,
-        __LEGACY: {
-          AggConfig, // TODO make static
-          AggType,
-          aggTypeFieldFilters,
-          FieldParamType,
-          MetricAggType,
-          parentPipelineAggHelper, // TODO make static
-          setBounds, // TODO make static
-          siblingPipelineAggHelper, // TODO make static
-        },
+        types: aggTypes, // TODO convert to registry
+        AggConfig, // TODO make static
+        AggConfigs,
+        AggType,
+        aggTypeFieldFilters,
+        FieldParamType,
+        MetricAggType,
+        parentPipelineAggHelper, // TODO make static
+        siblingPipelineAggHelper, // TODO make static
+        setBounds, // TODO make static
       },
     };
   }

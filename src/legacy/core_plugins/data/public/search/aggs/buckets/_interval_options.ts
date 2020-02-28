@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { i18n } from '@kbn/i18n';
 import { IBucketAggConfig } from './_bucket_agg_type';
 

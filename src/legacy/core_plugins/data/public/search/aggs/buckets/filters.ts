@@ -18,21 +18,19 @@
  */
 
 import _ from 'lodash';
+import angular from 'angular';
+
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
-
 import { createFilterFilters } from './create_filter/filters';
-import { toAngularJSON } from '../utils';
 import { BucketAggType } from './_bucket_agg_type';
-import { BUCKET_TYPES } from './bucket_agg_types';
 import { Storage } from '../../../../../../../plugins/kibana_utils/public';
-
 import { getQueryLog, esQuery, Query } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getUiSettings } from '../../../../../../../plugins/data/public/services';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
 const config = chrome.getUiSettingsClient();
+const storage = new Storage(window.localStorage);
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -54,17 +52,15 @@ export const filtersBucketAgg = new BucketAggType({
   params: [
     {
       name: 'filters',
-      // TODO need to get rid of reference to `config` below
       default: [{ input: { query: '', language: config.get('search:queryLanguage') }, label: '' }],
       write(aggConfig, output) {
-        const uiSettings = getUiSettings();
         const inFilters: FilterValue[] = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
 
         inFilters.forEach(filter => {
           const persistedLog = getQueryLog(
-            uiSettings,
-            new Storage(window.localStorage),
+            config,
+            storage,
             'vis_default_editor',
             filter.input.language
           );
@@ -81,13 +77,7 @@ export const filtersBucketAgg = new BucketAggType({
               return;
             }
 
-            const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
-            const query = esQuery.buildEsQuery(
-              aggConfig.getIndexPattern(),
-              [input],
-              [],
-              esQueryConfigs
-            );
+            const query = esQuery.buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
 
             if (!query) {
               console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
@@ -100,7 +90,7 @@ export const filtersBucketAgg = new BucketAggType({
               matchAllLabel ||
               (typeof filter.input.query === 'string'
                 ? filter.input.query
-                : toAngularJSON(filter.input.query));
+                : angular.toJson(filter.input.query));
             filters[label] = { query };
           },
           {}

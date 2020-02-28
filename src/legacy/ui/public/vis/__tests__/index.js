@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { SearchStart } from './search/search_service';
-
-export const [getSearchServiceShim, setSearchServiceShim] = createGetterSetter<SearchStart>(
-  'searchShim'
-);
+import './_agg_config';
+import './_agg_configs';
