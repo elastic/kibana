@@ -70,13 +70,13 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 // 'kibana-functional-35': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 35),
                 // 'kibana-functional-36': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 36),
                 // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
-              ]),
+              ], {
+                catchError {
+                  def metricsJson = toJSON(finishedSuites).toString()
+                  writeFile(file: "target/functional_test_suite_metrics.json", text: metricsJson)
+                }
+              }),
             ])
-          }
-
-          catchError {
-            print finishedSuites
-            print toJSON(finishedSuites).toString()
           }
         }
 
