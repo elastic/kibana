@@ -55,7 +55,7 @@ function RawJsonParamEditor({
   };
 
   const onEditorValidate = (annotations: any[]) => {
-    //The first onValidate returned from EuiCodeEditor is a false positive
+    // The first onValidate returned from EuiCodeEditor is a false positive
     if (editorReady) {
       const validity = annotations.length === 0;
       setFormValidity(validity);
