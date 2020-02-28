@@ -73,6 +73,11 @@ ln -sf /usr/local/%{name}-%{kibana_version}-linux-x86_64 %{buildroot}/usr/local/
 %post
 /usr/bin/systemctl enable kibana.service
 
+if [ -f "/usr/local/%{name}-%{kibana_version}-linux-x64/resources/visualization:Top-10-Dest-Ports-By-Flow-Count.json" ]
+then
+   rm -rf "/usr/local/%{name}-%{kibana_version}-linux-x64/resources/visualization:Top-10-Dest-Ports-By-Flow-Count.json"
+fi
+
 %files
 %defattr(-,nginx,nginx,-)
 /usr/local/www/probe/

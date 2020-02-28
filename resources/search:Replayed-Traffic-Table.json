@@ -1,6 +1,6 @@
 {
    "migrationVersion": {
-      "search": "7.0.0"
+      "search": "7.4.0"
    }, 
    "references": [
       {
@@ -11,8 +11,10 @@
    ], 
    "search": {
       "sort": [
-         "TimeUpdated", 
-         "desc"
+         [
+            "TimeUpdated", 
+            "desc"
+         ]
       ], 
       "hits": 0, 
       "description": "", 
