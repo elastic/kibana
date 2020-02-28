@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { querySignalsRoute } from './query_signals_route';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
@@ -12,7 +12,8 @@ import {
   typicalSignalsQueryAggs,
   getSignalsAggsAndQueryRequest,
 } from '../__mocks__/request_responses';
-import { requestContextMock, responseMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { querySignalsRoute } from './query_signals_route';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -77,39 +78,48 @@ describe('query for signal', () => {
 
   describe('request validation', () => {
     test('allows when query present', async () => {
-      const response = responseMock.create();
-      const body = typicalSignalsQuery();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+        body: typicalSignalsQuery(),
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('allows when aggs present', async () => {
-      const response = responseMock.create();
-      const body = typicalSignalsQueryAggs();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+        body: typicalSignalsQueryAggs(),
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('allows when aggs and query present', async () => {
-      const response = responseMock.create();
       const body = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+        body,
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('rejects when missing aggs and query', async () => {
-      const response = responseMock.create();
-      const body = {};
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+        body: {},
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith('"value" must have at least 1 children');
     });
   });
 });

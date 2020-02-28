@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
   typicalPayload,
@@ -11,7 +12,7 @@ import {
   getPatchBulkRequest,
   getResult,
 } from '../__mocks__/request_responses';
-import { serverMock, requestContextMock, responseMock } from '../__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 
 describe('patch_rules_bulk', () => {
@@ -56,30 +57,40 @@ describe('patch_rules_bulk', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      const response = responseMock.create();
-      const body = [{ ...typicalPayload(), rule_id: undefined }];
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [{ ...typicalPayload(), rule_id: undefined }],
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
+      );
     });
 
     test('allows query rule type', async () => {
-      const response = responseMock.create();
-      const body = [{ ...typicalPayload(), type: 'query' }];
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [{ ...typicalPayload(), type: 'query' }],
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('rejects unknown rule type', async () => {
-      const response = responseMock.create();
-      const body = [{ ...typicalPayload(), type: 'oh hi' }];
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [{ ...typicalPayload(), type: 'unknown_type' }],
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+      );
     });
   });
 });

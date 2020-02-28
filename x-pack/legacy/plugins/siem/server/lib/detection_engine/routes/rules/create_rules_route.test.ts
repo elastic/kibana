@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRulesRoute } from './create_rules_route';
-
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
   getResult,
@@ -16,7 +15,8 @@ import {
   getEmptyIndex,
   getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, responseMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { createRulesRoute } from './create_rules_route';
 
 describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -79,21 +79,33 @@ describe('create_rules', () => {
 
   describe('request validation', () => {
     test('allows rule type of query', async () => {
-      const body = { ...typicalPayload(), type: 'query' };
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...typicalPayload(),
+          type: 'query',
+        },
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('disallows unknown rule type', async () => {
-      const body = { ...typicalPayload(), type: 'unexpected_type' };
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...typicalPayload(),
+          type: 'unexpected_type',
+        },
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "type" fails because ["type" must be one of [query, saved_query]]'
+      );
     });
   });
 });

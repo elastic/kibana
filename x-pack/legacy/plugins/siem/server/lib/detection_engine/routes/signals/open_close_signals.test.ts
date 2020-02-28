@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setSignalsStatusRoute } from './open_close_signals_route';
-
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
@@ -13,7 +12,8 @@ import {
   typicalSetStatusSignalByQueryPayload,
   setStatusSignalMissingIdsAndQueryPayload,
 } from '../__mocks__/request_responses';
-import { requestContextMock, responseMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { setSignalsStatusRoute } from './open_close_signals_route';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -53,48 +53,66 @@ describe('set signal status', () => {
 
   describe('request validation', () => {
     test('allows signal_ids and status', async () => {
-      const response = responseMock.create();
-      const body = typicalSetStatusSignalByIdsPayload();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('allows query and status', async () => {
-      const response = responseMock.create();
-      const body = typicalSetStatusSignalByQueryPayload();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: typicalSetStatusSignalByQueryPayload(),
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('rejects if neither signal_ids nor query', async () => {
-      const body = setStatusSignalMissingIdsAndQueryPayload();
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: setStatusSignalMissingIdsAndQueryPayload(),
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" must contain at least one of [signal_ids, query]'
+      );
     });
 
     test('rejects if signal_ids but no status', async () => {
       const { status, ...body } = typicalSetStatusSignalByIdsPayload();
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
 
     test('rejects if query but no status', async () => {
       const { status, ...body } = typicalSetStatusSignalByIdsPayload();
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
 
     test('rejects if query and signal_ids but no status', async () => {
@@ -103,11 +121,16 @@ describe('set signal status', () => {
         ...typicalSetStatusSignalByQueryPayload(),
       };
       const { status, ...body } = allTogether;
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
   });
 });

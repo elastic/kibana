@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
@@ -14,8 +15,7 @@ import {
   getFindResultStatusEmpty,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, responseMock } from '../__mocks__';
-
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 
 describe('delete_rules', () => {
@@ -89,12 +89,16 @@ describe('delete_rules', () => {
 
   describe('request validation', () => {
     test('rejects requests without IDs', async () => {
-      const body = [{}];
-      const response = responseMock.create();
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+        body: [{}],
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
+      );
     });
   });
 });

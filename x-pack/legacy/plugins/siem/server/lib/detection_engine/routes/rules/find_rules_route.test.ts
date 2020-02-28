@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findRulesRoute } from './find_rules_route';
-
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getResult,
   getFindRequest,
   getFindResultWithSingleHit,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, responseMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { findRulesRoute } from './find_rules_route';
 
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -55,26 +55,32 @@ describe('find_rules', () => {
 
   describe('request validation', () => {
     test('allows optional query params', async () => {
-      const response = responseMock.create();
-      const query = {
-        page: 2,
-        per_page: 20,
-        sort_field: 'timestamp',
-        fields: ['field1', 'field2'],
-      };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.query(query, response);
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        query: {
+          page: 2,
+          per_page: 20,
+          sort_field: 'timestamp',
+          fields: ['field1', 'field2'],
+        },
+      });
+      const result = server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
-    test('disallows unknown query params', async () => {
-      const response = responseMock.create();
-      const query = { invalid_value: 500 };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.query(query, response);
+    test('rejects unknown query params', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        query: {
+          invalid_value: 'hi mom',
+        },
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith('"invalid_value" is not allowed');
     });
   });
 });

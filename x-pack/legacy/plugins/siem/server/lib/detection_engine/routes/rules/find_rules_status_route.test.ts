@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
-import { serverMock, requestContextMock, responseMock } from '../__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 
 describe('find_statuses', () => {
@@ -46,13 +47,15 @@ describe('find_statuses', () => {
   });
 
   describe('request validation', () => {
-    test('disallows id query param', async () => {
-      const response = responseMock.create();
-      const query = { id: ['someId'] };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.query(query, response);
+    test('disallows singular id query param', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+        query: { id: ['someId'] },
+      });
+      const result = server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith('"id" is not allowed');
     });
   });
 });

@@ -14,7 +14,8 @@ import {
   getFindResultStatusEmpty,
   nonRuleFindResult,
 } from '../__mocks__/request_responses';
-import { requestContextMock, responseMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -78,30 +79,40 @@ describe('update_rules', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      const response = responseMock.create();
-      const body = { ...typicalPayload(), rule_id: undefined };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const noIdRequest = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: { ...typicalPayload(), rule_id: undefined },
+      });
+      const result = await server.validate(noIdRequest);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" must contain at least one of [id, rule_id]'
+      );
     });
 
     test('allows query rule type', async () => {
-      const response = responseMock.create();
-      const body = { ...typicalPayload(), type: 'query' };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: { ...typicalPayload(), type: 'query' },
+      });
+      const result = await server.validate(request);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(result.ok).toHaveBeenCalled();
     });
 
     test('rejects unknown rule type', async () => {
-      const response = responseMock.create();
-      const body = { ...typicalPayload(), type: 'oh hi' };
-      // @ts-ignore ambiguous validation types
-      server.getRoute().config.validate.body(body, response);
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: { ...typicalPayload(), type: 'unknown type' },
+      });
+      const result = await server.validate(request);
 
-      expect(response.badRequest).toHaveBeenCalled();
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "type" fails because ["type" must be one of [query, saved_query]]'
+      );
     });
   });
 });
