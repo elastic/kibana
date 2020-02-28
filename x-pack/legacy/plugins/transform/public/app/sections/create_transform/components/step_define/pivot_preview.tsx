@@ -14,6 +14,7 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
+  EuiDataGridSorting,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -36,7 +37,7 @@ import {
   PivotQuery,
 } from '../../../../common';
 
-import { getPivotPreviewDevConsoleStatement } from './common';
+import { getPivotPreviewDevConsoleStatement, multiColumnSortFactory } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
@@ -130,11 +131,6 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
-  const pageData = data.slice(
-    pagination.pageIndex * pagination.pageSize,
-    (pagination.pageIndex + 1) * pagination.pageSize
-  );
-
   // EuiDataGrid State
   const dataGridColumns = columnKeys.map(id => ({ id }));
 
@@ -147,8 +143,17 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
   ]);
 
   // Sorting config
-  const [sortingColumns, setSortingColumns] = useState([]);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
+
+  if (sortingColumns.length > 0) {
+    data.sort(multiColumnSortFactory(sortingColumns));
+  }
+
+  const pageData = data.slice(
+    pagination.pageIndex * pagination.pageSize,
+    (pagination.pageIndex + 1) * pagination.pageSize
+  );
 
   const renderCellValue = useMemo(() => {
     return ({
@@ -247,7 +252,6 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
           columns={dataGridColumns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
           gridStyle={euiDataGridStyle}
-          inMemory={{ level: 'sorting' }}
           rowCount={data.length}
           renderCellValue={renderCellValue}
           sorting={{ columns: sortingColumns, onSort }}
