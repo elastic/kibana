@@ -4,23 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallESAsCurrentUser } from '../../../../types';
-import { getPolicy } from './ilm';
+import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import * as Registry from '../../registry';
 
-export async function installILMPolicy(name: string, callCluster: CallESAsCurrentUser) {
-  // TODO: This should be in the end loaded from the base package instead of being hardcoded
-  const policy = getPolicy();
-
-  const data = await callCluster('transport.request', {
-    method: 'PUT',
-    path: '/_ilm/policy/' + name,
-    body: policy,
-  });
-  // TODO: Check if policy was created as expected
-
-  return data;
+export async function installILMPolicy(pkgkey: string, callCluster: CallESAsCurrentUser) {
+  const ilmPaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isILMPolicy(entry)
+  );
+  if (!ilmPaths.length) return;
+  await Promise.all(
+    ilmPaths.map(async path => {
+      const body = Registry.getAsset(path).toString('utf-8');
+      const { file } = Registry.pathParts(path);
+      const name = file.substr(0, file.lastIndexOf('.'));
+      try {
+        await callCluster('transport.request', {
+          method: 'PUT',
+          path: '/_ilm/policy/' + name,
+          body,
+        });
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    })
+  );
 }
-
+const isILMPolicy = ({ path }: Registry.ArchiveEntry) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.ilmPolicy;
+};
 export async function policyExists(
   name: string,
   callCluster: CallESAsCurrentUser

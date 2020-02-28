@@ -13,6 +13,7 @@ import { getObject } from './get_objects';
 import { getInstallation } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
+import { installILMPolicy } from '../elasticsearch/ilm/install';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -28,8 +29,9 @@ export async function installPackage(options: {
   });
   const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
   const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
-  // index patterns are not associated with a particular so we do not save them in the package saved object state
+  // index patterns and ilm policies are not currently associated with a particular so we do not save them in the package saved object state
   await installIndexPatterns(savedObjectsClient, pkgkey);
+  await installILMPolicy(pkgkey, callCluster);
 
   const res = await Promise.all([
     installKibanaAssetsPromise,
