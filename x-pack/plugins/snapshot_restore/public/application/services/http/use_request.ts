@@ -6,17 +6,19 @@
 
 import {
   SendRequestConfig,
-  SendRequestResponse,
   UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../../shared_imports';
+
+import { Error as CustomError } from '../../components/section_error';
+
 import { httpService } from './index';
 
-export const sendRequest = (config: SendRequestConfig): Promise<SendRequestResponse> => {
-  return _sendRequest(httpService.httpClient, config);
+export const sendRequest = (config: SendRequestConfig) => {
+  return _sendRequest<any, CustomError>(httpService.httpClient, config);
 };
 
 export const useRequest = (config: UseRequestConfig) => {
-  return _useRequest(httpService.httpClient, config);
+  return _useRequest<any, CustomError>(httpService.httpClient, config);
 };

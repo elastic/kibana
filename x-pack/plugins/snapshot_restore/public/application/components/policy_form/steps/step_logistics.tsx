@@ -22,6 +22,7 @@ import {
 
 import { Repository } from '../../../../../common/types';
 import { CronEditor } from '../../../../shared_imports';
+import { useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
@@ -48,6 +49,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     },
     sendRequest: reloadRepositories,
   } = useLoadRepositories();
+
+  const { i18n } = useServices();
 
   // State for touched inputs
   const [touched, setTouched] = useState({
@@ -189,7 +192,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               defaultMessage="Error loading repositories"
             />
           }
-          error={{ data: { error: 'test' } } || errorLoadingRepositories}
+          error={errorLoadingRepositories}
           actions={
             <EuiButton
               onClick={() => reloadRepositories()}
@@ -217,11 +220,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             />
           }
           error={{
-            data: {
-              error: i18n.translate('xpack.snapshotRestore.policyForm.noRepositoriesErrorMessage', {
-                defaultMessage: 'You must register a repository to store your snapshots.',
-              }),
-            },
+            error: i18n.translate('xpack.snapshotRestore.policyForm.noRepositoriesErrorMessage', {
+              defaultMessage: 'You must register a repository to store your snapshots.',
+            }),
           }}
           actions={
             <EuiButton

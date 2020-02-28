@@ -8,11 +8,9 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 export interface Error {
-  data: {
-    error: string;
-    cause?: string[];
-    message?: string;
-  };
+  error: string;
+  cause?: string[];
+  message?: string;
 }
 
 interface Props {
@@ -31,7 +29,7 @@ export const SectionError: React.FunctionComponent<Props> = ({
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
     message,
-  } = error.data;
+  } = error;
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
