@@ -177,6 +177,7 @@ interface FooterProps {
   getUpdatedAt: () => number;
   hasNextPage: boolean;
   height: number;
+  isEventViewer?: boolean;
   isLive: boolean;
   isLoading: boolean;
   itemsCount: number;
@@ -195,6 +196,7 @@ export const FooterComponent = ({
   getUpdatedAt,
   hasNextPage,
   height,
+  isEventViewer,
   isLive,
   isLoading,
   itemsCount,
@@ -343,6 +345,7 @@ export const Footer = React.memo(
     prevProps.compact === nextProps.compact &&
     prevProps.hasNextPage === nextProps.hasNextPage &&
     prevProps.height === nextProps.height &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isLive === nextProps.isLive &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.itemsCount === nextProps.itemsCount &&

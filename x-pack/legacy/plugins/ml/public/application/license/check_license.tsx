@@ -82,9 +82,16 @@ function setLicenseExpired(features: any) {
     }
   }
 }
-
+// Temporary hack for cutting over server to NP
 function getFeatures() {
-  return xpackInfo.get('features.ml');
+  return {
+    isAvailable: true,
+    showLinks: true,
+    enableLinks: true,
+    licenseType: 1,
+    hasExpired: false,
+  };
+  // return xpackInfo.get('features.ml');
 }
 
 function redirectToKibana() {

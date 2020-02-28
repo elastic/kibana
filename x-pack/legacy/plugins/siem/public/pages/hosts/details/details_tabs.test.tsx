@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -16,6 +17,15 @@ import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
+
+jest.mock('../../../containers/source', () => ({
+  indicesExistOrDataTemporarilyUnavailable: () => true,
+  WithSource: ({
+    children,
+  }: {
+    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
+  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
+}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -36,7 +46,7 @@ describe('body', () => {
     allHosts: 'HostsQueryTabBody',
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
-    events: 'Memo(EventsQueryTabBodyComponent)',
+    events: 'EventsQueryTabBody',
     alerts: 'HostAlertsQueryTabBody',
   };
 
