@@ -20,12 +20,6 @@
  *
  ************/
 
-const { promisify } = require('util');
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
-const readFile = promisify(fs.readFile);
-const pLimit = require('p-limit');
 const { argv } = require('yargs');
 
 const APM_SERVER_URL = argv.serverUrl;
@@ -40,52 +34,6 @@ if (!APM_SERVER_URL) {
 if (!EVENTS_PATH) {
   console.log('`--events` is required');
   process.exit(1);
-}
-
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function insertItem(item) {
-  try {
-    const url = `${APM_SERVER_URL}${item.url}`;
-    console.log(Date.now(), url);
-
-    const headers = {
-      'content-type': 'application/x-ndjson'
-    };
-
-    if (SECRET_TOKEN) {
-      headers.Authorization = `Bearer ${SECRET_TOKEN}`;
-    }
-
-    await axios({
-      method: item.method,
-      url,
-      headers,
-      data: item.body
-    });
-
-    // add delay to avoid flooding the queue
-    return delay(500);
-  } catch (e) {
-    console.log('an error occurred');
-    if (e.response) {
-      console.log(e.response.data);
-    } else {
-      console.log('error', e);
-    }
-  }
-}
-
-async function init() {
-  const content = await readFile(path.resolve(__dirname, EVENTS_PATH));
-  const items = content
-    .toString()
-    .split('\n')
-    .filter(item => item)
-    .map(item => JSON.parse(item))
-    .filter(item => item.url === '/intake/v2/events');
-
-  const limit = pLimit(20); // number of concurrent requests
-  await Promise.all(items.map(item => limit(() => insertItem(item))));
 }
 
 init().catch(e => {
