@@ -18,6 +18,9 @@ export function compose(core: CoreStart): AppFrontendLibs {
     connectToDevTools: process.env.NODE_ENV !== 'production',
     cache: new InMemoryCache({
       typePolicies: {
+        HostEcsFields: {
+          keyFields: ['name'],
+        },
         TimelineItem: {
           keyFields: ['_id', '_index', 'data'],
         },
