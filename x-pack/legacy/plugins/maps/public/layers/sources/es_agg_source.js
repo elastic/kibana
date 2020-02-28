@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AbstractESSource } from './es_source';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
@@ -72,12 +73,22 @@ export class AbstractESAggSource extends AbstractESSource {
     return metrics;
   }
 
-  formatMetricKey(aggType, fieldName) {
+  getAggKey(aggType, fieldName) {
     return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }
 
-  formatMetricLabel(aggType, fieldName) {
-    return aggType !== AGG_TYPE.COUNT ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
+  getAggLabel(aggType, fieldName) {
+    switch (aggType) {
+      case AGG_TYPE.COUNT:
+        return COUNT_PROP_LABEL;
+      case AGG_TYPE.TERMS:
+        return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
+          defaultMessage: `Top {fieldName}`,
+          values: { fieldName },
+        });
+      default:
+        return `${aggType} ${fieldName}`;
+    }
   }
 
   getValueAggsDsl(indexPattern) {

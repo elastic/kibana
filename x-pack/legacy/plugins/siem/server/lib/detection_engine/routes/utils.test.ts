@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
 import {
   transformError,
   transformBulkError,
@@ -322,6 +324,20 @@ describe('utils', () => {
     it('returns empty object when object is empty', () => {
       const values = {};
       expect(convertToSnakeCase(values)).toEqual({});
+    });
+    it('returns null when passed in undefined', () => {
+      // Array accessors can result in undefined but
+      // this is not represented in typescript for some reason,
+      // https://github.com/Microsoft/TypeScript/issues/11122
+      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+        page: 0,
+        per_page: 5,
+        total: 0,
+        saved_objects: [],
+      };
+      expect(
+        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+      ).toEqual(null);
     });
   });
 });
