@@ -52,19 +52,7 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileName', {
           defaultMessage: 'File Name',
         }),
-        description: 'TODO',
-      },
-      {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileStatus', {
-          defaultMessage: 'File Status',
-        }),
-        description: 'TODO',
-      },
-      {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileType', {
-          defaultMessage: 'File Type',
-        }),
-        description: 'TODO',
+        description: alertData.file.name,
       },
     ];
   }, [alertData]);

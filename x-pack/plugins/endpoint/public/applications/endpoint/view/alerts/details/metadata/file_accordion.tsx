@@ -16,7 +16,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileName', {
           defaultMessage: 'File Name',
         }),
-        description: 'TODO',
+        description: alertData.file.name,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.filePath', {

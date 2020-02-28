@@ -5,6 +5,7 @@
  */
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTitle, EuiText, EuiHealth, EuiTabbedContent } from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
@@ -51,14 +52,24 @@ export const AlertDetailsOverview = memo(() => {
     <>
       <section className="details-overview-summary">
         <EuiTitle size="s">
-          <h3>Detected Malicious File</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+              defaultMessage="Detected Malicious File"
+            />
+          </h3>
         </EuiTitle>
         <EuiSpacer />
         <EuiText>
           <p>
-            Endgame MalwareScore detected the opening of a document with a blah blah blah on{' '}
-            {alertDetailsData.host.hostname} on{' '}
-            {<FormattedDate timestamp={alertDetailsData['@timestamp']} />}
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.overview.summary"
+              defaultMessage="Endgame MalwareScore detected the opening of a document on {hostname} on {date}"
+              values={{
+                hostname: alertDetailsData.host.hostname,
+                date: <FormattedDate timestamp={alertDetailsData['@timestamp']} />,
+              }}
+            />
           </p>
         </EuiText>
         <EuiSpacer />

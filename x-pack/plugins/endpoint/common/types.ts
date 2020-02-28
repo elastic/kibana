@@ -170,6 +170,7 @@ export type AlertEvent = Immutable<{
   };
   file: {
     owner: string;
+    name: string;
     path: string;
     accessed: number;
     mtime: number;

@@ -35,12 +35,6 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         }),
         description: alertData.host.os.name,
       },
-      {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.alertCount', {
-          defaultMessage: 'Alert Count',
-        }),
-        description: 'TODO',
-      },
     ];
   }, [alertData]);
 
