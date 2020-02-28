@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from '@apollo/client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
@@ -16,6 +16,7 @@ import {
 } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -75,26 +76,18 @@ export type LocationTypes =
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
 
-export interface Timeline {
-  id: string;
-  isOpen: boolean;
-}
-
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: Timeline;
+  [CONSTANTS.timeline]: TimelineUrl;
 }
 export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
   indexPattern?: IIndexPattern;
-  mapToUrlState?: (value: string) => UrlState;
-  onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
-  onInitialize?: (urlState: UrlState) => void;
 }
 
 export interface UrlStateStateToPropsType {
