@@ -124,7 +124,7 @@ export type LayerDescriptor = {
   minZoom?: number;
   maxZoom?: number;
   sourceDescriptor: SourceDescriptor;
-  type: string;
+  type?: string;
   visible?: boolean;
 };
 
