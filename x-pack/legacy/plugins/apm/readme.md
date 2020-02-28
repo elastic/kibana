@@ -53,7 +53,7 @@ node scripts/jest.js plugins/apm --watch
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
 
-### Functional tests
+### Functional tests2
 
 **Start server**
 
