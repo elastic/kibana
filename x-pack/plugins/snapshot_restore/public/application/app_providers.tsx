@@ -21,11 +21,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
   } = core;
 
   return (
-    <AuthorizationProvider
-      privilegesEndpoint={appDependencies.services.httpService.addBasePath(
-        `${API_BASE_PATH}privileges`
-      )}
-    >
+    <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
         <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
       </I18nContext>

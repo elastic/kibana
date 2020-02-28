@@ -3,16 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export class HttpService {
-  private client: any;
-  public addBasePath: (path: string) => string = () => '';
+import { HttpSetup } from '../../../../../../../src/core/public';
 
-  public init(httpClient: any, chrome: any): void {
+export class HttpService {
+  private client: HttpSetup | undefined;
+
+  public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
-    this.addBasePath = chrome.addBasePath.bind(chrome);
   }
 
   public get httpClient(): any {
+    if (!this.client) {
+      throw new Error('Http service has not be initialized. Client is missing.');
+    }
     return this.client;
   }
 }
