@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../kibana_react/public';
@@ -36,7 +36,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   constructor(
     options: EmbeddableFactoryOptions<any>,
-    private readonly execTrigger: ExecuteTriggerActions,
+    private readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
   ) {
     super(options);
