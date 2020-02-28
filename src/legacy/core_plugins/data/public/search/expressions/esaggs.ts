@@ -39,9 +39,8 @@ import {
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
-import { PersistedState } from '../../../../../ui/public/persisted_state';
+import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
+import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';

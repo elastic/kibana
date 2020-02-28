@@ -5,21 +5,32 @@
  */
 
 import { boomify, isBoom } from 'boom';
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import {
+  CustomHttpResponseOptions,
+  ResponseError,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from 'kibana/server';
+import {
+  AllComments,
+  CaseAttributes,
+  CommentAttributes,
+  FlattenedCaseSavedObject,
+  FlattenedCommentSavedObject,
+  AllCases,
   NewCaseType,
-  NewCaseFormatted,
   NewCommentType,
-  NewCommentFormatted,
+  SortFieldCase,
   UserType,
 } from './types';
 
 export const formatNewCase = (
   newCase: NewCaseType,
   { full_name, username }: { full_name?: string; username: string }
-): NewCaseFormatted => ({
-  created_at: new Date().valueOf(),
+): CaseAttributes => ({
+  created_at: new Date().toISOString(),
   created_by: { full_name, username },
+  updated_at: new Date().toISOString(),
   ...newCase,
 });
 
@@ -32,10 +43,11 @@ export const formatNewComment = ({
   newComment,
   full_name,
   username,
-}: NewCommentArgs): NewCommentFormatted => ({
+}: NewCommentArgs): CommentAttributes => ({
   ...newComment,
-  created_at: new Date().valueOf(),
+  created_at: new Date().toISOString(),
   created_by: { full_name, username },
+  updated_at: new Date().toISOString(),
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
@@ -46,3 +58,72 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
     statusCode: boom.output.statusCode,
   };
 }
+
+export const formatAllCases = (cases: SavedObjectsFindResponse<CaseAttributes>): AllCases => ({
+  page: cases.page,
+  per_page: cases.per_page,
+  total: cases.total,
+  cases: flattenCaseSavedObjects(cases.saved_objects),
+});
+
+export const flattenCaseSavedObjects = (
+  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects']
+): FlattenedCaseSavedObject[] =>
+  savedObjects.reduce(
+    (acc: FlattenedCaseSavedObject[], savedObject: SavedObject<CaseAttributes>) => {
+      return [...acc, flattenCaseSavedObject(savedObject, [])];
+    },
+    []
+  );
+
+export const flattenCaseSavedObject = (
+  savedObject: SavedObject<CaseAttributes>,
+  comments: Array<SavedObject<CommentAttributes>>
+): FlattenedCaseSavedObject => ({
+  case_id: savedObject.id,
+  version: savedObject.version ? savedObject.version : '0',
+  comments: flattenCommentSavedObjects(comments),
+  ...savedObject.attributes,
+});
+
+export const formatAllComments = (
+  comments: SavedObjectsFindResponse<CommentAttributes>
+): AllComments => ({
+  page: comments.page,
+  per_page: comments.per_page,
+  total: comments.total,
+  comments: flattenCommentSavedObjects(comments.saved_objects),
+});
+
+export const flattenCommentSavedObjects = (
+  savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
+): FlattenedCommentSavedObject[] =>
+  savedObjects.reduce(
+    (acc: FlattenedCommentSavedObject[], savedObject: SavedObject<CommentAttributes>) => {
+      return [...acc, flattenCommentSavedObject(savedObject)];
+    },
+    []
+  );
+
+export const flattenCommentSavedObject = (
+  savedObject: SavedObject<CommentAttributes>
+): FlattenedCommentSavedObject => ({
+  comment_id: savedObject.id,
+  version: savedObject.version ? savedObject.version : '0',
+  ...savedObject.attributes,
+});
+
+export const sortToSnake = (sortField: string): SortFieldCase => {
+  switch (sortField) {
+    case 'state':
+      return SortFieldCase.state;
+    case 'createdAt':
+    case 'created_at':
+      return SortFieldCase.createdAt;
+    case 'updatedAt':
+    case 'updated_at':
+      return SortFieldCase.updatedAt;
+    default:
+      return SortFieldCase.createdAt;
+  }
+};

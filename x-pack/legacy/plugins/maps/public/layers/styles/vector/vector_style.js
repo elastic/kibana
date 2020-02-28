@@ -138,6 +138,12 @@ export class VectorStyle extends AbstractStyle {
     ];
   }
 
+  _hasBorder() {
+    return this._lineWidthStyleProperty.isDynamic()
+      ? this._lineWidthStyleProperty.isComplete()
+      : this._lineWidthStyleProperty.getOptions().size !== 0;
+  }
+
   renderEditor({ layer, onStyleDescriptorChange }) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
@@ -170,6 +176,7 @@ export class VectorStyle extends AbstractStyle {
         onIsTimeAwareChange={onIsTimeAwareChange}
         isTimeAware={this.isTimeAware()}
         showIsTimeAware={propertiesWithFieldMeta.length > 0}
+        hasBorder={this._hasBorder()}
       />
     );
   }
@@ -423,12 +430,18 @@ export class VectorStyle extends AbstractStyle {
 
   getIcon = () => {
     const isLinesOnly = this._getIsLinesOnly();
-    const strokeColor = isLinesOnly
-      ? extractColorFromStyleProperty(this._descriptor.properties[VECTOR_STYLES.LINE_COLOR], 'grey')
-      : extractColorFromStyleProperty(
-          this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-          'none'
-        );
+    let strokeColor;
+    if (isLinesOnly) {
+      strokeColor = extractColorFromStyleProperty(
+        this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
+        'grey'
+      );
+    } else if (this._hasBorder()) {
+      strokeColor = extractColorFromStyleProperty(
+        this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
+        'none'
+      );
+    }
     const fillColor = isLinesOnly
       ? null
       : extractColorFromStyleProperty(
@@ -612,7 +625,6 @@ export class VectorStyle extends AbstractStyle {
         field,
         this._getFieldMeta,
         this._getFieldFormatter,
-        this._source,
         isSymbolizedAsIcon
       );
     } else {
@@ -632,8 +644,7 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -665,8 +676,7 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.LABEL_TEXT,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -685,8 +695,7 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.ICON,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);

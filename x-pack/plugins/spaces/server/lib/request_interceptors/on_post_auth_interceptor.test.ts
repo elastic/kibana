@@ -201,12 +201,10 @@ describe('onPostAuthInterceptor', () => {
     // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
     // we are including the already tested interceptor here in the test chain.
     initSpacesOnRequestInterceptor({
-      getLegacyAPI: () => legacyAPI,
       http: (http as unknown) as CoreSetup['http'],
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      getLegacyAPI: () => legacyAPI,
       http: (http as unknown) as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,

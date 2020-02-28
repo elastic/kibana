@@ -221,17 +221,17 @@ requests. Supported on Elastic Cloud Enterprise.
 Set to false to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
 and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
-<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
+<<tilemap, Coordinate map visualizations>>, and <<visualize-maps, Region map visualizations>>.
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
 Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
-This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
+This setting does not impact <<tilemap, Coordinate map visualizations>> and <<visualize-maps, Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
+use in <<visualize-maps, Region Map>> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
-https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
+https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
 and only include polygons. If the file is hosted on a separate domain from
 Kibana, the server needs to be CORS-enabled so Kibana can download the file.
 The following example shows a valid regionmap configuration.
@@ -254,7 +254,7 @@ The following example shows a valid regionmap configuration.
 [[regionmap-ES-map]]`map.includeElasticMapsService:`:: Turns on or off
 whether layers from the Elastic Maps Service should be included in the vector
 layer option list. Supported on Elastic Cloud Enterprise. By turning this off,
-only the layers that are configured here will be included. The default is `true`. 
+only the layers that are configured here will be included. The default is `true`.
 This also affects whether tile-service from the Elastic Maps Service will be available.
 
 [[regionmap-attribution]]`map.regionmap.layers[].attribution:`:: Optional.
@@ -447,7 +447,7 @@ us improve your user experience. Your data is never shared with anyone. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through the *Advanced Settings* in {kib}.
 
-`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+`vis_type_vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.

@@ -10,8 +10,10 @@ import { getSelectedLayer } from '../../selectors/map_selectors';
 import { fitToLayerExtent, updateSourceProp } from '../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
+  const selectedLayer = getSelectedLayer(state);
   return {
-    selectedLayer: getSelectedLayer(state),
+    key: selectedLayer ? selectedLayer.getId() : '',
+    selectedLayer,
   };
 }
 

@@ -127,6 +127,27 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   },
                 },
                 {
+                  loader: 'resolve-url-loader',
+                  options: {
+                    join: (_: string, __: any) => (uri: string, base?: string) => {
+                      if (!base) {
+                        return null;
+                      }
+
+                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
+                      if (uri.startsWith('ui/') && base.split(Path.sep).includes('legacy')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/legacy/ui/public',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
+                      return null;
+                    },
+                  },
+                },
+                {
                   loader: 'sass-loader',
                   options: {
                     sourceMap: !worker.dist,
@@ -196,7 +217,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.mjs', '.js', '.ts', '.tsx', '.json'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },
@@ -231,6 +252,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           cache: false,
           sourceMap: false,
           extractComments: false,
+          parallel: false,
           terserOptions: {
             compress: false,
             mangle: false,

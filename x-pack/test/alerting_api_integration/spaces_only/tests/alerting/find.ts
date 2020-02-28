@@ -77,7 +77,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         )
         .expect(200, {
           page: 1,
-          perPage: 20,
+          perPage: 10,
           total: 0,
           data: [],
         });

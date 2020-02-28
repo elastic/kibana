@@ -18,7 +18,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
 
 import { parseBundles, parseWorkerConfig, WorkerMsg, isWorkerMsg, WorkerMsgs } from '../common';
 
@@ -75,33 +74,27 @@ setInterval(() => {
 }, 1000).unref();
 
 Rx.defer(() => {
-  return Rx.of({
-    workerConfig: parseWorkerConfig(process.argv[2]),
-    bundles: parseBundles(process.argv[3]),
-  });
-})
-  .pipe(
-    mergeMap(({ workerConfig, bundles }) => {
-      // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
-      process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
+  const workerConfig = parseWorkerConfig(process.argv[2]);
+  const bundles = parseBundles(process.argv[3]);
 
-      return runCompilers(workerConfig, bundles);
-    })
-  )
-  .subscribe(
-    msg => {
-      send(msg);
-    },
-    error => {
-      if (isWorkerMsg(error)) {
-        send(error);
-      } else {
-        send(workerMsgs.error(error));
-      }
+  // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
+  process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
 
-      exit(1);
-    },
-    () => {
-      exit(0);
+  return runCompilers(workerConfig, bundles);
+}).subscribe(
+  msg => {
+    send(msg);
+  },
+  error => {
+    if (isWorkerMsg(error)) {
+      send(error);
+    } else {
+      send(workerMsgs.error(error));
     }
-  );
+
+    exit(1);
+  },
+  () => {
+    exit(0);
+  }
+);

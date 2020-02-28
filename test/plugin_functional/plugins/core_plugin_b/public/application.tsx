@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPage,
@@ -122,8 +123,8 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   />
 ));
 
-const BarApp = ({ basename, context }: { basename: string; context: AppMountContext }) => (
-  <Router basename={basename}>
+const BarApp = ({ history, context }: { history: History; context: AppMountContext }) => (
+  <Router history={history}>
     <EuiPage>
       <EuiPageSideBar>
         <Nav navigateToApp={context.core.application.navigateToApp} />
@@ -134,11 +135,8 @@ const BarApp = ({ basename, context }: { basename: string; context: AppMountCont
   </Router>
 );
 
-export const renderApp = (
-  context: AppMountContext,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(<BarApp basename={appBasePath} context={context} />, element);
+export const renderApp = (context: AppMountContext, { history, element }: AppMountParameters) => {
+  ReactDOM.render(<BarApp history={history} context={context} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
