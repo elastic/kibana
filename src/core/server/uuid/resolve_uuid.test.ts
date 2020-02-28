@@ -19,7 +19,7 @@
 
 import { join } from 'path';
 import { readFile, writeFile } from './fs';
-import { resolveInstanceUuid } from './resolve_uuid';
+import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { BehaviorSubject } from 'rxjs';
@@ -123,10 +123,10 @@ describe('resolveInstanceUuid', () => {
           expect(writeFile).not.toHaveBeenCalled();
           expect(logger.debug).toHaveBeenCalledTimes(1);
           expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
-          ]
-        `);
+                      Array [
+                        "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
+                      ]
+                  `);
         });
       });
     });
@@ -195,6 +195,60 @@ describe('resolveInstanceUuid', () => {
           "Resuming persistent Kibana instance UUID: FILE_UUID",
         ]
       `);
+    });
+  });
+
+  describe('when file is present with 7.6.0 UUID', () => {
+    describe('when config property is not set', () => {
+      it('writes new uuid to file and returns new uuid', async () => {
+        mockReadFile({ uuid: UUID_7_6_0_BUG });
+        configService = getConfigService(undefined);
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+        expect(uuid).not.toEqual(UUID_7_6_0_BUG);
+        expect(uuid).toEqual('NEW_UUID');
+        expect(writeFile).toHaveBeenCalledWith(
+          join('data-folder', 'uuid'),
+          'NEW_UUID',
+          expect.any(Object)
+        );
+        expect(logger.debug).toHaveBeenCalledTimes(2);
+        expect(logger.debug.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "UUID from 7.6.0 bug detected, ignoring file UUID",
+            ],
+            Array [
+              "Setting new Kibana instance UUID: NEW_UUID",
+            ],
+          ]
+        `);
+      });
+    });
+
+    describe('when config property is set', () => {
+      it('writes config uuid to file and returns config uuid', async () => {
+        mockReadFile({ uuid: UUID_7_6_0_BUG });
+        configService = getConfigService(DEFAULT_CONFIG_UUID);
+        const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: true });
+        expect(uuid).not.toEqual(UUID_7_6_0_BUG);
+        expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
+        expect(writeFile).toHaveBeenCalledWith(
+          join('data-folder', 'uuid'),
+          DEFAULT_CONFIG_UUID,
+          expect.any(Object)
+        );
+        expect(logger.debug).toHaveBeenCalledTimes(2);
+        expect(logger.debug.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "UUID from 7.6.0 bug detected, ignoring file UUID",
+            ],
+            Array [
+              "Setting new Kibana instance UUID: CONFIG_UUID",
+            ],
+          ]
+        `);
+      });
     });
   });
 
