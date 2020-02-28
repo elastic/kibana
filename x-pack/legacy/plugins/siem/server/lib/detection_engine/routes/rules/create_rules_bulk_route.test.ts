@@ -42,6 +42,7 @@ describe('create_rules_bulk', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
   });
 

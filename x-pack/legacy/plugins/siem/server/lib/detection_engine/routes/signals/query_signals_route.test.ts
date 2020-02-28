@@ -32,7 +32,7 @@ describe('query for signal', () => {
     test('returns 200 when using single query', async () => {
       const response = await server.inject(getSignalsQueryRequest(), context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({ body: typicalSignalsQuery() })
@@ -42,7 +42,7 @@ describe('query for signal', () => {
     test('returns 200 when using single agg', async () => {
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({ body: typicalSignalsQueryAggs() })
@@ -52,7 +52,7 @@ describe('query for signal', () => {
     test('returns 200 when using aggs and query together', async () => {
       const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
       expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({
@@ -69,8 +69,9 @@ describe('query for signal', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });

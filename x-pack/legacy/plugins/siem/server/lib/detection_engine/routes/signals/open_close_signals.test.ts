@@ -31,12 +31,12 @@ describe('set signal status', () => {
   describe('status on signal', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
       const response = await server.inject(getSetSignalStatusByIdsRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('catches error if callAsCurrentUser throws error', async () => {
@@ -44,8 +44,9 @@ describe('set signal status', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });

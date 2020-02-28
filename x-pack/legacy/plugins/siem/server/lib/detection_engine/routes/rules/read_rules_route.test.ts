@@ -32,20 +32,22 @@ describe('read_signals', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getReadRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getReadRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
 
     test('returns error if requesting a non-rule', async () => {
       clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getReadRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: expect.stringMatching(/rule_id.*not found/),
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: expect.stringMatching(/rule_id.*not found/),
         statusCode: 404,
       });
     });
@@ -55,8 +57,9 @@ describe('read_signals', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });
@@ -72,12 +75,8 @@ describe('read_signals', () => {
       });
       const response = await server.inject(request, context);
 
-      expect(response.customError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: 'rule_id: "DNE_RULE" not found',
-          statusCode: 404,
-        })
-      );
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', statusCode: 404 });
     });
   });
 });

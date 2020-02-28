@@ -59,7 +59,7 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
@@ -67,7 +67,11 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: undefined,
+        statusCode: 404,
+      });
     });
 
     test('it returns a 400 if the index does not exist', async () => {
@@ -75,8 +79,10 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: expect.stringContaining(
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        statusCode: 400,
+        message: expect.stringContaining(
           'Pre-packaged rules cannot be installed until the signals index is created'
         ),
       });
@@ -89,11 +95,10 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          rules_installed: 1,
-          rules_updated: 0,
-        },
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_installed: 1,
+        rules_updated: 0,
       });
     });
 
@@ -101,11 +106,10 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          rules_installed: 0,
-          rules_updated: 1,
-        },
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_installed: 0,
+        rules_updated: 1,
       });
     });
 
@@ -116,10 +120,8 @@ describe('add_prepackaged_rules_route', () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
-        statusCode: 500,
-      });
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
     });
   });
 });

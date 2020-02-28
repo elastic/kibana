@@ -34,22 +34,23 @@ describe('delete_rules', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
       const response = await server.inject(getDeleteRequest(), context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
       clients.alertsClient.get.mockResolvedValue(getResult());
       const response = await server.inject(getDeleteRequestById(), context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getDeleteRequest(), context);
 
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'rule_id: "rule-1" not found',
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: 'rule_id: "rule-1" not found',
         statusCode: 404,
       });
     });
@@ -58,7 +59,8 @@ describe('delete_rules', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getDeleteRequest(), context);
 
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
 
     test('catches error if deletion throws error', async () => {
@@ -66,8 +68,9 @@ describe('delete_rules', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getDeleteRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });

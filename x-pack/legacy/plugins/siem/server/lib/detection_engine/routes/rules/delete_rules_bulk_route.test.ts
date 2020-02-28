@@ -36,54 +36,56 @@ describe('delete_rules', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
       const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('resturns 200 when deleting a single rule and related rule status', async () => {
       clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
       const response = await server.inject(getDeleteAsPostBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
       const response = await server.inject(getDeleteBulkRequestById(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id using POST', async () => {
       const response = await server.inject(getDeleteAsPostBulkRequestById(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
       const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: expect.arrayContaining([
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
           {
             error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
             rule_id: 'rule-1',
           },
-        ]),
-      });
+        ])
+      );
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
   });
 

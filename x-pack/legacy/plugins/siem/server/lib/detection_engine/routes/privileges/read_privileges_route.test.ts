@@ -23,14 +23,13 @@ describe('read_privileges', () => {
   describe('normal status codes', () => {
     test('returns 200 when doing a normal request', async () => {
       const response = await server.inject(getPrivilegeRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns the payload when doing a normal request', async () => {
       const response = await server.inject(getPrivilegeRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: getMockPrivileges(),
-      });
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual(getMockPrivileges());
     });
 
     test('returns 500 when bad response from cluster', async () => {
@@ -38,10 +37,8 @@ describe('read_privileges', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getPrivilegeRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
-        statusCode: 500,
-      });
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
     });
   });
 });

@@ -37,13 +37,14 @@ describe('create_rules', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getCreateRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getCreateRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
   });
 
@@ -52,16 +53,21 @@ describe('create_rules', () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(getCreateRequest(), context);
 
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
+        statusCode: 400,
       });
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getCreateRequest(), context);
-      expect(response.conflict).toHaveBeenCalledWith({
-        body: expect.stringContaining('already exists'),
+
+      expect(response.status).toEqual(409);
+      expect(response.body).toEqual({
+        message: expect.stringContaining('already exists'),
+        statusCode: 409,
       });
     });
 
@@ -70,8 +76,9 @@ describe('create_rules', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getCreateRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });

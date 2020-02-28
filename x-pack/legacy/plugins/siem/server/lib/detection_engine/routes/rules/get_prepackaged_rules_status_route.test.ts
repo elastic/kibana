@@ -54,13 +54,14 @@ describe('get_prepackaged_rule_status_route', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
 
     test('catch error when finding rules throws error', async () => {
@@ -68,8 +69,9 @@ describe('get_prepackaged_rule_status_route', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
         statusCode: 500,
       });
     });
@@ -81,13 +83,12 @@ describe('get_prepackaged_rule_status_route', () => {
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          rules_custom_installed: 0,
-          rules_installed: 0,
-          rules_not_installed: 1,
-          rules_not_updated: 0,
-        },
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_custom_installed: 0,
+        rules_installed: 0,
+        rules_not_installed: 1,
+        rules_not_updated: 0,
       });
     });
 
@@ -96,13 +97,12 @@ describe('get_prepackaged_rule_status_route', () => {
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          rules_custom_installed: 1,
-          rules_installed: 1,
-          rules_not_installed: 0,
-          rules_not_updated: 1,
-        },
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_custom_installed: 1,
+        rules_installed: 1,
+        rules_not_installed: 0,
+        rules_not_updated: 1,
       });
     });
   });

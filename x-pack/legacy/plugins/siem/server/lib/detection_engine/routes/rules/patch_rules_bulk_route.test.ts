@@ -32,26 +32,26 @@ describe('patch_rules_bulk', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getPatchBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getPatchBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: [
-          {
-            error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
-            rule_id: 'rule-1',
-          },
-        ],
-      });
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPatchBulkRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
   });
 

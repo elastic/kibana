@@ -74,19 +74,21 @@ describe('import_rules_route', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(request, context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
 
     test('returns 404 if actionsClient is not available on the route', async () => {
       context.actions.getActionsClient = jest.fn();
       const response = await server.inject(request, context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
     });
   });
 
@@ -98,30 +100,27 @@ describe('import_rules_route', () => {
           throw new Error('Test error');
         });
       const response = await server.inject(request, context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
-        statusCode: 500,
-      });
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
     });
 
     test('returns an error if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [
-            {
-              error: {
-                message:
-                  'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-                status_code: 409,
-              },
-              rule_id: 'rule-1',
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message:
+                'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+              status_code: 409,
             },
-          ],
-          success: false,
-          success_count: 0,
-        },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
+        success_count: 0,
       });
     });
 
@@ -131,20 +130,19 @@ describe('import_rules_route', () => {
       });
 
       const response = await server.inject(request, context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [
-            {
-              error: {
-                message: 'Test error',
-                status_code: 400,
-              },
-              rule_id: 'rule-1',
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'Test error',
+              status_code: 400,
             },
-          ],
-          success: false,
-          success_count: 0,
-        },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
+        success_count: 0,
       });
     });
 
@@ -153,9 +151,8 @@ describe('import_rules_route', () => {
       const badRequest = getImportRulesRequest(requestPayload);
       const response = await server.inject(badRequest, context);
 
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: 'Invalid file extension .html',
-      });
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({ message: 'Invalid file extension .html', statusCode: 400 });
     });
   });
 
@@ -163,12 +160,11 @@ describe('import_rules_route', () => {
     test('returns 200 if rule imported successfully', async () => {
       clients.alertsClient.create.mockResolvedValue(getResult());
       const response = await server.inject(request, context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [],
-          success: true,
-          success_count: 1,
-        },
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [],
+        success: true,
+        success_count: 1,
       });
     });
 
@@ -177,20 +173,19 @@ describe('import_rules_route', () => {
       const badRequest = getImportRulesRequest(requestPayload);
       const response = await server.inject(badRequest, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [
-            {
-              error: {
-                message: 'Unexpected token h in JSON at position 1',
-                status_code: 400,
-              },
-              rule_id: '(unknown id)',
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'Unexpected token h in JSON at position 1',
+              status_code: 400,
             },
-          ],
-          success: false,
-          success_count: 0,
-        },
+            rule_id: '(unknown id)',
+          },
+        ],
+        success: false,
+        success_count: 0,
       });
     });
 
@@ -199,20 +194,19 @@ describe('import_rules_route', () => {
         clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const response = await server.inject(request, context);
 
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [
-              {
-                error: {
-                  message: 'rule_id: "rule-1" already exists',
-                  status_code: 409,
-                },
-                rule_id: 'rule-1',
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [
+            {
+              error: {
+                message: 'rule_id: "rule-1" already exists',
+                status_code: 409,
               },
-            ],
-            success: false,
-            success_count: 0,
-          },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
+          success_count: 0,
         });
       });
 
@@ -222,12 +216,12 @@ describe('import_rules_route', () => {
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
         const response = await server.inject(overwriteRequest, context);
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [],
-            success: true,
-            success_count: 1,
-          },
+
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [],
+          success: true,
+          success_count: 1,
         });
       });
     });
@@ -239,12 +233,12 @@ describe('import_rules_route', () => {
         buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2']))
       );
       const response = await server.inject(multiRequest, context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [],
-          success: true,
-          success_count: 2,
-        },
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [],
+        success: true,
+        success_count: 2,
       });
     });
 
@@ -255,27 +249,26 @@ describe('import_rules_route', () => {
 
       const response = await server.inject(badRequest, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [
-            {
-              error: {
-                message: 'child "rule_id" fails because ["rule_id" is required]',
-                status_code: 400,
-              },
-              rule_id: '(unknown id)',
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'child "rule_id" fails because ["rule_id" is required]',
+              status_code: 400,
             },
-            {
-              error: {
-                message: 'child "rule_id" fails because ["rule_id" is required]',
-                status_code: 400,
-              },
-              rule_id: '(unknown id)',
+            rule_id: '(unknown id)',
+          },
+          {
+            error: {
+              message: 'child "rule_id" fails because ["rule_id" is required]',
+              status_code: 400,
             },
-          ],
-          success: false,
-          success_count: 0,
-        },
+            rule_id: '(unknown id)',
+          },
+        ],
+        success: false,
+        success_count: 0,
       });
     });
 
@@ -286,20 +279,19 @@ describe('import_rules_route', () => {
         );
         const response = await server.inject(multiRequest, context);
 
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [
-              {
-                error: {
-                  message: 'More than one rule with rule-id: "rule-1" found',
-                  status_code: 400,
-                },
-                rule_id: 'rule-1',
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [
+            {
+              error: {
+                message: 'More than one rule with rule-id: "rule-1" found',
+                status_code: 400,
               },
-            ],
-            success: false,
-            success_count: 1,
-          },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
+          success_count: 1,
         });
       });
 
@@ -309,12 +301,11 @@ describe('import_rules_route', () => {
         );
 
         const response = await server.inject(multiRequest, context);
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [],
-            success: true,
-            success_count: 1,
-          },
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [],
+          success: true,
+          success_count: 1,
         });
       });
     });
@@ -329,20 +320,19 @@ describe('import_rules_route', () => {
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
         const response = await server.inject(multiRequest, context);
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [
-              {
-                error: {
-                  message: 'rule_id: "rule-1" already exists',
-                  status_code: 409,
-                },
-                rule_id: 'rule-1',
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [
+            {
+              error: {
+                message: 'rule_id: "rule-1" already exists',
+                status_code: 409,
               },
-            ],
-            success: false,
-            success_count: 2,
-          },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
+          success_count: 2,
         });
       });
 
@@ -351,12 +341,11 @@ describe('import_rules_route', () => {
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
         const response = await server.inject(multiRequest, context);
-        expect(response.ok).toHaveBeenCalledWith({
-          body: {
-            errors: [],
-            success: true,
-            success_count: 3,
-          },
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          errors: [],
+          success: true,
+          success_count: 3,
         });
       });
     });
