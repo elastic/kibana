@@ -41,7 +41,6 @@ const resolverPalette: Record<string, string | string[]> = {
  */
 type ResolverColorNames =
   | 'ok'
-  | 'okdark'
   | 'empty'
   | 'full'
   | 'warning'
@@ -58,7 +57,6 @@ type ResolverColorNames =
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
-  okdark: darken(0.2, resolverPalette.temperatures[0]),
   empty: euiColorEmptyShade,
   full: euiColorFullShade,
   strokeBehindEmpty: euiColor85Shade,
@@ -80,7 +78,6 @@ const idGenerator = htmlIdGenerator();
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
 export const PaintServerIds = {
-  darkLinearReflect: idGenerator('psDarkReflect'),
   runningProcess: idGenerator('psRunningProcess'),
   runningTrigger: idGenerator('psRunningTrigger'),
   runningProcessCube: idGenerator('psRunningProcessCube'),
@@ -95,18 +92,6 @@ export const PaintServerIds = {
  */
 const PaintServers = memo(() => (
   <>
-    <linearGradient
-      id={PaintServerIds.darkLinearReflect}
-      x1="-100"
-      y1="-30"
-      x2="100"
-      y2="30"
-      spreadMethod="reflect"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
-      <stop offset="100%" stopColor={darken(0.1, NamedColors.okdark)} stopOpacity="1" />
-    </linearGradient>
     <linearGradient
       id={PaintServerIds.runningProcess}
       x1="0"
@@ -203,7 +188,6 @@ const PaintServers = memo(() => (
  */
 export const SymbolIds = {
   processNode: idGenerator('nodeSymbol'),
-  processNodeWithHorizontalRule: idGenerator('nodeSymbolWithHR'),
   solidHexagon: idGenerator('hexagon'),
   runningProcessCube: idGenerator('runningCube'),
   runningTriggerCube: idGenerator('runningTriggerCube'),
@@ -227,25 +211,6 @@ const SymbolsAndShapes = memo(() => (
         paintOrder="normal"
       />
     </symbol>
-    <symbol
-      id={SymbolIds.processNodeWithHorizontalRule}
-      viewBox="-10 0 188.6889 29.31389"
-      preserveAspectRatio="xMinYMin slice"
-    >
-      <rect
-        x=".97904"
-        y=".89113"
-        width="156.96"
-        height="27.627"
-        rx="1.3357"
-        ry="1.1398"
-        fill="inherit"
-        strokeWidth=".88"
-        paintOrder="normal"
-      />
-      <line x1="1.425" x2="108.5" y1="10" y2="10" stroke={NamedColors.ok} strokeWidth="0.449" />
-    </symbol>
-
     <symbol id={SymbolIds.solidHexagon} viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
       <g transform="translate(0,-97)">
         <path

@@ -6,10 +6,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
-import { i18n } from '@kbn/i18n';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -43,8 +43,8 @@ const nodeAssets = {
     labelText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
     }),
-  }
-}
+  },
+};
 
 /**
  * A placeholder view for a process node.
@@ -108,17 +108,20 @@ export const ProcessEventDot = styled(
         return markerSize(magFactorX) / 1.7647;
       };
 
-      const nodeType = ((nodeData: any)=>{ 
-        if(nodeData.event_subtype_full === 'already_running'){
-          return typeof nodeData.attack_references === 'undefined' ? 'runningProcessCube' : 'runningTriggerCube'
+      const nodeType = ((nodeData: any) => {
+        if (nodeData.event_subtype_full === 'already_running') {
+          return typeof nodeData.attack_references === 'undefined'
+            ? 'runningProcessCube'
+            : 'runningTriggerCube';
+        } else {
+          return typeof nodeData.attack_references === 'undefined'
+            ? 'terminatedProcessCube'
+            : 'terminatedTriggerCube';
         }
-        else {
-          return typeof nodeData.attack_references === 'undefined' ? 'terminatedProcessCube' : 'terminatedTriggerCube'
-        }
-       })(event?.data_buffer)
+      })(event?.data_buffer);
 
-      const { cubeSymbol, labelFill, descriptionFill, labelText } = nodeAssets[nodeType]
-      
+      const { cubeSymbol, labelFill, descriptionFill, labelText } = nodeAssets[nodeType];
+
       return (
         <svg
           className={className}
