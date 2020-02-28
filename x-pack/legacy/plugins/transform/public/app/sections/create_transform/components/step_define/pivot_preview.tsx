@@ -134,9 +134,15 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
   // EuiDataGrid State
   const dataGridColumns = columnKeys.map(id => ({ id }));
 
-  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
-    setPagination,
-  ]);
+  const onChangeItemsPerPage = useCallback(
+    pageSize => {
+      setPagination(p => {
+        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
+        return { pageIndex, pageSize };
+      });
+    },
+    [setPagination]
+  );
 
   const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
     setPagination,

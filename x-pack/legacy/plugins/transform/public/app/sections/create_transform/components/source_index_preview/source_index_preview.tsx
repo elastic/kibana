@@ -101,9 +101,15 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
     return { id, schema };
   });
 
-  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
-    setPagination,
-  ]);
+  const onChangeItemsPerPage = useCallback(
+    pageSize => {
+      setPagination(p => {
+        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
+        return { pageIndex, pageSize };
+      });
+    },
+    [setPagination]
+  );
 
   const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
     setPagination,
