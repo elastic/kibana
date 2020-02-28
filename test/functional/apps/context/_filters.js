@@ -65,7 +65,7 @@ export default function({ getService, getPageObjects }) {
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      retry.try(async () => {
+      await retry.try(async () => {
         expect(
           await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)
         ).to.be(true);
