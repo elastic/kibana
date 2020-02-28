@@ -15,14 +15,11 @@ import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
-// @ts-ignore No declaration file for module
-import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { JOBS_LIST_PATH } from './management_urls';
 import { setDependencyCache } from '../util/dependency_cache';
 import './jobs_list';
 import {
   LicensingPluginSetup,
-  ILicense,
   LICENSE_CHECK_STATE,
 } from '../../../../../../plugins/licensing/public';
 import { PLUGIN_ID } from '../../../common/constants/app';
@@ -36,45 +33,44 @@ const MINIMUM_FULL_LICENSE = 'platinum';
 
 const plugins = npSetup.plugins as PluginsSetupExtended;
 const licencingSubscription = plugins.licensing.license$.subscribe(license => {
-  initManagementSection(license);
-  // unsubscribe, we only want to register the plugin once.
-  licencingSubscription.unsubscribe();
+  if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
+    initManagementSection();
+    // unsubscribe, we only want to register the plugin once.
+    licencingSubscription.unsubscribe();
+  }
 });
 
-function initManagementSection(license: ILicense) {
-  if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
-    const legacyBasePath = {
-      prepend: chrome.addBasePath,
-      get: chrome.getBasePath,
-      remove: () => {},
-    };
-    const legacyDocLinks = {
-      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-      DOC_LINK_VERSION: metadata.branch,
-    };
+function initManagementSection() {
+  const legacyBasePath = {
+    prepend: chrome.addBasePath,
+    get: chrome.getBasePath,
+    remove: () => {},
+  };
+  const legacyDocLinks = {
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: metadata.branch,
+  };
 
-    setDependencyCache({
-      docLinks: legacyDocLinks as any,
-      basePath: legacyBasePath as any,
-      XSRF: chrome.getXsrfToken(),
-    });
+  setDependencyCache({
+    docLinks: legacyDocLinks as any,
+    basePath: legacyBasePath as any,
+    XSRF: chrome.getXsrfToken(),
+  });
 
-    management.register('ml', {
-      display: i18n.translate('xpack.ml.management.mlTitle', {
-        defaultMessage: 'Machine Learning',
-      }),
-      order: 100,
-      icon: 'machineLearningApp',
-    });
+  management.register('ml', {
+    display: i18n.translate('xpack.ml.management.mlTitle', {
+      defaultMessage: 'Machine Learning',
+    }),
+    order: 100,
+    icon: 'machineLearningApp',
+  });
 
-    management.getSection('ml').register('jobsList', {
-      name: 'jobsListLink',
-      order: 10,
-      display: i18n.translate('xpack.ml.management.jobsListTitle', {
-        defaultMessage: 'Jobs list',
-      }),
-      url: `#${JOBS_LIST_PATH}`,
-    });
-  }
-  return true;
+  management.getSection('ml').register('jobsList', {
+    name: 'jobsListLink',
+    order: 10,
+    display: i18n.translate('xpack.ml.management.jobsListTitle', {
+      defaultMessage: 'Jobs list',
+    }),
+    url: `#${JOBS_LIST_PATH}`,
+  });
 }
