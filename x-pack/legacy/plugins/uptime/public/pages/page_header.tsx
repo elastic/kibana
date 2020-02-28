@@ -8,25 +8,25 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { getTitle } from '../lib/helper/get_title';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { useUrlParams } from '../hooks';
 import { MONITOR_ROUTE } from '../../common/constants';
 import { Ping } from '../../common/graphql/types';
 
 interface PageHeaderProps {
   monitorStatus?: Ping;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeaderProps) => {
+export const PageHeaderComponent = ({ monitorStatus }: PageHeaderProps) => {
   const monitorPage = useRouteMatch({
     path: MONITOR_ROUTE,
   });
 
+  const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs!;
   const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
 

@@ -11,7 +11,11 @@ import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../lib'
 import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../../../common/constants';
 import { Ping } from '../../../common/graphql/types';
 import { createMemoryHistory } from 'history';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb, ChromeStart } from 'kibana/public';
+import {
+  KibanaContextProvider,
+  useKibana,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 describe('PageHeaderComponent', () => {
   const monitorStatus: Ping = {
@@ -57,19 +61,19 @@ describe('PageHeaderComponent', () => {
   };
 
   it('shallow renders expected elements for valid props', () => {
-    const component = shallowWithRouter(<PageHeaderComponent setBreadcrumbs={jest.fn()} />);
+    const component = shallowWithRouter(<PageHeaderComponent />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders expected elements for valid props', () => {
-    const component = renderWithRouter(<PageHeaderComponent setBreadcrumbs={jest.fn()} />);
+    const component = renderWithRouter(<PageHeaderComponent />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders expected title for valid overview route', () => {
     const component = renderWithRouter(
       <Route path={OVERVIEW_ROUTE}>
-        <PageHeaderComponent setBreadcrumbs={jest.fn()} />
+        <PageHeaderComponent />
       </Route>
     );
     expect(component).toMatchSnapshot();
@@ -83,7 +87,7 @@ describe('PageHeaderComponent', () => {
 
     const component = renderWithRouter(
       <Route path={MONITOR_ROUTE}>
-        <PageHeaderComponent setBreadcrumbs={jest.fn()} monitorStatus={monitorStatus} />
+        <PageHeaderComponent />
       </Route>,
       history
     );
@@ -98,7 +102,7 @@ describe('PageHeaderComponent', () => {
 
     const component = mountWithRouter(
       <Route path={MONITOR_ROUTE}>
-        <PageHeaderComponent setBreadcrumbs={jest.fn()} monitorStatus={monitorStatus} />
+        <PageHeaderComponent monitorStatus={monitorStatus} />
       </Route>,
       history
     );
@@ -111,36 +115,50 @@ describe('PageHeaderComponent', () => {
 
   it('mount and set expected breadcrumb for monitor route', () => {
     const history = createMemoryHistory({ initialEntries: ['/monitor/ZWxhc3RpYy1jbw=='] });
-    let breadcrumbObj: ChromeBreadcrumb[] = [];
-    const setBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
-      breadcrumbObj = breadcrumbs;
-    };
+    const [getBreadcrumbObj, core] = mockCore();
 
     mountWithRouter(
       <Route path={MONITOR_ROUTE}>
-        <PageHeaderComponent setBreadcrumbs={setBreadcrumb} monitorStatus={monitorStatus} />
+        <KibanaContextProvider services={{ ...core }}>
+          <PageHeaderComponent monitorStatus={monitorStatus} />
+        </KibanaContextProvider>
       </Route>,
       history
     );
 
-    expect(breadcrumbObj).toStrictEqual([
+    expect(getBreadcrumbObj()).toStrictEqual([
       { href: '#/?', text: 'Uptime' },
       { text: 'https://www.elastic.co' },
     ]);
   });
 
   it('mount and set expected breadcrumb for overview route', () => {
-    let breadcrumbObj: ChromeBreadcrumb[] = [];
-    const setBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
-      breadcrumbObj = breadcrumbs;
-    };
+    const [getBreadcrumbObj, core] = mockCore();
 
     mountWithRouter(
-      <Route path={OVERVIEW_ROUTE}>
-        <PageHeaderComponent setBreadcrumbs={setBreadcrumb} monitorStatus={monitorStatus} />
-      </Route>
+      <KibanaContextProvider services={{ ...core }}>
+        <Route path={OVERVIEW_ROUTE}>
+          <PageHeaderComponent monitorStatus={monitorStatus} />
+        </Route>
+      </KibanaContextProvider>
     );
 
-    expect(breadcrumbObj).toStrictEqual([{ href: '#/', text: 'Uptime' }]);
+    expect(getBreadcrumbObj()).toStrictEqual([{ href: '#/', text: 'Uptime' }]);
   });
 });
+
+const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
+  let breadcrumbObj: ChromeBreadcrumb[] = [];
+  const get = () => {
+    return breadcrumbObj;
+  };
+  const core = {
+    chrome: {
+      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
+        breadcrumbObj = newBreadcrumbs;
+      },
+    },
+  };
+
+  return [get, core];
+};
