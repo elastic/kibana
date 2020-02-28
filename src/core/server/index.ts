@@ -229,6 +229,9 @@ export {
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
 } from './saved_objects';
 
 export {

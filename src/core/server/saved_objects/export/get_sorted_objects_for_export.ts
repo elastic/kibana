@@ -124,6 +124,12 @@ async function fetchObjectsToExport({
   }
 }
 
+/**
+ * Generates sorted saved object stream to be used for export.
+ * See the {@link SavedObjectsExportOptions | options} for more detailed information.
+ *
+ * @public
+ */
 export async function getSortedObjectsForExport({
   types,
   objects,

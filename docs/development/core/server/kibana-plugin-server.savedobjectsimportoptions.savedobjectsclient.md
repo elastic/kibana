@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportOptions.savedObjectsClient property
 
+client to use to perform the import operation
+
 <b>Signature:</b>
 
 ```typescript
