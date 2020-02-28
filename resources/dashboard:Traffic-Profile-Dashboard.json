@@ -1,6 +1,6 @@
 {
    "migrationVersion": {
-      "dashboard": "7.0.0"
+      "dashboard": "7.3.0"
    }, 
    "references": [
       {
@@ -31,16 +31,11 @@
       {
          "type": "visualization", 
          "name": "panel_5", 
-         "id": "Sum-of-Repeated-Field-Count-by-Application-(histogram)"
-      }, 
-      {
-         "type": "visualization", 
-         "name": "panel_6", 
          "id": "Average-Repeated-Elements-in-a-Message-(All-Reports)-(line)"
       }, 
       {
          "type": "visualization", 
-         "name": "panel_7", 
+         "name": "panel_6", 
          "id": "Average-Message-Size-(All-Reports)-(line)"
       }
    ], 
@@ -50,12 +45,12 @@
       "timeRestore": false, 
       "description": "", 
       "title": "Traffic Profile Dashboard", 
-      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":12,\"y\":0,\"w\":12,\"h\":12,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":12,\"h\":12,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":24,\"y\":0,\"w\":12,\"h\":12,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":12,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":12,\"w\":16,\"h\":12,\"i\":\"5\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":0,\"y\":24,\"w\":48,\"h\":12,\"i\":\"6\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":16,\"y\":12,\"w\":16,\"h\":12,\"i\":\"7\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"},{\"panelIndex\":\"8\",\"gridData\":{\"x\":32,\"y\":12,\"w\":16,\"h\":12,\"i\":\"8\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_7\"}]", 
+      "panelsJSON": "[{\"version\":\"7.5.2\",\"gridData\":{\"x\":12,\"y\":0,\"w\":12,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":12,\"h\":12,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":24,\"y\":0,\"w\":12,\"h\":12,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":12,\"i\":\"4\"},\"panelIndex\":\"4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":0,\"y\":12,\"w\":16,\"h\":12,\"i\":\"5\"},\"panelIndex\":\"5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":16,\"y\":12,\"w\":16,\"h\":12,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":32,\"y\":12,\"w\":16,\"h\":12,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"}]", 
       "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
       "version": 4, 
       "kibanaSavedObjectMeta": {
-         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"*\",\"language\":\"lucene\"}}"
       }
    }, 
-   "updated_at": "2019-09-30T22:34:01.657Z"
+   "updated_at": "2020-02-28T17:04:19.534Z"
 }

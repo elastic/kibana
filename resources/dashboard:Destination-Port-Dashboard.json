@@ -1,6 +1,6 @@
 {
    "migrationVersion": {
-      "dashboard": "7.0.0"
+      "dashboard": "7.3.0"
    }, 
    "references": [
       {
@@ -35,7 +35,7 @@
       "timeRestore": false, 
       "description": "", 
       "title": "Destination Port Dashboard", 
-      "panelsJSON": "[{\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":20,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":28,\"x\":20,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":28,\"x\":20,\"y\":16},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":20,\"x\":0,\"y\":16},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"columns\":[\"Application\",\"DestPort\",\"DestIP\",\"SrcPort\",\"SrcIP\",\"TotalBytesDelta\",\"TotalPackets\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"gridData\":{\"h\":8,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":32},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"}]", 
+      "panelsJSON": "[{\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":20,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":28,\"x\":20,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":28,\"x\":20,\"y\":16},\"panelIndex\":\"3\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":20,\"x\":0,\"y\":16},\"panelIndex\":\"4\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"columns\":[\"Application\",\"DestPort\",\"DestIP\",\"SrcPort\",\"SrcIP\",\"TotalBytesDelta\",\"TotalPackets\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"gridData\":{\"h\":8,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":32},\"panelIndex\":\"5\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_4\"}]", 
       "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
       "version": 1, 
       "kibanaSavedObjectMeta": {
