@@ -130,6 +130,11 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
+  const pageData = data.slice(
+    pagination.pageIndex * pagination.pageSize,
+    (pagination.pageIndex + 1) * pagination.pageSize
+  );
+
   // EuiDataGrid State
   const dataGridColumns = columnKeys.map(id => ({ id }));
 
@@ -157,8 +162,8 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
     }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = data.hasOwnProperty(adjustedRowIndex)
-        ? getNestedProperty(data[adjustedRowIndex], columnId, null)
+      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(pageData[adjustedRowIndex], columnId, null)
         : null;
 
       if (typeof cellValue === 'object' && cellValue !== null) {
@@ -171,7 +176,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
 
       return cellValue;
     };
-  }, [data, pagination.pageIndex, pagination.pageSize]);
+  }, [pageData, pagination.pageIndex, pagination.pageSize]);
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
