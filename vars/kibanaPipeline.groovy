@@ -332,8 +332,11 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
   ]) {
     while(!queue.isEmpty()) {
       def testSuite
+      def byFile = [:]
       try {
         testSuite = queue.pop()
+        byFile = [:]
+        testSuite.files.each { byFile[it.file] = it }
       } catch (ex) {
         print ex.toString()
         continue
@@ -342,7 +345,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
         // retryable("kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
-          def filesString = testSuite.files.collect { "--include-file '${it}'" }.join(' ')
+          def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
 
           iteration++
 
@@ -376,9 +379,13 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
 
       catchError {
         def suites = toJSON(readFile(file: testMetadataPath))
-        suites.each { finishedSuites << it }
+        suites.each {
+          if (byFile[it.file]) {
+            it.previousDuration = byFile[it.file].duration
+          }
+          finishedSuites << it
+        }
       }
-      // finishedSuites << testSuite
     }
   }
 }
@@ -395,8 +402,11 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
   ]) {
     while(!queue.isEmpty()) {
       def testSuite
+      def byFile = [:]
       try {
         testSuite = queue.pop()
+        byFile = [:]
+        testSuite.files.each { byFile[it.file] = it }
       } catch (ex) {
         print ex.toString()
         continue
@@ -405,7 +415,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
         // retryable("xpack-kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
-          def filesString = testSuite.files.collect { "--include-file '${it}'" }.join(' ')
+          def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
 
           iteration++
 
@@ -439,9 +449,13 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
 
       catchError {
         def suites = toJSON(readFile(file: testMetadataPath))
-        suites.each { finishedSuites << it }
+        suites.each {
+          if (byFile[it.file]) {
+            it.previousDuration = byFile[it.file].duration
+          }
+          finishedSuites << it
+        }
       }
-      // finishedSuites << testSuite
     }
   }
 }

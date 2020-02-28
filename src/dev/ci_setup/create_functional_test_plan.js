@@ -139,7 +139,8 @@ const getTestsTransformed = async (config, overrides = {}) => {
 
       return {
         config: next.config,
-        files: group.map(f => f.file),
+        files: group.map(f => ({ file: f.file, duration: f.duration })),
+        // files: group.map(f => f.file),
         estimatedDuration: totalDuration,
       };
     };
