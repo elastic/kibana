@@ -18,8 +18,6 @@ import {
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
-jest.mock('ui/new_platform');
-
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');
