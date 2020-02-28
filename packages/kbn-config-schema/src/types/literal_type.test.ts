@@ -38,17 +38,31 @@ test('handles null', () => {
 });
 
 test('returns error when not correct', () => {
-  expect(() => literal('test').validate('foo')).toThrowErrorMatchingSnapshot();
+  expect(() => literal('test').validate('foo')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [test] but got [foo]"`
+  );
 
-  expect(() => literal(true).validate(false)).toThrowErrorMatchingSnapshot();
+  expect(() => literal(true).validate(false)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [true] but got [false]"`
+  );
 
-  expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [test] but got [1,2,3]"`
+  );
 
-  expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
+  expect(() => literal(123).validate('abc')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [123] but got [abc]"`
+  );
 
-  expect(() => literal(null).validate(42)).toThrowErrorMatchingSnapshot();
+  expect(() => literal(null).validate(42)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [null] but got [42]"`
+  );
 });
 
 test('includes namespace in failure', () => {
-  expect(() => literal('test').validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    literal('test').validate('foo', {}, 'foo-namespace')
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: expected value to equal [test] but got [foo]"`
+  );
 });
