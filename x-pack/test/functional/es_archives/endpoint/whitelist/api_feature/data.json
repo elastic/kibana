@@ -1,0 +1,17 @@
+{
+    "type": "doc",
+    "value": {
+      "id": "3KVN2G8BYQH1gtPUuYk7",
+      "index": "whitelist",
+      "source": {
+        "@timestamp": 1579881969541,
+        "eventTypes": [],
+        "whitelistRuleType": "simple",
+        "whitelistRule": {
+            "type": "equality",
+            "value": "blah",
+            "applyTo": "actingProcess.file.singer"
+        }
+      }
+    }
+}

@@ -12,5 +12,6 @@ export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProvide
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./whitelist'));
   });
 }

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EndpointAppContext } from '../types';
 import { WhitelistRule } from '../../common/types';
 
-const whitelistIdx = 'whitelist-index'; // TODO: change this
+const whitelistIdx = 'whitelist'; // TODO: change this
 
 /**
  * Registers the whitelist routes for the API
@@ -33,10 +33,7 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
       validate: {
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
-          alert_id: schema.string({
-            minLength: 36, // TODO alert id format?
-            maxLength: 36,
-          }),
+          alert_id: schema.string(), // TODO: add beter validation when alert_id format is determined
           file_path: schema.maybe(schema.string()),
           signer: schema.maybe(schema.string()),
           sha256: schema.maybe(schema.string()),
@@ -116,11 +113,12 @@ async function handleWhitelistGet(context, req, res) {
 async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<boolean> {
   let body = '';
   whitelistRules.forEach(rule => {
-    body = body.concat(`{ "index" : {} }\n ${JSON.stringify(rule)}\n`);
+    body = body.concat(`{ "index" : {}}\n ${JSON.stringify(rule)}\n`);
   });
 
   const response = await ctx.core.elasticsearch.dataClient.callAsCurrentUser('bulk', {
     index: whitelistIdx,
+    refresh: 'true',
     body,
   });
   const errors: boolean = response.errors;
