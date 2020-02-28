@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'src/core/server';
 import { mlLog } from '../../client/log';
 
 import {
@@ -16,23 +17,31 @@ import {
 // - ML_ANNOTATIONS_INDEX_PATTERN index is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_WRITE alias is present
-export async function isAnnotationsFeatureAvailable(callAsCurrentUser) {
+export async function isAnnotationsFeatureAvailable(callAsCurrentUser: APICaller) {
   try {
     const indexParams = { index: ML_ANNOTATIONS_INDEX_PATTERN };
 
     const annotationsIndexExists = await callAsCurrentUser('indices.exists', indexParams);
-    if (!annotationsIndexExists) return false;
+    if (!annotationsIndexExists) {
+      return false;
+    }
 
     const annotationsReadAliasExists = await callAsCurrentUser('indices.existsAlias', {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
 
-    if (!annotationsReadAliasExists) return false;
+    if (!annotationsReadAliasExists) {
+      return false;
+    }
 
     const annotationsWriteAliasExists = await callAsCurrentUser('indices.existsAlias', {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });
-    if (!annotationsWriteAliasExists) return false;
+    if (!annotationsWriteAliasExists) {
+      return false;
+    }
   } catch (err) {
     mlLog.info('Disabling ML annotations feature because the index/alias integrity check failed.');
     return false;

@@ -45,6 +45,7 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   socket?: Socket;
   routeTags?: string[];
   kibanaRouteState?: KibanaRouteState;
+  routeAuthRequired?: false;
   validation?: {
     params?: RouteValidationSpec<P>;
     query?: RouteValidationSpec<Q>;
@@ -61,6 +62,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   method = 'get',
   socket = new Socket(),
   routeTags,
+  routeAuthRequired,
   validation = {},
   kibanaRouteState = { xsrfRequired: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
@@ -81,7 +83,9 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: { tags: routeTags } },
+      route: {
+        settings: { tags: routeTags, auth: routeAuthRequired },
+      },
       raw: {
         req: { socket },
       },

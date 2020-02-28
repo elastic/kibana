@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { documentationLinksService } from './documentation_links';
+export const capabilitiesProvider = () => ({
+  spaces: {
+    manage: true,
+  },
+  management: {
+    kibana: {
+      spaces: true,
+    },
+  },
+});
