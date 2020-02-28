@@ -25,15 +25,32 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
 
   switch (method) {
     case 'ok':
-      return calls.map(call => ({ status: 200, body: call[0]?.body }));
+      return calls.map(([call]) => ({ status: 200, body: call?.body }));
     case 'badRequest':
-      return calls.map(call => ({ status: 400, body: call[0]?.body }));
+      return calls.map(([call]) => ({
+        status: 400,
+        body: { message: call?.body, statusCode: 400 },
+      }));
     case 'notFound':
-      return calls.map(call => ({ status: 404, body: call[0]?.body }));
+      return calls.map(([call]) => ({
+        status: 404,
+        body: { message: call?.body, statusCode: 404 },
+      }));
+    case 'conflict':
+      return calls.map(([call]) => ({
+        status: 409,
+        body: { message: call?.body, statusCode: 409 },
+      }));
     case 'internalError':
-      return calls.map(call => ({ status: 500, body: call }));
+      return calls.map(([call]) => ({
+        status: 500,
+        body: { message: call?.body, statusCode: 500 },
+      }));
     case 'customError':
-      return calls.map(call => ({ status: 500, body: call }));
+      return calls.map(([call]) => ({
+        status: call?.statusCode,
+        body: { message: call?.body, statusCode: call?.statusCode },
+      }));
     default:
       throw new Error(`Encountered unexpected method call from ${method}`);
   }
