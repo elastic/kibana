@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { UiStatsMetric } from './ui_stats';
-import { UserAgentMetric } from './user_agent';
-import { ApplicationUsageCurrent } from './application_usage';
-
-export { UiStatsMetric, createUiStatsMetric, UiStatsMetricType } from './ui_stats';
-export { Stats } from './stats';
-export { trackUsageAgent } from './user_agent';
-export { ApplicationUsage, ApplicationUsageCurrent } from './application_usage';
-
-export type Metric = UiStatsMetric | UserAgentMetric | ApplicationUsageCurrent;
-export enum METRIC_TYPE {
-  COUNT = 'count',
-  LOADED = 'loaded',
-  CLICK = 'click',
-  USER_AGENT = 'user_agent',
-  APPLICATION_USAGE = 'application_usage',
-}
+export const mappings = {
+  application_usage_totals: {
+    properties: {
+      appId: { type: 'keyword' },
+      numberOfClicks: { type: 'long' },
+      minutesOnScreen: { type: 'float' },
+    },
+  },
+  application_usage_transactional: {
+    properties: {
+      timestamp: { type: 'date' },
+      appId: { type: 'keyword' },
+      numberOfClicks: { type: 'long' },
+      minutesOnScreen: { type: 'float' },
+    },
+  },
+};

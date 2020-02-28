@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
+import { Legacy } from '../../../../kibana';
+import { mappings } from './mappings';
 
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-  server: Legacy.Server;
-}
+// eslint-disable-next-line import/no-default-export
+export default function ApplicationUsagePlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'application_usage',
+    uiExports: { mappings }, // Needed to define the mappings for the SavedObjects
+  };
 
-export function registerRoutes({ core, currentKibanaVersion, server }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion, server });
-  registerTelemetryUsageStatsRoutes(server);
-  registerTelemetryOptInStatsRoutes(server);
-  registerTelemetryUserHasSeenNotice(server);
+  return new kibana.Plugin(config);
 }
