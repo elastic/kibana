@@ -21,6 +21,7 @@ const Path = require('path');
 
 exports.distDir = Path.resolve(__dirname, 'target');
 exports.distFilename = 'kbn-ui-shared-deps.js';
+exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
 exports.lightCssDistFilename = 'kbn-ui-shared-deps.light.css';
 exports.darkCssDistFilename = 'kbn-ui-shared-deps.dark.css';
 exports.externals = {

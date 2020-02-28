@@ -13,11 +13,13 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
 export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
@@ -113,7 +115,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -122,7 +124,17 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
           }
         })
       );
-      return rules;
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return headers
+          .response({
+            message: errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validated;
+      }
     },
   };
 };

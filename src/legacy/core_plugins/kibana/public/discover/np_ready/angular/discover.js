@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Subscription, Subject, merge } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
@@ -72,8 +72,8 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadc
 import {
   esFilters,
   indexPatterns as indexPatternsUtils,
-  syncQuery,
-  syncAppFilters,
+  connectToQueryState,
+  syncQueryStateWithUrl,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
@@ -139,7 +139,7 @@ app.config($routeProvider => {
               });
             }),
             savedSearch: getServices()
-              .getSavedSearchById(savedSearchId, kbnUrl)
+              .getSavedSearchById(savedSearchId)
               .then(savedSearch => {
                 if (savedSearchId) {
                   chrome.recentlyAccessed.add(
@@ -201,7 +201,6 @@ function discoverController(
     appStateContainer,
     stopSync: stopStateSync,
     setAppState,
-    getAppFilters,
     resetInitialAppState,
     replaceUrlState,
     isAppStateDirty,
@@ -216,6 +215,7 @@ function discoverController(
     setAppState({ index: $scope.indexPattern.id });
   }
   $scope.state = { ...appStateContainer.getState() };
+  $scope.query = $scope.state.query;
 
   const updateStateFromSavedQuery = savedQuery => {
     setAppState({
@@ -235,13 +235,13 @@ function discoverController(
     }
   };
 
-  const stopSyncingAppFilters = syncAppFilters(filterManager, {
-    set: filters => setAppState({ filters }),
-    get: () => getAppFilters(),
-    state$: appStateContainer.state$.pipe(map(state => state.filters)),
-  });
+  const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
+    data.query,
+    appStateContainer,
+    { filters: esFilters.FilterStateStore.APP_STATE }
+  );
   // syncs `_g` portion of url with query services
-  const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(data.query, kbnUrlStateStorage);
+  const { stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(data.query, kbnUrlStateStorage);
 
   $scope.filters = filterManager.getFilters();
   $scope.onFiltersUpdated = filters => filterManager.setFilters(filters);
@@ -275,7 +275,10 @@ function discoverController(
             $scope.savedQuery = undefined;
           }
         }
-        if (queryChanged || sortChanged || savedQueryChanged) {
+        if (queryChanged || sortChanged) {
+          if (queryChanged) {
+            $scope.query = newStatePartial.query;
+          }
           $fetchObservable.next();
         } else {
           $scope.$digest();
@@ -348,9 +351,9 @@ function discoverController(
     savedSearch.destroy();
     subscriptions.unsubscribe();
     appStateUnsubscribe();
-    stopSyncingAppFilters();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
+    stopSyncingQueryAppStateWithStateContainer();
   });
 
   const getTopNavLinks = () => {
@@ -656,8 +659,9 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield:
-      indexPatternsUtils.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield: indexPatternsUtils.isDefault($scope.indexPattern)
+      ? $scope.indexPattern.timeFieldName
+      : undefined,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
@@ -868,17 +872,25 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query, dateRange }) {
-    if (dateRange) {
-      timefilter.setTime(dateRange);
-      $scope.timeRangeObj = dateRange;
-    }
-
-    if (!_.isEqual(query, $scope.state.query)) {
-      $scope.state.query = query;
+  $scope.updateQuery = function({ query }) {
+    if (!_.isEqual(query, $scope.query)) {
       setAppState({ query });
     }
-    $fetchObservable.next();
+  };
+
+  $scope.updateSavedQueryId = newSavedQueryId => {
+    if (newSavedQueryId) {
+      setAppState({ savedQuery: newSavedQueryId });
+    } else {
+      //reset filters and query string, remove savedQuery from state
+      const state = {
+        ...appStateContainer.getState(),
+        query: getDefaultQuery(),
+        filters: [],
+      };
+      delete state.savedQuery;
+      appStateContainer.set(state);
+    }
   };
 
   function onResults(resp) {
@@ -1009,22 +1021,6 @@ function discoverController(
 
   $scope.showAllRows = function() {
     $scope.minimumVisibleRows = $scope.hits;
-  };
-
-  $scope.onSavedQueryUpdated = $scope.onSavedQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-    updateStateFromSavedQuery(savedQuery);
-  };
-
-  $scope.onSavedQueryCleared = () => {
-    //reset filters and query string, remove savedQuery from state
-    const state = {
-      ...appStateContainer.getState(),
-      query: getDefaultQuery(),
-      filters: [],
-    };
-    delete state.savedQuery;
-    appStateContainer.set(state);
   };
 
   async function setupVisualization() {

@@ -6,7 +6,6 @@
 
 export {
   createMlTelemetry,
-  getSavedObjectsClient,
   incrementFileDataVisualizerIndexCreationCount,
   storeMlTelemetry,
   MlTelemetry,
