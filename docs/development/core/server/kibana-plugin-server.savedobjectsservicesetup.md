@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceSetup interface
 
-Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers.
+Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
 
 <b>Signature:</b>
 
@@ -14,11 +14,11 @@ export interface SavedObjectsServiceSetup
 
 ## Remarks
 
-Note: The Saved Object setup API's should only be used for creating and registering client wrappers. Constructing a Saved Objects client or repository for use within your own plugin won't have any of the registered wrappers applied and is considered an anti-pattern. Use the Saved Objects client from the [SavedObjectsServiceStart\#getScopedClient](./kibana-plugin-server.savedobjectsservicestart.md) method or the [route handler context](./kibana-plugin-server.requesthandlercontext.md) instead.
+When plugins access the Saved Objects client, a new client is created using the factory provided to `setClientFactory` and wrapped by all wrappers registered through `addClientWrapper`<!-- -->.
 
-When plugins access the Saved Objects client, a new client is created using the factory provided to `setClientFactory` and wrapped by all wrappers registered through `addClientWrapper`<!-- -->. To create a factory or wrapper, plugins will have to construct a Saved Objects client. First create a repository by calling `scopedRepository` or `internalRepository` and then use this repository as the argument to the [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) constructor.
+All the setup APIs will throw if called after the service has started, and therefor cannot be used from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
 
-## Example
+## Example 1
 
 
 ```ts
@@ -34,10 +34,26 @@ export class Plugin() {
 
 ```
 
+## Example 2
+
+
+```ts
+import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+import { mySoType } from './saved_objects'
+
+export class Plugin() {
+  setup: (core: CoreSetup) => {
+    core.savedObjects.registerType(mySoType);
+  }
+}
+
+```
+
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) with the given priority. |
+|  [registerType](./kibana-plugin-server.savedobjectsservicesetup.registertype.md) | <code>(type: SavedObjectsType) =&gt; void</code> | Register a [savedObjects type](./kibana-plugin-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-server.savedobjectmigrationmap.md) for more details about these. |
 |  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

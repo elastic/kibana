@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
 import { createSavedDashboardLoader } from '../dashboard';
-import { createSavedSearchesLoader } from '../discover';
 import { TypesService, createSavedVisLoader } from '../../../visualizations/public';
+import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 /**
  * This registry is used for the editing mode of Saved Searches, Visualizations,
