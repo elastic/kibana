@@ -1,0 +1,23 @@
+{
+  "name": "@kbn/query-string",
+  "browser": "./target/web/index.js",
+  "main": "./target/node/index.js",
+  "types": "./target/types/index.d.ts",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build"
+  },
+  "dependencies": {
+    "query-string": "6.10.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@kbn/babel-preset": "1.0.0",
+    "@kbn/dev-utils": "1.0.0",
+    "del": "^5.1.0"
+  }
+}
