@@ -6,6 +6,7 @@
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import {
   MetricExpressionParams,
   Comparator,
@@ -26,6 +27,17 @@ async function getMetric(
   { metric, aggType, timeUnit, timeSize, indexPattern }: MetricExpressionParams
 ) {
   const interval = `${timeSize}${timeUnit}`;
+  const aggregations =
+    aggType === 'rate'
+      ? networkTraffic('aggregatedValue', metric)
+      : {
+          aggregatedValue: {
+            [aggType]: {
+              field: metric,
+            },
+          },
+        };
+
   const searchBody = {
     query: {
       bool: {
@@ -50,13 +62,7 @@ async function getMetric(
           field: '@timestamp',
           fixed_interval: interval,
         },
-        aggregations: {
-          aggregatedValue: {
-            [aggType]: {
-              field: metric,
-            },
-          },
-        },
+        aggregations,
       },
     },
   };
