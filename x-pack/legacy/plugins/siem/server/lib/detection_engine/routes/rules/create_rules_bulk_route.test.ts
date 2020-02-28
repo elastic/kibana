@@ -35,13 +35,13 @@ describe('create_rules_bulk', () => {
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.notFound).toHaveBeenCalled();
+      expect(response.status).toEqual(404);
     });
   });
 
@@ -49,33 +49,33 @@ describe('create_rules_bulk', () => {
     it('returns an error object if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: expect.arrayContaining([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index .siem-signals does not exist',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message:
+              'To create a rule, the index must exist first. Index .siem-signals does not exist',
+            status_code: 400,
           },
-        ]),
-      });
+          rule_id: 'rule-1',
+        },
+      ]);
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: [
-          expect.objectContaining({
-            error: {
-              message: expect.stringContaining('already exists'),
-              status_code: 409,
-            },
-          }),
-        ],
-      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          error: {
+            message: expect.stringContaining('already exists'),
+            status_code: 409,
+          },
+        }),
+      ]);
     });
 
     test('catches error if creation throws', async () => {
@@ -83,16 +83,16 @@ describe('create_rules_bulk', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.ok).toHaveBeenCalledWith({
-        body: [
-          expect.objectContaining({
-            error: {
-              message: 'Test error',
-              status_code: 500,
-            },
-          }),
-        ],
-      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          error: {
+            message: 'Test error',
+            status_code: 500,
+          },
+        }),
+      ]);
     });
 
     it('returns an error object if duplicate rule_ids found in request payload', async () => {
@@ -103,16 +103,15 @@ describe('create_rules_bulk', () => {
       });
       const response = await server.inject(request, context);
 
-      expect(response.ok).toHaveBeenCalledWith({
-        body: [
-          expect.objectContaining({
-            error: {
-              message: expect.stringContaining('already exists'),
-              status_code: 409,
-            },
-          }),
-        ],
-      });
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          error: {
+            message: expect.stringContaining('already exists'),
+            status_code: 409,
+          },
+        }),
+      ]);
     });
   });
 
