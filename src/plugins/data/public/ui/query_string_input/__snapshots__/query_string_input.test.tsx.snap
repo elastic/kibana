@@ -197,6 +197,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
+                "state$": Observable {
+                  "_isScalar": false,
+                },
                 "timefilter": Object {
                   "history": Object {
                     "add": [MockFunction],
@@ -215,8 +218,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                     "getEnabledUpdated$": [MockFunction],
                     "getFetch$": [MockFunction],
                     "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalDefaults": [MockFunction],
                     "getRefreshIntervalUpdate$": [MockFunction],
                     "getTime": [MockFunction],
+                    "getTimeDefaults": [MockFunction],
                     "getTimeUpdate$": [MockFunction],
                     "isAutoRefreshSelectorEnabled": [MockFunction],
                     "isTimeRangeSelectorEnabled": [MockFunction],
@@ -855,6 +860,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
+                        "state$": Observable {
+                          "_isScalar": false,
+                        },
                         "timefilter": Object {
                           "history": Object {
                             "add": [MockFunction],
@@ -873,8 +881,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                             "getEnabledUpdated$": [MockFunction],
                             "getFetch$": [MockFunction],
                             "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalDefaults": [MockFunction],
                             "getRefreshIntervalUpdate$": [MockFunction],
                             "getTime": [MockFunction],
+                            "getTimeDefaults": [MockFunction],
                             "getTimeUpdate$": [MockFunction],
                             "isAutoRefreshSelectorEnabled": [MockFunction],
                             "isTimeRangeSelectorEnabled": [MockFunction],
@@ -1495,6 +1505,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
+                "state$": Observable {
+                  "_isScalar": false,
+                },
                 "timefilter": Object {
                   "history": Object {
                     "add": [MockFunction],
@@ -1513,8 +1526,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                     "getEnabledUpdated$": [MockFunction],
                     "getFetch$": [MockFunction],
                     "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalDefaults": [MockFunction],
                     "getRefreshIntervalUpdate$": [MockFunction],
                     "getTime": [MockFunction],
+                    "getTimeDefaults": [MockFunction],
                     "getTimeUpdate$": [MockFunction],
                     "isAutoRefreshSelectorEnabled": [MockFunction],
                     "isTimeRangeSelectorEnabled": [MockFunction],
@@ -2150,6 +2165,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
+                        "state$": Observable {
+                          "_isScalar": false,
+                        },
                         "timefilter": Object {
                           "history": Object {
                             "add": [MockFunction],
@@ -2168,8 +2186,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                             "getEnabledUpdated$": [MockFunction],
                             "getFetch$": [MockFunction],
                             "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalDefaults": [MockFunction],
                             "getRefreshIntervalUpdate$": [MockFunction],
                             "getTime": [MockFunction],
+                            "getTimeDefaults": [MockFunction],
                             "getTimeUpdate$": [MockFunction],
                             "isAutoRefreshSelectorEnabled": [MockFunction],
                             "isTimeRangeSelectorEnabled": [MockFunction],
@@ -2790,6 +2810,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
+                "state$": Observable {
+                  "_isScalar": false,
+                },
                 "timefilter": Object {
                   "history": Object {
                     "add": [MockFunction],
@@ -2808,8 +2831,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                     "getEnabledUpdated$": [MockFunction],
                     "getFetch$": [MockFunction],
                     "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalDefaults": [MockFunction],
                     "getRefreshIntervalUpdate$": [MockFunction],
                     "getTime": [MockFunction],
+                    "getTimeDefaults": [MockFunction],
                     "getTimeUpdate$": [MockFunction],
                     "isAutoRefreshSelectorEnabled": [MockFunction],
                     "isTimeRangeSelectorEnabled": [MockFunction],
@@ -3445,6 +3470,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
+                        "state$": Observable {
+                          "_isScalar": false,
+                        },
                         "timefilter": Object {
                           "history": Object {
                             "add": [MockFunction],
@@ -3463,8 +3491,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                             "getEnabledUpdated$": [MockFunction],
                             "getFetch$": [MockFunction],
                             "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalDefaults": [MockFunction],
                             "getRefreshIntervalUpdate$": [MockFunction],
                             "getTime": [MockFunction],
+                            "getTimeDefaults": [MockFunction],
                             "getTimeUpdate$": [MockFunction],
                             "isAutoRefreshSelectorEnabled": [MockFunction],
                             "isTimeRangeSelectorEnabled": [MockFunction],

@@ -17,7 +17,6 @@ export { StateManagementConfigProvider } from 'ui/state_management/config_provid
 export { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
-export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
