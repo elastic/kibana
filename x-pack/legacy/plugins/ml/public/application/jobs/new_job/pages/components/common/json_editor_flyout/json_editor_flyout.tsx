@@ -18,8 +18,12 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
+import {
+  collapseLiteralStrings,
+  expandLiteralStrings,
+} from '../../../../../../../../shared_imports';
 import { Datafeed } from '../../../../common/job_creator/configs';
-import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
+import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
 
@@ -68,10 +72,11 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
   function onDatafeedChange(json: string) {
     setDatafeedConfigString(json);
-    let valid = isValidJson(json);
+    const jsonValue = collapseLiteralStrings(json);
+    let valid = isValidJson(jsonValue);
     if (valid) {
       // ensure that the user hasn't altered the indices list in the json.
-      const { indices }: Datafeed = JSON.parse(json);
+      const { indices }: Datafeed = JSON.parse(jsonValue);
       const originalIndices = jobCreator.indices.sort();
       valid =
         originalIndices.length === indices.length &&
@@ -82,7 +87,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
   function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
-    const datafeedConfig = JSON.parse(datafeedConfigString);
+    const datafeedConfig = JSON.parse(collapseLiteralStrings(datafeedConfigString));
     jobCreator.cloneFromExistingJob(jobConfig, datafeedConfig);
     jobCreatorUpdate();
     setShowJsonFlyout(false);
@@ -182,6 +187,7 @@ const Contents: FC<{
   editJson: boolean;
   onChange(s: string): void;
 }> = ({ title, value, editJson, onChange }) => {
+  const formattedValue = expandLiteralStrings(value);
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -189,8 +195,9 @@ const Contents: FC<{
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor
-        value={value}
+        value={formattedValue}
         height={EDITOR_HEIGHT}
+        mode={ML_EDITOR_MODE.XJSON}
         readOnly={editJson === false}
         onChange={onChange}
       />

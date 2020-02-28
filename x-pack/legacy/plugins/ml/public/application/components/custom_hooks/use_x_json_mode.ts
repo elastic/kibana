@@ -9,7 +9,7 @@ import {
   collapseLiteralStrings,
   expandLiteralStrings,
   XJsonMode,
-} from '../../../../../../../shared_imports';
+} from '../../../../shared_imports';
 
 export const xJsonMode = new XJsonMode();
 

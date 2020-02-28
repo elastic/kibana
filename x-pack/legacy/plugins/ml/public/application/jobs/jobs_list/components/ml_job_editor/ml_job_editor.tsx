@@ -4,23 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiCodeEditor } from '@elastic/eui';
+import { xJsonMode } from '../../../../components/custom_hooks';
 
-export const EDITOR_MODE = { TEXT: 'text', JSON: 'json' };
+export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: xJsonMode };
 
-export function MLJobEditor({
+interface MlJobEditorProps {
+  value: string;
+  height?: string;
+  width?: string;
+  mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
+  readOnly?: boolean;
+  syntaxChecking?: boolean;
+  theme?: string;
+  onChange?: Function;
+}
+export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
   height = '500px',
   width = '100%',
-  mode = EDITOR_MODE.JSON,
+  mode = ML_EDITOR_MODE.JSON,
   readOnly = false,
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
-}) {
+}) => {
   return (
     <EuiCodeEditor
       value={value}
@@ -40,14 +50,4 @@ export function MLJobEditor({
       onChange={onChange}
     />
   );
-}
-MLJobEditor.propTypes = {
-  value: PropTypes.string.isRequired,
-  height: PropTypes.string,
-  width: PropTypes.string,
-  mode: PropTypes.string,
-  readOnly: PropTypes.bool,
-  syntaxChecking: PropTypes.bool,
-  theme: PropTypes.string,
-  onChange: PropTypes.func,
 };

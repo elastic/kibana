@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { collapseLiteralStrings } from '../../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { xJsonMode } from './use_x_json_mode';
+import { xJsonMode } from '../../../../../components/custom_hooks';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const {
