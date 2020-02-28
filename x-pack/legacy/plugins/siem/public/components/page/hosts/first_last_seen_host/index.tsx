@@ -6,7 +6,6 @@
 
 import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { ApolloConsumer } from 'react-apollo';
 
 import { useFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -19,44 +18,37 @@ export enum FirstLastSeenHostType {
 
 export const FirstLastSeenHost = React.memo<{ hostname: string; type: FirstLastSeenHostType }>(
   ({ hostname, type }) => {
+    const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
+      hostname,
+      'default'
+    );
+    if (errorMessage != null) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={errorMessage}
+          data-test-subj="firstLastSeenErrorToolTip"
+          aria-label={`firstLastSeenError-${type}`}
+          id={`firstLastSeenError-${hostname}-${type}`}
+        >
+          <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
+        </EuiToolTip>
+      );
+    }
+    const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
     return (
-      <ApolloConsumer>
-        {client => {
-          const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
-            hostname,
-            'default',
-            client
-          );
-          if (errorMessage != null) {
-            return (
-              <EuiToolTip
-                position="top"
-                content={errorMessage}
-                data-test-subj="firstLastSeenErrorToolTip"
-                aria-label={`firstLastSeenError-${type}`}
-                id={`firstLastSeenError-${hostname}-${type}`}
-              >
-                <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
-              </EuiToolTip>
-            );
-          }
-          const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
-          return (
-            <>
-              {loading && <EuiLoadingSpinner size="m" />}
-              {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
-                ? valueSeen
-                : !loading &&
-                  valueSeen != null && (
-                    <EuiText size="s">
-                      <FormattedRelativePreferenceDate value={`${valueSeen}`} />
-                    </EuiText>
-                  )}
-              {!loading && valueSeen == null && getEmptyTagValue()}
-            </>
-          );
-        }}
-      </ApolloConsumer>
+      <>
+        {loading && <EuiLoadingSpinner size="m" />}
+        {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+          ? valueSeen
+          : !loading &&
+            valueSeen != null && (
+              <EuiText size="s">
+                <FormattedRelativePreferenceDate value={`${valueSeen}`} />
+              </EuiText>
+            )}
+        {!loading && valueSeen == null && getEmptyTagValue()}
+      </>
     );
   }
 );

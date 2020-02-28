@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { PersistedState } from '../../../ui/public/persisted_state';
 export {
   AggConfigs,
   IAggConfig,
@@ -25,4 +24,4 @@ export {
   isDateHistogramBucketAggConfig,
   setBounds,
 } from '../../data/public';
-export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';
+export { createSavedSearchesLoader } from '../../../../plugins/discover/public';
