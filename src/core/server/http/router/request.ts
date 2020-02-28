@@ -191,7 +191,7 @@ export class KibanaRequest<
     const options = ({
       authRequired: request.route.settings.auth !== false,
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.app as KibanaRouteState)?.xsrfRequired || true,
+      xsrfRequired: (request.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
       body: ['get', 'options'].includes(method)
         ? undefined
