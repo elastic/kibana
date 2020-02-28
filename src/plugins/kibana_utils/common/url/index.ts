@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { encodeUriQuery, encodeQuery } from './encode_uri_query';
+import { encodeUriQuery, encodeQuery, makeUrlFromQuery } from './encode_uri_query';
 
 export const url = {
   encodeQuery,
   encodeUriQuery,
+  makeUrlFromQuery,
 };

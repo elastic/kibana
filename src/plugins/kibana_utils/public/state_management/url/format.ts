@@ -18,7 +18,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify, ParsedUrlQuery } from 'querystring';
+import { ParsedUrlQuery } from 'querystring';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '../../../common';
 
@@ -29,7 +29,7 @@ export function replaceUrlHashQuery(
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);
   const newQuery = queryReplacer(hash?.query || {});
-  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery));
+  const searchQueryString = urlUtils.makeUrlFromQuery(newQuery);
 
   if ((!hash || !hash.search) && !searchQueryString) return rawUrl; // nothing to change. return original url
   return formatUrl({

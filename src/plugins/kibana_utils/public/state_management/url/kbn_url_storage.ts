@@ -18,7 +18,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify } from 'querystring';
+// import { stringify } from 'querystring';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
@@ -244,11 +244,11 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
 
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
-    search: stringify(urlUtils.encodeQuery(parsedUrl.query)),
+    search: urlUtils.makeUrlFromQuery(parsedUrl.query),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
-          search: stringify(urlUtils.encodeQuery(parsedHash.query)),
+          search: urlUtils.makeUrlFromQuery(parsedHash.query),
         })
       : parsedUrl.hash,
   });

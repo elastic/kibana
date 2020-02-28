@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ParsedUrlQuery } from 'querystring';
+import { stringify, ParsedUrlQuery } from 'querystring';
 import { transform } from 'lodash';
 
 /**
@@ -55,3 +55,6 @@ export const encodeQuery = (
       );
     }
   });
+
+export const makeUrlFromQuery = (query: ParsedUrlQuery | {}) =>
+  stringify(query, undefined, undefined, { encodeURIComponent: encodeUriQuery });

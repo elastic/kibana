@@ -67,4 +67,27 @@ describe('encodeQuery', () => {
       g: 'null',
     });
   });
+
+  test('encodeQuery without encoding', () => {
+    expect(
+      encodeQuery(
+        {
+          a: 'asdf1234asdf',
+          b: "-_.!~*'() -_.!~*'()",
+          c: ':@$, :@$,',
+          d: "&;=+# &;=+#'",
+          f: ' ',
+          g: 'null',
+        },
+        v => v
+      )
+    ).toEqual({
+      a: 'asdf1234asdf',
+      b: "-_.!~*'() -_.!~*'()",
+      c: ':@$, :@$,',
+      d: "&;=+# &;=+#'",
+      f: ' ',
+      g: 'null',
+    });
+  });
 });
