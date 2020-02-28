@@ -12,7 +12,6 @@ export const customElementType: SavedObjectsType = {
   hidden: false,
   namespaceAgnostic: false,
   mappings: {
-    // @ts-ignore
     dynamic: false,
     properties: {
       name: {
