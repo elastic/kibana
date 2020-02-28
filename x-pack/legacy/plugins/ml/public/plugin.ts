@@ -19,6 +19,7 @@ export class MlPlugin implements Plugin<Setup, Start> {
           element: params.element,
           appBasePath: params.appBasePath,
           onAppLeave: params.onAppLeave,
+          history: params.history,
           data,
           __LEGACY,
           security,
