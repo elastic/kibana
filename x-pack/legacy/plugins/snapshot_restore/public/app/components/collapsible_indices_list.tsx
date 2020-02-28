@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 interface Props {
-  indices: string[] | undefined;
+  indices: string[] | string | undefined;
 }
 
 import { useAppDependencies } from '../index';
@@ -18,21 +18,29 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
+  const displayIndices = indices
+    ? typeof indices === 'string'
+      ? indices.split(',')
+      : indices
+    : undefined;
+  const hiddenIndicesCount =
+    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   return (
     <>
-      {indices ? (
+      {displayIndices ? (
         <>
           <EuiText>
             <ul>
-              {(isShowingFullIndicesList ? indices : [...indices].splice(0, 10)).map(index => (
-                <li key={index}>
-                  <EuiTitle size="xs">
-                    <span>{index}</span>
-                  </EuiTitle>
-                </li>
-              ))}
+              {(isShowingFullIndicesList ? displayIndices : [...displayIndices].splice(0, 10)).map(
+                index => (
+                  <li key={index}>
+                    <EuiTitle size="xs">
+                      <span>{index}</span>
+                    </EuiTitle>
+                  </li>
+                )
+              )}
             </ul>
           </EuiText>
           {hiddenIndicesCount ? (
