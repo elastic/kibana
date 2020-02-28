@@ -43,7 +43,7 @@ export {
 export { AggParamType } from './param_types/agg';
 export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
 export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
-export { isDateHistogramBucketAggConfig, setBounds } from './buckets/date_histogram';
+export { isDateHistogramBucketAggConfig } from './buckets/date_histogram';
 export { termsAggFilter } from './buckets/terms';
 export { isType, isStringType } from './buckets/migrate_include_exclude_format';
 export { CidrMask } from './buckets/lib/cidr_mask';

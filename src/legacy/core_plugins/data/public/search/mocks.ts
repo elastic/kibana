@@ -78,7 +78,6 @@ export const searchStartMock = (): MockedKeys<SearchStart> => ({
       FieldParamType: jest.fn(),
       MetricAggType: jest.fn(),
       parentPipelineAggHelper: jest.fn() as any,
-      setBounds: jest.fn(),
       siblingPipelineAggHelper: jest.fn() as any,
     },
   },

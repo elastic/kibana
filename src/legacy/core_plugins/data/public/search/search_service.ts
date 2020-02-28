@@ -31,7 +31,6 @@ import {
   FieldParamType,
   MetricAggType,
   aggTypeFieldFilters,
-  setBounds,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
@@ -47,7 +46,6 @@ interface AggsStartLegacy {
   FieldParamType: typeof FieldParamType;
   MetricAggType: typeof MetricAggType;
   parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  setBounds: typeof setBounds;
   siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
@@ -108,7 +106,6 @@ export class SearchService {
           FieldParamType,
           MetricAggType,
           parentPipelineAggHelper, // TODO make static
-          setBounds, // TODO make static
           siblingPipelineAggHelper, // TODO make static
         },
       },

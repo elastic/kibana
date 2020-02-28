@@ -31,7 +31,7 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, TimefilterContract } from '../../../../../../../plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getUiSettings } from '../../../../../../../plugins/data/public/services';
 
@@ -40,8 +40,14 @@ const tzOffset = moment().format('Z');
 
 const getInterval = (agg: IBucketAggConfig): string => _.get(agg, ['params', 'interval']);
 
-export const setBounds = (agg: IBucketDateHistogramAggConfig, force?: boolean) => {
-  const { timefilter } = getQueryService().timefilter;
+const setAggTimeRangeBounds = (
+  agg: IBucketDateHistogramAggConfig,
+  opts: {
+    timefilter: TimefilterContract;
+    force?: boolean;
+  }
+) => {
+  const { force, timefilter } = opts;
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
@@ -91,7 +97,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
   },
   createFilter: createFilterDateHistogram,
   decorateAggConfig() {
+    const { timefilter } = getQueryService().timefilter;
     let buckets: any;
+
     return {
       buckets: {
         configurable: true,
@@ -100,7 +108,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
 
           buckets = new TimeBuckets();
           buckets.setInterval(getInterval(this));
-          setBounds(this);
+          setAggTimeRangeBounds(this, { timefilter });
 
           return buckets;
         },
@@ -119,11 +127,16 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         return agg.getIndexPattern().timeFieldName;
       },
       onChange(agg: IBucketDateHistogramAggConfig) {
+        const { timefilter } = getQueryService().timefilter;
+
         if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
           delete agg.params.interval;
         }
 
-        setBounds(agg, true);
+        setAggTimeRangeBounds(agg, {
+          force: true,
+          timefilter,
+        });
       },
     },
     {
@@ -162,10 +175,18 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       default: 'auto',
       options: intervalOptions,
       modifyAggConfigOnSearchRequestStart(agg: IBucketDateHistogramAggConfig) {
-        setBounds(agg, true);
+        const { timefilter } = getQueryService().timefilter;
+        setAggTimeRangeBounds(agg, {
+          force: true,
+          timefilter,
+        });
       },
       write(agg, output, aggs) {
-        setBounds(agg, true);
+        const { timefilter } = getQueryService().timefilter;
+        setAggTimeRangeBounds(agg, {
+          force: true,
+          timefilter,
+        });
         agg.buckets.setInterval(getInterval(agg));
         const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
