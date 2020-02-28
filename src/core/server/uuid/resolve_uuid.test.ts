@@ -172,7 +172,7 @@ describe('resolveInstanceUuid', () => {
         mockReadFile({ error: fileNotFoundError });
         const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: false });
         expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
-        expect(writeFile).not.toHaveBeenCalledWith();
+        expect(writeFile).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
@@ -279,7 +279,7 @@ describe('resolveInstanceUuid', () => {
         mockReadFile({ error: fileNotFoundError });
         const uuid = await resolveInstanceUuid({ configService, logger, syncToFile: false });
         expect(uuid).toEqual('NEW_UUID');
-        expect(writeFile).not.toHaveBeenCalledWith();
+        expect(writeFile).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
