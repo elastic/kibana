@@ -55,9 +55,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     security: deps.security,
   });
 
-  const licenseSubscription = deps.licensing.license$.subscribe(async license => {
-    setLicenseCache(license);
-  });
+  const licenseSubscription = deps.licensing.license$.subscribe(setLicenseCache);
 
   deps.onAppLeave(actions => {
     licenseSubscription.unsubscribe();

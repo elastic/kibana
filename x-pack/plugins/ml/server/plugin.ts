@@ -43,7 +43,6 @@ declare module 'kibana/server' {
 }
 
 export class MlServerPlugin {
-  private readonly pluginId: string = PLUGIN_ID;
   private log: Logger;
   private version: string;
 
@@ -131,7 +130,7 @@ export class MlServerPlugin {
     plugins.licensing.license$.subscribe(async license => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
       // @ts-ignore isAvailable is not read
-      const { isAvailable, isEnabled } = license.getFeature(this.pluginId);
+      const { isAvailable, isEnabled } = license.getFeature(PLUGIN_ID);
 
       this.licenseCheckResults = {
         isActive: license.isActive,

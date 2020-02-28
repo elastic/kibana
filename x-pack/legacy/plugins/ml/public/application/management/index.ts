@@ -18,29 +18,31 @@ import { metadata } from 'ui/metadata';
 // @ts-ignore No declaration file for module
 import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { JOBS_LIST_PATH } from './management_urls';
-import { VALID_FULL_LICENSE_MODES } from '../../../common/constants/license';
 import { setDependencyCache } from '../util/dependency_cache';
 import './jobs_list';
-import { LicensingPluginSetup, ILicense } from '../../../../../../plugins/licensing/public';
+import {
+  LicensingPluginSetup,
+  ILicense,
+  LICENSE_CHECK_STATE,
+} from '../../../../../../plugins/licensing/public';
+import { PLUGIN_ID } from '../../../common/constants/app';
 
 type PluginsSetupExtended = typeof npSetup.plugins & {
   // adds licensing which isn't in the PluginsSetup interface, but does exist
   licensing: LicensingPluginSetup;
 };
 
+const MINIMUM_FULL_LICENSE = 'platinum';
+
 const plugins = npSetup.plugins as PluginsSetupExtended;
-const licencingSubscription = plugins.licensing.license$.subscribe(async license => {
+const licencingSubscription = plugins.licensing.license$.subscribe(license => {
   initManagementSection(license);
   // unsubscribe, we only want to register the plugin once.
   licencingSubscription.unsubscribe();
 });
 
-export function initManagementSection(license: ILicense) {
-  if (
-    license.isActive &&
-    license.type !== undefined &&
-    VALID_FULL_LICENSE_MODES.includes(license.type)
-  ) {
+function initManagementSection(license: ILicense) {
+  if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
     const legacyBasePath = {
       prepend: chrome.addBasePath,
       get: chrome.getBasePath,
