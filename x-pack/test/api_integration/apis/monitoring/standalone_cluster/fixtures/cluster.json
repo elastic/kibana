@@ -24,20 +24,7 @@
       "types": []
     }
   },
-  "logstash": {
-    "avg_memory": 0,
-    "avg_memory_used": 0,
-    "events_in_total": 0,
-    "events_out_total": 0,
-    "max_uptime": 0,
-    "node_count": 0,
-    "pipeline_count": 0,
-    "queue_types": {
-      "memory": 0,
-      "persisted": 0
-    },
-    "versions": []
-  },
+  "logstash": {},
   "kibana": {},
   "beats": {
     "totalEvents": 348,
