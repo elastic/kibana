@@ -42,7 +42,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
     <I18nProvider>
       <BrowserRouter basename={basename}>
         <RouteCapture>
-          <HeaderNavigation />
+          <HeaderNavigation basename={basename} />
           <Switch>
             <Route
               exact

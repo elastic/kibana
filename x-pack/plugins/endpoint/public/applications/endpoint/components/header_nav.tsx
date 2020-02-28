@@ -54,7 +54,7 @@ const Tabs = styled(EuiTabs)`
   }
 `;
 
-export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
+export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = React.memo(({ basename }) => {
   const history = useHistory();
   const location = useLocation();
 
@@ -65,7 +65,7 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
           data-testid={`${tab.id}EndpointTab`}
           data-test-subj={`${tab.id}EndpointTab`}
           key={index}
-          href={`/app/endpoint${tab.href}`}
+          href={`${basename}${tab.href}`}
           onClick={(event: MouseEvent) => {
             event.preventDefault();
             history.push(tab.href);
@@ -73,7 +73,6 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
           isSelected={tab.href === location.pathname}
         >
                     {tab.name}
-                  
         </EuiTab>
       );
     });
