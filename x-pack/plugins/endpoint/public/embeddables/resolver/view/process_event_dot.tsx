@@ -8,7 +8,43 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
-import { SymbolIds, NamedColors } from './defs';
+import { SymbolIds, NamedColors, PaintServerIds } from './defs';
+import { i18n } from '@kbn/i18n';
+
+const nodeAssets = {
+  runningProcessCube: {
+    cubeSymbol: `#${SymbolIds.runningProcessCube}`,
+    labelFill: `url(#${PaintServerIds.runningProcess})`,
+    descriptionFill: NamedColors.activeNoWarning,
+    labelText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
+      defaultMessage: 'Running Process',
+    }),
+  },
+  runningTriggerCube: {
+    cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
+    labelFill: `url(#${PaintServerIds.runningTrigger})`,
+    descriptionFill: NamedColors.activeWarning,
+    labelText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
+      defaultMessage: 'Running Process',
+    }),
+  },
+  terminatedProcessCube: {
+    cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
+    labelFill: NamedColors.fullLabelBackground,
+    descriptionFill: NamedColors.inertDescription,
+    labelText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
+      defaultMessage: 'Terminated Process',
+    }),
+  },
+  terminatedTriggerCube: {
+    cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
+    labelFill: NamedColors.fullLabelBackground,
+    descriptionFill: NamedColors.inertDescription,
+    labelText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
+      defaultMessage: 'Terminated Process',
+    }),
+  }
+}
 
 /**
  * A placeholder view for a process node.
@@ -20,7 +56,6 @@ export const ProcessEventDot = styled(
       position,
       event,
       projectionMatrix,
-      bgColor,
     }: {
       /**
        * A `className` string provided by `styled`
@@ -38,11 +73,6 @@ export const ProcessEventDot = styled(
        * projectionMatrix which can be used to convert `position` to screen coordinates.
        */
       projectionMatrix: Matrix3;
-      /**
-       * A color that the Resolver is using for the background, to
-       * create a "mask" effect for markers on EdgeLines
-       */
-      bgColor?: string;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -56,7 +86,9 @@ export const ProcessEventDot = styled(
         top: `${top}px`,
         width: `${360 * magFactorX}px`,
         height: `${120 * magFactorX}px`,
-        transform: `translateX(-${.172413 * 360 * magFactorX + 10}px) translateY(-${.73684 * 120 * magFactorX}px)`,
+        transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
+          120 *
+          magFactorX}px)`,
       };
 
       const markerBaseSize = 15;
@@ -65,17 +97,28 @@ export const ProcessEventDot = styled(
       };
 
       const markerPositionOffset = (magFactor: number) => {
-        return -markerBaseSize/2;
+        return -markerBaseSize / 2;
       };
 
       const labelYOffset = (magFactor: number) => {
-        return markerPositionOffset(magFactorX) + .25 * markerSize(magFactorX) - .5;
+        return markerPositionOffset(magFactorX) + 0.25 * markerSize(magFactorX) - 0.5;
       };
 
       const labelYHeight = (magFactor: number) => {
-        return markerSize(magFactorX) / 1.76470
+        return markerSize(magFactorX) / 1.7647;
       };
 
+      const nodeType = ((nodeData: any)=>{ 
+        if(nodeData.event_subtype_full === 'already_running'){
+          return typeof nodeData.attack_references === 'undefined' ? 'runningProcessCube' : 'runningTriggerCube'
+        }
+        else {
+          return typeof nodeData.attack_references === 'undefined' ? 'terminatedProcessCube' : 'terminatedTriggerCube'
+        }
+       })(event?.data_buffer)
+
+      const { cubeSymbol, labelFill, descriptionFill, labelText } = nodeAssets[nodeType]
+      
       return (
         <svg
           className={className}
@@ -87,7 +130,7 @@ export const ProcessEventDot = styled(
         >
           <use
             role="presentation"
-            xlinkHref={`#${SymbolIds.terminatedTriggerCube}`}
+            xlinkHref={cubeSymbol}
             x={markerPositionOffset(magFactorX)}
             y={markerPositionOffset(magFactorX)}
             width={markerSize(magFactorX)}
@@ -97,14 +140,15 @@ export const ProcessEventDot = styled(
           <use
             role="presentation"
             xlinkHref={`#${SymbolIds.processNode}`}
-            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) - .5}
+            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) - 0.5}
             y={labelYOffset(magFactorX)}
-            width={(markerSize(magFactorX) / 1.76470) * 5}
-            height={markerSize(magFactorX) / 1.76470}
+            width={(markerSize(magFactorX) / 1.7647) * 5}
+            height={markerSize(magFactorX) / 1.7647}
             opacity="1"
+            fill={labelFill}
           />
           <text
-            x={markerPositionOffset(magFactorX) + .7 * markerSize(magFactorX) + 50/2}
+            x={markerPositionOffset(magFactorX) + 0.7 * markerSize(magFactorX) + 50 / 2}
             y={labelYOffset(magFactorX) + labelYHeight(magFactorX) / 2}
             textAnchor="middle"
             dominantBaseline="middle"
@@ -113,25 +157,23 @@ export const ProcessEventDot = styled(
             fill={NamedColors.empty}
             paintOrder="stroke"
             tabIndex={-1}
-            style={{ letterSpacing: '-0.02px'}}
+            style={{ letterSpacing: '-0.02px' }}
           >
-            {event.data_buffer.process_name}
-          </text> 
+            {event?.data_buffer?.process_name}
+          </text>
           <text
-            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) + 13}
+            x={markerPositionOffset(magFactorX) + markerSize(magFactorX)}
             y={labelYOffset(magFactorX) - 1}
-            textAnchor="middle"
+            textAnchor="start"
             dominantBaseline="middle"
             fontSize="2.67"
-            fill={NamedColors.activeNoWarning}
+            fill={descriptionFill}
             paintOrder="stroke"
             fontWeight="bold"
-            style={{ textTransform: 'uppercase', letterSpacing: '-0.01px'}}
+            style={{ textTransform: 'uppercase', letterSpacing: '-0.01px' }}
           >
-            Running Process
+            {labelText}
           </text>
-            
-         
         </svg>
       );
     }
@@ -139,7 +181,7 @@ export const ProcessEventDot = styled(
 )`
   position: absolute;
   display: block;
-  
+
   text-align: left;
   font-size: 10px;
   user-select: none;
@@ -148,5 +190,5 @@ export const ProcessEventDot = styled(
   padding: 4px;
   white-space: nowrap;
   contain: strict;
-  will-change: width, height;
+  will-change: left, top, width, height;
 `;
