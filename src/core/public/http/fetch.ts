@@ -133,7 +133,7 @@ export class Fetch {
     try {
       response = await window.fetch(request);
     } catch (err) {
-      throw new HttpFetchError(err.message, request);
+      throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -153,11 +153,11 @@ export class Fetch {
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, request, response, body);
+      throw new HttpFetchError(err.message, err.name ?? 'Error', request, response, body);
     }
 
     if (!response.ok) {
-      throw new HttpFetchError(response.statusText, request, response, body);
+      throw new HttpFetchError(response.statusText, 'Error', request, response, body);
     }
 
     return new HttpResponse({ request, response, body });

@@ -19,11 +19,16 @@
 
 import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { IFieldType, indexPatterns, esFilters } from '../index';
 
-export function registerValueSuggestionsRoute(router: IRouter) {
+export function registerValueSuggestionsRoute(
+  router: IRouter,
+  config$: Observable<SharedGlobalConfig>
+) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -45,14 +50,14 @@ export function registerValueSuggestionsRoute(router: IRouter) {
       },
     },
     async (context, request, response) => {
-      const { client: uiSettings } = context.core.uiSettings;
+      const config = await config$.pipe(first()).toPromise();
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
       const { dataClient } = context.core.elasticsearch;
 
       const autocompleteSearchOptions = {
-        timeout: await uiSettings.get<number>('kibana.autocompleteTimeout'),
-        terminate_after: await uiSettings.get<number>('kibana.autocompleteTerminateAfter'),
+        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
+        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
       };
 
       const indexPattern = await indexPatterns.findIndexPatternById(
