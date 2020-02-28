@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-
-// @ts-ignore
-import { percentilesMetricAgg } from './percentiles';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const medianTitle = i18n.translate('data.search.aggs.metrics.medianTitle', {
