@@ -4,6 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ACTION_GROUP_IDS = {
-  DOWN_MONITOR: 'down-monitor',
+interface ActionGroupDefinition {
+  id: string;
+  name: string;
+}
+
+type ActionGroupDefinitions = Record<string, ActionGroupDefinition>;
+
+export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
+  DOWN_MONITOR: {
+    id: 'down-monitor',
+    name: 'Uptime Down Monitor',
+  },
 };
