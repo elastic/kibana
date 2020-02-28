@@ -53,7 +53,7 @@ export class TestTracker {
 
   getTracked(suite: object): TrackedSuiteMetadata {
     if (!this.trackedSuites.has(suite)) {
-      this.trackedSuites.set(suite, {} as TrackedSuiteMetadata);
+      this.trackedSuites.set(suite, { success: true } as TrackedSuiteMetadata);
     }
     return this.trackedSuites.get(suite) || ({} as TrackedSuiteMetadata);
   }
@@ -71,13 +71,24 @@ export class TestTracker {
       tracked.success = true;
     });
 
+    const handleFailure = (error: any, test: any) => {
+      let parent = test.parent;
+      for (let i = 0; i < 100 && parent; i++) {
+        if (this.trackedSuites.has(parent)) {
+          this.getTracked(parent).success = false;
+        }
+        parent = parent.parent;
+      }
+    };
+
+    lifecycle.testFailure.add(handleFailure);
+    lifecycle.testHookFailure.add(handleFailure);
+
     lifecycle.afterTestSuite.add(suite => {
       const tracked = this.getTracked(suite);
       tracked.endTime = new Date();
       tracked.duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
       tracked.duration = Math.floor(tracked.duration / 1000);
-
-      this.setSuccessStatus(suite);
 
       const config = suite.ftrConfig.path.replace(REPO_ROOT + sep, '');
       const file = suite.file.replace(REPO_ROOT + sep, '');
@@ -106,21 +117,5 @@ export class TestTracker {
       flattened.sort((a, b) => b.duration - a.duration);
       fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
     });
-  }
-
-  setSuccessStatus(suite: any) {
-    const tracked = this.getTracked(suite);
-
-    if (suite.tests && suite.tests.length) {
-      tracked.success = !suite.tests.find((t: any) => t.state === 'failed');
-
-      if (!tracked.success) {
-        return;
-      }
-    }
-
-    if (suite.suites && suite.suites.length) {
-      tracked.success = !suite.suites.find((s: any) => this.getTracked(s).success === false);
-    }
   }
 }
