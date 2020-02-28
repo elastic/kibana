@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
 import { textService } from '../text';
 import {
   linkToHome,
@@ -13,8 +14,9 @@ import {
   linkToRestoreStatus,
 } from './';
 
+type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
+
 class BreadcrumbService {
-  private chrome: any;
   private breadcrumbs: {
     [key: string]: Array<{
       text: string;
@@ -33,19 +35,19 @@ class BreadcrumbService {
     policyAdd: [],
     policyEdit: [],
   };
+  private setBreadcrumbsHandler?: SetBreadcrumbs;
 
-  public init(chrome: any, managementBreadcrumb: any): void {
-    this.chrome = chrome;
-    this.breadcrumbs.management = [managementBreadcrumb];
+  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
+    this.setBreadcrumbsHandler = setBreadcrumbsHandler;
 
     // Home and sections
     this.breadcrumbs.home = [
-      ...this.breadcrumbs.management,
       {
         text: textService.breadcrumbs.home,
         href: linkToHome(),
       },
     ];
+
     this.breadcrumbs.snapshots = [
       ...this.breadcrumbs.home,
       {
@@ -53,6 +55,7 @@ class BreadcrumbService {
         href: linkToSnapshots(),
       },
     ];
+
     this.breadcrumbs.repositories = [
       ...this.breadcrumbs.home,
       {
@@ -60,6 +63,7 @@ class BreadcrumbService {
         href: linkToRepositories(),
       },
     ];
+
     this.breadcrumbs.policies = [
       ...this.breadcrumbs.home,
       {
@@ -67,6 +71,7 @@ class BreadcrumbService {
         href: linkToPolicies(),
       },
     ];
+
     this.breadcrumbs.restore_status = [
       ...this.breadcrumbs.home,
       {
@@ -82,24 +87,28 @@ class BreadcrumbService {
         text: textService.breadcrumbs.repositoryAdd,
       },
     ];
+
     this.breadcrumbs.repositoryEdit = [
       ...this.breadcrumbs.repositories,
       {
         text: textService.breadcrumbs.repositoryEdit,
       },
     ];
+
     this.breadcrumbs.restoreSnapshot = [
       ...this.breadcrumbs.snapshots,
       {
         text: textService.breadcrumbs.restoreSnapshot,
       },
     ];
+
     this.breadcrumbs.policyAdd = [
       ...this.breadcrumbs.policies,
       {
         text: textService.breadcrumbs.policyAdd,
       },
     ];
+
     this.breadcrumbs.policyEdit = [
       ...this.breadcrumbs.policies,
       {
@@ -109,6 +118,10 @@ class BreadcrumbService {
   }
 
   public setBreadcrumbs(type: string): void {
+    if (!this.setBreadcrumbsHandler) {
+      throw new Error(`BreadcrumbService#setup() must be called first!`);
+    }
+
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]]
       : [...this.breadcrumbs.home];
@@ -125,7 +138,7 @@ class BreadcrumbService {
       href: undefined,
     });
 
-    this.chrome.breadcrumbs.set(newBreadcrumbs);
+    this.setBreadcrumbsHandler(newBreadcrumbs);
   }
 }
 

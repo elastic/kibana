@@ -33,7 +33,6 @@ export class SnapshotRestoreUIPlugin {
     // Initialize services
     textService.init(i18n);
     httpService.setup(http);
-    // breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     // docTitleService.init(docTitle.change);
 
     management.sections.getSection('elasticsearch')!.registerApp({
@@ -46,7 +45,7 @@ export class SnapshotRestoreUIPlugin {
         const [core] = await getStartServices();
         const { docLinks } = core;
 
-        // breadcrumbService.setup(setBreadcrumbs);
+        breadcrumbService.setup(setBreadcrumbs);
         documentationLinksService.setup(docLinks);
 
         const appDependencies: AppDependencies = {
