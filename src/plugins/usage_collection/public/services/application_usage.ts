@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
+import { Observable } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { Reporter } from '@kbn/analytics';
 
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-  server: Legacy.Server;
-}
+/**
+ * List of appIds not to report usage from (due to legacy hacks)
+ */
+const DO_NOT_REPORT = ['kibana'];
 
-export function registerRoutes({ core, currentKibanaVersion, server }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion, server });
-  registerTelemetryUsageStatsRoutes(server);
-  registerTelemetryOptInStatsRoutes(server);
-  registerTelemetryUserHasSeenNotice(server);
+export function reportApplicationUsage(
+  currentAppId$: Observable<string | undefined>,
+  reporter: Reporter
+) {
+  currentAppId$
+    .pipe(
+      filter(appId => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
+      distinctUntilChanged()
+    )
+    .subscribe(appId => appId && reporter.reportApplicationUsage(appId));
 }
