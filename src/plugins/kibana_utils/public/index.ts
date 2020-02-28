@@ -26,6 +26,7 @@ export {
   Set,
   UiComponent,
   UiComponentInstance,
+  url,
   JsonValue,
   JsonObject,
   JsonArray,

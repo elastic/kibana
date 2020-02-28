@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterStatusButton, FilterStatusButtonProps } from '../filter_status_button';
-import { renderWithRouter } from '../../../../lib/';
+import { shallowWithRouter } from '../../../../lib/';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;
@@ -21,7 +20,7 @@ describe('FilterStatusButton', () => {
   });
 
   it('renders without errors for valid props', () => {
-    const wrapper = shallowWithIntl(renderWithRouter(<FilterStatusButton {...props} />));
+    const wrapper = shallowWithRouter(<FilterStatusButton {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

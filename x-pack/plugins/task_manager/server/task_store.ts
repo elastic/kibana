@@ -7,6 +7,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 import { omit, difference } from 'lodash';
 
@@ -252,6 +253,7 @@ export class TaskStore {
       )
     );
 
+    const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const { updated } = await this.updateByQuery(
       asUpdateByQuery({
         query: matchesClauses(
@@ -279,6 +281,7 @@ export class TaskStore {
       }
     );
 
+    if (apmTrans) apmTrans.end();
     return updated;
   }
 
@@ -425,7 +428,8 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
 }
 
 export function savedObjectToConcreteTaskInstance(
-  savedObject: Omit<SavedObject, 'references'>
+  // TODO: define saved object type
+  savedObject: Omit<SavedObject<any>, 'references'>
 ): ConcreteTaskInstance {
   return {
     ...savedObject.attributes,

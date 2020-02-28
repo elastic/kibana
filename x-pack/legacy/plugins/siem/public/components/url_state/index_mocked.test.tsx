@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { MockedProvider } from '@apollo/client/testing';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
 import { SiemPageName } from '../../pages/home/types';
@@ -46,7 +47,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         detailName: undefined,
       }).noSearch.definedQuery;
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />,
+        { wrappingComponent: MockedProvider }
       );
 
       const newUrlState = {
@@ -97,7 +99,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         detailName: undefined,
       }).noSearch.undefinedQuery;
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />,
+        { wrappingComponent: MockedProvider }
       );
       const newUrlState = {
         ...mockProps.urlState,
@@ -129,7 +132,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       }).noSearch.undefinedQuery;
 
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />,
+        { wrappingComponent: MockedProvider }
       );
       const newUrlState = {
         ...mockProps.urlState,
@@ -147,7 +151,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          '?timeline=(id:hello_timeline_id,isOpen:!t)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)',
         state: '',
       });
     });
@@ -161,7 +165,9 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .noSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />, {
+              wrappingComponent: MockedProvider,
+            });
 
             expect(mockHistory.replace.mock.calls[0][0]).toEqual({
               hash: '',
@@ -198,7 +204,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             detailName: undefined,
           }).noSearch.definedQuery;
           const wrapper = mount(
-            <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+            <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />,
+            { wrappingComponent: MockedProvider }
           );
 
           expect(

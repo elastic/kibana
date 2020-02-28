@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './explorer_charts_container_service.test.mocks';
 import _ from 'lodash';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
@@ -93,13 +92,6 @@ jest.mock('../legacy_utils', () => ({
   getChartContainerWidth() {
     return 1140;
   },
-}));
-
-jest.mock('ui/chrome', () => ({
-  getBasePath: path => path,
-  getUiSettingsClient: () => ({
-    get: () => null,
-  }),
 }));
 
 jest.mock('../explorer_dashboard_service', () => ({

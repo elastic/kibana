@@ -6,17 +6,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
+import { GetKpiHostsQueryComponent, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
-
-import { kpiHostsQuery } from './index.gql_query';
 
 const ID = 'kpiHostsQuery';
 
@@ -28,18 +25,13 @@ export interface KpiHostsArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface KpiHostsReducer {
-  isInspected: boolean;
-}
-
 export interface KpiHostsProps extends QueryTemplateProps {
-  children: (args: KpiHostsArgs) => React.ReactNode;
+  children: (args: KpiHostsArgs) => React.ReactElement;
 }
 
-const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
+const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
+    <GetKpiHostsQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -65,7 +57,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
           refetch,
         });
       }}
-    </Query>
+    </GetKpiHostsQueryComponent>
   )
 );
 
@@ -82,4 +74,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const KpiHostsQuery = connect(makeMapStateToProps)(KpiHostsComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const KpiHostsQuery = connector(KpiHostsComponentQuery);

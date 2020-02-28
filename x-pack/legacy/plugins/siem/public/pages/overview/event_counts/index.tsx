@@ -15,7 +15,7 @@ import { useKibana } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { filterNetworkData } from '../../network/navigation/alerts_query_tab_body';
 import {
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
   Query,
@@ -26,11 +26,11 @@ const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
 `;
 
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
 interface Props {
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   indexPattern: IIndexPattern;
   query?: Query;
@@ -53,17 +53,26 @@ const EventCountsComponent: React.FC<Props> = ({
 }) => {
   const kibana = useKibana();
 
+  const hostFilterQuery = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern,
+    queries: [query],
+    filters: [...filters, ...filterHostData],
+  });
+
+  const networkFilterQuery = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern,
+    queries: [query],
+    filters: [...filters, ...filterNetworkData],
+  });
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <OverviewHost
           endDate={to}
-          filterQuery={convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters: [...filters, ...filterHostData],
-          })}
+          filterQuery={hostFilterQuery}
           startDate={from}
           setQuery={setQuery}
         />
@@ -74,12 +83,7 @@ const EventCountsComponent: React.FC<Props> = ({
       <EuiFlexItem grow={true}>
         <OverviewNetwork
           endDate={to}
-          filterQuery={convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters: [...filters, ...filterNetworkData],
-          })}
+          filterQuery={networkFilterQuery}
           startDate={from}
           setQuery={setQuery}
         />

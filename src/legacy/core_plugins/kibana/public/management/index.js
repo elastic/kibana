@@ -59,7 +59,7 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent horizontalPosition="center">
+    <EuiPageContent horizontalPosition="center" data-test-subj="managementHome">
       <I18nContext>
         <div>
           <div className="eui-textCenter">
@@ -69,7 +69,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Welcome to Stack Management {version}"
+                  defaultMessage="Kibana {version} management"
                   values={{ version }}
                 />
               </h1>

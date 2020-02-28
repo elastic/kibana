@@ -12,13 +12,13 @@ import { getPivotQuery } from '../../../../common';
 
 import { SourceIndexPreview } from './source_index_preview';
 
-jest.mock('ui/new_platform');
-
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, memo: (x: any) => x };
 });
+
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {

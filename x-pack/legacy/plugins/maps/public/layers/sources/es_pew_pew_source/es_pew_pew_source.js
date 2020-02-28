@@ -20,15 +20,12 @@ import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AggConfigs, Schemas } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { isNestedField } from '../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 const MAX_GEOTILE_LEVEL = 29;
-
-const aggSchemas = new Schemas([AbstractESAggSource.METRIC_SCHEMA_CONFIG]);
 
 export class ESPewPewSource extends AbstractESAggSource {
   static type = ES_PEW_PEW;
@@ -170,9 +167,6 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
-    const metricAggConfigs = this.createMetricAggConfigs();
-    const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
-
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       destSplit: {
@@ -199,7 +193,7 @@ export class ESPewPewSource extends AbstractESAggSource {
                   field: this._descriptor.sourceGeoField,
                 },
               },
-              ...aggConfigs.toDsl(),
+              ...this.getValueAggsDsl(indexPattern),
             },
           },
         },
@@ -229,7 +223,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
     const field = indexPattern.fields.getByName(this._descriptor.destGeoField);
-    const geoField = isNestedField(field) ? undefined : field;
+    const geoField = indexPatterns.isNestedField(field) ? undefined : field;
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {

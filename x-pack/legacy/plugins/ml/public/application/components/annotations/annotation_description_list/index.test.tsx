@@ -21,12 +21,7 @@ describe('AnnotationDescriptionList', () => {
   });
 
   test('Initialization with annotation.', () => {
-    const wrapper = shallowWithIntl(
-      <AnnotationDescriptionList.WrappedComponent
-        annotation={mockAnnotations[0]}
-        intl={null as any}
-      />
-    );
+    const wrapper = shallowWithIntl(<AnnotationDescriptionList annotation={mockAnnotations[0]} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

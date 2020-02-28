@@ -36,12 +36,12 @@ const breadcrumbs = [
 
 export const fileBasedRoute: MlRoute = {
   path: '/filedatavisualizer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', undefined, config, {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkFindFileStructurePrivilege,
@@ -49,7 +49,7 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   });
   return (
     <PageLoader context={context}>
-      <FileDataVisualizerPage kibanaConfig={config} />
+      <FileDataVisualizerPage kibanaConfig={deps.config} />
     </PageLoader>
   );
 };

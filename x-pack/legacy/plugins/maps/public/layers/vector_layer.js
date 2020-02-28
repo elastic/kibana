@@ -187,10 +187,6 @@ export class VectorLayer extends AbstractLayer {
     return await this._source.getLeftJoinFields();
   }
 
-  async getSourceName() {
-    return this._source.getDisplayName();
-  }
-
   _getJoinFields() {
     const joinFields = [];
     this.getValidJoins().forEach(join => {
@@ -272,7 +268,7 @@ export class VectorLayer extends AbstractLayer {
 
     try {
       startLoading(sourceDataId, requestToken, searchFilters);
-      const leftSourceName = await this.getSourceName();
+      const leftSourceName = await this._source.getDisplayName();
       const { propertiesMap } = await joinSource.getPropertiesMap(
         searchFilters,
         leftSourceName,
@@ -369,8 +365,10 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isRequestStillActive,
   }) {
-    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+    const dataRequestId = SOURCE_DATA_ID_ORIGIN;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
@@ -386,22 +384,25 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
+      startLoading(dataRequestId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data: sourceFeatureCollection, meta } = await this._source.getGeoJsonWithMeta(
         layerName,
         searchFilters,
-        registerCancelCallback.bind(null, requestToken)
+        registerCancelCallback.bind(null, requestToken),
+        () => {
+          return isRequestStillActive(dataRequestId, requestToken);
+        }
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, layerFeatureCollection, meta);
+      stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
         featureCollection: layerFeatureCollection,
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+        onLoadError(dataRequestId, requestToken, error.message);
       }
       return {
         refreshed: false,
@@ -560,10 +561,13 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
 
       const formatters = {};
-      const promises = fields.map(async field => {
-        const fieldName = field.getName();
-        formatters[fieldName] = await source.getFieldFormatter(fieldName);
-      });
+      const promises = fields
+        .filter(field => {
+          return field.canValueBeFormatted();
+        })
+        .map(async field => {
+          formatters[field.getName()] = await source.createFieldFormatter(field);
+        });
       await Promise.all(promises);
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);

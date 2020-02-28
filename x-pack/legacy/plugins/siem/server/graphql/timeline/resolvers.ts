@@ -4,26 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { Timeline } from '../../lib/timeline/saved_object';
-
-export type QueryTimelineResolver = AppResolverOf<QueryResolvers.GetOneTimelineResolver>;
-
-export type QueryAllTimelineResolver = AppResolverWithFields<
-  QueryResolvers.GetAllTimelineResolver,
-  'totalCount' | 'timeline'
->;
-
-export type MutationTimelineResolver = AppResolverOf<
-  MutationResolvers.PersistTimelineResolver<QueryTimelineResolver>
->;
-
-export type MutationDeleteTimelineResolver = AppResolverOf<
-  MutationResolvers.DeleteTimelineResolver
->;
-
-export type MutationFavoriteResolver = AppResolverOf<MutationResolvers.PersistFavoriteResolver>;
 
 interface TimelineResolversDeps {
   timeline: Timeline;
@@ -33,13 +15,13 @@ export const createTimelineResolvers = (
   libs: TimelineResolversDeps
 ): {
   Query: {
-    getOneTimeline: QueryTimelineResolver;
-    getAllTimeline: QueryAllTimelineResolver;
+    getOneTimeline: QueryResolvers['getOneTimeline'];
+    getAllTimeline: QueryResolvers['getAllTimeline'];
   };
   Mutation: {
-    deleteTimeline: MutationDeleteTimelineResolver;
-    persistTimeline: MutationTimelineResolver;
-    persistFavorite: MutationFavoriteResolver;
+    deleteTimeline: MutationResolvers['deleteTimeline'];
+    persistTimeline: MutationResolvers['persistTimeline'];
+    persistFavorite: MutationResolvers['persistFavorite'];
   };
 } => ({
   Query: {
