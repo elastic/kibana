@@ -127,7 +127,7 @@ export const AllCases = React.memo(() => {
           <EuiBasicTable
             columns={memoizedGetCasesColumns}
             isSelectable
-            itemId="id"
+            itemId="caseId"
             items={data.cases}
             noItemsMessage={
               <EuiEmptyPrompt
