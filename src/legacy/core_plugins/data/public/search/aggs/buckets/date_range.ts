@@ -38,11 +38,13 @@ export const dateRangeBucketAgg = new BucketAggType({
   title: dateRangeTitle,
   createFilter: createFilterDateRange,
   getKey({ from, to }): DateRangeKey {
-    return { from, to };
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const format = fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.DATE);
+    const formatter = format.getConverterFor(fieldFormats.TEXT_CONTEXT_TYPE);
+    return convertDateRangeToString({ from, to }, formatter);
   },
   getFormat(agg) {
     const fieldFormatsService = npStart.plugins.data.fieldFormats;
-
     const formatter = agg.fieldOwnFormatter(
       fieldFormats.TEXT_CONTEXT_TYPE,
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.DATE)

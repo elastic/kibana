@@ -23,9 +23,13 @@ export interface DateRangeKey {
 }
 
 export const convertDateRangeToString = (
-  { from, to }: DateRangeKey,
+  range: DateRangeKey | string,
   format: (val: any) => string
 ) => {
+  if (typeof range === 'string') {
+    return range;
+  }
+  const { from, to } = range;
   if (!from) {
     return 'Before ' + format(to);
   } else if (!to) {
