@@ -11,6 +11,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { LoginState } from './login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
+import { DisabledLoginForm, BasicLoginForm } from './components';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
@@ -21,14 +22,63 @@ const createLoginState = (options?: Partial<LoginState>) => {
 };
 
 describe('LoginPage', () => {
-  describe('disabled form states', () => {
-    it('renders as expected when secure cookies are required but not present', async () => {
+  // mock a minimal subset of the HttpSetup
+  const httpMock = {
+    get: jest.fn(),
+    addLoadingCountSource: jest.fn(),
+  } as any;
+  const resetHttpMock = () => {
+    httpMock.get.mockReset();
+    httpMock.addLoadingCountSource.mockReset();
+  };
+
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: { href: 'http://some-host/bar', protocol: 'http' },
+      writable: true,
+    });
+  });
+
+  beforeEach(() => {
+    resetHttpMock();
+  });
+
+  afterAll(() => {
+    delete (window as any).location;
+  });
+
+  describe('page', () => {
+    it('renders as expected', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState());
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
+  describe('disabled form states', () => {
+    it('renders as expected when secure connection is required but not present', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={true}
@@ -40,21 +90,16 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(coreStartMock.http.get).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.get).toHaveBeenCalledWith('/internal/security/login_state');
-
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when a connection to ES is not available', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(
-        createLoginState({ layout: 'error-es-unavailable' })
-      );
+      httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-es-unavailable' }));
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={false}
@@ -66,18 +111,16 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when xpack is not available', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(
-        createLoginState({ layout: 'error-xpack-unavailable' })
-      );
+      httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-xpack-unavailable' }));
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={false}
@@ -89,18 +132,18 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when an unknown loginState layout is provided', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(
+      httpMock.get.mockResolvedValue(
         createLoginState({ layout: 'error-asdf-asdf-unknown' as any })
       );
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={false}
@@ -112,16 +155,63 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+  });
+
+  describe('enabled form state', () => {
+    it('renders as expected', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when info message is set', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+      window.location.href = 'http://some-host/bar?msg=SESSION_EXPIRED';
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState());
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
           requiresSecureConnection={false}
@@ -131,31 +221,21 @@ describe('LoginPage', () => {
       await act(async () => {
         await nextTick();
         wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
     });
   });
 
-  describe('enabled form state', () => {
-    beforeAll(() => {
-      Object.defineProperty(window, 'location', {
-        value: { href: 'http://some-host/bar', protocol: 'http' },
-        writable: true,
-      });
-    });
-
-    afterAll(() => {
-      delete (window as any).location;
-    });
-
-    it('renders as expected', async () => {
+  describe('API calls', () => {
+    it('GET login_state success', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState());
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={false}
@@ -167,17 +247,20 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
+      expect(coreStartMock.fatalErrors.add).not.toHaveBeenCalled();
     });
 
-    it('renders as expected when info message is set', async () => {
+    it('GET login_state failure', async () => {
       const coreStartMock = coreMock.createStart();
-      coreStartMock.http.get.mockResolvedValue(createLoginState());
-      window.location.href = 'http://some-host/bar?msg=SESSION_EXPIRED';
+      const error = Symbol();
+      httpMock.get.mockRejectedValue(error);
 
       const wrapper = shallow(
         <LoginPage
-          http={coreStartMock.http}
+          http={httpMock}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           requiresSecureConnection={false}
@@ -189,7 +272,11 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
+      expect(coreStartMock.fatalErrors.add).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.fatalErrors.add).toHaveBeenCalledWith(error);
     });
   });
 });
