@@ -113,6 +113,8 @@ const getTestsTransformed = async (config, overrides = {}) => {
 
     const finalQueue = [];
 
+    const TARGET_DURATION_SECONDS = 60 * 9;
+
     const nextGroup = () => {
       const group = [];
 
@@ -120,9 +122,9 @@ const getTestsTransformed = async (config, overrides = {}) => {
       const next = suites[0];
       const byConfig = suitesByConfig[next.config];
       let totalDuration = 0;
-      while (totalDuration < 60 * 12 && byConfig.length > 0) {
+      while (totalDuration < TARGET_DURATION_SECONDS && byConfig.length > 0) {
         const suite =
-          totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 9
+          totalDuration === 0 || byConfig[0].duration + totalDuration <= TARGET_DURATION_SECONDS
             ? byConfig.shift()
             : byConfig.pop();
 
