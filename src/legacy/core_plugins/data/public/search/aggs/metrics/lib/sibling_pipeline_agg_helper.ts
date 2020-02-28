@@ -21,7 +21,6 @@ import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
-
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { Schemas } from '../../schemas';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';

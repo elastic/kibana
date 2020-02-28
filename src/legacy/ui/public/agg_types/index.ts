@@ -27,18 +27,19 @@
 import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
 // runtime contracts
+const { types } = dataStart.search.aggs;
+export const aggTypes = types.getAll();
+export const { createAggConfigs } = dataStart.search.aggs;
 export const {
-  types: aggTypes,
   AggConfig,
-  AggConfigs,
   AggType,
   aggTypeFieldFilters,
   FieldParamType,
   MetricAggType,
   parentPipelineAggHelper,
-  siblingPipelineAggHelper,
   setBounds,
-} = dataStart.search.aggs;
+  siblingPipelineAggHelper,
+} = dataStart.search.aggs.__LEGACY;
 
 // types
 export {
