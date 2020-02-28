@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { DocLinksStart } from '../../../../../../../src/core/public';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryType } from '../../../../common/types';
 import { REPOSITORY_DOC_PATHS } from '../../constants';
@@ -11,9 +12,12 @@ class DocumentationLinksService {
   private esDocBasePath: string = '';
   private esPluginDocBasePath: string = '';
 
-  public init(esDocBasePath: string, esPluginDocBasePath: string): void {
-    this.esDocBasePath = esDocBasePath;
-    this.esPluginDocBasePath = esPluginDocBasePath;
+  public setup(docLinks: DocLinksStart): void {
+    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
+    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
+
+    this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    this.esPluginDocBasePath = `${docsBase}/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   }
 
   public getRepositoryPluginDocUrl() {
