@@ -19,7 +19,7 @@ interface CreateMockBrowserDriverFactoryOpts {
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
 }
 
-export const mockSelectors = {
+const mockSelectors = {
   renderComplete: 'renderedSelector',
   itemsCountAttribute: 'itemsSelector',
   screenshot: 'screenshotSelector',
@@ -72,9 +72,6 @@ mockBrowserEvaluate.mockImplementation(() => {
   }
   if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
-  }
-  if (mockCall === contexts.CONTEXT_CHECKFORTOASTMESSAGE) {
-    return Promise.resolve('Toast Message');
   }
   throw new Error(mockCall);
 });
