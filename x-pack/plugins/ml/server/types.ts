@@ -12,6 +12,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { MlLicense } from './lib/license';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -39,5 +40,5 @@ export interface PluginsSetup {
 
 export interface RouteInitialization {
   router: IRouter;
-  getLicenseCheckResults: () => LicenseCheckResult;
+  getLicenseCheckResults: () => MlLicense;
 }

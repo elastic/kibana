@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { checkLicense } from './check_license';
+export { MlLicense } from './ml_license';

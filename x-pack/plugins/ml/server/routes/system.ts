@@ -77,7 +77,7 @@ export function systemRoutes(
           }
         }
 
-        if (getLicenseCheckResults().isSecurityDisabled) {
+        if (getLicenseCheckResults().isSecurityEnabled() === false) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return response.ok({
@@ -156,7 +156,7 @@ export function systemRoutes(
       try {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (getLicenseCheckResults().isSecurityDisabled) {
+        if (getLicenseCheckResults().isSecurityEnabled() === false) {
           return response.ok({
             body: await getNodeCount(context),
           });

@@ -76,7 +76,7 @@ export function jobValidationRoutes(
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          getLicenseCheckResults().isSecurityDisabled
+          !getLicenseCheckResults().isSecurityEnabled()
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
@@ -182,7 +182,7 @@ export function jobValidationRoutes(
           request.body,
           version,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          getLicenseCheckResults().isSecurityDisabled
+          !getLicenseCheckResults().isSecurityEnabled()
         );
 
         return response.ok({

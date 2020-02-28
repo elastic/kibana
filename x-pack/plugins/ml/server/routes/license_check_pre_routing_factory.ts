@@ -10,10 +10,11 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { LicenseCheckResult } from '../types';
+// import { LicenseCheckResult } from '../types';
+import { MlLicense } from '../lib/license';
 
 export const licensePreRoutingFactory = (
-  getLicenseCheckResults: () => LicenseCheckResult,
+  getLicenseCheckResults: () => MlLicense,
   handler: RequestHandler<any, any, any>
 ): RequestHandler<any, any, any> => {
   // License checking and enable/disable logic
@@ -24,7 +25,7 @@ export const licensePreRoutingFactory = (
   ) {
     const licenseCheckResults = getLicenseCheckResults();
 
-    if (!licenseCheckResults.isAvailable) {
+    if (licenseCheckResults.isFullLicense() === false) {
       return response.forbidden();
     }
 

@@ -37,6 +37,9 @@ const licencingSubscription = plugins.licensing.license$.subscribe(license => {
     initManagementSection();
     // unsubscribe, we only want to register the plugin once.
     licencingSubscription.unsubscribe();
+    // should this unsubscribe happen?
+    // do we want to always check the licencing in case it is downgraded
+    // and we need to remove the ML section?
   }
 });
 

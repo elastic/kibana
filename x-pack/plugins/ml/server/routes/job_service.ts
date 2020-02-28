@@ -32,8 +32,8 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
   async function hasPermissionToCreateJobs(
     callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
   ) {
-    const { isSecurityDisabled } = getLicenseCheckResults();
-    if (isSecurityDisabled === true) {
+    const { isSecurityEnabled } = getLicenseCheckResults();
+    if (isSecurityEnabled() === false) {
       return true;
     }
 
