@@ -78,6 +78,54 @@ describe('ServerMetricsCollector', () => {
     });
   });
 
+  it('collect disconnects requests infos', async () => {
+    const never = new Promise(resolve => undefined);
+
+    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
+      return res.ok({ body: '' });
+    });
+    router.get({ path: '/disconnect', validate: false }, async (ctx, req, res) => {
+      await never;
+      return res.ok({ body: '' });
+    });
+    await server.start();
+
+    await sendGet('/');
+    const discoReq1 = sendGet('/disconnect').end();
+    const discoReq2 = sendGet('/disconnect').end();
+    await delay(20);
+
+    let metrics = await collector.collect();
+    expect(metrics.requests).toEqual(
+      expect.objectContaining({
+        total: 3,
+        disconnects: 0,
+      })
+    );
+
+    discoReq1.abort();
+    await delay(20);
+
+    metrics = await collector.collect();
+    expect(metrics.requests).toEqual(
+      expect.objectContaining({
+        total: 3,
+        disconnects: 1,
+      })
+    );
+
+    discoReq2.abort();
+    await delay(20);
+
+    metrics = await collector.collect();
+    expect(metrics.requests).toEqual(
+      expect.objectContaining({
+        total: 3,
+        disconnects: 2,
+      })
+    );
+  });
+
   it('collect response times', async () => {
     router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
