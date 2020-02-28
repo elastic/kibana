@@ -31,12 +31,6 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
         description: 'TODO',
       },
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.severity', {
-          defaultMessage: 'Severity',
-        }),
-        description: 'TODO',
-      },
-      {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.dateCreated', {
           defaultMessage: 'Date Created',
         }),
