@@ -20,8 +20,8 @@ export STATIC_SITE_URL_BASE
 for x in jest functional mocha; do
   echo "### Ingesting coverage for ${x}"
 
-#  COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
-  COVERAGE_SUMMARY_FILE=temp-target/kibana-coverage/mocha/coverage-summary-fake-${x}.json
+#  COVERAGE_SUMMARY_FILE=temp-target/kibana-coverage/mocha/coverage-summary-fake-${x}.json ## FAKE DATA
+  COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
 
   node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE}
 done
