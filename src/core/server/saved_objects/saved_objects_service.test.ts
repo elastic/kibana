@@ -130,7 +130,7 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('registerType', () => {
+    describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
@@ -230,6 +230,17 @@ describe('SavedObjectsService', () => {
       const startContract = await soService.start({});
       expect(startContract.migrator).toBe(migratorInstanceMock);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+    });
+
+    describe('#getTypeRegistry', () => {
+      it('returns the internal type registry of the service', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getTypeRegistry } = await soService.start({});
+
+        expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
     });
   });
 });
