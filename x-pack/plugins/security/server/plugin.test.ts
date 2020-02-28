@@ -28,6 +28,7 @@ describe('Security Plugin', () => {
         authc: {
           providers: ['saml', 'token'],
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+          http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
         },
       })
     );
@@ -75,6 +76,7 @@ describe('Security Plugin', () => {
                   "getSessionInfo": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
+                  "isProviderEnabled": [Function],
                   "login": [Function],
                   "logout": [Function],
                 },

@@ -18,6 +18,13 @@ describe('config schema', () => {
           "enabled": false,
         },
         "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
           "providers": Array [
             "basic",
           ],
@@ -40,6 +47,13 @@ describe('config schema', () => {
           "enabled": false,
         },
         "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
           "providers": Array [
             "basic",
           ],
@@ -62,6 +76,13 @@ describe('config schema', () => {
           "enabled": false,
         },
         "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
           "providers": Array [
             "basic",
           ],
@@ -113,15 +134,22 @@ describe('config schema', () => {
           authc: { providers: ['oidc'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+          ],
+        }
+      `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
@@ -138,16 +166,23 @@ describe('config schema', () => {
           authc: { providers: ['oidc', 'basic'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                    "basic",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+            "basic",
+          ],
+        }
+      `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
@@ -176,18 +211,25 @@ describe('config schema', () => {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "providers": Array [
-                                    "saml",
-                                  ],
-                                  "saml": Object {
-                                    "maxRedirectURLSize": ByteSizeValue {
-                                      "valueInBytes": 2048,
-                                    },
-                                    "realm": "realm-1",
-                                  },
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {
+            "maxRedirectURLSize": ByteSizeValue {
+              "valueInBytes": 2048,
+            },
+            "realm": "realm-1",
+          },
+        }
+      `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {
