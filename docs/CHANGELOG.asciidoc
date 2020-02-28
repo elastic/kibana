@@ -69,9 +69,10 @@ APM::
 * X-axis labels on Error occurrences chart are incorrect based on {kib} timezone {pull}55686[#55686]
 Canvas::
 *  Sanitizes workpad before sending to API {pull}57704[#57704]
-Lens::
+Lens and visualizations::
 * Fixes bugs in Lens filters (#56441) {pull}56648[#56648]
 * Makes field stats work for index patterns without time fields {pull}56759[#56759]
+* Fixes auto refresh in visualizations and Lens {pull}57667[#57667]
 Machine Learning::
 * Fixes Data Visualizer responsive layout  {pull}56372[#56372]
 * Fixes overall stats for saved search on the Data Visualizer page {pull}57312[#57312]
@@ -109,8 +110,6 @@ SIEM::
 * Fixes Host Details Events Table to only show events for specified Host {pull}57388[#57388]
 Uptime::
 * Uses scripted metric for snapshot calculation {pull}58247[#58247]
-Visualizations::
-* Fixes auto refresh in visualizations and Lens {pull}57667[#57667]
 
 [[release-notes-7.6.0]]
 == {kib} 7.6.0
