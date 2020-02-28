@@ -51,7 +51,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.malwareScore', {
           defaultMessage: 'MalwareScore',
         }),
-        description: alertData.process.malware_classification.score,
+        description: alertData.process.malware_classifier.score,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.parentProcessID', {
@@ -61,15 +61,15 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.signer', {
-          defaultMessage: 'signer',
+          defaultMessage: 'Signer',
         }),
-        description: 'TODO',
+        description: alertData.process.code_signature.subject_name,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.username', {
           defaultMessage: 'Username',
         }),
-        description: alertData.process.token.user, // TODO: Not sure about this
+        description: alertData.process.token.user,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.domain', {

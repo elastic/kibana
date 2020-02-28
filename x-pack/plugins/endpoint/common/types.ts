@@ -102,7 +102,6 @@ export interface OSFields {
   version: string;
   variant: string;
 }
-
 export interface HostFields {
   id: string;
   hostname: string;
@@ -110,22 +109,44 @@ export interface HostFields {
   mac: string[];
   os: OSFields;
 }
-
 export interface HashFields {
   md5: string;
   sha1: string;
   sha256: string;
-  imphash?: string;
 }
-
-export interface MalwareClassificationFields {
+export interface MalwareClassifierFields {
+  identifier: string;
   score: number;
+  threshold: number;
+  version: string;
 }
-
 export interface PrivilegesFields {
   description: string;
   name: string;
   enabled: boolean;
+}
+export interface ThreadFields {
+  id: number;
+  service_name: string;
+  start: number;
+  start_address: number;
+  start_address_module: string;
+}
+export interface DllFields {
+  pe: {
+    architecture: string;
+    imphash: string;
+  };
+  code_signature: {
+    subject_name: string;
+    trusted: boolean;
+  };
+  compile_time: number;
+  hash: HashFields;
+  malware_classifier: MalwareClassifierFields;
+  mapped_address: number;
+  mapped_size: number;
+  path: string;
 }
 
 /**
@@ -135,7 +156,10 @@ export interface PrivilegesFields {
 export type AlertEvent = Immutable<{
   '@timestamp': number;
   agent: {
+    ephemeral_id: string;
     id: string;
+    name: string;
+    type: string;
     version: string;
   };
   event: {
@@ -143,8 +167,17 @@ export type AlertEvent = Immutable<{
     action: string;
     category: string;
     kind: string;
+    dataset: string;
+    module: string;
+    type: string;
   };
   process: {
+    code_signature: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    command_line: string;
+    domain: string;
     pid: number;
     ppid: number;
     entity_id: string;
@@ -154,19 +187,22 @@ export type AlertEvent = Immutable<{
     };
     name: string;
     hash: HashFields;
+    pe: {
+      imphash: string;
+    };
     executable: string;
-    malware_classification: MalwareClassificationFields;
+    sid: string;
+    start: number;
+    malware_classifier: MalwareClassifierFields;
     token: {
       domain: string;
+      type: string;
       user: string;
       sid: string;
       integrity_level: number;
       privileges: PrivilegesFields[];
     };
-  };
-  file_classification: {
-    malware_classification: MalwareClassificationFields;
-    signature_signer: string;
+    thread: ThreadFields[];
   };
   file: {
     owner: string;
@@ -177,11 +213,27 @@ export type AlertEvent = Immutable<{
     created: number;
     size: number;
     hash: HashFields;
+    pe: {
+      imphash: string;
+    };
+    code_signature: {
+      trusted: boolean;
+      subject_name: string;
+    };
+    malware_classifier: {
+      features: {
+        data: {
+          buffer: string;
+          decompressed_size: number;
+          encoding: string;
+        };
+      };
+    } & MalwareClassifierFields;
+    temp_file_path: string;
   };
   host: HostFields;
   thread: {};
-  endpoint?: {};
-  endgame?: {};
+  dll: DllFields[];
 }>;
 
 /**

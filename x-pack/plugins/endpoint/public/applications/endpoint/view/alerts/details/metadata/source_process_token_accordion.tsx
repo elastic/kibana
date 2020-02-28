@@ -24,12 +24,6 @@ export const SourceProcessTokenAccordion = memo(
           }),
           description: alertData.process.token.integrity_level,
         },
-        {
-          title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.privileges', {
-            defaultMessage: 'Privileges',
-          }),
-          description: 'TODO',
-        },
       ];
     }, [alertData]);
 

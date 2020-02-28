@@ -52,7 +52,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.signer', {
           defaultMessage: 'Signer',
         }),
-        description: alertData.file_classification.signature_signer,
+        description: alertData.file.code_signature.subject_name,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.owner', {
