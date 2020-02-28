@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { TriggerContext } from './trigger';
 import { TriggerInternal } from './trigger_internal';
-import { TriggerId } from '../types';
+import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
  * This is a public representation of a trigger that is provided to other plugins.
@@ -50,7 +49,7 @@ export class TriggerContract<T extends TriggerId> {
   /**
    * Use this method to execute action attached to this trigger.
    */
-  public readonly exec = async (context: TriggerContext<T>) => {
+  public readonly exec = async (context: TriggerContextMapping[T]) => {
     await this.internal.execute(context);
   };
 }
