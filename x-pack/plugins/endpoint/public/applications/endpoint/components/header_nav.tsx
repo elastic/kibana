@@ -62,7 +62,8 @@ export const HeaderNavigation: React.FunctionComponent = () => {
     return tabs.map((tab, index) => {
       return (
         <EuiTab
-          data-testid={`${tab.id}Link`}
+          data-testid={`${tab.id}EndpointTab`}
+          data-test-subj={`${tab.id}EndpointTab`}
           key={index}
           onClick={() => {
             history.push(tab.href);
