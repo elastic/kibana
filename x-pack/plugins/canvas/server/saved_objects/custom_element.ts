@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore converting /libs/constants to TS breaks CI
-import { CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from '../common/lib/constants';
+import { SavedObjectsType } from 'src/core/server';
+import { CUSTOM_ELEMENT_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
 
-export const mappings = {
-  [CANVAS_TYPE]: {
-    dynamic: false,
-    properties: {
-      name: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          },
-        },
-      },
-      '@timestamp': { type: 'date' },
-      '@created': { type: 'date' },
-    },
-  },
-  [CUSTOM_ELEMENT_TYPE]: {
+export const customElementType: SavedObjectsType = {
+  name: CUSTOM_ELEMENT_TYPE,
+  hidden: false,
+  namespaceAgnostic: false,
+  mappings: {
+    // @ts-ignore
     dynamic: false,
     properties: {
       name: {
@@ -41,4 +30,5 @@ export const mappings = {
       '@created': { type: 'date' },
     },
   },
+  migrations: {},
 };
