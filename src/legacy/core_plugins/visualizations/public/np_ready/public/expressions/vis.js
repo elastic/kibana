@@ -29,7 +29,7 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { PersistedState } from '../../../legacy_imports';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 
 import { getTypes } from '../services';
 
