@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiTabs, EuiTab } from '@elastic/eui';
@@ -65,7 +65,9 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
           data-testid={`${tab.id}EndpointTab`}
           data-test-subj={`${tab.id}EndpointTab`}
           key={index}
-          onClick={() => {
+          href={`/app/endpoint${tab.href}`}
+          onClick={(even: MouseEvent) => {
+            event.preventDefault();
             history.push(tab.href);
           }}
           isSelected={tab.href === location.pathname}
@@ -78,4 +80,4 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
   }
 
   return <Tabs>{renderNavTabs(navTabs)}</Tabs>;
-};
+});
