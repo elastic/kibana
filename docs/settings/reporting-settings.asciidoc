@@ -95,6 +95,8 @@ index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
 heavy load, you might need to increase this timeout. Specified in milliseconds.
+If a Reporting job execution time goes over this time limit, the job will be
+marked as a failure and there will not be a download available.
 Defaults to `120000` (two minutes).
 
 [float]
@@ -103,6 +105,26 @@ Defaults to `120000` (two minutes).
 
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
+
+`xpack.reporting.capture.timeouts.openUrl`::
+How long to allow the Reporting browser to wait for the initial data of the
+Kibana page to load. Defaults to `30000` (30 seconds).
+
+`xpack.reporting.capture.timeouts.waitForElements`::
+How long to allow the Reporting browser to wait for the visualization panels to
+load on the Kibana page. Defaults to `30000` (30 seconds).
+
+`xpack.reporting.capture.timeouts.renderComplete`::
+How long to allow the Reporting brwoser to wait for each visualization to
+signal that it is done renderings. Defaults to `30000` (30 seconds).
+
+[NOTE]
+============
+If any timeouts from `xpack.reporting.capture.timeouts.*` settings occur when
+running a report job, Reporting will log the error and try to continue
+capturing the page with a screenshot. As a result, a download will be
+available, but there will likely be errors in the visualizations in the report.
+============
 
 `xpack.reporting.capture.maxAttempts`::
 If capturing a report fails for any reason, Kibana will re-attempt othe reporting
