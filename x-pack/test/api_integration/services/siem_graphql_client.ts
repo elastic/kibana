@@ -10,7 +10,7 @@ import {
   ApolloClient,
   HttpLink,
   InMemoryCache,
-} from '../../../../legacy/plugins/siem/public/lib/compose/kibana_compose';
+} from '../../../legacy/plugins/siem/public/lib/compose/kibana_compose';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

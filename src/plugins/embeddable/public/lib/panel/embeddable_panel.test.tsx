@@ -44,7 +44,7 @@ import {
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 
-const actionRegistry = new Map<string, Action>();
+const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
 const triggerRegistry = new Map<string, Trigger>();
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
