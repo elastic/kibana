@@ -120,10 +120,56 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  isIndexClosed?: boolean;
 }
 
 export interface UpgradeAssistantStatus {
   readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
+}
+
+export interface ClusterStateIndexAPIResponse {
+  state: 'open' | 'closed';
+  settings: {
+    index: {
+      verified_before_close: string;
+      search: {
+        throttled: string;
+      };
+      number_of_shards: string;
+      provided_name: string;
+      frozen: string;
+      creation_date: string;
+      number_of_replicas: string;
+      uuid: string;
+      version: {
+        created: string;
+      };
+    };
+  };
+  mappings: any;
+  aliases: any[];
+  primary_terms: {
+    '0': number;
+  };
+  in_sync_allocations: {
+    '0': string[];
+  };
+}
+
+export interface ClusterStateAPIResponse {
+  cluster_name: string;
+  cluster_uuid: string;
+  metadata: {
+    cluster_uuid: string;
+    cluster_coordination: {
+      term: number;
+      last_committed_config: string[];
+      last_accepted_config: string[];
+      voting_config_exclusions: [];
+    };
+    templates: any;
+    indices: { [indexName: string]: ClusterStateIndexAPIResponse };
+  };
 }

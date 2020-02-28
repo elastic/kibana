@@ -6,7 +6,11 @@
 
 import { IScopedClusterClient } from 'src/core/server';
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
+import {
+  ClusterStateAPIResponse,
+  EnrichedDeprecationInfo,
+  UpgradeAssistantStatus,
+} from '../../common/types';
 
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
@@ -19,6 +23,26 @@ export async function getUpgradeAssistantStatus(
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
+
+  const indexNames = indices.map(({ index }) => index!);
+
+  // If we have found deprecation information for index/indices, add some additional information;
+  // is it currently open or closed?
+  if (indexNames.length) {
+    const indicesMetadata: ClusterStateAPIResponse = await dataClient.callAsCurrentUser(
+      'cluster.state',
+      {
+        index: indexNames,
+        metric: 'metadata',
+      }
+    );
+
+    indices.forEach(indexData => {
+      indexData.isIndexClosed = Boolean(
+        indicesMetadata.metadata.indices[indexData.index!]?.state === 'closed'
+      );
+    });
+  }
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
