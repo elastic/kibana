@@ -7,16 +7,18 @@
 import { sortBy } from 'lodash';
 import React from 'react';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import { ReindexButton } from './reindex';
+import { ReindexButton, ReindexClosedWarningIcon } from './reindex';
 import { AppContext } from '../../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
+  blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
   details?: string;
 }
 
@@ -68,9 +70,10 @@ export class IndexDeprecationTableUI extends React.Component<
       },
     ];
 
-    if (this.actionsColumn) {
-      // @ts-ignore
-      columns.push(this.actionsColumn);
+    const actionsColumn = this.generateActionsColumn();
+
+    if (actionsColumn) {
+      columns.push(actionsColumn);
     }
 
     const sorting = {
@@ -134,7 +137,7 @@ export class IndexDeprecationTableUI extends React.Component<
     return { totalItemCount, pageSizeOptions, hidePerPageOptions: false };
   }
 
-  private get actionsColumn() {
+  private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
@@ -148,7 +151,28 @@ export class IndexDeprecationTableUI extends React.Component<
           render(indexDep: IndexDeprecationDetails) {
             return (
               <AppContext.Consumer>
-                {({ http }) => <ReindexButton indexName={indexDep.index!} http={http} />}
+                {({ http, docLinks }) => {
+                  return (
+                    <EuiFlexGroup
+                      alignItems="center"
+                      justifyContent="center"
+                      direction="row"
+                      responsive={false}
+                    >
+                      {indexDep.blockerForReindexing === 'index-closed' ? (
+                        <EuiFlexItem>
+                          <ReindexClosedWarningIcon
+                            indexName={indexDep.index}
+                            docLinks={docLinks}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                      <EuiFlexItem>
+                        <ReindexButton indexName={indexDep.index!} http={http} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  );
+                }}
               </AppContext.Consumer>
             );
           },

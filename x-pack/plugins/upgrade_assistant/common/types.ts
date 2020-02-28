@@ -120,7 +120,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
-  isIndexClosed?: boolean;
+  blockerForReindexing?: 'index-closed';
 }
 
 export interface UpgradeAssistantStatus {

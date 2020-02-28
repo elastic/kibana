@@ -89,6 +89,7 @@ export const DeprecationList: FunctionComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
+      blockerForReindexing: dep.blockerForReindexing,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
