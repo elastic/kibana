@@ -20,6 +20,7 @@ export const updatePrepackagedRules = async (
   await rules.forEach(async rule => {
     const {
       description,
+      documentation,
       false_positives: falsePositives,
       from,
       immutable,
@@ -49,6 +50,7 @@ export const updatePrepackagedRules = async (
       alertsClient,
       actionsClient,
       description,
+      documentation,
       falsePositives,
       from,
       immutable,

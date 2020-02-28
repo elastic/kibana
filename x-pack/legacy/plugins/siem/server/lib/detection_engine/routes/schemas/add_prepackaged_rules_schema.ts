@@ -10,6 +10,7 @@ import Joi from 'joi';
 import {
   enabled,
   description,
+  documentation,
   false_positives,
   filters,
   from,
@@ -49,6 +50,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  */
 export const addPrepackagedRulesSchema = Joi.object({
   description: description.required(),
+  documentation,
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
   filters,

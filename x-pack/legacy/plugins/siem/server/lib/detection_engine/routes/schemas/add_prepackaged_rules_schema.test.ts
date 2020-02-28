@@ -1274,4 +1274,62 @@ describe('add prepackaged rules schema', () => {
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
   });
+
+  describe('documentation', () => {
+    test('You can set documentation to any object you want', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          documentation: '# test header',
+          version: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create documentation as anything other than a string', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<
+          Partial<Omit<PrepackagedRules, 'documentation'> & { documentation: object }>
+        >({
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          documentation: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          version: 1,
+        }).error.message
+      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+    });
+  });
 });

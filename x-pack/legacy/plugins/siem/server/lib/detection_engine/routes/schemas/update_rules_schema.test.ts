@@ -1243,4 +1243,56 @@ describe('create rules schema', () => {
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
   });
+
+  describe('documentation', () => {
+    test('You can set description to a string', () => {
+      expect(
+        updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          documentation: '# some documentation title',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot set description as an object', () => {
+      expect(
+        updateRulesSchema.validate<
+          Partial<Omit<RuleAlertParamsRest, 'documentation'> & { documentation: object }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          documentation: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error.message
+      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+    });
+  });
 });

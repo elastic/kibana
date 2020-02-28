@@ -1422,4 +1422,64 @@ describe('import rules schema', () => {
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
   });
+
+  describe('documentation', () => {
+    test('You can set documentation to a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          documentation: '# test header',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create documentation as something other than a string', () => {
+      expect(
+        importRulesSchema.validate<
+          Partial<Omit<ImportRuleAlertRest, 'documentation'> & { documentation: object }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          documentation: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error.message
+      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+    });
+  });
 });

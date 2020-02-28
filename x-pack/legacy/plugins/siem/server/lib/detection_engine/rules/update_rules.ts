@@ -16,6 +16,7 @@ export const updateRules = async ({
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   savedObjectsClient,
   description,
+  documentation,
   falsePositives,
   enabled,
   query,
@@ -50,6 +51,7 @@ export const updateRules = async ({
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
     description,
+    documentation,
     falsePositives,
     query,
     language,
@@ -83,6 +85,7 @@ export const updateRules = async ({
       actions: rule.actions,
       params: {
         description,
+        documentation,
         ruleId: rule.params.ruleId,
         falsePositives,
         from,

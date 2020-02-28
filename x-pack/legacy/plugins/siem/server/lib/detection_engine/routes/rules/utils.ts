@@ -105,6 +105,7 @@ export const transformAlertToRule = (
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
     description: alert.params.description,
+    documentation: alert.params.documentation,
     enabled: alert.enabled,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,

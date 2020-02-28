@@ -77,6 +77,7 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  documentation: '# this is a markdown header',
 });
 
 export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({

@@ -36,6 +36,7 @@ export const createUpdateRulesRoute = (
     async handler(request: UpdateRulesRequest, headers) {
       const {
         description,
+        documentation,
         enabled,
         false_positives: falsePositives,
         from,
@@ -77,6 +78,7 @@ export const createUpdateRulesRoute = (
           alertsClient,
           actionsClient,
           description,
+          documentation,
           enabled,
           falsePositives,
           from,

@@ -10,6 +10,7 @@ import Joi from 'joi';
 import {
   enabled,
   description,
+  documentation,
   false_positives,
   filters,
   from,
@@ -39,6 +40,7 @@ import {
 
 export const patchRulesSchema = Joi.object({
   description,
+  documentation,
   enabled,
   false_positives,
   filters,
