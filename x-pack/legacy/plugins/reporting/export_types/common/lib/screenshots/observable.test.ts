@@ -153,7 +153,7 @@ describe('Screenshot Observable Pipeline', () => {
       await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase the 'xpack.reporting.capture.timeouts.waitForElements' setting. Error: [Error: Mock error!]],
+                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
                       "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
@@ -164,7 +164,7 @@ describe('Screenshot Observable Pipeline', () => {
                   "timeRange": null,
                 },
                 Object {
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase the 'xpack.reporting.capture.timeouts.waitForElements' setting. Error: [Error: Mock error!]],
+                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
                       "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
