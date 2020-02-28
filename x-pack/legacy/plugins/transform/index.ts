@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { resolve } from 'path';
-
-import { PluginInitializerContext } from 'src/core/server';
 
 import { PLUGIN } from './common/constants';
 
