@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLSchema } from 'graphql';
-import { runHttpQuery } from 'apollo-server-core';
+import { runHttpQuery, HttpQueryRequest } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
 import {
   IRouter,
@@ -29,7 +28,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private router: IRouter;
   private security: SetupPlugins['security'];
 
-  constructor(core: CoreSetup, plugins: SetupPlugins, private isProductionMode: boolean) {
+  constructor(core: CoreSetup, plugins: SetupPlugins) {
     this.router = core.http.createRouter();
     this.security = plugins.security;
   }
@@ -74,11 +73,18 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
               context: { req: wrapRequest(req, context, user) },
               schema,
             }),
+            request: (request as unknown) as HttpQueryRequest['request'],
             query: request.body,
           });
 
+          const parsedResponse = JSON.parse(gqlResponse.graphqlResponse);
+
           return response.ok({
-            body: gqlResponse,
+            body: {
+              errors: parsedResponse.errors,
+              data: parsedResponse.data,
+              extensions: parsedResponse.extensions,
+            },
             headers: {
               'content-type': 'application/json',
             },
@@ -88,35 +94,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         }
       }
     );
-
-    if (!this.isProductionMode) {
-      this.router.get(
-        {
-          path: `${routePath}/graphiql`,
-          validate: false,
-          options: {
-            tags: ['access:siem'],
-          },
-        },
-        async (context, request, response) => {
-          const graphiqlString = await GraphiQL.resolveGraphiQLString(
-            request.query,
-            {
-              endpointURL: routePath,
-              passHeader: "'kbn-xsrf': 'graphiql'",
-            },
-            request
-          );
-
-          return response.ok({
-            body: graphiqlString,
-            headers: {
-              'content-type': 'text/html',
-            },
-          });
-        }
-      );
-    }
   }
 
   private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {

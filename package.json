@@ -83,8 +83,7 @@
     "**/@types/hapi": "^17.0.18",
     "**/@types/angular": "^1.6.56",
     "**/@types/hoist-non-react-statics": "^3.3.1",
-    "**/deepmerge": "^4.2.2",
-    "**/fast-deep-equal": "^3.1.1",
+    "**/typescript": "3.7.2",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
@@ -92,8 +91,9 @@
     "**/react-dom": "^16.12.0",
     "**/react": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
+    "**/deepmerge": "^4.2.2",
     "**/serialize-javascript": "^2.1.1",
-    "**/typescript": "3.7.2"
+    "**/fast-deep-equal": "^3.1.1"
   },
   "workspaces": {
     "packages": [
@@ -113,6 +113,9 @@
       "**/apollo-*",
       "**/@apollo/*",
       "**/@apollo/*/**",
+      "**/graphql/**",
+      "**/graphql-*",
+      "**/graphql-*/**",
       "x-pack/typescript"
     ]
   },
@@ -328,7 +331,6 @@
     "@types/getopts": "^2.0.1",
     "@types/glob": "^7.1.1",
     "@types/globby": "^8.0.0",
-    "@types/graphql": "^0.13.2",
     "@types/hapi": "^17.0.18",
     "@types/hapi-auth-cookie": "^9.1.0",
     "@types/has-ansi": "^3.0.0",
