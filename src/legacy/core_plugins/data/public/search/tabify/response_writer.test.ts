@@ -19,18 +19,13 @@
 
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, AggGroupNames, Schemas, BUCKET_TYPES } from '../aggs';
-import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 import { TabbedResponseWriterOptions } from './types';
 
+jest.mock('ui/new_platform');
+
 describe('TabbedAggResponseWriter class', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
   let responseWriter: TabbedAggResponseWriter;
-
-  const typesRegistry = mockAggTypesRegistry();
 
   const splitAggConfig = [
     {
@@ -71,17 +66,18 @@ describe('TabbedAggResponseWriter class', () => {
     } as any;
 
     return new TabbedAggResponseWriter(
-      new AggConfigs(indexPattern, aggs, {
-        typesRegistry,
-        schemas: new Schemas([
+      new AggConfigs(
+        indexPattern,
+        aggs,
+        new Schemas([
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
             min: 1,
             defaults: [{ schema: 'metric', type: 'count' }],
           },
-        ]).all,
-      }),
+        ]).all
+      ),
       {
         metricsAtAllLevels: false,
         partialRows: false,

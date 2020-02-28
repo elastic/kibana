@@ -18,17 +18,12 @@
  */
 
 import { tabifyGetColumns } from './get_columns';
-import { TabbedAggColumn } from './types';
 import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
-import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
+import { TabbedAggColumn } from './types';
+
+jest.mock('ui/new_platform');
 
 describe('get columns', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
-  const typesRegistry = mockAggTypesRegistry();
-
   const createAggConfigs = (aggs: any[] = []) => {
     const field = {
       name: '@timestamp',
@@ -43,17 +38,18 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(indexPattern, aggs, {
-      typesRegistry,
-      schemas: new Schemas([
+    return new AggConfigs(
+      indexPattern,
+      aggs,
+      new Schemas([
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
           min: 1,
           defaults: [{ schema: 'metric', type: 'count' }],
         },
-      ]).all,
-    });
+      ]).all
+    );
   };
 
   test('should inject a count metric if no aggs exist', () => {

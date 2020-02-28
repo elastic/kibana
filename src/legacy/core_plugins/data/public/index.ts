@@ -35,18 +35,18 @@ export {
 } from '../../../../plugins/data/public';
 export {
   // agg_types
-  AggParam, // only the type is used externally, only in vis editor
-  AggParamOption, // only the type is used externally
-  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  AggParam,
+  AggParamOption,
+  DateRangeKey,
   IAggConfig,
   IAggConfigs,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  IpRangeKey, // only used in field formatter deserialization, which will live in data
+  IpRangeKey,
   ISchemas,
-  OptionedParamEditorProps, // only type is used externally
-  OptionedValueProp, // only type is used externally
+  OptionedParamEditorProps,
+  OptionedValueProp,
 } from './search/types';
 
 /** @public static code */

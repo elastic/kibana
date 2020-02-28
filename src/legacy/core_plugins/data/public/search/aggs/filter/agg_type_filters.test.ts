@@ -19,12 +19,13 @@
 
 import { IndexPattern } from '../../../../../../../plugins/data/public';
 import { AggTypeFilters } from './agg_type_filters';
-import { IAggConfig, IAggType } from '../types';
+import { AggConfig } from '..';
+import { IAggType } from '../types';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
   const indexPattern = ({ id: '1234', fields: [], title: 'foo' } as unknown) as IndexPattern;
-  const aggConfig = {} as IAggConfig;
+  const aggConfig = {} as AggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFilters();

@@ -17,8 +17,16 @@
  * under the License.
  */
 
+/**
+ * @name AggConfig
+ *
+ * @description This class represents an aggregation, which is displayed in the left-hand nav of
+ * the Visualize app.
+ */
+
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { IAggType } from './agg_type';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
@@ -30,20 +38,18 @@ import {
   FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../plugins/data/public/services';
 
 export interface AggConfigOptions {
-  type: IAggType;
-  enabled?: boolean;
+  enabled: boolean;
+  type: string;
+  params: any;
   id?: string;
-  params?: Record<string, any>;
-  schema?: string | Schema;
+  schema?: string;
 }
 
 const unknownSchema: Schema = {
   name: 'unknown',
-  title: 'Unknown', // only here for illustrative purposes
+  title: 'Unknown',
   hideCustomLabel: true,
   aggFilter: [],
   min: 1,
@@ -59,6 +65,21 @@ const unknownSchema: Schema = {
   },
 };
 
+const getTypeFromRegistry = (type: string): IAggType => {
+  // We need to inline require here, since we're having a cyclic dependency
+  // from somewhere inside agg_types back to AggConfig.
+  const aggTypes = require('../aggs').aggTypes;
+  const registeredType =
+    aggTypes.metrics.find((agg: IAggType) => agg.name === type) ||
+    aggTypes.buckets.find((agg: IAggType) => agg.name === type);
+
+  if (!registeredType) {
+    throw new Error('unknown type');
+  }
+
+  return registeredType;
+};
+
 const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
   let registeredSchema = schemas ? schemas.byName[schema] : null;
   if (!registeredSchema) {
@@ -68,13 +89,6 @@ const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
 
   return registeredSchema;
 };
-
-/**
- * @name AggConfig
- *
- * @description This class represents an aggregation, which is displayed in the left-hand nav of
- * the Visualize app.
- */
 
 // TODO need to make a more explicit interface for this
 export type IAggConfig = AggConfig;
@@ -87,9 +101,9 @@ export class AggConfig {
    * @param  {array[object]} list - a list of objects, objects can be anything really
    * @return {array} - the list that was passed in
    */
-  static ensureIds(list: any[]) {
-    const have: IAggConfig[] = [];
-    const haveNot: AggConfigOptions[] = [];
+  static ensureIds(list: AggConfig[]) {
+    const have: AggConfig[] = [];
+    const haveNot: AggConfig[] = [];
     list.forEach(function(obj) {
       (obj.id ? have : haveNot).push(obj);
     });
@@ -107,7 +121,7 @@ export class AggConfig {
    *
    * @return {array} list - a list of objects with id properties
    */
-  static nextId(list: IAggConfig[]) {
+  static nextId(list: AggConfig[]) {
     return (
       1 +
       list.reduce(function(max, obj) {
@@ -148,9 +162,9 @@ export class AggConfig {
     this.setParams(opts.params || {});
 
     // @ts-ignore
-    this.__schema = this.__schema;
-    // @ts-ignore
     this.__type = this.__type;
+    // @ts-ignore
+    this.__schema = this.__schema;
   }
 
   /**
@@ -380,8 +394,7 @@ export class AggConfig {
   }
 
   fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const fieldFormatsService = getFieldFormats();
-
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
@@ -443,8 +456,8 @@ export class AggConfig {
     });
   }
 
-  public setType(type: IAggType) {
-    this.type = type;
+  public setType(type: string | IAggType) {
+    this.type = typeof type === 'string' ? getTypeFromRegistry(type) : type;
   }
 
   public get schema() {

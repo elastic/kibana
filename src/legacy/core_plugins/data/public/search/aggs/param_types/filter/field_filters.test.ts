@@ -17,26 +17,27 @@
  * under the License.
  */
 
+import { IndexedArray } from 'ui/indexed_array';
 import { AggTypeFieldFilters } from './field_filters';
-import { IAggConfig } from '../../agg_config';
+import { AggConfig } from '../../agg_config';
 import { IndexPatternField } from '../../../../../../../../plugins/data/public';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;
-  const aggConfig = {} as IAggConfig;
+  const aggConfig = {} as AggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFieldFilters();
   });
 
   it('should filter nothing without registered filters', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexPatternField[];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<IndexPatternField>;
     const filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual(fields);
   });
 
   it('should pass all fields to the registered filter', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexPatternField[];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<IndexPatternField>;
     const filter = jest.fn();
     registry.addFilter(filter);
     registry.filter(fields, aggConfig);
@@ -45,7 +46,7 @@ describe('AggTypeFieldFilters', () => {
   });
 
   it('should allow registered filters to filter out fields', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexPatternField[];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<IndexPatternField>;
     let filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual(fields);
 
