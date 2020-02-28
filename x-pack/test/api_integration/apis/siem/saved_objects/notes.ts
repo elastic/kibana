@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { gql } from '@apollo/client';
+import { gql } from '../../../../../legacy/plugins/siem/public/lib/compose/kibana_compose';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { persistTimelineNoteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/notes/persist.gql_query';

@@ -5,7 +5,7 @@
  */
 
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
-export { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
+export { gql, ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 
 import { CoreStart } from '../../plugin';
 import { AppFrontendLibs } from '../lib';
