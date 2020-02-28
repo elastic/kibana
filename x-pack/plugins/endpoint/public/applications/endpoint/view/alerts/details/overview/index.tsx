@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo } from 'react';
-import { EuiSpacer, EuiTitle, EuiText, EuiHealth } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiTitle, EuiText, EuiHealth, EuiTabbedContent } from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
 import { MetadataPanel } from './metadata_panel';
@@ -15,6 +16,36 @@ export const AlertDetailsOverview = memo(() => {
   if (alertDetailsData === undefined) {
     return null;
   }
+
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'overviewMetadata',
+        name: i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <MetadataPanel />
+          </>
+        ),
+      },
+      {
+        id: 'overviewResolver',
+        name: i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.resolver',
+          {
+            defaultMessage: 'Resolver',
+          }
+        ),
+        content: 'Resolver',
+      },
+    ];
+  }, []);
 
   return (
     <>
@@ -37,7 +68,7 @@ export const AlertDetailsOverview = memo(() => {
         <EuiText>Alert Status: Open</EuiText>
         <EuiSpacer />
       </section>
-      <MetadataPanel />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
     </>
   );
 });
