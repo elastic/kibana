@@ -80,17 +80,8 @@ const createMockServer = () => {
     return responseMock;
   };
 
-  const injectWithoutValidation = async (
-    request: KibanaRequest,
-    context: RequestHandlerContext = contextMock
-  ) => {
-    await getRoute(routeSpy).handler(context, request, responseMock);
-    return responseMock;
-  };
-
   return {
     inject,
-    injectWithoutValidation,
     router: routerMock,
     validate,
   };

@@ -72,7 +72,7 @@ describe('import_rules_route', () => {
 
   describe('status codes with actionsClient and alertClient', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.injectWithoutValidation(request, context);
+      const response = await server.inject(request, context);
 
       expect(response.ok).toHaveBeenCalled();
     });
