@@ -39,7 +39,7 @@ describe('alertType Params validate()', () => {
   it('fails for invalid comparator', async () => {
     params.comparator = '[invalid-comparator]';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[comparator]: must be one of lessThan, lessThanOrEqual, greaterThanOrEqual, greaterThan, between, notBetween"`
+      `"[comparator]: invalid comparator specified: [invalid-comparator]"`
     );
   });
 

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ComparatorFnNames, getInvalidComparatorMessage } from './alert_type';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './lib/core_query_types';
 
 // alert type parameters
@@ -37,27 +39,27 @@ function validateParams(anyParams: any): string | undefined {
 
   if (betweenComparators.has(comparator)) {
     if (threshold.length === 1) {
-      return `[threshold]: must have two elements for the "${comparator}" comparator`;
+      return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold2ErrorMessage', {
+        defaultMessage: '[threshold]: must have two elements for the "{comparator}" comparator',
+        values: {
+          comparator,
+        },
+      });
     }
   } else {
     if (threshold.length === 2) {
-      return `[threshold]: must have one element for the "${comparator}" comparator`;
+      return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold1ErrorMessage', {
+        defaultMessage: '[threshold]: must have one element for the "{comparator}" comparator',
+        values: {
+          comparator,
+        },
+      });
     }
   }
 }
 
-const Comparators = new Set([
-  'lessThan',
-  'lessThanOrEqual',
-  'greaterThanOrEqual',
-  'greaterThan',
-  'between',
-  'notBetween',
-]);
+export function validateComparator(comparator: string): string | undefined {
+  if (ComparatorFnNames.has(comparator)) return;
 
-function validateComparator(comparator: string) {
-  if (Comparators.has(comparator)) return;
-
-  const comparators = Array.from(Comparators).join(', ');
-  return `must be one of ${comparators}`;
+  return getInvalidComparatorMessage(comparator);
 }

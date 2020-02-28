@@ -44,9 +44,7 @@ describe('TimeSeriesParams validate()', () => {
     );
 
     params.dateStart = 'x';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[dateStart]: invalid ISO date \\"x\\""`
-    );
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[dateStart]: invalid date x"`);
   });
 
   it('fails for invalid dateEnd', async () => {
@@ -56,9 +54,7 @@ describe('TimeSeriesParams validate()', () => {
     );
 
     params.dateEnd = 'x';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[dateEnd]: invalid ISO date \\"x\\""`
-    );
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[dateEnd]: invalid date x"`);
   });
 
   it('fails for invalid interval', async () => {
@@ -69,7 +65,7 @@ describe('TimeSeriesParams validate()', () => {
 
     params.interval = 'x';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[interval]: invalid duration value \\"x\\""`
+      `"[interval]: invalid duration: \\"x\\""`
     );
   });
 
@@ -95,7 +91,7 @@ describe('TimeSeriesParams validate()', () => {
     params.dateEnd = '2021-01-01T00:00:00.000Z';
     params.interval = '1s';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"calculated number of intervals 31622400 is greater than maximum 200"`
+      `"calculated number of intervals 31622400 is greater than maximum 1000"`
     );
   });
 

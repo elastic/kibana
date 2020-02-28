@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
 
 // alert type context provided to actions
@@ -34,11 +35,35 @@ export interface BaseActionContext {
 }
 
 export function addMessages(c: BaseActionContext, p: Params): ActionContext {
-  const subject = `alert ${c.name} instance ${c.group} value ${c.value} exceeded threshold`;
+  const subject = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.alertTypeContextSubjectTitle',
+    {
+      defaultMessage: 'alert {name} group {group} exceeded threshold',
+      values: {
+        name: c.name,
+        group: c.group,
+      },
+    }
+  );
 
   const agg = p.aggField ? `${p.aggType}(${p.aggField})` : `${p.aggType}`;
   const humanFn = `${agg} ${p.comparator} ${p.threshold.join(',')}`;
-  const message = `${subject} ${humanFn} over ${p.window} on ${c.date}`;
+
+  const message = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.alertTypeContextMessageDescription',
+    {
+      defaultMessage:
+        'alert {name} group {group} value {value} exceeded threshold {function} over {window} on {date}',
+      values: {
+        name: c.name,
+        group: c.group,
+        value: c.value,
+        function: humanFn,
+        window: p.window,
+        date: c.date,
+      },
+    }
+  );
 
   return { ...c, subject, message };
 }

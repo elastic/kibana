@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { times } from 'lodash';
 import { parseDuration } from '../../../../../alerting/server';
 import { MAX_INTERVALS } from '../index';
@@ -36,10 +37,10 @@ export function getDateRangeInfo(params: GetDateRangeInfoParams): DateRangeInfo 
   const { dateStart: dateStartS, dateEnd: dateEndS, interval: intervalS, window: windowS } = params;
 
   // get dates in epoch millis, interval and window in millis
-  const dateStart = getDateOrUndefined(dateStartS, 'dateStart') || Date.now();
-  const dateEnd = getDateOrUndefined(dateEndS, 'dateEnd') || dateStart;
+  const dateEnd = getDateOrUndefined(dateEndS, 'dateEnd') || Date.now();
+  const dateStart = getDateOrUndefined(dateStartS, 'dateStart') || dateEnd;
 
-  if (dateStart > dateEnd) throw new Error('dateStart is after dateEnd');
+  if (dateStart > dateEnd) throw new Error(getDateStartAfterDateEndErrorMessage());
 
   const interval = getDurationOrUndefined(intervalS, 'interval') || 0;
   const window = getDuration(windowS, 'window');
@@ -52,7 +53,7 @@ export function getDateRangeInfo(params: GetDateRangeInfoParams): DateRangeInfo 
   // Calculate number of intervals; if no interval specified, only calculate one.
   const intervals = !interval ? 1 : 1 + Math.round((dateEnd - dateStart) / interval);
   if (intervals > MAX_INTERVALS) {
-    throw new Error(`intervals calculated ${intervals} greater than maximum ${MAX_INTERVALS}`);
+    throw new Error(getTooManyIntervalsErrorMessage(intervals, MAX_INTERVALS));
   }
 
   times(intervals, () => {
@@ -99,5 +100,29 @@ function getDuration(durationS: string, field: string): number {
 }
 
 function getParseErrorMessage(formatName: string, fieldName: string, fieldValue: string) {
-  return `invalid ${formatName} format for ${fieldName}: "${fieldValue}"`;
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.formattedFieldErrorMessage', {
+    defaultMessage: 'invalid {formatName} format for {fieldName}: "{fieldValue}"',
+    values: {
+      formatName,
+      fieldName,
+      fieldValue,
+    },
+  });
+}
+
+export function getTooManyIntervalsErrorMessage(intervals: number, maxIntervals: number) {
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.maxIntervalsErrorMessage', {
+    defaultMessage:
+      'calculated number of intervals {intervals} is greater than maximum {maxIntervals}',
+    values: {
+      intervals,
+      maxIntervals,
+    },
+  });
+}
+
+export function getDateStartAfterDateEndErrorMessage(): string {
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.dateStartGTdateEndErrorMessage', {
+    defaultMessage: '[dateStart]: is greater than [dateEnd]',
+  });
 }

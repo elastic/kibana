@@ -7,11 +7,20 @@
 // The parameters and response for the `timeSeriesQuery()` service function,
 // and associated HTTP endpoint.
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import { parseDuration } from '../../../../../alerting/server';
 import { MAX_INTERVALS } from '../index';
+import {
+  CoreQueryParamsSchemaProperties,
+  validateCoreQueryBody,
+  validateDuration,
+} from './core_query_types';
+import {
+  getTooManyIntervalsErrorMessage,
+  getDateStartAfterDateEndErrorMessage,
+} from './date_range_info';
 
 // The result is an object with a key for every field value aggregated
 // via the `aggField` property.  If `aggField` is not specified, the
@@ -37,9 +46,9 @@ export type TimeSeriesQuery = TypeOf<typeof TimeSeriesQuerySchema>;
 export const TimeSeriesQuerySchema = schema.object(
   {
     ...CoreQueryParamsSchemaProperties,
-    // start of the date range to search, as an iso string
+    // start of the date range to search, as an iso string; defaults to dateEnd
     dateStart: schema.maybe(schema.string({ validate: validateDate })),
-    // end of the date range to search, as an iso string
+    // end of the date range to search, as an iso string; defaults to now
     dateEnd: schema.maybe(schema.string({ validate: validateDate })),
     // intended to be set to the `interval` property of the alert itself,
     // this value indicates the amount of time between time series dates
@@ -65,32 +74,33 @@ function validateBody(anyParams: any): string | undefined {
 
   if (epochStart && epochEnd) {
     if (epochStart > epochEnd) {
-      return `[dateStart]: is greater than [dateEnd]`;
+      return getDateStartAfterDateEndErrorMessage();
     }
 
     if (epochStart !== epochEnd && !interval) {
-      return `[interval]: must be specified if [dateStart] does not equal [dateEnd]`;
+      return i18n.translate('xpack.alertingBuiltins.indexThreshold.intervalRequiredErrorMessage', {
+        defaultMessage: '[interval]: must be specified if [dateStart] does not equal [dateEnd]',
+      });
     }
 
     if (interval) {
       const intervalMillis = parseDuration(interval);
       const intervals = Math.round((epochEnd - epochStart) / intervalMillis);
       if (intervals > MAX_INTERVALS) {
-        return `calculated number of intervals ${intervals} is greater than maximum ${MAX_INTERVALS}`;
+        return getTooManyIntervalsErrorMessage(intervals, MAX_INTERVALS);
       }
     }
   }
 }
 
-function validateDate(dateString: string) {
+function validateDate(dateString: string): string | undefined {
   const parsed = Date.parse(dateString);
-  if (isNaN(parsed)) return `invalid ISO date "${dateString}"`;
-}
-
-function validateDuration(duration: string) {
-  try {
-    parseDuration(duration);
-  } catch (err) {
-    return `invalid duration value "${duration}"`;
+  if (isNaN(parsed)) {
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDateErrorMessage', {
+      defaultMessage: 'invalid date {date}',
+      values: {
+        date: dateString,
+      },
+    });
   }
 }

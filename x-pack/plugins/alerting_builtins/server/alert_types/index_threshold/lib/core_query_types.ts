@@ -6,6 +6,7 @@
 
 // common properties on time_series_query and alert_type_params
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { MAX_GROUPS } from '../index';
@@ -39,18 +40,43 @@ export function validateCoreQueryBody(anyParams: any): string | undefined {
   const { aggType, aggField, groupLimit }: CoreQueryParams = anyParams;
 
   if (aggType === 'count' && aggField) {
-    return `[aggField]: must not have a value when [aggType] is "${aggType}"`;
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.aggTypeNotEmptyErrorMessage', {
+      defaultMessage: '[aggField]: must not have a value when [aggType] is "{aggType}"',
+      values: {
+        aggType,
+      },
+    });
   }
 
   if (aggType !== 'count' && !aggField) {
-    return `[aggField]: must have a value when [aggType] is "${aggType}"`;
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.aggTypeRequiredErrorMessage', {
+      defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
+      values: {
+        aggType,
+      },
+    });
   }
 
   // schema.number doesn't seem to check the max value ...
   if (groupLimit != null) {
-    if (groupLimit <= 0) return '[groupLimit]: must be greater than 0';
+    if (groupLimit <= 0) {
+      return i18n.translate(
+        'xpack.alertingBuiltins.indexThreshold.invalidGroupMinimumErrorMessage',
+        {
+          defaultMessage: '[groupLimit]: must be greater than 0',
+        }
+      );
+    }
     if (groupLimit > MAX_GROUPS) {
-      return `[groupLimit]: must be less than or equal to ${MAX_GROUPS}`;
+      return i18n.translate(
+        'xpack.alertingBuiltins.indexThreshold.invalidGroupMaximumErrorMessage',
+        {
+          defaultMessage: '[groupLimit]: must be less than or equal to {maxGroups}',
+          values: {
+            maxGroups: MAX_GROUPS,
+          },
+        }
+      );
     }
   }
 }
@@ -60,14 +86,23 @@ const AggTypes = new Set(['count', 'average', 'min', 'max', 'sum']);
 function validateAggType(aggType: string): string | undefined {
   if (AggTypes.has(aggType)) return;
 
-  const aggTypes = Array.from(AggTypes).join(', ');
-  return `must be one of ${aggTypes}`;
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidAggTypeErrorMessage', {
+    defaultMessage: 'invalid aggType: "{aggType}"',
+    values: {
+      aggType,
+    },
+  });
 }
 
-function validateDuration(duration: string): string | undefined {
+export function validateDuration(duration: string): string | undefined {
   try {
     parseDuration(duration);
   } catch (err) {
-    return `invalid duration value "${duration}"`;
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDurationErrorMessage', {
+      defaultMessage: 'invalid duration: "{duration}"',
+      values: {
+        duration,
+      },
+    });
   }
 }

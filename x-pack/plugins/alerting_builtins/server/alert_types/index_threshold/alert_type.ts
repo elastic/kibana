@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { BaseActionContext, addMessages } from './action_context';
@@ -13,14 +14,22 @@ export const ID = '.index-threshold';
 import { Service } from '../../types';
 
 const ActionGroupId = 'threshold met';
-const CompareFns = getCompareFns();
+const ComparatorFns = getComparatorFns();
+export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
 export function getAlertType(service: Service): AlertType {
   const { logger } = service;
 
-  // TODO: i18n
-  const alertTypeName = 'Index Threshold';
-  const actionGroupName = 'threshold met';
+  const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
+    defaultMessage: 'Index Threshold',
+  });
+
+  const actionGroupName = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
+    {
+      defaultMessage: 'Threshold Met',
+    }
+  );
 
   return {
     id: ID,
@@ -37,9 +46,9 @@ export function getAlertType(service: Service): AlertType {
     const { alertId, name, services } = options;
     const params: Params = options.params as Params;
 
-    const compareFn = CompareFns.get(params.comparator);
+    const compareFn = ComparatorFns.get(params.comparator);
     if (compareFn == null) {
-      throw new Error(`invalid comparator specified: "${params.comparator}"`);
+      throw new Error(getInvalidComparatorMessage(params.comparator));
     }
 
     const callCluster = services.callCluster;
@@ -89,10 +98,19 @@ export function getAlertType(service: Service): AlertType {
   }
 }
 
-type CompareFn = (value: number, threshold: number[]) => boolean;
+export function getInvalidComparatorMessage(comparator: string) {
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidComparatorErrorMessage', {
+    defaultMessage: 'invalid comparator specified: {comparator}',
+    values: {
+      comparator,
+    },
+  });
+}
 
-function getCompareFns(): Map<string, CompareFn> {
-  const fns: Record<string, CompareFn> = {
+type ComparatorFn = (value: number, threshold: number[]) => boolean;
+
+function getComparatorFns(): Map<string, ComparatorFn> {
+  const fns: Record<string, ComparatorFn> = {
     lessThan: (value: number, threshold: number[]) => value < threshold[0],
     lessThanOrEqual: (value: number, threshold: number[]) => value <= threshold[0],
     greaterThanOrEqual: (value: number, threshold: number[]) => value >= threshold[0],
@@ -102,7 +120,7 @@ function getCompareFns(): Map<string, CompareFn> {
       value < threshold[0] || value > threshold[1],
   };
 
-  const result = new Map<string, CompareFn>();
+  const result = new Map<string, ComparatorFn>();
   for (const key of Object.keys(fns)) {
     result.set(key, fns[key]);
   }

@@ -22,8 +22,8 @@ const BaseRangeQuery = {
 };
 
 describe('getRangeInfo', () => {
-  it('should return 1 date range when no dateEnd or interval specified', async () => {
-    const info = getDateRangeInfo({ ...BaseRangeQuery, dateStart: Dates[0] });
+  it('should return 1 date range when no dateStart or interval specified', async () => {
+    const info = getDateRangeInfo({ ...BaseRangeQuery, dateEnd: Dates[0] });
     const rInfo = asReadableDateRangeInfo(info);
     expect(rInfo).toMatchInlineSnapshot(`
       Object {
@@ -39,8 +39,8 @@ describe('getRangeInfo', () => {
     `);
   });
 
-  it('should return 1 date range when no dateEnd specified', async () => {
-    const info = getDateRangeInfo({ ...BaseRangeQuery, dateStart: Dates[0], interval: '1000d' });
+  it('should return 1 date range when no dateStart specified', async () => {
+    const info = getDateRangeInfo({ ...BaseRangeQuery, dateEnd: Dates[0], interval: '1000d' });
     const rInfo = asReadableDateRangeInfo(info);
     expect(rInfo).toMatchInlineSnapshot(`
       Object {
@@ -148,7 +148,7 @@ describe('getRangeInfo', () => {
       dateEnd: '2000-01-01T00:00:00.000Z',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"dateStart is after dateEnd"`
+      `"[dateStart]: is greater than [dateEnd]"`
     );
   });
 
@@ -198,7 +198,7 @@ describe('getRangeInfo', () => {
       interval: '1s',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"intervals calculated 631152001 greater than maximum 200"`
+      `"calculated number of intervals 631152001 is greater than maximum 1000"`
     );
   });
 });

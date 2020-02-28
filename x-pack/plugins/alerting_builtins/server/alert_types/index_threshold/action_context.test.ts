@@ -27,10 +27,10 @@ describe('ActionContext', () => {
     });
     const context = addMessages(base, params);
     expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 42 exceeded threshold"`
+      `"alert [name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 42 exceeded threshold count greaterThan 4 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [name] group [group] value 42 exceeded threshold count greaterThan 4 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 
@@ -54,10 +54,10 @@ describe('ActionContext', () => {
     });
     const context = addMessages(base, params);
     expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 42 exceeded threshold"`
+      `"alert [name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 42 exceeded threshold average([aggField]) greaterThan 4.2 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [name] group [group] value 42 exceeded threshold average([aggField]) greaterThan 4.2 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 
@@ -80,10 +80,10 @@ describe('ActionContext', () => {
     });
     const context = addMessages(base, params);
     expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 4 exceeded threshold"`
+      `"alert [name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] instance [group] value 4 exceeded threshold count between 4,5 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [name] group [group] value 4 exceeded threshold count between 4,5 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 });

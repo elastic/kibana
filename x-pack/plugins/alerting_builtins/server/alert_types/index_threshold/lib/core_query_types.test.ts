@@ -79,7 +79,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.aggType = '-not-a-valid-aggType-';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggType]: must be one of count, average, min, max, sum"`
+        `"[aggType]: invalid aggType: \\"-not-a-valid-aggType-\\""`
       );
     });
 
@@ -132,7 +132,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.window = 'x';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[window]: invalid duration value \\"x\\""`
+        `"[window]: invalid duration: \\"x\\""`
       );
     });
 

@@ -69,7 +69,8 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
 
     it('should handle queries before any data available', async () => {
       const query = getQueryBody({
-        dateStart: START_DATE_PLUS_YEAR,
+        dateStart: undefined,
+        dateEnd: START_DATE_PLUS_YEAR,
       });
 
       const expected = {
@@ -81,7 +82,8 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
 
     it('should handle queries after any data available', async () => {
       const query = getQueryBody({
-        dateStart: START_DATE_MINUS_YEAR,
+        dateStart: undefined,
+        dateEnd: START_DATE_MINUS_YEAR,
       });
 
       const expected = {
@@ -92,7 +94,10 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
     });
 
     it('should return the current count for 1 interval, not grouped', async () => {
-      const query = getQueryBody();
+      const query = getQueryBody({
+        dateStart: START_DATE,
+        dateEnd: START_DATE,
+      });
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
@@ -215,7 +220,7 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
       const query = { ...getQueryBody(), aggType: 'invalid-agg-type' };
       const expected = {
         error: 'Bad Request',
-        message: '[request body.aggType]: must be one of count, average, min, max, sum',
+        message: '[request body.aggType]: invalid aggType: "invalid-agg-type"',
         statusCode: 400,
       };
       expect(await runQueryExpect(query, 400)).eql(expected);
@@ -231,7 +236,7 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
       const expected = {
         error: 'Bad Request',
         message:
-          '[request body]: calculated number of intervals 631152000 is greater than maximum 200',
+          '[request body]: calculated number of intervals 631152000 is greater than maximum 1000',
         statusCode: 400,
       };
       expect(await runQueryExpect(query, 400)).eql(expected);

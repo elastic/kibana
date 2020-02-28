@@ -20,7 +20,7 @@ describe('alertType', () => {
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
     expect(alertType.name).toBe('Index Threshold');
-    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'threshold met' }]);
+    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold Met' }]);
   });
 
   it('validator succeeds with valid params', async () => {
@@ -50,7 +50,7 @@ describe('alertType', () => {
     };
 
     expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-      `"[aggType]: must be one of count, average, min, max, sum"`
+      `"[aggType]: invalid aggType: \\"foo\\""`
     );
   });
 });
