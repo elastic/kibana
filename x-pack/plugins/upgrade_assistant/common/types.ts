@@ -28,6 +28,11 @@ export enum ReindexStatus {
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+
+export interface ReindexOptions {
+  openAndClose: boolean;
+}
+
 export interface ReindexOperation extends SavedObjectAttributes {
   indexName: string;
   newIndexName: string;
@@ -37,6 +42,8 @@ export interface ReindexOperation extends SavedObjectAttributes {
   reindexTaskId: string | null;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
+
+  reindexOptions: ReindexOptions;
 
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;

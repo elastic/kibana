@@ -14,6 +14,7 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
+  ReindexOptions,
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
@@ -34,8 +35,9 @@ export interface ReindexActions {
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
+   * @param opts Additional options when creating the reindex operation
    */
-  createReindexOp(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
@@ -150,10 +152,11 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string) {
+    async createReindexOp(indexName: string, options = { openAndClose: false }) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
+        reindexOptions: options,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,

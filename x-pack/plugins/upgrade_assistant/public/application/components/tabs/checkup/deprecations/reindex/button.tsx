@@ -8,17 +8,24 @@ import { set } from 'lodash';
 import React, { Fragment, ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'src/core/public';
-import { ReindexStatus, UIReindexOption } from '../../../../../../../common/types';
+import { DocLinksStart, HttpSetup } from 'src/core/public';
+import {
+  EnrichedDeprecationInfo,
+  ReindexStatus,
+  UIReindexOption,
+} from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
+import { ReindexClosedWarningIcon } from './closed_warning_icon';
 
 interface ReindexButtonProps {
   indexName: string;
   http: HttpSetup;
+  docLinks: DocLinksStart;
+  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
 }
 
 interface ReindexButtonState {
@@ -61,7 +68,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   public render() {
-    const { indexName } = this.props;
+    const { indexName, reindexBlocker, docLinks } = this.props;
     const { flyoutVisible, reindexState } = this.state;
 
     const buttonProps: any = { size: 's', onClick: this.showFlyout };
@@ -137,7 +144,21 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
 
     return (
       <Fragment>
-        <EuiButton {...buttonProps}>{buttonContent}</EuiButton>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="center"
+          direction="row"
+          responsive={false}
+        >
+          {reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed ? (
+            <EuiFlexItem>
+              <ReindexClosedWarningIcon indexName={indexName} docLinks={docLinks} />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <EuiButton {...buttonProps}>{buttonContent}</EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         {flyoutVisible && (
           <ReindexFlyout
@@ -153,8 +174,10 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   private newService() {
-    const { indexName, http } = this.props;
-    return new ReindexPollingService(indexName, http);
+    const { indexName, http, reindexBlocker } = this.props;
+    return new ReindexPollingService(indexName, http, {
+      openAndClose: reindexBlocker === 'index-closed',
+    });
   }
 
   private subscribeToUpdates() {

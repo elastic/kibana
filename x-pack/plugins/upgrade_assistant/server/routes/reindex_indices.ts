@@ -47,6 +47,9 @@ export function registerReindexIndicesRoutes(
         params: schema.object({
           indexName: schema.string(),
         }),
+        body: schema.object({
+          openAndClose: schema.boolean({ defaultValue: false }),
+        }),
       },
     },
     versionCheckHandlerWrapper(
@@ -61,6 +64,7 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { indexName } = request.params as any;
+        const { openAndClose } = request.body as any;
         const { client } = savedObjects;
         const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
@@ -84,7 +88,7 @@ export function registerReindexIndicesRoutes(
           const reindexOp =
             existingOp && existingOp.attributes.status === ReindexStatus.paused
               ? await reindexService.resumeReindexOperation(indexName)
-              : await reindexService.createReindexOperation(indexName);
+              : await reindexService.createReindexOperation(indexName, { openAndClose });
 
           // Add users credentials for the worker to use
           credentialStore.set(reindexOp, request.headers);

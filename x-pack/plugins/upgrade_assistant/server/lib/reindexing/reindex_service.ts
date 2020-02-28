@@ -14,7 +14,9 @@ import {
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
+  ReindexOptions,
 } from '../../../common/types';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
@@ -51,8 +53,9 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
+   * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -311,7 +314,11 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
+
+    if (reindexOptions.openAndClose) {
+      await callAsUser('indices.open', { index: indexName });
+    }
 
     const startReindex = (await callAsUser('reindex', {
       refresh: true,
@@ -391,7 +398,7 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
     const existingAliases = (
       await callAsUser('indices.getAlias', {
@@ -415,6 +422,10 @@ export const reindexServiceFactory = (
 
     if (!aliasResponse.acknowledged) {
       throw Boom.badImplementation(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions.openAndClose) {
+      await callAsUser('indices.close', { index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -517,7 +528,7 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string) {
+    async createReindexOperation(indexName: string, opts = { openAndClose: false }) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
@@ -537,7 +548,7 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(indexName);
+      return actions.createReindexOp(indexName, opts);
     },
 
     async findReindexOperation(indexName: string) {

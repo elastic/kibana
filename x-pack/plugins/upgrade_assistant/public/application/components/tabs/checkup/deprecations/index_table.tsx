@@ -7,9 +7,9 @@
 import { sortBy } from 'lodash';
 import React from 'react';
 
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import { ReindexButton, ReindexClosedWarningIcon } from './reindex';
+import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
@@ -73,7 +73,7 @@ export class IndexDeprecationTableUI extends React.Component<
     const actionsColumn = this.generateActionsColumn();
 
     if (actionsColumn) {
-      columns.push(actionsColumn);
+      columns.push(actionsColumn as any);
     }
 
     const sorting = {
@@ -153,24 +153,12 @@ export class IndexDeprecationTableUI extends React.Component<
               <AppContext.Consumer>
                 {({ http, docLinks }) => {
                   return (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      justifyContent="center"
-                      direction="row"
-                      responsive={false}
-                    >
-                      {indexDep.blockerForReindexing === 'index-closed' ? (
-                        <EuiFlexItem>
-                          <ReindexClosedWarningIcon
-                            indexName={indexDep.index}
-                            docLinks={docLinks}
-                          />
-                        </EuiFlexItem>
-                      ) : null}
-                      <EuiFlexItem>
-                        <ReindexButton indexName={indexDep.index!} http={http} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <ReindexButton
+                      docLinks={docLinks}
+                      reindexBlocker={indexDep.blockerForReindexing}
+                      indexName={indexDep.index!}
+                      http={http}
+                    />
                   );
                 }}
               </AppContext.Consumer>
