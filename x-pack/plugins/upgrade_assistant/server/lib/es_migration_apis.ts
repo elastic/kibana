@@ -29,6 +29,10 @@ export async function getUpgradeAssistantStatus(
   // If we have found deprecation information for index/indices, add some additional information;
   // is it currently open or closed?
   if (indexNames.length) {
+    // According to https://www.elastic.co/guide/en/elasticsearch/reference/7.6/cluster-state.html
+    // The response from this call is considered internal and subject to change. We have an API
+    // integration test for asserting that the current ES version still returns what we expect.
+    // This lives in x-pack/test/upgrade_assistant_integration
     const indicesMetadata: ClusterStateAPIResponse = await dataClient.callAsCurrentUser(
       'cluster.state',
       {
