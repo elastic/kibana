@@ -6,6 +6,7 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
+import * as runtimeTypes from 'io-ts';
 
 import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
@@ -19,8 +20,6 @@ import {
   Maybe,
   HistogramType,
 } from '../../graphql/types';
-
-export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
@@ -133,3 +132,6 @@ export interface RequestOptionsPaginated extends RequestBasicOptions {
   fields: readonly string[];
   sortField?: SortField;
 }
+
+export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
+  runtimeTypes.union([type, runtimeTypes.null]);
