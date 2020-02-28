@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ParsedQuery } from 'query-string';
+import { ParsedUrlQuery } from 'querystring';
 import { transform } from 'lodash';
 
 /**
@@ -42,9 +42,9 @@ export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
 }
 
 export const encodeQuery = (
-  query: ParsedQuery,
+  query: ParsedUrlQuery | {},
   encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
-) =>
+): ParsedUrlQuery =>
   transform(query, (result, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;

@@ -20,7 +20,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
@@ -101,7 +101,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
 
-      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
+      return parse(queryString || '') as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {

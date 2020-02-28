@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
+// eslint-disable-next-line import/no-nodejs-modules
+import { parse, stringify } from 'querystring';
 import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
@@ -31,17 +32,12 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
       exact
       path={url}
       render={({ location }) => {
-        const queryStringDecoded = parse(location.search.substring(1), {
-          sort: false,
-        }) as Required<QueryStringType>;
+        const queryStringDecoded = parse(location.search.substring(1));
 
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
-        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-          sort: false,
-          encode: false,
-        });
+        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
         return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
@@ -61,10 +57,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(hostName)) {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-            sort: false,
-            encode: false,
-          });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
@@ -76,19 +69,13 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             hosts,
             queryStringDecoded.query || ''
           );
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-            sort: false,
-            encode: false,
-          });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
           );
         } else {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-            sort: false,
-            encode: false,
-          });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
 
           return (
             <Redirect

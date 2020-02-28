@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -45,7 +45,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
+      const { redirect } = parse(search.replace(/^\?/, ''));
 
       history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
     }

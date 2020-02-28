@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 
 export function parseQueryString() {
   // window.location.search is an empty string
@@ -26,5 +26,5 @@ export function parseQueryString() {
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return parse(hrefSplit[1]);
 }

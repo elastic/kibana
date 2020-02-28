@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
+import { parse, stringify } from 'querystring';
 import { Location } from 'history';
 import { omit } from 'lodash';
 import React from 'react';
@@ -102,7 +102,7 @@ const encodeRisonAppState = (state: AnyObject) => ({
 export const mapRisonAppLocationToState = <State extends {}>(
   mapState: (risonAppState: AnyObject) => State = (state: AnyObject) => state as State
 ) => (location: Location): State => {
-  const queryValues = parse(location.search.substring(1), { sort: false });
+  const queryValues = parse(location.search.substring(1));
   const decodedState = decodeRisonAppState(queryValues);
   return mapState(decodedState);
 };
@@ -110,20 +110,17 @@ export const mapRisonAppLocationToState = <State extends {}>(
 export const mapStateToRisonAppLocation = <State extends {}>(
   mapState: (state: State) => AnyObject = (state: State) => state
 ) => (state: State, location: Location): Location => {
-  const previousQueryValues = parse(location.search.substring(1), { sort: false });
+  const previousQueryValues = parse(location.search.substring(1));
   const previousState = decodeRisonAppState(previousQueryValues);
 
   const encodedState = encodeRisonAppState({
     ...previousState,
     ...mapState(state),
   });
-  const newQueryValues = stringify(
-    {
-      ...previousQueryValues,
-      ...encodedState,
-    },
-    { sort: false }
-  );
+  const newQueryValues = stringify({
+    ...previousQueryValues,
+    ...encodedState,
+  });
   return {
     ...location,
     search: `?${newQueryValues}`,

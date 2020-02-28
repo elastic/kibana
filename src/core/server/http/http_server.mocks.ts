@@ -19,7 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-import { stringify } from 'query-string';
+import querystring from 'querystring';
 
 import { schema } from '@kbn/config-schema';
 
@@ -63,7 +63,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeAuthRequired,
   validation = {},
 }: RequestFixtureOptions<P, Q, B> = {}) {
-  const queryString = stringify(query, { sort: false });
+  const queryString = querystring.stringify(query);
 
   return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({

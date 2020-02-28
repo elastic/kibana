@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
+import { parse, stringify } from 'querystring';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFilterName } from '../../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
 import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? parse(search.slice(1), { sort: false }) : {};
+  return search ? parse(search.slice(1)) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
@@ -18,7 +18,7 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, { sort: false, encode: false });
+  return stringify(encodedQuery);
 }
 
 export type APMQueryParams = {

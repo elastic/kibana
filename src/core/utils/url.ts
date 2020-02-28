@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ParsedQuery } from 'query-string';
+import { ParsedUrlQuery } from 'querystring';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 /**
@@ -32,7 +32,7 @@ export interface URLMeaningfulParts {
   protocol?: string | null;
   slashes?: boolean | null;
   port?: string | null;
-  query: ParsedQuery;
+  query: ParsedUrlQuery;
 }
 
 /**

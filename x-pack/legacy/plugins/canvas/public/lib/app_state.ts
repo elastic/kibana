@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import { get } from 'lodash';
 // @ts-ignore untyped local
 import { getInitialState } from '../state/initial_state';
@@ -38,7 +38,7 @@ export function getDefaultAppState(): AppState {
 export function getCurrentAppState(): AppState {
   const history = historyProvider(getWindow());
   const { search } = history.getLocation();
-  const qs = !!search ? parse(search.replace(/^\?/, ''), { sort: false }) : {};
+  const qs = !!search ? parse(search.replace(/^\?/, '')) : {};
   const appState = assignAppState({}, qs);
 
   return appState;

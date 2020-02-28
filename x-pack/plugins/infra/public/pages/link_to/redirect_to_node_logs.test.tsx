@@ -35,7 +35,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+        to="/?sourceId=default&logFilter=(expression%3A'HOST_FIELD%3A%2520HOST_NAME'%2Ckind%3Akuery)"
       />
     `);
   });
@@ -47,7 +47,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)"
+        to="/?sourceId=default&logFilter=(expression%3A'CONTAINER_FIELD%3A%2520CONTAINER_ID'%2Ckind%3Akuery)"
       />
     `);
   });
@@ -59,7 +59,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)"
+        to="/?sourceId=default&logFilter=(expression%3A'POD_FIELD%3A%2520POD_ID'%2Ckind%3Akuery)"
       />
     `);
   });
@@ -73,7 +73,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+        to="/?sourceId=default&logPosition=(position%3A(tiebreaker%3A0%2Ctime%3A1550671089404)%2CstreamLive%3A!f)&logFilter=(expression%3A'HOST_FIELD%3A%2520HOST_NAME'%2Ckind%3Akuery)"
       />
     `);
   });
@@ -89,7 +89,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)"
+        to="/?sourceId=default&logPosition=(position%3A(tiebreaker%3A0%2Ctime%3A1550671089404)%2CstreamLive%3A!f)&logFilter=(expression%3A'(HOST_FIELD%3A%2520HOST_NAME)%2520and%2520(FILTER_FIELD%3AFILTER_VALUE)'%2Ckind%3Akuery)"
       />
     `);
   });
@@ -103,7 +103,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=SOME-OTHER-SOURCE&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+        to="/?sourceId=SOME-OTHER-SOURCE&logFilter=(expression%3A'HOST_FIELD%3A%2520HOST_NAME'%2Ckind%3Akuery)"
       />
     `);
   });

@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { stringify } from 'query-string';
+import { stringify } from 'querystring';
 
 const esVersion: string[] = [];
 
@@ -35,7 +35,7 @@ export function send(method: string, path: string, data: any) {
   const wrappedDfd = $.Deferred(); // eslint-disable-line new-cap
 
   const options: JQuery.AjaxSettings = {
-    url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
+    url: '../api/console/proxy?' + stringify({ path, method }),
     data,
     contentType: getContentType(data),
     cache: false,

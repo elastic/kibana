@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
-import { stringify } from 'query-string';
+import { stringify } from 'querystring';
 import url from 'url';
 import zlib from 'zlib';
 import { promisify } from 'util';
@@ -140,7 +140,7 @@ export async function getLogoutRequest({
   };
 
   const signer = crypto.createSign('RSA-SHA256');
-  signer.update(stringify(queryStringParameters, { sort: false }));
+  signer.update(stringify(queryStringParameters));
   queryStringParameters.Signature = signer.sign(signingKey.toString(), 'base64');
 
   return queryStringParameters;

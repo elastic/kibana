@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import fn from './quandl';
 import moment from 'moment';
 import fetchMock from 'node-fetch';
@@ -26,7 +26,7 @@ const parseURL = require('url').parse;
 const tlConfig = require('./fixtures/tl_config')();
 
 function parseUrlParams(url) {
-  return parse(parseURL(url).query, { sort: false });
+  return parse(parseURL(url).query);
 }
 
 jest.mock('node-fetch', () =>

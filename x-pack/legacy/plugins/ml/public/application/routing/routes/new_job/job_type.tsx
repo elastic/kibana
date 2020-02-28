@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -31,7 +31,7 @@ export const jobTypeRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { index, savedSearchId }: Record<string, any> = parse(location.search);
   const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>

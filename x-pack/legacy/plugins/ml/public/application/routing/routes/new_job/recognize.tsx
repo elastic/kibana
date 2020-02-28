@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -39,7 +39,7 @@ export const checkViewOrCreateRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { id, index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { id, index, savedSearchId }: Record<string, any> = parse(location.search);
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
@@ -53,9 +53,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
 };
 
 const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { id: moduleId, index: indexPatternId }: Record<string, any> = parse(location.search, {
-    sort: false,
-  });
+  const { id: moduleId, index: indexPatternId }: Record<string, any> = parse(location.search);
 
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
   useResolver(undefined, undefined, deps.config, {

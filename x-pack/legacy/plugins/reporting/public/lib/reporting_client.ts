@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { stringify } from 'query-string';
+import { stringify } from 'querystring';
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import rison from 'rison-node';

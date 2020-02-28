@@ -5,7 +5,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { parse, stringify } from 'query-string';
+// eslint-disable-next-line import/no-nodejs-modules
+import { parse, stringify } from 'querystring';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 
@@ -43,7 +44,7 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string) => {
-  const parsedQueryString = parse(queryString, { sort: false });
+  const parsedQueryString = parse(queryString);
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -52,11 +53,11 @@ export const getParamFromQueryString = (queryString: string, key: string) => {
 export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
   queryString: string
 ): string => {
-  const previousQueryValues = parse(queryString, { sort: false });
+  const previousQueryValues = parse(queryString);
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 
-    return stringify(url.encodeQuery(previousQueryValues), { sort: false, encode: false });
+    return stringify(url.encodeQuery(previousQueryValues));
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ

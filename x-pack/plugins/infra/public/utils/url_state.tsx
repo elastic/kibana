@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
+import { parse, stringify, ParsedUrlQuery } from 'querystring';
 import { History, Location } from 'history';
 import { throttle } from 'lodash';
 import React from 'react';
@@ -145,7 +145,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString: Record<string, any> = parse(queryString, { sort: false });
+  const parsedQueryString: Record<string, any> = parse(queryString);
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -155,7 +155,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = parse(queryString, { sort: false });
+  const previousQueryValues = parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
@@ -163,8 +163,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
     url.encodeQuery({
       ...previousQueryValues,
       [stateKey]: encodedUrlState,
-    }),
-    { sort: false, encode: false }
+    })
   );
 };
 

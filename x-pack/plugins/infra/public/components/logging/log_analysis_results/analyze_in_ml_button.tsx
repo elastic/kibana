@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
 import url from 'url';
-import { stringify } from 'query-string';
+import { stringify } from 'querystring';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -62,7 +62,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${stringify(urlUtils.encodeQuery({ _g }), { encode: false })}`;
+  const hash = `/explorer?${stringify(urlUtils.encodeQuery({ _g }))}`;
 
   return url.format({
     pathname,
@@ -95,10 +95,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?${stringify(urlUtils.encodeQuery({ _g, _a }), {
-    sort: false,
-    encode: false,
-  })}`;
+  const hash = `/timeseriesexplorer?${stringify(urlUtils.encodeQuery({ _g, _a }))}`;
 
   return url.format({
     pathname,

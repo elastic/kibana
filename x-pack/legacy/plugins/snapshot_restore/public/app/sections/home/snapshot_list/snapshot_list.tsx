@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse } from 'querystring';
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
@@ -86,7 +86,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const [filteredPolicy, setFilteredPolicy] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (search) {
-      const parsedParams = parse(search.replace(/^\?/, ''), { sort: false });
+      const parsedParams = parse(search.replace(/^\?/, ''));
       const { repository, policy } = parsedParams;
 
       if (policy && policy !== filteredPolicy) {

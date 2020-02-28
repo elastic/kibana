@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
+import { parse, stringify } from 'querystring';
 import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
@@ -23,9 +23,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       search = location.search;
     }
 
-    const params = search
-      ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
-      : {};
+    const params = search ? parse(search[0] === '?' ? search.slice(1) : search) : {};
 
     return getSupportedUrlParams(params);
   };
@@ -33,7 +31,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
   const updateUrlParams: UpdateUrlParams = updatedParams => {
     if (!history || !location) return;
     const { pathname, search } = location;
-    const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });
+    const currentParams = parse(search[0] === '?' ? search.slice(1) : search);
     const mergedParams = {
       ...currentParams,
       ...updatedParams,
@@ -52,8 +50,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
             ...params,
             [key]: value,
           };
-        }, {}),
-        { sort: false }
+        }, {})
       ),
     });
   };
