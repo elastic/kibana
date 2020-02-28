@@ -20,12 +20,11 @@
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { tabifyAggResponse } from './tabify';
 import { IAggConfig, IAggConfigs, AggGroupNames, Schemas, AggConfigs } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 
-describe('tabifyAggResponse Integration', () => {
-  const typesRegistry = mockAggTypesRegistry();
+jest.mock('ui/new_platform');
 
+describe('tabifyAggResponse Integration', () => {
   const createAggConfigs = (aggs: IAggConfig[] = []) => {
     const field = {
       name: '@timestamp',
@@ -40,17 +39,18 @@ describe('tabifyAggResponse Integration', () => {
       },
     } as unknown) as IndexPattern;
 
-    return new AggConfigs(indexPattern, aggs, {
-      typesRegistry,
-      schemas: new Schemas([
+    return new AggConfigs(
+      indexPattern,
+      aggs,
+      new Schemas([
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
           min: 1,
           defaults: [{ schema: 'metric', type: 'count' }],
         },
-      ]).all,
-    });
+      ]).all
+    );
   };
 
   const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;

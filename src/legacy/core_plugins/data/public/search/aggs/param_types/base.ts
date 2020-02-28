@@ -18,10 +18,10 @@
  */
 
 import { IAggConfigs } from '../agg_configs';
-import { IAggConfig } from '../agg_config';
+import { AggConfig } from '../agg_config';
 import { FetchOptions, ISearchSource } from '../../../../../../../plugins/data/public';
 
-export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
+export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;
   type: string;
   displayName: string;

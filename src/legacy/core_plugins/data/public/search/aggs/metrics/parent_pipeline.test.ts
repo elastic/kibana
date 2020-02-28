@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import sinon from 'sinon';
 import { derivativeMetricAgg } from './derivative';
 import { cumulativeSumMetricAgg } from './cumulative_sum';
 import { movingAvgMetricAgg } from './moving_avg';
 import { serialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 jest.mock('../schemas', () => {
@@ -34,13 +34,9 @@ jest.mock('../schemas', () => {
   };
 });
 
+jest.mock('ui/new_platform');
+
 describe('parent pipeline aggs', function() {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
-  const typesRegistry = mockAggTypesRegistry();
-
   const metrics = [
     { name: 'derivative', title: 'Derivative', provider: derivativeMetricAgg },
     { name: 'cumulative_sum', title: 'Cumulative Sum', provider: cumulativeSumMetricAgg },
@@ -98,7 +94,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry }
+          null
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -224,16 +220,16 @@ describe('parent pipeline aggs', function() {
         });
 
         const searchSource: any = {};
-        const customMetricSpy = jest.fn();
+        const customMetricSpy = sinon.spy();
         const customMetric = aggConfig.params.customMetric;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
         });
-        expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);
+        expect(customMetricSpy.calledWith(customMetric, searchSource)).toBe(true);
       });
     });
   });

@@ -17,13 +17,8 @@
  * under the License.
  */
 
-export {
-  AggTypesRegistry,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
-} from './agg_types_registry';
-export { AggType } from './agg_type';
 export { aggTypes } from './agg_types';
+export { AggType } from './agg_type';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
@@ -57,4 +52,4 @@ export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
 
 // types
-export { CreateAggConfigParams, IAggConfig, IAggConfigs } from './types';
+export { IAggConfig, IAggConfigs } from './types';
