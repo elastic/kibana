@@ -9,7 +9,7 @@ import React from 'react';
 import { WrapperPage } from '../../components/wrapper_page';
 import { Create } from './components/create';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { HeaderPage } from '../../components/header_page';
+import { CaseHeaderPage } from './components/case_header_page';
 import * as i18n from './translations';
 import { getCaseUrl } from '../../components/link_to';
 
@@ -17,15 +17,11 @@ const backOptions = {
   href: getCaseUrl(),
   text: i18n.BACK_TO_ALL,
 };
-const badgeOptions = {
-  beta: true,
-  text: i18n.PAGE_BADGE_LABEL,
-  tooltip: i18n.PAGE_BADGE_TOOLTIP,
-};
+
 export const CreateCasePage = React.memo(() => (
   <>
     <WrapperPage>
-      <HeaderPage backOptions={backOptions} badgeOptions={badgeOptions} title={i18n.CREATE_TITLE} />
+      <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
       <Create />
     </WrapperPage>
     <SpyRoute />
