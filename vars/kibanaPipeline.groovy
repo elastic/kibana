@@ -191,43 +191,6 @@ def uploadCoverageArtifacts(prefix, pattern) {
   uploadGcsArtifact(uploadPrefix, pattern)
 }
 
-def uploadCoverageStaticSite(timestamp) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
-  def ARTIFACT_PATTERNS = [
-    'target/kibana-*/**/*.png',
-    'target/kibana-*/**/*.css',
-    'target/kibana-*/**/*.html',
-    'target/kibana-*/**/*.js',
-  ]
-
-  withEnv([
-    "GCS_UPLOAD_PREFIX=${uploadPrefix}"
-  ], {
-    ARTIFACT_PATTERNS.each { pattern ->
-      uploadGcsArtifact(uploadPrefix, pattern)
-    }
-  })
-}
-
-def uploadCoverageStaticSite_PROD(timestamp) {
-  def ARTIFACT_PATTERNS = [
-    'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined'
-  ]
-
-  def uploadPrefix = "elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
-
-  ARTIFACT_PATTERNS.each { pattern ->
-    withVaultSecret(secret: 'secret/gce/elastic-bekitzur/service-account/kibana', secret_field: 'value', variable_name: 'GCE_ACCOUNT') {
-      sh """
-        gsutil -m cp -r ${pattern} '${uploadPrefix}'
-      """
-    }
-  }
-}
-
-
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [

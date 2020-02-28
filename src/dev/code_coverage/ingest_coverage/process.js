@@ -20,41 +20,56 @@
 import { fromEventPattern, of } from 'rxjs';
 import { concatMap, delay, map } from 'rxjs/operators';
 import jsonStream from './json_stream';
-import { pipe, noop } from './utils';
+import { pipe, noop, green } from './utils';
 import { ingest } from './ingest';
 import {
   staticSite,
-  statsAndCoveredFilePath,
-  addPath,
+  statsAndstaticSiteUrl,
+  addJsonSummaryPath,
   testRunner,
-  timeStamp,
+  addTimeStamp,
   distro,
   buildId,
-  maybeDropCoveredFilePath,
-} from './conversions';
+  coveredFilePath,
+  ciRunUrl,
+} from './transforms';
+import { resolve } from "path";
+
+const KIBANA_ROOT_PATH = '../../../..';
+const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 
 const ms = process.env.DELAY || 0;
-const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
+const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || undefined;
+const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
+const prokStatsTimeStampBuildId = pipe(
+  statsAndstaticSiteUrl,
+  buildId,
+  addPrePopulatedTimeStamp,
+);
+const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase, 'live_cc_app'));
 
-export default ({ coveragePath }, log) => {
-  log.debug(`### Code coverage ingestion set to delay for: ${ms} ms\n`);
 
-  const prokStatsTimeStampBuildIdCoveredFilePath = pipe(
-    statsAndCoveredFilePath,
-    buildId,
-    timeStamp,
-    staticSite(staticSiteUrlBase)
-  );
-  const addPathTestRunnerAndDistro = pipe(addPath(coveragePath), testRunner, distro);
+export default ({ jsonSummaryPath }, log) => {
+  log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
+  log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
 
-  const objStream = jsonStream(coveragePath).on('done', noop);
+  validateRoot(KIBANA_ROOT, log);
+
+  const addjsonSummaryPathAndDistro = pipe(addJsonSummaryPath(jsonSummaryPath), distro);
+  const objStream = jsonStream(jsonSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
-      map(prokStatsTimeStampBuildIdCoveredFilePath),
-      map(addPathTestRunnerAndDistro),
-      map(maybeDropCoveredFilePath),
+      map(prokStatsTimeStampBuildId),
+      map(coveredFilePath),
+      map(ciRunUrl),
+      map(addjsonSummaryPathAndDistro),
+      map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
 };
+
+function validateRoot(x, log) {
+  return /kibana$/.test(x) ? noop() : log.warning(`!!! 'kibana' NOT FOUND in ROOT: ${x}\n`);
+}

@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import React from 'react';
+// import { render } from '@testing-library/react';
+// import App from './app';
 
-export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));;
-export const noop = () => {};
-export const green = x => chalk.greenBright.bold(x);
-export const id = x => x;
-export const always = x => () => x;
+test('placeholder test - add actual tests later if needed', () => {
+  // const { getByText } = render(<App />);
+  // const linkElement = getByText(/learn react/i);
+  // expect(linkElement).toBeInTheDocument();
+  expect(true).toBe(true);
+});

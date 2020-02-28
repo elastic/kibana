@@ -17,10 +17,32 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import React from "react";
+import CoverageItem from './coverage_item';
 
-export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));;
-export const noop = () => {};
-export const green = x => chalk.greenBright.bold(x);
-export const id = x => x;
-export const always = x => () => x;
+const renderItem = testRunnerTypes =>  (x, i) => {
+  return (
+      <CoverageItem
+        item={x}
+        key={i}
+        testRunnerTypes={testRunnerTypes}
+      />
+  );
+};
+
+export default function HistoricalList({testRunnerTypes, historicalItems}) {
+  const renderWithRunners = renderItem(testRunnerTypes);
+  const renderRunnersWithItem = (item, index) =>
+    renderWithRunners(item, index);
+
+  return (
+    <div className="font-bold text-xl mb-2 flex-horizontal-center">
+      <ul>
+        {historicalItems
+          .reverse()
+          .map(renderRunnersWithItem)}
+      </ul>
+    </div>
+     );
+}
+

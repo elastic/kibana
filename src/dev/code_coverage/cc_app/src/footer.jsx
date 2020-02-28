@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import React from "react";
 
-export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));;
-export const noop = () => {};
-export const green = x => chalk.greenBright.bold(x);
-export const id = x => x;
-export const always = x => () => x;
+export default function Footer () {
+  return (
+    <header className="App-footer">
+       Contact the Kibana QA Team on <span className="font-bold">Slack</span> @ #kibana-qa
+    </header>
+  );
+}

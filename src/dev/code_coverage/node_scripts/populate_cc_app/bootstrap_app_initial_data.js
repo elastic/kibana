@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import { run } from '@kbn/dev-utils';
+import { parseAndPopulate } from './parse_and_populate';
 
-export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));;
-export const noop = () => {};
-export const green = x => chalk.greenBright.bold(x);
-export const id = x => x;
-export const always = x => () => x;
+const description = 'Populate the initial data for the code coverage static site.';
+
+const exec = srcFile => destFile => ({ log }) => {
+  const processSrcAndDest = parseAndPopulate(srcFile)(destFile);
+  return processSrcAndDest(log);
+}
+
+
+export const populate = (srcFile, destFile) =>
+  run(exec(srcFile)(destFile), { description });

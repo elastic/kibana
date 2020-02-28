@@ -1,4 +1,4 @@
-String path = doc['coveredFilePath.keyword'].value;
+String path = doc['staticSiteUrl.keyword'].value;
 
 if (path.contains('/apm'))  return "APM";
  else if (path.contains('/canvas')) return "Canvas";

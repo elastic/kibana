@@ -20,35 +20,45 @@
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
-
+import { green } from './utils'
 const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
+
 export const ingest = log => async body => {
-  let index = '';
-  if (!body.coveredFilePath) {
-    index = TOTALS_INDEX;
-  } else {
-    index = COVERAGE_INDEX;
-  }
+  const  index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
 
   try {
     await client.index({ index, body });
+
     log.verbose(`
 ### Sent:
 ### ES HOST (redacted): ${redacted}
-### Index: ${index}
+### Index: ${green(index)}
 ${pretty(body)}
 `);
+
+    const {staticSiteUrl} = body;
+    log.debug(`
+### Sent:
+### Index: ${green(index)}
+### staticSiteUrl: ${staticSiteUrl}
+`);
+
   } catch (e) {
+    const red = color('red');
     const err = `
-### ES HOST (redacted): \n\t${color(redacted)}
-### INDEX: \n\t${color(index)}
+### ES HOST (redacted): \n\t${red(redacted)}
+### INDEX: \n\t${red(index)}
 ### Partial orig err stack: \n\t${partial(e.stack)}
-### BODY:\n${pretty(body)}
+### Item BODY:\n${pretty(body)}
+### Orig Err:\n${pretty(e.body.error)}
+
+### Troubleshooting Hint:
+${red('Perhaps the coverage data was not merged properly?\n')}
 `;
 
     throw createFailError(err);
@@ -68,8 +78,10 @@ function redact(x) {
     return x;
   }
 }
-function color(x) {
-  return chalk.red.bgWhiteBright(x);
+function color(whichColor) {
+  return function colorInner(x) {
+    return chalk[whichColor].bgWhiteBright(x);
+  }
 }
 function pretty(x) {
   return JSON.stringify(x, null, 2);
