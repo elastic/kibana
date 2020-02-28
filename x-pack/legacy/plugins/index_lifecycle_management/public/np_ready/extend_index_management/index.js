@@ -9,7 +9,6 @@ import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
-import { extensionsService } from '../../../../index_management/public';
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -200,11 +199,45 @@ export const ilmFilterExtension = indices => {
           },
         ],
       },
+      {
+        type: 'field_value_selection',
+        field: 'ilm.phase',
+        name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.lifecyclePhaseLabel', {
+          defaultMessage: 'Lifecycle phase',
+        }),
+        multiSelect: 'or',
+        options: [
+          {
+            value: 'hot',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
+              defaultMessage: 'Hot',
+            }),
+          },
+          {
+            value: 'warm',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
+              defaultMessage: 'Warm',
+            }),
+          },
+          {
+            value: 'cold',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
+              defaultMessage: 'Cold',
+            }),
+          },
+          {
+            value: 'delete',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
+              defaultMessage: 'Delete',
+            }),
+          },
+        ],
+      },
     ];
   }
 };
 
-export const addAllExtensions = () => {
+export const addAllExtensions = extensionsService => {
   extensionsService.addAction(retryLifecycleActionExtension);
   extensionsService.addAction(removeLifecyclePolicyActionExtension);
   extensionsService.addAction(addLifecyclePolicyActionExtension);

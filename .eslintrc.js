@@ -83,12 +83,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/vis_type_table/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: [
         'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
       ],

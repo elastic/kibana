@@ -38,7 +38,6 @@ beforeAll(async () => {
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
     parents: true,
-    deep: true,
   });
 });
 
@@ -179,6 +178,7 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
+      "success",
     ]
   `);
 });

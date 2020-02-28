@@ -6,18 +6,15 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
+import { GetOverviewNetworkQueryComponent, OverviewNetworkData } from '../../../graphql/types';
 import { useUiSetting } from '../../../lib/kibana';
 import { State } from '../../../store';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
-
-import { overviewNetworkQuery } from './index.gql_query';
 
 export const ID = 'overviewNetworkQuery';
 
@@ -30,7 +27,7 @@ export interface OverviewNetworkArgs {
 }
 
 export interface OverviewNetworkProps extends QueryTemplateProps {
-  children: (args: OverviewNetworkArgs) => React.ReactNode;
+  children: (args: OverviewNetworkArgs) => React.ReactElement;
   sourceId: string;
   endDate: number;
   startDate: number;
@@ -38,8 +35,7 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
 
 export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
-      query={overviewNetworkQuery}
+    <GetOverviewNetworkQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       variables={{
@@ -64,7 +60,7 @@ export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & P
           refetch,
         });
       }}
-    </Query>
+    </GetOverviewNetworkQueryComponent>
   )
 );
 
