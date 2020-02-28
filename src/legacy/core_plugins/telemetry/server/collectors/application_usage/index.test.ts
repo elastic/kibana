@@ -26,6 +26,7 @@ import { registerApplicationUsageCollector } from './';
 import {
   ROLL_INDICES_INTERVAL,
   SAVED_OBJECTS_TOTAL_TYPE,
+  SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './telemetry_application_usage_collector';
 
 describe('telemetry_application_usage', () => {
@@ -64,8 +65,10 @@ describe('telemetry_application_usage', () => {
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
+    jest.runTimersToTime(ROLL_INDICES_INTERVAL); // Force rollTotals to run
+
     expect(await collector.fetch(callCluster)).toStrictEqual({});
-    jest.runTimersToTime(ROLL_INDICES_INTERVAL);
+    expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
   test('paging in findAll works', async () => {
@@ -76,7 +79,7 @@ describe('telemetry_application_usage', () => {
         return {
           saved_objects: [
             {
-              id: 'test-id',
+              id: 'appId',
               attributes: {
                 appId: 'appId',
                 minutesOnScreen: 10,
@@ -103,7 +106,10 @@ describe('telemetry_application_usage', () => {
       total = savedObjects.length * 2 + 1;
       return { saved_objects: savedObjects, total };
     });
+
     getUsageCollector.mockImplementation(() => savedObjectClient);
+
+    jest.runTimersToTime(ROLL_INDICES_INTERVAL); // Force rollTotals to run
 
     expect(await collector.fetch(callCluster)).toStrictEqual({
       appId: {
@@ -115,6 +121,24 @@ describe('telemetry_application_usage', () => {
         minutes_on_screen_90_days: total - 1,
       },
     });
-    jest.runTimersToTime(ROLL_INDICES_INTERVAL);
+    expect(savedObjectClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          id: 'appId',
+          type: SAVED_OBJECTS_TOTAL_TYPE,
+          attributes: {
+            appId: 'appId',
+            minutesOnScreen: total - 1 + 10,
+            numberOfClicks: total - 1 + 10,
+          },
+        },
+      ],
+      { overwrite: true }
+    );
+    expect(savedObjectClient.delete).toHaveBeenCalledTimes(total - 1);
+    expect(savedObjectClient.delete).toHaveBeenCalledWith(
+      SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+      'test-id'
+    );
   });
 });

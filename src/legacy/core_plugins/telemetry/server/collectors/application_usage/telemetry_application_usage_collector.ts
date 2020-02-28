@@ -179,25 +179,31 @@ async function rollTotals(savedObjectsClient?: ISavedObjectsRepository) {
       }),
     ]);
 
+    const existingTotals = rawApplicationUsageTotals.reduce(
+      (acc, { attributes: { appId, numberOfClicks, minutesOnScreen } }) => {
+        return {
+          ...acc,
+          // No need to sum because there should be 1 document per appId only
+          [appId]: { appId, numberOfClicks, minutesOnScreen },
+        };
+      },
+      {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>
+    );
+
     const totals = rawApplicationUsageTransactional.reduce((acc, { attributes, id }) => {
       const { appId, numberOfClicks, minutesOnScreen } = attributes;
 
       const existing = acc[appId] || { minutesOnScreen: 0, numberOfClicks: 0 };
-      const { attributes: total } = rawApplicationUsageTotals.find(
-        entry => entry.attributes.appId === appId
-      ) || {
-        attributes: { numberOfClicks: 0, minutesOnScreen: 0 },
-      };
 
       return {
         ...acc,
         [appId]: {
           appId,
-          numberOfClicks: numberOfClicks + existing.numberOfClicks + total.numberOfClicks,
-          minutesOnScreen: minutesOnScreen + existing.minutesOnScreen + total.minutesOnScreen,
+          numberOfClicks: numberOfClicks + existing.numberOfClicks,
+          minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
         },
       };
-    }, {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>);
+    }, existingTotals);
 
     await Promise.all([
       Object.entries(totals).length &&
