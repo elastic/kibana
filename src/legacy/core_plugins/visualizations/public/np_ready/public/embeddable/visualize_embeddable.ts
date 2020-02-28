@@ -43,10 +43,10 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
 } from '../../../../../../../plugins/expressions/public';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { PersistedState } from '../../../legacy_imports';
 import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
