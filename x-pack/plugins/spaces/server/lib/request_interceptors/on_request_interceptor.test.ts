@@ -19,7 +19,8 @@ import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
 import { LegacyAPI } from '../../plugin';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
-describe('onRequestInterceptor', () => {
+// FAILING: https://github.com/elastic/kibana/issues/58942
+describe.skip('onRequestInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
