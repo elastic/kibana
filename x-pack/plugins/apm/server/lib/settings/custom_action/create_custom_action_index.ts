@@ -4,92 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
+import { IClusterClient, Logger } from 'src/core/server';
 import { APMConfig } from '../../..';
+import {
+  createOrUpdateIndex,
+  Mappings
+} from '../../helpers/create_or_update_index';
+import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomActionIndex = async ({
   esClient,
-  config
+  config,
+  logger
 }: {
   esClient: IClusterClient;
   config: APMConfig;
+  logger: Logger;
 }) => {
-  try {
-    const index = getApmIndicesConfig(config).apmCustomActionIndex;
-    const { callAsInternalUser } = esClient;
-    const indexExists = await callAsInternalUser('indices.exists', { index });
-    const result = indexExists
-      ? await updateExistingIndex(index, callAsInternalUser)
-      : await createNewIndex(index, callAsInternalUser);
-
-    if (!result.acknowledged) {
-      const resultError =
-        result && result.error && JSON.stringify(result.error);
-      throw new Error(
-        `Unable to create APM Custom Actions index '${index}': ${resultError}`
-      );
-    }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create APM Custom Actions index:', e.message);
-  }
+  const index = getApmIndicesConfig(config).apmCustomActionIndex;
+  return createOrUpdateIndex({ index, esClient, logger, mappings });
 };
 
-const createNewIndex = (index: string, callWithInternalUser: CallCluster) =>
-  callWithInternalUser('indices.create', {
-    index,
-    body: {
-      settings: { 'index.auto_expand_replicas': '0-1' },
-      mappings: { properties: mappingProperties }
-    }
-  });
-
-const updateExistingIndex = (
-  index: string,
-  callWithInternalUser: CallCluster
-) =>
-  callWithInternalUser('indices.putMapping', {
-    index,
-    body: { properties: mappingProperties }
-  });
-
-const mappingProperties = {
-  '@timestamp': {
-    type: 'date'
-  },
-  label: {
-    type: 'text'
-  },
-  url: {
-    type: 'keyword'
-  },
-  actionId: {
-    type: 'keyword'
-  },
-  filters: {
-    properties: {
-      service: {
-        properties: {
-          environment: {
-            type: 'keyword'
-          },
-          name: {
-            type: 'keyword'
-          }
-        }
-      },
-      transaction: {
-        properties: {
-          name: {
-            type: 'keyword'
-          },
-          type: {
-            type: 'keyword'
-          }
-        }
-      }
+const mappings: Mappings = {
+  dynamic: false,
+  properties: {
+    '@timestamp': {
+      type: 'date'
+    },
+    label: {
+      type: 'text'
+    },
+    url: {
+      type: 'keyword'
+    },
+    actionId: {
+      type: 'keyword'
+    },
+    filters: {
+      dynamic: true,
+      properties: {}
     }
   }
 };

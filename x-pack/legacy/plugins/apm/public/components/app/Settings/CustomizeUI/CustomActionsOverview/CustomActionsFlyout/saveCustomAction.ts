@@ -24,41 +24,53 @@ export async function saveCustomAction({
   callApmApi: APMClient;
   toasts: NotificationsStart['toasts'];
 }) {
-  const customAction = {
-    actionId: 'trace',
-    label,
-    url,
-    filters
-  };
-  if (id) {
-    await callApmApi({
-      pathname: '/api/apm/settings/custom-actions/{id}',
-      method: 'PUT',
-      params: {
-        path: { id },
-        body: customAction
-      }
-    });
-    toasts.addSuccess({
-      iconType: 'check',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.update.successed',
-        { defaultMessage: 'Changes saved!' }
-      )
-    });
-  } else {
-    await callApmApi({
-      pathname: '/api/apm/settings/custom-actions',
-      method: 'POST',
-      params: {
-        body: customAction
-      }
-    });
+  try {
+    const customAction = {
+      actionId: 'trace',
+      label,
+      url,
+      filters
+    };
+    if (id) {
+      await callApmApi({
+        pathname: '/api/apm/settings/custom-actions/{id}',
+        method: 'PUT',
+        params: {
+          path: { id },
+          body: customAction
+        }
+      });
+    } else {
+      await callApmApi({
+        pathname: '/api/apm/settings/custom-actions',
+        method: 'POST',
+        params: {
+          body: customAction
+        }
+      });
+    }
     toasts.addSuccess({
       iconType: 'check',
       title: i18n.translate(
         'xpack.apm.settings.customizeUI.customActions.create.successed',
-        { defaultMessage: 'Created a new custom action!' }
+        { defaultMessage: 'Link saved!' }
+      )
+    });
+  } catch (error) {
+    toasts.addDanger({
+      title: i18n.translate(
+        'xpack.apm.settings.customizeUI.customActions.create.failed',
+        { defaultMessage: 'Link could not be saved!' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.settings.customizeUI.customActions.create.failed',
+        {
+          defaultMessage:
+            'Something went wrong when saving the link. Error: "{errorMessage}"',
+          values: {
+            errorMessage: error.message
+          }
+        }
       )
     });
   }
