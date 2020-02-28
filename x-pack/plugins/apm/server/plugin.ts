@@ -67,6 +67,11 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       config: currentConfig,
       logger
     });
+    // create custom action index without blocking setup lifecycle
+    createApmCustomActionIndex({
+      esClient: core.elasticsearch.dataClient,
+      config: currentConfig
+    });
 
     plugins.home.tutorials.registerTutorial(
       tutorialProvider({
