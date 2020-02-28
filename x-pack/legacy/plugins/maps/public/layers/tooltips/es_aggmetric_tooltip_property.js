@@ -27,9 +27,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     ) {
       return this._rawValue;
     }
-    const indexPatternField = this._indexPattern.fields.getByName(
-      this._metricField.getESDocFieldName()
-    );
+    const indexPatternField = this._indexPattern.fields.getByName(this._metricField.getRootName());
     if (!indexPatternField) {
       return this._rawValue;
     }

@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlexItem, EuiIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiTitle, EuiFlexItem, EuiIcon, EuiFlexGroup, EuiBetaBadge } from '@elastic/eui';
 import {
   EuiModal,
   EuiButton,
@@ -128,6 +128,17 @@ export const ConnectorAddModal = ({
                       values={{
                         actionTypeName: actionType.name,
                       }}
+                    />
+                    &emsp;
+                    <EuiBetaBadge
+                      label="Beta"
+                      tooltipContent={i18n.translate(
+                        'xpack.triggersActionsUI.sections.addModalConnectorForm.betaBadgeTooltipContent',
+                        {
+                          defaultMessage:
+                            'This module is not GA. Please help us by reporting any bugs.',
+                        }
+                      )}
                     />
                   </h3>
                 </EuiTitle>
