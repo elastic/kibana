@@ -14,6 +14,7 @@ import { httpServiceMock } from '../../../../../../../../../src/core/server/mock
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';
+import { responseAdapter } from './test_adapters';
 
 interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get' | 'post'>;
@@ -77,7 +78,7 @@ const createMockServer = () => {
     }
 
     await getRoute(routeSpy).handler(context, validatedRequest, responseMock);
-    return responseMock;
+    return responseAdapter(responseMock);
   };
 
   return {
