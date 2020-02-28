@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -16,6 +15,7 @@ import {
   TlsEdges,
   TlsSortField,
   GetTlsQuery,
+  GetTlsQueryComponent,
   FlowTargetSourceDest,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
@@ -23,7 +23,6 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { tlsQuery } from './index.gql_query';
 
 const ID = 'tlsQuery';
 
@@ -40,7 +39,7 @@ export interface TlsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: TlsArgs) => React.ReactNode;
+  children: (args: TlsArgs) => React.ReactElement;
   flowTarget: FlowTargetSourceDest;
   ip: string;
   type: networkModel.NetworkType;
@@ -93,8 +92,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
-        query={tlsQuery}
+      <GetTlsQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -136,7 +134,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.Tls.totalCount', data),
           });
         }}
-      </Query>
+      </GetTlsQueryComponent>
     );
   }
 }

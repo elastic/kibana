@@ -11,7 +11,7 @@ import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
-import { createSavedSearchesLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/saved_searches';
+import { createSavedSearchesLoader } from '../../../../../src/plugins/discover/public';
 
 export class Plugin {
   public start(core: ShimCore, plugins: ShimPlugins): void {
