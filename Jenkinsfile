@@ -14,8 +14,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           catchError {
             // retryable.enable()
             parallel([
-              'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
-              'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
+              // 'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
+              // 'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
               'kibana-functional-agent': kibanaPipeline.withWorkers('kibana-functional-tests',
                 {
                   kibanaPipeline.bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
