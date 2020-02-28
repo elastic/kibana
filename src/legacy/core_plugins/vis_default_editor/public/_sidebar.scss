@@ -37,10 +37,6 @@
   padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
 }
 
-.visEditorSidebar__titleText {
-  @include euiTextTruncate;
-}
-
 .visEditorSidebar__indexPatternPlaceholder {
   min-height: $euiSizeXXL;
   border-bottom: $euiBorderThin;

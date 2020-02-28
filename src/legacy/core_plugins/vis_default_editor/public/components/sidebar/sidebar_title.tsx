@@ -27,14 +27,13 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
-  EuiToolTip,
+  EuiButton,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { EuiSpacer } from '@elastic/eui';
 import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
 
 interface LinkedSearchProps {
@@ -57,10 +56,10 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
     vis.emit('unlinkFromSavedSearch');
   }, [vis]);
 
-  const linkButtonTooltipText = i18n.translate(
-    'visDefaultEditor.sidebar.savedSearch.linkButtonTooltipText',
+  const linkButtonAriaLabel = i18n.translate(
+    'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
     {
-      defaultMessage: 'Click to read additional information or break link to saved search',
+      defaultMessage: 'Link to saved search. Click to learn more or break link.',
     }
   );
 
@@ -75,8 +74,8 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
         <EuiIcon type="search" />
       </EuiFlexItem>
 
-      <EuiFlexItem className="visEditorSidebar__titleText" grow={false}>
-        <EuiTitle size="xs">
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <EuiTitle size="xs" className="eui-textTruncate">
           <h2
             title={i18n.translate('visDefaultEditor.sidebar.savedSearch.titleAriaLabel', {
               defaultMessage: 'Saved search: {title}',
@@ -93,16 +92,13 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
       <EuiFlexItem grow={false}>
         <EuiPopover
           anchorPosition="downRight"
-          ownFocus
           button={
-            <EuiToolTip content={linkButtonTooltipText}>
-              <EuiButtonIcon
-                aria-label={linkButtonTooltipText}
-                data-test-subj="unlinkSavedSearch"
-                iconType="link"
-                onClick={onClickButtonLink}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              aria-label={linkButtonAriaLabel}
+              data-test-subj="unlinkSavedSearch"
+              iconType="link"
+              onClick={onClickButtonLink}
+            />
           }
           isOpen={showPopover}
           closePopover={closePopover}
@@ -114,8 +110,16 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
               defaultMessage="Linked to saved search"
             />
           </EuiPopoverTitle>
-          <div style={{ width: '300px' }}>
-            <EuiText>
+          <div style={{ width: 260 }}>
+            <EuiText size="s">
+              <p>
+                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
+                  <FormattedMessage
+                    id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
+                    defaultMessage="View this search in Discover"
+                  />
+                </EuiButtonEmpty>
+              </p>
               <p>
                 <FormattedMessage
                   id="visDefaultEditor.sidebar.savedSearch.popoverHelpText"
@@ -125,28 +129,15 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
                   from the saved search."
                 />
               </p>
-            </EuiText>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiButtonEmpty href={`#/discover/${savedSearch.id}`} size="s">
-                  <FormattedMessage
-                    id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
-                    defaultMessage="View in Discover"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty color="danger" onClick={onClickUnlikFromSavedSearch} size="s">
+              <p>
+                <EuiButton color="danger" onClick={onClickUnlikFromSavedSearch} size="s" fullWidth>
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.unlinkSavedSearchButtonText"
                     defaultMessage="Break link to saved search"
                   />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiButton>
+              </p>
+            </EuiText>
           </div>
         </EuiPopover>
       </EuiFlexItem>
@@ -158,7 +149,7 @@ function SidebarTitle({ savedSearch, vis, isLinkedSearch }: SidebarTitleProps) {
   return isLinkedSearch && savedSearch ? (
     <LinkedSearch savedSearch={savedSearch} vis={vis} />
   ) : vis.type.options.showIndexSelection ? (
-    <EuiTitle size="xs" className="visEditorSidebar__titleContainer visEditorSidebar__titleText">
+    <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
