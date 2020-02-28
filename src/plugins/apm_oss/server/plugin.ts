@@ -20,10 +20,6 @@ import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { APMOSSConfig } from './';
 
-export interface APMOSSPluginSetup {
-  config$: Observable<APMOSSConfig>;
-}
-
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -39,4 +35,8 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
 
   start() {}
   stop() {}
+}
+
+export interface APMOSSPluginSetup {
+  config$: Observable<APMOSSConfig>;
 }
