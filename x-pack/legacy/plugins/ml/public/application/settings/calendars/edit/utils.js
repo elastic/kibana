@@ -73,14 +73,17 @@ function getCalendars() {
 export function getCalendarSettingsData() {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await Promise.all([getJobIds(), getGroupIds(), getCalendars()]);
+      const [jobIds, groupIds, calendars] = await Promise.all([
+        getJobIds(),
+        getGroupIds(),
+        getCalendars(),
+      ]);
 
-      const formattedData = {
-        jobIds: data[0],
-        groupIds: data[1],
-        calendars: data[2],
-      };
-      resolve(formattedData);
+      resolve({
+        jobIds,
+        groupIds,
+        calendars,
+      });
     } catch (error) {
       console.log(error);
       reject(error);

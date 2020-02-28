@@ -173,6 +173,7 @@ describe('createIndex', () => {
     await clusterClientAdapter.createIndex('foo');
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.create', {
       index: 'foo',
+      body: {},
     });
   });
 
