@@ -59,6 +59,10 @@ export const createFindRulesStatusRoute = (getClients: GetScopedClients): Hapi.S
           searchFields: ['alertId'],
         });
         const accumulated = await acc;
+
+        // Array accessors can result in undefined but
+        // this is not represented in typescript for some reason,
+        // https://github.com/Microsoft/TypeScript/issues/11122
         const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
           lastFiveErrorsForId.saved_objects[0]?.attributes
         );
