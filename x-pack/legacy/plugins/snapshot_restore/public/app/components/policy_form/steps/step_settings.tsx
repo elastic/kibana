@@ -55,7 +55,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         checked:
           isAllIndices ||
           // Mark individual indices as selected in list mode
-          (Array.isArray(config.indices) && config.indices.includes(index))
+          config.indices?.includes(index)
             ? 'on'
             : undefined,
       })
@@ -65,14 +65,12 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   // Policy indices (config.indices) can contain existing indices, index patterns, aliases or non-existing indices
   // This returns the policy indices that exist in a user's system
   const policyIndicesInAllIndices = indices.filter(index => {
-    return Array.isArray(config.indices) && config.indices.includes(index);
+    return config.indices?.includes(index);
   });
 
-  const policyIndicesLength = Array.isArray(config.indices) && config.indices.length;
+  const policyIndicesLength = config.indices?.length ?? 0;
   // If the length is different, we can assume the policy indices contains index patterns, aliases or non-existing indices
-  const policyIndicesHasCustomPattern =
-    policyIndicesInAllIndices.length !== 0 &&
-    policyIndicesInAllIndices.length !== policyIndicesLength;
+  const policyIndicesHasCustomPattern = policyIndicesInAllIndices.length !== policyIndicesLength;
 
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select

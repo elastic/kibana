@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 interface Props {
-  indices: string[] | string | undefined;
+  indices: string[] | undefined;
 }
 
 import { useAppDependencies } from '../index';
