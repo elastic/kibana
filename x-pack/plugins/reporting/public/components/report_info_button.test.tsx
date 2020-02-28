@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockJobQueueClient } from './report_info_button.test.mocks';
-
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReportInfoButton } from './report_info_button';
+import { JobQueueClient } from '../lib/job_queue_client';
+
+jest.mock('../lib/job_queue_client');
+
+const httpSetup = {} as any;
+const mockJobQueueClient = new JobQueueClient(httpSetup);
 
 describe('ReportInfoButton', () => {
-  beforeEach(() => {
-    mockJobQueueClient.getInfo = jest.fn(() => ({
-      payload: { title: 'Test Job' },
-    }));
-  });
-
   it('handles button click flyout on click', () => {
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-123" />);
+    const wrapper = mountWithIntl(
+      <ReportInfoButton jobQueueClient={mockJobQueueClient} jobId="abc-123" />
+    );
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
     expect(input).toMatchSnapshot();
   });
 
-  it('opens flyout with info', () => {
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-456" />);
+  it('opens flyout with info', async () => {
+    const wrapper = mountWithIntl(
+      <ReportInfoButton jobQueueClient={mockJobQueueClient} jobId="abc-456" />
+    );
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');
@@ -42,7 +44,9 @@ describe('ReportInfoButton', () => {
       throw new Error('Could not fetch the job info');
     });
 
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-789" />);
+    const wrapper = mountWithIntl(
+      <ReportInfoButton jobQueueClient={mockJobQueueClient} jobId="abc-789" />
+    );
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');

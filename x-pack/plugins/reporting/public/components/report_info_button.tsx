@@ -259,13 +259,13 @@ export class ReportInfoButton extends Component<Props, State> {
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }
-    } catch (kfetchError) {
+    } catch (err) {
       if (this.mounted) {
         this.setState({
           isLoading: false,
           calloutTitle: 'Unable to fetch report info',
           info: null,
-          error: kfetchError,
+          error: err.message,
         });
       }
     }
