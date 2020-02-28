@@ -22,8 +22,8 @@ import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
 import { linkToSnapshots } from '../../../services/navigation';
+import { useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
@@ -49,11 +49,12 @@ export const RestoreList: React.FunctionComponent = () => {
     currentInterval
   );
 
+  const { uiMetricService } = useServices();
+
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_RESTORE_LIST_LOAD);
-  }, [trackUiMetric]);
+    uiMetricService.trackUiMetric(UIM_RESTORE_LIST_LOAD);
+  }, [uiMetricService]);
 
   let content: JSX.Element;
 

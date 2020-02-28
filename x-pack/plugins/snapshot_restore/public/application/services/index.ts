@@ -5,3 +5,5 @@
  */
 
 export { HttpService } from './http';
+
+export { UiMetricService } from './ui_metric';

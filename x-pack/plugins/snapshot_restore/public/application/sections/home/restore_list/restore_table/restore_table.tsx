@@ -13,7 +13,6 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useServices } from '../../../../app_context';
-import { uiMetricService } from '../../../../services/ui_metric';
 import { FormattedDateTime } from '../../../../components';
 import { ShardsTable } from './shards_table';
 
@@ -22,8 +21,7 @@ interface Props {
 }
 
 export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
-  const { i18n } = useServices();
-  const { trackUiMetric } = uiMetricService;
+  const { i18n, uiMetricService } = useServices();
 
   // Track restores to show based on sort and pagination state
   const [currentRestores, setCurrentRestores] = useState<SnapshotRestore[]>([]);
@@ -79,7 +77,7 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
     if (newItemIdToExpandedRowMap[index]) {
       delete newItemIdToExpandedRowMap[index];
     } else {
-      trackUiMetric(UIM_RESTORE_LIST_EXPAND_INDEX);
+      uiMetricService.trackUiMetric(UIM_RESTORE_LIST_EXPAND_INDEX);
       newItemIdToExpandedRowMap[index] = <ShardsTable shards={shards} />;
     }
     setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);

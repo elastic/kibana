@@ -14,13 +14,13 @@ import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
+import { useServices } from '../../../app_context';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -40,6 +40,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     },
     sendRequest: reload,
   } = useLoadPolicies();
+
+  const { uiMetricService } = useServices();
 
   // Load retention cluster settings
   const {
@@ -71,10 +73,9 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   };
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_POLICY_LIST_LOAD);
-  }, [trackUiMetric]);
+    uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
+  }, [uiMetricService]);
 
   let content: JSX.Element;
 

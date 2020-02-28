@@ -28,7 +28,6 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { uiMetricService } from '../../../../services/ui_metric';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -47,8 +46,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const { i18n } = useServices();
-  const { trackUiMetric } = uiMetricService;
+  const { i18n, uiMetricService } = useServices();
   const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 
   const columns = [
@@ -65,7 +63,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
-                onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+                onClick={() => uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
                 href={openPolicyDetailsUrl(name)}
                 data-test-subj="policyLink"
               >
@@ -323,6 +321,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           }
         );
       }
+      return '';
     },
   };
 

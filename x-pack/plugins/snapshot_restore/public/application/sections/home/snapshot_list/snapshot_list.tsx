@@ -23,8 +23,7 @@ import {
   linkToAddPolicy,
   linkToSnapshot,
 } from '../../../services/navigation';
-import { uiMetricService } from '../../../services/ui_metric';
-
+import { useServices } from '../../../app_context';
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
 
@@ -46,6 +45,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     data: { snapshots = [], repositories = [], policies = [], errors = {} },
     sendRequest: reload,
   } = useLoadSnapshots();
+
+  const { uiMetricService } = useServices();
 
   const openSnapshotDetailsUrl = (
     repositoryNameToOpen: string,
@@ -94,10 +95,9 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   }, [filteredPolicy, filteredRepository, history, search]);
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
-  }, [trackUiMetric]);
+    uiMetricService.trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
+  }, [uiMetricService]);
 
   let content;
 

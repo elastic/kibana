@@ -3,23 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UIM_APP_NAME } from '../../constants';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 
-class UiMetricService {
-  track?: ReturnType<typeof createUiStatsReporter>;
+import { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/public';
 
-  public init = (getReporter: typeof createUiStatsReporter): void => {
-    this.track = getReporter(UIM_APP_NAME);
-  };
+export class UiMetricService {
+  private usageCollection: UsageCollectionSetup | undefined;
 
-  public trackUiMetric = (eventName: string): void => {
-    if (!this.track) throw Error('UiMetricService not initialized.');
-    return this.track(METRIC_TYPE.COUNT, eventName);
-  };
+  constructor(private appName: string) {}
+
+  public setup(usageCollection: UsageCollectionSetup) {
+    this.usageCollection = usageCollection;
+  }
+
+  private track(name: string) {
+    if (!this.usageCollection) {
+      // Usage collection might have been disabled in Kibana config.
+      return;
+    }
+    this.usageCollection.reportUiStats(this.appName, 'count' as UiStatsMetricType, name);
+  }
+
+  public trackUiMetric(eventName: string) {
+    return this.track(eventName);
+  }
 }
-
-export const uiMetricService = new UiMetricService();

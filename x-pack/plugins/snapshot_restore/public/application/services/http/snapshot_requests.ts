@@ -5,24 +5,29 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
-import { uiMetricService } from '../ui_metric';
-import { httpService } from './http';
+import { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
+
+// Temporary hack to provide the uiMetricService instance to this file.
+// TODO: Refactor and export an ApiService instance through the app dependencies context
+let uiMetricService: UiMetricService;
+export const setUiMetricServiceSnapshot = (_uiMetricService: UiMetricService) => {
+  uiMetricService = _uiMetricService;
+};
+// End hack
 
 export const useLoadSnapshots = () =>
   useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
+    path: `${API_BASE_PATH}snapshots`,
     method: 'get',
     initialData: [],
   });
 
 export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
   useRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
-        snapshotId
-      )}`
-    ),
+    path: `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
+      snapshotId
+    )}`,
     method: 'get',
   });
 
@@ -30,15 +35,14 @@ export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>
 ) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}snapshots/${snapshotIds
-        .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
-        .join(',')}`
-    ),
+    path: `${API_BASE_PATH}snapshots/${snapshotIds
+      .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
+      .join(',')}`,
     method: 'delete',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE);
+  uiMetricService.trackUiMetric(
+    snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE
+  );
   return result;
 };

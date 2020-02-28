@@ -14,7 +14,6 @@ import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
 import { RepositoryDetails } from './repository_details';
@@ -42,6 +41,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     sendRequest: reload,
   } = useLoadRepositories();
 
+  const { uiMetricService } = useServices();
+
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
   };
@@ -60,10 +61,9 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
-  }, [trackUiMetric]);
+    uiMetricService.trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
+  }, [uiMetricService]);
 
   let content;
 

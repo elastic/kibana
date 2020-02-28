@@ -20,7 +20,6 @@ import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -58,8 +57,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositoryFilter,
   policyFilter,
 }) => {
-  const { i18n } = useServices();
-  const { trackUiMetric } = uiMetricService;
+  const { i18n, uiMetricService } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
   const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
@@ -75,7 +73,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
-          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          onClick={() => uiMetricService.trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
           data-test-subj="snapshotLink"
         >
@@ -296,6 +294,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           }
         );
       }
+      return '';
     },
   };
 

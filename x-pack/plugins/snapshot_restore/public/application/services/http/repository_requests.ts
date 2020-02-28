@@ -13,13 +13,20 @@ import {
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
   UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
 } from '../../constants';
-import { uiMetricService } from '../ui_metric';
-import { httpService } from './http';
+import { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
+
+// Temporary hack to provide the uiMetricService instance to this file.
+// TODO: Refactor and export an ApiService instance through the app dependencies context
+let uiMetricService: UiMetricService;
+export const setUiMetricServiceRepository = (_uiMetricService: UiMetricService) => {
+  uiMetricService = _uiMetricService;
+};
+// End hack
 
 export const useLoadRepositories = () => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
+    path: `${API_BASE_PATH}repositories`,
     method: 'get',
     initialData: [],
   });
@@ -27,41 +34,35 @@ export const useLoadRepositories = () => {
 
 export const useLoadRepository = (name: Repository['name']) => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
+    path: `${API_BASE_PATH}repositories/${encodeURIComponent(name)}`,
     method: 'get',
   });
 };
 
 export const verifyRepository = async (name: Repository['name']) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`
-    ),
+    path: `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`,
     method: 'get',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_VERIFY);
+  uiMetricService.trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_VERIFY);
   return result;
 };
 
 export const cleanupRepository = async (name: Repository['name']) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/cleanup`
-    ),
+    path: `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/cleanup`,
     method: 'post',
     body: undefined,
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_CLEANUP);
+  uiMetricService.trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_CLEANUP);
   return result;
 };
 
 export const useLoadRepositoryTypes = () => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
+    path: `${API_BASE_PATH}repository_types`,
     method: 'get',
     initialData: [],
   });
@@ -69,39 +70,34 @@ export const useLoadRepositoryTypes = () => {
 
 export const addRepository = async (newRepository: Repository | EmptyRepository) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
+    path: `${API_BASE_PATH}repositories`,
     method: 'put',
     body: newRepository,
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_REPOSITORY_CREATE);
+  uiMetricService.trackUiMetric(UIM_REPOSITORY_CREATE);
   return result;
 };
 
 export const editRepository = async (editedRepository: Repository | EmptyRepository) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`
-    ),
+    path: `${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`,
     method: 'put',
     body: editedRepository,
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_REPOSITORY_UPDATE);
+  uiMetricService.trackUiMetric(UIM_REPOSITORY_UPDATE);
   return result;
 };
 
 export const deleteRepositories = async (names: Array<Repository['name']>) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`
-    ),
+    path: `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(names.length > 1 ? UIM_REPOSITORY_DELETE_MANY : UIM_REPOSITORY_DELETE);
+  uiMetricService.trackUiMetric(
+    names.length > 1 ? UIM_REPOSITORY_DELETE_MANY : UIM_REPOSITORY_DELETE
+  );
   return result;
 };

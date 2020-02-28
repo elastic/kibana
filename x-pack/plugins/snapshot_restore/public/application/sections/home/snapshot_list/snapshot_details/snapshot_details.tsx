@@ -37,7 +37,6 @@ import {
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
 interface Props {
@@ -61,8 +60,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   onClose,
   onSnapshotDeleted,
 }) => {
-  const { i18n } = useServices();
-  const { trackUiMetric } = uiMetricService;
+  const { i18n, uiMetricService } = useServices();
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -107,7 +105,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
           {tabOptions.map(tab => (
             <EuiTab
               onClick={() => {
-                trackUiMetric(panelTypeToUiMetricMap[tab.id]);
+                uiMetricService.trackUiMetric(panelTypeToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}
@@ -212,7 +210,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                                     'You cannot delete the last successful snapshot stored in a managed repository.',
                                 }
                               )
-                            : null
+                            : undefined
                         }
                       >
                         <FormattedMessage
