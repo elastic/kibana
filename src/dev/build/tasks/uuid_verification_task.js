@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 import { read } from '../lib';
 
 export const UuidVerificationTask = {
   description: 'Verify that no UUID file is baked into the build',
 
   async run(config, log, build) {
-    const buildRoot = build.resolvePath();
-    const uuidFilePath = resolve(buildRoot, 'data', 'uuid');
+    const uuidFilePath = build.resolvePath('data', 'uuid');
     await read(uuidFilePath).then(
       function success() {
         throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
