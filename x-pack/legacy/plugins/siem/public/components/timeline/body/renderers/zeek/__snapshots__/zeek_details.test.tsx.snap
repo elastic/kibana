@@ -2803,7 +2803,7 @@ tr:hover .c3:focus::before {
                                             <div
                                               className="euiFlexItem euiFlexItem--flexGrowZero c1"
                                             >
-                                              <DraggableWrapper
+                                              <Component
                                                 dataProvider={
                                                   Object {
                                                     "and": Array [],
@@ -2821,34 +2821,25 @@ tr:hover .c3:focus::before {
                                                 }
                                                 render={[Function]}
                                               >
-                                                <Component
-                                                  dataProvider={
-                                                    Object {
-                                                      "and": Array [],
-                                                      "enabled": true,
-                                                      "excluded": false,
-                                                      "id": "draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j",
-                                                      "kqlQuery": "",
-                                                      "name": "Cu0n232QMyvNtzb75j",
-                                                      "queryMatch": Object {
-                                                        "field": "zeek.session_id",
-                                                        "operator": ":",
-                                                        "value": "Cu0n232QMyvNtzb75j",
-                                                      },
-                                                    }
-                                                  }
-                                                  registerProvider={[Function]}
-                                                  render={[Function]}
-                                                  unRegisterProvider={[Function]}
+                                                <Wrapper
+                                                  data-test-subj="draggableWrapperDiv"
                                                 >
-                                                  <Wrapper
+                                                  <div
+                                                    className="c2"
                                                     data-test-subj="draggableWrapperDiv"
                                                   >
-                                                    <div
-                                                      className="c2"
-                                                      data-test-subj="draggableWrapperDiv"
+                                                    <ConnectFunction
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                      getContainerForClone={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isCombineEnabled={false}
+                                                      isDropDisabled={true}
+                                                      mode="standard"
+                                                      renderClone={null}
+                                                      type="DEFAULT"
                                                     >
-                                                      <ConnectFunction
+                                                      <Droppable
                                                         direction="vertical"
                                                         droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                         getContainerForClone={[Function]}
@@ -2856,42 +2847,39 @@ tr:hover .c3:focus::before {
                                                         isCombineEnabled={false}
                                                         isDropDisabled={true}
                                                         mode="standard"
+                                                        placeholder={null}
                                                         renderClone={null}
-                                                        type="DEFAULT"
-                                                      >
-                                                        <Droppable
-                                                          direction="vertical"
-                                                          droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                          getContainerForClone={[Function]}
-                                                          ignoreContainerClipping={false}
-                                                          isCombineEnabled={false}
-                                                          isDropDisabled={true}
-                                                          mode="standard"
-                                                          placeholder={null}
-                                                          renderClone={null}
-                                                          shouldAnimatePlaceholder={false}
-                                                          snapshot={
-                                                            Object {
-                                                              "draggingFromThisWith": null,
-                                                              "draggingOverWith": null,
-                                                              "isDraggingOver": false,
-                                                              "isUsingPlaceholder": false,
-                                                            }
+                                                        shouldAnimatePlaceholder={false}
+                                                        snapshot={
+                                                          Object {
+                                                            "draggingFromThisWith": null,
+                                                            "draggingOverWith": null,
+                                                            "isDraggingOver": false,
+                                                            "isUsingPlaceholder": false,
                                                           }
-                                                          type="DEFAULT"
-                                                          updateViewportMaxScroll={[Function]}
-                                                          useClone={null}
+                                                        }
+                                                        type="DEFAULT"
+                                                        updateViewportMaxScroll={[Function]}
+                                                        useClone={null}
+                                                      >
+                                                        <div
+                                                          data-rbd-droppable-context-id="6"
+                                                          data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                         >
-                                                          <div
-                                                            data-rbd-droppable-context-id="6"
-                                                            data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                          <PublicDraggable
+                                                            draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                            index={0}
+                                                            key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                           >
-                                                            <PublicDraggable
+                                                            <PrivateDraggable
+                                                              canDragInteractiveElements={false}
                                                               draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                               index={0}
-                                                              key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                              isClone={false}
+                                                              isEnabled={true}
+                                                              shouldRespectForcePress={false}
                                                             >
-                                                              <PrivateDraggable
+                                                              <Connect(Draggable)
                                                                 canDragInteractiveElements={false}
                                                                 draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                                 index={0}
@@ -2899,56 +2887,70 @@ tr:hover .c3:focus::before {
                                                                 isEnabled={true}
                                                                 shouldRespectForcePress={false}
                                                               >
-                                                                <Connect(Draggable)
+                                                                <Draggable
                                                                   canDragInteractiveElements={false}
                                                                   draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                                  dropAnimationFinished={[Function]}
                                                                   index={0}
                                                                   isClone={false}
                                                                   isEnabled={true}
+                                                                  mapped={
+                                                                    Object {
+                                                                      "combineTargetFor": null,
+                                                                      "offset": Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      },
+                                                                      "shouldAnimateDisplacement": true,
+                                                                      "snapshot": Object {
+                                                                        "combineTargetFor": null,
+                                                                        "combineWith": null,
+                                                                        "draggingOver": null,
+                                                                        "dropAnimation": null,
+                                                                        "isClone": false,
+                                                                        "isDragging": false,
+                                                                        "isDropAnimating": false,
+                                                                        "mode": null,
+                                                                      },
+                                                                      "type": "SECONDARY",
+                                                                    }
+                                                                  }
                                                                   shouldRespectForcePress={false}
                                                                 >
-                                                                  <Draggable
-                                                                    canDragInteractiveElements={false}
-                                                                    draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                                    dropAnimationFinished={[Function]}
-                                                                    index={0}
-                                                                    isClone={false}
-                                                                    isEnabled={true}
-                                                                    mapped={
-                                                                      Object {
-                                                                        "combineTargetFor": null,
-                                                                        "offset": Object {
-                                                                          "x": 0,
-                                                                          "y": 0,
-                                                                        },
-                                                                        "shouldAnimateDisplacement": true,
-                                                                        "snapshot": Object {
-                                                                          "combineTargetFor": null,
-                                                                          "combineWith": null,
-                                                                          "draggingOver": null,
-                                                                          "dropAnimation": null,
-                                                                          "isClone": false,
-                                                                          "isDragging": false,
-                                                                          "isDropAnimating": false,
-                                                                          "mode": null,
-                                                                        },
-                                                                        "type": "SECONDARY",
-                                                                      }
-                                                                    }
-                                                                    shouldRespectForcePress={false}
+                                                                  <ConditionalPortal
+                                                                    isDragging={false}
+                                                                    registerProvider={[Function]}
+                                                                    usePortal={false}
                                                                   >
-                                                                    <ConditionalPortal
-                                                                      usePortal={false}
+                                                                    <ProviderContainerComponent
+                                                                      aria-labelledby="rbd-lift-instruction-6"
+                                                                      data-rbd-drag-handle-context-id="6"
+                                                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                                      data-rbd-draggable-context-id="6"
+                                                                      data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
+                                                                      data-test-subj="providerContainer"
+                                                                      draggable={false}
+                                                                      isDragging={false}
+                                                                      onDragStart={[Function]}
+                                                                      onTransitionEnd={null}
+                                                                      registerProvider={[Function]}
+                                                                      style={
+                                                                        Object {
+                                                                          "transform": null,
+                                                                          "transition": null,
+                                                                        }
+                                                                      }
+                                                                      tabIndex={0}
                                                                     >
-                                                                      <ProviderContainerComponent
+                                                                      <div
                                                                         aria-labelledby="rbd-lift-instruction-6"
+                                                                        className="c3"
                                                                         data-rbd-drag-handle-context-id="6"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                                         data-rbd-draggable-context-id="6"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
-                                                                        isDragging={false}
                                                                         onDragStart={[Function]}
                                                                         onTransitionEnd={null}
                                                                         style={
@@ -2959,132 +2961,112 @@ tr:hover .c3:focus::before {
                                                                         }
                                                                         tabIndex={0}
                                                                       >
-                                                                        <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
-                                                                          className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
-                                                                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                                          data-rbd-draggable-context-id="6"
-                                                                          data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                                          data-test-subj="providerContainer"
-                                                                          draggable={false}
-                                                                          onDragStart={[Function]}
-                                                                          onTransitionEnd={null}
-                                                                          style={
-                                                                            Object {
-                                                                              "transform": null,
-                                                                              "transition": null,
-                                                                            }
-                                                                          }
-                                                                          tabIndex={0}
+                                                                        <styled.span
+                                                                          data-test-subj="draggable-content-zeek.session_id"
                                                                         >
-                                                                          <styled.span
+                                                                          <span
+                                                                            className="c4"
                                                                             data-test-subj="draggable-content-zeek.session_id"
                                                                           >
-                                                                            <span
-                                                                              className="c4"
-                                                                              data-test-subj="draggable-content-zeek.session_id"
+                                                                            <EuiToolTip
+                                                                              content="zeek.session_id"
+                                                                              data-test-subj="badge-tooltip"
+                                                                              delay="regular"
+                                                                              position="top"
                                                                             >
-                                                                              <EuiToolTip
-                                                                                content="zeek.session_id"
-                                                                                data-test-subj="badge-tooltip"
-                                                                                delay="regular"
-                                                                                position="top"
+                                                                              <span
+                                                                                className="euiToolTipAnchor"
+                                                                                onMouseOut={[Function]}
+                                                                                onMouseOver={[Function]}
                                                                               >
-                                                                                <span
-                                                                                  className="euiToolTipAnchor"
-                                                                                  onMouseOut={[Function]}
-                                                                                  onMouseOver={[Function]}
+                                                                                <Badge
+                                                                                  color="hollow"
+                                                                                  iconType="tag"
+                                                                                  onBlur={[Function]}
+                                                                                  onFocus={[Function]}
                                                                                 >
-                                                                                  <Badge
+                                                                                  <EuiBadge
                                                                                     color="hollow"
                                                                                     iconType="tag"
                                                                                     onBlur={[Function]}
                                                                                     onFocus={[Function]}
-                                                                                  >
-                                                                                    <EuiBadge
-                                                                                      color="hollow"
-                                                                                      iconType="tag"
-                                                                                      onBlur={[Function]}
-                                                                                      onFocus={[Function]}
-                                                                                      style={
-                                                                                        Object {
-                                                                                          "verticalAlign": "top",
-                                                                                        }
+                                                                                    style={
+                                                                                      Object {
+                                                                                        "verticalAlign": "top",
                                                                                       }
-                                                                                    >
-                                                                                      <EuiInnerText>
-                                                                                        <span
-                                                                                          className="euiBadge euiBadge--hollow euiBadge--iconLeft"
-                                                                                          onBlur={[Function]}
-                                                                                          onFocus={[Function]}
-                                                                                          style={
-                                                                                            Object {
-                                                                                              "verticalAlign": "top",
-                                                                                            }
+                                                                                    }
+                                                                                  >
+                                                                                    <EuiInnerText>
+                                                                                      <span
+                                                                                        className="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                                                                                        onBlur={[Function]}
+                                                                                        onFocus={[Function]}
+                                                                                        style={
+                                                                                          Object {
+                                                                                            "verticalAlign": "top",
                                                                                           }
-                                                                                          title="Cu0n232QMyvNtzb75j"
+                                                                                        }
+                                                                                        title="Cu0n232QMyvNtzb75j"
+                                                                                      >
+                                                                                        <span
+                                                                                          className="euiBadge__content"
                                                                                         >
                                                                                           <span
-                                                                                            className="euiBadge__content"
+                                                                                            className="euiBadge__text"
                                                                                           >
-                                                                                            <span
-                                                                                              className="euiBadge__text"
+                                                                                            Cu0n232QMyvNtzb75j
+                                                                                          </span>
+                                                                                          <EuiIcon
+                                                                                            className="euiBadge__icon"
+                                                                                            size="s"
+                                                                                            type="tag"
+                                                                                          >
+                                                                                            <EuiIconEmpty
+                                                                                              aria-hidden={true}
+                                                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
+                                                                                              focusable="false"
+                                                                                              role="img"
+                                                                                              style={null}
                                                                                             >
-                                                                                              Cu0n232QMyvNtzb75j
-                                                                                            </span>
-                                                                                            <EuiIcon
-                                                                                              className="euiBadge__icon"
-                                                                                              size="s"
-                                                                                              type="tag"
-                                                                                            >
-                                                                                              <EuiIconEmpty
+                                                                                              <svg
                                                                                                 aria-hidden={true}
                                                                                                 className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
                                                                                                 focusable="false"
+                                                                                                height={16}
                                                                                                 role="img"
                                                                                                 style={null}
-                                                                                              >
-                                                                                                <svg
-                                                                                                  aria-hidden={true}
-                                                                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
-                                                                                                  focusable="false"
-                                                                                                  height={16}
-                                                                                                  role="img"
-                                                                                                  style={null}
-                                                                                                  viewBox="0 0 16 16"
-                                                                                                  width={16}
-                                                                                                  xmlns="http://www.w3.org/2000/svg"
-                                                                                                />
-                                                                                              </EuiIconEmpty>
-                                                                                            </EuiIcon>
-                                                                                          </span>
+                                                                                                viewBox="0 0 16 16"
+                                                                                                width={16}
+                                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                              />
+                                                                                            </EuiIconEmpty>
+                                                                                          </EuiIcon>
                                                                                         </span>
-                                                                                      </EuiInnerText>
-                                                                                    </EuiBadge>
-                                                                                  </Badge>
-                                                                                </span>
-                                                                              </EuiToolTip>
-                                                                            </span>
-                                                                          </styled.span>
-                                                                        </div>
-                                                                      </ProviderContainerComponent>
-                                                                    </ConditionalPortal>
-                                                                  </Draggable>
-                                                                </Connect(Draggable)>
-                                                              </PrivateDraggable>
-                                                            </PublicDraggable>
-                                                            <AnimateInOut
-                                                              on={null}
-                                                              shouldAnimate={false}
-                                                            />
-                                                          </div>
-                                                        </Droppable>
-                                                      </ConnectFunction>
-                                                    </div>
-                                                  </Wrapper>
-                                                </Component>
-                                              </DraggableWrapper>
+                                                                                      </span>
+                                                                                    </EuiInnerText>
+                                                                                  </EuiBadge>
+                                                                                </Badge>
+                                                                              </span>
+                                                                            </EuiToolTip>
+                                                                          </span>
+                                                                        </styled.span>
+                                                                      </div>
+                                                                    </ProviderContainerComponent>
+                                                                  </ConditionalPortal>
+                                                                </Draggable>
+                                                              </Connect(Draggable)>
+                                                            </PrivateDraggable>
+                                                          </PublicDraggable>
+                                                          <AnimateInOut
+                                                            on={null}
+                                                            shouldAnimate={false}
+                                                          />
+                                                        </div>
+                                                      </Droppable>
+                                                    </ConnectFunction>
+                                                  </div>
+                                                </Wrapper>
+                                              </Component>
                                             </div>
                                           </EuiFlexItem>
                                         </TokensFlexItem>
@@ -3105,7 +3087,7 @@ tr:hover .c3:focus::before {
                                             <div
                                               className="euiFlexItem euiFlexItem--flexGrowZero c1"
                                             >
-                                              <DraggableWrapper
+                                              <Component
                                                 dataProvider={
                                                   Object {
                                                     "and": Array [],
@@ -3123,34 +3105,25 @@ tr:hover .c3:focus::before {
                                                 }
                                                 render={[Function]}
                                               >
-                                                <Component
-                                                  dataProvider={
-                                                    Object {
-                                                      "and": Array [],
-                                                      "enabled": true,
-                                                      "excluded": false,
-                                                      "id": "draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files",
-                                                      "kqlQuery": "",
-                                                      "name": "zeek.files",
-                                                      "queryMatch": Object {
-                                                        "field": "event.dataset",
-                                                        "operator": ":",
-                                                        "value": "zeek.files",
-                                                      },
-                                                    }
-                                                  }
-                                                  registerProvider={[Function]}
-                                                  render={[Function]}
-                                                  unRegisterProvider={[Function]}
+                                                <Wrapper
+                                                  data-test-subj="draggableWrapperDiv"
                                                 >
-                                                  <Wrapper
+                                                  <div
+                                                    className="c2"
                                                     data-test-subj="draggableWrapperDiv"
                                                   >
-                                                    <div
-                                                      className="c2"
-                                                      data-test-subj="draggableWrapperDiv"
+                                                    <ConnectFunction
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                      getContainerForClone={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isCombineEnabled={false}
+                                                      isDropDisabled={true}
+                                                      mode="standard"
+                                                      renderClone={null}
+                                                      type="DEFAULT"
                                                     >
-                                                      <ConnectFunction
+                                                      <Droppable
                                                         direction="vertical"
                                                         droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                         getContainerForClone={[Function]}
@@ -3158,42 +3131,39 @@ tr:hover .c3:focus::before {
                                                         isCombineEnabled={false}
                                                         isDropDisabled={true}
                                                         mode="standard"
+                                                        placeholder={null}
                                                         renderClone={null}
-                                                        type="DEFAULT"
-                                                      >
-                                                        <Droppable
-                                                          direction="vertical"
-                                                          droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                          getContainerForClone={[Function]}
-                                                          ignoreContainerClipping={false}
-                                                          isCombineEnabled={false}
-                                                          isDropDisabled={true}
-                                                          mode="standard"
-                                                          placeholder={null}
-                                                          renderClone={null}
-                                                          shouldAnimatePlaceholder={false}
-                                                          snapshot={
-                                                            Object {
-                                                              "draggingFromThisWith": null,
-                                                              "draggingOverWith": null,
-                                                              "isDraggingOver": false,
-                                                              "isUsingPlaceholder": false,
-                                                            }
+                                                        shouldAnimatePlaceholder={false}
+                                                        snapshot={
+                                                          Object {
+                                                            "draggingFromThisWith": null,
+                                                            "draggingOverWith": null,
+                                                            "isDraggingOver": false,
+                                                            "isUsingPlaceholder": false,
                                                           }
-                                                          type="DEFAULT"
-                                                          updateViewportMaxScroll={[Function]}
-                                                          useClone={null}
+                                                        }
+                                                        type="DEFAULT"
+                                                        updateViewportMaxScroll={[Function]}
+                                                        useClone={null}
+                                                      >
+                                                        <div
+                                                          data-rbd-droppable-context-id="6"
+                                                          data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                         >
-                                                          <div
-                                                            data-rbd-droppable-context-id="6"
-                                                            data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                          <PublicDraggable
+                                                            draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                            index={0}
+                                                            key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                           >
-                                                            <PublicDraggable
+                                                            <PrivateDraggable
+                                                              canDragInteractiveElements={false}
                                                               draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                               index={0}
-                                                              key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                              isClone={false}
+                                                              isEnabled={true}
+                                                              shouldRespectForcePress={false}
                                                             >
-                                                              <PrivateDraggable
+                                                              <Connect(Draggable)
                                                                 canDragInteractiveElements={false}
                                                                 draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                                 index={0}
@@ -3201,56 +3171,70 @@ tr:hover .c3:focus::before {
                                                                 isEnabled={true}
                                                                 shouldRespectForcePress={false}
                                                               >
-                                                                <Connect(Draggable)
+                                                                <Draggable
                                                                   canDragInteractiveElements={false}
                                                                   draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                                  dropAnimationFinished={[Function]}
                                                                   index={0}
                                                                   isClone={false}
                                                                   isEnabled={true}
+                                                                  mapped={
+                                                                    Object {
+                                                                      "combineTargetFor": null,
+                                                                      "offset": Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      },
+                                                                      "shouldAnimateDisplacement": true,
+                                                                      "snapshot": Object {
+                                                                        "combineTargetFor": null,
+                                                                        "combineWith": null,
+                                                                        "draggingOver": null,
+                                                                        "dropAnimation": null,
+                                                                        "isClone": false,
+                                                                        "isDragging": false,
+                                                                        "isDropAnimating": false,
+                                                                        "mode": null,
+                                                                      },
+                                                                      "type": "SECONDARY",
+                                                                    }
+                                                                  }
                                                                   shouldRespectForcePress={false}
                                                                 >
-                                                                  <Draggable
-                                                                    canDragInteractiveElements={false}
-                                                                    draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                                    dropAnimationFinished={[Function]}
-                                                                    index={0}
-                                                                    isClone={false}
-                                                                    isEnabled={true}
-                                                                    mapped={
-                                                                      Object {
-                                                                        "combineTargetFor": null,
-                                                                        "offset": Object {
-                                                                          "x": 0,
-                                                                          "y": 0,
-                                                                        },
-                                                                        "shouldAnimateDisplacement": true,
-                                                                        "snapshot": Object {
-                                                                          "combineTargetFor": null,
-                                                                          "combineWith": null,
-                                                                          "draggingOver": null,
-                                                                          "dropAnimation": null,
-                                                                          "isClone": false,
-                                                                          "isDragging": false,
-                                                                          "isDropAnimating": false,
-                                                                          "mode": null,
-                                                                        },
-                                                                        "type": "SECONDARY",
-                                                                      }
-                                                                    }
-                                                                    shouldRespectForcePress={false}
+                                                                  <ConditionalPortal
+                                                                    isDragging={false}
+                                                                    registerProvider={[Function]}
+                                                                    usePortal={false}
                                                                   >
-                                                                    <ConditionalPortal
-                                                                      usePortal={false}
+                                                                    <ProviderContainerComponent
+                                                                      aria-labelledby="rbd-lift-instruction-6"
+                                                                      data-rbd-drag-handle-context-id="6"
+                                                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                                      data-rbd-draggable-context-id="6"
+                                                                      data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
+                                                                      data-test-subj="providerContainer"
+                                                                      draggable={false}
+                                                                      isDragging={false}
+                                                                      onDragStart={[Function]}
+                                                                      onTransitionEnd={null}
+                                                                      registerProvider={[Function]}
+                                                                      style={
+                                                                        Object {
+                                                                          "transform": null,
+                                                                          "transition": null,
+                                                                        }
+                                                                      }
+                                                                      tabIndex={0}
                                                                     >
-                                                                      <ProviderContainerComponent
+                                                                      <div
                                                                         aria-labelledby="rbd-lift-instruction-6"
+                                                                        className="c3"
                                                                         data-rbd-drag-handle-context-id="6"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                                         data-rbd-draggable-context-id="6"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
-                                                                        isDragging={false}
                                                                         onDragStart={[Function]}
                                                                         onTransitionEnd={null}
                                                                         style={
@@ -3261,132 +3245,112 @@ tr:hover .c3:focus::before {
                                                                         }
                                                                         tabIndex={0}
                                                                       >
-                                                                        <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
-                                                                          className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
-                                                                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                                          data-rbd-draggable-context-id="6"
-                                                                          data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                                          data-test-subj="providerContainer"
-                                                                          draggable={false}
-                                                                          onDragStart={[Function]}
-                                                                          onTransitionEnd={null}
-                                                                          style={
-                                                                            Object {
-                                                                              "transform": null,
-                                                                              "transition": null,
-                                                                            }
-                                                                          }
-                                                                          tabIndex={0}
+                                                                        <styled.span
+                                                                          data-test-subj="draggable-content-event.dataset"
                                                                         >
-                                                                          <styled.span
+                                                                          <span
+                                                                            className="c4"
                                                                             data-test-subj="draggable-content-event.dataset"
                                                                           >
-                                                                            <span
-                                                                              className="c4"
-                                                                              data-test-subj="draggable-content-event.dataset"
+                                                                            <EuiToolTip
+                                                                              content="event.dataset"
+                                                                              data-test-subj="badge-tooltip"
+                                                                              delay="regular"
+                                                                              position="top"
                                                                             >
-                                                                              <EuiToolTip
-                                                                                content="event.dataset"
-                                                                                data-test-subj="badge-tooltip"
-                                                                                delay="regular"
-                                                                                position="top"
+                                                                              <span
+                                                                                className="euiToolTipAnchor"
+                                                                                onMouseOut={[Function]}
+                                                                                onMouseOver={[Function]}
                                                                               >
-                                                                                <span
-                                                                                  className="euiToolTipAnchor"
-                                                                                  onMouseOut={[Function]}
-                                                                                  onMouseOver={[Function]}
+                                                                                <Badge
+                                                                                  color="hollow"
+                                                                                  iconType="tag"
+                                                                                  onBlur={[Function]}
+                                                                                  onFocus={[Function]}
                                                                                 >
-                                                                                  <Badge
+                                                                                  <EuiBadge
                                                                                     color="hollow"
                                                                                     iconType="tag"
                                                                                     onBlur={[Function]}
                                                                                     onFocus={[Function]}
-                                                                                  >
-                                                                                    <EuiBadge
-                                                                                      color="hollow"
-                                                                                      iconType="tag"
-                                                                                      onBlur={[Function]}
-                                                                                      onFocus={[Function]}
-                                                                                      style={
-                                                                                        Object {
-                                                                                          "verticalAlign": "top",
-                                                                                        }
+                                                                                    style={
+                                                                                      Object {
+                                                                                        "verticalAlign": "top",
                                                                                       }
-                                                                                    >
-                                                                                      <EuiInnerText>
-                                                                                        <span
-                                                                                          className="euiBadge euiBadge--hollow euiBadge--iconLeft"
-                                                                                          onBlur={[Function]}
-                                                                                          onFocus={[Function]}
-                                                                                          style={
-                                                                                            Object {
-                                                                                              "verticalAlign": "top",
-                                                                                            }
+                                                                                    }
+                                                                                  >
+                                                                                    <EuiInnerText>
+                                                                                      <span
+                                                                                        className="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                                                                                        onBlur={[Function]}
+                                                                                        onFocus={[Function]}
+                                                                                        style={
+                                                                                          Object {
+                                                                                            "verticalAlign": "top",
                                                                                           }
-                                                                                          title="files"
+                                                                                        }
+                                                                                        title="files"
+                                                                                      >
+                                                                                        <span
+                                                                                          className="euiBadge__content"
                                                                                         >
                                                                                           <span
-                                                                                            className="euiBadge__content"
+                                                                                            className="euiBadge__text"
                                                                                           >
-                                                                                            <span
-                                                                                              className="euiBadge__text"
+                                                                                            files
+                                                                                          </span>
+                                                                                          <EuiIcon
+                                                                                            className="euiBadge__icon"
+                                                                                            size="s"
+                                                                                            type="tag"
+                                                                                          >
+                                                                                            <EuiIconEmpty
+                                                                                              aria-hidden={true}
+                                                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
+                                                                                              focusable="false"
+                                                                                              role="img"
+                                                                                              style={null}
                                                                                             >
-                                                                                              files
-                                                                                            </span>
-                                                                                            <EuiIcon
-                                                                                              className="euiBadge__icon"
-                                                                                              size="s"
-                                                                                              type="tag"
-                                                                                            >
-                                                                                              <EuiIconEmpty
+                                                                                              <svg
                                                                                                 aria-hidden={true}
                                                                                                 className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
                                                                                                 focusable="false"
+                                                                                                height={16}
                                                                                                 role="img"
                                                                                                 style={null}
-                                                                                              >
-                                                                                                <svg
-                                                                                                  aria-hidden={true}
-                                                                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
-                                                                                                  focusable="false"
-                                                                                                  height={16}
-                                                                                                  role="img"
-                                                                                                  style={null}
-                                                                                                  viewBox="0 0 16 16"
-                                                                                                  width={16}
-                                                                                                  xmlns="http://www.w3.org/2000/svg"
-                                                                                                />
-                                                                                              </EuiIconEmpty>
-                                                                                            </EuiIcon>
-                                                                                          </span>
+                                                                                                viewBox="0 0 16 16"
+                                                                                                width={16}
+                                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                              />
+                                                                                            </EuiIconEmpty>
+                                                                                          </EuiIcon>
                                                                                         </span>
-                                                                                      </EuiInnerText>
-                                                                                    </EuiBadge>
-                                                                                  </Badge>
-                                                                                </span>
-                                                                              </EuiToolTip>
-                                                                            </span>
-                                                                          </styled.span>
-                                                                        </div>
-                                                                      </ProviderContainerComponent>
-                                                                    </ConditionalPortal>
-                                                                  </Draggable>
-                                                                </Connect(Draggable)>
-                                                              </PrivateDraggable>
-                                                            </PublicDraggable>
-                                                            <AnimateInOut
-                                                              on={null}
-                                                              shouldAnimate={false}
-                                                            />
-                                                          </div>
-                                                        </Droppable>
-                                                      </ConnectFunction>
-                                                    </div>
-                                                  </Wrapper>
-                                                </Component>
-                                              </DraggableWrapper>
+                                                                                      </span>
+                                                                                    </EuiInnerText>
+                                                                                  </EuiBadge>
+                                                                                </Badge>
+                                                                              </span>
+                                                                            </EuiToolTip>
+                                                                          </span>
+                                                                        </styled.span>
+                                                                      </div>
+                                                                    </ProviderContainerComponent>
+                                                                  </ConditionalPortal>
+                                                                </Draggable>
+                                                              </Connect(Draggable)>
+                                                            </PrivateDraggable>
+                                                          </PublicDraggable>
+                                                          <AnimateInOut
+                                                            on={null}
+                                                            shouldAnimate={false}
+                                                          />
+                                                        </div>
+                                                      </Droppable>
+                                                    </ConnectFunction>
+                                                  </div>
+                                                </Wrapper>
+                                              </Component>
                                             </div>
                                           </EuiFlexItem>
                                         </TokensFlexItem>
@@ -3407,7 +3371,7 @@ tr:hover .c3:focus::before {
                                             <div
                                               className="euiFlexItem euiFlexItem--flexGrowZero c1"
                                             >
-                                              <DraggableWrapper
+                                              <Component
                                                 dataProvider={
                                                   Object {
                                                     "and": Array [],
@@ -3425,34 +3389,25 @@ tr:hover .c3:focus::before {
                                                 }
                                                 render={[Function]}
                                               >
-                                                <Component
-                                                  dataProvider={
-                                                    Object {
-                                                      "and": Array [],
-                                                      "enabled": true,
-                                                      "excluded": false,
-                                                      "id": "draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde",
-                                                      "kqlQuery": "",
-                                                      "name": "fa5195a5dfacc9d1c68d43600f0e0262cad14dde",
-                                                      "queryMatch": Object {
-                                                        "field": "zeek.files.sha1",
-                                                        "operator": ":",
-                                                        "value": "fa5195a5dfacc9d1c68d43600f0e0262cad14dde",
-                                                      },
-                                                    }
-                                                  }
-                                                  registerProvider={[Function]}
-                                                  render={[Function]}
-                                                  unRegisterProvider={[Function]}
+                                                <Wrapper
+                                                  data-test-subj="draggableWrapperDiv"
                                                 >
-                                                  <Wrapper
+                                                  <div
+                                                    className="c2"
                                                     data-test-subj="draggableWrapperDiv"
                                                   >
-                                                    <div
-                                                      className="c2"
-                                                      data-test-subj="draggableWrapperDiv"
+                                                    <ConnectFunction
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                      getContainerForClone={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isCombineEnabled={false}
+                                                      isDropDisabled={true}
+                                                      mode="standard"
+                                                      renderClone={null}
+                                                      type="DEFAULT"
                                                     >
-                                                      <ConnectFunction
+                                                      <Droppable
                                                         direction="vertical"
                                                         droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                         getContainerForClone={[Function]}
@@ -3460,42 +3415,39 @@ tr:hover .c3:focus::before {
                                                         isCombineEnabled={false}
                                                         isDropDisabled={true}
                                                         mode="standard"
+                                                        placeholder={null}
                                                         renderClone={null}
-                                                        type="DEFAULT"
-                                                      >
-                                                        <Droppable
-                                                          direction="vertical"
-                                                          droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                          getContainerForClone={[Function]}
-                                                          ignoreContainerClipping={false}
-                                                          isCombineEnabled={false}
-                                                          isDropDisabled={true}
-                                                          mode="standard"
-                                                          placeholder={null}
-                                                          renderClone={null}
-                                                          shouldAnimatePlaceholder={false}
-                                                          snapshot={
-                                                            Object {
-                                                              "draggingFromThisWith": null,
-                                                              "draggingOverWith": null,
-                                                              "isDraggingOver": false,
-                                                              "isUsingPlaceholder": false,
-                                                            }
+                                                        shouldAnimatePlaceholder={false}
+                                                        snapshot={
+                                                          Object {
+                                                            "draggingFromThisWith": null,
+                                                            "draggingOverWith": null,
+                                                            "isDraggingOver": false,
+                                                            "isUsingPlaceholder": false,
                                                           }
-                                                          type="DEFAULT"
-                                                          updateViewportMaxScroll={[Function]}
-                                                          useClone={null}
+                                                        }
+                                                        type="DEFAULT"
+                                                        updateViewportMaxScroll={[Function]}
+                                                        useClone={null}
+                                                      >
+                                                        <div
+                                                          data-rbd-droppable-context-id="6"
+                                                          data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                         >
-                                                          <div
-                                                            data-rbd-droppable-context-id="6"
-                                                            data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                          <PublicDraggable
+                                                            draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                            index={0}
+                                                            key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                           >
-                                                            <PublicDraggable
+                                                            <PrivateDraggable
+                                                              canDragInteractiveElements={false}
                                                               draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                               index={0}
-                                                              key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                              isClone={false}
+                                                              isEnabled={true}
+                                                              shouldRespectForcePress={false}
                                                             >
-                                                              <PrivateDraggable
+                                                              <Connect(Draggable)
                                                                 canDragInteractiveElements={false}
                                                                 draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                                 index={0}
@@ -3503,56 +3455,70 @@ tr:hover .c3:focus::before {
                                                                 isEnabled={true}
                                                                 shouldRespectForcePress={false}
                                                               >
-                                                                <Connect(Draggable)
+                                                                <Draggable
                                                                   canDragInteractiveElements={false}
                                                                   draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                                  dropAnimationFinished={[Function]}
                                                                   index={0}
                                                                   isClone={false}
                                                                   isEnabled={true}
+                                                                  mapped={
+                                                                    Object {
+                                                                      "combineTargetFor": null,
+                                                                      "offset": Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      },
+                                                                      "shouldAnimateDisplacement": true,
+                                                                      "snapshot": Object {
+                                                                        "combineTargetFor": null,
+                                                                        "combineWith": null,
+                                                                        "draggingOver": null,
+                                                                        "dropAnimation": null,
+                                                                        "isClone": false,
+                                                                        "isDragging": false,
+                                                                        "isDropAnimating": false,
+                                                                        "mode": null,
+                                                                      },
+                                                                      "type": "SECONDARY",
+                                                                    }
+                                                                  }
                                                                   shouldRespectForcePress={false}
                                                                 >
-                                                                  <Draggable
-                                                                    canDragInteractiveElements={false}
-                                                                    draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                                    dropAnimationFinished={[Function]}
-                                                                    index={0}
-                                                                    isClone={false}
-                                                                    isEnabled={true}
-                                                                    mapped={
-                                                                      Object {
-                                                                        "combineTargetFor": null,
-                                                                        "offset": Object {
-                                                                          "x": 0,
-                                                                          "y": 0,
-                                                                        },
-                                                                        "shouldAnimateDisplacement": true,
-                                                                        "snapshot": Object {
-                                                                          "combineTargetFor": null,
-                                                                          "combineWith": null,
-                                                                          "draggingOver": null,
-                                                                          "dropAnimation": null,
-                                                                          "isClone": false,
-                                                                          "isDragging": false,
-                                                                          "isDropAnimating": false,
-                                                                          "mode": null,
-                                                                        },
-                                                                        "type": "SECONDARY",
-                                                                      }
-                                                                    }
-                                                                    shouldRespectForcePress={false}
+                                                                  <ConditionalPortal
+                                                                    isDragging={false}
+                                                                    registerProvider={[Function]}
+                                                                    usePortal={false}
                                                                   >
-                                                                    <ConditionalPortal
-                                                                      usePortal={false}
+                                                                    <ProviderContainerComponent
+                                                                      aria-labelledby="rbd-lift-instruction-6"
+                                                                      data-rbd-drag-handle-context-id="6"
+                                                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                                      data-rbd-draggable-context-id="6"
+                                                                      data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
+                                                                      data-test-subj="providerContainer"
+                                                                      draggable={false}
+                                                                      isDragging={false}
+                                                                      onDragStart={[Function]}
+                                                                      onTransitionEnd={null}
+                                                                      registerProvider={[Function]}
+                                                                      style={
+                                                                        Object {
+                                                                          "transform": null,
+                                                                          "transition": null,
+                                                                        }
+                                                                      }
+                                                                      tabIndex={0}
                                                                     >
-                                                                      <ProviderContainerComponent
+                                                                      <div
                                                                         aria-labelledby="rbd-lift-instruction-6"
+                                                                        className="c3"
                                                                         data-rbd-drag-handle-context-id="6"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                                         data-rbd-draggable-context-id="6"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
-                                                                        isDragging={false}
                                                                         onDragStart={[Function]}
                                                                         onTransitionEnd={null}
                                                                         style={
@@ -3563,132 +3529,112 @@ tr:hover .c3:focus::before {
                                                                         }
                                                                         tabIndex={0}
                                                                       >
-                                                                        <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
-                                                                          className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
-                                                                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                                          data-rbd-draggable-context-id="6"
-                                                                          data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                                          data-test-subj="providerContainer"
-                                                                          draggable={false}
-                                                                          onDragStart={[Function]}
-                                                                          onTransitionEnd={null}
-                                                                          style={
-                                                                            Object {
-                                                                              "transform": null,
-                                                                              "transition": null,
-                                                                            }
-                                                                          }
-                                                                          tabIndex={0}
+                                                                        <styled.span
+                                                                          data-test-subj="draggable-content-zeek.files.sha1"
                                                                         >
-                                                                          <styled.span
+                                                                          <span
+                                                                            className="c4"
                                                                             data-test-subj="draggable-content-zeek.files.sha1"
                                                                           >
-                                                                            <span
-                                                                              className="c4"
-                                                                              data-test-subj="draggable-content-zeek.files.sha1"
+                                                                            <EuiToolTip
+                                                                              content="zeek.files.sha1"
+                                                                              data-test-subj="badge-tooltip"
+                                                                              delay="regular"
+                                                                              position="top"
                                                                             >
-                                                                              <EuiToolTip
-                                                                                content="zeek.files.sha1"
-                                                                                data-test-subj="badge-tooltip"
-                                                                                delay="regular"
-                                                                                position="top"
+                                                                              <span
+                                                                                className="euiToolTipAnchor"
+                                                                                onMouseOut={[Function]}
+                                                                                onMouseOver={[Function]}
                                                                               >
-                                                                                <span
-                                                                                  className="euiToolTipAnchor"
-                                                                                  onMouseOut={[Function]}
-                                                                                  onMouseOver={[Function]}
+                                                                                <Badge
+                                                                                  color="hollow"
+                                                                                  iconType="tag"
+                                                                                  onBlur={[Function]}
+                                                                                  onFocus={[Function]}
                                                                                 >
-                                                                                  <Badge
+                                                                                  <EuiBadge
                                                                                     color="hollow"
                                                                                     iconType="tag"
                                                                                     onBlur={[Function]}
                                                                                     onFocus={[Function]}
-                                                                                  >
-                                                                                    <EuiBadge
-                                                                                      color="hollow"
-                                                                                      iconType="tag"
-                                                                                      onBlur={[Function]}
-                                                                                      onFocus={[Function]}
-                                                                                      style={
-                                                                                        Object {
-                                                                                          "verticalAlign": "top",
-                                                                                        }
+                                                                                    style={
+                                                                                      Object {
+                                                                                        "verticalAlign": "top",
                                                                                       }
-                                                                                    >
-                                                                                      <EuiInnerText>
-                                                                                        <span
-                                                                                          className="euiBadge euiBadge--hollow euiBadge--iconLeft"
-                                                                                          onBlur={[Function]}
-                                                                                          onFocus={[Function]}
-                                                                                          style={
-                                                                                            Object {
-                                                                                              "verticalAlign": "top",
-                                                                                            }
+                                                                                    }
+                                                                                  >
+                                                                                    <EuiInnerText>
+                                                                                      <span
+                                                                                        className="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                                                                                        onBlur={[Function]}
+                                                                                        onFocus={[Function]}
+                                                                                        style={
+                                                                                          Object {
+                                                                                            "verticalAlign": "top",
                                                                                           }
-                                                                                          title="sha1: fa5195a..."
+                                                                                        }
+                                                                                        title="sha1: fa5195a..."
+                                                                                      >
+                                                                                        <span
+                                                                                          className="euiBadge__content"
                                                                                         >
                                                                                           <span
-                                                                                            className="euiBadge__content"
+                                                                                            className="euiBadge__text"
                                                                                           >
-                                                                                            <span
-                                                                                              className="euiBadge__text"
+                                                                                            sha1: fa5195a...
+                                                                                          </span>
+                                                                                          <EuiIcon
+                                                                                            className="euiBadge__icon"
+                                                                                            size="s"
+                                                                                            type="tag"
+                                                                                          >
+                                                                                            <EuiIconEmpty
+                                                                                              aria-hidden={true}
+                                                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
+                                                                                              focusable="false"
+                                                                                              role="img"
+                                                                                              style={null}
                                                                                             >
-                                                                                              sha1: fa5195a...
-                                                                                            </span>
-                                                                                            <EuiIcon
-                                                                                              className="euiBadge__icon"
-                                                                                              size="s"
-                                                                                              type="tag"
-                                                                                            >
-                                                                                              <EuiIconEmpty
+                                                                                              <svg
                                                                                                 aria-hidden={true}
                                                                                                 className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
                                                                                                 focusable="false"
+                                                                                                height={16}
                                                                                                 role="img"
                                                                                                 style={null}
-                                                                                              >
-                                                                                                <svg
-                                                                                                  aria-hidden={true}
-                                                                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
-                                                                                                  focusable="false"
-                                                                                                  height={16}
-                                                                                                  role="img"
-                                                                                                  style={null}
-                                                                                                  viewBox="0 0 16 16"
-                                                                                                  width={16}
-                                                                                                  xmlns="http://www.w3.org/2000/svg"
-                                                                                                />
-                                                                                              </EuiIconEmpty>
-                                                                                            </EuiIcon>
-                                                                                          </span>
+                                                                                                viewBox="0 0 16 16"
+                                                                                                width={16}
+                                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                              />
+                                                                                            </EuiIconEmpty>
+                                                                                          </EuiIcon>
                                                                                         </span>
-                                                                                      </EuiInnerText>
-                                                                                    </EuiBadge>
-                                                                                  </Badge>
-                                                                                </span>
-                                                                              </EuiToolTip>
-                                                                            </span>
-                                                                          </styled.span>
-                                                                        </div>
-                                                                      </ProviderContainerComponent>
-                                                                    </ConditionalPortal>
-                                                                  </Draggable>
-                                                                </Connect(Draggable)>
-                                                              </PrivateDraggable>
-                                                            </PublicDraggable>
-                                                            <AnimateInOut
-                                                              on={null}
-                                                              shouldAnimate={false}
-                                                            />
-                                                          </div>
-                                                        </Droppable>
-                                                      </ConnectFunction>
-                                                    </div>
-                                                  </Wrapper>
-                                                </Component>
-                                              </DraggableWrapper>
+                                                                                      </span>
+                                                                                    </EuiInnerText>
+                                                                                  </EuiBadge>
+                                                                                </Badge>
+                                                                              </span>
+                                                                            </EuiToolTip>
+                                                                          </span>
+                                                                        </styled.span>
+                                                                      </div>
+                                                                    </ProviderContainerComponent>
+                                                                  </ConditionalPortal>
+                                                                </Draggable>
+                                                              </Connect(Draggable)>
+                                                            </PrivateDraggable>
+                                                          </PublicDraggable>
+                                                          <AnimateInOut
+                                                            on={null}
+                                                            shouldAnimate={false}
+                                                          />
+                                                        </div>
+                                                      </Droppable>
+                                                    </ConnectFunction>
+                                                  </div>
+                                                </Wrapper>
+                                              </Component>
                                             </div>
                                           </EuiFlexItem>
                                         </TokensFlexItem>
@@ -3709,7 +3655,7 @@ tr:hover .c3:focus::before {
                                             <div
                                               className="euiFlexItem euiFlexItem--flexGrowZero c1"
                                             >
-                                              <DraggableWrapper
+                                              <Component
                                                 dataProvider={
                                                   Object {
                                                     "and": Array [],
@@ -3727,34 +3673,25 @@ tr:hover .c3:focus::before {
                                                 }
                                                 render={[Function]}
                                               >
-                                                <Component
-                                                  dataProvider={
-                                                    Object {
-                                                      "and": Array [],
-                                                      "enabled": true,
-                                                      "excluded": false,
-                                                      "id": "draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32",
-                                                      "kqlQuery": "",
-                                                      "name": "f7653f1951693021daa9e6be61226e32",
-                                                      "queryMatch": Object {
-                                                        "field": "zeek.files.md5",
-                                                        "operator": ":",
-                                                        "value": "f7653f1951693021daa9e6be61226e32",
-                                                      },
-                                                    }
-                                                  }
-                                                  registerProvider={[Function]}
-                                                  render={[Function]}
-                                                  unRegisterProvider={[Function]}
+                                                <Wrapper
+                                                  data-test-subj="draggableWrapperDiv"
                                                 >
-                                                  <Wrapper
+                                                  <div
+                                                    className="c2"
                                                     data-test-subj="draggableWrapperDiv"
                                                   >
-                                                    <div
-                                                      className="c2"
-                                                      data-test-subj="draggableWrapperDiv"
+                                                    <ConnectFunction
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                      getContainerForClone={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isCombineEnabled={false}
+                                                      isDropDisabled={true}
+                                                      mode="standard"
+                                                      renderClone={null}
+                                                      type="DEFAULT"
                                                     >
-                                                      <ConnectFunction
+                                                      <Droppable
                                                         direction="vertical"
                                                         droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                         getContainerForClone={[Function]}
@@ -3762,42 +3699,39 @@ tr:hover .c3:focus::before {
                                                         isCombineEnabled={false}
                                                         isDropDisabled={true}
                                                         mode="standard"
+                                                        placeholder={null}
                                                         renderClone={null}
-                                                        type="DEFAULT"
-                                                      >
-                                                        <Droppable
-                                                          direction="vertical"
-                                                          droppableId="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                          getContainerForClone={[Function]}
-                                                          ignoreContainerClipping={false}
-                                                          isCombineEnabled={false}
-                                                          isDropDisabled={true}
-                                                          mode="standard"
-                                                          placeholder={null}
-                                                          renderClone={null}
-                                                          shouldAnimatePlaceholder={false}
-                                                          snapshot={
-                                                            Object {
-                                                              "draggingFromThisWith": null,
-                                                              "draggingOverWith": null,
-                                                              "isDraggingOver": false,
-                                                              "isUsingPlaceholder": false,
-                                                            }
+                                                        shouldAnimatePlaceholder={false}
+                                                        snapshot={
+                                                          Object {
+                                                            "draggingFromThisWith": null,
+                                                            "draggingOverWith": null,
+                                                            "isDraggingOver": false,
+                                                            "isUsingPlaceholder": false,
                                                           }
-                                                          type="DEFAULT"
-                                                          updateViewportMaxScroll={[Function]}
-                                                          useClone={null}
+                                                        }
+                                                        type="DEFAULT"
+                                                        updateViewportMaxScroll={[Function]}
+                                                        useClone={null}
+                                                      >
+                                                        <div
+                                                          data-rbd-droppable-context-id="6"
+                                                          data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                         >
-                                                          <div
-                                                            data-rbd-droppable-context-id="6"
-                                                            data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                          <PublicDraggable
+                                                            draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                            index={0}
+                                                            key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                           >
-                                                            <PublicDraggable
+                                                            <PrivateDraggable
+                                                              canDragInteractiveElements={false}
                                                               draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                               index={0}
-                                                              key="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                              isClone={false}
+                                                              isEnabled={true}
+                                                              shouldRespectForcePress={false}
                                                             >
-                                                              <PrivateDraggable
+                                                              <Connect(Draggable)
                                                                 canDragInteractiveElements={false}
                                                                 draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                                 index={0}
@@ -3805,56 +3739,70 @@ tr:hover .c3:focus::before {
                                                                 isEnabled={true}
                                                                 shouldRespectForcePress={false}
                                                               >
-                                                                <Connect(Draggable)
+                                                                <Draggable
                                                                   canDragInteractiveElements={false}
                                                                   draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                                  dropAnimationFinished={[Function]}
                                                                   index={0}
                                                                   isClone={false}
                                                                   isEnabled={true}
+                                                                  mapped={
+                                                                    Object {
+                                                                      "combineTargetFor": null,
+                                                                      "offset": Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      },
+                                                                      "shouldAnimateDisplacement": true,
+                                                                      "snapshot": Object {
+                                                                        "combineTargetFor": null,
+                                                                        "combineWith": null,
+                                                                        "draggingOver": null,
+                                                                        "dropAnimation": null,
+                                                                        "isClone": false,
+                                                                        "isDragging": false,
+                                                                        "isDropAnimating": false,
+                                                                        "mode": null,
+                                                                      },
+                                                                      "type": "SECONDARY",
+                                                                    }
+                                                                  }
                                                                   shouldRespectForcePress={false}
                                                                 >
-                                                                  <Draggable
-                                                                    canDragInteractiveElements={false}
-                                                                    draggableId="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                                    dropAnimationFinished={[Function]}
-                                                                    index={0}
-                                                                    isClone={false}
-                                                                    isEnabled={true}
-                                                                    mapped={
-                                                                      Object {
-                                                                        "combineTargetFor": null,
-                                                                        "offset": Object {
-                                                                          "x": 0,
-                                                                          "y": 0,
-                                                                        },
-                                                                        "shouldAnimateDisplacement": true,
-                                                                        "snapshot": Object {
-                                                                          "combineTargetFor": null,
-                                                                          "combineWith": null,
-                                                                          "draggingOver": null,
-                                                                          "dropAnimation": null,
-                                                                          "isClone": false,
-                                                                          "isDragging": false,
-                                                                          "isDropAnimating": false,
-                                                                          "mode": null,
-                                                                        },
-                                                                        "type": "SECONDARY",
-                                                                      }
-                                                                    }
-                                                                    shouldRespectForcePress={false}
+                                                                  <ConditionalPortal
+                                                                    isDragging={false}
+                                                                    registerProvider={[Function]}
+                                                                    usePortal={false}
                                                                   >
-                                                                    <ConditionalPortal
-                                                                      usePortal={false}
+                                                                    <ProviderContainerComponent
+                                                                      aria-labelledby="rbd-lift-instruction-6"
+                                                                      data-rbd-drag-handle-context-id="6"
+                                                                      data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                                      data-rbd-draggable-context-id="6"
+                                                                      data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
+                                                                      data-test-subj="providerContainer"
+                                                                      draggable={false}
+                                                                      isDragging={false}
+                                                                      onDragStart={[Function]}
+                                                                      onTransitionEnd={null}
+                                                                      registerProvider={[Function]}
+                                                                      style={
+                                                                        Object {
+                                                                          "transform": null,
+                                                                          "transition": null,
+                                                                        }
+                                                                      }
+                                                                      tabIndex={0}
                                                                     >
-                                                                      <ProviderContainerComponent
+                                                                      <div
                                                                         aria-labelledby="rbd-lift-instruction-6"
+                                                                        className="c3"
                                                                         data-rbd-drag-handle-context-id="6"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                                         data-rbd-draggable-context-id="6"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
-                                                                        isDragging={false}
                                                                         onDragStart={[Function]}
                                                                         onTransitionEnd={null}
                                                                         style={
@@ -3865,132 +3813,112 @@ tr:hover .c3:focus::before {
                                                                         }
                                                                         tabIndex={0}
                                                                       >
-                                                                        <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
-                                                                          className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
-                                                                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                                          data-rbd-draggable-context-id="6"
-                                                                          data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                                          data-test-subj="providerContainer"
-                                                                          draggable={false}
-                                                                          onDragStart={[Function]}
-                                                                          onTransitionEnd={null}
-                                                                          style={
-                                                                            Object {
-                                                                              "transform": null,
-                                                                              "transition": null,
-                                                                            }
-                                                                          }
-                                                                          tabIndex={0}
+                                                                        <styled.span
+                                                                          data-test-subj="draggable-content-zeek.files.md5"
                                                                         >
-                                                                          <styled.span
+                                                                          <span
+                                                                            className="c4"
                                                                             data-test-subj="draggable-content-zeek.files.md5"
                                                                           >
-                                                                            <span
-                                                                              className="c4"
-                                                                              data-test-subj="draggable-content-zeek.files.md5"
+                                                                            <EuiToolTip
+                                                                              content="zeek.files.md5"
+                                                                              data-test-subj="badge-tooltip"
+                                                                              delay="regular"
+                                                                              position="top"
                                                                             >
-                                                                              <EuiToolTip
-                                                                                content="zeek.files.md5"
-                                                                                data-test-subj="badge-tooltip"
-                                                                                delay="regular"
-                                                                                position="top"
+                                                                              <span
+                                                                                className="euiToolTipAnchor"
+                                                                                onMouseOut={[Function]}
+                                                                                onMouseOver={[Function]}
                                                                               >
-                                                                                <span
-                                                                                  className="euiToolTipAnchor"
-                                                                                  onMouseOut={[Function]}
-                                                                                  onMouseOver={[Function]}
+                                                                                <Badge
+                                                                                  color="hollow"
+                                                                                  iconType="tag"
+                                                                                  onBlur={[Function]}
+                                                                                  onFocus={[Function]}
                                                                                 >
-                                                                                  <Badge
+                                                                                  <EuiBadge
                                                                                     color="hollow"
                                                                                     iconType="tag"
                                                                                     onBlur={[Function]}
                                                                                     onFocus={[Function]}
-                                                                                  >
-                                                                                    <EuiBadge
-                                                                                      color="hollow"
-                                                                                      iconType="tag"
-                                                                                      onBlur={[Function]}
-                                                                                      onFocus={[Function]}
-                                                                                      style={
-                                                                                        Object {
-                                                                                          "verticalAlign": "top",
-                                                                                        }
+                                                                                    style={
+                                                                                      Object {
+                                                                                        "verticalAlign": "top",
                                                                                       }
-                                                                                    >
-                                                                                      <EuiInnerText>
-                                                                                        <span
-                                                                                          className="euiBadge euiBadge--hollow euiBadge--iconLeft"
-                                                                                          onBlur={[Function]}
-                                                                                          onFocus={[Function]}
-                                                                                          style={
-                                                                                            Object {
-                                                                                              "verticalAlign": "top",
-                                                                                            }
+                                                                                    }
+                                                                                  >
+                                                                                    <EuiInnerText>
+                                                                                      <span
+                                                                                        className="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                                                                                        onBlur={[Function]}
+                                                                                        onFocus={[Function]}
+                                                                                        style={
+                                                                                          Object {
+                                                                                            "verticalAlign": "top",
                                                                                           }
-                                                                                          title="md5: f7653f1..."
+                                                                                        }
+                                                                                        title="md5: f7653f1..."
+                                                                                      >
+                                                                                        <span
+                                                                                          className="euiBadge__content"
                                                                                         >
                                                                                           <span
-                                                                                            className="euiBadge__content"
+                                                                                            className="euiBadge__text"
                                                                                           >
-                                                                                            <span
-                                                                                              className="euiBadge__text"
+                                                                                            md5: f7653f1...
+                                                                                          </span>
+                                                                                          <EuiIcon
+                                                                                            className="euiBadge__icon"
+                                                                                            size="s"
+                                                                                            type="tag"
+                                                                                          >
+                                                                                            <EuiIconEmpty
+                                                                                              aria-hidden={true}
+                                                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
+                                                                                              focusable="false"
+                                                                                              role="img"
+                                                                                              style={null}
                                                                                             >
-                                                                                              md5: f7653f1...
-                                                                                            </span>
-                                                                                            <EuiIcon
-                                                                                              className="euiBadge__icon"
-                                                                                              size="s"
-                                                                                              type="tag"
-                                                                                            >
-                                                                                              <EuiIconEmpty
+                                                                                              <svg
                                                                                                 aria-hidden={true}
                                                                                                 className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
                                                                                                 focusable="false"
+                                                                                                height={16}
                                                                                                 role="img"
                                                                                                 style={null}
-                                                                                              >
-                                                                                                <svg
-                                                                                                  aria-hidden={true}
-                                                                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiBadge__icon"
-                                                                                                  focusable="false"
-                                                                                                  height={16}
-                                                                                                  role="img"
-                                                                                                  style={null}
-                                                                                                  viewBox="0 0 16 16"
-                                                                                                  width={16}
-                                                                                                  xmlns="http://www.w3.org/2000/svg"
-                                                                                                />
-                                                                                              </EuiIconEmpty>
-                                                                                            </EuiIcon>
-                                                                                          </span>
+                                                                                                viewBox="0 0 16 16"
+                                                                                                width={16}
+                                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                              />
+                                                                                            </EuiIconEmpty>
+                                                                                          </EuiIcon>
                                                                                         </span>
-                                                                                      </EuiInnerText>
-                                                                                    </EuiBadge>
-                                                                                  </Badge>
-                                                                                </span>
-                                                                              </EuiToolTip>
-                                                                            </span>
-                                                                          </styled.span>
-                                                                        </div>
-                                                                      </ProviderContainerComponent>
-                                                                    </ConditionalPortal>
-                                                                  </Draggable>
-                                                                </Connect(Draggable)>
-                                                              </PrivateDraggable>
-                                                            </PublicDraggable>
-                                                            <AnimateInOut
-                                                              on={null}
-                                                              shouldAnimate={false}
-                                                            />
-                                                          </div>
-                                                        </Droppable>
-                                                      </ConnectFunction>
-                                                    </div>
-                                                  </Wrapper>
-                                                </Component>
-                                              </DraggableWrapper>
+                                                                                      </span>
+                                                                                    </EuiInnerText>
+                                                                                  </EuiBadge>
+                                                                                </Badge>
+                                                                              </span>
+                                                                            </EuiToolTip>
+                                                                          </span>
+                                                                        </styled.span>
+                                                                      </div>
+                                                                    </ProviderContainerComponent>
+                                                                  </ConditionalPortal>
+                                                                </Draggable>
+                                                              </Connect(Draggable)>
+                                                            </PrivateDraggable>
+                                                          </PublicDraggable>
+                                                          <AnimateInOut
+                                                            on={null}
+                                                            shouldAnimate={false}
+                                                          />
+                                                        </div>
+                                                      </Droppable>
+                                                    </ConnectFunction>
+                                                  </div>
+                                                </Wrapper>
+                                              </Component>
                                             </div>
                                           </EuiFlexItem>
                                         </TokensFlexItem>
