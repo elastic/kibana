@@ -17,12 +17,5 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../core/public/mocks';
-
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export { mockAggTypesRegistry } from './mock_agg_types_registry';
+export { mockDataServices } from './mock_data_services';
