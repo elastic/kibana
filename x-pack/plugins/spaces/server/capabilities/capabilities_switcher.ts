@@ -4,15 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
+import { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
+import { SpacesServiceSetup } from '../spaces_service';
+import { PluginsStart } from '../plugin';
 
-export function toggleUICapabilities(
-  features: Feature[],
-  capabilities: UICapabilities,
-  activeSpace: Space
-) {
+export function setupCapabilitiesSwitcher(
+  core: CoreSetup<PluginsStart>,
+  spacesService: SpacesServiceSetup,
+  logger: Logger
+): CapabilitiesSwitcher {
+  return async (request, capabilities) => {
+    const isAnonymousRequest = !request.route.options.authRequired;
+
+    if (isAnonymousRequest) {
+      return capabilities;
+    }
+
+    try {
+      const [activeSpace, [, { features }]] = await Promise.all([
+        spacesService.getActiveSpace(request),
+        core.getStartServices(),
+      ]);
+
+      const registeredFeatures = features.getFeatures();
+
+      return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
+    } catch (e) {
+      logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
+      return capabilities;
+    }
+  };
+}
+
+function toggleCapabilities(features: Feature[], capabilities: Capabilities, activeSpace: Space) {
   const clonedCapabilities = _.cloneDeep(capabilities);
 
   toggleDisabledFeatures(features, clonedCapabilities, activeSpace);
@@ -22,7 +48,7 @@ export function toggleUICapabilities(
 
 function toggleDisabledFeatures(
   features: Feature[],
-  capabilities: UICapabilities,
+  capabilities: Capabilities,
   activeSpace: Space
 ) {
   const disabledFeatureKeys = activeSpace.disabledFeatures;
