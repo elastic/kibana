@@ -87,7 +87,7 @@ export const ProcessEventDot = styled(
         >
           <use
             role="presentation"
-            xlinkHref={`#${SymbolIds.runningProcessCube}`}
+            xlinkHref={`#${SymbolIds.terminatedTriggerCube}`}
             x={markerPositionOffset(magFactorX)}
             y={markerPositionOffset(magFactorX)}
             width={markerSize(magFactorX)}

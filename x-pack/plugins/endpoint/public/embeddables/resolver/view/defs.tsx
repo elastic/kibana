@@ -70,9 +70,12 @@ const idGenerator = htmlIdGenerator();
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
 export const PaintServerIds = {
-  darkLinearReflect: idGenerator('darkreflect'),
-  runningProcess: idGenerator('runningProcess'),
-  runningProcessCube: idGenerator('runningProcessCube'),
+  darkLinearReflect: idGenerator('psDarkReflect'),
+  runningProcess: idGenerator('psRunningProcess'),
+  runningProcessCube: idGenerator('psRunningProcessCube'),
+  runningTriggerCube: idGenerator('psRunningTriggerCube'),
+  terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
+  terminatedTriggerCube: idGenerator('psTerminatedTriggerCube'),
 };
 
 /**
@@ -109,8 +112,16 @@ const PaintServers = memo(() => (
       <stop offset="0" stopColor={NamedColors.runningProcessStart}/>
       <stop offset="1" stopColor={NamedColors.runningProcessEnd}/>
     </linearGradient>
-    <linearGradient id="linear-gradient" x1="-382.32713" y1="265.24057" x2="-381.88108" y2="264.46057" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse">
+    <linearGradient id={PaintServerIds.runningTriggerCube} x1="-382.32713" y1="265.24057" x2="-381.88108" y2="264.46057" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse">
         <stop offset="0" stop-color="#bd281f" />
+        <stop offset="1" stop-color="#dc0b72" />
+    </linearGradient>
+    <linearGradient id={PaintServerIds.terminatedProcessCube} x1="-382.33074" y1="265.24689" x2="-381.88086" y2="264.46019" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#006bb4" />
+        <stop offset="1" stop-color="#017d73" />
+    </linearGradient>
+    <linearGradient id={PaintServerIds.terminatedTriggerCube} x1="-382.33074" y1="265.24689" x2="-381.88086" y2="264.46019" gradientTransform="matrix(88, 0, 0, -100, 33669, 26535)" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#be2820" />
         <stop offset="1" stop-color="#dc0b72" />
     </linearGradient>
   </>
@@ -125,6 +136,8 @@ export const SymbolIds = {
   solidHexagon: idGenerator('hexagon'),
   runningProcessCube: idGenerator('runningCube'),
   runningTriggerCube: idGenerator('runningTriggerCube'),
+  terminatedProcessCube: idGenerator('terminatedCube'),
+  terminatedTriggerCube: idGenerator('terminatedTriggerCube'),
 };
 
 /**
@@ -180,12 +193,32 @@ const SymbolsAndShapes = memo(() => (
           <polygon points="27 41.077 44.089 31 61 41.077 61 60.128 44.089 70 27 60.128 27 41.077" fill="#fff" />
           <polygon points="44 31 61 41.077 61 60.128 44 50 44 31" fill="#d8d8d8" />
           <polygon points="27 60.128 27 41.077 44 31 44 50 27 60.128" fill="#959595" />
-          <polygon points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.75" fill="url(#linear-gradient)" style={{isolation: 'isolate'}} />
+          <polygon points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.75" fill={`url(#${PaintServerIds.runningTriggerCube})`} style={{isolation: 'isolate'}} />
           <polygon points="88 25.839 44.23 0 0 25.839 44 50 88 25.839" fill="#fff" opacity="0.13893" style={{isolation: 'isolate'}} />
           <polygon points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
       </g>
         
     </symbol>
+    <symbol viewBox="0 0 88 100" id={SymbolIds.terminatedProcessCube}>
+    <title>Terminated Process</title>
+    <g>
+        <polygon points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" fill="#1d1e24" />
+        <polygon points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}}/>
+        <polygon id="Path-4-Copy-15" points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.35" fill={`url(#${PaintServerIds.terminatedProcessCube})`} style={{isolation: 'isolate'}} />
+        <polygon id="Path-Copy-20" points="88 25.839 44.23 0 0 25.839 44 50 88 25.839" fill="#fff" opacity="0.13893" style={{isolation: 'isolate'}} />
+        <polygon id="Path-Copy-21" points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
+    </g>
+    </symbol>
+    <svg id={SymbolIds.terminatedTriggerCube} viewBox="0 0 88 100">
+      <title>Terminated Trigger Process</title>
+      <g>
+          <polygon  points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" fill="#1d1e24" />
+          <polygon  points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
+          <polygon  points="0 25.839 44.23 0 88 25.839 88 74.688 44.23 100 0 74.688 0 25.839" opacity="0.35" fill={`url(#${PaintServerIds.terminatedTriggerCube})`} style={{isolation: 'isolate'}} />
+          <polygon points="88 25.839 44.23 0 0 25.839 44 50 88 25.839" fill="#fff" opacity="0.13893" style={{isolation: 'isolate'}} />
+          <polygon  points="44.23 100 44 50 0 25.839 0 74.664 44.23 100" opacity="0.25179" style={{isolation: 'isolate'}} />
+      </g>
+    </svg>
   </>
 ));
 
