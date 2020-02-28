@@ -20,7 +20,7 @@ import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
 
-export interface MonitorStatusBarProps {
+interface MonitorStatusBarProps {
   monitorId: string;
   monitorStatus: Ping;
   monitorLocations: MonitorLocations;

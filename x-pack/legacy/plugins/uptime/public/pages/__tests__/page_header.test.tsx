@@ -7,7 +7,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { PageHeaderComponent, BaseBreadcrumb } from '../page_header';
-import { mountWithRouter, shallowWithRouter } from '../../lib';
+import { mountWithRouter,  renderWithRouter } from '../../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
@@ -19,7 +19,7 @@ describe('PageHeaderComponent', () => {
   ];
 
   it('shallow renders with breadcrumbs and the date picker', () => {
-    const component = shallowWithRouter(
+    const component = renderWithRouter(
       <PageHeaderComponent
         headingText={'TestingHeading'}
         breadcrumbs={simpleBreadcrumbs}
@@ -30,7 +30,7 @@ describe('PageHeaderComponent', () => {
   });
 
   it('shallow renders with breadcrumbs without the date picker', () => {
-    const component = shallowWithRouter(
+    const component = renderWithRouter(
       <PageHeaderComponent
         headingText={'TestingHeading'}
         breadcrumbs={simpleBreadcrumbs}
