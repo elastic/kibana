@@ -4,20 +4,20 @@
 [partintro]
 --
 
-You're new to {kib}, and not sure where to start. To quickly get started with {kib}, set up on Cloud and add a sample data set that you can use to get a handle on the full range of {kib} features.
+Ready to try out {kib} and see what it can do? To quickest way to get started with {kib} is to set up on Cloud, then add a sample data set that helps you get a handle on the full range of {kib} features.
 
 [float]
 [[cloud-set-up]]
 == Set up on Cloud
 
-To easily access {kib} in a single click, run our hosted Elasticsearch Service on Elastic Cloud.
+To access {kib} in a single click, run our hosted Elasticsearch Service on Elastic Cloud.
 
 . Log into the link:https://cloud.elastic.co/[Elasticsearch Service Console].
 If you need an account, register for a link:https://www.elastic.co/cloud/elasticsearch-service/signup[free 14-day trial].
 
 . Click *Create deployment*, then give your deployment a name.
 
-. To use the default options, click *Create deployment*. If you want, you can modify the other deployment options, but the default options are great to get started.
+. To use the default options, click *Create deployment*. You can modify the other deployment options, but the default options are great to get started.
 
 Be sure to copy down the password for the `elastic` user and Cloud ID information. You'll need that later.
 
@@ -25,11 +25,9 @@ Be sure to copy down the password for the `elastic` user and Cloud ID informatio
 [[get-data-in]]
 == Get data into {kib}
 
-Before you create visualizations and analyze your data, you must get the data into {kib}.
+The easiest way to get data into {kib} is to add a sample data set.
 
-The easiest way to get data into {kib} is to add a sample data set. {kib} has several sample data sets that you can use before loading your own data.
-
-These sample data sets showcase a variety of use cases:
+{kib} has several sample data sets that you can use before loading your own data:
 
 * *Sample eCommerce orders* includes visualizations for tracking product-related information,
 such as cost, revenue, and price.
@@ -56,7 +54,7 @@ If you uninstall and reinstall a data set, the timestamps change to reflect the 
 [[getting-started-next-steps]]
 == Next steps
 
-* To get a hands-on experience using the sample flight data, follow the <<tutorial-sample-data, add sample data>> tutorial.
+* To get a hands-on experience creating visualizations, follow the <<tutorial-sample-data, add sample data>> tutorial.
 
 * If you're ready to load an actual data set and build a dashboard, follow the <<tutorial-build-dashboard, build your own dashboard>> tutorial.
 
