@@ -34,19 +34,6 @@ export const spaces = (kibana: Record<string, any>) =>
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
-    uiCapabilities() {
-      return {
-        spaces: {
-          manage: true,
-        },
-        management: {
-          kibana: {
-            spaces: true,
-          },
-        },
-      };
-    },
-
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [],
@@ -110,14 +97,9 @@ export const spaces = (kibana: Record<string, any>) =>
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
 
-      const config = server.config();
-
       const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
-        legacyConfig: {
-          kibanaIndex: config.get('kibana.index'),
-        },
         savedObjects: server.savedObjects,
         auditLogger: {
           create: (pluginId: string) =>

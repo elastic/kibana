@@ -17,6 +17,14 @@ export class AbstractField {
     return this._fieldName;
   }
 
+  getRootName() {
+    return this.getName();
+  }
+
+  canValueBeFormatted() {
+    return true;
+  }
+
   getSource() {
     return this._source;
   }

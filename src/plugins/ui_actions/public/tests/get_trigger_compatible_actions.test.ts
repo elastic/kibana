@@ -22,6 +22,7 @@ import { uiActionsPluginMock } from '../mocks';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
 import { Action } from '../actions';
 import { Trigger } from '../triggers';
+import { TriggerId } from '../types';
 
 let action: Action<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
@@ -31,10 +32,10 @@ beforeEach(() => {
 
   uiActions.setup.registerAction(action);
   uiActions.setup.registerTrigger({
-    id: 'trigger',
+    id: 'trigger' as TriggerId,
     title: 'trigger',
   });
-  uiActions.setup.attachAction('trigger', action.id);
+  uiActions.setup.attachAction('trigger' as TriggerId, action.id);
 });
 
 test('can register action', async () => {
@@ -51,14 +52,14 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
   setup.registerAction(helloWorldAction);
 
   const testTrigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
   setup.registerTrigger(testTrigger);
-  setup.attachAction('MY-TRIGGER', helloWorldAction.id);
+  setup.attachAction('MY-TRIGGER' as TriggerId, helloWorldAction.id);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {});
+  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER' as TriggerId, {});
 
   expect(actions.length).toBe(1);
   expect(actions[0].id).toBe(helloWorldAction.id);
@@ -73,7 +74,7 @@ test('filters out actions not applicable based on the context', async () => {
   setup.registerAction(restrictedAction);
 
   const testTrigger: Trigger = {
-    id: 'MY-TRIGGER',
+    id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
 
@@ -94,15 +95,15 @@ test(`throws an error with an invalid trigger ID`, async () => {
   const { doStart } = uiActions;
   const start = doStart();
 
-  await expect(start.getTriggerCompatibleActions('I do not exist', {})).rejects.toMatchObject(
-    new Error('Trigger [triggerId = I do not exist] does not exist.')
-  );
+  await expect(
+    start.getTriggerCompatibleActions('I do not exist' as TriggerId, {})
+  ).rejects.toMatchObject(new Error('Trigger [triggerId = I do not exist] does not exist.'));
 });
 
 test(`with a trigger mapping that maps to an non-existing action returns empty list`, async () => {
   const { setup, doStart } = uiActions;
   const testTrigger: Trigger = {
-    id: '123',
+    id: '123' as TriggerId,
     title: '123',
   };
   setup.registerTrigger(testTrigger);
