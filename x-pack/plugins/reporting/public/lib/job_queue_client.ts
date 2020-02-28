@@ -59,7 +59,7 @@ export class JobQueueClient {
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_BASE_URL);
-    const downloadLink = `${apiBaseUrl}/jobs/download/${jobId}`;
+    const downloadLink = `${apiBaseUrl}/download/${jobId}`;
 
     return downloadLink;
   }
