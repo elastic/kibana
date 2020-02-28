@@ -101,13 +101,33 @@ export type XYZTMSSourceDescriptor = {
   urlTemplate: string;
 };
 
-export type joinDescriptor = {
+export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
 };
 
+export type DataRequestDescriptor = {
+  dataId: string;
+  dataMetaAtStart: object;
+  dataRequestToken: symbol;
+  data: object;
+  dataMeta: object;
+};
+
 export type LayerDescriptor = {
-  sourceDescriptor: SourceDescriptor;
+  __dataRequests: DataRequestDescriptor[];
+  __isInErrorState?: boolean;
+  __errorMessage?: string;
+  alpha: number;
   id: string;
   label?: string;
+  minZoom: number;
+  maxZoom: number;
+  sourceDescriptor: SourceDescriptor;
+  type: string;
+  visible: boolean;
+};
+
+export type VectorLayerDescriptor = LayerDescriptor & {
+  joins?: JoinDescriptor[];
 };
