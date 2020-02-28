@@ -93,7 +93,7 @@ export default function({ getService }) {
         .expect(400)
         .then(resp => {
           expect(resp.body.message).to.contain(
-            '[request query.look_back]: Value is [0] but it must be equal to or greater than [1].'
+            '[request query.look_back]: Value must be equal to or greater than [1].'
           );
         }));
   });

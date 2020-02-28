@@ -111,7 +111,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null] but got [666]',
+              'error validating action type config: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null]',
           });
         });
     });

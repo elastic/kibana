@@ -100,7 +100,7 @@ export default function({ getService }: FtrProviderContext) {
             ],
           })
           .expect(400);
-        expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
+        expect(body.message).to.contain('Value must be equal to or greater than [1]');
       });
 
       it('metadata api should return page based on filters passed.', async () => {
