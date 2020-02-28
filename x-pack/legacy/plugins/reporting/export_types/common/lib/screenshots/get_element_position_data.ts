@@ -16,7 +16,7 @@ export const getElementPositionAndAttributes = async (
   layout: LayoutInstance,
   logger: Logger
 ): Promise<ElementsPositionAndAttribute[] | null> => {
-  const { screenshot: screenshotSelector } = layout.selectors;
+  const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
     elementsPositionAndAttributes = await browser.evaluate(
@@ -61,8 +61,7 @@ export const getElementPositionAndAttributes = async (
     if (!elementsPositionAndAttributes || elementsPositionAndAttributes.length === 0) {
       throw new Error(
         i18n.translate('xpack.reporting.screencapture.noElements', {
-          defaultMessage: `No shared items containers of {selector} were found on the page. It's possible there are no visualizations at this Kibana URL.`,
-          values: { selector: screenshotSelector },
+          defaultMessage: `An error occurred while reading the page for visualization panels: no panels were found.`,
         })
       );
     }
