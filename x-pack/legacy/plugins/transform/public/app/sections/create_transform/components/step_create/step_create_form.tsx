@@ -35,7 +35,7 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useKibanaContext } from '../../../../lib/kibana';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
 
@@ -74,6 +74,7 @@ export const StepCreateForm: FC<Props> = React.memo(
       undefined
     );
 
+    const deps = useAppDependencies();
     const kibanaContext = useKibanaContext();
     const toastNotifications = useToastNotifications();
 
@@ -439,7 +440,7 @@ export const StepCreateForm: FC<Props> = React.memo(
                           defaultMessage: 'Use Discover to explore the transform.',
                         }
                       )}
-                      href={getDiscoverUrl(indexPatternId, kibanaContext.kbnBaseUrl)}
+                      href={getDiscoverUrl(indexPatternId, deps.core.http.basePath.get())}
                       data-test-subj="transformWizardCardDiscover"
                     />
                   </EuiFlexItem>

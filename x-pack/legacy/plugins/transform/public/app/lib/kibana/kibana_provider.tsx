@@ -58,7 +58,6 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
     const kibanaContext: InitializedKibanaContextValue = {
       indexPatterns,
       initialized: true,
-      kbnBaseUrl: appDeps.core.injectedMetadata.getBasePath(),
       kibanaConfig,
       combinedQuery,
       currentIndexPattern,
