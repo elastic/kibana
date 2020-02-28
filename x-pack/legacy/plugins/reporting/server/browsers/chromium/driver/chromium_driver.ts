@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trunc, map } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { map, trunc } from 'lodash';
 import open from 'opn';
+import { EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
-import { allowRequest } from '../../network_policy';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -18,6 +18,7 @@ import {
   InterceptedRequest,
   NetworkPolicy,
 } from '../../../../types';
+import { allowRequest } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
@@ -81,7 +82,7 @@ export class HeadlessChromiumDriver {
     //    https://github.com/puppeteer/puppeteer/issues/5003
     // Docs on this client/protocol can be found here:
     //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
-    client.on('Fetch.requestPaused', (interceptedRequest: InterceptedRequest) => {
+    client.on('Fetch.requestPaused', async (interceptedRequest: InterceptedRequest) => {
       const {
         requestId,
         request: { url: interceptedUrl },
@@ -92,12 +93,17 @@ export class HeadlessChromiumDriver {
       // We should never ever let file protocol requests go through
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
-        client.send('Fetch.failRequest', {
+        await client.send('Fetch.failRequest', {
           errorReason: 'Aborted',
           requestId,
         });
         this.page.browser().close();
-        throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
+        throw new Error(
+          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
+            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}", exiting`,
+            values: { interceptedUrl },
+          })
+        );
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
@@ -112,14 +118,33 @@ export class HeadlessChromiumDriver {
             value,
           })
         );
-        client.send('Fetch.continueRequest', {
-          requestId,
-          headers,
-        });
+
+        try {
+          await client.send('Fetch.continueRequest', {
+            requestId,
+            headers,
+          });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequestUsingHeaders', {
+              defaultMessage: 'Failed to complete a request using headers: {error}',
+              values: { error: err },
+            })
+          );
+        }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
         logger.debug(`No custom headers for ${loggedUrl}`);
-        client.send('Fetch.continueRequest', { requestId });
+        try {
+          await client.send('Fetch.continueRequest', { requestId });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequest', {
+              defaultMessage: 'Failed to complete a request: {error}',
+              values: { error: err },
+            })
+          );
+        }
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
