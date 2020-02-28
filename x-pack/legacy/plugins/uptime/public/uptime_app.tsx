@@ -23,7 +23,6 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import { PageHeader } from './components/connected/pages/page_header_container';
 
 export interface UptimeAppColors {
   danger: string;
@@ -50,6 +49,7 @@ export interface UptimeAppProps {
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 const Application = (props: UptimeAppProps) => {

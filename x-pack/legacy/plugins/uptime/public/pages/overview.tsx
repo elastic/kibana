@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiBreadcrumbs } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import {
   EmptyState,
   MonitorList,

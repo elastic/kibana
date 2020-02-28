@@ -10,11 +10,12 @@ import { Dispatch } from 'redux';
 import { AppState } from '../../../state';
 import { selectMonitorLocations, selectMonitorStatus } from '../../../state/selectors';
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
-import { getMonitorStatus, getSelectedMonitor } from '../../../state/actions';
+import { getMonitorStatus } from '../../../state/actions';
 import { useUrlParams } from '../../../hooks';
 import { Ping } from '../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
 import { UptimeRefreshContext } from '../../../contexts';
+import { MonitorStatusBarProps } from '../../functional/monitor_status_details/monitor_status_bar/monitor_status_bar';
 
 interface StateProps {
   monitorStatus: Ping;
@@ -69,17 +70,11 @@ const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
         dateEnd,
       })
     );
-    dispatch(
-      getSelectedMonitor({
-        monitorId,
-      })
-    );
   },
 });
 
-// @ts-ignore TODO: Investigate typescript issues here
-export const MonitorStatusBar = connect<StateProps, DispatchProps, MonitorStatusBarProps>(
-  // @ts-ignore TODO: Investigate typescript issues here
+export const MonitorStatusBar = connect<typeof mapStateToProps, typeof mapDispatchToProps, MonitorStatusBarProps, AppState>(
+  // @ts-ignore TODO fix this in a subsequent patch
   mapStateToProps,
   mapDispatchToProps
 )(Container);
