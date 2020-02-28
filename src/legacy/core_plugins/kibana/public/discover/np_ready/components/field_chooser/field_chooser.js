@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import uuid from 'uuid/v4';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
@@ -26,7 +25,7 @@ import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import fieldChooserTemplate from './field_chooser.html';
 import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
-import { getServices } from '../../../kibana_services';
+import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
 
 export function createFieldChooserDirective($location, config, $route) {
   return {
@@ -183,71 +182,13 @@ export function createFieldChooserDirective($location, config, $route) {
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
-      function getMapsAppUrl() {
-        const services = getServices();
-        const mapsAppVisAlias = services.visualizations.types.getAliases().find(({ name }) => {
-          return name === 'maps';
-        });
-        return mapsAppVisAlias ? mapsAppVisAlias.aliasUrl : null;
-      }
-
-      function isFieldVisualizable(field) {
-        const mapsAppUrl = getMapsAppUrl();
-        if (mapsAppUrl && (field.type === 'geo_point' || field.type === 'geo_shape')) {
-          return true;
-        }
-
-        return field.visualizable;
-      }
-
       function getVisualizeUrl(field) {
         if (!$scope.state) {
           return '';
         }
 
-        const mapsAppUrl = getMapsAppUrl();
-        if (mapsAppUrl && (field.type === 'geo_point' || field.type === 'geo_shape')) {
-          const mapAppParams = new URLSearchParams();
-
-          // Copy global state
-          const locationSplit = window.location.href.split('discover?');
-          if (locationSplit.length > 1) {
-            const discoverParams = new URLSearchParams(locationSplit[1]);
-            mapAppParams.set('_g', discoverParams.get('_g'));
-          }
-
-          // Copy filters and query in app state
-          const mapsAppState = {
-            filters: $scope.state.filters || [],
-          };
-          if ($scope.state.query) {
-            mapsAppState.query = $scope.state.query;
-          }
-          mapAppParams.set('_a', rison.encode(mapsAppState));
-
-          // create initial layer descriptor
-          const hasColumns =
-            $scope.columns && $scope.columns.length && $scope.columns[0] !== '_source';
-          mapAppParams.set(
-            'initialLayers',
-            rison.encode([
-              {
-                id: uuid(),
-                label: $scope.indexPattern.title,
-                sourceDescriptor: {
-                  id: uuid(),
-                  type: 'ES_SEARCH',
-                  geoField: field.name,
-                  tooltipProperties: hasColumns ? $scope.columns : [],
-                  indexPatternId: $scope.indexPattern.id,
-                },
-                visible: true,
-                type: 'VECTOR',
-              },
-            ])
-          );
-
-          return getServices().addBasePath(`${mapsAppUrl}?${mapAppParams.toString()}`);
+        if ((field.type === 'geo_point' || field.type === 'geo_shape') && isMapsAppRegistered()) {
+          return getMapsAppUrl(field, $scope.indexPattern, $scope.state, $scope.columns);
         }
 
         let agg = {};
