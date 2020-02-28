@@ -29,7 +29,8 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { AggConfigs, PersistedState } from '../../legacy_imports';
+import { PersistedState } from '../../../../../../../src/plugins/visualizations/public';
+import { AggConfigs } from '../../legacy_imports';
 import { updateVisualizationConfig } from './legacy/vis_update';
 import { getTypes } from './services';
 
