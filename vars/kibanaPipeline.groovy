@@ -177,7 +177,6 @@ def jobRunner(label, useRamDisk, closure) {
 }
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
-  return
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
     bucket: "gs://${uploadPrefix}",
@@ -188,19 +187,19 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 }
 
 def downloadCoverageArtifacts() {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
+  def storageLocation = "gs://kibana-pipeline-testing/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
   def targetLocation = "/tmp/downloaded_coverage"
 
   sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
 }
 
 def uploadCoverageArtifacts(prefix, pattern) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  def uploadPrefix = "kibana-pipeline-testing/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
   uploadGcsArtifact(uploadPrefix, pattern)
 }
 
 def withGcsArtifactUpload(workerName, closure) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
+  def uploadPrefix = "kibana-pipeline-testing/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
     'target/junit/**/*',
@@ -220,6 +219,8 @@ def withGcsArtifactUpload(workerName, closure) {
       catchError {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
+          uploadGcsArtifact('kibana-oss/' + uploadPrefix, pattern)
+          uploadGcsArtifact('kibana-xpack/' + uploadPrefix, pattern)
         }
       }
     }
@@ -227,7 +228,7 @@ def withGcsArtifactUpload(workerName, closure) {
 
   if (env.CODE_COVERAGE) {
     sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
-    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
+    uploadGcsArtifact("kibana-pipeline-testing/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
   }
 }
 
