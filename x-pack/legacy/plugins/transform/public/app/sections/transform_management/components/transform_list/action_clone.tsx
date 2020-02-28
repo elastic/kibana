@@ -30,7 +30,7 @@ export const CloneAction: FC<CloneActionProps> = ({ itemId }) => {
   });
 
   function clickHandler() {
-    history.push(`${CLIENT_BASE_PATH}/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
+    history.push(`${CLIENT_BASE_PATH}${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
   const cloneButton = (
