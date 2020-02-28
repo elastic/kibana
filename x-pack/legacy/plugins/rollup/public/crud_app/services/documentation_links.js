@@ -9,7 +9,7 @@ let xPackBase = '';
 
 export function setEsBaseAndXPackBase(elasticWebsiteUrl, docLinksVersion) {
   esBase = `${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinksVersion}`;
-  xPackBase = `${elasticWebsiteUrl}guide/en/x-pack/${docLinksVersion}`;
+  xPackBase = `${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinksVersion}`;
 }
 
 export const getLogisticalDetailsUrl = () => `${esBase}/rollup-job-config.html#_logistical_details`;
