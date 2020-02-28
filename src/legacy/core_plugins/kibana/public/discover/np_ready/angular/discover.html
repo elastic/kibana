@@ -196,8 +196,6 @@
                 data-test-subj="discoverDocTable"
               ></doc-table>
 
-              <a tabindex="0" id="discoverBottomMarker"></a>
-
               <div ng-if="rows.length == opts.sampleSize" class="dscTable__footer">
                 <span
                   i18n-id="kbn.discover.howToSeeOtherMatchingDocumentsDescription"
@@ -210,6 +208,7 @@
                 <a
                   kbn-accessible-click
                   ng-click="scrollToTop()"
+                  id="discoverBottomMarker"
                   i18n-id="kbn.discover.backToTopLinkText"
                   i18n-default-message="Back to top."
                 ></a>

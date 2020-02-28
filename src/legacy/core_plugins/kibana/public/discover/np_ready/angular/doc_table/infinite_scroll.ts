@@ -31,6 +31,7 @@ export function createInfiniteScrollDirective() {
     },
     link: ($scope: LazyScope, $element: JQuery) => {
       const $window = $(window);
+      const $dscTable = $('.dscTable');
       let checkTimer: any;
 
       function onScroll() {
@@ -57,10 +58,10 @@ export function createInfiniteScrollDirective() {
         }, 50);
       }
 
-      $window.on('scroll', scheduleCheck);
+      $dscTable.on('scroll', scheduleCheck);
       $scope.$on('$destroy', function() {
         clearTimeout(checkTimer);
-        $window.off('scroll', scheduleCheck);
+        $dscTable.off('scroll', scheduleCheck);
       });
       scheduleCheck();
     },
