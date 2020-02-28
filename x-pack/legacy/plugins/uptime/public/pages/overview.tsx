@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiBreadcrumbs } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   EmptyState,
   MonitorList,
@@ -20,6 +22,7 @@ import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plug
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
+import { PageHeader } from '../components/connected/pages/page_header_container';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -73,6 +76,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   return (
     <>
+      <PageHeader headingText={'Overview'} breadcrumbs={[]} datePicker={true} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

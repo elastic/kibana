@@ -7,11 +7,13 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { ChromeBreadcrumb } from 'kibana/public';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
+import { PageHeader } from '../components/connected/pages/page_header_container';
 
 export const MonitorPage = () => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
@@ -39,8 +41,11 @@ export const MonitorPage = () => {
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
+  // TODO BEFORE MERGE: Fix breadcrumbs and heading text to follow logic from https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/uptime/public/pages/page_header.tsx
+  const breadcrumbs: ChromeBreadcrumb[] = [{ text: monitorId }];
   return (
     <>
+      <PageHeader headingText={monitorId} breadcrumbs={breadcrumbs} datePicker={true} />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />

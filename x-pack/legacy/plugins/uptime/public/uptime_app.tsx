@@ -98,7 +98,6 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <PageHeader />
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>
