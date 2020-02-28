@@ -309,7 +309,8 @@ function wrapWithTry(
 ) {
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const result = migrationFn(doc, new MigrationLogger(log));
+      const context = { log: new MigrationLogger(log) };
+      const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
