@@ -6,7 +6,6 @@
 
 import React, { MouseEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -47,36 +46,31 @@ export const navTabs: NavTabs[] = [
   },
 ];
 
-const Tabs = styled(EuiTabs)`
-  top: 1px;
-  &:before {
-    height: 0px;
+export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = React.memo(
+  ({ basename }) => {
+    const history = useHistory();
+    const location = useLocation();
+
+    function renderNavTabs(tabs: NavTabs[]) {
+      return tabs.map((tab, index) => {
+        return (
+          <EuiTab
+            data-testid={`${tab.id}EndpointTab`}
+            data-test-subj={`${tab.id}EndpointTab`}
+            key={index}
+            href={`${basename}${tab.href}`}
+            onClick={(event: MouseEvent) => {
+              event.preventDefault();
+              history.push(tab.href);
+            }}
+            isSelected={tab.href === location.pathname}
+          >
+            {tab.name}
+          </EuiTab>
+        );
+      });
+    }
+
+    return <EuiTabs>{renderNavTabs(navTabs)}</EuiTabs>;
   }
-`;
-
-export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = React.memo(({ basename }) => {
-  const history = useHistory();
-  const location = useLocation();
-
-  function renderNavTabs(tabs: NavTabs[]) {
-    return tabs.map((tab, index) => {
-      return (
-        <EuiTab
-          data-testid={`${tab.id}EndpointTab`}
-          data-test-subj={`${tab.id}EndpointTab`}
-          key={index}
-          href={`${basename}${tab.href}`}
-          onClick={(event: MouseEvent) => {
-            event.preventDefault();
-            history.push(tab.href);
-          }}
-          isSelected={tab.href === location.pathname}
-        >
-                    {tab.name}
-        </EuiTab>
-      );
-    });
-  }
-
-  return <Tabs>{renderNavTabs(navTabs)}</Tabs>;
-});
+);
