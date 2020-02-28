@@ -69,19 +69,19 @@ export const distro = obj => {
 const dropFront = staticSiteUrl =>
   trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
 
-const buildFinalUrl = (urlBase, ts, testRunnerType) => trimmed =>
-  `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
+const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
+  `${urlBase}/${ts}/${liveAppPath}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
 
 const assignUrl = obj => name => value => {
   obj[name] = value;
   return obj;
 };
 
-export const staticSite = urlBase => obj => {
+export const staticSite = (urlBase, liveAppPath) => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
 
-  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, ts, testRunnerType);
+  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, ts, testRunnerType, liveAppPath);
   const assignObj = assignUrl(obj);
   const assignStaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
 
