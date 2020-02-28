@@ -67,7 +67,7 @@ export class ESTermSource extends AbstractESAggSource {
     return this._descriptor.whereQuery;
   }
 
-  formatMetricKey(aggType, fieldName) {
+  getAggKey(aggType, fieldName) {
     const metricKey =
       aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
     return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
@@ -75,21 +75,13 @@ export class ESTermSource extends AbstractESAggSource {
     }.${this._termField.getName()}`;
   }
 
-  formatMetricLabel(type, fieldName) {
-    switch (type) {
-      case AGG_TYPE.COUNT:
-        return i18n.translate('xpack.maps.source.esJoin.countLabel', {
+  getAggLabel(aggType, fieldName) {
+    return aggType === AGG_TYPE.COUNT
+      ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
           values: { indexPatternTitle: this._descriptor.indexPatternTitle },
-        });
-      case AGG_TYPE.TERMS:
-        return i18n.translate('xpack.maps.source.esJoin.topTermLabel', {
-          defaultMessage: `Top {fieldName}`,
-          values: { fieldName },
-        });
-      default:
-        return `${type} ${fieldName}`;
-    }
+        })
+      : super.getAggLabel(aggType, fieldName);
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
@@ -116,7 +108,7 @@ export class ESTermSource extends AbstractESAggSource {
       requestDescription: this._getRequestDescription(leftSourceName, leftFieldName),
     });
 
-    const countPropertyName = this.formatMetricKey(AGG_TYPE.COUNT);
+    const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
     return {
       propertiesMap: extractPropertiesMap(rawEsData, countPropertyName),
     };

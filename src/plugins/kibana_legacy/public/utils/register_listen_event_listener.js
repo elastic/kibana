@@ -21,7 +21,7 @@ export function registerListenEventListener($rootScope) {
    * Helper that registers an event listener, and removes that listener when
    * the $scope is destroyed.
    *
-   * @param  {SimpleEmitter} emitter - the event emitter to listen to
+   * @param  {EventEmitter} emitter - the event emitter to listen to
    * @param  {string} eventName - the event name
    * @param  {Function} handler - the event handler
    * @return {undefined}
