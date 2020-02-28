@@ -105,6 +105,20 @@ Operations::
 Platform::
 * Limits fetching index patterns {pull}56603[#56603]
 
+[float]
+[[security-fix-6.8.7]]
+=== Security issues
+In {kib} 6.8.7 and earlier, Node.js contains the following security issues:
+
+* The TLS handling code for Node.js includes a Denial of Service (DoS) issue. Successful exploitation of the flaw could result in {kib} crashing. CVE-2019-15604
++
+There are no known workarounds for this issue.
+
+* There are issues with how Node.js handles malformed HTTP headers. The malformed headers could result in an HTTP request smuggling attack when {kib} is running behind a proxy that is vulnerable to HTTP request smuggling attacks. CVE-2019-15605 and CVE-2019-15606
++
+For instructions on how to mitigate HTTP request smuggling attacks, contact your proxy vendor.
+
+Administrators running {kib} in an environment with untrusted users should upgrade to {kib} 6.8.7, which updates Node.js to 10.19.0.
 
 [[release-notes-6.8.6]]
 == {kib} 6.8.6
