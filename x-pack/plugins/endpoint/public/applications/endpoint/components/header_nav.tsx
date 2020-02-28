@@ -54,7 +54,7 @@ const Tabs = styled(EuiTabs)`
   }
 `;
 
-export const HeaderNavigation: React.FunctionComponent = () => {
+export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
   const history = useHistory();
   const location = useLocation();
 
