@@ -134,6 +134,7 @@ Example:
 Start the [Storybook](https://storybook.js.org/) development environment with
 `yarn storybook apm`. All files with a .stories.tsx extension will be loaded.
 You can access the development environment at http://localhost:9001.
+s
 
 #### Further resources
 
