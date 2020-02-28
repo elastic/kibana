@@ -11,7 +11,7 @@ import { registerTransformsRoutes } from './api/transforms';
 
 import { API_BASE_PATH } from '../../../../legacy/plugins/transform/common/constants';
 
-export const addBasePath = (uri: string): string => API_BASE_PATH + uri;
+export const addBasePath = (uri: string): string => `${API_BASE_PATH}${uri}`;
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {

@@ -39,7 +39,7 @@ interface StopOptions {
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license } = routeDependencies;
   router.get(
-    { path: addBasePath('transforms'), validate: {} },
+    { path: addBasePath('transforms'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const options = {};
       try {
@@ -75,7 +75,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     })
   );
   router.get(
-    { path: addBasePath('transforms/_stats'), validate: {} },
+    { path: addBasePath('transforms/_stats'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const options = {};
       try {
