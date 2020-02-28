@@ -36,6 +36,7 @@ import {
   EuiSpacer,
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -44,7 +45,8 @@ import { shortenDottedString } from '../../../../../../../../plugins/data/common
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
-const KibanaJSON = 'kibana-json';
+const kibanaJSON = 'kibana-json';
+const geoPoint = 'geo-point';
 interface SortObj {
   id: string;
   direction: Direction;
@@ -137,7 +139,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
   onAddColumn,
 }: Props) {
   const actionColumnId = 'uniqueString'; // TODO should be guaranteed unique...
-  const lowestPageSize = 500;
+  const lowestPageSize = 50;
   const timeString = i18n.translate('kbn.discover.timeLabel', {
     defaultMessage: 'Time',
   });
@@ -162,12 +164,18 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
         case 'date':
           column.schema = 'datetime';
           break;
-        case 'numeric':
-          column.schema = 'number';
+        case 'number':
+          column.schema = 'numeric';
           break;
         case '_source':
         case 'object':
-          column.schema = KibanaJSON;
+          column.schema = kibanaJSON;
+          break;
+        case 'geo_point':
+          column.schema = geoPoint;
+          break;
+        default:
+          column.schema = undefined;
           break;
       }
 
@@ -277,6 +285,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
       value = formattedField(row, fieldName);
 
       if (showFilterActions(isDetails, fieldName)) {
+        // console.log(dataGridColumns[fieldName].schema)
         return (
           <CellPopover
             value={value}
@@ -338,7 +347,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
           ...pagination,
           onChangeItemsPerPage,
           onChangePage,
-          pageSizeOptions: [lowestPageSize],
+          pageSizeOptions: [lowestPageSize, 100, 500],
         }}
         toolbarVisibility={{
           showColumnSelector: false,
@@ -351,7 +360,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
         }}
         schemaDetectors={[
           {
-            type: KibanaJSON,
+            type: kibanaJSON,
             detector() {
               return 0; // this schema is always explicitly defined
             },
@@ -364,7 +373,27 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
             icon: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
             color: '', // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
           },
+          {
+            type: geoPoint,
+            detector() {
+              return 0; // this schema is always explicitly defined
+            },
+            comparator(a, b, direction) {
+              // TODO @myasonik this column is not sortable
+              return 1;
+            },
+            sortTextAsc: '',
+            sortTextDesc: '',
+            icon: 'tokenGeo',
+          },
         ]}
+        // TODO @dsnide can make edits here per type
+        // Types [geoPoint], [kibanaJSON], numeric, datetime
+        popoverContents={{
+          [geoPoint]: ({ children, cellContentsElement }) => {
+            return <span className="geo-point">{children}</span>;
+          },
+        }}
       />
       {showDisclaimer && (
         <>
@@ -382,7 +411,11 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
           </p>
         </>
       )}
-      {searchString && <p id={randomId}>{searchString}</p>}
+      {searchString && (
+        <EuiScreenReaderOnly>
+          <p id={randomId}>{searchString}</p>
+        </EuiScreenReaderOnly>
+      )}
       {typeof flyoutRow !== 'undefined' && (
         <EuiPortal>
           <EuiFlyout onClose={() => setFlyoutRow(undefined)} size="l" ownFocus>
