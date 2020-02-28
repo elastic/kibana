@@ -224,8 +224,8 @@ def withGcsArtifactUpload(workerName, closure) {
       catchError {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
-          uploadGcsArtifact('../kibana-oss/' + uploadPrefix, pattern)
-          uploadGcsArtifact('../kibana-xpack/' + uploadPrefix, pattern)
+          uploadGcsArtifact(uploadPrefix, '../kibana-oss/' + pattern)
+          uploadGcsArtifact(uploadPrefix, '../kibana-xpack/' + pattern)
         }
       }
     }
@@ -327,7 +327,7 @@ def runErrorReporter() {
 }
 
 def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
-  def testMetadataPath = "target/test_metadata_${type}_${workerNumber}.json"
+  def testMetadataPath = pwd() + "target/test_metadata_${type}_${workerNumber}.json"
   def iteration = 0
 
   withEnv([
