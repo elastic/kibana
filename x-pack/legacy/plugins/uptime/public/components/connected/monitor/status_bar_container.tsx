@@ -73,7 +73,12 @@ const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
   },
 });
 
-export const MonitorStatusBar = connect<typeof mapStateToProps, typeof mapDispatchToProps, MonitorStatusBarProps, AppState>(
+export const MonitorStatusBar = connect<
+  typeof mapStateToProps,
+  typeof mapDispatchToProps,
+  MonitorStatusBarProps,
+  AppState
+>(
   // @ts-ignore TODO fix this in a subsequent patch
   mapStateToProps,
   mapDispatchToProps

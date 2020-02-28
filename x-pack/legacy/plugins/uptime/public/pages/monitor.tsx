@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { connect, MapDispatchToPropsFunction,  } from 'react-redux';
+import { connect, MapDispatchToPropsFunction } from 'react-redux';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
@@ -106,13 +106,9 @@ const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispa
         getSelectedMonitor({
           monitorId,
         })
-      )
+      );
     },
   };
 };
 
-
-export const MonitorPage = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(MonitorPageComponent);
+export const MonitorPage = connect(mapStateToProps, mapDispatchToProps)(MonitorPageComponent);
