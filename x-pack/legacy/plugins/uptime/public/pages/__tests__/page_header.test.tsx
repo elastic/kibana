@@ -6,144 +6,55 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { PageHeaderComponent } from '../page_header';
-import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../lib';
-import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../../../common/constants';
-import { Ping } from '../../../common/graphql/types';
-import { createMemoryHistory } from 'history';
-import { ChromeBreadcrumb, ChromeStart } from 'kibana/public';
-import {
-  KibanaContextProvider,
-  useKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { PageHeaderComponent, BaseBreadcrumb } from '../page_header';
+import { mountWithRouter, shallowWithRouter } from '../../lib';
+import { OVERVIEW_ROUTE } from '../../../common/constants';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 describe('PageHeaderComponent', () => {
-  const monitorStatus: Ping = {
-    id: 'elastic-co',
-    tcp: { rtt: { connect: { us: 174982 } } },
-    http: {
-      response: {
-        body: {
-          bytes: 2092041,
-          hash: '5d970606a6be810ae5d37115c4807fdd07ba4c3e407924ee5297e172d2efb3dc',
-        },
-        status_code: 200,
-      },
-      rtt: {
-        response_header: { us: 340175 },
-        write_request: { us: 38 },
-        validate: { us: 1797839 },
-        content: { us: 1457663 },
-        total: { us: 2030012 },
-      },
-    },
-    monitor: {
-      ip: '2a04:4e42:3::729',
-      status: 'up',
-      duration: { us: 2030035 },
-      type: 'http',
-      id: 'elastic-co',
-      name: 'elastic',
-      check_group: '2a017afa-4736-11ea-b3d0-acde48001122',
-    },
-    resolve: { ip: '2a04:4e42:3::729', rtt: { us: 2102 } },
-    url: { port: 443, full: 'https://www.elastic.co', scheme: 'https', domain: 'www.elastic.co' },
-    ecs: { version: '1.4.0' },
-    tls: {
-      certificate_not_valid_after: '2020-07-16T03:15:39.000Z',
-      rtt: { handshake: { us: 57115 } },
-      certificate_not_valid_before: '2019-08-16T01:40:25.000Z',
-    },
-    observer: {
-      geo: { name: 'US-West', location: '37.422994, -122.083666' },
-    },
-    timestamp: '2020-02-04T10:07:42.142Z',
-  };
+  const simpleBreadcrumbs: ChromeBreadcrumb[] = [
+    { text: 'TestCrumb1', href: '#testHref1' },
+    { text: 'TestCrumb2', href: '#testHref2' },
+  ];
 
-  it('shallow renders expected elements for valid props', () => {
-    const component = shallowWithRouter(<PageHeaderComponent />);
-    expect(component).toMatchSnapshot();
-  });
-
-  it('renders expected elements for valid props', () => {
-    const component = renderWithRouter(<PageHeaderComponent />);
-    expect(component).toMatchSnapshot();
-  });
-
-  it('renders expected title for valid overview route', () => {
-    const component = renderWithRouter(
-      <Route path={OVERVIEW_ROUTE}>
-        <PageHeaderComponent />
-      </Route>
+  it('shallow renders with breadcrumbs and the date picker', () => {
+    const component = shallowWithRouter(
+      <PageHeaderComponent
+        headingText={'TestingHeading'}
+        breadcrumbs={simpleBreadcrumbs}
+        datePicker={true}
+      />
     );
-    expect(component).toMatchSnapshot();
-
-    const titleComponent = component.find('.euiTitle');
-    expect(titleComponent.text()).toBe('Overview');
+    expect(component).toMatchSnapshot('page_header_with_date_picker');
   });
 
-  it('renders expected title for valid monitor route', () => {
-    const history = createMemoryHistory({ initialEntries: ['/monitor/ZWxhc3RpYy1jbw=='] });
-
-    const component = renderWithRouter(
-      <Route path={MONITOR_ROUTE}>
-        <PageHeaderComponent />
-      </Route>,
-      history
+  it('shallow renders with breadcrumbs without the date picker', () => {
+    const component = shallowWithRouter(
+      <PageHeaderComponent
+        headingText={'TestingHeading'}
+        breadcrumbs={simpleBreadcrumbs}
+        datePicker={false}
+      />
     );
-    expect(component).toMatchSnapshot();
-
-    const titleComponent = component.find('.euiTitle');
-    expect(titleComponent.text()).toBe('https://www.elastic.co');
+    expect(component).toMatchSnapshot('page_header_no_date_picker');
   });
 
-  it('mount expected page title for valid monitor route', () => {
-    const history = createMemoryHistory({ initialEntries: ['/monitor/ZWxhc3RpYy1jbw=='] });
-
-    const component = mountWithRouter(
-      <Route path={MONITOR_ROUTE}>
-        <PageHeaderComponent monitorStatus={monitorStatus} />
-      </Route>,
-      history
-    );
-    expect(component).toMatchSnapshot();
-
-    const titleComponent = component.find('.euiTitle');
-    expect(titleComponent.text()).toBe('https://www.elastic.co');
-    expect(document.title).toBe('Uptime | elastic - Kibana');
-  });
-
-  it('mount and set expected breadcrumb for monitor route', () => {
-    const history = createMemoryHistory({ initialEntries: ['/monitor/ZWxhc3RpYy1jbw=='] });
-    const [getBreadcrumbObj, core] = mockCore();
-
-    mountWithRouter(
-      <Route path={MONITOR_ROUTE}>
-        <KibanaContextProvider services={{ ...core }}>
-          <PageHeaderComponent monitorStatus={monitorStatus} />
-        </KibanaContextProvider>
-      </Route>,
-      history
-    );
-
-    expect(getBreadcrumbObj()).toStrictEqual([
-      { href: '#/?', text: 'Uptime' },
-      { text: 'https://www.elastic.co' },
-    ]);
-  });
-
-  it('mount and set expected breadcrumb for overview route', () => {
-    const [getBreadcrumbObj, core] = mockCore();
-
+  it('sets the given breadcrumbs', () => {
+    const [getBreadcrumbs, core] = mockCore();
     mountWithRouter(
       <KibanaContextProvider services={{ ...core }}>
         <Route path={OVERVIEW_ROUTE}>
-          <PageHeaderComponent monitorStatus={monitorStatus} />
+          <PageHeaderComponent
+            headingText={'TestingHeading'}
+            breadcrumbs={simpleBreadcrumbs}
+            datePicker={false}
+          />
         </Route>
       </KibanaContextProvider>
     );
 
-    expect(getBreadcrumbObj()).toStrictEqual([{ href: '#/', text: 'Uptime' }]);
+    expect(getBreadcrumbs()).toStrictEqual([BaseBreadcrumb].concat(simpleBreadcrumbs));
   });
 });
 

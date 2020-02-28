@@ -17,22 +17,22 @@ interface PageHeaderProps {
   datePicker: boolean;
 }
 
+export const BaseBreadcrumb: ChromeBreadcrumb = {
+  text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+    defaultMessage: 'Uptime',
+  }),
+  href: '#/',
+};
+
 export const PageHeaderComponent = ({
   headingText,
   breadcrumbs,
   datePicker = true,
 }: PageHeaderProps) => {
-  const baseBreadcrumb: ChromeBreadcrumb = {
-    text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
-      defaultMessage: 'Uptime',
-    }),
-    href: '#/',
-  };
-
   const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs!;
   useEffect(() => {
-    setBreadcrumbs([baseBreadcrumb].concat(breadcrumbs));
-  }, [baseBreadcrumb, breadcrumbs, setBreadcrumbs]);
+    setBreadcrumbs([BaseBreadcrumb].concat(breadcrumbs));
+  }, [breadcrumbs, setBreadcrumbs]);
 
   const datePickerComponent = datePicker ? (
     <EuiFlexItem grow={false}>
