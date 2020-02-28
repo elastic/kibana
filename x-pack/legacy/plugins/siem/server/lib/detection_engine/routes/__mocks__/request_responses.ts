@@ -17,9 +17,12 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
-import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  RuleAlertType,
+  IRuleSavedAttributesSavedObjectAttributes,
+  HapiReadableStream,
+} from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
-import { TEST_BOUNDARY } from './utils';
 import { requestMock } from './request';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
@@ -77,7 +80,6 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
-  tags: [],
 });
 
 export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
@@ -250,24 +252,24 @@ export const ruleStatusRequest = () =>
     query: { ids: ['someId'] },
   });
 
-export const getImportRulesRequest = (payload?: Buffer) =>
+export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
     headers: {
-      'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+      'Content-Type': 'multipart/form-data; boundary=???',
     },
-    body: payload,
+    body: { file: hapiStream },
   });
 
-export const getImportRulesRequestOverwriteTrue = (payload?: Buffer) =>
+export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
     headers: {
-      'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+      'Content-Type': 'multipart/form-data; boundary=???',
     },
-    body: payload,
+    body: { file: hapiStream },
     query: { overwrite: true },
   });
 

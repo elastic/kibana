@@ -5,11 +5,10 @@
  */
 
 import {
-  getSimpleRuleAsMultipartContent,
-  getSimpleRuleAsMultipartContentNoRuleId,
-  TEST_BOUNDARY,
-  UNPARSABLE_LINE,
-  getSimpleRule,
+  buildHapiStream,
+  ruleIdsToNdJsonString,
+  rulesToNdJsonString,
+  getSimpleRuleWithId,
 } from '../__mocks__/utils';
 import {
   getImportRulesRequest,
@@ -41,7 +40,8 @@ describe('import_rules_route', () => {
 
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    request = getImportRulesRequest(getSimpleRuleAsMultipartContent(['rule-1']));
+    const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
+    request = getImportRulesRequest(hapiStream);
 
     config = () => ({
       get: jest.fn(value => {
@@ -72,7 +72,7 @@ describe('import_rules_route', () => {
 
   describe('status codes with actionsClient and alertClient', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.inject(request, context);
+      const response = await server.injectWithoutValidation(request, context);
 
       expect(response.ok).toHaveBeenCalled();
     });
@@ -88,7 +88,9 @@ describe('import_rules_route', () => {
       const response = await server.inject(request, context);
       expect(response.notFound).toHaveBeenCalled();
     });
+  });
 
+  describe('unhappy paths', () => {
     test('returns error if createPromiseFromStreams throws error', async () => {
       jest
         .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
@@ -101,9 +103,7 @@ describe('import_rules_route', () => {
         statusCode: 500,
       });
     });
-  });
 
-  describe('unhappy paths', () => {
     test('returns an error if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
@@ -113,8 +113,8 @@ describe('import_rules_route', () => {
             {
               error: {
                 message:
-                  'To create a rule, the index must exist first. Index .siem-signals does not exist',
-                status_code: 400,
+                  'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+                status_code: 409,
               },
               rule_id: 'rule-1',
             },
@@ -131,19 +131,30 @@ describe('import_rules_route', () => {
       });
 
       const response = await server.inject(request, context);
-      expect(response.customError).toHaveBeenCalledWith({
-        body: 'Test error',
-        statusCode: 500,
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          errors: [
+            {
+              error: {
+                message: 'Test error',
+                status_code: 400,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
+          success_count: 0,
+        },
       });
     });
 
     test('returns 400 if file extension type is not .ndjson', async () => {
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1'], false);
+      const requestPayload = buildHapiStream(ruleIdsToNdJsonString(['rule-1']), 'wrong.html');
       const badRequest = getImportRulesRequest(requestPayload);
       const response = await server.inject(badRequest, context);
 
       expect(response.badRequest).toHaveBeenCalledWith({
-        body: 'Invalid file extension .json',
+        body: 'Invalid file extension .html',
       });
     });
   });
@@ -162,15 +173,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns reported conflict if error parsing rule', async () => {
-      const multipartPayload =
-        `--${TEST_BOUNDARY}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
-        'Content-Type: application/octet-stream\r\n' +
-        '\r\n' +
-        `${UNPARSABLE_LINE}\r\n` +
-        `--${TEST_BOUNDARY}--\r\n`;
-
-      const requestPayload = Buffer.from(multipartPayload);
+      const requestPayload = buildHapiStream('this is not a valid ndjson string!');
       const badRequest = getImportRulesRequest(requestPayload);
       const response = await server.inject(badRequest, context);
 
@@ -179,7 +182,7 @@ describe('import_rules_route', () => {
           errors: [
             {
               error: {
-                message: 'Unexpected token : in JSON at position 8',
+                message: 'Unexpected token h in JSON at position 1',
                 status_code: 400,
               },
               rule_id: '(unknown id)',
@@ -216,7 +219,7 @@ describe('import_rules_route', () => {
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
         clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
-          getSimpleRuleAsMultipartContent(['rule-1'])
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
         const response = await server.inject(overwriteRequest, context);
         expect(response.ok).toHaveBeenCalledWith({
@@ -233,7 +236,7 @@ describe('import_rules_route', () => {
   describe('multi rule import', () => {
     test('returns 200 if all rules imported successfully', async () => {
       const multiRequest = getImportRulesRequest(
-        getSimpleRuleAsMultipartContent(['rule-1', 'rule-2'])
+        buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2']))
       );
       const response = await server.inject(multiRequest, context);
       expect(response.ok).toHaveBeenCalledWith({
@@ -246,7 +249,8 @@ describe('import_rules_route', () => {
     });
 
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
-      const badPayload = getSimpleRuleAsMultipartContentNoRuleId(2);
+      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map(ruleId => getSimpleRuleWithId(ruleId));
+      const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
 
       const response = await server.inject(badRequest, context);
@@ -261,33 +265,9 @@ describe('import_rules_route', () => {
               },
               rule_id: '(unknown id)',
             },
-          ],
-          success: false,
-          success_count: 0,
-        },
-      });
-    });
-
-    test('returns 200 with reported conflict if error parsing rule', async () => {
-      const multipartPayload =
-        `--${TEST_BOUNDARY}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
-        'Content-Type: application/octet-stream\r\n' +
-        '\r\n' +
-        `${UNPARSABLE_LINE}\r\n` +
-        `${JSON.stringify(getSimpleRule('rule-2'))}\r\n` +
-        `--${TEST_BOUNDARY}--\r\n`;
-
-      const requestPayload = Buffer.from(multipartPayload);
-      const badRequest = getImportRulesRequest(requestPayload);
-      const response = await server.inject(badRequest, context);
-
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          errors: [
             {
               error: {
-                message: 'Unexpected token : in JSON at position 8',
+                message: 'child "rule_id" fails because ["rule_id" is required]',
                 status_code: 400,
               },
               rule_id: '(unknown id)',
@@ -302,7 +282,7 @@ describe('import_rules_route', () => {
     describe('importing duplicated rule_ids', () => {
       test('reports a conflict if `overwrite` is set to `false`', async () => {
         const multiRequest = getImportRulesRequest(
-          getSimpleRuleAsMultipartContent(['rule-1', 'rule-1'])
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
         );
         const response = await server.inject(multiRequest, context);
 
@@ -325,7 +305,7 @@ describe('import_rules_route', () => {
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
         const multiRequest = getImportRulesRequestOverwriteTrue(
-          getSimpleRuleAsMultipartContent(['rule-1', 'rule-1'])
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
         );
 
         const response = await server.inject(multiRequest, context);
@@ -346,7 +326,7 @@ describe('import_rules_route', () => {
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         const multiRequest = getImportRulesRequest(
-          getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3'])
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
         const response = await server.inject(multiRequest, context);
         expect(response.ok).toHaveBeenCalledWith({
@@ -368,7 +348,7 @@ describe('import_rules_route', () => {
 
       test('returns 200 with NO reported conflict if `overwrite` is set to `true`', async () => {
         const multiRequest = getImportRulesRequestOverwriteTrue(
-          getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3'])
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
         const response = await server.inject(multiRequest, context);
         expect(response.ok).toHaveBeenCalledWith({
