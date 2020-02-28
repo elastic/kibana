@@ -30,7 +30,7 @@ import { AgentConfig } from '../../../types';
 import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH, FLEET_PATH } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 // import { SearchBar } from '../../../components';
-import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
+import { useGetAgentConfigs, usePagination, useLink, useConfig } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 
@@ -142,6 +142,11 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
 );
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
+  // Config information
+  const {
+    fleet: { enabled: isFleetEnabled },
+  } = useConfig();
+
   // Create agent config flyout state
   const [isCreateAgentConfigFlyoutOpen, setIsCreateAgentConfigFlyoutOpen] = useState<boolean>(
     false
@@ -160,10 +165,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const FLEET_URI = useLink(FLEET_PATH);
 
   // Some configs retrieved, set up table props
-  const columns = useMemo(
-    (): Array<
-      EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
-    > => [
+  const columns = useMemo((): Array<
+    EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
+  > => {
+    const cols = [
       {
         field: 'name',
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
@@ -247,9 +252,15 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           },
         ],
       },
-    ],
-    [DETAILS_URI, FLEET_URI, sendRequest]
-  );
+    ];
+
+    // If Fleet is not enabled, then remove the `agents` column
+    if (!isFleetEnabled) {
+      return cols.filter(col => col.field !== 'agents');
+    }
+
+    return cols;
+  }, [DETAILS_URI, FLEET_URI, isFleetEnabled, sendRequest]);
 
   const emptyPrompt = (
     <EuiEmptyPrompt
