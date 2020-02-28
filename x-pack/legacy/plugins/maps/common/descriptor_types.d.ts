@@ -115,17 +115,17 @@ export type DataRequestDescriptor = {
 };
 
 export type LayerDescriptor = {
-  __dataRequests: DataRequestDescriptor[];
+  __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
-  alpha: number;
+  alpha?: number;
   id: string;
   label?: string;
-  minZoom: number;
-  maxZoom: number;
+  minZoom?: number;
+  maxZoom?: number;
   sourceDescriptor: SourceDescriptor;
   type: string;
-  visible: boolean;
+  visible?: boolean;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
