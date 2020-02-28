@@ -7,91 +7,70 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-// @ts-ignore No declaration file for module
-import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
-import { LICENSE_TYPE } from '../../../common/constants/license';
-import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
-import { getOverlays } from '../util/dependency_cache';
+import { ILicense } from '../../../../../../plugins/licensing/public';
+import { getOverlays, getLicensing } from '../util/dependency_cache';
+import { VALID_FULL_LICENSE_MODES } from '../../../common/constants/license';
 
-let licenseHasExpired = true;
-let licenseType: LICENSE_TYPE | null = null;
 let expiredLicenseBannerId: string;
+let license: ILicense | null = null;
 
-export function checkFullLicense() {
-  const features = getFeatures();
-  licenseType = features.licenseType;
+export function setLicenseCache(newLicense: ILicense) {
+  license = newLicense;
+}
 
-  if (features.isAvailable === false) {
+export async function checkFullLicense() {
+  if (license === null) {
+    // just in case the license hasn't been loaded
+    await loadLicense();
+  }
+
+  if (license === null || license.type === undefined || license.isAvailable === false) {
     // ML is not enabled
     return redirectToKibana();
-  } else if (features.licenseType === LICENSE_TYPE.BASIC) {
+  } else if (license.type === 'basic') {
     // ML is enabled, but only with a basic or gold license
     return redirectToBasic();
   } else {
     // ML is enabled
-    setLicenseExpired(features);
-    return Promise.resolve(features);
+    if (hasLicenseExpired()) {
+      showExpiredLicenseWarning();
+    }
+    return license;
   }
 }
 
-export function checkBasicLicense() {
-  const features = getFeatures();
-  licenseType = features.licenseType;
+export async function checkBasicLicense() {
+  if (license === null) {
+    // just in case the license hasn't been loaded
+    await loadLicense();
+  }
 
-  if (features.isAvailable === false) {
+  if (license === null || license.type === undefined || license.isAvailable === false) {
     // ML is not enabled
     return redirectToKibana();
   } else {
     // ML is enabled
-    setLicenseExpired(features);
-    return Promise.resolve(features);
-  }
-}
-
-// a wrapper for checkFullLicense which doesn't resolve if the license has expired.
-// this is used by all create jobs pages to redirect back to the jobs list
-// if the user's license has expired.
-export function checkLicenseExpired() {
-  return checkFullLicense()
-    .then((features: any) => {
-      if (features.hasExpired) {
-        window.location.href = '#/jobs';
-        return Promise.reject();
-      } else {
-        return Promise.resolve(features);
-      }
-    })
-    .catch(() => {
-      return Promise.reject();
-    });
-}
-
-function setLicenseExpired(features: any) {
-  licenseHasExpired = features.hasExpired || false;
-  // If the license has expired ML app will still work for 7 days and then
-  // the job management endpoints (e.g. create job, start datafeed) will be restricted.
-  // Therefore we need to keep the app enabled but show an info banner to the user.
-  if (licenseHasExpired) {
-    const message = features.message;
-    if (expiredLicenseBannerId === undefined) {
-      // Only show the banner once with no way to dismiss it
-      const overlays = getOverlays();
-      expiredLicenseBannerId = overlays.banners.add(
-        toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={message} />)
-      );
+    if (hasLicenseExpired()) {
+      showExpiredLicenseWarning();
     }
+    return license;
   }
 }
-// Temporary hack for cutting over server to NP
-function getFeatures() {
-  return {
-    isAvailable: true,
-    showLinks: true,
-    enableLinks: true,
-    licenseType: 1,
-    hasExpired: false,
-  };
-  // return xpackInfo.get('features.ml');
+
+async function loadLicense() {
+  const { refresh } = getLicensing();
+  license = await refresh();
+  return license;
+}
+
+function showExpiredLicenseWarning() {
+  if (expiredLicenseBannerId === undefined) {
+    // Only show the banner once with no way to dismiss it
+    const overlays = getOverlays();
+    expiredLicenseBannerId = overlays.banners.add(
+      toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={''} />)
+    );
+  }
 }
 
 function redirectToKibana() {
@@ -105,25 +84,13 @@ function redirectToBasic() {
 }
 
 export function hasLicenseExpired() {
-  return licenseHasExpired;
+  return license !== null && license.status === 'expired';
 }
 
 export function isFullLicense() {
-  return licenseType === LICENSE_TYPE.FULL;
-}
-
-export function xpackFeatureAvailable(feature: string) {
-  // each plugin can register their own set of features.
-  // so we need specific checks for each one.
-  // this list can grow if we need to check other plugin's features.
-  switch (feature) {
-    case 'watcher':
-      // watcher only has a license status feature
-      // if watcher is disabled in kibana.yml, the feature is completely missing from xpackInfo
-      return xpackInfo.get(`features.${feature}.status`, false) === LICENSE_STATUS_VALID;
-    default:
-      // historically plugins have used `isAvailable` as a catch all for
-      // license and feature enabled checks
-      return xpackInfo.get(`features.${feature}.isAvailable`, false);
-  }
+  return (
+    license !== null &&
+    license.type !== undefined &&
+    VALID_FULL_LICENSE_MODES.includes(license.type)
+  );
 }

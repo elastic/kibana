@@ -21,6 +21,7 @@ import {
   IBasePath,
 } from 'kibana/public';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
+import { LicensingPluginSetup } from '../../../../../../plugins/licensing/public';
 
 export interface DependencyCache {
   timefilter: TimefilterSetup | null;
@@ -39,6 +40,7 @@ export interface DependencyCache {
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginSetup | null;
+  licensing: LicensingPluginSetup | null;
 }
 
 const cache: DependencyCache = {
@@ -58,6 +60,7 @@ const cache: DependencyCache = {
   application: null,
   http: null,
   security: null,
+  licensing: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -76,6 +79,8 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.XSRF = deps.XSRF || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
+  cache.security = deps.security || null;
+  cache.licensing = deps.licensing || null;
 }
 
 export function getTimefilter() {
@@ -187,6 +192,13 @@ export function getSecurity() {
     throw new Error("security hasn't been initialized");
   }
   return cache.security;
+}
+
+export function getLicensing() {
+  if (cache.licensing === null) {
+    throw new Error("licensing hasn't been initialized");
+  }
+  return cache.licensing;
 }
 
 export function clearCache() {

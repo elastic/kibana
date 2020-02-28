@@ -10,6 +10,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npSetup } from 'ui/new_platform';
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
@@ -17,44 +18,57 @@ import { metadata } from 'ui/metadata';
 // @ts-ignore No declaration file for module
 import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { JOBS_LIST_PATH } from './management_urls';
-import { LICENSE_TYPE } from '../../../common/constants/license';
+import { VALID_FULL_LICENSE_MODES } from '../../../common/constants/license';
 import { setDependencyCache } from '../util/dependency_cache';
 import './jobs_list';
+import { LicensingPluginSetup, ILicense } from '../../../../../../plugins/licensing/public';
 
-if (
-  xpackInfo.get('features.ml.showLinks', false) === true &&
-  xpackInfo.get('features.ml.licenseType') === LICENSE_TYPE.FULL
-) {
-  const legacyBasePath = {
-    prepend: chrome.addBasePath,
-    get: chrome.getBasePath,
-    remove: () => {},
-  };
-  const legacyDocLinks = {
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-    DOC_LINK_VERSION: metadata.branch,
-  };
+type PluginsSetupExtended = typeof npSetup.plugins & {
+  // adds licensing which isn't in the PluginsSetup interface, but does exist
+  licensing: LicensingPluginSetup;
+};
 
-  setDependencyCache({
-    docLinks: legacyDocLinks as any,
-    basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
-  });
+const plugins = npSetup.plugins as PluginsSetupExtended;
+const licencingSubscription = plugins.licensing.license$.subscribe(async license => {
+  initManagementSection(license);
+  // unsubscribe, we only want to register the plugin once.
+  licencingSubscription.unsubscribe();
+});
 
-  management.register('ml', {
-    display: i18n.translate('xpack.ml.management.mlTitle', {
-      defaultMessage: 'Machine Learning',
-    }),
-    order: 100,
-    icon: 'machineLearningApp',
-  });
+export function initManagementSection(license: ILicense) {
+  if (license.type !== undefined && VALID_FULL_LICENSE_MODES.includes(license.type)) {
+    const legacyBasePath = {
+      prepend: chrome.addBasePath,
+      get: chrome.getBasePath,
+      remove: () => {},
+    };
+    const legacyDocLinks = {
+      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+      DOC_LINK_VERSION: metadata.branch,
+    };
 
-  management.getSection('ml').register('jobsList', {
-    name: 'jobsListLink',
-    order: 10,
-    display: i18n.translate('xpack.ml.management.jobsListTitle', {
-      defaultMessage: 'Jobs list',
-    }),
-    url: `#${JOBS_LIST_PATH}`,
-  });
+    setDependencyCache({
+      docLinks: legacyDocLinks as any,
+      basePath: legacyBasePath as any,
+      XSRF: chrome.getXsrfToken(),
+    });
+
+    management.register('ml', {
+      display: i18n.translate('xpack.ml.management.mlTitle', {
+        defaultMessage: 'Machine Learning',
+      }),
+      order: 100,
+      icon: 'machineLearningApp',
+    });
+
+    management.getSection('ml').register('jobsList', {
+      name: 'jobsListLink',
+      order: 10,
+      display: i18n.translate('xpack.ml.management.jobsListTitle', {
+        defaultMessage: 'Jobs list',
+      }),
+      url: `#${JOBS_LIST_PATH}`,
+    });
+  }
+  return true;
 }

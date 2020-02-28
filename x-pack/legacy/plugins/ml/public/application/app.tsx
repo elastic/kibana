@@ -13,15 +13,18 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SecurityPluginSetup } from '../../../../../plugins/security/public';
+import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
+import { setLicenseCache } from './license/check_license';
 
 import { MlRouter } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
   security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   __LEGACY: {
     XSRF: string;
   };
@@ -36,22 +39,29 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
   setDependencyCache({
     indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
+    fieldFormats: deps.data.fieldFormats,
+    autocomplete: deps.data.autocomplete,
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
     overlays: coreStart.overlays,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    fieldFormats: deps.data.fieldFormats,
-    autocomplete: deps.data.autocomplete,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
     XSRF: deps.__LEGACY.XSRF,
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
+    licensing: deps.licensing,
   });
+
+  const licenseSubscription = deps.licensing.license$.subscribe(async license => {
+    setLicenseCache(license);
+  });
+
   deps.onAppLeave(actions => {
+    licenseSubscription.unsubscribe();
     clearCache();
     return actions.default();
   });
