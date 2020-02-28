@@ -11,7 +11,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ApolloClient } from '@apollo/client';
+import { ApolloClient } from '../../../../../legacy/plugins/siem/public/lib/compose/kibana_compose';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
