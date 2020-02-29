@@ -245,7 +245,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
               noSuggestions={!indexOptions.length}
               options={indexOptions}
               data-test-subj="thresholdIndexesComboBox"
-              selectedOptions={(index || []).map((anIndex: string) => {
+              selectedOptions={([index] || []).map((anIndex: string) => {
                 return {
                   label: anIndex,
                   value: anIndex,
@@ -349,7 +349,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                     defaultMessage: 'index',
                   }
                 )}
-                value={index ? index.join(' ') : firstFieldOption.text}
+                value={index ? index : firstFieldOption.text}
                 isActive={indexPopoverOpen}
                 onClick={() => {
                   setIndexPopoverOpen(true);

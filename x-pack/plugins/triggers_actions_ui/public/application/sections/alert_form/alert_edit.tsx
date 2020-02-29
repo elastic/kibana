@@ -25,34 +25,21 @@ import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 
-interface AlertAddProps {
-  consumer: string;
-  alertTypeId?: string;
-  canChangeTrigger?: boolean;
+interface AlertEditProps {
+  initialAlert: Alert;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddProps) => {
-  const initialAlert = ({
-    params: {},
-    consumer,
-    alertTypeId,
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-  } as unknown) as Alert;
-
+export const AlertEdit = ({
+  initialAlert,
+  editFlyoutVisible,
+  setEditFlyoutVisibility,
+}: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const setAlert = (value: any) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
-  };
-
   const {
-    addFlyoutVisible,
-    setAddFlyoutVisibility,
     reloadAlerts,
     http,
     toastNotifications,
@@ -61,20 +48,22 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
-    setAlert(initialAlert);
+    setEditFlyoutVisibility(false);
     setServerError(null);
-  }, [initialAlert, setAddFlyoutVisibility]);
+  }, [setEditFlyoutVisibility]);
 
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
 
-  if (!addFlyoutVisible) {
+  if (!editFlyoutVisible) {
     return null;
   }
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
+  if (!alertType) {
+    return null;
+  }
   const errors = {
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
@@ -134,7 +123,7 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create Alert"
+                defaultMessage="Edit Alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
               &emsp;
@@ -156,7 +145,7 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
             dispatch={dispatch}
             errors={errors}
             serverError={serverError}
-            canChangeTrigger={canChangeTrigger}
+            canChangeTrigger={false}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

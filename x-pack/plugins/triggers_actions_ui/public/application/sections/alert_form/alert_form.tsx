@@ -155,18 +155,6 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypes = await loadAlertTypes({ http });
-        // temp hack of API result
-        alertTypes.push({
-          id: 'threshold',
-          actionGroups: [
-            { id: 'alert', name: 'Alert' },
-            { id: 'warning', name: 'Warning' },
-            { id: 'ifUnacknowledged', name: 'If unacknowledged' },
-          ],
-          name: 'threshold',
-          actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
-          defaultActionGroupId: 'alert',
-        });
         const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
