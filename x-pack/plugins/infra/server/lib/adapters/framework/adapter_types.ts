@@ -13,6 +13,7 @@ import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../../../../plugins/apm/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../../plugins/alerting/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
@@ -25,6 +26,7 @@ export interface InfraServerPluginDeps {
   };
   features: FeaturesPluginSetup;
   apm: APMPluginContract;
+  alerting: AlertingPluginContract;
 }
 
 export interface CallWithRequestParams extends GenericParams {

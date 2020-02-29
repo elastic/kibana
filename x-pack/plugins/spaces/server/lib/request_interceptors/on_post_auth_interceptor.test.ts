@@ -30,7 +30,8 @@ import { Feature } from '../../../../features/server';
 import { spacesConfig } from '../__fixtures__';
 import { securityMock } from '../../../../security/server/mocks';
 
-describe('onPostAuthInterceptor', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/55953
+describe.skip('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
   jest.setTimeout(30000);
 
@@ -201,12 +202,10 @@ describe('onPostAuthInterceptor', () => {
     // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
     // we are including the already tested interceptor here in the test chain.
     initSpacesOnRequestInterceptor({
-      getLegacyAPI: () => legacyAPI,
       http: (http as unknown) as CoreSetup['http'],
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      getLegacyAPI: () => legacyAPI,
       http: (http as unknown) as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,
