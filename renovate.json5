@@ -548,6 +548,14 @@
         ],
       },
       {
+        groupSlug: 'long',
+        groupName: 'long related packages',
+        packageNames: [
+          'long',
+          '@types/long',
+        ],
+      },
+      {
         groupSlug: 'lru-cache',
         groupName: 'lru-cache related packages',
         packageNames: [
@@ -986,6 +994,14 @@
         ],
       },
       {
+        groupSlug: 'ws',
+        groupName: 'ws related packages',
+        packageNames: [
+          'ws',
+          '@types/ws',
+        ],
+      },
+      {
         groupSlug: 'xml-crypto',
         groupName: 'xml-crypto related packages',
         packageNames: [
@@ -999,6 +1015,14 @@
         packageNames: [
           'xml2js',
           '@types/xml2js',
+        ],
+      },
+      {
+        groupSlug: 'yargs',
+        groupName: 'yargs related packages',
+        packageNames: [
+          'yargs',
+          '@types/yargs',
         ],
       },
       {
