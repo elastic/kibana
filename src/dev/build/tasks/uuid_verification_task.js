@@ -17,6 +17,22 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-export const DEV_SSL_CERT_PATH = resolve(__dirname, '../../test/dev_certs/server.crt');
-export const DEV_SSL_KEY_PATH = resolve(__dirname, '../../test/dev_certs/server.key');
+import { read } from '../lib';
+
+export const UuidVerificationTask = {
+  description: 'Verify that no UUID file is baked into the build',
+
+  async run(config, log, build) {
+    const uuidFilePath = build.resolvePath('data', 'uuid');
+    await read(uuidFilePath).then(
+      function success() {
+        throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
+      },
+      function error(err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
+      }
+    );
+  },
+};
