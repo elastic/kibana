@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.clearValue();
       await nameInput.type(alertName);
 
-      await testSubjects.click('threshold-SelectOption');
+      await testSubjects.click('.index-threshold-SelectOption');
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
 
-      await testSubjects.click('selectIndexExpression');
+      await testSubjects.click('selectIf.index-threshold-SelectOptionndexExpression');
 
       await find.clickByCssSelector('[data-test-subj="cancelSaveAlertButton"]');
 
