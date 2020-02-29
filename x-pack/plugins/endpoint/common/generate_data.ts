@@ -119,33 +119,34 @@ export function generateRelatedEvents(
   return relatedEvents;
 }
 
-export function generateProcessChildren(
+export function generateResolverTree(
   root: EndpointEvent,
   generator: EndpointDocGenerator,
-  generations = 3,
-  maxChildrenPerNode = 3,
-  relatedEventsPerNode = 10,
-  percentNodesWithRelated = 10,
-  percentChildrenTerminated = 30
+  generations = 2,
+  maxChildrenPerNode = 2,
+  relatedEventsPerNode = 3,
+  percentNodesWithRelated = 100,
+  percentChildrenTerminated = 100
 ): EndpointEvent[] {
-  const events: EndpointEvent[] = [];
+  let events: EndpointEvent[] = [root];
   let parents = [root];
   let timestamp = root['@timestamp'];
   for (let i = 0; i < generations; i++) {
     const newParents: EndpointEvent[] = [];
     parents.forEach(element => {
-      const numChildren = Math.min(1, randomN(maxChildrenPerNode));
+      // const numChildren = randomN(maxChildrenPerNode);
+      const numChildren = maxChildrenPerNode;
       for (let j = 0; j < numChildren; j++) {
         timestamp = new Date(timestamp.getTime() + 1000);
         const child = generator.generateEvent(timestamp, undefined, element.process.entity_id);
         newParents.push(child);
       }
     });
-    events.concat(newParents);
+    events = events.concat(newParents);
     parents = newParents;
   }
-  const terminationEvents: EndpointEvent[] = [];
-  const relatedEvents: EndpointEvent[] = [];
+  let terminationEvents: EndpointEvent[] = [];
+  let relatedEvents: EndpointEvent[] = [];
   events.forEach(element => {
     if (randomN(100) < percentChildrenTerminated) {
       timestamp = new Date(timestamp.getTime() + 1000);
@@ -160,15 +161,15 @@ export function generateProcessChildren(
       );
     }
     if (randomN(100) < percentNodesWithRelated) {
-      relatedEvents.concat(generateRelatedEvents(element, generator, relatedEventsPerNode));
+      relatedEvents = relatedEvents.concat(generateRelatedEvents(element, generator, relatedEventsPerNode));
     }
   });
-  events.concat(terminationEvents);
-  events.concat(relatedEvents);
+  events = events.concat(terminationEvents);
+  events = events.concat(relatedEvents);
   return events;
 }
 
-export function generateResolverEvents(
+export function generateEventAncestry(
   generator: EndpointDocGenerator,
   alertAncestors = 3
 ): Array<AlertData | EndpointEvent> {
@@ -281,7 +282,7 @@ export class EndpointDocGenerator {
         os: this.os,
       },
       process: {
-        entity_id: randomString(100),
+        entity_id: entityID ? entityID : randomString(10),
         parent: {
           entity_id: parentEntityID ? parentEntityID : undefined,
         },
@@ -320,7 +321,7 @@ export class EndpointDocGenerator {
         os: this.os,
       },
       process: {
-        entity_id: entityID ? entityID : randomString(100),
+        entity_id: entityID ? entityID : randomString(10),
         parent: {
           entity_id: parentEntityID ? parentEntityID : undefined,
         },

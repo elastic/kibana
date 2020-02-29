@@ -178,10 +178,16 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
-    parent?: {
+    parent: {
       entity_id?: string;
     };
   };
+}
+
+export interface Node {
+  events: EndpointEvent[];
+  children: Node[];
+  parent_entity_id?: string;
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;

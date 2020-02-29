@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointDocGenerator, generateResolverEvents } from './generate_data';
+import { EndpointDocGenerator, generateEventAncestry, generateResolverTree } from './generate_data';
+import { EndpointEvent, Node } from './types';
 
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
@@ -57,15 +58,56 @@ describe('data generator', () => {
   });
 
   it('creates alert ancestor tree', () => {
-    const events = generateResolverEvents(generator, 3);
-    for (let i = 1; i < events.length; i++) {
+    const events = generateEventAncestry(generator, 3);
+    for (let i = 1; i < events.length - 1; i++) {
       expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
-      if (i < events.length - 1) {
-        expect(events[i].event.kind).toEqual('event');
-        expect(events[i].event.category).toEqual('process');
-      }
+      expect(events[i].event.kind).toEqual('event');
+      expect(events[i].event.category).toEqual('process');
     }
+    // The alert should be last and have the same entity_id as the previous process event
+    expect(events[events.length - 1].process.entity_id).toEqual(events[events.length - 2].process.entity_id)
+    expect(events[events.length - 1].process.parent?.entity_id).toEqual(events[events.length - 2].process.parent?.entity_id)
     expect(events[events.length - 1].event.kind).toEqual('alert');
     expect(events[events.length - 1].event.category).toEqual('malware');
+  });
+
+  it('creates tree of process children', () => {
+    const timestamp = new Date();
+    const root = generator.generateEvent(timestamp);
+    const generations = 2;
+    const events = generateResolverTree(root, generator, generations);
+    let tree: Record<string, Node> = {};
+    // First pass we gather up all the events by entity_id
+    events.forEach(event => {
+      if(event.process.entity_id in tree) {
+        tree[event.process.entity_id].events.push(event)
+      }
+      else {
+        tree[event.process.entity_id] = {
+          events: [event],
+          children: [],
+          parent_entity_id: event.process.parent.entity_id,
+        }
+      }
+    });
+    // Second pass add child references to each node
+    for(const key in tree) {
+      let child = tree[key]
+      if(child.parent_entity_id) {
+        tree[child.parent_entity_id].children.push(child);
+      }
+    }
+    // Start at the root, traverse N levels of the tree and check that we found all nodes
+    let nodes = [tree[root.process.entity_id]];
+    let visitedEvents = 0;
+    for(let i = 0; i < generations + 1; i++) {
+      let nextNodes: Node[] = []
+      nodes.forEach(node => {
+        nextNodes = nextNodes.concat(node.children)
+        visitedEvents += node.events.length;
+      })
+      nodes = nextNodes;
+    }
+    expect(visitedEvents).toEqual(events.length);
   });
 });
