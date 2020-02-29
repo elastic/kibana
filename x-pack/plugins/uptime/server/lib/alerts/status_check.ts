@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AlertExecutorOptions } from '../../../../alerting/server';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
@@ -60,6 +61,48 @@ export const contextMessage = (monitorIds: string[], max: number): string => {
   return message;
 };
 
+interface StatusCheckAlertState {
+  currentTriggerStarted?: string;
+  firstCheckedAt: string;
+  firstTriggeredAt?: string;
+  lastCheckedAt: string;
+  lastTriggeredAt?: string;
+  lastResolvedAt?: string;
+  isTriggered: boolean;
+}
+
+export const updateState = (
+  state: Record<string, any>,
+  isTriggeredNow: boolean
+): StatusCheckAlertState => {
+  const {
+    currentTriggerStarted,
+    firstCheckedAt,
+    firstTriggeredAt,
+    lastTriggeredAt,
+    isTriggered: wasTriggered,
+    lastResolvedAt,
+  } = state as StatusCheckAlertState;
+  const now = new Date().toISOString();
+
+  let cts: string | undefined;
+  if (isTriggeredNow && !currentTriggerStarted) {
+    cts = now;
+  } else if (isTriggeredNow) {
+    cts = currentTriggerStarted;
+  }
+
+  return {
+    currentTriggerStarted: cts,
+    firstCheckedAt: firstCheckedAt ?? now,
+    firstTriggeredAt: isTriggeredNow && !firstTriggeredAt ? now : firstTriggeredAt,
+    lastCheckedAt: now,
+    lastTriggeredAt: isTriggeredNow ? now : lastTriggeredAt,
+    lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
+    isTriggered: isTriggeredNow,
+  };
+};
+
 // Right now the maximum number of monitors shown in the message is hardcoded here.
 // we will probably want to make this a parameter in the future
 const DEFAULT_MAX_MESSAGE_ROWS = 3;
@@ -78,14 +121,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       locations: schema.arrayOf(schema.string()),
     }),
   },
-  defaultActionGroupId: DOWN_MONITOR,
+  defaultActionGroupId: DOWN_MONITOR.id,
   actionGroups: [
     {
       id: DOWN_MONITOR.id,
       name: DOWN_MONITOR.name,
     },
   ],
-  async executor(options: any) {
+  async executor(options: AlertExecutorOptions) {
     const params = options.params as StatusCheckExecutorParams;
 
     /* This is called `monitorsByLocation` but it's really:
@@ -100,11 +143,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     // if no monitors are down for our query, we don't need to trigger an alert
     if (monitorsByLocation.length) {
       const uniqueIds = uniqueMonitorIds(monitorsByLocation);
-      const alertInstance = options.services.alertInstanceFactory(server);
+      const alertInstance = options.services.alertInstanceFactory(DOWN_MONITOR.id);
       alertInstance.replaceState({
+        ...options.state,
         monitors: monitorsByLocation,
       });
-      alertInstance.scheduleActions(DOWN_MONITOR, {
+      alertInstance.scheduleActions(DOWN_MONITOR.id, {
         message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
         server,
         monitors: monitorsByLocation,
@@ -113,6 +157,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
 
     // this stateful data is at the cluster level, not an alert instance level,
     // so any alert of this type will flush/overwrite the state when they return
-    return {};
+    return updateState(options.state, monitorsByLocation.length > 0);
   },
 });
