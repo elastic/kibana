@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MlLicense } from '../license';
+import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 import { PluginsSetup } from '../../types';
 
 export function initSampleDataSets(license: MlLicense, plugins: PluginsSetup) {

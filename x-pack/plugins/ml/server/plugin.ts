@@ -32,7 +32,7 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from './lib/license';
+import { MlLicense } from '../../../legacy/plugins/ml/common/license';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -79,7 +79,7 @@ export class MlServerPlugin {
       },
     });
 
-    this.mlLicense.setup(plugins.licensing, [
+    this.mlLicense.setup(plugins.licensing.license$, [
       (license: MlLicense) => initSampleDataSets(license, plugins),
     ]);
 

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicensingPluginSetup, ILicense, LICENSE_CHECK_STATE } from '../../../../licensing/server';
-import { PLUGIN_ID } from '../../../../../legacy/plugins/ml/common/constants/app';
+import { Observable } from 'rxjs';
+import { ILicense, LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/common/types';
+import { PLUGIN_ID } from '../constants/app';
 
 const MINIMUM_LICENSE = 'basic';
 const MINIMUM_FULL_LICENSE = 'platinum';
@@ -26,10 +27,10 @@ export class MlLicense {
   private _initialized: boolean = false;
 
   public setup(
-    licensing: LicensingPluginSetup,
+    license$: Observable<ILicense>,
     postInitFunctions?: Array<(lic: MlLicense) => void>
   ) {
-    licensing.license$.subscribe(async license => {
+    license$.subscribe(async license => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;
@@ -44,8 +45,6 @@ export class MlLicense {
       if (this._initialized === false && postInitFunctions !== undefined) {
         postInitFunctions.forEach(f => f(this));
       }
-
-      this._initialized = true;
     });
   }
 

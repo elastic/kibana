@@ -10,7 +10,7 @@ import {
   getDefaultPrivileges,
 } from '../../../../../legacy/plugins/ml/common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
-import { MlLicense } from '../../lib/license';
+import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 
 import { mlPrivileges } from './privileges';
 

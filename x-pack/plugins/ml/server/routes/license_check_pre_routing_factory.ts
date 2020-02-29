@@ -10,8 +10,7 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-// import { LicenseCheckResult } from '../types';
-import { MlLicense } from '../lib/license';
+import { MlLicense } from '../../../../legacy/plugins/ml/common/license';
 
 export const licensePreRoutingFactory = (
   getLicenseCheckResults: () => MlLicense,
