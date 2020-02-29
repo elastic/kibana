@@ -39,7 +39,7 @@ export interface UncommonProcessesArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UncommonProcessesArgs) => React.ReactNode;
+  children: (args: UncommonProcessesArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -207,7 +208,7 @@ describe('Body', () => {
         </TestProviders>
       );
       wrapper.update();
-      await wait();
+      await act(() => wait());
       wrapper.update();
       headersJustTimestamp.forEach(() => {
         expect(

@@ -35,7 +35,7 @@ export interface UsersArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UsersArgs) => React.ReactNode;
+  children: (args: UsersArgs) => React.ReactElement;
   flowTarget: FlowTarget;
   ip: string;
   type: networkModel.NetworkType;

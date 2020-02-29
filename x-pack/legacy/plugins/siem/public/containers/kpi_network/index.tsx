@@ -29,7 +29,7 @@ export interface KpiNetworkArgs {
 }
 
 export interface KpiNetworkProps extends QueryTemplateProps {
-  children: (args: KpiNetworkArgs) => React.ReactNode;
+  children: (args: KpiNetworkArgs) => React.ReactElement;
 }
 
 const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(

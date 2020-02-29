@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/react-testing';
 
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';

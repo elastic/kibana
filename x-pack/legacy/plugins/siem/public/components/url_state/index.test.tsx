@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { HookWrapper } from '../../mock';
 import { SiemPageName } from '../../pages/home/types';
@@ -193,7 +194,7 @@ describe('UrlStateContainer', () => {
           }).relativeTimeSearch.undefinedQuery,
         });
         wrapper.update();
-        await wait();
+        await act(() => wait());
 
         if (CONSTANTS.detectionsPage === page) {
           expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({

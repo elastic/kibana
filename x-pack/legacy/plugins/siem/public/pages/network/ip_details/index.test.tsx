@@ -7,8 +7,9 @@
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { Router } from 'react-router-dom';
-import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
@@ -144,9 +145,6 @@ describe('Ip Details', () => {
         </MockedProvider>
       </TestProviders>
     );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
-    wrapper.update();
     expect(
       wrapper
         .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')

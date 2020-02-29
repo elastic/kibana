@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 
 import '../../mock/match_media';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MockedResponse } from 'react-apollo/test-utils';
+import { MockedResponse } from '@apollo/react-testing';
 
 import { defaultIndexPattern } from '../../../../default_index_pattern';
 import { LastEventIndexKey } from '../../../graphql/types';

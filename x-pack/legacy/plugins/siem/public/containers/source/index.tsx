@@ -57,7 +57,7 @@ interface WithSourceArgs {
 }
 
 interface WithSourceProps {
-  children: (args: WithSourceArgs) => React.ReactNode;
+  children: (args: WithSourceArgs) => React.ReactElement;
   indexToAdd?: string[] | null;
   sourceId: string;
 }

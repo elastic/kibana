@@ -44,7 +44,7 @@ export interface HostsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: HostsArgs) => React.ReactNode;
+  children: (args: HostsArgs) => React.ReactElement;
   type: hostsModel.HostsType;
   startDate: number;
   endDate: number;

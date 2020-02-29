@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { act } from 'react-dom/test-utils';
+import { MockedProvider } from '@apollo/react-testing';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { wait } from '../../lib/helpers';
@@ -51,7 +52,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -77,7 +78,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);

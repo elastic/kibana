@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../mock/match_media';

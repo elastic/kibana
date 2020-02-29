@@ -29,7 +29,7 @@ export interface IpOverviewArgs {
 }
 
 export interface IpOverviewProps extends QueryTemplateProps {
-  children: (args: IpOverviewArgs) => React.ReactNode;
+  children: (args: IpOverviewArgs) => React.ReactElement;
   type: networkModel.NetworkType;
   ip: string;
 }

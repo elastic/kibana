@@ -41,7 +41,7 @@ export interface NetworkTopCountriesArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkTopCountriesArgs) => React.ReactNode;
+  children: (args: NetworkTopCountriesArgs) => React.ReactElement;
   flowTarget: FlowTargetSourceDest;
   ip?: string;
   type: networkModel.NetworkType;

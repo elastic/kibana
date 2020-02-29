@@ -6,7 +6,8 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { act } from 'react-dom/test-utils';
+import { MockedProvider } from '@apollo/react-testing';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -104,7 +105,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
@@ -134,7 +135,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
@@ -166,7 +167,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       expect(
         wrapper
@@ -197,7 +198,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('.euiCheckbox__input')
@@ -243,7 +244,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('.euiCheckbox__input')
@@ -287,7 +288,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('.euiCheckbox__input')
@@ -399,7 +400,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
       wrapper.update();
 
       expect(
@@ -451,7 +452,7 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper.update();
 
@@ -487,7 +488,7 @@ describe('StatefulOpenTimeline', () => {
       </ThemeProvider>
     );
 
-    await wait();
+    await act(() => wait());
 
     expect(
       wrapper
@@ -519,7 +520,7 @@ describe('StatefulOpenTimeline', () => {
           .find('[data-test-subj="open-timeline"]')
           .last()
           .prop('selectedItems');
-      await wait();
+      await act(() => wait());
       expect(getSelectedItem().length).toEqual(0);
       wrapper
         .find('.euiCheckbox__input')
@@ -551,7 +552,7 @@ describe('StatefulOpenTimeline', () => {
       </ThemeProvider>
     );
 
-    await wait();
+    await act(() => wait());
 
     wrapper.update();
 
@@ -583,7 +584,7 @@ describe('StatefulOpenTimeline', () => {
       </ThemeProvider>
     );
 
-    await wait();
+    await act(() => wait());
 
     wrapper
       .find(
@@ -621,7 +622,7 @@ describe('StatefulOpenTimeline', () => {
       </ThemeProvider>
     );
 
-    await wait();
+    await act(() => wait());
 
     wrapper
       .find('[data-test-subj="open-duplicate"]')

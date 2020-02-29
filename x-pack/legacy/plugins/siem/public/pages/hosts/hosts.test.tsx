@@ -7,8 +7,9 @@
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { Router } from 'react-router-dom';
-import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import '../../mock/match_media';
@@ -128,7 +129,7 @@ describe('Hosts - rendering', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     wrapper.update();
     expect(wrapper.find(SiemNavigation).exists()).toBe(true);
   });
@@ -177,7 +178,7 @@ describe('Hosts - rendering', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));

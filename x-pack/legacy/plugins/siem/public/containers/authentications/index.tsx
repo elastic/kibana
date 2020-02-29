@@ -39,7 +39,7 @@ export interface AuthenticationArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: AuthenticationArgs) => React.ReactNode;
+  children: (args: AuthenticationArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 

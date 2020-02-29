@@ -7,7 +7,8 @@
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
+import { act } from 'react-dom/test-utils';
+import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 
@@ -117,7 +118,7 @@ describe('OverviewNetwork', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(

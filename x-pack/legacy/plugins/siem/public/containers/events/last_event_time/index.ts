@@ -25,7 +25,7 @@ export interface LastEventTimeArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: LastEventTimeArgs) => React.ReactNode;
+  children: (args: LastEventTimeArgs) => React.ReactElement;
   indexKey: LastEventIndexKey;
 }
 

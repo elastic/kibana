@@ -29,7 +29,7 @@ export interface KpiHostDetailsArgs {
 }
 
 export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
-  children: (args: KpiHostDetailsArgs) => React.ReactNode;
+  children: (args: KpiHostDetailsArgs) => React.ReactElement;
 }
 
 const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & PropsFromRedux>(

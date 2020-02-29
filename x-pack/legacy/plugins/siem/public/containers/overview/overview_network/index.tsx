@@ -30,7 +30,7 @@ export interface OverviewNetworkArgs {
 }
 
 export interface OverviewNetworkProps extends QueryTemplateProps {
-  children: (args: OverviewNetworkArgs) => React.ReactNode;
+  children: (args: OverviewNetworkArgs) => React.ReactElement;
   sourceId: string;
   endDate: number;
   startDate: number;

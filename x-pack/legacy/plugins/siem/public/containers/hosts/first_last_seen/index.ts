@@ -26,7 +26,7 @@ export interface FirstLastSeenHostArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: FirstLastSeenHostArgs) => React.ReactNode;
+  children: (args: FirstLastSeenHostArgs) => React.ReactElement;
   hostName: string;
 }
 

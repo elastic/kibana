@@ -30,7 +30,7 @@ export interface OverviewHostArgs {
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
-  children: (args: OverviewHostArgs) => React.ReactNode;
+  children: (args: OverviewHostArgs) => React.ReactElement;
   sourceId: string;
   endDate: number;
   startDate: number;

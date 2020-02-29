@@ -7,9 +7,7 @@
 import { isEqual } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-
-import { wait } from '../../lib/helpers';
+import { MockedProvider } from '@apollo/react-testing';
 
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
@@ -26,14 +24,11 @@ describe('Index Fields & Browser Fields', () => {
               expect(indexPattern.fields).toEqual(mockIndexFields);
             }
 
-            return null;
+            return <div />;
           }}
         </WithSource>
       </MockedProvider>
     );
-
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
   });
 
   test('Browser Fields', async () => {
@@ -45,14 +40,11 @@ describe('Index Fields & Browser Fields', () => {
               expect(browserFields).toEqual(mockBrowserFields);
             }
 
-            return null;
+            return <div />;
           }}
         </WithSource>
       </MockedProvider>
     );
-
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

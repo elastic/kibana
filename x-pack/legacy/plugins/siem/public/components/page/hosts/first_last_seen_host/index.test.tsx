@@ -6,7 +6,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/react-testing';
 import { render, act } from '@testing-library/react';
 
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';

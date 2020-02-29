@@ -46,7 +46,7 @@ export interface CustomReduxProps {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
+  children?: (args: TimelineArgs) => React.ReactElement;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;

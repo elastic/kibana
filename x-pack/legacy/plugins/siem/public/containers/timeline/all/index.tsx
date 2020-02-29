@@ -33,7 +33,7 @@ export interface AllTimelinesVariables {
 }
 
 interface OwnProps extends AllTimelinesVariables {
-  children?: (args: AllTimelinesArgs) => React.ReactNode;
+  children?: (args: AllTimelinesArgs) => React.ReactElement;
 }
 
 const getAllTimeline = memoizeOne(

@@ -7,7 +7,7 @@
 import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { withApollo, WithApolloClient } from 'react-apollo';
+import { withApollo } from 'react-apollo';
 import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
 import { UptimeRefreshContext } from '../../contexts';
 
@@ -32,9 +32,9 @@ interface UptimeGraphQLProps {
  * @param query - the graphQL query
  */
 export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) {
-  type Props = UptimeGraphQLProps & WithApolloClient<T> & P;
+  type Props = UptimeGraphQLProps & P;
 
-  return withApollo((props: Props) => {
+  return withApollo<Props>(props => {
     const { lastRefresh } = useContext(UptimeRefreshContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [data, setData] = useState<T | undefined>(undefined);

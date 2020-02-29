@@ -40,7 +40,7 @@ export interface NetworkHttpArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkHttpArgs) => React.ReactNode;
+  children: (args: NetworkHttpArgs) => React.ReactElement;
   ip?: string;
   type: networkModel.NetworkType;
 }

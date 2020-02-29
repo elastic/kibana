@@ -36,7 +36,7 @@ export interface HostOverviewReduxProps {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: HostOverviewArgs) => React.ReactNode;
+  children: (args: HostOverviewArgs) => React.ReactElement;
   hostName: string;
   startDate: number;
   endDate: number;

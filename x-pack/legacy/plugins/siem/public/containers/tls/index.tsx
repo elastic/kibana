@@ -40,7 +40,7 @@ export interface TlsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: TlsArgs) => React.ReactNode;
+  children: (args: TlsArgs) => React.ReactElement;
   flowTarget: FlowTargetSourceDest;
   ip: string;
   type: networkModel.NetworkType;
