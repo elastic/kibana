@@ -5,39 +5,12 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { ApolloConsumer } from 'react-apollo';
 
-import { HeaderPage } from '../../components/header_page';
-import { StatefulOpenTimeline } from '../../components/open_timeline';
-import { WrapperPage } from '../../components/wrapper_page';
-import { SpyRoute } from '../../utils/route/spy_routes';
-import * as i18n from './translations';
+import { TimelinesPage } from './timelines_page';
 
-const TimelinesContainer = styled.div`
-  width: 100%;
-`;
-TimelinesContainer.displayName = 'TimelinesContainer';
+export const Timelines = React.memo(() => (
+  <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+));
 
-export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
-
-export const TimelinesPage = () => (
-  <>
-    <WrapperPage>
-      <HeaderPage border title={i18n.PAGE_TITLE} />
-
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={i18n.ALL_TIMELINES_PANEL_TITLE}
-        />
-      </TimelinesContainer>
-    </WrapperPage>
-
-    <SpyRoute />
-  </>
-);
-
-TimelinesPage.displayName = 'TimelinesPage';
-
-export const Timelines = React.memo(TimelinesPage);
+Timelines.displayName = 'Timelines';
