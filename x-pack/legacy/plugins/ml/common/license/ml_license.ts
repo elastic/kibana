@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/common/types';
 import { PLUGIN_ID } from '../constants/app';
 
@@ -18,6 +18,7 @@ export interface LicenseStatus {
 }
 
 export class MlLicense {
+  private _licenseSubscription: Subscription | null = null;
   private _license: ILicense | null = null;
   private _isSecurityEnabled: boolean = false;
   private _hasLicenseExpired: boolean = false;
@@ -30,7 +31,7 @@ export class MlLicense {
     license$: Observable<ILicense>,
     postInitFunctions?: Array<(lic: MlLicense) => void>
   ) {
-    license$.subscribe(async license => {
+    this._licenseSubscription = license$.subscribe(async license => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;
@@ -46,6 +47,12 @@ export class MlLicense {
         postInitFunctions.forEach(f => f(this));
       }
     });
+  }
+
+  public unsubscribe() {
+    if (this._licenseSubscription !== null) {
+      this._licenseSubscription.unsubscribe();
+    }
   }
 
   public isSecurityEnabled() {

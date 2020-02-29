@@ -82,6 +82,8 @@ export class MlServerPlugin {
     this.mlLicense.setup(plugins.licensing.license$, [
       (license: MlLicense) => initSampleDataSets(license, plugins),
     ]);
+    // WHERE DO I CALL THINGS ON UNLOAD?????
+    // this.mlLicense.unsubscribe()
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
