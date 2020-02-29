@@ -71,10 +71,9 @@ const createMockServer = () => {
 
   const inject = async (request: KibanaRequest, context: RequestHandlerContext = contextMock) => {
     const [validatedRequest, result] = validateRequest(request);
-
-    // transfer our failed validation to the response mock
-    for (const call of result.badRequest.mock.calls) {
-      responseMock.badRequest(...call);
+    const [rejection] = result.badRequest.mock.calls;
+    if (rejection) {
+      throw new Error(`Request was rejected with message: '${rejection}'`);
     }
 
     await getRoute(routeSpy).handler(context, validatedRequest, responseMock);
