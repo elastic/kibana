@@ -10,7 +10,7 @@ import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-import { transformBulkError, buildRouteValidation } from '../utils';
+import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
 import {
   IRuleSavedAttributesSavedObjectAttributes,
   DeleteRulesRequestParams,
@@ -33,9 +33,10 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
       const alertsClient = context.alerting.getAlertsClient();
       const actionsClient = context.actions.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const rules = await Promise.all(
@@ -72,7 +73,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
       );
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return response.internalError({ body: errors });
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
         return response.ok({ body: validated ?? {} });
       }

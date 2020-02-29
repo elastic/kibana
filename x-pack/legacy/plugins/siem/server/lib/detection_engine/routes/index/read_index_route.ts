@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
 export const readIndexRoute = (router: IRouter) => {
@@ -19,6 +19,8 @@ export const readIndexRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
@@ -29,13 +31,14 @@ export const readIndexRoute = (router: IRouter) => {
         if (indexExists) {
           return response.ok({ body: { name: index } });
         } else {
-          return response.notFound({
+          return siemResponse.error({
+            statusCode: 404,
             body: 'index for this space does not exist',
           });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

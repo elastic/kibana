@@ -24,6 +24,7 @@ import {
   FrameworkRequest,
   internalFrameworkRequest,
 } from './types';
+import { buildSiemResponse } from '../detection_engine/routes/utils';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private router: IRouter;
@@ -130,22 +131,17 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any, response: KibanaResponseFactory) {
+    const siemResponse = buildSiemResponse(response);
     if (error.name !== 'HttpQueryError') {
-      return response.internalError({
+      return siemResponse.error({
         body: error.message,
-        headers: {
-          'content-type': 'application/json',
-        },
+        statusCode: 500,
       });
     }
 
-    return response.customError({
+    return siemResponse.error({
       statusCode: error.statusCode,
       body: error.message,
-      headers: {
-        'content-type': 'application/json',
-        ...error.headers,
-      },
     });
   }
 

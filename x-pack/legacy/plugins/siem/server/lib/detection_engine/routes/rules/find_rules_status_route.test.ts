@@ -32,7 +32,7 @@ describe('find_statuses', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
 
     test('catch error when status search throws error', async () => {

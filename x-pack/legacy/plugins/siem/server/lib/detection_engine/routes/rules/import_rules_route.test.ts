@@ -81,14 +81,14 @@ describe('import_rules_route', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
 
     test('returns 404 if actionsClient is not available on the route', async () => {
       context.actions.getActionsClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
   });
 

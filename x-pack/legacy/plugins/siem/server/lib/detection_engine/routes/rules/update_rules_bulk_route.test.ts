@@ -56,7 +56,7 @@ describe('update_rules_bulk', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getUpdateBulkRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
 
     test('returns an error if update throws', async () => {

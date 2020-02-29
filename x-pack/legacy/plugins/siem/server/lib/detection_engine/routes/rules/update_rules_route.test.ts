@@ -54,7 +54,7 @@ describe('update_rules', () => {
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
 
     test('returns error when updating non-rule', async () => {

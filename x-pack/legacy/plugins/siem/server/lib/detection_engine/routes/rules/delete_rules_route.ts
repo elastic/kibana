@@ -10,7 +10,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { buildRouteValidation, transformError } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import {
   DeleteRuleRequestParams,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -29,6 +29,8 @@ export const deleteRulesRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const { id, rule_id: ruleId } = request.query;
 
@@ -37,7 +39,7 @@ export const deleteRulesRoute = (router: IRouter) => {
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
-          return response.notFound();
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const rule = await deleteRules({
@@ -60,20 +62,20 @@ export const deleteRulesRoute = (router: IRouter) => {
           );
           const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
           if (errors != null) {
-            return response.internalError({ body: errors });
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
             return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return response.customError({
+          return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

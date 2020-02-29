@@ -8,7 +8,7 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { SignalsStatusRestParams } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { transformError, buildRouteValidation } from '../utils';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
 export const setSignalsStatusRoute = (router: IRouter) => {
   router.post(
@@ -25,6 +25,7 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       const { signal_ids: signalIds, query, status } = request.body;
       const clusterClient = context.core.elasticsearch.dataClient;
       const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       let queryObject;
       if (signalIds) {
@@ -53,7 +54,7 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

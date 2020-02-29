@@ -14,7 +14,12 @@ import {
   IRuleStatusAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { buildRouteValidation, transformError, convertToSnakeCase } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  convertToSnakeCase,
+  buildSiemResponse,
+} from '../utils';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.get(
@@ -31,9 +36,10 @@ export const findRulesStatusesRoute = (router: IRouter) => {
       const { query } = request;
       const alertsClient = context.alerting.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
+      const siemResponse = buildSiemResponse(response);
 
       if (!alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       // build return object with ids as keys and errors as values.
@@ -80,7 +86,7 @@ export const findRulesStatusesRoute = (router: IRouter) => {
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

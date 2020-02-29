@@ -10,7 +10,7 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   PatchRuleAlertParamsRest,
 } from '../../rules/types';
-import { transformBulkError, buildRouteValidation } from '../utils';
+import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
@@ -33,9 +33,10 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       const alertsClient = context.alerting.getAlertsClient();
       const actionsClient = context.actions.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const rules = await Promise.all(
@@ -124,7 +125,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
 
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return response.internalError({ body: errors });
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
         return response.ok({ body: validated ?? {} });
       }

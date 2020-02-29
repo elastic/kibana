@@ -8,7 +8,7 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { buildRouteValidation, transformError } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import {
@@ -32,10 +32,11 @@ export const readRulesRoute = (router: IRouter) => {
       const { id, rule_id: ruleId } = request.query;
       const alertsClient = context.alerting.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
+      const siemResponse = buildSiemResponse(response);
 
       try {
         if (!alertsClient) {
-          return response.notFound();
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const rule = await readRules({
@@ -56,20 +57,20 @@ export const readRulesRoute = (router: IRouter) => {
           });
           const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
           if (errors != null) {
-            return response.internalError({ body: errors });
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
             return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return response.customError({
+          return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

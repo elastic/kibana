@@ -14,7 +14,12 @@ import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
-import { transformBulkError, createBulkErrorObject, buildRouteValidation } from '../utils';
+import {
+  transformBulkError,
+  createBulkErrorObject,
+  buildRouteValidation,
+  buildSiemResponse,
+} from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
@@ -34,9 +39,10 @@ export const createRulesBulkRoute = (router: IRouter) => {
       const actionsClient = context.actions.getActionsClient();
       const clusterClient = context.core.elasticsearch.dataClient;
       const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const ruleDefinitions = request.body;
@@ -142,7 +148,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
       ];
       const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
       if (errors != null) {
-        return response.internalError({ body: errors });
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
         return response.ok({ body: validated ?? {} });
       }

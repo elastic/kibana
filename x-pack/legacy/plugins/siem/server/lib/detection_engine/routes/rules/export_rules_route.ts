@@ -12,7 +12,7 @@ import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_r
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
-import { transformError, buildRouteValidation } from '../utils';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
 export const exportRulesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
@@ -28,21 +28,24 @@ export const exportRulesRoute = (router: IRouter, config: LegacyServices['config
     },
     async (context, request, response) => {
       const alertsClient = context.alerting.getAlertsClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
-          return response.badRequest({
+          return siemResponse.error({
+            statusCode: 400,
             body: `Can't export more than ${exportSizeLimit} rules`,
           });
         } else {
           const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
           if (nonPackagedRulesCount > exportSizeLimit) {
-            return response.badRequest({
+            return siemResponse.error({
+              statusCode: 400,
               body: `Can't export more than ${exportSizeLimit} rules`,
             });
           }
@@ -66,7 +69,7 @@ export const exportRulesRoute = (router: IRouter, config: LegacyServices['config
         });
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

@@ -16,7 +16,7 @@ import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { buildRouteValidation, transformError } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -56,6 +56,8 @@ export const createRulesRoute = (router: IRouter): void => {
         type,
         references,
       } = request.body;
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const alertsClient = context.alerting.getAlertsClient();
         const actionsClient = context.actions.getActionsClient();
@@ -64,20 +66,22 @@ export const createRulesRoute = (router: IRouter): void => {
         const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return response.notFound();
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const finalIndex = outputIndex ?? siemClient.signalsIndex;
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
-          return response.badRequest({
+          return siemResponse.error({
+            statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
           });
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return response.conflict({
+            return siemResponse.error({
+              statusCode: 409,
               body: `rule_id: "${ruleId}" already exists`,
             });
           }
@@ -124,13 +128,13 @@ export const createRulesRoute = (router: IRouter): void => {
         });
         const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
         if (errors != null) {
-          return response.internalError({ body: errors });
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

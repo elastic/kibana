@@ -7,7 +7,7 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { getIndexExists } from '../../index/get_index_exists';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
@@ -30,6 +30,8 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const alertsClient = context.alerting.getAlertsClient();
         const actionsClient = context.actions.getActionsClient();
@@ -38,7 +40,7 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
         const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return response.notFound();
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const rulesFromFileSystem = getPrepackagedRules();
@@ -54,7 +56,8 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
             signalsIndex
           );
           if (!signalsIndexExists) {
-            return response.badRequest({
+            return siemResponse.error({
+              statusCode: 400,
               body: `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,
             });
           }
@@ -75,13 +78,13 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
         };
         const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
         if (errors != null) {
-          return response.internalError({ body: errors });
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

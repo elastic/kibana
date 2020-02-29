@@ -23,6 +23,7 @@ import {
   isBulkError,
   isImportRegular,
   transformError,
+  buildSiemResponse,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
@@ -58,15 +59,17 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
       const clusterClient = context.core.elasticsearch.dataClient;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const { filename } = request.body.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return response.badRequest({
+        return siemResponse.error({
+          statusCode: 400,
           body: `Invalid file extension ${fileExtension}`,
         });
       }
@@ -258,13 +261,13 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
         };
         const [validated, errors] = validate(importRules, importRulesSchema);
         if (errors != null) {
-          return response.internalError({ body: errors });
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

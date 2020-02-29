@@ -11,7 +11,7 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { buildRouteValidation, transformError } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -57,6 +57,7 @@ export const updateRulesRoute = (router: IRouter) => {
         references,
         version,
       } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
         const alertsClient = context.alerting.getAlertsClient();
@@ -65,7 +66,7 @@ export const updateRulesRoute = (router: IRouter) => {
         const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return response.notFound();
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const finalIndex = outputIndex ?? siemClient.signalsIndex;
@@ -114,20 +115,20 @@ export const updateRulesRoute = (router: IRouter) => {
           });
           const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
           if (errors != null) {
-            return response.internalError({ body: errors });
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
             return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return response.customError({
+          return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

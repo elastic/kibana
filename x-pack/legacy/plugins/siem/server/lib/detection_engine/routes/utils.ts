@@ -8,7 +8,12 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
 
-import { RouteValidationFunction } from '../../../../../../../../src/core/server';
+import {
+  RouteValidationFunction,
+  KibanaResponseFactory,
+  HttpResponsePayload,
+  ResponseError,
+} from '../../../../../../../../src/core/server';
 
 export interface OutputError {
   message: string;
@@ -227,6 +232,50 @@ export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidatio
   }
   return ok(value as T); // TODO: infer type from our schema
 };
+
+const statusToErrorMessage = (statusCode: number) => {
+  switch (statusCode) {
+    case 400:
+      return 'Bad Request';
+    case 401:
+      return 'Unauthorized';
+    case 403:
+      return 'Forbidden';
+    case 404:
+      return 'Not Found';
+    case 409:
+      return 'Conflict';
+    case 500:
+      return 'Internal Error';
+    default:
+      return '(unknown error)';
+  }
+};
+
+export interface ErrorOptions {
+  statusCode: number;
+  body?: HttpResponsePayload | ResponseError;
+}
+
+export class SiemResponseFactory {
+  constructor(private response: KibanaResponseFactory) {}
+
+  error({ statusCode, body }: ErrorOptions) {
+    return this.response.custom({
+      headers: { 'Content-Type': 'application/json' },
+      statusCode,
+      body: Buffer.from(
+        JSON.stringify({
+          message: body || statusToErrorMessage(statusCode),
+          status_code: statusCode,
+        })
+      ),
+    });
+  }
+}
+
+export const buildSiemResponse = (response: KibanaResponseFactory) =>
+  new SiemResponseFactory(response);
 
 export const convertToSnakeCase = <T extends Record<string, unknown>>(
   obj: T

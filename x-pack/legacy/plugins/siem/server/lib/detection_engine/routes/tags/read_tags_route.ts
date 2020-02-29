@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { readTags } from '../../tags/read_tags';
 
 export const readTagsRoute = (router: IRouter) => {
@@ -20,9 +20,10 @@ export const readTagsRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const alertsClient = context.alerting.getAlertsClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
@@ -32,7 +33,7 @@ export const readTagsRoute = (router: IRouter) => {
         return response.ok({ body: tags });
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

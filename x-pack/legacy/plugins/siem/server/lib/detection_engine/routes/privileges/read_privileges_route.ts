@@ -8,7 +8,7 @@ import { merge } from 'lodash/fp';
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { buildSiemResponse, transformError } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
 export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey: boolean) => {
@@ -21,6 +21,7 @@ export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
@@ -35,7 +36,7 @@ export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey
         return response.ok({ body: privileges });
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

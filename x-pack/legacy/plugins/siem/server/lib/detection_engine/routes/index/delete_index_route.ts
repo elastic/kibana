@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { deletePolicy } from '../../index/delete_policy';
@@ -34,6 +34,8 @@ export const deleteIndexRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
@@ -43,7 +45,8 @@ export const deleteIndexRoute = (router: IRouter) => {
         const indexExists = await getIndexExists(callCluster, index);
 
         if (!indexExists) {
-          return response.notFound({
+          return siemResponse.error({
+            statusCode: 404,
             body: `index: "${index}" does not exist`,
           });
         } else {
@@ -60,7 +63,7 @@ export const deleteIndexRoute = (router: IRouter) => {
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

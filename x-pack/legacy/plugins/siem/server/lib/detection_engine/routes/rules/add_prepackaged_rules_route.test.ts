@@ -69,7 +69,7 @@ describe('add_prepackaged_rules_route', () => {
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
-        message: undefined,
+        message: 'Not Found',
         statusCode: 404,
       });
     });

@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
@@ -26,6 +26,8 @@ export const createIndexRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
@@ -34,7 +36,8 @@ export const createIndexRoute = (router: IRouter) => {
         const index = siemClient.signalsIndex;
         const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
-          return response.conflict({
+          return siemResponse.error({
+            statusCode: 409,
             body: `index: "${index}" already exists`,
           });
         } else {
@@ -52,7 +55,7 @@ export const createIndexRoute = (router: IRouter) => {
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

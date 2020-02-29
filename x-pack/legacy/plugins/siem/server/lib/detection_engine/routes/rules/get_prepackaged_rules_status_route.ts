@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
@@ -29,9 +29,10 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const alertsClient = context.alerting.getAlertsClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
@@ -55,13 +56,13 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
         };
         const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
         if (errors != null) {
-          return response.internalError({ body: errors });
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return response.customError({
+        return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,
         });

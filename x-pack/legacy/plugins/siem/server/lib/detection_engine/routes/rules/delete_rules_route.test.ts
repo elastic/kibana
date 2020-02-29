@@ -60,7 +60,7 @@ describe('delete_rules', () => {
       const response = await server.inject(getDeleteRequest(), context);
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: undefined, statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
     });
 
     test('catches error if deletion throws error', async () => {

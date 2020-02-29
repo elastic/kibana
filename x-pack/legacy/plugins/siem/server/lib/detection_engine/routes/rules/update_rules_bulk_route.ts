@@ -12,7 +12,7 @@ import {
 } from '../../rules/types';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-import { buildRouteValidation, transformBulkError } from '../utils';
+import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
@@ -34,9 +34,10 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const actionsClient = context.actions.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return response.notFound();
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const rules = await Promise.all(
@@ -127,7 +128,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
 
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return response.internalError({ body: errors });
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
         return response.ok({ body: validated ?? {} });
       }
