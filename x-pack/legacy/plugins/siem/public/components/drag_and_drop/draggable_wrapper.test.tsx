@@ -24,7 +24,7 @@ describe('DraggableWrapper', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
+          <MockedProvider mocks={[]} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>

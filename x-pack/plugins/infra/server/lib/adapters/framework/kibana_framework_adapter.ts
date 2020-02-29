@@ -8,7 +8,7 @@
 
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
-import { runHttpQuery } from 'apollo-server-core';
+import { runHttpQuery, HttpQueryRequest } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
@@ -106,10 +106,17 @@ export class KibanaFramework {
             schema: gqlSchema,
           }),
           query,
+          request: (request as unknown) as HttpQueryRequest['request'],
         });
 
+        const parsedResponse = JSON.parse(gqlResponse.graphqlResponse);
+
         return response.ok({
-          body: gqlResponse,
+          body: {
+            errors: parsedResponse.errors,
+            data: parsedResponse.data,
+            extensions: parsedResponse.extensions,
+          },
           headers: {
             'content-type': 'application/json',
           },

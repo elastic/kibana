@@ -146,7 +146,7 @@ export class Plugin {
       }
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod);
+    const libs = compose(core, plugins);
     initServer(libs);
   }
 

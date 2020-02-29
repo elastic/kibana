@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
@@ -28,8 +28,7 @@ jest.mock('../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
-let localSource: Array<{
-  request: {};
+interface LocalSoure extends MockedResponse {
   result: {
     data: {
       source: {
@@ -39,7 +38,9 @@ let localSource: Array<{
       };
     };
   };
-}>;
+}
+
+let localSource: LocalSoure[];
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

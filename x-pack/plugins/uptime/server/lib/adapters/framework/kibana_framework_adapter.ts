@@ -6,7 +6,7 @@
 
 import { GraphQLSchema } from 'graphql';
 import { schema as kbnSchema } from '@kbn/config-schema';
-import { runHttpQuery } from 'apollo-server-core';
+import { runHttpQuery, HttpQueryRequest } from 'apollo-server-core';
 import { UptimeCoreSetup } from './adapter_types';
 import { UMBackendFrameworkAdapter } from './adapter_types';
 import { UMKibanaRoute } from '../../../rest_api';
@@ -76,10 +76,17 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
             method: 'POST',
             options: options.graphQLOptions,
             query,
+            request: (request as unknown) as HttpQueryRequest['request'],
           });
 
+          const parsedResponse = JSON.parse(graphQLResponse.graphqlResponse);
+
           return resp.ok({
-            body: graphQLResponse,
+            body: {
+              errors: parsedResponse.errors,
+              data: parsedResponse.data,
+              extensions: parsedResponse.extensions,
+            },
             headers: {
               'content-type': 'application/json',
             },

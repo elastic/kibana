@@ -20,7 +20,7 @@ describe('DragDropContextWrapper', () => {
 
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
+          <MockedProvider mocks={[]} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               {message}
             </DragDropContextWrapper>

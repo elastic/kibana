@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider, MockedResponse } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
@@ -36,8 +36,7 @@ jest.mock('../../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
-let localSource: Array<{
-  request: {};
+interface LocalSoure extends MockedResponse {
   result: {
     data: {
       source: {
@@ -47,7 +46,9 @@ let localSource: Array<{
       };
     };
   };
-}>;
+}
+
+let localSource: LocalSoure[];
 
 const getMockHistory = (ip: string) => ({
   length: 2,
