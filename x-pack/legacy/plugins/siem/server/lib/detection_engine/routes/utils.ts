@@ -11,8 +11,7 @@ import { has, snakeCase } from 'lodash/fp';
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
-  HttpResponsePayload,
-  ResponseError,
+  CustomHttpResponseOptions,
 } from '../../../../../../../../src/core/server';
 
 export interface OutputError {
@@ -252,17 +251,15 @@ const statusToErrorMessage = (statusCode: number) => {
   }
 };
 
-export interface ErrorOptions {
-  statusCode: number;
-  body?: HttpResponsePayload | ResponseError;
-}
+export type ErrorOptions = CustomHttpResponseOptions<Buffer>;
 
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error({ statusCode, body }: ErrorOptions) {
+  error({ statusCode, body, headers: _headers }: ErrorOptions) {
+    const headers = { 'content-type': 'application/json', ..._headers } as ErrorOptions['headers']; // https://github.com/microsoft/TypeScript/issues/27273
     return this.response.custom({
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       statusCode,
       body: Buffer.from(
         JSON.stringify({
