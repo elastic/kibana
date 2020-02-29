@@ -17,13 +17,5 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
-
-const defaultSessionId = `${Date.now()}`;
-
-export function getEsPreference(uiSettings: IUiSettingsClient, sessionId = defaultSessionId) {
-  const setPreference = uiSettings.get('courier:setRequestPreference');
-  if (setPreference === 'sessionId') return `${sessionId}`;
-  const customPreference = uiSettings.get('courier:customRequestPreference');
-  return setPreference === 'custom' ? customPreference : undefined;
-}
+export { esSearchStrategyProvider } from './es_search_strategy';
+export { getEsPreference } from './get_es_preference';

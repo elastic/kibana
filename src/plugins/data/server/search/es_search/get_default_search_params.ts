@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { SharedGlobalConfig } from '../../../../../core/server';
 
-const defaultSessionId = `${Date.now()}`;
-
-export function getEsPreference(uiSettings: IUiSettingsClient, sessionId = defaultSessionId) {
-  const setPreference = uiSettings.get('courier:setRequestPreference');
-  if (setPreference === 'sessionId') return `${sessionId}`;
-  const customPreference = uiSettings.get('courier:customRequestPreference');
-  return setPreference === 'custom' ? customPreference : undefined;
+export function getDefaultSearchParams(config: SharedGlobalConfig) {
+  return {
+    timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
+    ignoreUnavailable: true, // Don't fail if the index/indices don't exist
+    restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+  };
 }

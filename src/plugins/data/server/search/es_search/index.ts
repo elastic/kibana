@@ -21,6 +21,7 @@ import { PluginInitializerContext } from '../../../../../core/server';
 import { EsSearchService } from './es_search_service';
 
 export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
+export { getDefaultSearchParams } from './get_default_search_params';
 
 export function esSearchService(initializerContext: PluginInitializerContext) {
   return new EsSearchService(initializerContext);
