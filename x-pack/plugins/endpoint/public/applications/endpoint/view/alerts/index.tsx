@@ -21,9 +21,10 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPageContentBody,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
@@ -141,9 +142,11 @@ export const AlertIndex = memo(() => {
       const row = alertListData[rowIndex % pageSize];
       if (columnId === 'alert_type') {
         return (
-          <Link
+          <EuiLink
             data-testid="alertTypeCellLink"
-            to={urlFromQueryParams({ ...queryParams, selected_alert: row.id })}
+            onClick={() =>
+              history.push(urlFromQueryParams({ ...queryParams, selected_alert: row.id }))
+            }
           >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
@@ -151,7 +154,7 @@ export const AlertIndex = memo(() => {
                 defaultMessage: 'Malicious File',
               }
             )}
-          </Link>
+          </EuiLink>
         );
       } else if (columnId === 'event_type') {
         return row.event.action;
@@ -184,7 +187,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, timestampForRows, pageSize, queryParams, total]);
+  }, [total, alertListData, pageSize, history, queryParams, timestampForRows]);
 
   const pagination = useMemo(() => {
     return {
@@ -195,6 +198,14 @@ export const AlertIndex = memo(() => {
       onChangePage,
     };
   }, [onChangeItemsPerPage, onChangePage, pageIndex, pageSize]);
+
+  const columnVisibility = useMemo(
+    () => ({
+      visibleColumns,
+      setVisibleColumns,
+    }),
+    [setVisibleColumns, visibleColumns]
+  );
 
   const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
 
@@ -236,13 +247,7 @@ export const AlertIndex = memo(() => {
                 aria-label="Alert List"
                 rowCount={total}
                 columns={columns}
-                columnVisibility={useMemo(
-                  () => ({
-                    visibleColumns,
-                    setVisibleColumns,
-                  }),
-                  [setVisibleColumns, visibleColumns]
-                )}
+                columnVisibility={columnVisibility}
                 renderCellValue={renderCellValue}
                 pagination={pagination}
                 data-test-subj="alertListGrid"
