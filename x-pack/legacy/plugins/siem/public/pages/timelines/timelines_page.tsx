@@ -19,21 +19,21 @@ const TimelinesContainer = styled.div`
 `;
 
 interface TimelinesProps<TCache = object> {
-  apolloClient: ApolloClient<TCache>;
+  client: ApolloClient<TCache>;
 }
 
 type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
+const TimelinesPageComponent: React.FC<OwnProps> = ({ client }) => (
   <>
     <WrapperPage>
       <HeaderPage border title={i18n.PAGE_TITLE} />
 
       <TimelinesContainer>
         <StatefulOpenTimeline
-          apolloClient={apolloClient}
+          apolloClient={client}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isModal={false}
           title={i18n.ALL_TIMELINES_PANEL_TITLE}
