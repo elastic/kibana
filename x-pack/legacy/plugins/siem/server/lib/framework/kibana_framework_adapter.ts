@@ -132,15 +132,17 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any, response: KibanaResponseFactory) {
     const siemResponse = buildSiemResponse(response);
-    if (error.name !== 'HttpQueryError') {
+
+    if (error.name === 'HttpQueryError') {
       return siemResponse.error({
+        statusCode: error.statusCode,
+        headers: error.headers,
         body: error.message,
-        statusCode: 500,
       });
     }
 
     return siemResponse.error({
-      statusCode: error.statusCode,
+      statusCode: 500,
       body: error.message,
     });
   }
