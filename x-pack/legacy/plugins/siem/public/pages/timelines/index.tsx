@@ -8,6 +8,6 @@ import { withApollo } from 'react-apollo';
 
 import { TimelinesPage } from './timelines_page';
 
-export const Timelines = withApollo(TimelinesPage);
+export const Timelines = withApollo<{}>(TimelinesPage);
 
 Timelines.displayName = 'Timelines';
