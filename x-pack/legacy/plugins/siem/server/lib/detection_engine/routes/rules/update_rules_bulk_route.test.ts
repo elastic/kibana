@@ -12,7 +12,7 @@ import {
   getUpdateBulkRequest,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { serverMock, requestContextMock, responseMock, requestMock } from '../__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
