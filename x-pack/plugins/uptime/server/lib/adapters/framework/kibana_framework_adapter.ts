@@ -79,6 +79,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
             request: (request as unknown) as HttpQueryRequest['request'],
           });
 
+          // https://github.com/apollographql/apollo-server/blob/master/packages/apollo-server-core/src/runHttpQuery.ts#L46
           const parsedResponse = JSON.parse(graphQLResponse.graphqlResponse);
 
           return resp.ok({
