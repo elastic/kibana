@@ -38,7 +38,7 @@ describe('read_privileges', () => {
       });
       const response = await server.inject(getPrivilegeRequest(), context);
       expect(response.status).toEqual(500);
-      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
+      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
     });
   });
 });

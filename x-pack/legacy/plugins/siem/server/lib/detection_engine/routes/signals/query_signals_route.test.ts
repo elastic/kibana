@@ -72,7 +72,7 @@ describe('query for signal', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });

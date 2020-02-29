@@ -44,7 +44,7 @@ describe('patch_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'rule_id: "rule-1" not found',
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -52,7 +52,7 @@ describe('patch_rules', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error if requesting a non-rule', async () => {
@@ -61,7 +61,7 @@ describe('patch_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringContaining('not found'),
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -73,7 +73,7 @@ describe('patch_rules', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });

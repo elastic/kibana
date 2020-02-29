@@ -44,7 +44,7 @@ describe('create_rules', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -56,7 +56,7 @@ describe('create_rules', () => {
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
-        statusCode: 400,
+        status_code: 400,
       });
     });
 
@@ -67,7 +67,7 @@ describe('create_rules', () => {
       expect(response.status).toEqual(409);
       expect(response.body).toEqual({
         message: expect.stringContaining('already exists'),
-        statusCode: 409,
+        status_code: 409,
       });
     });
 
@@ -79,7 +79,7 @@ describe('create_rules', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });

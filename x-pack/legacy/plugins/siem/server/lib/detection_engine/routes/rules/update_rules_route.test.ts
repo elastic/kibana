@@ -45,7 +45,7 @@ describe('update_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringMatching(/rule_id.*not found/),
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -54,7 +54,7 @@ describe('update_rules', () => {
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error when updating non-rule', async () => {
@@ -64,7 +64,7 @@ describe('update_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringMatching(/rule_id.*not found/),
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -76,7 +76,7 @@ describe('update_rules', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });

@@ -70,7 +70,7 @@ describe('add_prepackaged_rules_route', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'Not Found',
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -81,7 +81,7 @@ describe('add_prepackaged_rules_route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        statusCode: 400,
+        status_code: 400,
         message: expect.stringContaining(
           'Pre-packaged rules cannot be installed until the signals index is created'
         ),
@@ -121,7 +121,7 @@ describe('add_prepackaged_rules_route', () => {
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(500);
-      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
+      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
     });
   });
 });

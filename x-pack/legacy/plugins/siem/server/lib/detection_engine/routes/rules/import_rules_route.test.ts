@@ -81,14 +81,14 @@ describe('import_rules_route', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns 404 if actionsClient is not available on the route', async () => {
       context.actions.getActionsClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -101,7 +101,7 @@ describe('import_rules_route', () => {
         });
       const response = await server.inject(request, context);
       expect(response.status).toEqual(500);
-      expect(response.body).toEqual({ message: 'Test error', statusCode: 500 });
+      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
     });
 
     test('returns an error if the index does not exist', async () => {
@@ -152,7 +152,7 @@ describe('import_rules_route', () => {
       const response = await server.inject(badRequest, context);
 
       expect(response.status).toEqual(400);
-      expect(response.body).toEqual({ message: 'Invalid file extension .html', statusCode: 400 });
+      expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
     });
   });
 

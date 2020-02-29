@@ -51,7 +51,7 @@ describe('delete_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'rule_id: "rule-1" not found',
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -60,7 +60,7 @@ describe('delete_rules', () => {
       const response = await server.inject(getDeleteRequest(), context);
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if deletion throws error', async () => {
@@ -71,7 +71,7 @@ describe('delete_rules', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });

@@ -39,7 +39,7 @@ describe('read_signals', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error if requesting a non-rule', async () => {
@@ -48,7 +48,7 @@ describe('read_signals', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringMatching(/rule_id.*not found/),
-        statusCode: 404,
+        status_code: 404,
       });
     });
 
@@ -60,7 +60,7 @@ describe('read_signals', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });
@@ -76,7 +76,7 @@ describe('read_signals', () => {
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', status_code: 404 });
     });
   });
 });

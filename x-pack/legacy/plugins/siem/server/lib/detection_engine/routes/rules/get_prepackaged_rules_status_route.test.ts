@@ -61,7 +61,7 @@ describe('get_prepackaged_rule_status_route', () => {
       context.alerting.getAlertsClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', statusCode: 404 });
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when finding rules throws error', async () => {
@@ -72,7 +72,7 @@ describe('get_prepackaged_rule_status_route', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
-        statusCode: 500,
+        status_code: 500,
       });
     });
   });
