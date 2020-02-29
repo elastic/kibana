@@ -17,7 +17,9 @@ import {
   createImportErrorObject,
   transformImportError,
   convertToSnakeCase,
+  SiemResponseFactory,
 } from './utils';
+import { responseMock } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -318,6 +320,33 @@ describe('utils', () => {
       expect(
         convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
       ).toEqual(null);
+    });
+  });
+
+  describe('SiemResponseFactory', () => {
+    it('builds a custom response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      expect(response.custom).toHaveBeenCalled();
+    });
+
+    it('generates a status_code key on the response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
+
+      expect(statusCode).toEqual(400);
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
+        expect.objectContaining({
+          message: 'Bad Request',
+          status_code: 400,
+        })
+      );
     });
   });
 });
