@@ -22,7 +22,12 @@ interface Route {
 }
 
 const getRoute = (routeSpy: jest.Mock): Route => {
-  const [config, handler] = routeSpy.mock.calls[routeSpy.mock.calls.length - 1];
+  const [route] = routeSpy.mock.calls;
+  if (!route) {
+    throw new Error('No route registered!');
+  }
+
+  const [config, handler] = route;
   return { config, handler };
 };
 
