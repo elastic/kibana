@@ -20,12 +20,17 @@
 import { Action } from './actions/action';
 import { TriggerInternal } from './triggers/trigger_internal';
 
-export type TriggerRegistry = Map<string, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, Action>;
-export type TriggerToActionsRegistry = Map<string, string[]>;
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
+export type ActionRegistry = Map<string, Action<any>>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
-export type TriggerId = string;
+const DEFAULT_TRIGGER = '';
+
+export type TriggerId = keyof TriggerContextMapping;
+
+export type TriggerContext = BaseContext;
+export type BaseContext = object | undefined | string | number;
 
 export interface TriggerContextMapping {
-  [key: string]: object;
+  [DEFAULT_TRIGGER]: TriggerContext;
 }
