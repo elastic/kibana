@@ -23,7 +23,7 @@ function createXPackRoot(config: {} = {}) {
 }
 
 describe('ingestManager', () => {
-  describe('default. manager, EPM, and Fleet all disabled', () => {
+  describe.skip('default. manager, EPM, and Fleet all disabled', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
       root = createXPackRoot();
@@ -50,7 +50,7 @@ describe('ingestManager', () => {
     });
   });
 
-  describe('manager only (no EPM, no Fleet)', () => {
+  describe.skip('manager only (no EPM, no Fleet)', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
       const ingestManagerConfig = {
