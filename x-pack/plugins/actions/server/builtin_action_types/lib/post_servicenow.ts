@@ -6,7 +6,7 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Services } from '../../types';
-import { ParamsType, SecretsType } from '../servicenow';
+import { ParamsType, SecretsType } from '../servicenow/types';
 
 interface PostServiceNowOptions {
   apiUrl: string;

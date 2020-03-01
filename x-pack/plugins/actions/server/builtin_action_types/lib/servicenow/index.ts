@@ -7,6 +7,9 @@
 import { Instance } from './types';
 
 class ServiceNow {
+  private static readonly API_VERSION = 'v1';
+  private static readonly INCIDENT_URL = `/api/now/${ServiceNow.API_VERSION}/table/incident`;
+
   constructor(private readonly instance: Instance) {
     if (
       !this.instance ||
