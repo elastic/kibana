@@ -87,7 +87,7 @@ describe('ingestManager', () => {
   // https://github.com/jfsiii/kibana/blob/f73b54ebb7e0f6fc00efd8a6800a01eb2d9fb772/x-pack/plugins/ingest_manager/server/plugin.ts#L84
   // adding tests to confirm the Fleet & EPM routes are never added
 
-  describe('manager and EPM; no Fleet', () => {
+  describe.skip('manager and EPM; no Fleet', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
       const ingestManagerConfig = {
