@@ -14,8 +14,8 @@ export const createGetMonitorDurationRoute: UMRestApiRouteFactory = (libs: UMSer
   validate: {
     query: schema.object({
       monitorId: schema.string(),
-      dateStart: schema.maybe(schema.string()),
-      dateEnd: schema.maybe(schema.string()),
+      dateStart: schema.string(),
+      dateEnd: schema.string(),
     }),
   },
   options: {
