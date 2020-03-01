@@ -70,7 +70,7 @@ export interface ActionsPluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
-  event_log: IEventLogService;
+  eventLog: IEventLogService;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -132,8 +132,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       attributesToEncrypt: new Set(['apiKey']),
     });
 
-    plugins.event_log.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
-    this.eventLogger = plugins.event_log.getLogger({
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
 

@@ -26,12 +26,16 @@ import {
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistryStart,
+  TutorialService,
+  TutorialServiceSetup,
+  TutorialServiceStart,
 } from './services';
 import { ConfigSchema } from '../config';
 
 export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
+  private readonly tutorialService = new TutorialService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -39,6 +43,7 @@ export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePubli
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
       environment: { ...this.environmentService.setup() },
+      tutorials: { ...this.tutorialService.setup() },
       config: this.initializerContext.config.get(),
     };
   }
@@ -50,6 +55,7 @@ export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePubli
           capabilities: core.application.capabilities,
         }),
       },
+      tutorials: { ...this.tutorialService.start() },
       environment: { ...this.environmentService.start() },
     };
   }
@@ -68,7 +74,14 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 export type EnvironmentStart = EnvironmentServiceStart;
 
 /** @public */
+export type TutorialSetup = TutorialServiceSetup;
+
+/** @public */
+export type TutorialStart = TutorialServiceStart;
+
+/** @public */
 export interface HomePublicPluginSetup {
+  tutorials: TutorialServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
   /**
    * The environment service is only available for a transition period and will
@@ -81,6 +94,7 @@ export interface HomePublicPluginSetup {
 
 /** @public */
 export interface HomePublicPluginStart {
+  tutorials: TutorialServiceStart;
   featureCatalogue: FeatureCatalogueStart;
   environment: EnvironmentStart;
 }
