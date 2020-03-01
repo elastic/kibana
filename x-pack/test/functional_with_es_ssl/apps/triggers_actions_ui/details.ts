@@ -218,25 +218,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             meta: {
               lastScheduledActions: { date },
             },
-          }) => moment(date)
+          }) => date
         );
+
+        log.debug(`API RESULT: ${JSON.stringify(dateOnAllInstances)}`);
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(instancesList.map(instance => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
             status: 'Active',
-            start: dateOnAllInstances['us-central'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-central'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
             status: 'Active',
-            start: dateOnAllInstances['us-east'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-east'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
             status: 'Active',
-            start: dateOnAllInstances['us-west'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-west'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
         ]);
 
