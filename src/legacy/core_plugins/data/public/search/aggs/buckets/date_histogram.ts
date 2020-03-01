@@ -54,8 +54,8 @@ const setAggTimeRangeBounds = (
   agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
 };
 
-// will be replaced by src/legacy/ui/public/time_buckets/time_buckets.js
-interface TimeBuckets {
+// TODO: Need to incorporate these properly into TimeBuckets
+interface ITimeBuckets {
   _alreadySet?: boolean;
   setBounds: Function;
   getScaledDateFormatter: Function;
@@ -64,7 +64,7 @@ interface TimeBuckets {
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
-  buckets: TimeBuckets;
+  buckets: ITimeBuckets;
 }
 
 export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
