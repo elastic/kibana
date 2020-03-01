@@ -18,8 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const alerting = getService('alerting');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/57426
-  describe.skip('Alert Details', function() {
+  describe('Alert Details', function() {
     describe('Header', function() {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -219,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             meta: {
               lastScheduledActions: { date },
             },
-          }) => moment(date).utc()
+          }) => moment(date)
         );
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
