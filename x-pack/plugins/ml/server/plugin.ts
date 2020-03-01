@@ -33,6 +33,7 @@ import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlServerLicense } from './lib/license';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -45,12 +46,12 @@ declare module 'kibana/server' {
 export class MlServerPlugin {
   private log: Logger;
   private version: string;
-  private mlLicense: MlLicense;
+  private mlLicense: MlServerLicense;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
-    this.mlLicense = new MlLicense();
+    this.mlLicense = new MlServerLicense();
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
@@ -82,8 +83,6 @@ export class MlServerPlugin {
     this.mlLicense.setup(plugins.licensing.license$, [
       (license: MlLicense) => initSampleDataSets(license, plugins),
     ]);
-    // WHERE DO I CALL THINGS ON UNLOAD?????
-    // this.mlLicense.unsubscribe()
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
@@ -98,7 +97,7 @@ export class MlServerPlugin {
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      getLicenseCheckResults: () => this.mlLicense,
+      mlLicense: this.mlLicense,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -129,5 +128,7 @@ export class MlServerPlugin {
 
   public start() {}
 
-  public stop() {}
+  public stop() {
+    this.mlLicense.unsubscribe();
+  }
 }

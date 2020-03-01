@@ -12,7 +12,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlServerLicense } from './lib/license';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -40,5 +40,5 @@ export interface PluginsSetup {
 
 export interface RouteInitialization {
   router: IRouter;
-  getLicenseCheckResults: () => MlLicense;
+  mlLicense: MlServerLicense;
 }

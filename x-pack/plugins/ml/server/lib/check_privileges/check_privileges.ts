@@ -25,7 +25,7 @@ interface Response {
 
 export function privilegesProvider(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  licenseCheckResult: MlLicense,
+  mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>,
   ignoreSpaces: boolean = false
 ) {
@@ -35,9 +35,9 @@ export function privilegesProvider(
     const privileges = getDefaultPrivileges();
 
     const upgradeInProgress = await isUpgradeInProgress();
-    const isSecurityEnabled = licenseCheckResult.isSecurityEnabled();
+    const isSecurityEnabled = mlLicense.isSecurityEnabled();
 
-    const isPlatinumOrTrialLicense = licenseCheckResult.isFullLicense();
+    const isPlatinumOrTrialLicense = mlLicense.isFullLicense();
     const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 
     const setGettingPrivileges = isPlatinumOrTrialLicense
