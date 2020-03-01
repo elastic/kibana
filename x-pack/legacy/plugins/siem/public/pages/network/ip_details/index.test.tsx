@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { Router } from 'react-router-dom';
 import { MockedProvider, MockedResponse } from '@apollo/react-testing';
 import { ActionCreator } from 'typescript-fsa';
