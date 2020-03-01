@@ -47,7 +47,7 @@ export const histogramConfigs: MatrixHisrogramConfigs = {
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const EventsQueryTabBodyComponent = ({
+export const EventsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
@@ -86,4 +86,4 @@ export const EventsQueryTabBodyComponent = ({
   );
 };
 
-export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
+EventsQueryTabBody.displayName = 'EventsQueryTabBody';
