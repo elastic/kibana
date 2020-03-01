@@ -81,8 +81,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
       }
     }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
-  },
-  deepEqual
+  }
 );
 
 export const SpyRoute = withRouter(SpyRouteComponent);
