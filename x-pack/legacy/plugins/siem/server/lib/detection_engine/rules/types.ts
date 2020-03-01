@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { LegacyRequest } from '../../../types';
-import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-import { Alert } from '../../../../../alerting/server/types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
@@ -189,16 +189,12 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
-  return obj.every(rule => isAlertType(rule));
+export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+  return partialAlert.every(rule => isAlertType(rule));
 };
 
-export const isAlertType = (obj: unknown): obj is RuleAlertType => {
-  return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
+export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+  return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
 export const isRuleStatusSavedObjectType = (

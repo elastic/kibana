@@ -21,8 +21,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { npStart } from 'ui/new_platform';
-import { timefilter } from 'ui/timefilter';
+// TODO need to move TimeBuckets
 import { TimeBuckets } from 'ui/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -33,6 +32,8 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getQueryService, getUiSettings } from '../../../../../../../plugins/data/public/services';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
@@ -40,6 +41,7 @@ const tzOffset = moment().format('Z');
 const getInterval = (agg: IBucketAggConfig): string => _.get(agg, ['params', 'interval']);
 
 export const setBounds = (agg: IBucketDateHistogramAggConfig, force?: boolean) => {
+  const { timefilter } = getQueryService().timefilter;
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
@@ -221,7 +223,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           ]);
         }
         if (!tz) {
-          const config = npStart.core.uiSettings;
+          const config = getUiSettings();
           // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
           const isDefaultTimezone = config.isDefault('dateFormat:tz');
           tz = isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
