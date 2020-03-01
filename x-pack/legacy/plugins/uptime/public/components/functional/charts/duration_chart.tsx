@@ -18,6 +18,8 @@ import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
+import { MLJobLink } from '../ml/ml_job_link';
+import * as labels from '../ml/translations';
 
 interface DurationChartProps {
   /**
@@ -56,6 +58,20 @@ export const DurationChartComponent = ({
     });
   };
 
+  const findMaxInArray = arr => {
+    return Math.max(
+      ...arr.map(item => {
+        return item.y ? item.y : 0;
+      })
+    );
+  };
+
+  const maxY = Math.max(
+    ...locationDurationLines.map(data => {
+      return findMaxInArray(data.line);
+    })
+  );
+
   return (
     <>
       <EuiPanel paddingSize="m">
@@ -72,6 +88,8 @@ export const DurationChartComponent = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <MLJobLink>Analyze in ML</MLJobLink>
+
             <EuiButton fill={true} size="s">
               Analyze in ML
             </EuiButton>
@@ -106,7 +124,7 @@ export const DurationChartComponent = ({
                 })}
               />
               <DurationLineSeriesList lines={locationDurationLines} />
-              <DurationAnomaliesBar anomalies={anomalies} />
+              <DurationAnomaliesBar anomalies={anomalies} maxY={maxY} />
             </Chart>
           ) : (
             <DurationChartEmptyState />

@@ -31,7 +31,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   useEffect(() => {
     const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
     dispatch(getMonitorDurationAction(params));
-    dispatch(anomalyRecordsAction.get());
+    dispatch(anomalyRecordsAction.get(params));
   }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
 
   return (

@@ -5,33 +5,67 @@
  */
 
 import React from 'react';
-import { ScaleType, BarSeries } from '@elastic/charts';
+import moment from 'moment';
+import { useParams } from 'react-router-dom';
+import { RectAnnotation } from '@elastic/charts';
 
 interface Props {
   anomalies: any;
+  maxY: number;
 }
 
-export const DurationAnomaliesBar = ({ anomalies }: Props) => {
-  const anomaliesBars = [];
-  if (anomalies?.buckets) {
-    const buckets = anomalies.buckets;
-    buckets.forEach((bucket: any) => {
-      bucket.records.forEach((record: any) => {
-        if (record['monitor.id']?.includes('elastic-co')) {
-          anomaliesBars.push({ x: record.timestamp, y: 2000 });
+export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
+  let { monitorId } = useParams();
+  monitorId = atob(monitorId || '');
+
+  const severeAnomalyAnnotations = [];
+  const mildAnnotations = [];
+  if (anomalies?.records) {
+    const records = anomalies.records;
+    records.forEach((record: any) => {
+      if (record['monitor.id']?.includes(monitorId)) {
+        if (record.record_score > 25) {
+          severeAnomalyAnnotations.push({
+            coordinates: {
+              x0: record.timestamp,
+              x1: moment(record.timestamp)
+                .add(record.bucket_span, 's')
+                .valueOf(),
+            },
+            details: `Record Score with ${record.record_score}`,
+          });
+        } else {
+          mildAnnotations.push({
+            coordinates: {
+              x0: record.timestamp,
+              x1: moment(record.timestamp)
+                .add(record.bucket_span, 's')
+                .valueOf(),
+            },
+            details: `Record Score with ${record.record_score}`,
+          });
         }
-      });
+      }
     });
   }
 
+  const style = {
+    fill: 'rgb(251, 167, 64)',
+    opacity: 1,
+    // strokeWidth: 5,
+    // strokeColor: 'rgb(251, 167, 64)',
+  };
+  const mildStyle = {
+    fill: 'rgb(139, 200, 251)',
+    opacity: 1,
+    // strokeWidth: 5,
+    // strokeColor: 'rgb(251, 167, 64)',
+  };
+
   return (
-    <BarSeries
-      id="bars"
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      xAccessor="x"
-      yAccessors={['y']}
-      data={anomaliesBars}
-    />
+    <>
+      <RectAnnotation dataValues={severeAnomalyAnnotations} id="rect" style={style} />
+      <RectAnnotation dataValues={mildAnnotations} id="rectMild" style={mildStyle} />
+    </>
   );
 };

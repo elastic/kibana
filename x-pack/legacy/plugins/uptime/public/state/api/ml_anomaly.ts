@@ -49,11 +49,13 @@ export const getIndexDateRange = async () => {
   return [result.start.epoch, result.end.epoch];
 };
 
-export const fetchAnomalyRecords = async () => {
-  const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`;
+export const fetchAnomalyRecords = async params => {
+  const { dateStart, dateEnd } = params;
+  const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/records`;
 
   return fetchPost(url, {
-    expand: true,
-    anomaly_score: 10,
+    start: dateStart,
+    end: dateEnd,
+    record_score: 10,
   });
 };

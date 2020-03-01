@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, useContext, useEffect } from 'react';
+import React, { Component, useContext, useEffect, useState } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
@@ -40,34 +40,46 @@ export const MLFlyoutContainer: Component<Props> = ({
     loadMLJob(ML_JOB_ID);
   }, [loadMLJob]);
 
+  const [isCreatingJob, setIsCreatingJob] = useState(false);
   useEffect(() => {
-    notifications.toasts.success({
-      title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
-      body: toMountPoint(
-        <p>
-          {labels.JOB_CREATED_SUCCESS_MESSAGE}
-          <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
-        </p>
-      ),
-    });
+    if (hasMLJob && isCreatingJob) {
+      notifications.toasts.success({
+        title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+        body: toMountPoint(
+          <p>
+            {labels.JOB_CREATED_SUCCESS_MESSAGE}
+            <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
+          </p>
+        ),
+      });
+      setIsCreatingJob(false);
+    }
     // onClose();
-  }, [hasMLJob, notifications, onClose]);
+  }, [hasMLJob, notifications, onClose, isCreatingJob]);
 
   useEffect(() => {
-    notifications.toasts.warning({
-      title: <p>{labels.JOB_CREATION_FAILED}</p>,
-      body: toMountPoint(<p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>),
-    });
-  }, [mlError, notifications]);
+    if (isCreatingJob) {
+      notifications.toasts.warning({
+        title: <p>{labels.JOB_CREATION_FAILED}</p>,
+        body: toMountPoint(<p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>),
+      });
+      setIsCreatingJob(false);
+    }
+  }, [mlError, notifications, isCreatingJob]);
 
   if (!isOpen) {
     return null;
   }
 
+  const createAnomalyJob = () => {
+    setIsCreatingJob(true);
+    createMLJob();
+  };
+
   return (
     <MachineLearningFlyoutView
       isCreatingJob={isJobCreating}
-      onClickCreate={createMLJob}
+      onClickCreate={createAnomalyJob}
       onClose={onClose}
       hasMLJob={hasMLJob}
     />
