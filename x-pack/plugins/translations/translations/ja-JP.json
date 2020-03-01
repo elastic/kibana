@@ -3778,7 +3778,7 @@
     "xpack.apm.metrics.transactionChart.transactionDurationLabel": "トランザクション時間",
     "xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel": "1 分あたりのトランザクション数",
     "xpack.apm.notAvailableLabel": "N/A",
-    "xpack.apm.percentOfParent": "({parentType, select, transaction { 件中 {value} 件のトランザクション} トレース {trace} })",
+    "xpack.apm.percentOfParent": "({parentType, select, transaction {トランザクション} trace {トレース} } の {value})",
     "xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel": "利用可能なデータがありません",
     "xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel": "例外のスタックトレース",
     "xpack.apm.propertiesTable.tabs.logStacktraceLabel": "ログのスタックトレース",
