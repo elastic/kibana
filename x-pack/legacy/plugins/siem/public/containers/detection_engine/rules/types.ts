@@ -21,6 +21,7 @@ export const NewRuleSchema = t.intersection([
     type: t.union([t.literal('query'), t.literal('saved_query')]),
   }),
   t.partial({
+    actions: t.array(t.unknown),
     created_by: t.string,
     false_positives: t.array(t.string),
     from: t.string,
@@ -75,6 +76,7 @@ export const RuleSchema = t.intersection([
     threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
+    actions: t.array(t.unknown),
   }),
   t.partial({
     last_failure_at: t.string,

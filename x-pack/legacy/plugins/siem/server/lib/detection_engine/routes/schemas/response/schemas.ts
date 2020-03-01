@@ -24,6 +24,7 @@ export const file_name = t.string;
  * become the actual ESFilter as a type.
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
+export const actions = t.array(t.unknown);
 
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;

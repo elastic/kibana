@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -38,6 +39,7 @@ import {
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const patchRulesSchema = Joi.object({
+  actions,
   description,
   enabled,
   false_positives,

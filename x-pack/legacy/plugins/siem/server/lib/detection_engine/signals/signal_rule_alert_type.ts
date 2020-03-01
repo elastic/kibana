@@ -94,6 +94,8 @@ export const signalRulesAlertType = ({
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      const alertInstance = await services.alertInstanceFactory(alertId);
+      console.log('saved', savedObject);
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -210,12 +212,23 @@ export const signalRulesAlertType = ({
           );
           const noReIndexResult = await services.callCluster('search', noReIndex);
           if (noReIndexResult.hits.total.value !== 0) {
+            const signalsCount = noReIndexResult.hits.total.value;
+            const inputIndexes = inputIndex.join(', ');
+
+            alertInstance
+              .replaceState({
+                signalsCount,
+              })
+              .scheduleActions('default', {
+                signalsCount,
+                inputIndexes,
+                outputIndex,
+                name,
+                alertId,
+                ruleId,
+              });
             logger.info(
-              `Found ${
-                noReIndexResult.hits.total.value
-              } signals from the indexes of "[${inputIndex.join(
-                ', '
-              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${signalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 

@@ -13,9 +13,11 @@ import {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
   FormatRuleType,
 } from '../types';
 
@@ -97,11 +99,18 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
   };
 };
 
+const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+  const { actions } = actionsStepData;
+  return {
+    actions,
+  };
+};
+
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
-  actionsData: ScheduleStepRule,
+  actionsData: ActionsStepRule,
   ruleId?: string
 ): NewRule => {
   const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';
@@ -110,6 +119,9 @@ export const formatRule = (
     ...formatDefineStepData(defineStepData),
     ...formatAboutStepData(aboutStepData),
     ...formatScheduleStepData(scheduleData),
+    ...formatActionsStepData(actionsData),
   };
+
+  console.error('sss', persistData);
   return ruleId != null ? { id: ruleId, ...persistData } : persistData;
 };

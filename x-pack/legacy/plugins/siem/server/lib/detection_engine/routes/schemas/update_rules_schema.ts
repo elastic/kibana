@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -47,6 +48,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *   - id is on here because you can pass in an id to update using it instead of rule_id.
  */
 export const updateRulesSchema = Joi.object({
+  actions,
   description: description.required(),
   enabled: enabled.default(true),
   id,

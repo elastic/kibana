@@ -9,6 +9,8 @@ import { get, pick } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertAction } from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../shared_imports';
@@ -84,7 +86,7 @@ export const getStepsData = ({
       : null;
 
   const ruleActionsData: ActionsStepRule | null =
-    rule != null ? { isNew: false, actions: rule.actions, interval } : null;
+    rule != null ? { isNew: false, actions: (rule.actions || []) as AlertAction[] } : null;
 
   return { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData };
 };

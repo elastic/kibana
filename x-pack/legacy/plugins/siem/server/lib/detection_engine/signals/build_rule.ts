@@ -35,6 +35,7 @@ export const buildRule = ({
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
     rule_id: ruleParams.ruleId,
+    actions: ruleParams.actions,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,

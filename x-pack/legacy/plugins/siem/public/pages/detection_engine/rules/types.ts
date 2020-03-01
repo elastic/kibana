@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertAction } from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from './components/query_bar';
 import { FormData, FormHook } from '../../shared_imports';
@@ -74,9 +76,7 @@ export interface ScheduleStepRule extends StepRuleData {
 }
 
 export interface ActionsStepRule extends StepRuleData {
-  interval: string;
-  // @ts-ignore
-  actions: any[];
+  actions: AlertAction[];
 }
 
 export interface DefineStepRuleJson {
@@ -106,6 +106,10 @@ export interface ScheduleStepRuleJson {
   from: string;
   to?: string;
   meta?: unknown;
+}
+
+export interface ActionsStepRuleJson {
+  actions: AlertAction[];
 }
 
 export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {

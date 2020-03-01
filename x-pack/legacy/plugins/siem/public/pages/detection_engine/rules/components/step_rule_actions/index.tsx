@@ -13,30 +13,25 @@ import deepEqual from 'fast-deep-equal';
 import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 
 import { useKibana } from '../../../../../lib/kibana';
-import {
-  AlertAction,
-  Alert,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
 import { setFieldValue } from '../../helpers';
-import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
+import { RuleStep, RuleStepProps, ActionsStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
-import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { schema } from './schema';
 import * as I18n from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
-  defaultValues?: ScheduleStepRule | null;
+  defaultValues?: ActionsStepRule | null;
+  isNew: boolean;
 }
 
-const stepScheduleDefaultValue = {
-  enabled: true,
-  interval: '5m',
+const stepActionsDefaultValue = {
   isNew: true,
-  from: '1m',
+  actions: [],
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
@@ -61,18 +56,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ];
   const { http, triggers_actions_ui } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
-  const [alert, setAlert] = useState<Alert>(({
-    params: {},
-    consumer: 'siem',
-    alertTypeId: '.siem',
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-  } as unknown) as Alert);
-
-  const [myStepData, setMyStepData] = useState<ScheduleStepRule>(stepScheduleDefaultValue);
+  const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
 
   const { form } = useForm({
     defaultValue: myStepData,
@@ -83,11 +67,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const onSubmit = useCallback(
     async (enabled: boolean) => {
       if (setStepData) {
-        setStepData(RuleStep.scheduleRule, null, false);
+        setStepData(RuleStep.ruleActions, null, false);
         const { isValid: newIsValid, data } = await form.submit();
         if (newIsValid) {
-          setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);
-          setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
+          setStepData(RuleStep.ruleActions, { ...data, enabled }, newIsValid);
+          setMyStepData({ ...data, isNew: false } as ActionsStepRule);
         }
       }
     },
@@ -108,9 +92,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
   useEffect(() => {
     if (setForm != null) {
-      setForm(RuleStep.scheduleRule, form);
+      setForm(RuleStep.ruleActions, form);
     }
   }, [form]);
+
+  console.error('aa', myStepData);
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
@@ -120,38 +106,37 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="StepRuleActions">
-          <UseField
-            path="interval"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEngineStepRuleActionsInterval',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepRuleActionsInterval',
-            }}
-          />
+          <UseField path="actions" defaultValue={myStepData.actions} />
         </Form>
       </StepContentWrapper>
-
       <ActionForm
-        actions={alert.actions}
-        messageVariables={['test var1', 'test var2']}
+        actions={myStepData.actions}
+        messageVariables={['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId', 'ruleLink']}
         defaultActionGroupId={'default'}
         setActionIdByIndex={(id: string, index: number) => {
-          alert.actions[index].id = id;
+          console.error('setActionIdByIndex', id, index);
+          myStepData.actions[index].id = id;
         }}
         setAlertProperty={(updatedActions: AlertAction[]) => {
-          setAlert({ ...alert, actions: updatedActions });
+          console.error('setAlertProperty', updatedActions);
+          setMyStepData({ ...myStepData, actions: updatedActions });
         }}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setActionParamsProperty={(key: string, value: any, index: number) =>
-          (alert.actions[index] = { ...alert.actions[index], [key]: value })
-        }
+        setActionParamsProperty={(key: string, value: any, index: number) => {
+          console.error('setActionParamsProperty', key, value, index);
+          const newActions = [...myStepData.actions];
+          newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
+
+          setMyStepData({
+            ...myStepData,
+            actions: newActions,
+          });
+        }}
         http={http}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={actionTypes}
         defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
       />
-
       {!isUpdateView && (
         <>
           <EuiHorizontalRule margin="m" />

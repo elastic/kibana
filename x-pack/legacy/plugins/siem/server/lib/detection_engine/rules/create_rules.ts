@@ -12,6 +12,7 @@ import { addTags } from './add_tags';
 export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  actions,
   description,
   enabled,
   falsePositives,
@@ -71,7 +72,7 @@ export const createRules = ({
       },
       schedule: { interval },
       enabled,
-      actions: [], // TODO: Create and add actions here once we have email, etc...
+      actions,
       throttle: null,
     },
   });

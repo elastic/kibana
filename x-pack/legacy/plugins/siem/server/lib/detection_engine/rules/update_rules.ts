@@ -14,6 +14,7 @@ import { calculateVersion } from './utils';
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -80,7 +81,7 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
+      actions: actions || rule.actions,
       params: {
         description,
         ruleId: rule.params.ruleId,

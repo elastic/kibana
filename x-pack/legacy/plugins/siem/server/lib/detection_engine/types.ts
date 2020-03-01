@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertAction } from '../../../../../../plugins/triggers_actions_ui/public/types';
+
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
@@ -23,6 +26,7 @@ export interface ThreatParams {
 }
 
 export interface RuleAlertParams {
+  actions: AlertAction[];
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -75,6 +79,7 @@ export type RuleAlertParamsRest = Omit<
     | 'lastSuccessMessage'
     | 'lastFailureMessage'
   > & {
+    actions: RuleAlertParams['actions'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];
