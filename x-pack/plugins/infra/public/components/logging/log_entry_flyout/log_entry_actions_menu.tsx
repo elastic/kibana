@@ -93,7 +93,15 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
 const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   const searchExpressions = logItem.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
-    .map(({ field, value }) => `${field}:${value}`);
+    .reduce<string[]>((acc, fieldItem) => {
+      const { field, value } = fieldItem;
+      try {
+        const parsedValue: string[] = JSON.parse(value);
+        return acc.concat(parsedValue.map(val => `${field}:${val}`));
+      } catch (e) {
+        return acc.concat([`${field}:${value}`]);
+      }
+    }, []);
 
   if (searchExpressions.length === 0) {
     return undefined;
@@ -101,7 +109,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   return {
     hash: '/',
     search: {
-      search: `(${searchExpressions.join(' OR ')})`,
+      search: `${searchExpressions.join(' or ')}`,
     },
   };
 };
