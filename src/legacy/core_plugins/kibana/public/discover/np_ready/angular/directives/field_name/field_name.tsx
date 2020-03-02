@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { FieldIcon, FieldIconProps } from '../../../../../../../../../plugins/kibana_react/public';
 import { shortenDottedString } from '../../../../../../../../../plugins/data/common/utils';
@@ -64,7 +64,14 @@ export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIcon
         />
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
-        <span className="dscFieldName__displayName eui-textTruncate">{displayName}</span>
+        <EuiToolTip
+          position="top"
+          content={displayName}
+          delay="long"
+          anchorClassName="eui-textTruncate"
+        >
+          <span>{displayName}</span>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

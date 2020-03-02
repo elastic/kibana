@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
+import React, { FunctionComponent, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -62,14 +62,25 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
+  const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   useEffect(() => {
     const fetchCountAndSavedQueries = async () => {
-      const savedQueryCount = await savedQueryService.getSavedQueryCount();
-      setTotalCount(savedQueryCount);
+      cancelPendingListingRequest.current();
+      let requestGotCancelled = false;
+      cancelPendingListingRequest.current = () => {
+        requestGotCancelled = true;
+      };
 
-      const savedQueryItems = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const {
+        total: savedQueryCount,
+        queries: savedQueryItems,
+      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+
+      if (requestGotCancelled) return;
+
       const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
+      setTotalCount(savedQueryCount);
       setSavedQueries(sortedSavedQueryItems);
     };
     if (isOpen) {
@@ -103,6 +114,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
+    cancelPendingListingRequest.current();
     setSavedQueries(
       savedQueries.filter(currentSavedQuery => currentSavedQuery.id !== savedQuery.id)
     );

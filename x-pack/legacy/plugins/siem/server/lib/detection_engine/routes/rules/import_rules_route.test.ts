@@ -8,6 +8,7 @@ import { omit } from 'lodash/fp';
 
 import {
   getSimpleRuleAsMultipartContent,
+  getSimpleRuleAsMultipartContentNoRuleId,
   TEST_BOUNDARY,
   UNPARSABLE_LINE,
   getSimpleRule,
@@ -25,6 +26,7 @@ import {
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
+import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 
 describe('import_rules_route', () => {
   let server = createMockServer();
@@ -33,8 +35,12 @@ describe('import_rules_route', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     config = () => ({
@@ -93,6 +99,21 @@ describe('import_rules_route', () => {
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
       const { statusCode } = await inject(getImportRulesRequest(requestPayload));
       expect(statusCode).toEqual(404);
+    });
+
+    test('returns error if createPromiseFromStreams throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      jest
+        .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
+        .mockImplementation(() => {
+          throw new Error('Test error');
+        });
+      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
+      const { payload, statusCode } = await server.inject(getImportRulesRequest(requestPayload));
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
@@ -303,6 +324,21 @@ describe('import_rules_route', () => {
         success: true,
         success_count: 2,
       });
+      expect(statusCode).toEqual(200);
+    });
+
+    test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+
+      const requestPayload = getSimpleRuleAsMultipartContentNoRuleId(2);
+      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
+      const parsed: ImportSuccessError = JSON.parse(payload);
+
+      expect(parsed.success).toEqual(false);
+      expect(parsed.errors[0].error.message).toEqual(
+        'child "rule_id" fails because ["rule_id" is required]'
+      );
+      expect(parsed.errors[0].error.status_code).toEqual(400);
       expect(statusCode).toEqual(200);
     });
 
