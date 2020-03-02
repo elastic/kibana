@@ -18,7 +18,11 @@
  */
 import uuid from 'uuid/v4';
 import rison from 'rison-node';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import {
+  IFieldType,
+  IIndexPattern,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../../../plugins/data/public';
 import { AppState } from '../../../angular/context_state';
 import { getServices } from '../../../../kibana_services';
 
@@ -40,7 +44,10 @@ export function isMapsAppRegistered() {
 }
 
 export function isFieldVisualizable(field: IFieldType) {
-  if ((field.type === 'geo_point' || field.type === 'geo_shape') && isMapsAppRegistered()) {
+  if (
+    (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
+    isMapsAppRegistered()
+  ) {
     return true;
   }
   return field.visualizable;
@@ -65,7 +72,7 @@ export function getMapsAppUrl(
   }
 
   // Copy filters and query in app state
-  const mapsAppState = {
+  const mapsAppState: object = {
     filters: appState.filters || [],
   };
   if (appState.query) {

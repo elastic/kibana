@@ -47,7 +47,7 @@ interface AppState {
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
-  query: Query;
+  query?: Query;
 }
 
 interface GlobalState {
