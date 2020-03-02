@@ -29,6 +29,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
+import { EdgeInfoPanel } from './EdgeInfoPanel';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
@@ -215,6 +216,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       >
         <Controls />
         <Popover focusedServiceName={serviceName} />
+        <EdgeInfoPanel />
       </Cytoscape>
     </div>
   ) : (

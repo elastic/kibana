@@ -26,6 +26,12 @@ const layout = {
   padding: nodeHeight
 };
 
+function getEdgeColor(el: cytoscape.EdgeSingular) {
+  return el.selected() || el.hasClass('hover') || el.hasClass('nodeHover')
+    ? theme.euiColorPrimary
+    : lineColor;
+}
+
 function isService(el: cytoscape.NodeSingular) {
   return el.data('type') === 'service';
 }
@@ -76,9 +82,9 @@ const style: cytoscape.Stylesheet[] = [
     selector: 'edge',
     style: {
       'curve-style': 'bezier',
-      'line-color': lineColor,
+      'line-color': getEdgeColor,
       'overlay-opacity': 0,
-      'target-arrow-color': lineColor,
+      'target-arrow-color': getEdgeColor,
       'target-arrow-shape': 'triangle',
       // The DefinitelyTyped definitions don't specify this property since it's
       // fairly new.
@@ -89,11 +95,12 @@ const style: cytoscape.Stylesheet[] = [
       'source-arrow-shape': 'none'
     }
   },
+  // @ts-ignore The type definitions don't recognize using a function for source-arrow-color
   {
     selector: 'edge[bidirectional]',
     style: {
       'source-arrow-shape': 'triangle',
-      'source-arrow-color': lineColor,
+      'source-arrow-color': getEdgeColor,
       'target-arrow-shape': 'triangle',
       // @ts-ignore
       'source-distance-from-node': theme.paddingSizes.xs,
