@@ -27,7 +27,7 @@ import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig } from '../common';
+import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -127,7 +127,7 @@ const observeCompiler = (
         );
       }
 
-      const files = Array.from(referencedFiles);
+      const files = Array.from(referencedFiles).sort(ascending(p => p));
       const mtimes = new Map(
         files.map((path): [string, number | undefined] => {
           try {
