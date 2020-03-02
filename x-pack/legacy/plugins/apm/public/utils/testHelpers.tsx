@@ -163,7 +163,7 @@ export async function inspectSearchParams(
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
-      apmCustomActionIndex: 'myIndex'
+      apmCustomLinkIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };

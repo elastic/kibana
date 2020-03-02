@@ -18,13 +18,13 @@ export const FlyoutFooter = ({
   onClose,
   isSaving,
   onDelete,
-  customActionId,
+  customLinkId,
   isSaveButtonEnabled
 }: {
   onClose: () => void;
   isSaving: boolean;
   onDelete: () => void;
-  customActionId?: string;
+  customLinkId?: string;
   isSaveButtonEnabled: boolean;
 }) => {
   return (
@@ -33,7 +33,7 @@ export const FlyoutFooter = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             {i18n.translate(
-              'xpack.apm.settings.customizeUI.customActions.flyout.close',
+              'xpack.apm.settings.customizeUI.customLink.flyout.close',
               {
                 defaultMessage: 'Close'
               }
@@ -42,12 +42,9 @@ export const FlyoutFooter = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
-            {customActionId && (
+            {customLinkId && (
               <EuiFlexItem>
-                <DeleteButton
-                  customActionId={customActionId}
-                  onDelete={onDelete}
-                />
+                <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
@@ -58,7 +55,7 @@ export const FlyoutFooter = ({
                 isDisabled={!isSaveButtonEnabled}
               >
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.save',
+                  'xpack.apm.settings.customizeUI.customLink.flyout.save',
                   {
                     defaultMessage: 'Save'
                   }

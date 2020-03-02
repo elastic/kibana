@@ -17,16 +17,16 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/list_custom_actions';
+import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/list_custom_links';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE
 } from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { CustomActionFormData } from '.';
+import { CustomLinkFormData } from '.';
 
-type FiltersType = CustomActionFormData['filters'];
+type FiltersType = CustomLinkFormData['filters'];
 
 interface FilterOption {
   value: 'DEFAULT' | keyof FilterOptionsType;
@@ -36,7 +36,7 @@ interface FilterOption {
 const DEFAULT_OPTION: FilterOption = {
   value: 'DEFAULT',
   text: i18n.translate(
-    'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
+    'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption',
     { defaultMessage: 'Select fields...' }
   )
 };
@@ -98,7 +98,7 @@ export const FiltersSection = ({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.flyout.filters.title',
+            'xpack.apm.settings.customizeUI.customLink.flyout.filters.title',
             {
               defaultMessage: 'Filters'
             }
@@ -108,7 +108,7 @@ export const FiltersSection = ({
       <EuiSpacer size="s" />
       <EuiText size="xs">
         {i18n.translate(
-          'xpack.apm.settings.customizeUI.customActions.flyout.filters.subtitle',
+          'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
           {
             defaultMessage:
               'Add additional values within the same field by comma separating values.'
@@ -131,7 +131,7 @@ export const FiltersSection = ({
                 options={selectOptions}
                 value={key}
                 prepend={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.filters.prepend',
+                  'xpack.apm.settings.customizeUI.customLink.flyout.filters.prepend',
                   {
                     defaultMessage: 'Field'
                   }
@@ -147,7 +147,7 @@ export const FiltersSection = ({
               <EuiFieldText
                 fullWidth
                 placeholder={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption.value',
+                  'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
                 onChange={e => onChangeFilter([key, e.target.value], idx)}
@@ -197,7 +197,7 @@ const AddFilterButton = ({
     disabled={isDisabled}
   >
     {i18n.translate(
-      'xpack.apm.settings.customizeUI.customActions.flyout.filters.addAnotherFilter',
+      'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
       {
         defaultMessage: 'Add another filter'
       }

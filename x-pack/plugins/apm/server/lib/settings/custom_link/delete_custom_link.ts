@@ -6,19 +6,19 @@
 
 import { Setup } from '../../helpers/setup_request';
 
-export async function deleteCustomAction({
-  customActionId,
+export async function deleteCustomLink({
+  customLinkId,
   setup
 }: {
-  customActionId: string;
+  customLinkId: string;
   setup: Setup;
 }) {
   const { internalClient, indices } = setup;
 
   const params = {
     refresh: 'wait_for',
-    index: indices.apmCustomActionIndex,
-    id: customActionId
+    index: indices.apmCustomLinkIndex,
+    id: customLinkId
   };
 
   return internalClient.delete(params);

@@ -13,7 +13,7 @@ import {
   SERVICE_ENVIRONMENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { CustomAction } from './custom_action_types';
+import { CustomAction } from './custom_link_types';
 
 export const FilterOptions = t.partial({
   [SERVICE_NAME]: t.string,
@@ -24,7 +24,7 @@ export const FilterOptions = t.partial({
 
 export type FilterOptionsType = t.TypeOf<typeof FilterOptions>;
 
-export async function listCustomActions({
+export async function listCustomLinks({
   setup,
   filters = {}
 }: {
@@ -47,7 +47,7 @@ export async function listCustomActions({
   });
 
   const params = {
-    index: indices.apmCustomActionIndex,
+    index: indices.apmCustomLinkIndex,
     size: 500,
     body: {
       query: {

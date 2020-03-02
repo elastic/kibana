@@ -12,7 +12,7 @@ import {
 } from '../../helpers/create_or_update_index';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
-export const createApmCustomActionIndex = async ({
+export const createApmCustomLinkIndex = async ({
   esClient,
   config,
   logger
@@ -21,7 +21,7 @@ export const createApmCustomActionIndex = async ({
   config: APMConfig;
   logger: Logger;
 }) => {
-  const index = getApmIndicesConfig(config).apmCustomActionIndex;
+  const index = getApmIndicesConfig(config).apmCustomLinkIndex;
   return createOrUpdateIndex({ index, esClient, logger, mappings });
 };
 

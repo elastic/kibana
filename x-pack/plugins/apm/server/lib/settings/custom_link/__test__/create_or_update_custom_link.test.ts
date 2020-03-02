@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createOrUpdateCustomAction } from '../create_or_update_custom_action';
-import { CustomAction } from '../custom_action_types';
+import { createOrUpdateCustomLink } from '../create_or_update_custom_link';
+import { CustomLink } from '../custom_link_types';
 import { Setup } from '../../../helpers/setup_request';
 import { mockNow } from '../../../../../../../legacy/plugins/apm/public/utils/testHelpers';
 
-describe('Create or Update Custom Action', () => {
+describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();
   const mockedSetup = ({
     internalClient: {
       index: internalClientIndexMock
     },
     indices: {
-      apmCustomActionIndex: 'apmCustomActionIndex'
+      apmCustomLinkIndex: 'apmCustomLinkIndex'
     }
   } as unknown) as Setup;
 
@@ -37,11 +37,11 @@ describe('Create or Update Custom Action', () => {
     mockNow(1570737000000);
   });
 
-  it('creates a new custom action', () => {
-    createOrUpdateCustomAction({ customAction, setup: mockedSetup });
+  it('creates a new custom link', () => {
+    createOrUpdateCustomLink({ customAction, setup: mockedSetup });
     expect(internalClientIndexMock).toHaveBeenCalledWith({
       refresh: true,
-      index: 'apmCustomActionIndex',
+      index: 'apmCustomLinkIndex',
       body: {
         '@timestamp': 1570737000000,
         label: 'foo',
@@ -54,15 +54,15 @@ describe('Create or Update Custom Action', () => {
       }
     });
   });
-  it('update a new custom action', () => {
-    createOrUpdateCustomAction({
+  it('update a new custom link', () => {
+    createOrUpdateCustomLink({
       customActionId: 'bar',
       customAction,
       setup: mockedSetup
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith({
       refresh: true,
-      index: 'apmCustomActionIndex',
+      index: 'apmCustomLinkIndex',
       id: 'bar',
       body: {
         '@timestamp': 1570737000000,

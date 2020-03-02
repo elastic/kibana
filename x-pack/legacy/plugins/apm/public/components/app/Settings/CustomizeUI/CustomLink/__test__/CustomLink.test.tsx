@@ -7,14 +7,14 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { CustomActionsOverview } from '../';
+import { CustomLinkOverview } from '../';
 import * as hooks from '../../../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   MockApmPluginContextWrapper
 } from '../../../../../../utils/testHelpers';
 
-describe('CustomActions', () => {
+describe('CustomLink', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('empty prompt', () => {
@@ -28,21 +28,21 @@ describe('CustomActions', () => {
     afterAll(() => {
       jest.clearAllMocks();
     });
-    it('shows when no action is available', () => {
-      const component = render(<CustomActionsOverview />);
-      expectTextsInDocument(component, ['No actions found.']);
+    it('shows when no link is available', () => {
+      const component = render(<CustomLinkOverview />);
+      expectTextsInDocument(component, ['No links found.']);
     });
-    it('opens flyout when click to create new action', () => {
+    it('opens flyout when click to create new link', () => {
       const { queryByText, getByText } = render(
         <MockApmPluginContextWrapper>
-          <CustomActionsOverview />
+          <CustomLinkOverview />
         </MockApmPluginContextWrapper>
       );
-      expect(queryByText('Create action')).not.toBeInTheDocument();
+      expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
-        fireEvent.click(getByText('Create custom action'));
+        fireEvent.click(getByText('Create custom link'));
       });
-      expect(queryByText('Create action')).toBeInTheDocument();
+      expect(queryByText('Create link')).toBeInTheDocument();
     });
   });
 
@@ -71,10 +71,10 @@ describe('CustomActions', () => {
       });
     });
 
-    it('shows a table with all custom actions', () => {
+    it('shows a table with all custom link', () => {
       const component = render(
         <MockApmPluginContextWrapper>
-          <CustomActionsOverview />
+          <CustomLinkOverview />
         </MockApmPluginContextWrapper>
       );
       expectTextsInDocument(component, [
@@ -85,32 +85,32 @@ describe('CustomActions', () => {
       ]);
     });
 
-    it('checks if create custom action button is available and working', () => {
+    it('checks if create custom link button is available and working', () => {
       const { queryByText, getByText } = render(
         <MockApmPluginContextWrapper>
-          <CustomActionsOverview />
+          <CustomLinkOverview />
         </MockApmPluginContextWrapper>
       );
-      expect(queryByText('Create action')).not.toBeInTheDocument();
+      expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
-        fireEvent.click(getByText('Create custom action'));
+        fireEvent.click(getByText('Create custom link'));
       });
-      expect(queryByText('Create action')).toBeInTheDocument();
+      expect(queryByText('Create link')).toBeInTheDocument();
     });
 
-    it('opens flyout to edit a custom action', () => {
+    it('opens flyout to edit a custom link', () => {
       const component = render(
         <MockApmPluginContextWrapper>
-          <CustomActionsOverview />
+          <CustomLinkOverview />
         </MockApmPluginContextWrapper>
       );
-      expect(component.queryByText('Create action')).not.toBeInTheDocument();
+      expect(component.queryByText('Create link')).not.toBeInTheDocument();
       const editButtons = component.getAllByLabelText('Edit');
       expect(editButtons.length).toEqual(2);
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      expect(component.queryByText('Create action')).toBeInTheDocument();
+      expect(component.queryByText('Create link')).toBeInTheDocument();
     });
   });
 
@@ -118,14 +118,14 @@ describe('CustomActions', () => {
     const openFlyout = () => {
       const component = render(
         <MockApmPluginContextWrapper>
-          <CustomActionsOverview />
+          <CustomLinkOverview />
         </MockApmPluginContextWrapper>
       );
-      expect(component.queryByText('Create action')).not.toBeInTheDocument();
+      expect(component.queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
-        fireEvent.click(component.getByText('Create custom action'));
+        fireEvent.click(component.getByText('Create custom link'));
       });
-      expect(component.queryByText('Create action')).toBeInTheDocument();
+      expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
 

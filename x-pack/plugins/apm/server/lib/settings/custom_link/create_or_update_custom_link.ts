@@ -6,33 +6,33 @@
 
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
-import { CustomAction } from './custom_action_types';
+import { CustomLink } from './custom_link_types';
 
-export async function createOrUpdateCustomAction({
-  customActionId,
-  customAction,
+export async function createOrUpdateCustomLink({
+  customLinkId,
+  customLink,
   setup
 }: {
-  customActionId?: string;
-  customAction: Omit<CustomAction, '@timestamp'>;
+  customLinkId?: string;
+  customLink: Omit<CustomLink, '@timestamp'>;
   setup: Setup;
 }) {
   const { internalClient, indices } = setup;
 
-  const params: APMIndexDocumentParams<CustomAction> = {
+  const params: APMIndexDocumentParams<CustomLink> = {
     refresh: true,
-    index: indices.apmCustomActionIndex,
+    index: indices.apmCustomLinkIndex,
     body: {
       '@timestamp': Date.now(),
-      label: customAction.label,
-      url: customAction.url,
-      filters: customAction.filters
+      label: customLink.label,
+      url: customLink.url,
+      filters: customLink.filters
     }
   };
 
   // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
-  if (customActionId) {
-    params.id = customActionId;
+  if (customLinkId) {
+    params.id = customLinkId;
   }
 
   return internalClient.index(params);

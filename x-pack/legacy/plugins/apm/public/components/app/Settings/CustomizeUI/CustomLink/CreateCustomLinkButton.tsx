@@ -7,15 +7,15 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const CreateCustomActionButton = ({
+export const CreateCustomLinkButton = ({
   onClick
 }: {
   onClick: () => void;
 }) => (
   <EuiButton color="primary" fill onClick={onClick}>
     {i18n.translate(
-      'xpack.apm.settings.customizeUI.customActions.createCustomAction',
-      { defaultMessage: 'Create custom action' }
+      'xpack.apm.settings.customizeUI.customLink.createCustomLink',
+      { defaultMessage: 'Create custom link' }
     )}
   </EuiButton>
 );

@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { listCustomActions } from '../list_custom_actions';
+import { listCustomLinks } from '../list_custom_links';
 import {
   inspectSearchParams,
   SearchParamsMock
 } from '../../../../../../../legacy/plugins/apm/public/utils/testHelpers';
 import { Setup } from '../../../helpers/setup_request';
 
-describe('List Custom Actions', () => {
+describe('List Custom Links', () => {
   let mock: SearchParamsMock;
 
-  it('fetches custom actions', async () => {
+  it('fetches custom links', async () => {
     mock = await inspectSearchParams(setup =>
-      listCustomActions({
+      listCustomLinks({
         setup: (setup as unknown) as Setup
       })
     );

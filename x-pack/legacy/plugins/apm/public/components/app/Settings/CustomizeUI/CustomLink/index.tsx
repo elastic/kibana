@@ -7,49 +7,49 @@
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
-import { CustomActionsFlyout } from './CustomActionsFlyout';
-import { CustomActionsTable } from './CustomActionsTable';
+import { CustomLinkFlyout } from './CustomLinkFlyout';
+import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 import { Title } from './Title';
-import { CreateCustomActionButton } from './CreateCustomActionButton';
+import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 
-export const CustomActionsOverview = () => {
+export const CustomLinkOverview = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [customActionSelected, setCustomActionSelected] = useState<
-    CustomAction | undefined
+  const [customLinkSelected, setCustomLinkSelected] = useState<
+    CustomLink | undefined
   >();
 
-  const { data: customActions, status, refetch } = useFetcher(
-    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-actions' }),
+  const { data: customLinks, status, refetch } = useFetcher(
+    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-links' }),
     []
   );
 
   useEffect(() => {
-    if (customActionSelected) {
+    if (customLinkSelected) {
       setIsFlyoutOpen(true);
     }
-  }, [customActionSelected]);
+  }, [customLinkSelected]);
 
   const onCloseFlyout = () => {
-    setCustomActionSelected(undefined);
+    setCustomLinkSelected(undefined);
     setIsFlyoutOpen(false);
   };
 
-  const onCreateCustomActionClick = () => {
+  const onCreateCustomLinkClick = () => {
     setIsFlyoutOpen(true);
   };
 
   const showEmptyPrompt =
-    status === FETCH_STATUS.SUCCESS && isEmpty(customActions);
+    status === FETCH_STATUS.SUCCESS && isEmpty(customLinks);
 
   return (
     <>
       {isFlyoutOpen && (
-        <CustomActionsFlyout
+        <CustomLinkFlyout
           onClose={onCloseFlyout}
-          customActionSelected={customActionSelected}
+          customLinkSelected={customLinkSelected}
           onSave={() => {
             onCloseFlyout();
             refetch();
@@ -69,9 +69,7 @@ export const CustomActionsOverview = () => {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <CreateCustomActionButton
-                    onClick={onCreateCustomActionClick}
-                  />
+                  <CreateCustomLinkButton onClick={onCreateCustomLinkClick} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -81,11 +79,11 @@ export const CustomActionsOverview = () => {
         <EuiSpacer size="m" />
 
         {showEmptyPrompt ? (
-          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
+          <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
         ) : (
-          <CustomActionsTable
-            items={customActions}
-            onCustomActionSelected={setCustomActionSelected}
+          <CustomLinkTable
+            items={customLinks}
+            onCustomLinkSelected={setCustomLinkSelected}
           />
         )}
       </EuiPanel>

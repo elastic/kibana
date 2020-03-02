@@ -6,22 +6,22 @@
 import * as t from 'io-ts';
 import { createRoute } from '../create_route';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { createOrUpdateCustomAction } from '../../lib/settings/custom_action/create_or_update_custom_action';
-import { deleteCustomAction } from '../../lib/settings/custom_action/delete_custom_action';
+import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
+import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import {
-  listCustomActions,
+  listCustomLinks,
   FilterOptions
-} from '../../lib/settings/custom_action/list_custom_actions';
+} from '../../lib/settings/custom_link/list_custom_links';
 
-export const listCustomActionsRoute = createRoute(core => ({
-  path: '/api/apm/settings/custom-actions',
+export const listCustomLinksRoute = createRoute(core => ({
+  path: '/api/apm/settings/custom-links',
   params: {
     query: FilterOptions
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
-    return await listCustomActions({ setup, filters: params.query });
+    return await listCustomLinks({ setup, filters: params.query });
   }
 }));
 
@@ -35,9 +35,9 @@ const payload = t.intersection([
   })
 ]);
 
-export const createCustomActionRoute = createRoute(() => ({
+export const createCustomLinkRoute = createRoute(() => ({
   method: 'POST',
-  path: '/api/apm/settings/custom-actions',
+  path: '/api/apm/settings/custom-links',
   params: {
     body: payload
   },
@@ -46,15 +46,15 @@ export const createCustomActionRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const customAction = context.params.body;
-    const res = await createOrUpdateCustomAction({ customAction, setup });
+    const customLink = context.params.body;
+    const res = await createOrUpdateCustomLink({ customLink, setup });
     return res;
   }
 }));
 
-export const updateCustomActionRoute = createRoute(() => ({
+export const updateCustomLinkRoute = createRoute(() => ({
   method: 'PUT',
-  path: '/api/apm/settings/custom-actions/{id}',
+  path: '/api/apm/settings/custom-links/{id}',
   params: {
     path: t.type({
       id: t.string
@@ -67,19 +67,19 @@ export const updateCustomActionRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { id } = context.params.path;
-    const customAction = context.params.body;
-    const res = await createOrUpdateCustomAction({
-      customActionId: id,
-      customAction,
+    const customLink = context.params.body;
+    const res = await createOrUpdateCustomLink({
+      customLinkId: id,
+      customLink,
       setup
     });
     return res;
   }
 }));
 
-export const deleteCustomActionRoute = createRoute(() => ({
+export const deleteCustomLinkRoute = createRoute(() => ({
   method: 'DELETE',
-  path: '/api/apm/settings/custom-actions/{id}',
+  path: '/api/apm/settings/custom-links/{id}',
   params: {
     path: t.type({
       id: t.string
@@ -91,8 +91,8 @@ export const deleteCustomActionRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { id } = context.params.path;
-    const res = await deleteCustomAction({
-      customActionId: id,
+    const res = await deleteCustomLink({
+      customLinkId: id,
       setup
     });
     return res;

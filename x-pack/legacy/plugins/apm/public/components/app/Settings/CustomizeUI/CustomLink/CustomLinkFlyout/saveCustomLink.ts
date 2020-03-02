@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { APMClient } from '../../../../../../services/rest/createCallApmApi';
 
-export async function saveCustomAction({
+export async function saveCustomLink({
   id,
   label,
   url,
@@ -20,49 +20,49 @@ export async function saveCustomAction({
   id?: string;
   label: string;
   url: string;
-  filters?: CustomAction['filters'];
+  filters?: CustomLink['filters'];
   callApmApi: APMClient;
   toasts: NotificationsStart['toasts'];
 }) {
   try {
-    const customAction = {
+    const customLink = {
       label,
       url,
       filters
     };
     if (id) {
       await callApmApi({
-        pathname: '/api/apm/settings/custom-actions/{id}',
+        pathname: '/api/apm/settings/custom-links/{id}',
         method: 'PUT',
         params: {
           path: { id },
-          body: customAction
+          body: customLink
         }
       });
     } else {
       await callApmApi({
-        pathname: '/api/apm/settings/custom-actions',
+        pathname: '/api/apm/settings/custom-links',
         method: 'POST',
         params: {
-          body: customAction
+          body: customLink
         }
       });
     }
     toasts.addSuccess({
       iconType: 'check',
       title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.create.successed',
+        'xpack.apm.settings.customizeUI.customLink.create.successed',
         { defaultMessage: 'Link saved!' }
       )
     });
   } catch (error) {
     toasts.addDanger({
       title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.create.failed',
+        'xpack.apm.settings.customizeUI.customLink.create.failed',
         { defaultMessage: 'Link could not be saved!' }
       ),
       text: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.create.failed',
+        'xpack.apm.settings.customizeUI.customLink.create.failed',
         {
           defaultMessage:
             'Something went wrong when saving the link. Error: "{errorMessage}"',

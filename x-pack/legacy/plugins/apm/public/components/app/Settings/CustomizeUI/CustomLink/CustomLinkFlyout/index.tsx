@@ -15,26 +15,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
-import { ActionSection } from './ActionSection';
+import { LinkSection } from './LinkSection';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
-import { saveCustomAction } from './saveCustomAction';
+import { saveCustomLink } from './saveCustomLink';
 
 interface Props {
   onClose: () => void;
-  customActionSelected?: CustomAction;
+  customLinkSelected?: CustomLink;
   onSave: () => void;
   onDelete: () => void;
 }
 
-export interface CustomActionFormData extends Omit<CustomAction, 'filters'> {
+export interface CustomLinkFormData extends Omit<CustomLink, 'filters'> {
   filters: Array<[string, string]>;
 }
 
-const convertFiltersToArray = (filters: CustomAction['filters'] = {}) => {
+const convertFiltersToArray = (filters: CustomLink['filters'] = {}) => {
   const convertedFilters = Object.entries(filters);
   // When convertedFilters is empty, initiate the filters filled with one item.
   if (isEmpty(convertedFilters)) {
@@ -43,7 +43,7 @@ const convertFiltersToArray = (filters: CustomAction['filters'] = {}) => {
   return convertedFilters;
 };
 
-const convertFiltersToObject = (filters: CustomActionFormData['filters']) => {
+const convertFiltersToObject = (filters: CustomLinkFormData['filters']) => {
   const convertedFilters = Object.fromEntries(
     filters.filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
   );
@@ -52,9 +52,9 @@ const convertFiltersToObject = (filters: CustomActionFormData['filters']) => {
   }
 };
 
-export const CustomActionsFlyout = ({
+export const CustomLinkFlyout = ({
   onClose,
-  customActionSelected,
+  customLinkSelected,
   onSave,
   onDelete
 }: Props) => {
@@ -63,10 +63,10 @@ export const CustomActionsFlyout = ({
   const [isSaving, setIsSaving] = useState(false);
 
   // form fields
-  const [label, setLabel] = useState(customActionSelected?.label || '');
-  const [url, setUrl] = useState(customActionSelected?.url || '');
+  const [label, setLabel] = useState(customLinkSelected?.label || '');
+  const [url, setUrl] = useState(customLinkSelected?.url || '');
   const [filters, setFilters] = useState(
-    convertFiltersToArray(customActionSelected?.filters)
+    convertFiltersToArray(customLinkSelected?.filters)
   );
 
   const isFormValid = !!label && !!url;
@@ -78,8 +78,8 @@ export const CustomActionsFlyout = ({
   ) => {
     event.preventDefault();
     setIsSaving(true);
-    await saveCustomAction({
-      id: customActionSelected?.id,
+    await saveCustomLink({
+      id: customLinkSelected?.id,
       label,
       url,
       filters: convertFiltersToObject(filters),
@@ -98,9 +98,9 @@ export const CustomActionsFlyout = ({
             <EuiTitle size="s">
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.title',
+                  'xpack.apm.settings.customizeUI.customLink.flyout.title',
                   {
-                    defaultMessage: 'Create action'
+                    defaultMessage: 'Create link'
                   }
                 )}
               </h2>
@@ -110,10 +110,10 @@ export const CustomActionsFlyout = ({
             <EuiText>
               <p>
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.label',
+                  'xpack.apm.settings.customizeUI.customLink.flyout.label',
                   {
                     defaultMessage:
-                      'Actions will be available in the context of transaction details throughout the APM app. You can create an unlimited number of actions and use the filter options to scope them to only appear for specific services. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. TODO: Learn more about it in the docs.'
+                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links and use the filter options to scope them to only appear for specific services. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. TODO: Learn more about it in the docs.'
                   }
                 )}
               </p>
@@ -121,7 +121,7 @@ export const CustomActionsFlyout = ({
 
             <EuiSpacer size="l" />
 
-            <ActionSection
+            <LinkSection
               label={label}
               onChangeLabel={setLabel}
               url={url}
@@ -138,7 +138,7 @@ export const CustomActionsFlyout = ({
             onClose={onClose}
             isSaving={isSaving}
             onDelete={onDelete}
-            customActionId={customActionSelected?.id}
+            customLinkId={customLinkSelected?.id}
           />
         </EuiFlyout>
       </form>

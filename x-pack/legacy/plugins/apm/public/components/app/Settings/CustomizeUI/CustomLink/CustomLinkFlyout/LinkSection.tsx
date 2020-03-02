@@ -12,10 +12,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CustomActionFormData } from './';
+import { CustomLinkFormData } from './';
 
 interface InputField {
-  name: keyof CustomActionFormData;
+  name: keyof CustomLinkFormData;
   label: string;
   helpText: string;
   placeholder: string;
@@ -30,7 +30,7 @@ interface Props {
   onChangeUrl: (url: string) => void;
 }
 
-export const ActionSection = ({
+export const LinkSection = ({
   label,
   onChangeLabel,
   url,
@@ -39,19 +39,50 @@ export const ActionSection = ({
   const inputFields: InputField[] = [
     {
       name: 'label',
-      label: 'Label',
-      helpText:
-        'This is the label shown in the actions context menu. Keep it as short as possible.',
-      placeholder: 'e.g. Support tickets',
+      label: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.label',
+        {
+          defaultMessage: 'Label'
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.label.helpText',
+        {
+          defaultMessage:
+            'This is the label shown in the actions context menu. Keep it as short as possible.'
+        }
+      ),
+      placeholder: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.label.placeholder',
+        {
+          defaultMessage: 'e.g. Support tickets'
+        }
+      ),
       value: label,
       onChange: onChangeLabel
     },
     {
       name: 'url',
-      label: 'URL',
-      helpText:
-        'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
-      placeholder: 'e.g. https://www.elastic.co/',
+      label: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.url',
+        {
+          defaultMessage: 'URL'
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText',
+        {
+          defaultMessage:
+            'Add fieldname variables to your URL to apply values e.g. {sample}. TODO: Learn more in the docs.',
+          values: { sample: '{{trace.id}}' }
+        }
+      ),
+      placeholder: i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.link.url.placeholder',
+        {
+          defaultMessage: 'e.g. https://www.elastic.co/'
+        }
+      ),
       value: url,
       onChange: onChangeUrl
     }
@@ -62,9 +93,9 @@ export const ActionSection = ({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.flyout.action.title',
+            'xpack.apm.settings.customizeUI.customLink.flyout.action.title',
             {
-              defaultMessage: 'Action'
+              defaultMessage: 'Link'
             }
           )}
         </h3>
@@ -80,7 +111,7 @@ export const ActionSection = ({
             labelAppend={
               <EuiText size="xs">
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.required',
+                  'xpack.apm.settings.customizeUI.customLink.flyout.required',
                   {
                     defaultMessage: 'Required'
                   }

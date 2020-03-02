@@ -14,10 +14,10 @@ import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext
 
 interface Props {
   onDelete: () => void;
-  customActionId: string;
+  customLinkId: string;
 }
 
-export function DeleteButton({ onDelete, customActionId }: Props) {
+export function DeleteButton({ onDelete, customLinkId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
   const callApmApi = useCallApmApi();
@@ -29,12 +29,12 @@ export function DeleteButton({ onDelete, customActionId }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(callApmApi, customActionId, toasts);
+        await deleteConfig(callApmApi, customLinkId, toasts);
         setIsDeleting(false);
         onDelete();
       }}
     >
-      {i18n.translate('xpack.apm.settings.customizeUI.customActions.delete', {
+      {i18n.translate('xpack.apm.settings.customizeUI.customLink.delete', {
         defaultMessage: 'Delete'
       })}
     </EuiButtonEmpty>
@@ -43,30 +43,30 @@ export function DeleteButton({ onDelete, customActionId }: Props) {
 
 async function deleteConfig(
   callApmApi: APMClient,
-  customActionId: string,
+  customLinkId: string,
   toasts: NotificationsStart['toasts']
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/custom-actions/{id}',
+      pathname: '/api/apm/settings/custom-links/{id}',
       method: 'DELETE',
       params: {
-        path: { id: customActionId }
+        path: { id: customLinkId }
       }
     });
     toasts.addSuccess({
       iconType: 'trash',
       title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.delete.successed',
-        { defaultMessage: 'Deleted custom action.' }
+        'xpack.apm.settings.customizeUI.customLink.delete.successed',
+        { defaultMessage: 'Deleted custom link.' }
       )
     });
   } catch (error) {
     toasts.addDanger({
       iconType: 'cross',
       title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.delete.failed',
-        { defaultMessage: 'Custom action could not be deleted' }
+        'xpack.apm.settings.customizeUI.customLink.delete.failed',
+        { defaultMessage: 'Custom link could not be deleted' }
       )
     });
   }

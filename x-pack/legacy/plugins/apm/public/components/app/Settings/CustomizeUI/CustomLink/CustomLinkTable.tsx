@@ -14,19 +14,19 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { units, px } from '../../../../../style/variables';
-import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 
 interface Props {
-  items: CustomAction[];
-  onCustomActionSelected: (customAction: CustomAction) => void;
+  items: CustomLink[];
+  onCustomLinkSelected: (customLink: CustomLink) => void;
 }
 
-export const CustomActionsTable = ({
+export const CustomLinkTable = ({
   items = [],
-  onCustomActionSelected
+  onCustomLinkSelected
 }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -34,16 +34,16 @@ export const CustomActionsTable = ({
     {
       field: 'label',
       name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.table.actionName',
-        { defaultMessage: 'Action Name' }
+        'xpack.apm.settings.customizeUI.customLink.table.name',
+        { defaultMessage: 'Name' }
       ),
       truncateText: true
     },
     {
       field: 'url',
       name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.table.actionURL',
-        { defaultMessage: 'Action URL' }
+        'xpack.apm.settings.customizeUI.customLink.table.url',
+        { defaultMessage: 'URL' }
       ),
       truncateText: true
     },
@@ -52,7 +52,7 @@ export const CustomActionsTable = ({
       align: 'right',
       field: '@timestamp',
       name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.table.lastUpdated',
+        'xpack.apm.settings.customizeUI.customLink.table.lastUpdated',
         { defaultMessage: 'Last updated' }
       ),
       sortable: true,
@@ -63,24 +63,24 @@ export const CustomActionsTable = ({
     {
       width: px(units.quadruple),
       name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.table.actions',
-        { defaultMessage: 'Actions' }
+        'xpack.apm.settings.customizeUI.customLink.table.links',
+        { defaultMessage: 'Links' }
       ),
       actions: [
         {
           name: i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.table.editButtonLabel',
+            'xpack.apm.settings.customizeUI.customLink.table.editButtonLabel',
             { defaultMessage: 'Edit' }
           ),
           description: i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.table.editButtonDescription',
-            { defaultMessage: 'Edit this custom action' }
+            'xpack.apm.settings.customizeUI.customLink.table.editButtonDescription',
+            { defaultMessage: 'Edit this custom link' }
           ),
           icon: 'pencil',
           color: 'primary',
           type: 'icon',
-          onClick: (customAction: CustomAction) => {
-            onCustomActionSelected(customAction);
+          onClick: (customLink: CustomLink) => {
+            onCustomLinkSelected(customLink);
           }
         }
       ]
@@ -101,7 +101,7 @@ export const CustomActionsTable = ({
         fullWidth
         onChange={e => setSearchTerm(e.target.value)}
         placeholder={i18n.translate('xpack.apm.searchInput.filter', {
-          defaultMessage: 'Filter actions...'
+          defaultMessage: 'Filter links by Name or URL...'
         })}
       />
       <EuiSpacer size="s" />
@@ -128,7 +128,7 @@ const NoResultFound = ({ value }: { value: string }) => (
     <EuiFlexItem grow={false}>
       <EuiText size="s">
         {i18n.translate(
-          'xpack.apm.settings.customizeUI.customActions.table.noResultFound',
+          'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
           {
             defaultMessage: `No results for "{value}".`,
             values: { value }

@@ -25,7 +25,7 @@ export interface ApmIndicesConfig {
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
   apmAgentConfigurationIndex: string;
-  apmCustomActionIndex: string;
+  apmCustomLinkIndex: string;
 }
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
@@ -54,7 +54,7 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomActionIndex: '.apm-custom-action'
+    apmCustomLinkIndex: '.apm-custom-link'
   };
 }
 
