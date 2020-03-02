@@ -51,7 +51,7 @@ const reset = () => {
   uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
   });
-  // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'SEND_MESSAGE_ACTION');
+  // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'ACTION_SEND_MESSAGE');
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();

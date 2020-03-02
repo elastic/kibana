@@ -24,7 +24,7 @@ import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
-export const REPLACE_PANEL_ACTION = 'replacePanel';
+export const ACTION_REPLACE_PANEL = 'replacePanel';
 
 function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
@@ -34,9 +34,9 @@ export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ReplacePanelAction implements ActionByType<typeof REPLACE_PANEL_ACTION> {
-  public readonly type = REPLACE_PANEL_ACTION;
-  public readonly id = REPLACE_PANEL_ACTION;
+export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
+  public readonly type = ACTION_REPLACE_PANEL;
+  public readonly id = ACTION_REPLACE_PANEL;
   public order = 11;
 
   constructor(

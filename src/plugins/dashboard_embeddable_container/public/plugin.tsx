@@ -31,8 +31,8 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
-import { ExpandPanelActionContext, EXPAND_PANEL_ACTION } from './actions/expand_panel_action';
-import { ReplacePanelActionContext, REPLACE_PANEL_ACTION } from './actions/replace_panel_action';
+import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
+import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
@@ -50,8 +50,8 @@ export type Start = void;
 
 declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [EXPAND_PANEL_ACTION]: ExpandPanelActionContext;
-    [REPLACE_PANEL_ACTION]: ReplacePanelActionContext;
+    [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
+    [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
   }
 }
 

@@ -22,7 +22,7 @@ import { IEmbeddable } from '../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
-export const EXPAND_PANEL_ACTION = 'togglePanel';
+export const ACTION_EXPAND_PANEL = 'togglePanel';
 
 function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
@@ -40,9 +40,9 @@ export interface ExpandPanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction implements ActionByType<typeof EXPAND_PANEL_ACTION> {
-  public readonly type = EXPAND_PANEL_ACTION;
-  public readonly id = EXPAND_PANEL_ACTION;
+export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANEL> {
+  public readonly type = ACTION_EXPAND_PANEL;
+  public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;
 
   constructor() {}

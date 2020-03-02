@@ -44,14 +44,14 @@ import {
   setIndexPatterns,
   setUiSettings,
 } from './services';
-import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
+import { createFilterAction, ACTION_GLOBAL_APPLY_FILTER } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
-    [GLOBAL_APPLY_FILTER_ACTION]: ApplyGlobalFilterActionContext;
+    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
   }
 }
 
@@ -100,7 +100,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const indexPatternsService = new IndexPatternsService(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(GLOBAL_APPLY_FILTER_ACTION));
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),

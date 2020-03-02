@@ -24,7 +24,7 @@ import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
-export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
+export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
@@ -38,10 +38,10 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): ActionByType<typeof GLOBAL_APPLY_FILTER_ACTION> {
-  return createAction<typeof GLOBAL_APPLY_FILTER_ACTION>({
-    type: GLOBAL_APPLY_FILTER_ACTION,
-    id: GLOBAL_APPLY_FILTER_ACTION,
+): ActionByType<typeof ACTION_GLOBAL_APPLY_FILTER> {
+  return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
+    type: ACTION_GLOBAL_APPLY_FILTER,
+    id: ACTION_GLOBAL_APPLY_FILTER,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

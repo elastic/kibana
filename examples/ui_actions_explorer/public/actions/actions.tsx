@@ -27,29 +27,29 @@ export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';
 export const PHONE_TRIGGER = 'PHONE_TRIGGER';
 
-export const VIEW_IN_MAPS_ACTION = 'VIEW_IN_MAPS_ACTION';
-export const TRAVEL_GUIDE_ACTION = 'TRAVEL_GUIDE_ACTION';
-export const CALL_PHONE_NUMBER_ACTION = 'CALL_PHONE_NUMBER_ACTION';
-export const EDIT_USER_ACTION = 'EDIT_USER_ACTION';
-export const PHONE_USER_ACTION = 'PHONE_USER_ACTION';
-export const SHOWCASE_PLUGGABILITY_ACTION = 'SHOWCASE_PLUGGABILITY_ACTION';
+export const ACTION_VIEW_IN_MAPS = 'ACTION_VIEW_IN_MAPS';
+export const ACTION_TRAVEL_GUIDE = 'ACTION_TRAVEL_GUIDE';
+export const ACTION_CALL_PHONE_NUMBER = 'ACTION_CALL_PHONE_NUMBER';
+export const ACTION_EDIT_USER = 'ACTION_EDIT_USER';
+export const ACTION_PHONE_USER = 'ACTION_PHONE_USER';
+export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 
-export const showcasePluggability = createAction<typeof SHOWCASE_PLUGGABILITY_ACTION>({
-  type: SHOWCASE_PLUGGABILITY_ACTION,
+export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
+  type: ACTION_SHOWCASE_PLUGGABILITY,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
   execute: async () => alert("Isn't that cool?!"),
 });
 
 export type PhoneContext = string;
 
-export const makePhoneCallAction = createAction<typeof CALL_PHONE_NUMBER_ACTION>({
-  type: CALL_PHONE_NUMBER_ACTION,
+export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
+  type: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
   execute: async phone => alert(`Pretend calling ${phone}...`),
 });
 
-export const lookUpWeatherAction = createAction<typeof TRAVEL_GUIDE_ACTION>({
-  type: TRAVEL_GUIDE_ACTION,
+export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
+  type: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
   execute: async country => {
@@ -59,8 +59,8 @@ export const lookUpWeatherAction = createAction<typeof TRAVEL_GUIDE_ACTION>({
 
 export type CountryContext = string;
 
-export const viewInMapsAction = createAction<typeof VIEW_IN_MAPS_ACTION>({
-  type: VIEW_IN_MAPS_ACTION,
+export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
+  type: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
   execute: async country => {
@@ -100,8 +100,8 @@ function EditUserModal({
 }
 
 export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
-  createAction<typeof EDIT_USER_ACTION>({
-    type: EDIT_USER_ACTION,
+  createAction<typeof ACTION_EDIT_USER>({
+    type: ACTION_EDIT_USER,
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
     execute: async ({ user, update }) => {
@@ -117,8 +117,8 @@ export interface UserContext {
 }
 
 export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
-  createAction<typeof PHONE_USER_ACTION>({
-    type: PHONE_USER_ACTION,
+  createAction<typeof ACTION_PHONE_USER>({
+    type: ACTION_PHONE_USER,
     getDisplayName: () => 'Call phone number',
     isCompatible: async ({ user }) => user.phone !== undefined,
     execute: async ({ user }) => {

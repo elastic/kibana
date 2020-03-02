@@ -346,7 +346,7 @@ describe('UiActionsService', () => {
   });
 
   describe('registries', () => {
-    const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+    const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
     test('can register trigger', () => {
       const triggers: TriggerRegistry = new Map();
@@ -371,12 +371,12 @@ describe('UiActionsService', () => {
       const service = new UiActionsService({ actions });
 
       service.registerAction({
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 13,
       } as any);
 
-      expect(actions.get(HELLO_WORLD_ACTION_ID)).toMatchObject({
-        id: HELLO_WORLD_ACTION_ID,
+      expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
+        id: ACTION_HELLO_WORLD,
         order: 13,
       });
     });
@@ -388,7 +388,7 @@ describe('UiActionsService', () => {
         id: MY_TRIGGER,
       };
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
@@ -398,7 +398,7 @@ describe('UiActionsService', () => {
       const actions = service.getTriggerActions(trigger.id);
 
       expect(actions.length).toBe(1);
-      expect(actions[0].id).toBe(HELLO_WORLD_ACTION_ID);
+      expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
     test('can detach an action to a trigger', () => {
@@ -408,7 +408,7 @@ describe('UiActionsService', () => {
         id: MY_TRIGGER,
       };
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
@@ -425,15 +425,15 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
       expect(() =>
-        service.detachAction('i do not exist' as TriggerId, HELLO_WORLD_ACTION_ID)
+        service.detachAction('i do not exist' as TriggerId, ACTION_HELLO_WORLD)
       ).toThrowError(
-        'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = HELLO_WORLD_ACTION_ID].'
+        'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
 
@@ -441,13 +441,13 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
       expect(() => service.attachAction('i do not exist' as TriggerId, action)).toThrowError(
-        'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = HELLO_WORLD_ACTION_ID].'
+        'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
 
@@ -455,13 +455,13 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
       expect(() => service.registerAction(action)).toThrowError(
-        'Action [action.id = HELLO_WORLD_ACTION_ID] already registered.'
+        'Action [action.id = ACTION_HELLO_WORLD] already registered.'
       );
     });
 

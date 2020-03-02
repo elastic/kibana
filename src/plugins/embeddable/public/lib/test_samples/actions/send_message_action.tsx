@@ -25,7 +25,7 @@ import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 
-export const SEND_MESSAGE_ACTION = 'SEND_MESSAGE_ACTION' as ActionType;
+export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE' as ActionType;
 
 interface ActionContext {
   embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
@@ -42,8 +42,8 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
     overlays.openFlyout(toMountPoint(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
   };
 
-  return createAction<typeof SEND_MESSAGE_ACTION>({
-    type: SEND_MESSAGE_ACTION,
+  return createAction<typeof ACTION_SEND_MESSAGE>({
+    type: ACTION_SEND_MESSAGE,
     getDisplayName: () => 'Send message',
     isCompatible,
     execute: async (context: ActionContext) => {

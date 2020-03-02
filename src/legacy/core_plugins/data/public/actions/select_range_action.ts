@@ -26,7 +26,7 @@ import {
 import { onBrushEvent } from './filters/brush_event';
 import { FilterManager, TimefilterContract, esFilters } from '../../../../../plugins/data/public';
 
-export const SELECT_RANGE_ACTION = 'SELECT_RANGE_ACTION';
+export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export interface SelectRangeActionContext {
   data: any;
@@ -44,10 +44,10 @@ async function isCompatible(context: SelectRangeActionContext) {
 export function selectRangeAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): ActionByType<typeof SELECT_RANGE_ACTION> {
-  return createAction<typeof SELECT_RANGE_ACTION>({
-    type: SELECT_RANGE_ACTION,
-    id: SELECT_RANGE_ACTION,
+): ActionByType<typeof ACTION_SELECT_RANGE> {
+  return createAction<typeof ACTION_SELECT_RANGE>({
+    type: ACTION_SELECT_RANGE,
+    id: ACTION_SELECT_RANGE,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

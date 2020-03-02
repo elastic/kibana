@@ -39,13 +39,13 @@ const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID' as ActionType;
+export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD' as ActionType;
 
 export function createHelloWorldAction(
   overlays: CoreStart['overlays']
-): ActionByType<typeof HELLO_WORLD_ACTION_ID> {
-  return createAction<typeof HELLO_WORLD_ACTION_ID>({
-    type: HELLO_WORLD_ACTION_ID,
+): ActionByType<typeof ACTION_HELLO_WORLD> {
+  return createAction<typeof ACTION_HELLO_WORLD>({
+    type: ACTION_HELLO_WORLD,
     getIconType: () => 'lock',
     MenuItem: UiMenuItem,
     execute: async () => {

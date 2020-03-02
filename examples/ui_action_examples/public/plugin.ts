@@ -19,7 +19,7 @@
 
 import { Plugin, CoreSetup } from '../../../src/core/public';
 import { UiActionsSetup } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction, HELLO_WORLD_ACTION_TYPE } from './hello_world_action';
+import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
 import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
 
 interface UiActionExamplesSetupDependencies {
@@ -32,7 +32,7 @@ declare module '../../../src/plugins/ui_actions/public' {
   }
 
   export interface ActionContextMapping {
-    [HELLO_WORLD_ACTION_TYPE]: undefined;
+    [ACTION_HELLO_WORLD]: undefined;
   }
 }
 

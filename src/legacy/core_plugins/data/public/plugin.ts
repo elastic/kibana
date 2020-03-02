@@ -40,11 +40,11 @@ import { setSearchServiceShim } from './services';
 import {
   selectRangeAction,
   SelectRangeActionContext,
-  SELECT_RANGE_ACTION,
+  ACTION_SELECT_RANGE,
 } from './actions/select_range_action';
 import {
   valueClickAction,
-  VALUE_CLICK_ACTION,
+  ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
 import {
@@ -86,8 +86,8 @@ export interface DataStart {
 }
 declare module '../../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [SELECT_RANGE_ACTION]: SelectRangeActionContext;
-    [VALUE_CLICK_ACTION]: ValueClickActionContext;
+    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
+    [ACTION_VALUE_CLICK]: ValueClickActionContext;
   }
 }
 

@@ -32,12 +32,12 @@ import {
   UserContext,
   CountryContext,
   PhoneContext,
-  EDIT_USER_ACTION,
-  SHOWCASE_PLUGGABILITY_ACTION,
-  CALL_PHONE_NUMBER_ACTION,
-  TRAVEL_GUIDE_ACTION,
-  VIEW_IN_MAPS_ACTION,
-  PHONE_USER_ACTION,
+  ACTION_EDIT_USER,
+  ACTION_SHOWCASE_PLUGGABILITY,
+  ACTION_CALL_PHONE_NUMBER,
+  ACTION_TRAVEL_GUIDE,
+  ACTION_VIEW_IN_MAPS,
+  ACTION_PHONE_USER,
 } from './actions/actions';
 
 interface StartDeps {
@@ -56,12 +56,12 @@ declare module '../../../src/plugins/ui_actions/public' {
   }
 
   export interface ActionContextMapping {
-    [EDIT_USER_ACTION]: UserContext;
-    [SHOWCASE_PLUGGABILITY_ACTION]: undefined;
-    [CALL_PHONE_NUMBER_ACTION]: PhoneContext;
-    [TRAVEL_GUIDE_ACTION]: CountryContext;
-    [VIEW_IN_MAPS_ACTION]: CountryContext;
-    [PHONE_USER_ACTION]: UserContext;
+    [ACTION_EDIT_USER]: UserContext;
+    [ACTION_SHOWCASE_PLUGGABILITY]: undefined;
+    [ACTION_CALL_PHONE_NUMBER]: PhoneContext;
+    [ACTION_TRAVEL_GUIDE]: CountryContext;
+    [ACTION_VIEW_IN_MAPS]: CountryContext;
+    [ACTION_PHONE_USER]: UserContext;
   }
 }
 
@@ -93,7 +93,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     deps.uiActions.attachAction(COUNTRY_TRIGGER, showcasePluggability);
     deps.uiActions.attachAction(PHONE_TRIGGER, makePhoneCallAction);
     deps.uiActions.attachAction(PHONE_TRIGGER, showcasePluggability);
-    deps.uiActions.attachAction(USER_TRIGGER, viewInMapsAction);
+    deps.uiActions.attachAction(USER_TRIGGER, showcasePluggability);
 
     core.application.register({
       id: 'uiActionsExplorer',

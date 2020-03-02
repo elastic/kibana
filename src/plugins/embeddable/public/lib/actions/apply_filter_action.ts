@@ -22,7 +22,7 @@ import { ActionByType, createAction, IncompatibleActionError } from '../ui_actio
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
 import { Filter } from '../../../../../plugins/data/public';
 
-export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
+export const ACTION_APPLY_FILTER = 'ACTION_APPLY_FILTER';
 
 type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
 export interface FilterActionContext {
@@ -38,10 +38,10 @@ async function isCompatible(context: FilterActionContext) {
   return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
 }
 
-export function createFilterAction(): ActionByType<typeof APPLY_FILTER_ACTION> {
-  return createAction<typeof APPLY_FILTER_ACTION>({
-    type: APPLY_FILTER_ACTION,
-    id: APPLY_FILTER_ACTION,
+export function createFilterAction(): ActionByType<typeof ACTION_APPLY_FILTER> {
+  return createAction<typeof ACTION_APPLY_FILTER>({
+    type: ACTION_APPLY_FILTER,
+    id: ACTION_APPLY_FILTER,
     getDisplayName: () => {
       return i18n.translate('embeddableApi.actions.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

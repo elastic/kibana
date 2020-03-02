@@ -35,7 +35,7 @@ import { EuiModalBody } from '@elastic/eui';
 import { toMountPoint } from '../../../src/plugins/kibana_react/public';
 import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/public';
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
-import { HELLO_WORLD_TRIGGER_ID, HELLO_WORLD_ACTION_TYPE } from '../../ui_action_examples/public';
+import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
 import { TriggerContextExample } from './trigger_context_example';
 
 interface Props {
@@ -76,9 +76,9 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
               <EuiButton
                 data-test-subj="addDynamicAction"
                 onClick={() => {
-                  const dynamicAction = createAction<typeof HELLO_WORLD_ACTION_TYPE>({
-                    id: `${HELLO_WORLD_ACTION_TYPE}-${name}`,
-                    type: HELLO_WORLD_ACTION_TYPE,
+                  const dynamicAction = createAction<typeof ACTION_HELLO_WORLD>({
+                    id: `${ACTION_HELLO_WORLD}-${name}`,
+                    type: ACTION_HELLO_WORLD,
                     getDisplayName: () => `Say hello to ${name}`,
                     execute: async () => {
                       const overlay = openModal(

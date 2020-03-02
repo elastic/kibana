@@ -37,7 +37,7 @@ import {
   esFilters,
 } from '../../../../../plugins/data/public';
 
-export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
+export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
 export interface ValueClickActionContext {
   data: any;
@@ -56,10 +56,10 @@ async function isCompatible(context: ValueClickActionContext) {
 export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): ActionByType<typeof VALUE_CLICK_ACTION> {
-  return createAction<typeof VALUE_CLICK_ACTION>({
-    type: VALUE_CLICK_ACTION,
-    id: VALUE_CLICK_ACTION,
+): ActionByType<typeof ACTION_VALUE_CLICK> {
+  return createAction<typeof ACTION_VALUE_CLICK>({
+    type: ACTION_VALUE_CLICK,
+    id: ACTION_VALUE_CLICK,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
