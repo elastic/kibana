@@ -58,7 +58,7 @@ export async function enroll(
     );
   }
 
-  const accessAPIKey = await APIKeyService.generateAccessApiKey(agent.id, configId);
+  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id, configId);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     access_api_key_id: accessAPIKey.id,

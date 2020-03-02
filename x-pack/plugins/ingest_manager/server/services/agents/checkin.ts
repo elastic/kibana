@@ -43,7 +43,11 @@ export async function agentCheckin(
       // Assign output API keys
       // We currently only support default ouput
       if (!agent.default_api_key) {
-        updateData.default_api_key = await APIKeysService.generateOutputApiKey('default', agent.id);
+        updateData.default_api_key = await APIKeysService.generateOutputApiKey(
+          soClient,
+          'default',
+          agent.id
+        );
       }
       // Mutate the config to set the api token for this agent
       config.outputs.default.api_token = agent.default_api_key || updateData.default_api_key;

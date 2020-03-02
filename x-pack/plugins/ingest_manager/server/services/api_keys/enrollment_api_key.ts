@@ -9,6 +9,7 @@ import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
+import { agentConfigService } from '../agent_config';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -50,7 +51,7 @@ export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, 
 export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContract, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(soClient, id);
 
-  await invalidateAPIKey(enrollmentApiKey.api_key_id);
+  await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
 
   await soClient.delete(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id);
 }
@@ -87,11 +88,12 @@ export async function generateEnrollmentAPIKey(
   }
 ) {
   const id = uuid.v4();
-  const { name: providedKeyName, configId = 'default' } = data;
+  const { name: providedKeyName } = data;
+  const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  const key = await createAPIKey(name, {});
+  const key = await createAPIKey(soClient, name, {});
 
   if (!key) {
     throw new Error('Unable to create an enrollment api key');
