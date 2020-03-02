@@ -30,6 +30,10 @@ const wrapperPageStyle: Record<string, string> = {
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
+    & > * {
+      margin-top 40px;
+    }
+
     padding-top: ${theme.eui.paddingSizes.l};
     padding-bottom: ${theme.eui.paddingSizes.l};
   `}
@@ -45,7 +49,11 @@ const ConfigureCasesPageComponent: React.FC = () => (
         <FormWrapper>
           <SectionWrapper>
             <Connectors />
+          </SectionWrapper>
+          <SectionWrapper>
             <ClosureOptions />
+          </SectionWrapper>
+          <SectionWrapper>
             <FieldMapping />
           </SectionWrapper>
         </FormWrapper>
