@@ -218,6 +218,20 @@ def runErrorReporter() {
   )
 }
 
+def call(Map params = [:], Closure closure) {
+  def config = [timeoutMinutes: 135] + params
+
+  stage("Kibana Pipeline") {
+    timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
+      timestamps {
+        ansiColor('xterm') {
+          closure()
+        }
+      }
+    }
+  }
+}
+
 def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
   def testMetadataPath = pwd() + "target/test_metadata_${type}_${workerNumber}.json"
   def iteration = 0
