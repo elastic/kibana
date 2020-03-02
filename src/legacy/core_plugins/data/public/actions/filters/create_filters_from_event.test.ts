@@ -21,8 +21,13 @@ import {
   fieldFormats,
   FieldFormatsGetConfigFn,
   esFilters,
+  IndexPatternsContract,
 } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 import { createFiltersFromEvent, EventData } from './create_filters_from_event';
+import { mockDataServices } from '../../search/aggs/test_helpers';
 
 jest.mock('ui/new_platform');
 
@@ -34,22 +39,6 @@ const mockField = {
   filterable: true,
   format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
 };
-
-jest.mock('../../../../../../plugins/data/public/services', () => ({
-  getIndexPatterns: () => {
-    return {
-      get: async () => {
-        return {
-          id: 'logstash-*',
-          fields: {
-            getByName: () => mockField,
-            filter: () => [mockField],
-          },
-        };
-      },
-    };
-  },
-}));
 
 describe('createFiltersFromEvent', () => {
   let dataPoints: EventData[];
@@ -84,6 +73,18 @@ describe('createFiltersFromEvent', () => {
         value: 'test',
       },
     ];
+
+    mockDataServices();
+    setIndexPatterns(({
+      ...dataPluginMock.createStartContract().indexPatterns,
+      get: async () => ({
+        id: 'logstash-*',
+        fields: {
+          getByName: () => mockField,
+          filter: () => [mockField],
+        },
+      }),
+    } as unknown) as IndexPatternsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {

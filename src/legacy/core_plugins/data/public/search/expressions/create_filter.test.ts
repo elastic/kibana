@@ -21,65 +21,54 @@ import {
   fieldFormats,
   FieldFormatsGetConfigFn,
   esFilters,
-  IndexPattern,
 } from '../../../../../../plugins/data/public';
 import { createFilter } from './create_filter';
 import { TabbedTable } from '../tabify';
+import { AggConfigs } from '../aggs/agg_configs';
 import { IAggConfig } from '../aggs/agg_config';
-import { deserializeAggConfig } from './utils';
-
-jest.mock('ui/new_platform');
-
-jest.mock('../../../../../../plugins/data/public/services', () => ({
-  getIndexPatterns: () => {
-    return {
-      get: async () => {
-        return {
-          id: 'logstash-*',
-          fields: [
-            {
-              name: 'bytes',
-              format: {
-                getConverterFor: () => '',
-              },
-            },
-          ],
-        };
-      },
-    };
-  },
-}));
+import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('createFilter', () => {
   let table: TabbedTable;
   let aggConfig: IAggConfig;
-  const createAggConfig = (type: string, aggConfigParams: any) => {
-    return deserializeAggConfig({
-      type,
-      aggConfigParams,
-      indexPattern: {
-        id: 'logstash-*',
-        fields: [
-          {
-            name: 'bytes',
-            format: {
-              getConverterFor: () => '',
-            },
-          },
-        ],
-      } as IndexPattern,
-    });
-  };
 
-  const aggConfigParams: Record<string, any> = {
-    field: {
+  const typesRegistry = mockAggTypesRegistry();
+
+  const getAggConfigs = (type: string, params: any) => {
+    const field = {
       name: 'bytes',
       filterable: true,
       indexPattern: {
-        id: 'logstash-*',
+        id: '1234',
       },
       format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
-    },
+    };
+
+    const indexPattern = {
+      id: '1234',
+      title: 'logstash-*',
+      fields: {
+        getByName: () => field,
+        filter: () => [field],
+      },
+    } as any;
+
+    return new AggConfigs(
+      indexPattern,
+      [
+        {
+          id: type,
+          type,
+          schema: 'buckets',
+          params,
+        },
+      ],
+      { typesRegistry }
+    );
+  };
+
+  const aggConfigParams: Record<string, any> = {
+    field: 'bytes',
     interval: 30,
     otherBucket: true,
   };
@@ -99,17 +88,18 @@ describe('createFilter', () => {
         },
       ],
     };
+    mockDataServices();
   });
 
   test('ignores event when cell value is not provided', async () => {
-    aggConfig = createAggConfig('histogram', aggConfigParams);
+    aggConfig = getAggConfigs('histogram', aggConfigParams).aggs[0];
     const filters = await createFilter([aggConfig], table, 0, -1, null);
 
     expect(filters).not.toBeDefined();
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    aggConfig = createAggConfig('terms', aggConfigParams);
+    aggConfig = getAggConfigs('terms', aggConfigParams).aggs[0];
     const filters = await createFilter([aggConfig], table, 0, 0, 'test');
 
     expect(filters).toBeDefined();
@@ -121,7 +111,7 @@ describe('createFilter', () => {
   });
 
   test('handles an event when aggregations type is not terms', async () => {
-    aggConfig = createAggConfig('histogram', aggConfigParams);
+    aggConfig = getAggConfigs('histogram', aggConfigParams).aggs[0];
     const filters = await createFilter([aggConfig], table, 0, 0, 'test');
 
     expect(filters).toBeDefined();
