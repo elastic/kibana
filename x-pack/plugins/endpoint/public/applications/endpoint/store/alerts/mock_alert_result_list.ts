@@ -43,6 +43,7 @@ export const mockAlertResultList: (options?: {
       },
       process: {
         pid: 107,
+        unique_pid: 1,
       },
       host: {
         hostname: 'HD-c15-bc09190a',
