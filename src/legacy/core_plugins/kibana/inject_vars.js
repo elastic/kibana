@@ -21,11 +21,7 @@ export function injectVars(server) {
   const serverConfig = server.config();
 
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
-  const { types: allTypes } = server.savedObjects;
-  const savedObjectsManagement = server.getSavedObjectsManagement();
-  const importAndExportableTypes = allTypes.filter(type =>
-    savedObjectsManagement.isImportAndExportable(type)
-  );
+  const { importAndExportableTypes } = server.savedObjects;
 
   return {
     importAndExportableTypes,
