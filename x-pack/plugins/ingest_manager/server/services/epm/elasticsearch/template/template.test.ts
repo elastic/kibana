@@ -22,10 +22,10 @@ expect.addSnapshotSerializer({
 });
 
 test('get template', () => {
-  const pattern = 'logs-nginx-access-abcd-*';
+  const templateName = 'logs-nginx-access-abcd';
 
-  const template = getTemplate(pattern, { properties: {} });
-  expect(template.index_patterns).toStrictEqual([pattern]);
+  const template = getTemplate('logs', templateName, { properties: {} });
+  expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
 });
 
 test('tests loading fields.yml', () => {
@@ -36,7 +36,7 @@ test('tests loading fields.yml', () => {
 
   processFields(fields);
   const mappings = generateMappings(fields);
-  const template = getTemplate('foo', mappings);
+  const template = getTemplate('logs', 'foo', mappings);
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });

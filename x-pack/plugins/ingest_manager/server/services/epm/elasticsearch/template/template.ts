@@ -30,12 +30,13 @@ export interface Mappings {
  * @param indexPattern String with the index pattern
  */
 export function getTemplate(
-  indexPattern: string,
+  type: string,
+  templateName: string,
   mappings: Mappings,
   pipelineName?: string | undefined
 ): Template {
-  const template = getBaseTemplate(mappings);
-  template.index_patterns = [indexPattern];
+  const template = getBaseTemplate(type, mappings);
+  template.index_patterns = [templateName + '-*'];
   if (pipelineName) {
     template.settings.index.default_pipeline = pipelineName;
   }
@@ -75,7 +76,7 @@ export function generateTemplateName(dataset: Dataset): string {
   return getDatasetAssetBaseName(dataset);
 }
 
-function getBaseTemplate(mappings: Mappings): Template {
+function getBaseTemplate(type: string, mappings: Mappings): Template {
   return {
     // We need to decide which order we use for the templates
     order: 1,
@@ -83,10 +84,11 @@ function getBaseTemplate(mappings: Mappings): Template {
     index_patterns: [],
     settings: {
       index: {
-        // ILM Policy must be added here
+        // ILM Policy must be added here, for now point to the default global ILM policy name
         lifecycle: {
-          name: 'logs-default',
-          rollover_alias: 'logs-nginx-access-abcd',
+          name: `${type}-default`,
+          // i don't think we will be using this once datastream/index templates v2 is supported
+          // rollover_alias: `logs-nginx-access-abcd`,
         },
         // What should be our default for the compression?
         codec: 'best_compression',

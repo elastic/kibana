@@ -28,9 +28,13 @@ export async function installPackage(options: {
     pkgkey,
   });
   const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
-  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
-  // index patterns and ilm policies are not currently associated with a particular so we do not save them in the package saved object state
+  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster, pkgkey);
+
+  // index patterns and ilm policies are not currently associated with a particular package
+  // so we do not save them in the package saved object state.  at some point ILM policies can be installed/modified
+  // per dataset and we should then save them
   await installIndexPatterns(savedObjectsClient, pkgkey);
+  // currenly only the base package has an ILM policy
   await installILMPolicy(pkgkey, callCluster);
 
   const res = await Promise.all([
@@ -49,7 +53,6 @@ export async function installPackage(options: {
   return toSave;
 }
 
-// the function which how to install each of the various asset types
 // TODO: make it an exhaustive list
 // e.g. switch statement with cases for each enum key returning `never` for default case
 export async function installKibanaAssets(options: {
