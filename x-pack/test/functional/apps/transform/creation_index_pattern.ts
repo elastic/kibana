@@ -176,7 +176,6 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the advanced configuration', async () => {
           await transform.wizard.enabledAdvancedPivotEditor();
-          await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(true);
           await transform.wizard.assertAdvancedPivotEditorContent(
             testData.expected.pivotAdvancedEditorValue
           );

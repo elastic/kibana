@@ -295,7 +295,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async enabledAdvancedPivotEditor() {
+      await this.assertAdvancedPivotEditorSwitchCheckState(false);
       await testSubjects.click('transformAdvancedPivotEditorSwitch');
+      await this.assertAdvancedPivotEditorSwitchCheckState(true);
+      await testSubjects.existOrFail('transformAdvancedPivotEditor');
     },
 
     async assertTransformIdInputExists() {
