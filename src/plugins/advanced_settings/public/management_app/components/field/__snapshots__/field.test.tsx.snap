@@ -17,7 +17,12 @@ exports[`Field for array setting should render as read only if saving is disable
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
       
     </h3>
   }
@@ -84,7 +89,12 @@ exports[`Field for array setting should render as read only with help text if ov
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
       
     </h3>
   }
@@ -139,7 +149,11 @@ exports[`Field for array setting should render custom setting icon if it is cust
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -152,6 +166,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -195,7 +210,12 @@ exports[`Field for array setting should render default value if there is no user
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
       
     </h3>
   }
@@ -240,7 +260,11 @@ exports[`Field for array setting should render unsaved value if there are unsave
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -252,6 +276,13 @@ exports[`Field for array setting should render unsaved value if there are unsave
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -330,7 +361,12 @@ exports[`Field for array setting should render user value if there is user value
   fullWidth={true}
   title={
     <h3>
-      Array test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
       
     </h3>
   }
@@ -392,7 +428,12 @@ exports[`Field for boolean setting should render as read only if saving is disab
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
       
     </h3>
   }
@@ -465,7 +506,12 @@ exports[`Field for boolean setting should render as read only with help text if 
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
       
     </h3>
   }
@@ -526,7 +572,11 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -539,6 +589,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -588,7 +639,12 @@ exports[`Field for boolean setting should render default value if there is no us
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
       
     </h3>
   }
@@ -639,7 +695,11 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -651,6 +711,13 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -731,7 +798,12 @@ exports[`Field for boolean setting should render user value if there is user val
   fullWidth={true}
   title={
     <h3>
-      Boolean test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
       
     </h3>
   }
@@ -799,7 +871,12 @@ exports[`Field for image setting should render as read only if saving is disable
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
       
     </h3>
   }
@@ -868,7 +945,12 @@ exports[`Field for image setting should render as read only with help text if ov
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
       
     </h3>
   }
@@ -921,7 +1003,11 @@ exports[`Field for image setting should render custom setting icon if it is cust
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -934,6 +1020,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -979,7 +1066,12 @@ exports[`Field for image setting should render default value if there is no user
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
       
     </h3>
   }
@@ -1026,7 +1118,11 @@ exports[`Field for image setting should render unsaved value if there are unsave
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -1038,6 +1134,13 @@ exports[`Field for image setting should render unsaved value if there are unsave
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -1113,7 +1216,12 @@ exports[`Field for image setting should render user value if there is user value
   fullWidth={true}
   title={
     <h3>
-      Image test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
       
     </h3>
   }
@@ -1211,7 +1319,12 @@ exports[`Field for json setting should render as read only if saving is disabled
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
       
     </h3>
   }
@@ -1302,7 +1415,12 @@ exports[`Field for json setting should render as read only with help text if ove
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
       
     </h3>
   }
@@ -1378,7 +1496,11 @@ exports[`Field for json setting should render custom setting icon if it is custo
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -1391,6 +1513,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -1480,7 +1603,12 @@ exports[`Field for json setting should render default value if there is no user 
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
       
     </h3>
   }
@@ -1563,7 +1691,11 @@ exports[`Field for json setting should render unsaved value if there are unsaved
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -1575,6 +1707,13 @@ exports[`Field for json setting should render unsaved value if there are unsaved
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -1677,7 +1816,12 @@ exports[`Field for json setting should render user value if there is user value 
   fullWidth={true}
   title={
     <h3>
-      Json test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
       
     </h3>
   }
@@ -1760,7 +1904,12 @@ exports[`Field for markdown setting should render as read only if saving is disa
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
       
     </h3>
   }
@@ -1848,7 +1997,12 @@ exports[`Field for markdown setting should render as read only with help text if
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
       
     </h3>
   }
@@ -1924,7 +2078,11 @@ exports[`Field for markdown setting should render custom setting icon if it is c
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -1937,6 +2095,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -2001,7 +2160,12 @@ exports[`Field for markdown setting should render default value if there is no u
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
       
     </h3>
   }
@@ -2067,7 +2231,11 @@ exports[`Field for markdown setting should render unsaved value if there are uns
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -2079,6 +2247,13 @@ exports[`Field for markdown setting should render unsaved value if there are uns
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -2174,7 +2349,12 @@ exports[`Field for markdown setting should render user value if there is user va
   fullWidth={true}
   title={
     <h3>
-      Markdown test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
       
     </h3>
   }
@@ -2257,7 +2437,12 @@ exports[`Field for number setting should render as read only if saving is disabl
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
       
     </h3>
   }
@@ -2324,7 +2509,12 @@ exports[`Field for number setting should render as read only with help text if o
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
       
     </h3>
   }
@@ -2379,7 +2569,11 @@ exports[`Field for number setting should render custom setting icon if it is cus
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -2392,6 +2586,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -2435,7 +2630,12 @@ exports[`Field for number setting should render default value if there is no use
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
       
     </h3>
   }
@@ -2480,7 +2680,11 @@ exports[`Field for number setting should render unsaved value if there are unsav
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -2492,6 +2696,13 @@ exports[`Field for number setting should render unsaved value if there are unsav
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -2566,7 +2777,12 @@ exports[`Field for number setting should render user value if there is user valu
   fullWidth={true}
   title={
     <h3>
-      Number test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
       
     </h3>
   }
@@ -2628,7 +2844,12 @@ exports[`Field for select setting should render as read only if saving is disabl
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
       
     </h3>
   }
@@ -2711,7 +2932,12 @@ exports[`Field for select setting should render as read only with help text if o
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
       
     </h3>
   }
@@ -2782,7 +3008,11 @@ exports[`Field for select setting should render custom setting icon if it is cus
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -2795,6 +3025,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -2854,7 +3085,12 @@ exports[`Field for select setting should render default value if there is no use
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
       
     </h3>
   }
@@ -2915,7 +3151,11 @@ exports[`Field for select setting should render unsaved value if there are unsav
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -2927,6 +3167,13 @@ exports[`Field for select setting should render unsaved value if there are unsav
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -3017,7 +3264,12 @@ exports[`Field for select setting should render user value if there is user valu
   fullWidth={true}
   title={
     <h3>
-      Select test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
       
     </h3>
   }
@@ -3095,7 +3347,12 @@ exports[`Field for string setting should render as read only if saving is disabl
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
       
     </h3>
   }
@@ -3162,7 +3419,12 @@ exports[`Field for string setting should render as read only with help text if o
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
       
     </h3>
   }
@@ -3217,7 +3479,11 @@ exports[`Field for string setting should render custom setting icon if it is cus
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -3230,6 +3496,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -3273,7 +3540,12 @@ exports[`Field for string setting should render default value if there is no use
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
       
     </h3>
   }
@@ -3318,7 +3590,11 @@ exports[`Field for string setting should render unsaved value if there are unsav
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -3330,6 +3606,13 @@ exports[`Field for string setting should render unsaved value if there are unsav
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -3404,7 +3687,12 @@ exports[`Field for string setting should render user value if there is user valu
   fullWidth={true}
   title={
     <h3>
-      String test setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
       
     </h3>
   }
@@ -3466,7 +3754,12 @@ exports[`Field for stringWithValidation setting should render as read only if sa
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
       
     </h3>
   }
@@ -3533,7 +3826,12 @@ exports[`Field for stringWithValidation setting should render as read only with 
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
       
     </h3>
   }
@@ -3588,7 +3886,11 @@ exports[`Field for stringWithValidation setting should render custom setting ico
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -3601,6 +3903,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
         }
         type="asterisk"
       />
+      
     </h3>
   }
 >
@@ -3644,7 +3947,12 @@ exports[`Field for stringWithValidation setting should render default value if t
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
       
     </h3>
   }
@@ -3689,7 +3997,11 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
       <EuiIconTip
         aria-label="Custom setting"
         color="primary"
@@ -3701,6 +4013,13 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
           />
         }
         type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
       />
     </h3>
   }
@@ -3775,7 +4094,12 @@ exports[`Field for stringWithValidation setting should render user value if ther
   fullWidth={true}
   title={
     <h3>
-      String test validation setting
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
       
     </h3>
   }
