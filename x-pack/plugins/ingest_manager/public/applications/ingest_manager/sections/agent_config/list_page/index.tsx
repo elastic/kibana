@@ -218,7 +218,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        render: () => {
+        render: (agents: unknown, config: AgentConfig) => {
           // FIXME: implement agents once known in API/Schema
           const agentCount = 99;
           const displayValue = (
@@ -228,9 +228,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
               values={{ agentCount }}
             />
           );
-          // FIXME: add kuery value to URI to filter list in fleet list (probably something like: ?kuery=agents.config_id:config_id_here)
           return agentCount > 0 ? (
-            <EuiLink href={`${FLEET_URI}?kuery=tbd`}>{displayValue}</EuiLink>
+            <EuiLink href={`${FLEET_URI}?kuery=agents.config_id : ${config.id}`}>
+              {displayValue}
+            </EuiLink>
           ) : (
             displayValue
           );
