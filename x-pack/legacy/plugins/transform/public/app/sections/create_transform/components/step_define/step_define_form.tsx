@@ -404,6 +404,10 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     xJson: advancedEditorConfig,
   } = useXJsonMode(stringifiedPivotConfig);
 
+  useEffect(() => {
+    setAdvancedEditorConfig(stringifiedPivotConfig);
+  }, [setAdvancedEditorConfig, stringifiedPivotConfig]);
+
   // source config
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
   const [
