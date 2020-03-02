@@ -22,7 +22,6 @@ import {
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
-  // EuiButtonEmpty,
   EuiSpacer,
   EuiFormLabel,
 } from '@elastic/eui';
@@ -483,14 +482,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   title={
                     localState.typeFilter.length || localState.nameFilter.length
                       ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
-                          defaultMessage: 'No fields match the current filters. Try:',
+                          defaultMessage: 'No fields match the current filters.',
                         })
                       : showEmptyFields
                       ? i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
                           defaultMessage: 'No fields exist in this index pattern.',
                         })
                       : i18n.translate('xpack.lens.indexPatterns.emptyFieldsWithDataLabel', {
-                          defaultMessage: 'Looks like you don’t have any data. Try:',
+                          defaultMessage: 'Looks like you don’t have any data.',
                         })
                   }
                 >
@@ -498,6 +497,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     localState.typeFilter.length ||
                     localState.nameFilter.length) && (
                     <>
+                      <strong>
+                        {i18n.translate('xpack.lens.indexPatterns.noFields.tryText', {
+                          defaultMessage: 'Try:',
+                        })}
+                      </strong>
                       <ul>
                         <li>
                           {i18n.translate('xpack.lens.indexPatterns.noFields.extendTimeBullet', {
@@ -512,21 +516,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                           })}
                         </li>
                       </ul>
-                      {/* <EuiButtonEmpty
-                        size="xs"
-                        color="primary"
-                        flush="left"
-                        data-test-subj="lnsDataPanelShowAllFields"
-                        onClick={() => {
-                          trackUiEvent('indexpattern_show_all_fields_clicked');
-                          clearLocalState();
-                          onToggleEmptyFields(true);
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
-                          defaultMessage: 'Show all fields',
-                        })}
-                      </EuiButtonEmpty> */}
                     </>
                   )}
                 </EuiCallOut>
