@@ -15,6 +15,7 @@ import { WhitePageWrapper, SectionWrapper } from './components/wrappers';
 import { Connectors } from './components/configure_cases/connectors';
 import * as i18n from './translations';
 import { ClosureOptions } from './components/configure_cases/closure_options';
+import { FieldMapping } from './components/configure_cases/field_mapping';
 
 const backOptions = {
   href: getCaseUrl(),
@@ -45,6 +46,7 @@ const ConfigureCasesPageComponent: React.FC = () => (
           <SectionWrapper>
             <Connectors />
             <ClosureOptions />
+            <FieldMapping />
           </SectionWrapper>
         </FormWrapper>
       </WhitePageWrapper>
