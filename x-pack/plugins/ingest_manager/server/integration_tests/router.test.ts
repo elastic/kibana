@@ -25,6 +25,12 @@ function createXPackRoot(config: {} = {}) {
 describe('ingestManager', () => {
   describe.skip('default. manager, EPM, and Fleet all disabled', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    /**
+     *
+     * commented out due to hooks being called regardless of skip
+     * https://github.com/facebook/jest/issues/8379
+
     beforeAll(async () => {
       root = createXPackRoot();
       await root.setup();
@@ -32,6 +38,8 @@ describe('ingestManager', () => {
     }, 30000);
 
     afterAll(async () => await root.shutdown());
+
+    */
 
     it('does not have agent config api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(404);
@@ -52,6 +60,12 @@ describe('ingestManager', () => {
 
   describe.skip('manager only (no EPM, no Fleet)', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    /**
+     *
+     * commented out due to hooks being called regardless of skip
+     * https://github.com/facebook/jest/issues/8379
+
     beforeAll(async () => {
       const ingestManagerConfig = {
         enabled: true,
@@ -64,6 +78,8 @@ describe('ingestManager', () => {
     }, 30000);
 
     afterAll(async () => await root.shutdown());
+
+    */
 
     it('has agent config api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
@@ -89,6 +105,12 @@ describe('ingestManager', () => {
 
   describe.skip('manager and EPM; no Fleet', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    /**
+     *
+     * commented out due to hooks being called regardless of skip
+     * https://github.com/facebook/jest/issues/8379
+
     beforeAll(async () => {
       const ingestManagerConfig = {
         enabled: true,
@@ -102,6 +124,8 @@ describe('ingestManager', () => {
     }, 30000);
 
     afterAll(async () => await root.shutdown());
+
+    */
 
     it('has agent config api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);

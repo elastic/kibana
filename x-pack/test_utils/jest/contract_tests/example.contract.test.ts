@@ -19,6 +19,11 @@ let esArchiver: EsArchiver;
 
 // FLAKY: https://github.com/elastic/kibana/issues/44250
 describe.skip('Example contract tests', () => {
+  /**
+   *
+   * commented out due to hooks being called regardless of skip
+   * https://github.com/facebook/jest/issues/8379
+
   beforeAll(async () => {
     await callWhenOnline(async () => {
       servers = await createKibanaServer();
@@ -28,6 +33,7 @@ describe.skip('Example contract tests', () => {
       });
     });
   });
+
   afterAll(async () => {
     if (servers) {
       await servers.shutdown();
@@ -36,6 +42,8 @@ describe.skip('Example contract tests', () => {
 
   beforeEach(async () => await callWhenOnline(() => esArchiver.load('example')));
   afterEach(async () => await callWhenOnline(() => esArchiver.unload('example')));
+
+  */
 
   it('should run online or offline', async () => {
     const res = await memorize('example_test_snapshot', async () => {
