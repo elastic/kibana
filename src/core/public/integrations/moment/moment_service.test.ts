@@ -56,7 +56,7 @@ describe('MomentService', () => {
 
     service.start({ uiSettings });
     await flushPromises();
-    expect(momentMock.tz.setDefault).toHaveBeenCalledWith(undefined);
+    expect(momentMock.tz.setDefault).not.toHaveBeenCalled();
   });
 
   it('sets timezone when a zone is defined', async () => {
