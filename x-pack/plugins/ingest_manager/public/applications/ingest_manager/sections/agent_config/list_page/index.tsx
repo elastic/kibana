@@ -27,12 +27,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { AgentConfig } from '../../../types';
-import { AGENT_CONFIG_DETAILS_PATH, FLEET_PATH } from '../../../constants';
+import {
+  AGENT_CONFIG_DETAILS_PATH,
+  FLEET_PATH,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 // import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink, useConfig } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
+import { SearchBar } from '../components/search_bar';
 
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -76,8 +81,6 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
     const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-
-    const isDefaultConfig = config.name === 'default'; // FIXME: need to implement disable for default config
 
     return (
       <EuiPopover
@@ -123,7 +126,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
                 return (
                   <DangerEuiContextMenuItem
                     icon="trash"
-                    disabled={isDefaultConfig}
+                    disabled={config.id === DEFAULT_AGENT_CONFIG_ID}
                     onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
                   >
                     <FormattedMessage
@@ -161,6 +164,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
+    kuery: search,
   });
 
   // Base path for config details
@@ -332,17 +336,17 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={4}>
-          {/* <SearchBar
-              value={search}
-              onChange={newSearch => {
-                setPagination({
-                  ...pagination,
-                  currentPage: 1,
-                });
-                setSearch(newSearch);
-              }}
-              fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
-            /> */}
+          <SearchBar
+            value={search}
+            onChange={newSearch => {
+              setPagination({
+                ...pagination,
+                currentPage: 1,
+              });
+              setSearch(newSearch);
+            }}
+            fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
