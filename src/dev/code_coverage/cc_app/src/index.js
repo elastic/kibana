@@ -20,6 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './app';
+import { NoData } from './no_data'
 import * as serviceWorker from './service_worker';
 import { pretty as p } from './utils/pretty';
 import { tryCatch as tc } from './utils/either';
@@ -36,6 +37,11 @@ tryInit()
 
 function noDataLoaded() {
   console.log('\n### NO DATA');
+
+  ReactDOM.render(
+    <NoData />,
+    rootEl()
+  )
 }
 
 function boot(testRunnerTypes) {
