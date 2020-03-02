@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
-import { AlertNavigationRegistry } from '../alert_navigation_registry/alert_navigation_registry';
+import { AlertNavigationRegistry } from '../alert_navigation_registry';
 import { AlertTypeRegistry } from '../alert_type_registry';
 
 const paramSchema = schema.object({

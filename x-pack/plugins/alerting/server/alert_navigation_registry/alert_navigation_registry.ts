@@ -6,23 +6,8 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { AlertType, SanitizedAlert } from '../types';
-import { AlertInstances } from '../alert_instance/alert_instance';
-
-interface AlertNavigationContext {
-  filter?: string;
-  dateRange?: {
-    start: Date;
-    end: Date;
-  };
-}
-
-export type AlertNavigationHandler = (
-  alert: SanitizedAlert,
-  alertType: AlertType,
-  alertInstances?: AlertInstances[],
-  context?: AlertNavigationContext
-) => Record<string, any> | string;
+import { AlertType } from '../types';
+import { AlertNavigationHandler } from './types';
 
 export class AlertNavigationRegistry {
   private readonly alertNavigations: Map<string, Map<string, AlertNavigationHandler>> = new Map();

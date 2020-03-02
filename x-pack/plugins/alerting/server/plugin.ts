@@ -51,10 +51,7 @@ import {
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../plugins/actions/server';
 import { Services } from './types';
-import {
-  AlertNavigationRegistry,
-  AlertNavigationHandler,
-} from './alert_navigation_registry/alert_navigation_registry';
+import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
