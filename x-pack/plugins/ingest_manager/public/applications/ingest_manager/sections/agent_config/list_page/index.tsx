@@ -207,6 +207,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         render: (description: AgentConfig['description']) => (
           <EuiTextColor color="subdued">{description}</EuiTextColor>
         ),
+        width: '30%',
       },
       {
         field: 'updated_on',
@@ -244,7 +245,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'datasources',
         name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
-          defaultMessage: 'Datasources',
+          defaultMessage: 'Data sources',
         }),
         render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
       },
