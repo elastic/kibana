@@ -5,8 +5,15 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { UncommonProcesses } from '../../lib/uncommon_processes';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+type QueryUncommonProcessesResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.UncommonProcessesResolver>,
+  QuerySourceResolver
+>;
 
 export interface UncommonProcessesResolversDeps {
   uncommonProcesses: UncommonProcesses;
@@ -16,7 +23,7 @@ export const createUncommonProcessesResolvers = (
   libs: UncommonProcessesResolversDeps
 ): {
   Source: {
-    UncommonProcesses: SourceResolvers['UncommonProcesses'];
+    UncommonProcesses: QueryUncommonProcessesResolver;
   };
 } => ({
   Source: {

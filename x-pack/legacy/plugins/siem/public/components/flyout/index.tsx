@@ -9,7 +9,6 @@ import { defaultTo, getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -91,17 +90,7 @@ export const FlyoutComponent = React.memo<Props>(
         />
       </>
     );
-  },
-  (prevProps, nextProps) =>
-    prevProps.children === nextProps.children &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-    prevProps.flyoutHeight === nextProps.flyoutHeight &&
-    prevProps.headerHeight === nextProps.headerHeight &&
-    prevProps.show === nextProps.show &&
-    prevProps.showTimeline === nextProps.showTimeline &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.usersViewing === nextProps.usersViewing &&
-    prevProps.width === nextProps.width
+  }
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';

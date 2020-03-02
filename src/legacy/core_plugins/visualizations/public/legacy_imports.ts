@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export { PersistedState } from '../../../ui/public/persisted_state';
 export {
-  AggConfigs,
   IAggConfig,
   IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
 } from '../../data/public';
+export { createAggConfigs } from 'ui/agg_types';
 export { createSavedSearchesLoader } from '../../../../plugins/discover/public';

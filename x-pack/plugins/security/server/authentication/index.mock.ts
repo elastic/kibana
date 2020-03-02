@@ -9,11 +9,12 @@ import { Authentication } from '.';
 export const authenticationMock = {
   create: (): jest.Mocked<Authentication> => ({
     login: jest.fn(),
+    logout: jest.fn(),
+    isProviderEnabled: jest.fn(),
     createAPIKey: jest.fn(),
     getCurrentUser: jest.fn(),
     invalidateAPIKey: jest.fn(),
     isAuthenticated: jest.fn(),
-    logout: jest.fn(),
     getSessionInfo: jest.fn(),
   }),
 };
