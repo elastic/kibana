@@ -78,7 +78,7 @@ function getInitialLayersFromUrlParam() {
   }
 
   try {
-    return rison.decode(mapAppParams.get('initialLayers'));
+    return rison.decode_array(mapAppParams.get('initialLayers'));
   } catch (e) {
     toastNotifications.addWarning({
       title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
