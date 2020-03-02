@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldownAction } from '../actions';
 import { DrilldownsSetupDependencies } from '../plugin';
 
