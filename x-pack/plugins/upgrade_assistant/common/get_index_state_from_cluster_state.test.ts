@@ -11,9 +11,9 @@ describe('getIndexStateFromClusterState', () => {
   const clusterState: ClusterStateAPIResponse = {
     metadata: {
       indices: {},
-      cluster_coordination: {},
+      cluster_coordination: {} as any,
       cluster_uuid: 'test',
-      templates: {},
+      templates: {} as any,
     },
     cluster_name: 'test',
     cluster_uuid: 'test',
@@ -33,11 +33,11 @@ describe('getIndexStateFromClusterState', () => {
     clusterState.metadata.indices.aTotallyDifferentName = {
       state: 'close',
       aliases: [indexName, 'test'],
-    };
+    } as any;
     clusterState.metadata.indices.aTotallyDifferentName1 = {
       state: 'open',
       aliases: ['another', 'test'],
-    };
+    } as any;
 
     expect(getIndexStateFromClusterState(indexName, clusterState)).toBe('close');
   });
@@ -47,7 +47,7 @@ describe('getIndexStateFromClusterState', () => {
     clusterState.metadata.indices.aTotallyDifferentName1 = {
       state: 'open',
       aliases: ['another', 'test'],
-    };
+    } as any;
     expect(() => getIndexStateFromClusterState(indexName, clusterState)).toThrow('not found');
   });
 });
