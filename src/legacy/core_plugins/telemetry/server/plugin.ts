@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  ISavedObjectsRepository,
+  CoreStart,
+} from 'src/core/server';
 import { Server } from 'hapi';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -28,6 +33,7 @@ import {
   registerLocalizationUsageCollector,
   registerTelemetryPluginUsageCollector,
   registerManagementUsageCollector,
+  registerApplicationUsageCollector,
 } from './collectors';
 
 export interface PluginsSetup {
@@ -36,6 +42,7 @@ export interface PluginsSetup {
 
 export class TelemetryPlugin {
   private readonly currentKibanaVersion: string;
+  private savedObjectsClient?: ISavedObjectsRepository;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -45,12 +52,19 @@ export class TelemetryPlugin {
     const currentKibanaVersion = this.currentKibanaVersion;
 
     registerCollection();
-    registerRoutes({ core, currentKibanaVersion });
+    registerRoutes({ core, currentKibanaVersion, server });
+
+    const getSavedObjectsClient = () => this.savedObjectsClient;
 
     registerTelemetryPluginUsageCollector(usageCollection, server);
     registerLocalizationUsageCollector(usageCollection, server);
     registerTelemetryUsageCollector(usageCollection, server);
     registerUiMetricUsageCollector(usageCollection, server);
     registerManagementUsageCollector(usageCollection, server);
+    registerApplicationUsageCollector(usageCollection, getSavedObjectsClient);
+  }
+
+  public start({ savedObjects }: CoreStart) {
+    this.savedObjectsClient = savedObjects.createInternalRepository();
   }
 }

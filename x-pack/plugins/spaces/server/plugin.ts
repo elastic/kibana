@@ -13,7 +13,10 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { createDefaultSpace } from './lib/create_default_space';
@@ -22,15 +25,15 @@ import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { spacesSavedObjectsClientWrapperFactory } from './lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
+import { registerSpacesUsageCollector } from './usage_collection';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
-import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
+import { setupCapabilities } from './capabilities';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -41,9 +44,6 @@ export interface LegacyAPI {
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
-  legacyConfig: {
-    kibanaIndex: string;
-  };
 }
 
 export interface PluginsSetup {
@@ -52,6 +52,10 @@ export interface PluginsSetup {
   security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+}
+
+export interface PluginsStart {
+  features: FeaturesPluginStart;
 }
 
 export interface SpacesPluginSetup {
@@ -69,6 +73,8 @@ export class Plugin {
   private readonly pluginId = 'spaces';
 
   private readonly config$: Observable<ConfigType>;
+
+  private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
 
@@ -92,12 +98,16 @@ export class Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
+    this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
   }
 
   public async start() {}
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
+  public async setup(
+    core: CoreSetup<PluginsStart>,
+    plugins: PluginsSetup
+  ): Promise<SpacesPluginSetup> {
     const service = new SpacesService(this.log, this.getLegacyAPI);
 
     const spacesService = await service.setup({
@@ -131,20 +141,19 @@ export class Plugin {
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
-      getLegacyAPI: this.getLegacyAPI,
       spacesService,
       features: plugins.features,
     });
 
-    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(request);
-        const features = plugins.features.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
-    });
+    setupCapabilities(core, spacesService, this.log);
+
+    if (plugins.usageCollection) {
+      registerSpacesUsageCollector(plugins.usageCollection, {
+        kibanaIndexConfig$: this.kibanaIndexConfig$,
+        features: plugins.features,
+        licensing: plugins.licensing,
+      });
+    }
 
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
@@ -161,12 +170,7 @@ export class Plugin {
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
-          this.setupLegacyComponents(
-            spacesService,
-            plugins.features,
-            plugins.licensing,
-            plugins.usageCollection
-          );
+          this.setupLegacyComponents(spacesService);
         },
         createDefaultSpace: async () => {
           return await createDefaultSpace({
@@ -180,12 +184,7 @@ export class Plugin {
 
   public stop() {}
 
-  private setupLegacyComponents(
-    spacesService: SpacesServiceSetup,
-    featuresSetup: FeaturesPluginSetup,
-    licensingSetup: LicensingPluginSetup,
-    usageCollectionSetup?: UsageCollectionSetup
-  ) {
+  private setupLegacyComponents(spacesService: SpacesServiceSetup) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
@@ -193,11 +192,5 @@ export class Plugin {
       'spaces',
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
-    // Register a function with server to manage the collection of usage stats
-    registerSpacesUsageCollector(usageCollectionSetup, {
-      kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
-      features: featuresSetup,
-      licensing: licensingSetup,
-    });
   }
 }

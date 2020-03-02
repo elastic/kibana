@@ -22,14 +22,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { npStart } from 'ui/new_platform';
-
 import { useApi } from '../../hooks/use_api';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+
+import { useAppDependencies, useDocumentationLinks } from '../../app_dependencies';
 import { TransformPivotConfig } from '../../common';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { documentationLinksService } from '../../services/documentation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import {
   getIndexPatternIdByTitle,
@@ -39,9 +38,6 @@ import {
 } from '../../lib/kibana';
 
 import { Wizard } from '../create_transform/components/wizard';
-
-const indexPatterns = npStart.plugins.data.indexPatterns;
-const savedObjectsClient = npStart.core.savedObjects.client;
 
 interface GetTransformsResponseOk {
   count: number;
@@ -73,6 +69,12 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   }, []);
 
   const api = useApi();
+
+  const appDeps = useAppDependencies();
+  const savedObjectsClient = appDeps.core.savedObjects.client;
+  const indexPatterns = appDeps.plugins.data.indexPatterns;
+
+  const { esTransform } = useDocumentationLinks();
 
   const transformId = match.params.transformId;
 
@@ -154,7 +156,7 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={documentationLinksService.getTransformsDocUrl()}
+                href={esTransform}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"
