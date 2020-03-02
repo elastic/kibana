@@ -28,11 +28,11 @@ interface UiActionExamplesSetupDependencies {
 
 declare module '../../../src/plugins/ui_actions/public' {
   export interface TriggerContextMapping {
-    [HELLO_WORLD_TRIGGER_ID]: undefined;
+    [HELLO_WORLD_TRIGGER_ID]: {};
   }
 
   export interface ActionContextMapping {
-    [ACTION_HELLO_WORLD]: undefined;
+    [ACTION_HELLO_WORLD]: {};
   }
 }
 

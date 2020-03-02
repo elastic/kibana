@@ -28,8 +28,8 @@ const DEFAULT_TRIGGER = '';
 
 export type TriggerId = keyof TriggerContextMapping;
 
+export type BaseContext = object;
 export type TriggerContext = BaseContext;
-export type BaseContext = object | undefined | string | number;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;

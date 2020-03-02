@@ -22,7 +22,7 @@ import { ActionType, ActionContextMapping } from '../types';
 
 export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
 
-export interface Action<Context = undefined, T = ActionType> {
+export interface Action<Context = {}, T = ActionType> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.

@@ -57,7 +57,7 @@ declare module '../../../src/plugins/ui_actions/public' {
 
   export interface ActionContextMapping {
     [ACTION_EDIT_USER]: UserContext;
-    [ACTION_SHOWCASE_PLUGGABILITY]: undefined;
+    [ACTION_SHOWCASE_PLUGGABILITY]: {};
     [ACTION_CALL_PHONE_NUMBER]: PhoneContext;
     [ACTION_TRAVEL_GUIDE]: CountryContext;
     [ACTION_VIEW_IN_MAPS]: CountryContext;

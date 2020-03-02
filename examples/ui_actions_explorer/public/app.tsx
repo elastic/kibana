@@ -60,7 +60,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
             </EuiText>
             <EuiButton
               data-test-subj="emitHelloWorldTrigger"
-              onClick={() => uiActionsApi.executeTriggerActions(HELLO_WORLD_TRIGGER_ID, undefined)}
+              onClick={() => uiActionsApi.executeTriggerActions(HELLO_WORLD_TRIGGER_ID, {})}
             >
               Say hello world!
             </EuiButton>
@@ -99,7 +99,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                   uiActionsApi.attachAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
                     `You've successfully added a new action: ${dynamicAction.getDisplayName(
-                      undefined
+                      {}
                     )}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
                   );
                 }}

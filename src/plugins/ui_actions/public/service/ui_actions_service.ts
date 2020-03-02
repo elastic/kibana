@@ -96,7 +96,7 @@ export class UiActionsService {
     triggerId: TType,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: Action<Partial<TriggerContextMapping[TType]> | undefined> & ActionByType<AType>
+    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
   ): void => {
     if (!this.actions.has(action.id)) {
       this.registerAction(action);
@@ -157,7 +157,7 @@ export class UiActionsService {
   public readonly getTriggerCompatibleActions = async <T extends TriggerId>(
     triggerId: T,
     context: TriggerContextMapping[T]
-  ): Promise<Array<Action<TriggerContextMapping[T] | undefined>>> => {
+  ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
     return actions.reduce(

@@ -105,7 +105,7 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerActions()', () => {
-    const action1: Action<undefined, ActionType> = {
+    const action1: Action = {
       id: 'action1',
       order: 1,
       type: 'type1' as ActionType,
@@ -114,7 +114,7 @@ describe('UiActionsService', () => {
       getIconType: () => '',
       isCompatible: async () => true,
     };
-    const action2: Action<undefined, ActionType> = {
+    const action2: Action = {
       id: 'action2',
       order: 2,
       type: 'type2' as ActionType,
