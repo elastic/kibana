@@ -16,21 +16,20 @@ interface OwnProps {
 }
 
 interface StateProps {
-  addFlyoutVisible: boolean;
+  alertFlyoutVisible: boolean;
 }
 
 interface DispatchProps {
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const mapStateToProps = (state: AppState): StateProps => ({
-  addFlyoutVisible: state.ui.alertFlyoutVisible,
+  alertFlyoutVisible: state.ui.alertFlyoutVisible,
 });
 
 const mapDispatchToProps = (dispatch: any): DispatchProps => ({
-  // @ts-ignore the value here is a boolean, and it works with the
-  // action creator function
-  setAddFlyoutVisibility: value => dispatch(setAlertFlyoutVisible(value)),
+  // @ts-ignore the value here is a boolean, and it works with the action creator function
+  setAlertFlyoutVisibility: value => dispatch(setAlertFlyoutVisible(value)),
 });
 
 export const UptimeAlertContextContainer = connect<StateProps, DispatchProps, OwnProps, AppState>(

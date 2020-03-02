@@ -8,10 +8,10 @@ import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '
 import React, { useState } from 'react';
 
 interface Props {
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ToggleAlertFlyoutButton = ({ setAddFlyoutVisibility }: Props) => {
+export const ToggleAlertFlyoutButton = ({ setAlertFlyoutVisibility }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <EuiPopover
@@ -29,7 +29,7 @@ export const ToggleAlertFlyoutButton = ({ setAddFlyoutVisibility }: Props) => {
           <EuiContextMenuItem
             key="create-alert"
             icon="plusInCircle"
-            onClick={() => setAddFlyoutVisibility(true)}
+            onClick={() => setAlertFlyoutVisibility(true)}
           >
             Create alert
           </EuiContextMenuItem>,

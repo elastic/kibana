@@ -9,15 +9,15 @@ import { AlertsContextProvider } from '../../../../../../../plugins/triggers_act
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
-  addFlyoutVisible: boolean;
   children: any;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  alertFlyoutVisible: boolean;
+  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UptimeAlertsContextProvider = ({
-  addFlyoutVisible,
   children,
-  setAddFlyoutVisibility,
+  alertFlyoutVisible,
+  setAlertFlyoutVisibility,
 }: Props) => {
   const {
     services: {
@@ -34,12 +34,12 @@ export const UptimeAlertsContextProvider = ({
     <AlertsContextProvider
       value={{
         actionTypeRegistry,
-        addFlyoutVisible,
+        addFlyoutVisible: alertFlyoutVisible,
         alertTypeRegistry,
         charts,
         dataFieldsFormats: fieldFormats,
         http,
-        setAddFlyoutVisibility,
+        setAddFlyoutVisibility: setAlertFlyoutVisibility,
         toastNotifications: notifications?.toasts,
         uiSettings,
       }}
