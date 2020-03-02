@@ -286,9 +286,7 @@ export class EndpointDocGenerator {
       },
       process: {
         entity_id: entityID ? entityID : randomString(10),
-        parent: {
-          entity_id: parentEntityID ? parentEntityID : undefined,
-        },
+        parent: parentEntityID ? { entity_id: parentEntityID } : undefined,
       },
     };
   }
@@ -325,9 +323,7 @@ export class EndpointDocGenerator {
       },
       process: {
         entity_id: entityID ? entityID : randomString(10),
-        parent: {
-          entity_id: parentEntityID ? parentEntityID : undefined,
-        },
+        parent: parentEntityID ? { entity_id: parentEntityID } : undefined,
       },
     };
   }
