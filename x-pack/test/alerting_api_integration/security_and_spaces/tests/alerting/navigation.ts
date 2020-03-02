@@ -57,11 +57,7 @@ export default function alertNavigationTests({ getService }: FtrProviderContext)
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(space.id)}/api/alert/${
-                createdAlert.id
-              }/consumer/${consumer}/navigation`
-            )
+            .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/navigation`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -96,11 +92,7 @@ export default function alertNavigationTests({ getService }: FtrProviderContext)
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix('other')}/api/alert/${
-                createdAlert.id
-              }/consumer/${consumer}/navigation`
-            )
+            .get(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}/navigation`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -129,7 +121,7 @@ export default function alertNavigationTests({ getService }: FtrProviderContext)
 
         it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alert/1/consumer/${consumer}/navigation`)
+            .get(`${getUrlPrefix(space.id)}/api/alert/1/navigation`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

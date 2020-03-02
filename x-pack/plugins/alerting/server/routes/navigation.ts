@@ -19,7 +19,6 @@ import { AlertTypeRegistry } from '../alert_type_registry';
 
 const paramSchema = schema.object({
   id: schema.string(),
-  consumer: schema.string(),
 });
 
 export const getAlertNavigationRoute = (
@@ -30,7 +29,7 @@ export const getAlertNavigationRoute = (
 ) => {
   router.get(
     {
-      path: `/api/alert/{id}/consumer/{consumer}/navigation`,
+      path: `/api/alert/{id}/navigation`,
       validate: {
         params: paramSchema,
       },
@@ -44,11 +43,11 @@ export const getAlertNavigationRoute = (
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
-      const { id, consumer } = req.params;
+      const { id } = req.params;
       const alertsClient = context.alerting.getAlertsClient();
       const alert = await alertsClient.get({ id });
       const alertType = alertTypeRegistry.get(alert.alertTypeId);
-      const navigationHandler = alertNavigationRegistry.get(consumer, alertType);
+      const navigationHandler = alertNavigationRegistry.get(alert.consumer, alertType);
       const state = navigationHandler(alert, alertType);
       return res.ok({
         body: typeof state === 'string' ? { url: state } : { state },

@@ -46,7 +46,7 @@ describe('getAlertNavigationRoute', () => {
         },
       },
     ],
-    consumer: 'bar',
+    consumer: 'test-consumer',
     name: 'abc',
     tags: ['foo'],
     enabled: true,
@@ -79,7 +79,7 @@ describe('getAlertNavigationRoute', () => {
     getAlertNavigationRoute(router, licenseState, alertTypeRegistry, alertNavigationRegistry);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/consumer/{consumer}/navigation"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/navigation"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -103,7 +103,7 @@ describe('getAlertNavigationRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
       {
-        params: { id: '1', consumer: 'siem' },
+        params: { id: '1' },
       },
       ['ok']
     );
@@ -113,7 +113,7 @@ describe('getAlertNavigationRoute', () => {
     expect(alertsClient.get.mock.calls[0][0].id).toEqual('1');
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('testAlertType');
-    expect(alertNavigationRegistry.get).toHaveBeenCalledWith('siem', mockedAlertType);
+    expect(alertNavigationRegistry.get).toHaveBeenCalledWith('test-consumer', mockedAlertType);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
@@ -131,7 +131,7 @@ describe('getAlertNavigationRoute', () => {
     getAlertNavigationRoute(router, licenseState, alertTypeRegistry, alertNavigationRegistry);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/consumer/{consumer}/navigation"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/navigation"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -153,7 +153,7 @@ describe('getAlertNavigationRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
       {
-        params: { id: '1', consumer: 'siem' },
+        params: { id: '1' },
       },
       ['ok']
     );
@@ -163,7 +163,7 @@ describe('getAlertNavigationRoute', () => {
     expect(alertsClient.get.mock.calls[0][0].id).toEqual('1');
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('testAlertType');
-    expect(alertNavigationRegistry.get).toHaveBeenCalledWith('siem', mockedAlertType);
+    expect(alertNavigationRegistry.get).toHaveBeenCalledWith('test-consumer', mockedAlertType);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {

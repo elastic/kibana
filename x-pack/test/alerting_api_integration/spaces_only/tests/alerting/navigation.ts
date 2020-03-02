@@ -33,9 +33,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${
-          createdAlert.id
-        }/consumer/${consumer}/navigation`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/navigation`
       );
 
       expect(response.statusCode).to.eql(200);
@@ -53,11 +51,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       await supertest
-        .get(
-          `${getUrlPrefix(Spaces.other.id)}/api/alert/${
-            createdAlert.id
-          }/consumer/${consumer}/navigation`
-        )
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}/navigation`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -66,13 +60,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it(`should handle get alert navigation request appropriately when alert doesn't exist`, async () => {
-      await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1/consumer/${consumer}/navigation`)
-        .expect(404, {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Saved object [alert/1] not found',
-        });
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1/navigation`).expect(404, {
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Saved object [alert/1] not found',
+      });
     });
   });
 }
