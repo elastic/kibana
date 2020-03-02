@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { memoize } from 'lodash';
+import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
@@ -13,7 +15,12 @@ import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
 } from '../../../../../../../common/util/job_utils';
-import { maxLengthValidator } from '../../../../../../../common/util/validators';
+import {
+  composeValidators,
+  maxLengthValidator,
+  memoryInputValidator,
+  requiredValidator,
+} from '../../../../../../../common/util/validators';
 import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
@@ -36,6 +43,38 @@ export const mmlUnitInvalidErrorMessage = i18n.translate(
     values: { str: mmlAllowedUnitsStr },
   }
 );
+
+/**
+ * Returns the list of model memory limit errors based on validation result.
+ * @param mmlValidationResult
+ */
+export function getModelMemoryLimitErrors(mmlValidationResult: any): string[] | null {
+  if (mmlValidationResult === null) {
+    return null;
+  }
+
+  return Object.keys(mmlValidationResult).reduce((acc, errorKey) => {
+    if (errorKey === 'min') {
+      acc.push(
+        i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryUnitsMinError', {
+          defaultMessage: 'Model memory limit can not be lower than {mml}',
+          values: {
+            mml: mmlValidationResult.min.minValue,
+          },
+        })
+      );
+    }
+    if (errorKey === 'invalidUnits') {
+      acc.push(
+        i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryUnitsInvalidError', {
+          defaultMessage: 'Model memory limit data unit unrecognized. It must be {str}',
+          values: { str: mmlAllowedUnitsStr },
+        })
+      );
+    }
+    return acc;
+  }, [] as string[]);
+}
 
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
@@ -222,6 +261,23 @@ export const validateAdvancedEditor = (state: State): State => {
   return state;
 };
 
+function validateMinMML(estimatedMml: string) {
+  return (mml: string) => {
+    // @ts-ignore
+    const mmlInBytes = numeral(mml).value();
+    // @ts-ignore
+    const estimatedMmlInBytes = numeral(estimatedMml).value();
+
+    return estimatedMmlInBytes > mmlInBytes
+      ? { min: { minValue: estimatedMml, actualValue: mml } }
+      : null;
+  };
+}
+
+const mmlValidator = memoize((estimatedMml: string) =>
+  composeValidators(requiredValidator(), validateMinMML(estimatedMml), memoryInputValidator())
+);
+
 const validateForm = (state: State): State => {
   const {
     jobIdEmpty,
@@ -238,22 +294,21 @@ const validateForm = (state: State): State => {
     maxDistinctValuesError,
     modelMemoryLimit,
   } = state.form;
+  const { estimatedModelMemoryLimit } = state;
 
   const jobTypeEmpty = jobType === undefined;
   const dependentVariableEmpty =
     (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
     dependentVariable === '';
-  const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
-  if (!modelMemoryLimitEmpty && modelMemoryLimit !== undefined) {
-    const { valid } = validateModelMemoryLimitUnits(modelMemoryLimit);
-    state.form.modelMemoryLimitUnitValid = valid;
-  }
+  const mmlValidationResult = mmlValidator(estimatedModelMemoryLimit)(modelMemoryLimit);
+
+  state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
     maxDistinctValuesError === undefined &&
     !jobTypeEmpty &&
-    state.form.modelMemoryLimitUnitValid &&
+    !mmlValidationResult &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -262,7 +317,6 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
-    !modelMemoryLimitEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -373,6 +427,12 @@ export function reducer(state: State, action: Action): State {
         isAdvancedEditorEnabled: true,
         jobConfig,
       });
+
+    case ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT:
+      return {
+        ...state,
+        estimatedModelMemoryLimit: action.value,
+      };
   }
 
   return state;

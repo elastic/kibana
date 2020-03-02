@@ -36,7 +36,7 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { Messages } from './messages';
 import { JobType } from './job_type';
 import { JobDescriptionInput } from './job_description';
-import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
+import { getModelMemoryLimitErrors } from '../../hooks/use_create_analytics_form/reducer';
 import {
   IndexPattern,
   indexPatterns,
@@ -49,7 +49,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     services: { docLinks },
   } = useMlKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const { setFormState } = actions;
+  const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
@@ -77,7 +77,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     loadingFieldOptions,
     maxDistinctValuesError,
     modelMemoryLimit,
-    modelMemoryLimitUnitValid,
+    modelMemoryLimitValidationResult,
     previousJobType,
     previousSourceIndex,
     sourceIndex,
@@ -154,6 +154,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
+
+      setEstimatedModelMemoryLimit(resp.memory_estimation?.expected_memory_without_disk);
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -642,7 +644,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
             })}
-            helpText={!modelMemoryLimitUnitValid && mmlUnitInvalidErrorMessage}
+            isInvalid={modelMemoryLimitValidationResult !== null}
+            error={getModelMemoryLimitErrors(modelMemoryLimitValidationResult)}
           >
             <EuiFieldText
               placeholder={
@@ -653,7 +656,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={modelMemoryLimit === ''}
+              isInvalid={modelMemoryLimitValidationResult !== null}
               data-test-subj="mlAnalyticsCreateJobFlyoutModelMemoryInput"
             />
           </EuiFormRow>
