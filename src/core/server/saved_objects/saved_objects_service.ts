@@ -61,6 +61,9 @@ import { registerRoutes } from './routes';
  * the factory provided to `setClientFactory` and wrapped by all wrappers
  * registered through `addClientWrapper`.
  *
+ * All the setup APIs will throw if called after the service has started, and therefor cannot be used
+ * from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
+ *
  * @example
  * ```ts
  * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
@@ -275,6 +278,7 @@ export class SavedObjectsService
   private migrator$ = new Subject<KibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
+  private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -316,12 +320,18 @@ export class SavedObjectsService
 
     return {
       setClientFactoryProvider: provider => {
+        if (this.started) {
+          throw new Error('cannot call `setClientFactoryProvider` after service startup.');
+        }
         if (this.clientFactoryProvider) {
           throw new Error('custom client factory is already set, and can only be set once');
         }
         this.clientFactoryProvider = provider;
       },
       addClientWrapper: (priority, id, factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addClientWrapper` after service startup.');
+        }
         this.clientFactoryWrappers.push({
           priority,
           id,
@@ -329,6 +339,9 @@ export class SavedObjectsService
         });
       },
       registerType: type => {
+        if (this.started) {
+          throw new Error('cannot call `registerType` after service startup.');
+        }
         this.typeRegistry.registerType(type);
       },
     };
@@ -374,6 +387,14 @@ export class SavedObjectsService
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
+
+      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.logger.error(message);
+        }
+      });
+
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter(nodes => nodes.isCompatible),
         take(1)
@@ -414,6 +435,8 @@ export class SavedObjectsService
     this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
       clientProvider.addClientWrapperFactory(priority, id, factory);
     });
+
+    this.started = true;
 
     return {
       migrator,

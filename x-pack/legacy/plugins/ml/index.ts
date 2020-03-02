@@ -6,22 +6,12 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { plugin } from './server/new_platform';
-import { CloudSetup } from '../../../plugins/cloud/server';
+import { Server } from 'src/legacy/server/kbn_server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import {
-  MlInitializerContext,
-  MlCoreSetup,
-  MlHttpServiceSetup,
-} from './server/new_platform/plugin';
+// @ts-ignore: could not find declaration file for module
+import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
-
-interface MlServer extends Server {
-  addAppLinksToSampleDataset: () => {};
-}
 
 export const ml = (kibana: any) => {
   return new kibana.Plugin({
@@ -60,43 +50,8 @@ export const ml = (kibana: any) => {
       },
     },
 
-    async init(server: MlServer) {
-      const kbnServer = (server as unknown) as KbnServer;
-
-      const initializerContext = ({
-        legacyConfig: server.config(),
-        logger: {
-          get(...contextParts: string[]) {
-            return kbnServer.newPlatform.coreContext.logger.get('plugins', 'ml', ...contextParts);
-          },
-        },
-      } as unknown) as MlInitializerContext;
-
-      const mlHttpService: MlHttpServiceSetup = {
-        ...kbnServer.newPlatform.setup.core.http,
-        route: server.route.bind(server),
-      };
-
-      const core: MlCoreSetup = {
-        injectUiAppVars: server.injectUiAppVars,
-        http: mlHttpService,
-        savedObjects: server.savedObjects,
-        coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
-      };
-      const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
-      const plugins = {
-        elasticsearch: server.plugins.elasticsearch, // legacy
-        security: server.newPlatform.setup.plugins.security,
-        xpackMain: server.plugins.xpack_main,
-        spaces: server.plugins.spaces,
-        home,
-        usageCollection: usageCollection as UsageCollectionSetup,
-        cloud: cloud as CloudSetup,
-        ml: this,
-      };
-
-      plugin(initializerContext).setup(core, plugins);
+    async init(server: Server) {
+      mirrorPluginStatus(server.plugins.xpack_main, this);
     },
   });
 };
