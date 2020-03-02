@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PageHeaderComponent shallow renders with breadcrumbs and the date picker: page_header_with_date_picker 1`] = `
+exports[`PageHeader shallow renders with breadcrumbs and the date picker: page_header_with_date_picker 1`] = `
 Array [
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
@@ -133,7 +133,7 @@ Array [
 ]
 `;
 
-exports[`PageHeaderComponent shallow renders with breadcrumbs without the date picker: page_header_no_date_picker 1`] = `
+exports[`PageHeader shallow renders with breadcrumbs without the date picker: page_header_no_date_picker 1`] = `
 Array [
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"

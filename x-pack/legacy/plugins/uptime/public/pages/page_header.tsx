@@ -24,11 +24,7 @@ export const BaseBreadcrumb: ChromeBreadcrumb = {
   href: '#/',
 };
 
-export const PageHeaderComponent = ({
-  headingText,
-  breadcrumbs,
-  datePicker = true,
-}: PageHeaderProps) => {
+export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: PageHeaderProps) => {
   const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs!;
   useEffect(() => {
     setBreadcrumbs([BaseBreadcrumb].concat(breadcrumbs));

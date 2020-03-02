@@ -14,11 +14,11 @@ import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
-import { PageHeader } from '../components/connected/pages/page_header_container';
 import { Ping } from '../../common/graphql/types';
 import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitor } from '../state/actions';
+import { PageHeader } from './page_header';
 
 interface StateProps {
   selectedMonitor: Ping | null;

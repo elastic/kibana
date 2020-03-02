@@ -6,13 +6,13 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { PageHeaderComponent, BaseBreadcrumb } from '../page_header';
+import { PageHeader, BaseBreadcrumb } from '../page_header';
 import { mountWithRouter, renderWithRouter } from '../../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
-describe('PageHeaderComponent', () => {
+describe('PageHeader', () => {
   const simpleBreadcrumbs: ChromeBreadcrumb[] = [
     { text: 'TestCrumb1', href: '#testHref1' },
     { text: 'TestCrumb2', href: '#testHref2' },
@@ -20,7 +20,7 @@ describe('PageHeaderComponent', () => {
 
   it('shallow renders with breadcrumbs and the date picker', () => {
     const component = renderWithRouter(
-      <PageHeaderComponent
+      <PageHeader
         headingText={'TestingHeading'}
         breadcrumbs={simpleBreadcrumbs}
         datePicker={true}
@@ -31,7 +31,7 @@ describe('PageHeaderComponent', () => {
 
   it('shallow renders with breadcrumbs without the date picker', () => {
     const component = renderWithRouter(
-      <PageHeaderComponent
+      <PageHeader
         headingText={'TestingHeading'}
         breadcrumbs={simpleBreadcrumbs}
         datePicker={false}
@@ -45,7 +45,7 @@ describe('PageHeaderComponent', () => {
     mountWithRouter(
       <KibanaContextProvider services={{ ...core }}>
         <Route path={OVERVIEW_ROUTE}>
-          <PageHeaderComponent
+          <PageHeader
             headingText={'TestingHeading'}
             breadcrumbs={simpleBreadcrumbs}
             datePicker={false}

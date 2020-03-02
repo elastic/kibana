@@ -20,7 +20,7 @@ import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plug
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
-import { PageHeader } from '../components/connected/pages/page_header_container';
+import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
