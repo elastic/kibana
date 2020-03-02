@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
   EmptyState,
   MonitorList,
@@ -21,7 +22,6 @@ import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
-import { i18n } from '@kbn/i18n';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
