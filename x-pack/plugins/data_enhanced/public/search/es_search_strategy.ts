@@ -5,14 +5,15 @@
  */
 
 import { Observable } from 'rxjs';
-import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
-import { ASYNC_SEARCH_STRATEGY } from '../async_search_strategy';
+import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../../../src/plugins/data/common';
 import {
   TSearchStrategyProvider,
   ISearchContext,
   ISearch,
   getEsPreference,
-} from '../../../../../../src/plugins/data/public';
+} from '../../../../../src/plugins/data/public';
+import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
+import { IEnhancedEsSearchRequest } from '../../common';
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext
@@ -20,7 +21,10 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   const asyncStrategyProvider = context.getSearchStrategy(ASYNC_SEARCH_STRATEGY);
   const { search: asyncSearch } = asyncStrategyProvider(context);
 
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = (request, options) => {
+  const search: ISearch<typeof ES_SEARCH_STRATEGY> = (
+    request: IEnhancedEsSearchRequest,
+    options
+  ) => {
     const params = {
       ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
       preference: getEsPreference(context.core.uiSettings),

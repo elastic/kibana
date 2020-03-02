@@ -152,6 +152,7 @@ export {
 export {
   ISearch,
   ICancel,
+  ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,
   ISearchContext,

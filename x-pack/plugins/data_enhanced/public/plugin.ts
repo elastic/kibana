@@ -12,8 +12,11 @@ import {
 } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import { ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider } from './search';
-import { enhancedEsSearchStrategyProvider } from './search/es_search';
+import {
+  ASYNC_SEARCH_STRATEGY,
+  asyncSearchStrategyProvider,
+  enhancedEsSearchStrategyProvider,
+} from './search';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;

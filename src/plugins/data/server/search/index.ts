@@ -21,7 +21,7 @@ export { ISearchSetup } from './i_search_setup';
 
 export { ISearchContext } from './i_search_context';
 
-export { ISearch, ICancel, IRequestTypesMap, IResponseTypesMap } from './i_search';
+export { ISearch, ICancel, ISearchOptions, IRequestTypesMap, IResponseTypesMap } from './i_search';
 
 export { TStrategyTypes } from './strategy_types';
 

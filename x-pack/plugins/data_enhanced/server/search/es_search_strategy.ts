@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
-import { ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
+import { APICaller } from '../../../../../src/core/server';
+import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
   ISearchContext,
   TSearchStrategyProvider,
   ISearch,
   ICancel,
+  ISearchOptions,
   getDefaultSearchParams,
-} from '../../../../../../src/plugins/data/server';
+} from '../../../../../src/plugins/data/server';
+import { IEnhancedEsSearchRequest } from '../../common';
 
 export interface AsyncSearchResponse<T> {
   id: string;
@@ -27,18 +29,21 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   caller: APICaller
 ) => {
   const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (request, options) => {
+    const config = await context.config$.pipe(first()).toPromise();
+    const params = { ...getDefaultSearchParams(config), ...request.params };
+
+    if (request.isRollup) {
+      return rollupSearch(caller, { ...request, params }, options);
+    }
+
     // If we have an ID, then just poll for that ID, otherwise send the entire request body
     const method = request.id ? 'GET' : 'POST';
     const path = request.id
       ? `_async_search/${request.id}`
       : `${request.params.index}/_async_search`;
 
-    const config = await context.config$.pipe(first()).toPromise();
-    const defaultParams = getDefaultSearchParams(config);
-    const params = request.id
-      ? {}
-      : { waitForCompletion: '1s', ...defaultParams, ...request.params };
-    const { body, ...query } = params;
+    // Wait up to 1s for the initial response to return
+    const { body, ...query } = request.id ? {} : { waitForCompletion: '1s', ...params };
 
     const esSearchResponse = (await caller(
       'transport.request',
@@ -60,3 +65,24 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 
   return { search, cancel };
 };
+
+async function rollupSearch(
+  caller: APICaller,
+  request: IEnhancedEsSearchRequest,
+  options: ISearchOptions
+) {
+  const { body, ...query } = request.params;
+  const rawResponse = (await caller(
+    'transport.request',
+    {
+      method: 'POST',
+      path: `${request.params.index}/_rollup_search`,
+      body,
+      query: mapKeys(query, (value, key) => snakeCase(key)),
+    },
+    options
+  )) as AsyncSearchResponse<any>;
+  const { total, failed, skipped, successful } = rawResponse._shards;
+  const loaded = failed + skipped + successful;
+  return { total, loaded, rawResponse };
+}

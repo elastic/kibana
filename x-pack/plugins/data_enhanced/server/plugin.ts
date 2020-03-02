@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/server';
-import { DataPluginSetup } from '../../../../src/plugins/data/server';
-import { enhancedEsSearchStrategyProvider } from '../server/search/es_search';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
+import { DataPluginSetup } from '../../../../src/plugins/data/server';
+import { enhancedEsSearchStrategyProvider } from './search';
 
 interface SetupDependencies {
   data: DataPluginSetup;
