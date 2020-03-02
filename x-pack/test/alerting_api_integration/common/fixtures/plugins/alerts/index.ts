@@ -426,6 +426,11 @@ export default function(kibana: any) {
       server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerNavigation(
+        'consumer.noop',
+        noopAlertType.id,
+        () => 'about:blank'
+      );
     },
   });
 }
