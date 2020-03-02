@@ -17,6 +17,7 @@
  * under the License.
  */
 import uuid from 'uuid/v4';
+// @ts-ignore
 import rison from 'rison-node';
 import {
   IFieldType,
@@ -72,12 +73,13 @@ export function getMapsAppUrl(
   }
 
   // Copy filters and query in app state
-  const mapsAppState: object = {
+  const mapsAppState: any = {
     filters: appState.filters || [],
   };
   if (appState.query) {
     mapsAppState.query = appState.query;
   }
+  // @ts-ignore
   mapAppParams.set('_a', rison.encode(mapsAppState));
 
   // create initial layer descriptor

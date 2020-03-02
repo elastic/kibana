@@ -26,7 +26,7 @@ import {
 } from '../../../../../../../plugins/kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../../../../plugins/data/public';
 
-interface AppState {
+export interface AppState {
   /**
    * Columns displayed in the table, cannot be changed by UI, just in discover's main app
    */
