@@ -70,7 +70,14 @@ const dropFront = staticSiteUrl =>
   trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
 
 const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
-  `${urlBase}/${ts}/${liveAppPath}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
+  [
+    `${urlBase}/`,
+    ts,
+    `/${liveAppPath}/`,
+    'coverage_data/',
+    `${testRunnerType.toLowerCase()}-combined`,
+    trimmed,
+  ].join('');
 
 const assignUrl = obj => name => value => {
   obj[name] = value;
