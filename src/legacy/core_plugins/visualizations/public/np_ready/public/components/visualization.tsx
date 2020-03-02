@@ -19,8 +19,7 @@
 
 import { get } from 'lodash';
 import React from 'react';
-
-import { PersistedState } from '../../../legacy_imports';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { memoizeLast } from '../legacy/memoize';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
