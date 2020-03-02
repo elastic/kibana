@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, mapValues, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { Feature } from '../../../../features/server';
-import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../common/model';
+import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import { FeaturesService } from '../../plugin';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
@@ -23,46 +27,67 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
       const features = featuresService.getFeatures();
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
-      const allActions = uniq(
-        flatten(
-          basePrivilegeFeatures.map(feature =>
-            Object.values(feature.privileges).reduce<string[]>((acc, privilege) => {
-              if (privilege.excludeFromBasePrivileges) {
-                return acc;
-              }
+      let allActions: string[] = [];
+      let readActions: string[] = [];
 
-              return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
-            }, [])
-          )
-        )
-      );
+      basePrivilegeFeatures.forEach(feature => {
+        for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
+        })) {
+          const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
+          allActions = [...allActions, ...privilegeActions];
+          if (privilegeId === 'read') {
+            readActions = [...readActions, ...privilegeActions];
+          }
+        }
+      });
 
-      const readActions = uniq(
-        flatten(
-          basePrivilegeFeatures.map(feature =>
-            Object.entries(feature.privileges).reduce<string[]>((acc, [privilegeId, privilege]) => {
-              if (privilegeId !== 'read' || privilege.excludeFromBasePrivileges) {
-                return acc;
-              }
+      allActions = uniq(allActions);
+      readActions = uniq(readActions);
 
-              return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
-            }, [])
-          )
-        )
-      );
+      const featurePrivileges: Record<string, Record<string, string[]>> = {};
+      for (const feature of features) {
+        featurePrivileges[feature.id] = {};
+        for (const featurePrivilege of featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+        })) {
+          featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
+            actions.login,
+            actions.version,
+            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+            ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
+          ];
+        }
 
-      return {
-        features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
-          if (Object.keys(feature.privileges).length > 0) {
-            acc[feature.id] = mapValues(feature.privileges, (privilege, privilegeId) => [
+        if (feature.subFeatures?.length > 0) {
+          for (const featurePrivilege of featurePrivilegeIterator(feature, {
+            augmentWithSubFeaturePrivileges: false,
+          })) {
+            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
               actions.login,
               actions.version,
-              ...featurePrivilegeBuilder.getActions(privilege, feature),
-              ...(privilegeId === 'all' ? [actions.allHack] : []),
-            ]);
+              ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+              ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
+            ];
           }
-          return acc;
-        }, {}),
+        }
+
+        for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+          featurePrivileges[feature.id][subFeaturePrivilege.id] = [
+            actions.login,
+            actions.version,
+            ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
+          ];
+        }
+
+        if (Object.keys(featurePrivileges[feature.id]).length === 0) {
+          delete featurePrivileges[feature.id];
+        }
+      }
+
+      return {
+        features: featurePrivileges,
         global: {
           all: [
             actions.login,

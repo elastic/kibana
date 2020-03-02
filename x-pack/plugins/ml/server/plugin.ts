@@ -64,9 +64,11 @@ export class MlServerPlugin {
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
-      privileges: {},
+      privileges: null,
       reserved: {
         privilege: {
+          app: [PLUGIN_ID, 'kibana'],
+          catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],

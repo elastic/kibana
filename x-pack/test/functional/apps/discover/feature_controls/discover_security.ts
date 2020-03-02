@@ -220,6 +220,97 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('global discover read-only privileges with url_create', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_url_create_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read', 'url_create'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_read_url_create_user', {
+          password: 'global_discover_read_url_create_user-password',
+          roles: ['global_discover_read_url_create_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_read_url_create_user',
+          'global_discover_read_url_create_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await security.user.delete('global_discover_read_url_create_user');
+        await security.role.delete('global_discover_read_url_create_role');
+      });
+
+      it('shows discover navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Discover', 'Management']);
+      });
+
+      it(`doesn't show save button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
+        await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+      });
+
+      it(`doesn't show visualize button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+      });
+
+      it('Permalinks shows create short-url button', async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
+        // close the menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('allows loading a saved query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
+      });
+
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+      });
+
+      it('does not allow saving changes to saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      });
+    });
+
     describe('discover and visualize privileges', () => {
       before(async () => {
         await security.role.create('global_discover_visualize_read_role', {

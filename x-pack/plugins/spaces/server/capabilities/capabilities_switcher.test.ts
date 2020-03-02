@@ -13,12 +13,11 @@ import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { PluginsStart } from '../plugin';
 
-const features: Feature[] = [
+const features = ([
   {
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
-    privileges: {},
   },
   {
     id: 'feature_2',
@@ -60,7 +59,7 @@ const features: Feature[] = [
       },
     },
   },
-];
+] as unknown) as Feature[];
 
 const buildCapabilities = () =>
   Object.freeze({

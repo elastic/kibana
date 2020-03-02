@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Feature } from '../../../../../../../../features/public';
+import { FeatureConfig } from '../../../../../../../../features/public';
 import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../common/model';
 import {
   AllowedPrivilege,
@@ -30,7 +30,7 @@ import { ChangeAllPrivilegesControl } from './change_all_privileges';
 
 interface Props {
   role: Role;
-  features: Feature[];
+  features: FeatureConfig[];
   calculatedPrivileges: CalculatedPrivilege;
   allowedPrivileges: AllowedPrivilege;
   rankedFeaturePrivileges: FeaturesPrivileges;
@@ -41,7 +41,7 @@ interface Props {
   disabled?: boolean;
 }
 
-interface TableFeature extends Feature {
+interface TableFeature extends FeatureConfig {
   hasAnyPrivilegeAssigned: boolean;
 }
 
@@ -61,17 +61,11 @@ export class FeatureTable extends Component<Props, {}> {
 
     const items: TableRow[] = features
       .sort((feature1, feature2) => {
-        if (
-          Object.keys(feature1.privileges).length === 0 &&
-          Object.keys(feature2.privileges).length > 0
-        ) {
+        if (feature1.privileges == null && feature2.privileges != null) {
           return 1;
         }
 
-        if (
-          Object.keys(feature2.privileges).length === 0 &&
-          Object.keys(feature1.privileges).length > 0
-        ) {
+        if (feature2.privileges == null && feature1.privileges != null) {
           return -1;
         }
 
@@ -169,7 +163,7 @@ export class FeatureTable extends Component<Props, {}> {
       render: (roleEntry: Role, record: TableRow) => {
         const { id: featureId, name: featureName, reserved, privileges } = record.feature;
 
-        if (reserved && Object.keys(privileges).length === 0) {
+        if (reserved && !privileges) {
           return <EuiText size={'s'}>{reserved.description}</EuiText>;
         }
 

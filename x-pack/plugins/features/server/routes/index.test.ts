@@ -21,7 +21,7 @@ describe('GET /api/features', () => {
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
-      privileges: {},
+      privileges: null,
     });
 
     featureRegistry.register({
@@ -29,7 +29,7 @@ describe('GET /api/features', () => {
       name: 'Licensed Feature',
       app: ['bar-app'],
       validLicenses: ['gold'],
-      privileges: {},
+      privileges: null,
     });
 
     const routerMock = httpServiceMock.createRouter();
@@ -56,32 +56,32 @@ describe('GET /api/features', () => {
     routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
     expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
-            Array [
-              Array [
-                Object {
-                  "body": Array [
-                    Object {
-                      "app": Array [],
-                      "id": "feature_1",
-                      "name": "Feature 1",
-                      "privileges": Object {},
-                    },
-                    Object {
-                      "app": Array [
-                        "bar-app",
-                      ],
-                      "id": "licensed_feature",
-                      "name": "Licensed Feature",
-                      "privileges": Object {},
-                      "validLicenses": Array [
-                        "gold",
-                      ],
-                    },
-                  ],
-                },
-              ],
-            ]
-        `);
+      Array [
+        Array [
+          Object {
+            "body": Array [
+              Object {
+                "app": Array [],
+                "id": "feature_1",
+                "name": "Feature 1",
+                "privileges": null,
+              },
+              Object {
+                "app": Array [
+                  "bar-app",
+                ],
+                "id": "licensed_feature",
+                "name": "Licensed Feature",
+                "privileges": null,
+                "validLicenses": Array [
+                  "gold",
+                ],
+              },
+            ],
+          },
+        ],
+      ]
+    `);
   });
 
   it(`by default does not return features that arent allowed by current license`, async () => {
@@ -99,7 +99,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": Object {},
+                "privileges": null,
               },
             ],
           },
@@ -123,7 +123,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": Object {},
+                "privileges": null,
               },
             ],
           },
@@ -147,7 +147,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": Object {},
+                "privileges": null,
               },
               Object {
                 "app": Array [
@@ -155,7 +155,7 @@ describe('GET /api/features', () => {
                 ],
                 "id": "licensed_feature",
                 "name": "Licensed Feature",
-                "privileges": Object {},
+                "privileges": null,
                 "validLicenses": Array [
                   "gold",
                 ],

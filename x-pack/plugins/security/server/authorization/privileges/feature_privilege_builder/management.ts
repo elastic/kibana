@@ -9,7 +9,7 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeManagementBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    const managementSections = privilegeDefinition.management || feature.management;
+    const managementSections = privilegeDefinition.management;
 
     if (!managementSections) {
       return [];

@@ -96,9 +96,11 @@ export class Plugin {
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
-      privileges: {},
+      privileges: null,
       reserved: {
         privilege: {
+          app: ['monitoring', 'kibana'],
+          catalogue: ['monitoring'],
           savedObject: {
             all: [],
             read: [],

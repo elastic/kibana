@@ -15,7 +15,7 @@ import { deepFreeze } from '../../../../src/core/utils';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { Feature, FeatureWithAllOrReadPrivileges } from '../common/feature';
+import { Feature, FeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
@@ -24,7 +24,7 @@ import { defineRoutes } from './routes';
  * Describes public Features plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
+  registerFeature(feature: FeatureConfig): void;
   getFeatures(): Feature[];
   getFeaturesUICapabilities(): UICapabilities;
   registerLegacyAPI: (legacyAPI: LegacyAPI) => void;

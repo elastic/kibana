@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { Feature } from '../../../../../../plugins/features/public';
+import { FeatureConfig } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { ToggleAllFeatures } from './toggle_all_features';
 
 interface Props {
   space: Partial<Space>;
-  features: Feature[];
+  features: FeatureConfig[];
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -69,7 +69,10 @@ export class FeatureTable extends Component<Props, {}> {
       name: i18n.translate('xpack.spaces.management.enabledSpaceFeaturesFeatureColumnTitle', {
         defaultMessage: 'Feature',
       }),
-      render: (feature: Feature, _item: { feature: Feature; space: Props['space'] }) => {
+      render: (
+        feature: FeatureConfig,
+        _item: { feature: FeatureConfig; space: Props['space'] }
+      ) => {
         return (
           <EuiText>
             <EuiIcon size="m" type={feature.icon as IconType} />

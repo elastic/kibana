@@ -88,6 +88,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
+            app: ['apm', 'kibana'],
             api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
@@ -97,6 +98,7 @@ export const apm: LegacyPluginInitializer = kibana => {
             ui: ['show', 'save']
           },
           read: {
+            app: ['apm', 'kibana'],
             api: ['apm'],
             catalogue: ['apm'],
             savedObject: {

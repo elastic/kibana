@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Feature, FeatureConfig, FeatureKibanaPrivileges } from '../common';
+export { featurePrivilegeIterator } from './feature_privilege_iterator';
+export { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
