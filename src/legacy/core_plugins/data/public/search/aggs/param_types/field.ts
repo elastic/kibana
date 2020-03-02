@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { isFunction } from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { IAggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
@@ -30,6 +29,8 @@ import {
   indexPatterns,
   KBN_FIELD_TYPES,
 } from '../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getNotifications } from '../../../../../../../plugins/data/public/services';
 
 const filterByType = propFilter('type');
 
@@ -93,7 +94,7 @@ export class FieldParamType extends BaseParamType {
       // @ts-ignore
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
-        npStart.core.notifications.toasts.addDanger(
+        getNotifications().toasts.addDanger(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {

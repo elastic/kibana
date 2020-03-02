@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 import { StatefulOverview } from './overview';
 
-export const Overview = memo(StatefulOverview);
+export const Overview = memo(() => <StatefulOverview />);
 
 Overview.displayName = 'Overview';
