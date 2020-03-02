@@ -197,44 +197,6 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should work with custom metrics', async () => {
-        const data = await fetchSnapshot({
-          sourceId: 'default',
-          timerange: {
-            to: max,
-            from: min,
-            interval: '1m',
-          },
-          metric: {
-            type: 'custom',
-            field: 'system.cpu.user.pct',
-            aggregation: 'avg',
-            id: '1',
-          } as SnapshotMetricInput,
-          nodeType: 'host' as InfraNodeType,
-          groupBy: [],
-        });
-
-        const snapshot = data;
-        expect(snapshot).to.have.property('nodes');
-        if (snapshot) {
-          const { nodes } = snapshot;
-          expect(nodes.length).to.equal(1);
-          const firstNode = first(nodes);
-          expect(firstNode).to.have.property('path');
-          expect(firstNode.path.length).to.equal(1);
-          expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-          expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-          expect(firstNode).to.have.property('metric');
-          expect(firstNode.metric).to.eql({
-            name: 'custom',
-            value: 0.0016,
-            max: 0.0018333333333333333,
-            avg: 0.0013666666666666669,
-          });
-        }
-      });
-
       it('should basically work with 1 grouping', () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
