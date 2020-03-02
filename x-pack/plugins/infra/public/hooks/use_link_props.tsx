@@ -11,7 +11,7 @@ import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public'
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 import { useHistory } from '../utils/history_context';
 
-type Search = Record<string, string>;
+type Search = Record<string, string | string[]>;
 
 export interface LinkDescriptor {
   // When an app isn't provided (for external linking) the history instance will
