@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IResolvers, makeExecutableSchema } from '@kamilkisiela/graphql-tools';
+import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
 import { createAuthenticationsResolvers } from './graphql/authentications';
