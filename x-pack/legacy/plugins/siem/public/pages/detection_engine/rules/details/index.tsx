@@ -66,10 +66,12 @@ import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
+import { Documentation } from './documentation';
 
 enum RuleDetailTabs {
   signals = 'signals',
   failures = 'failures',
+  documentation = 'documentation',
 }
 
 const ruleDetailTabs = [
@@ -81,6 +83,11 @@ const ruleDetailTabs = [
   {
     id: RuleDetailTabs.failures,
     name: i18n.FAILURE_HISTORY_TAB,
+    disabled: false,
+  },
+  {
+    id: RuleDetailTabs.documentation,
+    name: i18n.DOCUMENTATION_TAB,
     disabled: false,
   },
 ];
@@ -362,6 +369,9 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       </>
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
+                    {ruleDetailTab === RuleDetailTabs.documentation && (
+                      <Documentation content={rule?.documentation} />
+                    )}
                   </WrapperPage>
                 </StickyContainer>
               )}

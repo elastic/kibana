@@ -184,4 +184,14 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  documentation: {
+    type: FIELD_TYPES.TEXTAREA,
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.documentationLabel',
+      {
+        defaultMessage: 'Documentation',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
 };

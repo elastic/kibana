@@ -174,6 +174,14 @@ const getDescriptionItem = (
         description,
       },
     ];
+  } else if (field === 'documentation') {
+    const description: string = get(field, value);
+    return [
+      {
+        title: label,
+        description,
+      },
+    ];
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {

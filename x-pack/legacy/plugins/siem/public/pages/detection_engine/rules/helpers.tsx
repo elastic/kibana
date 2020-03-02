@@ -52,6 +52,7 @@ export const getStepsData = ({
             id: rule.timeline_id ?? null,
             title: rule.timeline_title ?? null,
           },
+          documentation: rule.documentation,
         }
       : null;
 

@@ -39,6 +39,7 @@ import { schema } from './schema';
 import * as I18n from './translations';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { AddRuleDocumentation } from '../rule_documentation';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -239,6 +240,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
+              }}
+            />
+            <UseField
+              path="documentation"
+              component={AddRuleDocumentation}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleDocumentation',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleDocumentation',
               }}
             />
           </AdvancedSettingsAccordion>

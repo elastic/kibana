@@ -83,6 +83,7 @@ export interface DefineStepRuleJson {
 export interface AboutStepRuleJson {
   name: string;
   description: string;
+  documentation: string;
   severity: string;
   risk_score: number;
   references: string[];
