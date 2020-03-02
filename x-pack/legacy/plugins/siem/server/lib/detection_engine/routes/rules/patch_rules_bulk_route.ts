@@ -5,21 +5,23 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   BulkPatchRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
-export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'PATCH',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -33,14 +35,9 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
       },
     },
     async handler(request: BulkPatchRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
@@ -118,7 +115,7 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -127,11 +124,24 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
           }
         })
       );
-      return rules;
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return headers
+          .response({
+            message: errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validated;
+      }
     },
   };
 };
 
-export const patchRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createPatchRulesBulkRoute(server));
+export const patchRulesBulkRoute = (
+  route: LegacyServices['route'],
+  getClients: GetScopedClients
+): void => {
+  route(createPatchRulesBulkRoute(getClients));
 };

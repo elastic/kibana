@@ -38,8 +38,7 @@ export const register = (deps: RouteDependencies): void => {
       // Check if cluster already exists.
       const existingCluster = await doesClusterExist(callAsCurrentUser, name);
       if (existingCluster) {
-        return response.customError({
-          statusCode: 409,
+        return response.conflict({
           body: {
             message: i18n.translate(
               'xpack.remoteClusters.addRemoteCluster.existingRemoteClusterErrorMessage',

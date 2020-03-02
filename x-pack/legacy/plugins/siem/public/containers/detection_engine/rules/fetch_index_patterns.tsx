@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isEqual, get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
@@ -29,7 +30,7 @@ interface FetchIndexPatternReturn {
   indexPatterns: IIndexPattern;
 }
 
-type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
+export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
@@ -41,7 +42,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
-    if (!isEqual(defaultIndices, indices)) {
+    if (!deepEqual(defaultIndices, indices)) {
       setIndices(defaultIndices);
     }
   }, [defaultIndices, indices]);

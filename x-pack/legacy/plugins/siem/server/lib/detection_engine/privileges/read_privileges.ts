@@ -7,7 +7,7 @@
 import { CallWithRequest } from '../types';
 
 export const readPrivileges = async (
-  callWithRequest: CallWithRequest<unknown, unknown, unknown>,
+  callWithRequest: CallWithRequest<{}, unknown>,
   index: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {

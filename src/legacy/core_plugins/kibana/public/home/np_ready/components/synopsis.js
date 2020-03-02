@@ -37,13 +37,7 @@ export function Synopsis({
   if (iconUrl) {
     optionalImg = <img className="synopsisIcon" src={iconUrl} alt="" />;
   } else if (iconType) {
-    optionalImg = (
-      <EuiIcon
-        type={iconType}
-        // color="primary"
-        size="l"
-      />
-    );
+    optionalImg = <EuiIcon type={iconType} alt="" size="l" />;
   }
 
   const classes = classNames('homSynopsis__card', {

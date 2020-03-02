@@ -519,7 +519,6 @@ describe('events elasticsearch_adapter', () => {
         return mockResponseMap;
       });
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),

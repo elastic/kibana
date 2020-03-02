@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import { Logger } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { ALERT_TYPE_LICENSE_EXPIRATION, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
-import { AlertType } from '../../../alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -54,6 +54,7 @@ export const getLicenseExpiration = (
         }),
       },
     ],
+    defaultActionGroupId: 'default',
     async executor({
       services,
       params,

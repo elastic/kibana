@@ -20,7 +20,7 @@
 import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { IConfigService } from '../config';
+import { IConfigService, CliArgs } from '../config';
 
 /**
  * APIs to access the application's instance uuid.
@@ -38,15 +38,21 @@ export interface UuidServiceSetup {
 export class UuidService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
+  private readonly cliArgs: CliArgs;
   private uuid: string = '';
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('uuid');
     this.configService = core.configService;
+    this.cliArgs = core.env.cliArgs;
   }
 
   public async setup() {
-    this.uuid = await resolveInstanceUuid(this.configService, this.log);
+    this.uuid = await resolveInstanceUuid({
+      configService: this.configService,
+      syncToFile: !this.cliArgs.optimize,
+      logger: this.log,
+    });
 
     return {
       getInstanceUuid: () => this.uuid,

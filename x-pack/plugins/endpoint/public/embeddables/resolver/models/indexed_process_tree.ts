@@ -5,15 +5,16 @@
  */
 
 import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
-import { IndexedProcessTree, ProcessEvent } from '../types';
+import { IndexedProcessTree } from '../types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents
  */
-export function factory(processes: ProcessEvent[]): IndexedProcessTree {
-  const idToChildren = new Map<number | undefined, ProcessEvent[]>();
-  const idToValue = new Map<number, ProcessEvent>();
+export function factory(processes: LegacyEndpointEvent[]): IndexedProcessTree {
+  const idToChildren = new Map<number | undefined, LegacyEndpointEvent[]>();
+  const idToValue = new Map<number, LegacyEndpointEvent>();
 
   for (const process of processes) {
     idToValue.set(uniquePidForProcess(process), process);
@@ -35,7 +36,10 @@ export function factory(processes: ProcessEvent[]): IndexedProcessTree {
 /**
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
-export function children(tree: IndexedProcessTree, process: ProcessEvent): ProcessEvent[] {
+export function children(
+  tree: IndexedProcessTree,
+  process: LegacyEndpointEvent
+): LegacyEndpointEvent[] {
   const id = uniquePidForProcess(process);
   const processChildren = tree.idToChildren.get(id);
   return processChildren === undefined ? [] : processChildren;
@@ -46,8 +50,8 @@ export function children(tree: IndexedProcessTree, process: ProcessEvent): Proce
  */
 export function parent(
   tree: IndexedProcessTree,
-  childProcess: ProcessEvent
-): ProcessEvent | undefined {
+  childProcess: LegacyEndpointEvent
+): LegacyEndpointEvent | undefined {
   const uniqueParentPid = uniqueParentPidForProcess(childProcess);
   if (uniqueParentPid === undefined) {
     return undefined;
@@ -70,7 +74,7 @@ export function root(tree: IndexedProcessTree) {
   if (size(tree) === 0) {
     return null;
   }
-  let current: ProcessEvent = tree.idToProcess.values().next().value;
+  let current: LegacyEndpointEvent = tree.idToProcess.values().next().value;
   while (parent(tree, current) !== undefined) {
     current = parent(tree, current)!;
   }
