@@ -132,14 +132,20 @@ export function initGraphApp(angularModule, deps) {
         template: appTemplate,
         badge: getReadonlyBadge,
         resolve: {
-          savedWorkspace: function($route) {
+          savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? savedWorkspaceLoader.get($route.current.params.id).catch(function() {
-                  toastNotifications.addDanger(
-                    i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
-                      defaultMessage: 'Missing workspace',
-                    })
-                  );
+              ? savedWorkspaceLoader.get($route.current.params.id).catch(function(e) {
+                  toastNotifications.addError(e, {
+                    title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
+                      defaultMessage: "Couldn't load graph with ID",
+                    }),
+                  });
+                  $rootScope.$eval(() => {
+                    $location.path('/home');
+                    $location.replace();
+                  });
+                  // return promise that never returns to prevent the controller from loading
+                  return new Promise();
                 })
               : savedWorkspaceLoader.get();
           },

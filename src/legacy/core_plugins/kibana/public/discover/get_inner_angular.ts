@@ -24,9 +24,6 @@ import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
@@ -119,7 +116,6 @@ export function initializeInnerAngularModule(
     createLocalPromiseModule();
     createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
-    createLocalPersistedStateModule();
     createLocalTopNavModule(navigation);
     createLocalGlobalStateModule();
     createLocalAppStateModule();
@@ -140,7 +136,6 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
-        'discoverPersistedState',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
@@ -158,7 +153,6 @@ export function initializeInnerAngularModule(
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
-      'discoverPersistedState',
       'discoverTopNav',
       'discoverGlobalState',
       'discoverAppState',
@@ -194,19 +188,6 @@ export function createLocalGlobalStateModule() {
     ])
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('discoverPersistedState', ['discoverPrivate', 'discoverPromise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
     });
 }
 
