@@ -32,26 +32,9 @@ export const HostsTabs = memo<HostsTabsProps>(
     setQuery,
     isInitializing,
     type,
+    indexPattern,
     hostsPagePath,
   }) => {
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-    const updateDateRange = useCallback(
-      (min: number, max: number) => {
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -60,8 +43,24 @@ export const HostsTabs = memo<HostsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      narrowDateRange,
-      updateDateRange,
+      indexPattern,
+      narrowDateRange: useCallback(
+        (score: Anomaly, interval: string) => {
+          const fromTo = scoreIntervalToDateTime(score, interval);
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: fromTo.from,
+            to: fromTo.to,
+          });
+        },
+        [setAbsoluteRangeDatePicker]
+      ),
+      updateDateRange: useCallback(
+        (min: number, max: number) => {
+          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        },
+        [setAbsoluteRangeDatePicker]
+      ),
     };
 
     return (

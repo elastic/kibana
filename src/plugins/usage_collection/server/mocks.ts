@@ -27,9 +27,6 @@ const createSetupContract = () => {
       logger: loggingServiceMock.createLogger(),
       maximumWaitTimeForAllCollectorsInS: 1,
     }),
-    registerLegacySavedObjects: jest.fn() as jest.Mocked<
-      UsageCollectionSetup['registerLegacySavedObjects']
-    >,
   } as UsageCollectionSetup;
 };
 
