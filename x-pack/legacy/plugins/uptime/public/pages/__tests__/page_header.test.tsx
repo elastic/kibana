@@ -11,7 +11,7 @@ import { mountWithRouter, renderWithRouter } from '../../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { UptimeUrlParams } from '../../lib/helper';
+import { UptimeUrlParams, getSupportedUrlParams } from '../../lib/helper';
 
 describe('PageHeader', () => {
   const simpleBreadcrumbs: ChromeBreadcrumb[] = [
@@ -55,7 +55,7 @@ describe('PageHeader', () => {
       </KibanaContextProvider>
     );
 
-    const urlParams: UptimeUrlParams = {};
+    const urlParams: UptimeUrlParams = getSupportedUrlParams({});
     expect(getBreadcrumbs()).toStrictEqual(
       [makeBaseBreadcrumb(urlParams)].concat(simpleBreadcrumbs)
     );

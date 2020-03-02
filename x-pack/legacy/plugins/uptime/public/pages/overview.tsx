@@ -72,9 +72,14 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   const linkParameters = stringifyUrlParams(params, true);
 
+  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
+    defaultMessage: 'Overview',
+    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+  });
+
   return (
     <>
-      <PageHeader headingText={'Overview'} breadcrumbs={[]} datePicker={true} />
+      <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

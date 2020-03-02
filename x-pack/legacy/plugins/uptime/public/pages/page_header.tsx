@@ -21,7 +21,15 @@ interface PageHeaderProps {
 }
 
 export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
-  const href = params ? '#/' + stringifyUrlParams(params, true) : '#/';
+  let href = '#/';
+  if (params) {
+    const crumbParams: Partial<UptimeUrlParams> = {...params};
+    // We don't want to encode this values because they are often set to Date.now(), the relative
+    // values in dateRangeStart are better for a URL.
+    delete crumbParams.absoluteDateRangeStart;
+    delete crumbParams.absoluteDateRangeEnd;
+    href += stringifyUrlParams(crumbParams, true);
+  }
   return {
     text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
       defaultMessage: 'Uptime',
