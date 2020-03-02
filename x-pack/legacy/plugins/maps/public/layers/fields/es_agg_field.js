@@ -5,10 +5,12 @@
  */
 
 import { AbstractField } from './field';
+import { ESDocField } from './es_doc_field';
 import { AGG_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { getField, addFieldToDSL } from '../util/es_agg_utils';
+import { TopTermPercentageField } from './top_term_percentage_field';
 
 export class ESAggMetricField extends AbstractField {
   static type = 'ES_AGG';
@@ -50,12 +52,6 @@ export class ESAggMetricField extends AbstractField {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
-  getRequestDescription() {
-    return this.getAggType() !== AGG_TYPE.COUNT
-      ? `${this.getAggType()} ${this.getRootName()}`
-      : AGG_TYPE.COUNT;
-  }
-
   async createTooltipProperty(value) {
     const indexPattern = await this._source.getIndexPattern();
     return new ESAggMetricTooltipProperty(
@@ -68,12 +64,21 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getValueAggDsl(indexPattern) {
+    if (this.getAggType() === AGG_TYPE.COUNT) {
+      return null;
+    }
+
     const field = getField(indexPattern, this.getRootName());
     const aggType = this.getAggType();
     const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };
+  }
+
+  getBucketCount() {
+    // terms aggregation increases the overall number of buckets per split bucket
+    return this.getAggType() === AGG_TYPE.TERMS ? 1 : 0;
   }
 
   supportsFieldMeta() {
@@ -93,4 +98,24 @@ export class ESAggMetricField extends AbstractField {
   async getCategoricalFieldMetaRequest() {
     return this._esDocField.getCategoricalFieldMetaRequest();
   }
+}
+
+export function esAggFieldsFactory(aggDescriptor, source, origin) {
+  const aggField = new ESAggMetricField({
+    label: aggDescriptor.label,
+    esDocField: aggDescriptor.field
+      ? new ESDocField({ fieldName: aggDescriptor.field, source })
+      : null,
+    aggType: aggDescriptor.type,
+    source,
+    origin,
+  });
+
+  const aggFields = [aggField];
+
+  if (aggDescriptor.type === AGG_TYPE.TERMS) {
+    aggFields.push(new TopTermPercentageField(aggField));
+  }
+
+  return aggFields;
 }
