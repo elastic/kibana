@@ -23,13 +23,12 @@ import {
   LICENSE_CHECK_STATE,
 } from '../../../../../../plugins/licensing/public';
 import { PLUGIN_ID } from '../../../common/constants/app';
+import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
 type PluginsSetupExtended = typeof npSetup.plugins & {
   // adds licensing which isn't in the PluginsSetup interface, but does exist
   licensing: LicensingPluginSetup;
 };
-
-const MINIMUM_FULL_LICENSE = 'platinum';
 
 const plugins = npSetup.plugins as PluginsSetupExtended;
 const licencingSubscription = plugins.licensing.license$.subscribe(license => {

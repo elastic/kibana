@@ -8,8 +8,8 @@ import { Observable, Subscription } from 'rxjs';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/common/types';
 import { PLUGIN_ID } from '../constants/app';
 
-const MINIMUM_LICENSE = 'basic';
-const MINIMUM_FULL_LICENSE = 'platinum';
+export const MINIMUM_LICENSE = 'basic';
+export const MINIMUM_FULL_LICENSE = 'platinum';
 
 export interface LicenseStatus {
   isValid: boolean;

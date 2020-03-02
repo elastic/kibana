@@ -151,7 +151,7 @@ export function systemRoutes(
       path: '/api/ml/ml_node_count',
       validate: false,
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         // check for basic license first for consistency with other
         // security disabled checks
@@ -202,7 +202,7 @@ export function systemRoutes(
       path: '/api/ml/info',
       validate: false,
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
         const cloudId = cloud && cloud.cloudId;

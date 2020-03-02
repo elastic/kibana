@@ -82,7 +82,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
       validate: dataVisualizerFieldStatsSchema,
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -134,7 +134,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
       validate: dataVisualizerOverallStatsSchema,
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },
