@@ -13,7 +13,9 @@ export class KibanaFeaturePrivileges {
     return Object.entries(this.featurePrivilegesMap).reduce((acc, [featureId, privileges]) => {
       return {
         ...acc,
-        [featureId]: Object.keys(privileges),
+        [featureId]: Object.keys(privileges).filter(
+          privilege => privilege === 'all' || privilege === 'read'
+        ),
       };
     }, {});
   }
@@ -24,7 +26,9 @@ export class KibanaFeaturePrivileges {
       return [];
     }
 
-    return Object.keys(featurePrivileges);
+    return Object.keys(featurePrivileges).filter(
+      privilege => privilege === 'all' || privilege === 'read'
+    );
   }
 
   public getActions(featureId: string, privilege: string): string[] {

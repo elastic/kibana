@@ -20,7 +20,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space, SpaceAvatar } from '../../../../../../../../spaces/public';
-import { Feature } from '../../../../../../../../features/public';
+import { FeatureConfig } from '../../../../../../../../features/public';
 import { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { CalculatedPrivilege } from '../kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
@@ -32,7 +32,7 @@ const SPACES_DISPLAY_COUNT = 4;
 interface Props {
   role: Role;
   spaces: Space[];
-  features: Feature[];
+  features: FeatureConfig[];
   calculatedPrivileges: CalculatedPrivilege[];
   intl: InjectedIntl;
 }
@@ -42,7 +42,7 @@ interface State {
 }
 
 interface TableRow {
-  feature: Feature & { isBase: boolean };
+  feature: FeatureConfig & { isBase: boolean };
   tooltip?: string;
   role: Role;
 }
@@ -135,7 +135,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
             defaultMessage: 'Base privilege',
           }),
           app: [],
-          privileges: {},
+          privileges: null,
         },
         role,
       },
@@ -156,7 +156,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
           defaultMessage: 'Feature',
         }),
         width: '230px',
-        render: (feature: Feature & { isBase: boolean }) => {
+        render: (feature: FeatureConfig & { isBase: boolean }) => {
           return feature.isBase ? (
             <Fragment>
               <strong>{feature.name}</strong>
@@ -246,7 +246,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
               )}
             </div>
           ),
-          render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
+          render: (feature: FeatureConfig & { isBase: boolean }, record: TableRow) => {
             return this.renderPrivilegeDisplay(item, record, globalPrivilege.base);
           },
         };

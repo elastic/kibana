@@ -31,13 +31,15 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
       const allFeatures = featureRegistry.getAll();
 
       return response.ok({
-        body: allFeatures.filter(
-          feature =>
-            request.query.ignoreValidLicenses ||
-            !feature.validLicenses ||
-            !feature.validLicenses.length ||
-            getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
-        ),
+        body: allFeatures
+          .filter(
+            feature =>
+              request.query.ignoreValidLicenses ||
+              !feature.validLicenses ||
+              !feature.validLicenses.length ||
+              getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
+          )
+          .map(feature => feature.toRaw()),
       });
     }
   );

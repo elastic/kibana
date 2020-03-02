@@ -31,7 +31,7 @@ import { Space } from '../../../../../spaces/public';
 
 const buildFeatures = () => {
   return [
-    {
+    new Feature({
       id: 'feature1',
       name: 'Feature 1',
       icon: 'addDataApp',
@@ -45,9 +45,17 @@ const buildFeatures = () => {
             read: [],
           },
         },
+        read: {
+          app: ['feature1App'],
+          ui: ['feature1-ui'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
       },
-    },
-    {
+    }),
+    new Feature({
       id: 'feature2',
       name: 'Feature 2',
       icon: 'addDataApp',
@@ -61,8 +69,16 @@ const buildFeatures = () => {
             read: ['config'],
           },
         },
+        read: {
+          app: ['feature2App'],
+          ui: ['feature2-ui'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+        },
       },
-    },
+    }),
   ] as Feature[];
 };
 
