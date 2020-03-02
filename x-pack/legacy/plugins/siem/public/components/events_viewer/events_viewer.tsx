@@ -201,6 +201,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                         getUpdatedAt={getUpdatedAt}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         height={footerHeight}
+                        isEventViewer={true}
                         isLive={isLive}
                         isLoading={loading}
                         itemsCount={events.length}
@@ -242,7 +243,7 @@ export const EventsViewer = React.memo(
     prevProps.kqlMode === nextProps.kqlMode &&
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
+    prevProps.sort === nextProps.sort &&
     deepEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
     prevProps.utilityBar === nextProps.utilityBar
 );

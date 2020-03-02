@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { gql } from '@apollo/client';
+import gql from 'graphql-tag';
 
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
