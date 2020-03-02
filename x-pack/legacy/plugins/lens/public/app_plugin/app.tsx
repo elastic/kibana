@@ -374,7 +374,7 @@ export function App({
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
-            hideDescription={true}
+            showDescription={false}
             confirmButtonLabel={confirmButton}
           />
         )}

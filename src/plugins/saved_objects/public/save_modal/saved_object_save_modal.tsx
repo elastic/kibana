@@ -57,7 +57,7 @@ interface Props {
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
-  hideDescription: boolean;
+  showDescription: boolean;
 }
 
 interface State {
@@ -108,7 +108,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
               <EuiForm>
-                {this.props.hideDescription && this.props.description && (
+                {!this.props.showDescription && this.props.description && (
                   <EuiFormRow>
                     <EuiText color="subdued">{this.props.description}</EuiText>
                   </EuiFormRow>
@@ -160,7 +160,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   }
 
   private renderViewDescription = () => {
-    if (this.props.hideDescription) {
+    if (!this.props.showDescription) {
       return;
     }
 
