@@ -7,7 +7,7 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { TimeRange } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { Filter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,

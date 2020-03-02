@@ -7,17 +7,11 @@
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
-
-// TODO: We should be importing from `data/server` below instead of `data/common`, but
-// need to keep `data/common` since the contents of this file are currently imported
-// by the browser. This file should probably be refactored so that the pieces required
-// on the client live in a `public` directory instead. See kibana/issues/52343
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   TimeRange,
   esFilters,
   Filter as DataFilter,
-} from '../../../../../../src/plugins/data/server';
+} from '../../../../../../src/plugins/data/public';
 
 export interface EmbeddableFilterInput {
   filters: DataFilter[];
