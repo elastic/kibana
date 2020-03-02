@@ -6,9 +6,15 @@
 
 import React from 'react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { FieldMappingRow } from './field_mapping_row';
+
+const FieldRowWrapper = styled.div`
+  margin-top: 8px;
+  font-size: 14px;
+`;
 
 const supportedThirdPartyFields = [
   {
@@ -49,9 +55,12 @@ const FieldMappingComponent: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow fullWidth>
+      <FieldRowWrapper>
         <FieldMappingRow siemField="Name" thirdPartyFields={supportedThirdPartyFields} />
-      </EuiFormRow>
+        <FieldMappingRow siemField="Tags" thirdPartyFields={supportedThirdPartyFields} />
+        <FieldMappingRow siemField="Description" thirdPartyFields={supportedThirdPartyFields} />
+        <FieldMappingRow siemField="Comment" thirdPartyFields={supportedThirdPartyFields} />
+      </FieldRowWrapper>
     </EuiDescribedFormGroup>
   );
 };
