@@ -32,12 +32,12 @@ and processes the data, with {kib} sitting on top.
 From the home page, {kib} provides these options for getting data in:
 
 * <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
-* Set up a data flow between your app and the Elastic Stack using our built-in tutorials.
+* Set up a data flow to Elasticsearch using our built-in tutorials.
 (If a tutorial doesn’t exist for your data, go to the
 {beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
 in the {beats} family.)
-* Import log data using the file upload feature.
-* {ref}/getting-started-index.html[Index your data] in Elasticsearch.
+* Import static data using the file upload feature.
+* {ref}/getting-started-index.html[Index your data] into Elasticsearch with REST APIs or client libraries.
 +
 [role="screenshot"]
 image::images/intro-data-tutorial.png[Ways to get data in from the home page]
@@ -93,7 +93,7 @@ questions of your location-based data. Elastic Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<TSVB, TSVB>> allows you to combine
+* <<TSVB, Time Series Visual Builder>> (TSVB) allows you to combine
 an infinite number of aggregations to display complex data in a meaningful way.
 With TSVB, you can analyze multiple index patterns and customize
 every aspect of your visualization. Choose your own date format and color
@@ -134,7 +134,7 @@ image::images/intro-management.png[]
 
 [float]
 [[extend-your-use-case]]
-=== Extend your use case...or add a new one
+=== Extend your use case &mdash; or add a new one
 
 As a hub for Elastic's https://www.elastic.co/products/[solutions], {kib}
 can help you find security vulnerabilities,
