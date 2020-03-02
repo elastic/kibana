@@ -475,14 +475,9 @@ export class SavedObjectsService
 }
 
 function getImportableAndExportableTypes({
-  savedObjectMappings = [],
   savedObjectsManagement = {},
 }: SavedObjectsLegacyUiExports) {
-  const visibleTypes = savedObjectMappings.reduce(
-    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
-    [] as string[]
-  );
-  return visibleTypes.filter(
-    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
+  return Object.keys(savedObjectsManagement).filter(
+    type => savedObjectsManagement[type]?.isImportableAndExportable
   );
 }

@@ -17,12 +17,35 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin, SavedObjectsType } from 'kibana/server';
 import { registerRoutes } from './routes';
+import * as migrations from '../../migrations';
 
 export class IndexPatternsService implements Plugin<void> {
-  public setup({ http }: CoreSetup) {
-    registerRoutes(http);
+  public setup(core: CoreSetup) {
+    const indexPatternType: SavedObjectsType = {
+      name: 'index-pattern',
+      hidden: false,
+      namespaceAgnostic: false,
+      mappings: {
+        properties: {
+          fieldFormatMap: { type: 'text' },
+          fields: { type: 'text' },
+          intervalName: { type: 'keyword' },
+          notExpandable: { type: 'boolean' },
+          sourceFilters: { type: 'text' },
+          timeFieldName: { type: 'keyword' },
+          title: { type: 'text' },
+          type: { type: 'keyword' },
+          typeMeta: { type: 'keyword' },
+        },
+      },
+      migrations: migrations.indexPatterns,
+    };
+
+    core.savedObjects.registerType(indexPatternType);
+
+    registerRoutes(core.http);
   }
 
   public start() {}

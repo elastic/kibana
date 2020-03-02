@@ -459,31 +459,6 @@ function migrateFiltersAggQueryStringQueries(doc) {
   return doc;
 }
 
-function migrateSubTypeAndParentFieldProperties(doc) {
-  if (!doc.attributes.fields) return doc;
-
-  const fieldsString = doc.attributes.fields;
-  const fields = JSON.parse(fieldsString);
-  const migratedFields = fields.map(field => {
-    if (field.subType === 'multi') {
-      return {
-        ...omit(field, 'parent'),
-        subType: { multi: { parent: field.parent } },
-      };
-    }
-
-    return field;
-  });
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      fields: JSON.stringify(migratedFields),
-    },
-  };
-}
-
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -502,14 +477,6 @@ const executeSearchMigrations740 = flow(migrateSearchSortToNestedArray);
 const executeMigrations742 = flow(transformSplitFiltersStringToQueryObject);
 
 export const migrations = {
-  'index-pattern': {
-    '6.5.0': doc => {
-      doc.attributes.type = doc.attributes.type || undefined;
-      doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
-      return doc;
-    },
-    '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
-  },
   visualization: {
     /**
      * We need to have this migration twice, once with a version prior to 7.0.0 once with a version

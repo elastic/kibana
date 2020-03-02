@@ -19,68 +19,6 @@
 
 import { migrations } from './migrations';
 
-describe('index-pattern', () => {
-  describe('6.5.0', () => {
-    const migrate = doc => migrations['index-pattern']['6.5.0'](doc);
-
-    it('adds "type" and "typeMeta" properties to object when not declared', () => {
-      expect(
-        migrate({
-          attributes: {},
-        })
-      ).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "type": undefined,
-    "typeMeta": undefined,
-  },
-}
-`);
-    });
-
-    it('keeps "type" and "typeMeta" properties as is when declared', () => {
-      expect(
-        migrate({
-          attributes: {
-            type: '123',
-            typeMeta: '123',
-          },
-        })
-      ).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "type": "123",
-    "typeMeta": "123",
-  },
-}
-`);
-    });
-  });
-
-  describe('7.6.0', function() {
-    const migrate = doc => migrations['index-pattern']['7.6.0'](doc);
-
-    it('should remove the parent property and update the subType prop on every field that has them', () => {
-      const input = {
-        attributes: {
-          title: 'test',
-          fields:
-            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
-        },
-      };
-      const expected = {
-        attributes: {
-          title: 'test',
-          fields:
-            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
-        },
-      };
-
-      expect(migrate(input)).toEqual(expected);
-    });
-  });
-});
-
 describe('visualization', () => {
   describe('date histogram time zone removal', () => {
     const migrate = doc => migrations.visualization['6.7.2'](doc);
