@@ -16,6 +16,8 @@ import { AppDeps } from '../../app';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { AlertsContextProvider } from '../../context/alerts_context';
+import fetchMock from 'fetch-mock';
+import { BASE_ACTION_API_PATH } from '../../constants';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 describe('alert_form', () => {
@@ -175,6 +177,28 @@ describe('alert_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
+      fetchMock.mock(`${BASE_ACTION_API_PATH}/_find`, {
+        returnedData: {
+          page: 1,
+          perPage: 10,
+          total: 1,
+          data: {
+            secrets: {},
+            id: 'test',
+            actionTypeId: actionType.id,
+            name: 'Test',
+            config: {},
+          },
+        },
+      });
+
+      fetchMock.mock(`${BASE_ACTION_API_PATH}/types`, {
+        returnedData: {
+          id: actionType.id,
+          name: 'Test',
+          enabled: true,
+        },
+      });
       await act(async () => {
         if (deps) {
           wrapper = mountWithIntl(
@@ -215,13 +239,6 @@ describe('alert_form', () => {
     it('renders registered selected alert type', () => {
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('renders registered action types', () => {
-      const actionTypeSelectOptions = wrapper.find(
-        '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
-      );
-      expect(actionTypeSelectOptions.exists()).toBeTruthy();
     });
   });
 
