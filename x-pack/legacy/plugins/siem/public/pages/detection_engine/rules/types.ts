@@ -51,6 +51,7 @@ interface StepRuleData {
 export interface AboutStepRule extends StepRuleData {
   name: string;
   description: string;
+  documentation: string;
   severity: string;
   riskScore: number;
   references: string[];

@@ -78,6 +78,7 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
   }),
   t.partial({
+    documentation: t.string,
     last_failure_at: t.string,
     last_failure_message: t.string,
     meta: MetaRule,

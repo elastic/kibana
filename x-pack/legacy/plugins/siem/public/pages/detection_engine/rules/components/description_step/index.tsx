@@ -29,6 +29,7 @@ import {
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
 } from './helpers';
+import { DOCUMENTATION_PREVIEW_DESCRIPTION } from './translations';
 
 interface StepRuleDescriptionProps {
   direction?: 'row' | 'column';
@@ -175,11 +176,10 @@ const getDescriptionItem = (
       },
     ];
   } else if (field === 'documentation') {
-    const description: string = get(field, value);
     return [
       {
         title: label,
-        description,
+        description: DOCUMENTATION_PREVIEW_DESCRIPTION,
       },
     ];
   }
