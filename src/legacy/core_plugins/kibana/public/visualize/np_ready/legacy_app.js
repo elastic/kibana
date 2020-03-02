@@ -19,6 +19,9 @@
 
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
+
+import { createKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -37,6 +40,14 @@ import {
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
+
+  app.factory('history', () => createHashHistory());
+  app.factory('kbnUrlStateStorage', history =>
+    createKbnUrlStateStorage({
+      history,
+      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+    })
+  );
 
   app.config(function($routeProvider) {
     const defaults = {

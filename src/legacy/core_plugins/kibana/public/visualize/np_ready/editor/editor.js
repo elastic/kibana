@@ -22,7 +22,6 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { createHashHistory } from 'history';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,16 +30,17 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import {
-  unhashUrl,
-  createKbnUrlStateStorage,
-} from '../../../../../../../plugins/kibana_utils/public';
+import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../../plugins/saved_objects/public';
-import { syncAppFilters, syncQuery } from '../../../../../../../plugins/data/public';
+import {
+  esFilters,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+} from '../../../../../../../plugins/data/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -75,7 +75,9 @@ function VisualizeAppController(
   $injector,
   $timeout,
   kbnUrl,
-  redirectWhenMissing
+  redirectWhenMissing,
+  kbnUrlStateStorage,
+  history
 ) {
   const {
     indexPatterns,
@@ -93,18 +95,16 @@ function VisualizeAppController(
     setActiveUrl,
   } = getServices();
 
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history: createHashHistory(),
-    useHash: uiSettings.get('state:storeInSessionStorage'),
-  });
-
   const {
     filterManager,
     timefilter: { timefilter },
   } = queryService;
 
-  // syncs `_g` portion of url with query services
-  const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(queryService, kbnUrlStateStorage);
+  // starts syncing `_g` portion of url with query services
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+    queryService,
+    kbnUrlStateStorage
+  );
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -287,7 +287,7 @@ function VisualizeAppController(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     query: searchSource.getOwnField('query') || defaultQuery,
-    filters: searchSource.getOwnField('filter') || [],
+    filters: (searchSource.getOwnField('filter') || []).filter(f => !esFilters.isFilterPinned(f)),
     vis: savedVisState,
     linked: !!savedVis.savedSearchId,
   };
@@ -297,11 +297,20 @@ function VisualizeAppController(
     kbnUrlStateStorage,
   });
 
-  const stopSyncingAppFilters = syncAppFilters(filterManager, {
-    set: _filters => stateContainer.transitions.set('filters', _filters),
-    get: () => stateContainer.getState().filters,
-    state$: stateContainer.state$.pipe(map(state => state.filters)),
-  });
+  // sync initial app filters from state to filterManager
+  filterManager.setAppFilters(_.cloneDeep(stateContainer.getState().filters));
+  // setup syncing of app filters between appState and filterManager
+  const stopSyncingAppFilters = connectToQueryState(
+    queryService,
+    {
+      set: ({ filters }) => stateContainer.transitions.set('filters', filters),
+      get: () => ({ filters: stateContainer.getState().filters }),
+      state$: stateContainer.state$.pipe(map(state => ({ filters: state.filters }))),
+    },
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+    }
+  );
 
   // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
   // defaults applied. If the url was from a previous session which included modifications to the
@@ -489,7 +498,7 @@ function VisualizeAppController(
       unsubscribePersisted();
       unsubscribeStateUpdates();
       stopStateSync();
-      stopSyncingGlobalStateWithUrl();
+      stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();
     });
 
@@ -608,7 +617,10 @@ function VisualizeAppController(
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;
             } else {
-              kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+              history.replace({
+                ...history.location,
+                pathname: `${VisualizeConstants.EDIT_PATH}/${savedVis.id}`,
+              });
             }
           }
         });
