@@ -10,13 +10,16 @@ import React, {
   useRef,
   useEffect,
   ReactNode,
-  createContext
+  createContext,
+  useCallback
 } from 'react';
 import cytoscape from 'cytoscape';
-import dagre from 'cytoscape-dagre';
-import { cytoscapeOptions } from './cytoscapeOptions';
-
-cytoscape.use(dagre);
+import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
+import {
+  cytoscapeOptions,
+  nodeHeight,
+  animationOptions
+} from './cytoscapeOptions';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
@@ -26,6 +29,7 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
+  width: number;
   serviceName?: string;
   style?: CSSProperties;
 }
@@ -52,30 +56,65 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
 
+function getLayoutOptions(
+  selectedRoots: string[],
+  height: number,
+  width: number
+): cytoscape.LayoutOptions {
+  return {
+    name: 'breadthfirst',
+    roots: selectedRoots,
+    fit: true,
+    padding: nodeHeight,
+    nodeDimensionsIncludeLabels: true,
+    animate: true,
+    animationEasing: animationOptions.easing,
+    animationDuration: animationOptions.duration,
+    // Rotate nodes from top -> bottom to display left -> right
+    // @ts-ignore
+    transform: (node: any, { x, y }: cytoscape.Position) => ({ x: y, y: -x }),
+    // swap width/height of boundingBox to compensation for the rotation
+    boundingBox: { x1: 0, y1: 0, w: height, h: width }
+  };
+}
+
+function selectRoots(elements: cytoscape.ElementDefinition[]): string[] {
+  const nodeData = elements
+    .filter(({ group }) => group === 'nodes')
+    .map(({ data }) => data) as cytoscape.NodeDataDefinition[];
+  const clientNodeIds = nodeData
+    .filter(data => isRumAgentName(data.agentName))
+    .map(({ id }) => id) as string[];
+  return clientNodeIds;
+}
+
 export function Cytoscape({
   children,
   elements,
   height,
+  width,
   serviceName,
   style
 }: CytoscapeProps) {
-  const [ref, cy] = useCytoscape({ ...cytoscapeOptions, elements });
+  const initialElements = elements.map(element => ({
+    ...element,
+    // prevents flash of unstyled elements
+    classes: [element.classes, 'invisible'].join(' ').trim()
+  }));
+  const [ref, cy] = useCytoscape({
+    ...cytoscapeOptions,
+    elements: initialElements
+  });
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
   const divStyle = { ...style, height };
 
-  // Trigger a custom "data" event when data changes
-  useEffect(() => {
-    if (cy) {
-      cy.add(elements);
-      cy.trigger('data');
-    }
-  }, [cy, elements]);
-
-  // Set up cytoscape event handlers
-  useEffect(() => {
-    const dataHandler: cytoscape.EventHandler = event => {
+  const dataHandler = useCallback(
+    (
+      event: cytoscape.EventObject,
+      currentElements: cytoscape.ElementDefinition[]
+    ) => {
       if (cy) {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
@@ -84,10 +123,31 @@ export function Cytoscape({
         }
 
         if (event.cy.elements().length > 0) {
-          cy.layout(cytoscapeOptions.layout as cytoscape.LayoutOptions).run();
+          const selectedRoots = selectRoots(currentElements);
+          const layout = cy.layout(
+            getLayoutOptions(selectedRoots, height, width)
+          );
+          layout.one('layoutstop', () => {
+            // show elements after layout is applied
+            cy.elements().removeClass('invisible');
+          });
+          layout.run();
         }
       }
-    };
+    },
+    [cy, serviceName, height, width]
+  );
+
+  // Trigger a custom "data" event when data changes
+  useEffect(() => {
+    if (cy) {
+      cy.add(elements);
+      cy.trigger('data', [elements]);
+    }
+  }, [cy, elements]);
+
+  // Set up cytoscape event handlers
+  useEffect(() => {
     const mouseoverHandler: cytoscape.EventHandler = event => {
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
@@ -98,19 +158,25 @@ export function Cytoscape({
     };
 
     if (cy) {
-      cy.on('data', dataHandler);
+      cy.on('data', dataHandler as cytoscape.EventHandler);
+      cy.ready(event => dataHandler(event, initialElements));
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
 
     return () => {
       if (cy) {
-        cy.removeListener('data', undefined, dataHandler);
+        cy.removeListener(
+          'data',
+          undefined,
+          dataHandler as cytoscape.EventHandler
+        );
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
-  }, [cy, serviceName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cy, dataHandler, serviceName]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

@@ -8,13 +8,17 @@ import { useWindowSize } from 'react-use';
 
 export function useRefHeight(): [
   MutableRefObject<HTMLDivElement | null>,
+  number,
   number
 ] {
   const ref = useRef<HTMLDivElement>(null);
   const windowHeight = useWindowSize().height;
-  const topOffset = ref.current?.getBoundingClientRect()?.top ?? 0;
+  const { top: topOffset, width } = ref.current?.getBoundingClientRect() ?? {
+    top: 0,
+    width: 0
+  };
 
   const height = ref.current ? windowHeight - topOffset : 0;
 
-  return [ref, height];
+  return [ref, height, width];
 }

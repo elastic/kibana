@@ -196,7 +196,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elements]);
 
-  const [wrapperRef, height] = useRefHeight();
+  const [wrapperRef, height, width] = useRefHeight();
 
   if (!license) {
     return null;
@@ -211,6 +211,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={renderedElements.current}
         serviceName={serviceName}
         height={height}
+        width={width}
         style={cytoscapeDivStyle}
       >
         <Controls />
