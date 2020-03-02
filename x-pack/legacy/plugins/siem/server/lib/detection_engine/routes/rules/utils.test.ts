@@ -20,7 +20,7 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
 import { getSimpleRule } from '../__mocks__/utils';
@@ -1222,20 +1222,32 @@ describe('utils', () => {
 
   describe('getDuplicates', () => {
     test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
-      const output = getDuplicates({
-        value1: 1,
-        value2: 2,
-        value3: 2,
-      });
+      const output = getDuplicates(
+        [
+          { rule_id: 'value1' },
+          { rule_id: 'value2' },
+          { rule_id: 'value2' },
+          { rule_id: 'value3' },
+          { rule_id: 'value3' },
+          {},
+          {},
+        ] as RuleAlertParamsRest[],
+        'rule_id'
+      );
       const expected = ['value2', 'value3'];
       expect(output).toEqual(expected);
     });
     test('returns null when given a map of no duplicates', () => {
-      const output = getDuplicates({
-        value1: 1,
-        value2: 1,
-        value3: 1,
-      });
+      const output = getDuplicates(
+        [
+          { rule_id: 'value1' },
+          { rule_id: 'value2' },
+          { rule_id: 'value3' },
+          {},
+          {},
+        ] as RuleAlertParamsRest[],
+        'rule_id'
+      );
       const expected: string[] = [];
       expect(output).toEqual(expected);
     });
@@ -1251,9 +1263,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -1272,9 +1285,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
 
@@ -1300,9 +1314,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
 
@@ -1320,9 +1335,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;

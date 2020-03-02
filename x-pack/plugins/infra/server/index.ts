@@ -10,11 +10,31 @@ import { InfraPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
-    enabled: schema.maybe(schema.boolean()),
+    enabled: schema.boolean({ defaultValue: true }),
     query: schema.object({
-      partitionSize: schema.maybe(schema.number()),
-      partitionFactor: schema.maybe(schema.number()),
+      partitionSize: schema.number({ defaultValue: 75 }),
+      partitionFactor: schema.number({ defaultValue: 1.2 }),
     }),
+    sources: schema.maybe(
+      schema.object({
+        default: schema.maybe(
+          schema.object({
+            logAlias: schema.maybe(schema.string()),
+            metricAlias: schema.maybe(schema.string()),
+            fields: schema.maybe(
+              schema.object({
+                timestamp: schema.maybe(schema.string()),
+                message: schema.maybe(schema.arrayOf(schema.string())),
+                tiebreaker: schema.maybe(schema.string()),
+                host: schema.maybe(schema.string()),
+                container: schema.maybe(schema.string()),
+                pod: schema.maybe(schema.string()),
+              })
+            ),
+          })
+        ),
+      })
+    ),
   }),
 };
 
