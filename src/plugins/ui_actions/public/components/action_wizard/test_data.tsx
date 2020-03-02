@@ -19,7 +19,7 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { ActionFactory, BaseConfig } from './action_wizard';
+import { ActionFactory, ActionFactoryBaseConfig } from './action_wizard';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -70,15 +70,14 @@ export const DashboardDrilldownActionFactory: ActionFactory<
           <EuiSelect
             name="selectDashboard"
             hasNoInitialSelection={true}
-            options={props.context.dashboards.map(({ id, title }) => ({ id, text: title }))}
+            options={props.context.dashboards.map(({ id, title }) => ({ value: id, text: title }))}
             value={config.dashboardId}
             onChange={e => {
               setAndSubmit({
                 ...config,
-                dashboardId: dashboards.find(d => d.title === e.target.value)?.id,
+                dashboardId: e.target.value,
               });
             }}
-            aria-label="Use aria labels when no actual label is in use"
           />
         </EuiFormRow>
         <EuiFormRow hasChildLabel={false}>
@@ -161,4 +160,4 @@ export const UrlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
 export const ACTION_FACTORIES = [
   DashboardDrilldownActionFactory,
   UrlDrilldownActionFactory,
-] as Array<ActionFactory<BaseConfig, unknown>>;
+] as Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;

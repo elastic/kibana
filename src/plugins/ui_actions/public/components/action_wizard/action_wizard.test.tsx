@@ -82,7 +82,7 @@ test('Pick and configure action', () => {
 
   // Select dashboard
   fireEvent.change(screen.getByLabelText(/Choose destination dashboard/i), {
-    target: { value: dashboards[1].title },
+    target: { value: dashboards[1].id },
   });
 
   // check that wizard emitted change event
