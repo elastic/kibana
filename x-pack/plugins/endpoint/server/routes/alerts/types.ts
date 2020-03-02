@@ -8,11 +8,20 @@ import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 import { Direction } from '../../../common/types';
 
 /**
+ * Represents the side of the result set where entries with undefined sort values will appear.
+ */
+export enum UndefinedResultPosition {
+  first = '_first',
+  last = '_last',
+}
+
+/**
  * Sort parameters for alerts in ES.
  */
 export interface AlertSortParam {
   [key: string]: {
     order: Direction;
+    missing?: UndefinedResultPosition;
   };
 }
 
@@ -27,21 +36,39 @@ export type AlertSort = [AlertSortParam, AlertSortParam];
 export type SearchCursor = [string, string];
 
 /**
- * Request metadata used in searching alerts.
+ * Parsed request parameters for searching and sorting.
  */
-export interface AlertSearchQuery {
-  pageSize: number;
-  pageIndex?: number;
-  fromIndex?: number;
+export interface AlertSearchAndSortParams {
+  // Filtering
   query?: string;
-  filters?: Filter[];
-  dateRange?: TimeRange;
+  filters: Filter[];
+  dateRange: TimeRange;
+
+  // Sorting
   sort: string;
   order: Direction;
+}
+
+/**
+ * Parsed request parameters for paginating.
+ */
+export interface AlertPaginationParams {
+  pageSize: number;
+
+  // Simple pagination
+  pageIndex?: number;
+  fromIndex?: number;
+
+  // Cursor-based pagination
   searchAfter?: SearchCursor;
   searchBefore?: SearchCursor;
-  emptyStringIsUndefined: boolean;
+  emptyStringIsUndefined?: boolean;
 }
+
+/**
+ * All alert parameters.
+ */
+export type AlertSearchParams = AlertSearchAndSortParams & AlertPaginationParams;
 
 /**
  * ES request body for alerts.
@@ -71,18 +98,28 @@ export interface AlertDetailsRequestParams {
 }
 
 /**
- * Request params for alert queries.
- *
- * Must match exactly the values that the API receives.
+ * Common query params for alerts.
  */
-export interface AlertListRequestQuery {
-  page_index?: number;
-  page_size: number;
+export interface AlertRequestQuery {
+  page_size?: number;
   query?: string;
   filters?: string;
   date_range: string;
   sort: string;
   order: Direction;
+}
+
+/**
+ * Request params for paginating alerts.
+ */
+export interface AlertListRequestQueryPagination {
+  page_index?: number;
   after?: SearchCursor;
   before?: SearchCursor;
+  empty_string_is_undefined?: boolean;
 }
+
+/**
+ * Full set of query params for the Alert List API.
+ */
+export type AlertListRequestQuery = AlertRequestQuery & AlertListRequestQueryPagination;

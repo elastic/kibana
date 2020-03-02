@@ -11,12 +11,11 @@ import { EndpointAppConstants } from '../../../../common/types';
 
 export const alertListReqSchema = schema.object(
   {
-    page_size: schema.maybe(
-      schema.number({
-        min: 1,
-        max: 100,
-      })
-    ),
+    page_size: schema.number({
+      min: 1,
+      max: 100,
+      defaultValue: EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
+    }),
     page_index: schema.maybe(
       schema.number({
         min: 0,
@@ -34,19 +33,20 @@ export const alertListReqSchema = schema.object(
         maxSize: 2,
       })
     ),
-    empty_string_is_undefined: schema.boolean({ defaultValue: false }),
-    sort: schema.maybe(schema.string()),
-    order: schema.maybe(
-      schema.string({
-        validate(value) {
-          if (value !== 'asc' && value !== 'desc') {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_sort_direction', {
-              defaultMessage: 'must be `asc` or `desc`',
-            });
-          }
-        },
-      })
-    ),
+    empty_string_is_undefined: schema.maybe(schema.boolean()),
+    sort: schema.string({
+      defaultValue: EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
+    }),
+    order: schema.string({
+      defaultValue: EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
+      validate(value) {
+        if (value !== 'asc' && value !== 'desc') {
+          return i18n.translate('xpack.endpoint.alerts.errors.bad_sort_direction', {
+            defaultMessage: 'must be `asc` or `desc`',
+          });
+        }
+      },
+    }),
     query: schema.maybe(
       schema.string({
         validate(value) {
@@ -77,6 +77,7 @@ export const alertListReqSchema = schema.object(
     ),
 
     // rison-encoded string
+    // No default provided here, because the value comes from the config, which is loaded later.
     date_range: schema.maybe(
       schema.string({
         validate(value) {

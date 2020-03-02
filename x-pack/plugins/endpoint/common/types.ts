@@ -46,6 +46,7 @@ export class EndpointAppConstants {
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
   static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
+  static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
 }
 
 export interface AlertResultList {
@@ -133,7 +134,12 @@ export type AlertEvent = Immutable<{
  */
 interface AlertMetadata {
   id: string;
+}
 
+/**
+ * Extensions to alert metadata returned by alert details API.
+ */
+interface ExtendedAlertMetadata {
   // Alert Details Pagination
   next: string | null;
   prev: string | null;
@@ -143,6 +149,11 @@ interface AlertMetadata {
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
+
+/**
+ * Full alert data.
+ */
+export type FullAlertData = AlertData & ExtendedAlertMetadata;
 
 export interface EndpointMetadata {
   event: {

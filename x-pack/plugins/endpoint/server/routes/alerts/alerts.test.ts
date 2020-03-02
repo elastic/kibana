@@ -9,9 +9,13 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
+import { esFilters } from '../../../../../../src/plugins/data/server';
+import { Direction } from '../../../common/types';
+import { EndpointConfigSchema } from '../../config';
+import { buildQueryString } from './lib';
 import { alertListReqSchema } from './list/schemas';
 import { registerAlertRoutes } from './index';
-import { EndpointConfigSchema } from '../../config';
+import { AlertSearchParams } from './types';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -84,5 +88,47 @@ describe('test alerts route', () => {
       });
     };
     expect(validate).toThrow();
+  });
+
+  it('should correctly translate AlertSearchParams to a valid query string (with search_after)', async () => {
+    const query: AlertSearchParams = {
+      pageSize: 25,
+      pageIndex: 2,
+      query: 'agent.version:3.0.0',
+      filters: [esFilters.buildEmptyFilter(true)],
+      dateRange: {
+        from: 'now-2h',
+        to: 'now',
+      },
+      sort: 'process.pid',
+      order: Direction.asc,
+      searchAfter: ['123', '456'],
+      emptyStringIsUndefined: true,
+    };
+    const qs = buildQueryString(query);
+    expect(qs).toStrictEqual(
+      'after=123&after=456&date_range=%28from%3Anow-2h%2Cto%3Anow%29&empty_string_is_undefined=true&filters=%28%27%24state%27%3A%28store%3AappState%29%2Cmeta%3A%28alias%3A%21n%2Cdisabled%3A%21f%2Cnegate%3A%21f%29%29&order=asc&page_index=2&page_size=25&query=agent.version%3A3.0.0&sort=process.pid'
+    );
+  });
+
+  it('should correctly translate AlertSearchParams to a valid query string (with search_before)', async () => {
+    const query: AlertSearchParams = {
+      pageSize: 25,
+      pageIndex: 2,
+      query: 'agent.version:3.0.0',
+      filters: [esFilters.buildEmptyFilter(true)],
+      dateRange: {
+        from: 'now-2h',
+        to: 'now',
+      },
+      sort: 'process.pid',
+      order: Direction.asc,
+      searchBefore: ['123', '456'],
+      emptyStringIsUndefined: true,
+    };
+    const qs = buildQueryString(query);
+    expect(qs).toStrictEqual(
+      'before=123&before=456&date_range=%28from%3Anow-2h%2Cto%3Anow%29&empty_string_is_undefined=true&filters=%28%27%24state%27%3A%28store%3AappState%29%2Cmeta%3A%28alias%3A%21n%2Cdisabled%3A%21f%2Cnegate%3A%21f%29%29&order=asc&page_index=2&page_size=25&query=agent.version%3A3.0.0&sort=process.pid'
+    );
   });
 });

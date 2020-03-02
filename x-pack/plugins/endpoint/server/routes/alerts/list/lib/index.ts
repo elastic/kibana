@@ -3,85 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
-import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
-import { Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
   AlertEvent,
   AlertData,
   AlertResultList,
   AlertHits,
-  EndpointAppConstants,
   ESTotal,
 } from '../../../../../common/types';
 import { EndpointAppContext } from '../../../../types';
-import { AlertSearchQuery, AlertListRequestQuery } from '../../types';
+import { AlertSearchParams } from '../../types';
 import { AlertListPagination } from './pagination';
-
-export const getRequestData = async (
-  request: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
-  endpointAppContext: EndpointAppContext
-): Promise<AlertSearchQuery> => {
-  const config = await endpointAppContext.config();
-  const reqData: AlertSearchQuery = {
-    // Defaults not enforced by schema
-    pageSize: request.query.page_size || EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
-    sort: request.query.sort || EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
-    order: request.query.order || EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
-    dateRange: ((request.query.date_range !== undefined
-      ? decode(request.query.date_range)
-      : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
-
-    // Filtering
-    query: request.query.query,
-    filters:
-      request.query.filters !== undefined
-        ? ((decode(request.query.filters) as unknown) as Filter[])
-        : ([] as Filter[]),
-
-    // Paging
-    pageIndex: request.query.page_index,
-    searchAfter: request.query.after,
-    searchBefore: request.query.before,
-    emptyStringIsUndefined: request.query.empty_string_is_undefined,
-  };
-
-  if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
-    // simple pagination
-    if (reqData.pageIndex === undefined) {
-      reqData.pageIndex = 0;
-    }
-    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
-  }
-
-  // See: https://github.com/elastic/elasticsearch-js/issues/662
-  // and https://github.com/elastic/endpoint-app-team/issues/221
-  const MIN_LONG_INT = '-9223372036854775808'; // -2^63
-  if (
-    reqData.searchBefore !== undefined &&
-    reqData.searchBefore[0] === '' &&
-    reqData.emptyStringIsUndefined
-  ) {
-    reqData.searchBefore[0] = MIN_LONG_INT;
-  }
-
-  if (
-    reqData.searchAfter !== undefined &&
-    reqData.searchAfter[0] === '' &&
-    reqData.emptyStringIsUndefined
-  ) {
-    reqData.searchAfter[0] = MIN_LONG_INT;
-  }
-
-  return reqData;
-};
 
 export async function mapToAlertResultList(
   reqCtx: RequestHandlerContext,
   endpointAppContext: EndpointAppContext,
-  reqData: AlertSearchQuery,
+  reqData: AlertSearchParams,
   searchResponse: SearchResponse<AlertEvent>
 ): Promise<AlertResultList> {
   let totalNumberOfAlerts: number = 0;
@@ -107,8 +45,6 @@ export async function mapToAlertResultList(
     return {
       id: entry._id,
       ...entry._source,
-      prev: null,
-      next: null,
     };
   }
 
