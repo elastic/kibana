@@ -300,7 +300,6 @@
     "data.search.aggs.metrics.averageBucketTitle": "平均存储桶",
     "data.search.aggs.metrics.averageLabel": "{field}平均值",
     "data.search.aggs.metrics.averageTitle": "平均值",
-    "data.search.aggs.metrics.bucketAggTitle": "存储桶聚合",
     "data.search.aggs.metrics.countLabel": "计数",
     "data.search.aggs.metrics.countTitle": "计数",
     "data.search.aggs.metrics.cumulativeSumLabel": "累计和",

@@ -39,6 +39,7 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'geo.src',
       },
     },
+    { type: 'count' },
   ];
 
   const twoSplitsAggConfig = [
@@ -54,6 +55,7 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'machine.os.raw',
       },
     },
+    { type: 'count' },
   ];
 
   const createResponseWritter = (aggs: any[] = [], opts?: Partial<TabbedResponseWriterOptions>) => {

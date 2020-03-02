@@ -300,7 +300,6 @@
     "data.search.aggs.metrics.averageBucketTitle": "平均バケット",
     "data.search.aggs.metrics.averageLabel": "平均 {field}",
     "data.search.aggs.metrics.averageTitle": "平均",
-    "data.search.aggs.metrics.bucketAggTitle": "バケット集約",
     "data.search.aggs.metrics.countLabel": "カウント",
     "data.search.aggs.metrics.countTitle": "カウント",
     "data.search.aggs.metrics.cumulativeSumLabel": "累積合計",

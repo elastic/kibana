@@ -39,7 +39,15 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
     let agg: IAggConfig;
     let editorConfig: EditorConfig;
-    const schemas: Schema[] = [];
+    const schemas: Schema[] = [
+      {
+        name: 'metric',
+      } as Schema,
+      {
+        name: 'metric2',
+        hideCustomLabel: true,
+      } as Schema,
+    ];
     const state = {} as VisState;
     const metricAggs: IAggConfig[] = [];
     const emptyParams = {
@@ -52,7 +60,7 @@ describe('DefaultEditorAggParams helpers', () => {
         type: {
           params: [{ name: 'interval' }],
         },
-        schema: {},
+        schema: 'metric',
       } as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
@@ -60,7 +68,7 @@ describe('DefaultEditorAggParams helpers', () => {
     });
 
     it('should not create any param if there is no agg type', () => {
-      agg = {} as IAggConfig;
+      agg = { schema: 'metric' } as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
@@ -87,9 +95,7 @@ describe('DefaultEditorAggParams helpers', () => {
         type: {
           params: [{ name: 'customLabel' }],
         },
-        schema: {
-          hideCustomLabel: true,
-        },
+        schema: 'metric2',
       } as any) as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
@@ -118,7 +124,7 @@ describe('DefaultEditorAggParams helpers', () => {
             },
           ],
         },
-        schema: {},
+        schema: 'metric',
         getIndexPattern: jest.fn(() => ({
           fields: [
             { name: '@timestamp', type: 'date' },
@@ -142,6 +148,7 @@ describe('DefaultEditorAggParams helpers', () => {
             paramEditor: FieldParamEditor,
             metricAggs,
             state,
+            schemas,
             value: agg.params.field,
           },
           {
@@ -152,6 +159,7 @@ describe('DefaultEditorAggParams helpers', () => {
             paramEditor: OrderByParamEditor,
             metricAggs,
             state,
+            schemas,
             value: agg.params.orderBy,
           },
         ],

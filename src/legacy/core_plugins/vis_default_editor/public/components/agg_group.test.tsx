@@ -108,9 +108,13 @@ describe('DefaultEditorAgg component', () => {
       } as VisState,
       schemas: [
         {
+          name: 'metrics',
+          group: 'metrics',
           max: 1,
         } as Schema,
         {
+          name: 'buckets',
+          group: 'buckets',
           max: 1,
         } as Schema,
       ],

@@ -124,10 +124,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterFieldTypes: (aggConfig: IMetricAggConfig) =>
-          get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
-            ? '*'
-            : KBN_FIELD_TYPES.NUMBER,
+        filterFieldTypes: (aggConfig: IMetricAggConfig) => '*',
       });
 
       const fields = aggParam.getAvailableFields(agg);

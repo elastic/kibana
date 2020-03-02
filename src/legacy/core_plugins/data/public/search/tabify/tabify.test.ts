@@ -48,7 +48,7 @@ describe('tabifyAggResponse Integration', () => {
   const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;
 
   test('transforms a simple response properly', () => {
-    const aggConfigs = createAggConfigs();
+    const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
 
     const resp = tabifyAggResponse(aggConfigs, metricOnly, {
       metricsAtAllLevels: true,

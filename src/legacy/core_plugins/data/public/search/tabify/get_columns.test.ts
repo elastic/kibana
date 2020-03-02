@@ -48,31 +48,6 @@ describe('get columns', () => {
     });
   };
 
-  test('should inject a count metric if no aggs exist', () => {
-    const columns = tabifyGetColumns(createAggConfigs().aggs, true);
-
-    expect(columns).toHaveLength(1);
-    expect(columns[0]).toHaveProperty('aggConfig');
-    expect(columns[0].aggConfig.type).toHaveProperty('name', 'count');
-  });
-
-  test('should inject a count metric if only buckets exist', () => {
-    const columns = tabifyGetColumns(
-      createAggConfigs([
-        {
-          type: 'date_histogram',
-          schema: 'segment',
-          params: { field: '@timestamp', interval: '10s' },
-        },
-      ]).aggs,
-      true
-    );
-
-    expect(columns).toHaveLength(2);
-    expect(columns[1]).toHaveProperty('aggConfig');
-    expect(columns[1].aggConfig.type).toHaveProperty('name', 'count');
-  });
-
   test('should inject the metric after each bucket if the vis is hierarchical', () => {
     const columns = tabifyGetColumns(
       createAggConfigs([
@@ -95,6 +70,9 @@ describe('get columns', () => {
           type: 'date_histogram',
           schema: 'segment',
           params: { field: '@timestamp', interval: '10s' },
+        },
+        {
+          type: 'count',
         },
       ]).aggs,
       false

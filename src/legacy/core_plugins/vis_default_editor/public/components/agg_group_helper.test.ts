@@ -49,7 +49,7 @@ describe('DefaultEditorGroup helpers', () => {
             type: 'string',
           },
         },
-        schema: 'metric',
+        schema: 'metric2',
       } as IAggConfig,
     ];
     schemas = [
@@ -57,7 +57,19 @@ describe('DefaultEditorGroup helpers', () => {
         name: 'metric',
         title: 'Metric',
         group: 'metrics',
-        min: 1,
+        min: 0,
+        max: 3,
+        aggFilter: [],
+        editor: false,
+        params: [],
+        defaults: null,
+        mustBeFirst: true,
+      },
+      {
+        name: 'metric2',
+        title: 'Metric',
+        group: 'metrics',
+        min: 2,
         max: 3,
         aggFilter: [],
         editor: false,
@@ -92,6 +104,7 @@ describe('DefaultEditorGroup helpers', () => {
     it('should return 2 when there are multiple enabled aggs', () => {
       group[0].enabled = true;
       group[1].enabled = true;
+      group[1].schema = 'metric';
       const enabledAggs = getEnabledMetricAggsCount(group);
 
       expect(enabledAggs).toBe(2);
