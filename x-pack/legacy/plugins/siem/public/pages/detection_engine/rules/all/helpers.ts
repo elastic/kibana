@@ -8,6 +8,7 @@ import {
   Rule,
   RuleError,
   RuleResponseBuckets,
+  FilterOptions,
 } from '../../../../containers/detection_engine/rules';
 
 /**
@@ -34,3 +35,18 @@ export const showRulesTable = ({
 }) =>
   (rulesCustomInstalled != null && rulesCustomInstalled > 0) ||
   (rulesInstalled != null && rulesInstalled > 0);
+
+export const getRulesTotal = ({
+  rulesCustomInstalled,
+  rulesInstalled,
+  filterOptions,
+}: {
+  rulesCustomInstalled: number | null;
+  rulesInstalled: number | null;
+  filterOptions: Partial<FilterOptions>;
+}): number => {
+  const showAllRules = !filterOptions.showCustomRules && !filterOptions.showElasticRules;
+  const customRules = filterOptions.showCustomRules || showAllRules ? rulesCustomInstalled ?? 0 : 0;
+  const installedRules = filterOptions.showElasticRules || showAllRules ? rulesInstalled ?? 0 : 0;
+  return customRules + installedRules;
+};
