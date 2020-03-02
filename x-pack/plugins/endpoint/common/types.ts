@@ -108,7 +108,7 @@ export interface OSFields {
  * Should be in line with ECS schema.
  */
 export type AlertEvent = Immutable<{
-  '@timestamp': number;
+  '@timestamp': Date;
   agent: {
     id: string;
     version: string;

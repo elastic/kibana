@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { AlertData, EndpointEvent, EndpointMetadata, OSFields } from './types';
+import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
 
 const Windows: OSFields[] = [
   {
@@ -174,7 +174,7 @@ export function generateResolverTree(
 export function generateEventAncestry(
   generator: EndpointDocGenerator,
   alertAncestors = 3
-): Array<AlertData | EndpointEvent> {
+): Array<AlertEvent | EndpointEvent> {
   const events = [];
   const startDate = new Date();
   const root = generator.generateEvent(new Date(startDate.getTime() + 1000));
@@ -253,7 +253,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  generateAlert(ts: Date, entityID?: string, parentEntityID?: string): AlertData {
+  generateAlert(ts: Date, entityID?: string, parentEntityID?: string): AlertEvent {
     return {
       '@timestamp': ts,
       agent: {
@@ -265,6 +265,7 @@ export class EndpointDocGenerator {
         action: randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
+        id: uuid.v4(),
       },
       endpoint: {
         policy: {

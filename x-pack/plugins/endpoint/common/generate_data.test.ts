@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EndpointDocGenerator, generateEventAncestry, generateResolverTree } from './generate_data';
-import { EndpointEvent, Node } from './types';
+import { Node } from './types';
 
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
