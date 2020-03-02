@@ -4,6 +4,11 @@
 
 ## AppMountParameters.appBasePath property
 
+> Warning: This API is now obsolete.
+> 
+> Use [AppMountParameters.history](./kibana-plugin-public.appmountparameters.history.md) instead.
+> 
+
 The route path for configuring navigation to the application. This string should not include the base path from HTTP.
 
 <b>Signature:</b>
@@ -39,10 +44,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
 
-import { CoreStart, AppMountParams } from 'src/core/public';
+import { CoreStart, AppMountParameters } from 'src/core/public';
 import { MyPluginDepsStart } from './plugin';
 
-export renderApp = ({ appBasePath, element }: AppMountParams) => {
+export renderApp = ({ appBasePath, element }: AppMountParameters) => {
   ReactDOM.render(
     // pass `appBasePath` to `basename`
     <BrowserRouter basename={appBasePath}>

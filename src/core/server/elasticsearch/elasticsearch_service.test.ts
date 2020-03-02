@@ -33,6 +33,9 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { duration } from 'moment';
 
+const delay = async (durationMs: number) =>
+  await new Promise(resolve => setTimeout(resolve, durationMs));
+
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const deps = {
@@ -42,7 +45,7 @@ configService.atPath.mockReturnValue(
   new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
     healthCheck: {
-      delay: duration(2000),
+      delay: duration(10),
     },
     ssl: {
       verificationMode: 'none',
@@ -125,21 +128,21 @@ describe('#setup', () => {
 
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": "PT2S",
-  "hosts": Array [
-    "http://8.8.8.8",
-  ],
-  "logQueries": true,
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "certificate": "certificate-value",
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
     it('falls back to elasticsearch config if custom config not passed', async () => {
       const setupContract = await elasticsearchService.setup(deps);
@@ -150,24 +153,24 @@ Object {
 
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": "PT2S",
-  "hosts": Array [
-    "http://1.2.3.4",
-  ],
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "alwaysPresentCertificate": undefined,
-    "certificate": undefined,
-    "certificateAuthorities": undefined,
-    "key": undefined,
-    "keyPassphrase": undefined,
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://1.2.3.4",
+          ],
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "alwaysPresentCertificate": undefined,
+            "certificate": undefined,
+            "certificateAuthorities": undefined,
+            "key": undefined,
+            "keyPassphrase": undefined,
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
 
     it('does not merge elasticsearch hosts if custom config overrides', async () => {
@@ -213,6 +216,45 @@ Object {
       `);
     });
   });
+
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async done => {
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    MockClusterClient.mockImplementationOnce(
+      () => mockAdminClusterClientInstance
+    ).mockImplementationOnce(() => mockDataClusterClientInstance);
+
+    mockAdminClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+
+    const setupContract = await elasticsearchService.setup(deps);
+    await delay(10);
+
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    setupContract.esNodesCompatibility$.subscribe(() => {
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
+
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async done => {
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    MockClusterClient.mockImplementationOnce(
+      () => mockAdminClusterClientInstance
+    ).mockImplementationOnce(() => mockDataClusterClientInstance);
+
+    mockAdminClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+
+    const setupContract = await elasticsearchService.setup(deps);
+
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
+      sub.unsubscribe();
+      await delay(100);
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
 });
 
 describe('#stop', () => {
@@ -228,5 +270,28 @@ describe('#stop', () => {
 
     expect(mockAdminClusterClientInstance.close).toHaveBeenCalledTimes(1);
     expect(mockDataClusterClientInstance.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops pollEsNodeVersions even if there are active subscriptions', async done => {
+    expect.assertions(2);
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+
+    MockClusterClient.mockImplementationOnce(
+      () => mockAdminClusterClientInstance
+    ).mockImplementationOnce(() => mockDataClusterClientInstance);
+
+    mockAdminClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+
+    const setupContract = await elasticsearchService.setup(deps);
+
+    setupContract.esNodesCompatibility$.subscribe(async () => {
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+
+      await elasticsearchService.stop();
+      await delay(100);
+      expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      done();
+    });
   });
 });

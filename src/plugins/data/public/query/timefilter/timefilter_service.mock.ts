@@ -43,6 +43,8 @@ const createSetupContractMock = () => {
     getBounds: jest.fn(),
     calculateBounds: jest.fn(),
     createFilter: jest.fn(),
+    getRefreshIntervalDefaults: jest.fn(),
+    getTimeDefaults: jest.fn(),
   };
 
   const historyMock: jest.Mocked<TimeHistoryContract> = {

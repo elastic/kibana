@@ -8,7 +8,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   justifyContent="flexStart"
 >
   <WrappedByAutoSizer>
-    <TimelineHeader
+    <Memo(TimelineHeaderComponent)
       browserFields={
         Object {
           "agent": Object {
