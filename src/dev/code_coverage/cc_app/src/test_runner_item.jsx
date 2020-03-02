@@ -27,7 +27,7 @@ function timestamp(item) {
 }
 
 function href(type) {
-  const prefix = `https://kibana-coverage.elastic.dev/jobs/elastic%2Bkibana%2Bcode-coverage`;
+  const prefix = `https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage`;
   const postfix = `coverage_data/${type}-combined/index.html`;
 
   return item => `${prefix}/${timestamp(item)}/${postfix}`;

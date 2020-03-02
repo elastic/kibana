@@ -14,7 +14,7 @@ echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 ES_HOST=https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243
 export ES_HOST
 
-STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev/jobs/elastic%2Bkibana%2Bcode-coverage'
+STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage'
 export STATIC_SITE_URL_BASE
 
 for x in jest functional mocha; do
