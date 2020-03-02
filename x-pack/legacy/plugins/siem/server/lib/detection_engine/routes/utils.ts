@@ -251,19 +251,21 @@ const statusToErrorMessage = (statusCode: number) => {
   }
 };
 
-export type ErrorOptions = CustomHttpResponseOptions<Buffer>;
-
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error({ statusCode, body, headers: _headers }: ErrorOptions) {
-    const headers = { 'content-type': 'application/json', ..._headers } as ErrorOptions['headers']; // https://github.com/microsoft/TypeScript/issues/27273
+  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    const defaultedHeaders = {
+      'content-type': 'application/json',
+      ...headers,
+    } as CustomHttpResponseOptions<T>['headers']; // https://github.com/microsoft/TypeScript/issues/27273
+
     return this.response.custom({
-      headers,
+      headers: defaultedHeaders,
       statusCode,
       body: Buffer.from(
         JSON.stringify({
-          message: body || statusToErrorMessage(statusCode),
+          message: body ?? statusToErrorMessage(statusCode),
           status_code: statusCode,
         })
       ),
