@@ -71,7 +71,7 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         body: getTimeFieldRangeSchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getTimeFieldRange(context, request.body);
 

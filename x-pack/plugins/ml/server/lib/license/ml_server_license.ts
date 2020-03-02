@@ -22,10 +22,14 @@ export class MlServerLicense extends MlLicense {
 }
 
 function guard(check: () => boolean, handler: RequestHandler<any, any, any>) {
-  return (ctx: RequestHandlerContext, request: KibanaRequest, response: KibanaResponseFactory) => {
+  return (
+    context: RequestHandlerContext,
+    request: KibanaRequest,
+    response: KibanaResponseFactory
+  ) => {
     if (check() === false) {
       return response.forbidden();
     }
-    return handler(ctx, request, response);
+    return handler(context, request, response);
   };
 }
