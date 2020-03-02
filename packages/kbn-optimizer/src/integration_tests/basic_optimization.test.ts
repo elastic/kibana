@@ -124,15 +124,20 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   ).toMatchSnapshot('foo bundle');
 
   expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/0.plugin.js'), 'utf8')
+  ).toMatchSnapshot('0 async bundle');
+
+  expect(
     Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
   ).toMatchSnapshot('bar bundle');
 
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(3);
+  expect(foo.cache.getModuleCount()).toBe(4);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/foo/public/async_import.ts,
       <absolute path>/plugins/foo/public/ext.ts,
       <absolute path>/plugins/foo/public/index.ts,
       <absolute path>/plugins/foo/public/lib.ts,
@@ -142,14 +147,15 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const bar = config.bundles.find(b => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
-  expect(bar.cache.getModuleCount()).toBe(5);
+  expect(bar.cache.getModuleCount()).toBe(6);
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/bar/public/index.ts,
+      <absolute path>/plugins/bar/public/lib.ts,
+      <absolute path>/plugins/foo/public/async_import.ts,
       <absolute path>/plugins/foo/public/ext.ts,
       <absolute path>/plugins/foo/public/index.ts,
       <absolute path>/plugins/foo/public/lib.ts,
-      <absolute path>/plugins/bar/public/index.ts,
-      <absolute path>/plugins/bar/public/lib.ts,
     ]
   `);
 });
