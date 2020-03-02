@@ -53,7 +53,7 @@ export default function({ getService, getPageObjects }) {
   ]);
 
   describe('scripted fields', function() {
-    this.tags(['skipFirefox']);
+    this.tags(['skipFirefox', 'skipCoverage']);
 
     before(async function() {
       await browser.setWindowSize(1200, 800);
@@ -119,7 +119,6 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
-      this.tags('skipCoverage');
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function() {
