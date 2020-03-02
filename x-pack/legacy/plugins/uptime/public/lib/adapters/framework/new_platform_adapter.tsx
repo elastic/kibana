@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart, } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AlertMonitorStatus } from '../../../components/connected';
-import {
-  AlertTypeModel,
-  ValidationResult,
-} from '../../../../../../../plugins/triggers_actions_ui/public/types';
-import { CreateGraphQLClient } from './framework_adapter_types';
+import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { alertTypeInitializers } from '../../alert_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -37,18 +33,14 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
-  const { triggers_actions_ui } = plugins;
-  const getAlertType = (): AlertTypeModel => ({
-    id: 'xpack.uptime.alerts.downMonitor',
-    name: 'Uptime Monitor Status',
-    iconClass: 'uptimeApp',
-    alertParamsExpression: params => {
-      return <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />;
-    },
-    validate: (alertParams: any): ValidationResult => ({ errors: {} }),
-    defaultActionMessage: 'Monitor [{{ctx.metadata.name}}] is down',
-  });
-  triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+  const {
+    data: { autocomplete },
+    // @ts-ignore we don't control this type
+    triggers_actions_ui,
+  } = plugins;
+  alertTypeInitializers.forEach(init =>
+    triggers_actions_ui.alertTypeRegistry.register(init(autocomplete))
+  );
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
