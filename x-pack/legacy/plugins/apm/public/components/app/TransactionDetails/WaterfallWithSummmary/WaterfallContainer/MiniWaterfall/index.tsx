@@ -18,13 +18,9 @@ import {
 } from '@elastic/charts';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IWaterfall } from '../Waterfall/waterfall_helpers/waterfall_helpers';
+import { SelectionText } from './SelectionText';
 
-type Selection = [number, number] | [undefined, undefined];
-
-interface SelectionTextProps {
-  selection: Selection;
-  resetSelection: () => void;
-}
+export type Selection = [number, number] | [undefined, undefined];
 
 function SelectionAnnotation({
   maxY,
@@ -70,27 +66,6 @@ function SelectionAnnotation({
       }}
       zIndex={1}
     />
-  );
-}
-
-function SelectionText({ selection, resetSelection }: SelectionTextProps) {
-  return (
-    <div
-      style={{
-        visibility: selection[0] ? 'visible' : 'hidden',
-        fontSize: '11px',
-        color: 'grey',
-        textAlign: 'right',
-        marginBottom: 16
-      }}
-    >
-      Selected {selection[0] && (selection[0] / 100).toFixed(0)}
-      &thinsp;&ndash;&thinsp;
-      {selection[1] && (selection[1] / 100).toFixed(0)} ms |{' '}
-      <button onClick={resetSelection} style={{ color: 'blue' }}>
-        Reset
-      </button>
-    </div>
   );
 }
 
