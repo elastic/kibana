@@ -49,6 +49,11 @@ export const ConfigSchema = schema.object(
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
         })
       ),
+      http: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+        schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      }),
     }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
