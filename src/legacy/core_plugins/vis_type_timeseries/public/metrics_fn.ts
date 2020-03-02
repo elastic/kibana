@@ -24,10 +24,10 @@ import {
   KibanaContext,
   Render,
 } from '../../../../plugins/expressions/public';
+import { PersistedState } from '../../../../plugins/visualizations/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
-import { PersistedState } from './legacy_imports';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;

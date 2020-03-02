@@ -25,6 +25,7 @@ import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
+import { AlertDetailResolver } from './resolver';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -86,6 +87,7 @@ export const AlertIndex = memo(() => {
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
+  const selectedEvent = useAlertListSelector(selectors.selectedEvent);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -132,12 +134,11 @@ export const AlertIndex = memo(() => {
       }
 
       const row = alertListData[rowIndex % pageSize];
-
       if (columnId === 'alert_type') {
         return (
           <Link
             data-testid="alertTypeCellLink"
-            to={urlFromQueryParams({ ...queryParams, selected_alert: 'TODO' })}
+            to={urlFromQueryParams({ ...queryParams, selected_alert: row.event.id })}
           >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
@@ -213,7 +214,9 @@ export const AlertIndex = memo(() => {
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody />
+          <EuiFlyoutBody>
+            <AlertDetailResolver selectedEvent={selectedEvent} />
+          </EuiFlyoutBody>
         </EuiFlyout>
       )}
       <EuiPage data-test-subj="alertListPage" data-testid="alertListPage">

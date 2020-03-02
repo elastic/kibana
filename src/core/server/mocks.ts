@@ -44,7 +44,11 @@ import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: { index: '.kibana-tests' },
+    kibana: {
+      index: '.kibana-tests',
+      autocompleteTerminateAfter: duration(100000),
+      autocompleteTimeout: duration(1000),
+    },
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
@@ -114,18 +118,12 @@ function createCoreSetupMock() {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
 
-  const savedObjectsService = savedObjectsServiceMock.createSetupContract();
-  const savedObjectMock: jest.Mocked<CoreSetup['savedObjects']> = {
-    addClientWrapper: savedObjectsService.addClientWrapper,
-    setClientFactoryProvider: savedObjectsService.setClientFactoryProvider,
-  };
-
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
-    savedObjects: savedObjectMock,
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     getStartServices: jest
