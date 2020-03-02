@@ -234,6 +234,7 @@ export class Server {
           },
           savedObjects: {
             client: savedObjectsClient,
+            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
             adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),

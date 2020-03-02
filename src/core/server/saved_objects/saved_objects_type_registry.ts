@@ -86,4 +86,11 @@ export class SavedObjectTypeRegistry {
   public getIndex(type: string) {
     return this.types.get(type)?.indexPattern;
   }
+
+  /**
+   * TODO: doc
+   */
+  public isImportableAndExportable(type: string) {
+    return this.types.get(type)?.management?.importableAndExportable ?? false;
+  }
 }

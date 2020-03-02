@@ -21,7 +21,6 @@ import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
-import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -247,6 +246,24 @@ export interface SavedObjectsType {
    * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
   migrations?: SavedObjectMigrationMap;
+  /**
+   * TODO doc
+   */
+  management?: SavedObjectsTypeManagementDefinition;
+}
+
+/**
+ * TODO doc
+ *
+ * @public
+ */
+export interface SavedObjectsTypeManagementDefinition {
+  importableAndExportable?: boolean;
+  defaultSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 /**
@@ -258,7 +275,7 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
   savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsManagementDefinition;
+  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
 }
 
 /**
@@ -268,6 +285,27 @@ export interface SavedObjectsLegacyUiExports {
 export interface SavedObjectsLegacyMapping {
   pluginId: string;
   properties: SavedObjectsTypeMappingDefinitions;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyManagementDefinition {
+  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyManagementTypeDefinition {
+  isImportableAndExportable?: boolean;
+  defaultSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 /**
