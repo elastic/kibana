@@ -89,7 +89,7 @@ describe('data generator', () => {
         tree[event.process.entity_id] = {
           events: [event],
           children: [],
-          parent_entity_id: event.process.parent.entity_id,
+          parent_entity_id: event.process.parent?.entity_id,
         };
       }
     });

@@ -140,7 +140,7 @@ export type AlertEvent = Immutable<{
   process: {
     entity_id: string;
     parent?: {
-      entity_id?: string;
+      entity_id: string;
     };
   };
 }>;
@@ -247,8 +247,8 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
-    parent: {
-      entity_id?: string;
+    parent?: {
+      entity_id: string;
     };
   };
 }
