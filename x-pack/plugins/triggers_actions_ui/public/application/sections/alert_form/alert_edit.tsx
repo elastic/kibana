@@ -95,7 +95,7 @@ export const AlertEdit = ({
       const newAlert = await createAlert({ http, alert });
       if (toastNotifications) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
+          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
             defaultMessage: "Updated '{alertName}'",
             values: {
               alertName: newAlert.name,
@@ -120,7 +120,7 @@ export const AlertEdit = ({
         ownFocus
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
+          <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
                 defaultMessage="Edit Alert"
@@ -151,7 +151,7 @@ export const AlertEdit = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
+              <EuiButtonEmpty data-test-subj="cancelSaveEditedAlertButton" onClick={closeFlyout}>
                 {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
                   defaultMessage: 'Cancel',
                 })}

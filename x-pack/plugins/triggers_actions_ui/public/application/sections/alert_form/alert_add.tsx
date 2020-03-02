@@ -112,7 +112,7 @@ export const AlertAdd = ({
       const newAlert = await createAlert({ http, alert });
       if (toastNotifications) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
             defaultMessage: "Saved '{alertName}'",
             values: {
               alertName: newAlert.name,

@@ -25,7 +25,7 @@ export interface GroupByType {
 }
 
 export interface IndexThresholdAlertParams {
-  index: string;
+  index: string[];
   timeField?: string;
   aggType: string;
   aggField?: string;

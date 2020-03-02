@@ -149,8 +149,8 @@ describe('alert_edit', () => {
   });
 
   it('renders alert add flyout', () => {
-    expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
   });
 });
 
