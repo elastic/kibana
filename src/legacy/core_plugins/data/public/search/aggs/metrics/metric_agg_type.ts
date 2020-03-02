@@ -18,13 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
+import { FilterFieldTypes } from '../param_types/field';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { FilterFieldTypes } from '../param_types/field';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -78,7 +79,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
     this.getFormat =
       config.getFormat ||
       (agg => {
-        const fieldFormatsService = npStart.plugins.data.fieldFormats;
+        const fieldFormatsService = getFieldFormats();
         const field = agg.getField();
         return field
           ? field.format

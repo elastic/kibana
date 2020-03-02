@@ -17,15 +17,16 @@
  * under the License.
  */
 
+import { medianMetricAgg } from './median';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
-
-jest.mock('ui/new_platform');
 
 describe('AggTypeMetricMedianProvider class', () => {
   let aggConfigs: IAggConfigs;
 
   beforeEach(() => {
+    const typesRegistry = mockAggTypesRegistry([medianMetricAgg]);
     const field = {
       name: 'bytes',
     };
@@ -47,23 +48,31 @@ describe('AggTypeMetricMedianProvider class', () => {
           schema: 'metric',
           params: {
             field: 'bytes',
-            percents: [70],
           },
         },
       ],
-      null
+      { typesRegistry }
     );
   });
 
   it('requests the percentiles aggregation in the Elasticsearch query DSL', () => {
     const dsl: Record<string, any> = aggConfigs.toDsl();
 
-    expect(dsl.median.percentiles.percents).toEqual([70]);
+    expect(dsl.median.percentiles.field).toEqual('bytes');
+    expect(dsl.median.percentiles.percents).toEqual([50]);
   });
 
-  it('asks Elasticsearch for array-based values in the aggregation response', () => {
-    const dsl: Record<string, any> = aggConfigs.toDsl();
+  it('converts the response', () => {
+    const agg = aggConfigs.getResponseAggs()[0];
 
-    expect(dsl.median.percentiles.keyed).toBeFalsy();
+    expect(
+      agg.getValue({
+        [agg.id]: {
+          values: {
+            '50.0': 10,
+          },
+        },
+      })
+    ).toEqual(10);
   });
 });

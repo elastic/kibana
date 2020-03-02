@@ -127,5 +127,18 @@ describe('query for signal', () => {
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
+    test('catches error if deleteRules throws error', async () => {
+      const request: ServerInjectOptions = {
+        method: 'POST',
+        url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+        payload: { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() },
+      };
+      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(request);
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
+    });
   });
 });

@@ -31,7 +31,6 @@ export const inverseProjectionMatrix = composeSelectors(
 
 /**
  * The scale by which world values are scaled when rendered.
- * TODO make it a number
  */
 export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
 
@@ -68,6 +67,11 @@ function cameraStateSelector(state: ResolverState) {
 function dataStateSelector(state: ResolverState) {
   return state.data;
 }
+
+/**
+ * Whether or not the resolver is pending fetching data
+ */
+export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

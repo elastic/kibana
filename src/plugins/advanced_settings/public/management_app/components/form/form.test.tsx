@@ -18,9 +18,14 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
 
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
+
+import { notificationServiceMock } from '../../../../../../core/public/mocks';
+import { SettingsChanges } from '../../types';
 import { Form } from './form';
 
 jest.mock('../field', () => ({
@@ -28,6 +33,25 @@ jest.mock('../field', () => ({
     return 'field';
   },
 }));
+
+beforeAll(() => {
+  const localStorage: Record<string, any> = {
+    'core.chrome.isLocked': true,
+  };
+
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: (key: string) => {
+        return localStorage[key] || null;
+      },
+    },
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  delete (window as any).localStorage;
+});
 
 const defaults = {
   requiresPageReload: false,
@@ -43,50 +67,52 @@ const defaults = {
 const settings = {
   dashboard: [
     {
+      ...defaults,
       name: 'dashboard:test:setting',
       ariaName: 'dashboard test setting',
       displayName: 'Dashboard test setting',
       category: ['dashboard'],
-      ...defaults,
+      requiresPageReload: true,
     },
   ],
   general: [
     {
+      ...defaults,
       name: 'general:test:date',
       ariaName: 'general test date',
       displayName: 'Test date',
       description: 'bar',
       category: ['general'],
-      ...defaults,
     },
     {
+      ...defaults,
       name: 'setting:test',
       ariaName: 'setting test',
       displayName: 'Test setting',
       description: 'foo',
       category: ['general'],
-      ...defaults,
     },
   ],
   'x-pack': [
     {
+      ...defaults,
       name: 'xpack:test:setting',
       ariaName: 'xpack test setting',
       displayName: 'X-Pack test setting',
       category: ['x-pack'],
       description: 'bar',
-      ...defaults,
     },
   ],
 };
+
 const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
 const categoryCounts = {
   general: 2,
   dashboard: 1,
   'x-pack': 10,
 };
-const save = (key: string, value: any) => Promise.resolve(true);
-const clear = (key: string) => Promise.resolve(true);
+const save = jest.fn((changes: SettingsChanges) => Promise.resolve([true]));
+
 const clearQuery = () => {};
 
 describe('Form', () => {
@@ -94,10 +120,10 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
@@ -113,10 +139,10 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={false}
@@ -132,10 +158,10 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={{}}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
@@ -151,10 +177,10 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={{}}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={false}
         enableSaving={true}
@@ -164,5 +190,71 @@ describe('Form', () => {
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should hide bottom bar when clicking on the cancel changes button', async () => {
+    const wrapper = mountWithI18nProvider(
+      <Form
+        settings={settings}
+        visibleSettings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
+        toasts={{} as any}
+        dockLinks={{} as any}
+      />
+    );
+    (wrapper.instance() as Form).setState({
+      unsavedChanges: {
+        'dashboard:test:setting': {
+          value: 'changedValue',
+        },
+      },
+    });
+    const updated = wrapper.update();
+    expect(updated.exists('[data-test-subj="advancedSetting-bottomBar"]')).toEqual(true);
+    await findTestSubject(updated, `advancedSetting-cancelButton`).simulate('click');
+    updated.update();
+    expect(updated.exists('[data-test-subj="advancedSetting-bottomBar"]')).toEqual(false);
+  });
+
+  it('should show a reload toast when saving setting requiring a page reload', async () => {
+    const toasts = notificationServiceMock.createStartContract().toasts;
+    const wrapper = mountWithI18nProvider(
+      <Form
+        settings={settings}
+        visibleSettings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
+        toasts={toasts}
+        dockLinks={{} as any}
+      />
+    );
+    (wrapper.instance() as Form).setState({
+      unsavedChanges: {
+        'dashboard:test:setting': {
+          value: 'changedValue',
+        },
+      },
+    });
+    const updated = wrapper.update();
+
+    findTestSubject(updated, `advancedSetting-saveButton`).simulate('click');
+    expect(save).toHaveBeenCalled();
+    await save({ 'dashboard:test:setting': 'changedValue' });
+    expect(toasts.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining(
+          'One or more settings require you to reload the page to take effect.'
+        ),
+      })
+    );
   });
 });
