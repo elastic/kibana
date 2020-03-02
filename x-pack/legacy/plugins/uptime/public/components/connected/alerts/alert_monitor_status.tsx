@@ -9,17 +9,10 @@ import { AppState } from '../../../state';
 import { selectIndexPattern } from '../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../../functional';
 
-interface OwnProps {
-  autocomplete: any;
-}
-
 const mapStateToProps = (state: AppState) => ({
   filters: state.ui.esKuery,
-
   locations: state.overviewFilters.filters.locations,
   indexPattern: selectIndexPattern(state),
 });
 
-export const AlertMonitorStatus = connect<typeof mapStateToProps, {}, OwnProps, AppState>(
-  mapStateToProps
-)(AlertMonitorStatusComponent);
+export const AlertMonitorStatus = connect(mapStateToProps)(AlertMonitorStatusComponent);
