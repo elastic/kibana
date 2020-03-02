@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { Observable } from 'rxjs';
+import { CoreSetup, SharedGlobalConfig } from 'kibana/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
-export function registerRoutes({ http }: CoreSetup): void {
+export function registerRoutes({ http }: CoreSetup, config$: Observable<SharedGlobalConfig>): void {
   const router = http.createRouter();
 
-  registerValueSuggestionsRoute(router);
+  registerValueSuggestionsRoute(router, config$);
 }
