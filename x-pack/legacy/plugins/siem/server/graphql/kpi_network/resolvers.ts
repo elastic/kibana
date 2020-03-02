@@ -5,8 +5,15 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { KpiNetwork } from '../../lib/kpi_network';
 import { createOptions } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+export type QueryKipNetworkResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.KpiNetworkResolver>,
+  QuerySourceResolver
+>;
 
 export interface KpiNetworkResolversDeps {
   kpiNetwork: KpiNetwork;
@@ -16,7 +23,7 @@ export const createKpiNetworkResolvers = (
   libs: KpiNetworkResolversDeps
 ): {
   Source: {
-    KpiNetwork: SourceResolvers['KpiNetwork'];
+    KpiNetwork: QueryKipNetworkResolver;
   };
 } => ({
   Source: {
