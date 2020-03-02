@@ -43,7 +43,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     savedObjectsClient = handlerContext.savedObjects.client;
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerResolveImportErrorsRoute(router, config, allowedTypes);
+    registerResolveImportErrorsRoute(router, config, () => allowedTypes);
 
     await server.start();
   });

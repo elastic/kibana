@@ -52,7 +52,7 @@ describe('POST /internal/saved_objects/_import', () => {
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
-    registerImportRoute(router, config, allowedTypes);
+    registerImportRoute(router, config, () => allowedTypes);
 
     await server.start();
   });

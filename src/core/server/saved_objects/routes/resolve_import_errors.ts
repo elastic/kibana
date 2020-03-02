@@ -34,7 +34,7 @@ interface FileStream extends Readable {
 export const registerResolveImportErrorsRoute = (
   router: IRouter,
   config: SavedObjectConfig,
-  supportedTypes: string[]
+  getSupportedTypes: () => string[]
 ) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
@@ -76,7 +76,7 @@ export const registerResolveImportErrorsRoute = (
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
       const result = await resolveImportErrors({
-        supportedTypes,
+        supportedTypes: getSupportedTypes(),
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
         retries: req.body.retries,

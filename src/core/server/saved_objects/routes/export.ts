@@ -31,13 +31,13 @@ import { getSortedObjectsForExport } from '../export';
 export const registerExportRoute = (
   router: IRouter,
   config: SavedObjectConfig,
-  supportedTypes: string[]
+  getSupportedTypes: () => string[]
 ) => {
   const { maxImportExportSize } = config;
 
   const typeSchema = schema.string({
     validate: (type: string) => {
-      if (!supportedTypes.includes(type)) {
+      if (!getSupportedTypes().includes(type)) {
         return `${type} is not exportable`;
       }
     },

@@ -39,13 +39,13 @@ export function registerRoutes({
   http,
   logger,
   config,
-  importableExportableTypes,
+  getImportableAndExportableTypes,
   migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
   logger: Logger;
   config: SavedObjectConfig;
-  importableExportableTypes: string[];
+  getImportableAndExportableTypes: () => string[];
   migratorPromise: Promise<IKibanaMigrator>;
 }) {
   const router = http.createRouter('/api/saved_objects/');
@@ -59,9 +59,9 @@ export function registerRoutes({
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
-  registerExportRoute(router, config, importableExportableTypes);
-  registerImportRoute(router, config, importableExportableTypes);
-  registerResolveImportErrorsRoute(router, config, importableExportableTypes);
+  registerExportRoute(router, config, getImportableAndExportableTypes);
+  registerImportRoute(router, config, getImportableAndExportableTypes);
+  registerResolveImportErrorsRoute(router, config, getImportableAndExportableTypes);
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

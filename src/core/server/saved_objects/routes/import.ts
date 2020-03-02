@@ -34,7 +34,7 @@ interface FileStream extends Readable {
 export const registerImportRoute = (
   router: IRouter,
   config: SavedObjectConfig,
-  supportedTypes: string[]
+  getSupportedTypes: () => string[]
 ) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
@@ -66,7 +66,7 @@ export const registerImportRoute = (
       }
 
       const result = await importSavedObjects({
-        supportedTypes,
+        supportedTypes: getSupportedTypes(),
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
         objectLimit: maxImportExportSize,
