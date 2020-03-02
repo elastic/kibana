@@ -27,141 +27,62 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { txtChangeButton } from './i18n';
+import './index.scss';
 
-// TODO:
-// import './index.scss';
+// TODO: this interface is temporary for just moving forward with the component
+// and it will be imported from the ../ui_actions when implemented properly
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type BaseConfig = {};
+export interface ActionFactory<Config extends BaseConfig, Context = null> {
+  type: string;
+  displayName: string;
+  iconType?: string;
+  wizard: React.FC<ActionFactoryWizardProps<Config, Context>>;
+  context: Context;
+}
 
-// import { Action } from '../../actions';
-// don't use external interface for now. not sure if it is stabilized
-
-export interface ActionFactoryWizardProps<Config, Context = void> {
+export interface ActionFactoryWizardProps<Config extends BaseConfig, Context = void> {
   /**
    * Context represents environment where this component is being rendered.
    */
   context: Context;
 
   /**
-   * Current (latest) config of the item.
+   * Current (latest) config of the item. (state)
    */
   config: Config | null;
 
   /**
    * Callback called when user updates the config in UI.
+   * ActionFactory's wizard should do validations to the user's input
+   * In case input is complete and valid - config: Config object should be emitted
+   * In case input has changed to the invalid state: null should be emitted
    */
   onConfig: (config: Config | null) => void;
 }
 
-export interface ActionFactory<Config, Context = null> {
-  type: string;
-  displayName: string;
-  iconType?: string;
-  context: Context;
-  wizard: React.FC<ActionFactoryWizardProps<Config, Context>>;
+export interface ActionWizardProps {
+  /**
+   * List of available action factories
+   */
+  actionFactories: Array<ActionFactory<BaseConfig, unknown>>;
+
+  /**
+   * Notifies when wizard's state changes because of user's interaction
+   *
+   * @param actionFactory - current selected action factory. null if none is selected
+   * @param config - current config for current action factory. null if no action factory or if wizard's inputs are invalid or incomplete
+   */
+  onChange: (
+    actionFactory: ActionFactory<BaseConfig, unknown> | null,
+    config: BaseConfig | null
+  ) => void;
 }
-
-export interface ActionFactoryPickerProps {
-  actionFactories: Array<ActionFactory<unknown, unknown>>;
-  onActionFactoryPicked: (actionFactory: ActionFactory<unknown, unknown>) => void;
-}
-
-export interface SelectedActionFactoryProps<Config = unknown> {
-  actionFactory: ActionFactory<Config, unknown>;
-  onConfigChange: (config: Config | null) => void;
-  showDeselect: boolean;
-  onDeselect: () => void;
-}
-export interface ActionWizardProps<Config = unknown> {
-  actionFactories: Array<ActionFactory<any, unknown>>;
-  onChange: (actionFactory: ActionFactory<Config, unknown> | null, config: Config | null) => void;
-}
-
-export const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
-  actionFactory,
-  onDeselect,
-  showDeselect,
-  onConfigChange,
-}) => {
-  const [config, setConfig] = useState();
-  return (
-    <div
-      className="uiActions__selectedActionFactoryContainer"
-      style={{ backgroundColor: '#f5f7fa', padding: '16px' }}
-    >
-      <header>
-        <EuiFlexGroup alignItems="center">
-          {actionFactory.iconType && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionFactory.iconType} size="m" />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={true}>
-            <EuiText>
-              <h4>{actionFactory.displayName}</h4>
-            </EuiText>
-          </EuiFlexItem>
-          {showDeselect && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onDeselect()}>
-                change
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </header>
-      <EuiSpacer size="m" />
-      <div>
-        {actionFactory.wizard({
-          context: actionFactory.context,
-          config,
-          onConfig: newConfig => {
-            setConfig(newConfig);
-            onConfigChange(newConfig);
-          },
-        })}
-      </div>
-    </div>
-  );
-};
-
-export const ActionFactoryPicker: React.FC<ActionFactoryPickerProps> = ({
-  actionFactories,
-  onActionFactoryPicked,
-}) => {
-  if (actionFactories.length === 0) return <div>No action factories to pick from :(</div>;
-
-  return (
-    <EuiFlexGroup>
-      {actionFactories.map(actionFactory => (
-        <EuiFlexItem
-          grow={false}
-          key={actionFactory.type}
-          style={{ width: '120px', minHeight: '100px' }}
-        >
-          <EuiPanel
-            onClick={() => onActionFactoryPicked(actionFactory)}
-            className="eui-textCenter"
-            paddingSize="s"
-          >
-            {actionFactory.iconType && (
-              <>
-                <EuiIcon type={actionFactory.iconType} size="m" />
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <EuiText size="xs">
-              <h4>{actionFactory.displayName}</h4>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
-
 export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onChange }) => {
   // eslint-disable-next-line prefer-const
   let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory<
-    unknown,
+    BaseConfig,
     unknown
   > | null>(null);
 
@@ -187,12 +108,112 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onC
   }
 
   return (
-    <ActionFactoryPicker
+    <ActionFactorySelector
       actionFactories={actionFactories}
-      onActionFactoryPicked={actionFactory => {
+      onActionFactorySelected={actionFactory => {
         setSelectedActionFactory(actionFactory);
         onChange(actionFactory, null);
       }}
     />
+  );
+};
+
+interface SelectedActionFactoryProps<Config extends BaseConfig, Context = unknown> {
+  actionFactory: ActionFactory<Config, Context>;
+  onConfigChange: (config: Config | null) => void;
+  showDeselect: boolean;
+  onDeselect: () => void;
+}
+export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
+const SelectedActionFactory: React.FC<SelectedActionFactoryProps<BaseConfig>> = ({
+  actionFactory,
+  onDeselect,
+  showDeselect,
+  onConfigChange,
+}) => {
+  const [config, setConfig] = useState<BaseConfig | null>(null);
+  return (
+    <div
+      className="uiActions__SelectedActionFactory"
+      data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
+    >
+      <header>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          {actionFactory.iconType && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={actionFactory.iconType} size="m" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={true}>
+            <EuiText>
+              <h4>{actionFactory.displayName}</h4>
+            </EuiText>
+          </EuiFlexItem>
+          {showDeselect && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" onClick={() => onDeselect()}>
+                {txtChangeButton}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </header>
+      <EuiSpacer size="m" />
+      <div>
+        {actionFactory.wizard({
+          context: actionFactory.context,
+          config,
+          onConfig: newConfig => {
+            setConfig(newConfig);
+            onConfigChange(newConfig);
+          },
+        })}
+      </div>
+    </div>
+  );
+};
+
+interface ActionFactorySelectorProps {
+  actionFactories: Array<ActionFactory<BaseConfig, unknown>>;
+  onActionFactorySelected: (actionFactory: ActionFactory<BaseConfig, unknown>) => void;
+}
+export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
+const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
+  actionFactories,
+  onActionFactorySelected,
+}) => {
+  if (actionFactories.length === 0) {
+    // this is not user facing, as it would be impossible to get into this state
+    // just leaving for dev purposes for troubleshooting
+    return <div>No action factories to pick from</div>;
+  }
+
+  return (
+    <EuiFlexGroup wrap={true}>
+      {actionFactories.map(actionFactory => (
+        <EuiFlexItem
+          className="uiActions__ActionFactory"
+          grow={false}
+          key={actionFactory.type}
+          data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+        >
+          <EuiPanel
+            onClick={() => onActionFactorySelected(actionFactory)}
+            className="eui-textCenter"
+            paddingSize="s"
+          >
+            {actionFactory.iconType && (
+              <>
+                <EuiIcon type={actionFactory.iconType} size="m" />
+                <EuiSpacer size="s" />
+              </>
+            )}
+            <EuiText size="xs">
+              <h4>{actionFactory.displayName}</h4>
+            </EuiText>
+          </EuiPanel>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };

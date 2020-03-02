@@ -72,6 +72,32 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable SASS
+  config.module.rules.push({
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          config: {
+            path: resolve(REPO_ROOT, 'src/optimize/'),
+          },
+        },
+      },
+      {
+        loader: 'sass-loader',
+        options: {
+          sassOptions: {
+            includePaths: [resolve(REPO_ROOT, 'node_modules')],
+          },
+        },
+      },
+    ],
+  });
+
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
@@ -96,7 +122,7 @@ module.exports = async ({ config }) => {
   );
 
   // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Load custom Webpack config specified by a plugin.
   if (currentConfig.webpackHook) {

@@ -17,146 +17,11 @@
  * under the License.
  */
 
-import * as React from 'react';
+import React, { useState } from 'react';
+
 import { storiesOf } from '@storybook/react';
-import { ActionWizard, ActionFactory } from './action_wizard';
-import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { useState } from 'react';
-
-const DashboardDrilldownActionFactory: ActionFactory<
-  {
-    dashboardId: string;
-    useCurrentDashboardFilters: boolean;
-    useCurrentDashboardDataRange: boolean;
-  },
-  {
-    dashboards: Array<{ id: string; title: string }>;
-  }
-> = {
-  type: 'Dashboard',
-  displayName: 'Go to Dashboard',
-  iconType: 'dashboardApp',
-  wizard: props => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [config, setConfig] = useState(
-      props.config || {
-        dashboardId: undefined,
-        useCurrentDashboardDataRange: false,
-        useCurrentDashboardFilters: false,
-      }
-    );
-
-    function setAndSubmit(newConfig: {
-      dashboardId: string;
-      useCurrentDashboardFilters: boolean;
-      useCurrentDashboardDataRange: boolean;
-    }) {
-      // validate
-      if (newConfig.dashboardId) {
-        props.onConfig(newConfig as any);
-      } else {
-        props.onConfig(null);
-      }
-
-      setConfig(newConfig);
-    }
-
-    return (
-      <>
-        <EuiFormRow label="Choose destination dashboard:">
-          <EuiSelect
-            name="selectDashboard"
-            hasNoInitialSelection={true}
-            options={props.context.dashboards.map(({ id, title }) => ({ id, text: title }))}
-            value={config.dashboardId}
-            onChange={e => {
-              setAndSubmit({
-                ...config,
-                dashboardId: e.target.value,
-              });
-            }}
-            aria-label="Use aria labels when no actual label is in use"
-          />
-        </EuiFormRow>
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="useCurrentFilters"
-            label="Use current dashboard's filters"
-            checked={config.useCurrentDashboardFilters}
-            onChange={() =>
-              setAndSubmit({
-                ...config,
-                useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
-              } as any)
-            }
-          />
-        </EuiFormRow>
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="useCurrentDateRange"
-            label="Use current dashboard's date range"
-            checked={config.useCurrentDashboardDataRange}
-            onChange={() =>
-              setAndSubmit({
-                ...config,
-                useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
-              } as any)
-            }
-          />
-        </EuiFormRow>
-      </>
-    );
-  },
-  context: {
-    dashboards: [
-      { id: 'dashboard1', title: 'Dashboard 1' },
-      { id: 'dashboard2', title: 'Dashboard 2' },
-    ],
-  },
-};
-
-const UrlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTab: boolean }> = {
-  type: 'Url',
-  displayName: 'Go to URL',
-  iconType: 'link',
-  wizard: props => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [config, setConfig] = useState(props.config || { url: '', openInNewTab: false });
-
-    function setAndSubmit(newConfig: { url: string; openInNewTab: boolean }) {
-      // validate
-      if (newConfig.url) {
-        props.onConfig(newConfig);
-      } else {
-        props.onConfig(null);
-      }
-
-      setConfig(newConfig);
-    }
-
-    return (
-      <>
-        <EuiFormRow label="Enter target URL">
-          <EuiFieldText
-            placeholder="Enter URL"
-            name="url"
-            value={config.url}
-            onChange={event => setAndSubmit({ ...config, url: event.target.value })}
-          />
-        </EuiFormRow>
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="openInNewTab"
-            label="Open in new tab?"
-            checked={config.openInNewTab}
-            onChange={() => setAndSubmit({ ...config, openInNewTab: !config.openInNewTab })}
-          />
-        </EuiFormRow>
-      </>
-    );
-  },
-  context: null,
-};
+import { ActionWizard } from './action_wizard';
+import { ACTION_FACTORIES } from './test_data';
 
 function Demo() {
   const [state, setState] = useState();
@@ -164,8 +29,7 @@ function Demo() {
   return (
     <>
       <ActionWizard
-        // @ts-ignore
-        actionFactories={[DashboardDrilldownActionFactory, UrlDrilldownActionFactory]}
+        actionFactories={ACTION_FACTORIES}
         onChange={(factory, config) => {
           setState({
             factory,
@@ -181,4 +45,17 @@ function Demo() {
   );
 }
 
-storiesOf('components/ActionWizard', module).add('default', () => <Demo />);
+storiesOf('components/ActionWizard', module)
+  .add('default', () => <Demo />)
+  .add('Long list of action factories', () => (
+    // to make sure layout doesn't break
+    <ActionWizard
+      actionFactories={[
+        ...ACTION_FACTORIES,
+        ...ACTION_FACTORIES,
+        ...ACTION_FACTORIES,
+        ...ACTION_FACTORIES,
+      ]}
+      onChange={() => {}}
+    />
+  ));
