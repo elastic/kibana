@@ -21,6 +21,7 @@ import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
+import { i18n } from '@kbn/i18n';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];

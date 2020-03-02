@@ -23,7 +23,7 @@ interface PageHeaderProps {
 export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
   let href = '#/';
   if (params) {
-    const crumbParams: Partial<UptimeUrlParams> = {...params};
+    const crumbParams: Partial<UptimeUrlParams> = { ...params };
     // We don't want to encode this values because they are often set to Date.now(), the relative
     // values in dateRangeStart are better for a URL.
     delete crumbParams.absoluteDateRangeStart;
