@@ -189,9 +189,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.002794444444444445,
             });
           }
         });
@@ -279,9 +279,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.002794444444444445,
             });
             const secondNode = nodes[1];
             expect(secondNode).to.have.property('path');
@@ -291,9 +291,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(secondNode).to.have.property('metric');
             expect(secondNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.002794444444444445,
             });
           }
         });
