@@ -325,7 +325,7 @@ export const reindexServiceFactory = (
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
     const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
@@ -539,7 +539,7 @@ export const reindexServiceFactory = (
 
     async createReindexOperation(indexName: string) {
       if (isSystemIndex(indexName)) {
-        throw Boom.notImplemented(
+        throw error.reindexSystemIndex(
           `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${CURRENT_MAJOR_VERSION}.x minor version.`
         );
       }

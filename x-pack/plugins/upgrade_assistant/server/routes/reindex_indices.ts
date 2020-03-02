@@ -26,6 +26,7 @@ import {
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
   MultipleReindexJobsFound,
+  CannotReindexSystemIndexInCurrent,
 } from '../lib/reindexing/error_symbols';
 
 interface CreateReindexWorker {
@@ -72,6 +73,9 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       case ReindexAlreadyInProgress:
       case MultipleReindexJobsFound:
         return kibanaResponseFactory.badRequest({ body: e.message });
+      case CannotReindexSystemIndexInCurrent:
+        // Not implemented (specific to current version)
+        return kibanaResponseFactory.customError({ body: e.message, statusCode: 501 });
       default:
       // nothing matched
     }
