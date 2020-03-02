@@ -277,7 +277,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async assertAdvancedPivotEditorContent(expectedValue: Record<string, any>) {
       const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
       const advancedEditorValue = JSON.parse(advancedEditorString);
-      expect(advancedEditorValue).to.equal(expectedValue);
+      expect(advancedEditorValue).to.eql(expectedValue);
     },
 
     async assertAdvancedPivotEditorSwitchExists() {
