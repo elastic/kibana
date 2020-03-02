@@ -22,12 +22,12 @@ describe('useLogSummary hook', () => {
   });
 
   it('provides an empty list of buckets by default', () => {
-    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, null, null, null, null));
+    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, null, null));
     expect(result.current.buckets).toEqual([]);
   });
 
   it('queries for new summary buckets when the source id changes', async () => {
-    const { startDate, endDate, startTimestamp, endTimestamp } = createMockDateRange();
+    const { startTimestamp, endTimestamp } = createMockDateRange();
 
     const firstMockResponse = createMockResponse([
       { start: startTimestamp, end: endTimestamp, entriesCount: 1 },
@@ -41,8 +41,7 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ sourceId }) =>
-        useLogSummary(sourceId, startDate, endDate, startTimestamp, endTimestamp, null),
+      ({ sourceId }) => useLogSummary(sourceId, startTimestamp, endTimestamp, null),
       {
         initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
       }
@@ -71,7 +70,7 @@ describe('useLogSummary hook', () => {
   });
 
   it('queries for new summary buckets when the filter query changes', async () => {
-    const { startDate, endDate, startTimestamp, endTimestamp } = createMockDateRange();
+    const { startTimestamp, endTimestamp } = createMockDateRange();
 
     const firstMockResponse = createMockResponse([
       { start: startTimestamp, end: endTimestamp, entriesCount: 1 },
@@ -85,8 +84,7 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ filterQuery }) =>
-        useLogSummary('SOURCE_ID', startDate, endDate, startTimestamp, endTimestamp, filterQuery),
+      ({ filterQuery }) => useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, filterQuery),
       {
         initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
       }
@@ -121,8 +119,8 @@ describe('useLogSummary hook', () => {
 
     const firstRange = createMockDateRange();
     const { waitForNextUpdate, rerender } = renderHook(
-      ({ startDate, endDate, startTimestamp, endTimestamp }) =>
-        useLogSummary('SOURCE_ID', startDate, endDate, startTimestamp, endTimestamp, null),
+      ({ startTimestamp, endTimestamp }) =>
+        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
       {
         initialProps: firstRange,
       }

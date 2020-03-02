@@ -5,6 +5,7 @@
  */
 
 import { useContext } from 'react';
+import { useThrottle } from 'react-use';
 
 import { RendererFunction } from '../../../utils/typed_react';
 import { Source } from '../../source';
@@ -25,12 +26,14 @@ export const WithSummary = ({
   const { filterQuery } = useContext(LogFilterState.Context);
   const { startDate, endDate, startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
 
+  // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
+  const throttledStartTimestamp = useThrottle(startTimestamp, 3000);
+  const throttledEndTimestamp = useThrottle(endTimestamp, 3000);
+
   const { buckets, start, end } = useLogSummary(
     sourceId,
-    startDate,
-    endDate,
-    startTimestamp,
-    endTimestamp,
+    throttledStartTimestamp,
+    throttledEndTimestamp,
     filterQuery
   );
 
