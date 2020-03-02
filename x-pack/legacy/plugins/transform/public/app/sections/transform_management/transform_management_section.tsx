@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,18 +82,6 @@ export const TransformManagement: FC = () => {
                 <FormattedMessage
                   id="xpack.transform.transformList.transformTitle"
                   defaultMessage="Transforms"
-                />
-                <span>&nbsp;</span>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.transform.transformList.betaBadgeLabel', {
-                    defaultMessage: `Beta`,
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.transform.transformList.betaBadgeTooltipContent',
-                    {
-                      defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                    }
-                  )}
                 />
               </h1>
             </EuiFlexItem>
