@@ -47,6 +47,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  state: string;
   tags: string[];
 }
 
@@ -65,7 +66,6 @@ export interface AllCases {
 }
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  state = 'state',
   updatedAt = 'updatedAt',
 }
 

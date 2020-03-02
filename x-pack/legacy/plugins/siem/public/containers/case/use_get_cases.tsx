@@ -98,6 +98,7 @@ export const useGetCases = (): [
     data: initialData,
     filterOptions: {
       search: '',
+      state: 'open',
       tags: [],
     },
     queryParams: {

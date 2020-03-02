@@ -20,16 +20,35 @@ import * as i18n from './translations';
 
 export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
 
-const Spacer = styled.span`
-  margin-left: 8px;
+const MediumShadeText = styled.p`
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
+
+const Spacer = styled.span`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+const TempNumberComponent = () => <span>{1}</span>;
+TempNumberComponent.displayName = 'TempNumberComponent';
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
     name: i18n.CASE_TITLE,
     render: (theCase: Case) => {
       if (theCase.caseId != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>;
+        const caseDetailsLinkComponent = (
+          <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>
+        );
+        return theCase.state === 'open' ? (
+          caseDetailsLinkComponent
+        ) : (
+          <>
+            <MediumShadeText>
+              {caseDetailsLinkComponent}
+              <Spacer>{i18n.CLOSED}</Spacer>
+            </MediumShadeText>
+          </>
+        );
       }
       return getEmptyTagValue();
     },
@@ -37,19 +56,21 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     field: 'createdBy',
     name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']) =>
-      createdBy != null ? (
-        <>
-          <EuiAvatar
-            className="userAction__circle"
-            name={createdBy.fullName ? createdBy.fullName : createdBy.username}
-            size="s"
-          />
-          <Spacer>{createdBy.username}</Spacer>
-        </>
-      ) : (
-        getEmptyTagValue()
-      ),
+    render: (createdBy: Case['createdBy']) => {
+      if (createdBy != null) {
+        return (
+          <>
+            <EuiAvatar
+              className="userAction__circle"
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              size="s"
+            />
+            <Spacer>{createdBy.username}</Spacer>
+          </>
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     field: 'tags',
@@ -76,12 +97,10 @@ export const getCasesColumns = (): CasesColumns[] => [
   },
   {
     align: 'right',
-    field: 'updatedAt', // TO DO once we have commentCount returned in the API: https://github.com/elastic/kibana/issues/58525
+    field: 'commentCount', // TO DO once we have commentCount returned in the API: https://github.com/elastic/kibana/issues/58525
     name: i18n.COMMENTS,
     sortable: true,
-    render: () => {
-      return <span>{1}</span>;
-    },
+    render: TempNumberComponent,
   },
   {
     field: 'createdAt',

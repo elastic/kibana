@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import styled from 'styled-components';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
@@ -22,7 +23,6 @@ import { SortFieldCase, Case, FilterOptions } from '../../../../containers/case/
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
-import { HeaderSection } from '../../../../components/header_section';
 import { CasesTableFilters } from './table_filters';
 
 import {
@@ -33,11 +33,12 @@ import {
 } from '../../../../components/detection_engine/utility_bar';
 import { getCreateCaseUrl } from '../../../../components/link_to';
 
+const Div = styled.div`
+  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+`;
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
-  } else if (field === SortFieldCase.state) {
-    return SortFieldCase.state;
   } else if (field === SortFieldCase.updatedAt) {
     return SortFieldCase.updatedAt;
   }
@@ -104,17 +105,19 @@ export const AllCases = React.memo(() => {
 
   return (
     <Panel loading={isLoading}>
-      <HeaderSection split title={i18n.ALL_CASES}>
-        <CasesTableFilters
-          onFilterChanged={onFilterChangedCallback}
-          initial={{ search: filterOptions.search, tags: filterOptions.tags }}
-        />
-      </HeaderSection>
+      <CasesTableFilters
+        onFilterChanged={onFilterChangedCallback}
+        initial={{
+          search: filterOptions.search,
+          tags: filterOptions.tags,
+          state: filterOptions.state,
+        }}
+      />
       {isLoading && isEmpty(data.cases) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
       )}
       {!isLoading && !isEmpty(data.cases) && (
-        <>
+        <Div>
           <UtilityBar border>
             <UtilityBarSection>
               <UtilityBarGroup>
@@ -146,7 +149,7 @@ export const AllCases = React.memo(() => {
             selection={euiBasicTableSelectionProps}
             sorting={sorting}
           />
-        </>
+        </Div>
       )}
     </Panel>
   );

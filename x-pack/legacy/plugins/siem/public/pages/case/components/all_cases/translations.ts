@@ -8,9 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../translations';
 
-export const ALL_CASES = i18n.translate('xpack.siem.case.caseTable.title', {
-  defaultMessage: 'All Cases',
-});
 export const NO_CASES = i18n.translate('xpack.siem.case.caseTable.noCases.title', {
   defaultMessage: 'No Cases',
 });
@@ -46,3 +43,13 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'e.g. case name',
   }
 );
+export const OPEN_CASES = i18n.translate('xpack.siem.case.caseTable.openCases', {
+  defaultMessage: 'Open cases',
+});
+export const CLOSED_CASES = i18n.translate('xpack.siem.case.caseTable.closedCases', {
+  defaultMessage: 'Closed cases',
+});
+
+export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
+  defaultMessage: 'Closed',
+});

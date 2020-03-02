@@ -81,6 +81,17 @@ export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const NO_TAGS_AVAILABLE = i18n.translate('xpack.siem.case.allCases.noTagsAvailable', {
+  defaultMessage: 'No tags available',
+});
+
+export const NO_REPORTERS_AVAILABLE = i18n.translate(
+  'xpack.siem.case.caseView.noReportersAvailable',
+  {
+    defaultMessage: 'No reporters available.',
+  }
+);
+
 export const COMMENTS = i18n.translate('xpack.siem.case.allCases.comments', {
   defaultMessage: 'Comments',
 });
