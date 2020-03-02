@@ -13,7 +13,7 @@ type ActionGroupDefinitions = Record<string, ActionGroupDefinition>;
 
 export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
   DOWN_MONITOR: {
-    id: 'down-monitor',
+    id: 'xpack.uptime.alerts.actionGroups.downMonitor',
     name: 'Uptime Down Monitor',
   },
 };
