@@ -22,9 +22,6 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
@@ -73,6 +70,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
+import { PersistedState } from '../../../../../plugins/visualizations/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -177,11 +175,10 @@ export function initializeInnerAngularModule(
 function createLocalPersistedStateModule() {
   angular
     .module('discoverPersistedState', ['discoverPrivate', 'discoverPromise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
+    .factory('PersistedState', () => {
       return class AngularPersistedState extends PersistedState {
         constructor(value: any, path: any) {
-          super(value, path, Events);
+          super(value, path);
         }
       };
     });
