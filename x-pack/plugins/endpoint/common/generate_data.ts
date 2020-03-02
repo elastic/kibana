@@ -145,7 +145,7 @@ export function generateResolverTree(
     events = events.concat(newParents);
     parents = newParents;
   }
-  let terminationEvents: EndpointEvent[] = [];
+  const terminationEvents: EndpointEvent[] = [];
   let relatedEvents: EndpointEvent[] = [];
   events.forEach(element => {
     if (randomN(100) < percentChildrenTerminated) {
@@ -161,7 +161,9 @@ export function generateResolverTree(
       );
     }
     if (randomN(100) < percentNodesWithRelated) {
-      relatedEvents = relatedEvents.concat(generateRelatedEvents(element, generator, relatedEventsPerNode));
+      relatedEvents = relatedEvents.concat(
+        generateRelatedEvents(element, generator, relatedEventsPerNode)
+      );
     }
   });
   events = events.concat(terminationEvents);
