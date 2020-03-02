@@ -157,12 +157,6 @@ export interface ClusterStateIndexAPIResponse {
   };
   mappings: any;
   aliases: any[];
-  primary_terms: {
-    '0': number;
-  };
-  in_sync_allocations: {
-    '0': string[];
-  };
 }
 
 export interface ClusterStateAPIResponse {
