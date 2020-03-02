@@ -18,9 +18,13 @@
  */
 import { createMemoryHistory } from 'history';
 
+// Only import types from '.' to avoid triggering default Jest mocks.
+import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
+// Import values from their individual modules instead.
+import { ScopedHistory } from './application';
+
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, PluginInitializerContext, AppMountParameters, ScopedHistory } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
