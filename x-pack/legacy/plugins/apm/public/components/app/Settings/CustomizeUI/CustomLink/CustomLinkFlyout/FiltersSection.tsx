@@ -126,6 +126,7 @@ export const FiltersSection = ({
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiSelect
+                aria-label={filterId}
                 id={filterId}
                 fullWidth
                 options={selectOptions}

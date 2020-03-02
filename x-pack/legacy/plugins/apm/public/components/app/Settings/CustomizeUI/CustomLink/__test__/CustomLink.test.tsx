@@ -4,19 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  wait,
+  waitForElement
+} from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '../';
 import * as hooks from '../../../../../../hooks/useFetcher';
+import * as callApmApi from '../../../../../../hooks/useCallApmApi';
 import {
   expectTextsInDocument,
   MockApmPluginContextWrapper
 } from '../../../../../../utils/testHelpers';
+import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
+
+const data = [
+  {
+    id: '1',
+    label: 'label 1',
+    url: 'url 1',
+    filters: {
+      'service.name': 'opbeans-java'
+    }
+  },
+  {
+    id: '2',
+    label: 'label 2',
+    url: 'url 2',
+    filters: {
+      'transaction.type': 'request'
+    }
+  }
+];
 
 describe('CustomLink', () => {
-  afterEach(() => jest.restoreAllMocks());
-
   describe('empty prompt', () => {
     beforeAll(() => {
       spyOn(hooks, 'useFetcher').and.returnValue({
@@ -49,26 +73,13 @@ describe('CustomLink', () => {
   describe('overview', () => {
     beforeAll(() => {
       spyOn(hooks, 'useFetcher').and.returnValue({
-        data: [
-          {
-            id: '1',
-            label: 'label 1',
-            url: 'url 1',
-            filters: {
-              'service.name': 'opbeans-java'
-            }
-          },
-          {
-            id: '2',
-            label: 'label 2',
-            url: 'url 2',
-            filters: {
-              'transaction.type': 'request'
-            }
-          }
-        ],
+        data,
         status: 'success'
       });
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
     it('shows a table with all custom link', () => {
@@ -97,24 +108,25 @@ describe('CustomLink', () => {
       });
       expect(queryByText('Create link')).toBeInTheDocument();
     });
-
-    it('opens flyout to edit a custom link', () => {
-      const component = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
-      );
-      expect(component.queryByText('Create link')).not.toBeInTheDocument();
-      const editButtons = component.getAllByLabelText('Edit');
-      expect(editButtons.length).toEqual(2);
-      act(() => {
-        fireEvent.click(editButtons[0]);
-      });
-      expect(component.queryByText('Create link')).toBeInTheDocument();
-    });
   });
 
   describe('Flyout', () => {
+    const refetch = jest.fn();
+    let callApmApiSpy: Function;
+    let saveCustomLinkSpy: Function;
+    beforeAll(() => {
+      callApmApiSpy = spyOn(callApmApi, 'useCallApmApi');
+      saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
+      spyOn(hooks, 'useFetcher').and.returnValue({
+        data,
+        status: 'success',
+        refetch
+      });
+    });
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     const openFlyout = () => {
       const component = render(
         <MockApmPluginContextWrapper>
@@ -128,6 +140,46 @@ describe('CustomLink', () => {
       expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
+
+    it('creates a custom link', async () => {
+      const component = openFlyout();
+      const labelInput = component.getByLabelText('label');
+      act(() => {
+        fireEvent.change(labelInput, {
+          target: { value: 'foo' }
+        });
+      });
+      const urlInput = component.getByLabelText('url');
+      act(() => {
+        fireEvent.change(urlInput, {
+          target: { value: 'bar' }
+        });
+      });
+      await act(async () => {
+        await wait(() => fireEvent.submit(component.getByText('Save')));
+      });
+      expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('deletes a custom link', async () => {
+      const component = render(
+        <MockApmPluginContextWrapper>
+          <CustomLinkOverview />
+        </MockApmPluginContextWrapper>
+      );
+      expect(component.queryByText('Create link')).not.toBeInTheDocument();
+      const editButtons = component.getAllByLabelText('Edit');
+      expect(editButtons.length).toEqual(2);
+      act(() => {
+        fireEvent.click(editButtons[0]);
+      });
+      expect(component.queryByText('Create link')).toBeInTheDocument();
+      await act(async () => {
+        await wait(() => fireEvent.submit(component.getByText('Delete')));
+      });
+      expect(callApmApiSpy).toHaveBeenCalled();
+      expect(refetch).toHaveBeenCalled();
+    });
 
     describe('Filters', () => {
       const addFilterField = (
@@ -146,9 +198,62 @@ describe('CustomLink', () => {
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
         // After 4 items, the button is disabled
-        // Even adding a new filter, it still has only 4 items.
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
+      });
+      it('removes items already selected', () => {
+        const component = openFlyout();
+
+        const addFieldAndCheck = (
+          fieldName: string,
+          selectValue: string,
+          addNewFilter: boolean,
+          optionsExpected: string[]
+        ) => {
+          if (addNewFilter) {
+            addFilterField(component, 1);
+          }
+          const field = component.getByLabelText(
+            fieldName
+          ) as HTMLSelectElement;
+          const optionsAvailable = Object.values(field)
+            .map(option => (option as HTMLOptionElement).text)
+            .filter(option => option);
+
+          act(() => {
+            fireEvent.change(field, {
+              target: { value: selectValue }
+            });
+          });
+          expect(field.value).toEqual(selectValue);
+          expect(optionsAvailable).toEqual(optionsExpected);
+        };
+
+        addFieldAndCheck('filter-0', 'transaction.name', false, [
+          'Select fields...',
+          'service.name',
+          'service.environment',
+          'transaction.type',
+          'transaction.name'
+        ]);
+
+        addFieldAndCheck('filter-1', 'service.name', true, [
+          'Select fields...',
+          'service.name',
+          'service.environment',
+          'transaction.type'
+        ]);
+
+        addFieldAndCheck('filter-2', 'transaction.type', true, [
+          'Select fields...',
+          'service.environment',
+          'transaction.type'
+        ]);
+
+        addFieldAndCheck('filter-3', 'service.environment', true, [
+          'Select fields...',
+          'service.environment'
+        ]);
       });
     });
   });

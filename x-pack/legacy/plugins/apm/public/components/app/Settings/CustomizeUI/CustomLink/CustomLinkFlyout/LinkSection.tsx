@@ -125,6 +125,7 @@ export const LinkSection = ({
               fullWidth
               value={field.value}
               onChange={e => field.onChange(e.target.value)}
+              aria-label={field.name}
             />
           </EuiFormRow>
         );

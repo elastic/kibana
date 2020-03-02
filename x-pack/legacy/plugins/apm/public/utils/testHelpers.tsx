@@ -196,7 +196,8 @@ const mockCore = {
   },
   notifications: {
     toasts: {
-      addWarning: () => {}
+      addWarning: () => {},
+      addDanger: () => {}
     }
   }
 };
