@@ -7,10 +7,5 @@
 import { PluginInitializerContext } from 'src/core/server';
 
 import { TransformServerPlugin } from './plugin';
-import { configSchema } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new TransformServerPlugin(ctx);
-
-export const config = {
-  schema: configSchema,
-};
