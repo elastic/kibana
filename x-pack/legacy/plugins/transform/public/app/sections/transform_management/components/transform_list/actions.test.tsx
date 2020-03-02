@@ -6,7 +6,7 @@
 
 import { getActions } from './actions';
 
-jest.mock('ui/new_platform');
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List Actions', () => {
   test('getActions()', () => {

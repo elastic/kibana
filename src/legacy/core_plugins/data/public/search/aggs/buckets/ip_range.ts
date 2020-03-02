@@ -19,15 +19,17 @@
 
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
-import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
-// @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
-export { IpRangeKey, convertIPRangeToString };
+
+import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
+export { IpRangeKey, convertIPRangeToString }; // for BWC
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
@@ -44,7 +46,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
   getFormat(agg) {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = getFieldFormats();
     const formatter = agg.fieldOwnFormatter(
       fieldFormats.TEXT_CONTEXT_TYPE,
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.IP)

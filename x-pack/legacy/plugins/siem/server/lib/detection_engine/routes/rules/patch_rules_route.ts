@@ -12,7 +12,9 @@ import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '..
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transform } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -108,16 +110,16 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
             return headers
               .response({
-                message: 'Internal error transforming rules',
+                message: errors,
                 status_code: 500,
               })
               .code(500);
           } else {
-            return transformed;
+            return validated;
           }
         } else {
           const error = getIdError({ id, ruleId });
