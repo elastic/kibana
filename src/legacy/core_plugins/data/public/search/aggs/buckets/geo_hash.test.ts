@@ -19,12 +19,13 @@
 
 import { geoHashBucketAgg } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 
-jest.mock('ui/new_platform');
-
 describe('Geohash Agg', () => {
+  // const typesRegistry = mockAggTypesRegistry([geoHashBucketAgg]);
+  const typesRegistry = mockAggTypesRegistry();
   const getAggConfigs = (params?: Record<string, any>) => {
     const indexPattern = {
       id: '1234',
@@ -62,7 +63,7 @@ describe('Geohash Agg', () => {
           },
         },
       ],
-      null
+      { typesRegistry }
     );
   };
 
