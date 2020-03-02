@@ -7,13 +7,14 @@
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedResponse, MockedProvider } from '@apollo/client/testing';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 
 import { OverviewHost } from '.';
 import { createStore, State } from '../../../../store';
 import { overviewHostQuery } from '../../../../containers/overview/overview_host/index.gql_query';
+import { GetOverviewHostQuery } from '../../../../graphql/types';
+import { MockedProvider } from 'react-apollo/test-utils';
 import { wait } from '../../../../lib/helpers';
 
 jest.mock('../../../../lib/kibana');
@@ -21,7 +22,12 @@ jest.mock('../../../../lib/kibana');
 const startDate = 1579553397080;
 const endDate = 1579639797080;
 
-interface MockedProvidedQuery extends MockedResponse {
+interface MockedProvidedQuery {
+  request: {
+    query: GetOverviewHostQuery.Query;
+    fetchPolicy: string;
+    variables: GetOverviewHostQuery.Variables;
+  };
   result: {
     data: {
       source: unknown;
@@ -33,6 +39,7 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
   {
     request: {
       query: overviewHostQuery,
+      fetchPolicy: 'cache-and-network',
       variables: {
         sourceId: 'default',
         timerange: { interval: '12h', from: startDate, to: endDate },
