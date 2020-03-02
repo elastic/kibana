@@ -12,9 +12,9 @@ export const fetchMLJob = async () => {
   try {
     return await fetchGet(url);
   } catch (error) {
-    if (error.response.status === 404) {
-      return null;
-    }
+    // if (error.response.status === 404) {
+    //   return null;
+    // }
     throw error;
   }
 };
@@ -52,10 +52,16 @@ export const getIndexDateRange = async () => {
 export const fetchAnomalyRecords = async params => {
   const { dateStart, dateEnd } = params;
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/records`;
-
-  return fetchPost(url, {
-    start: dateStart,
-    end: dateEnd,
-    record_score: 10,
-  });
+  try {
+    return fetchPost(url, {
+      start: dateStart,
+      end: dateEnd,
+      record_score: 10,
+    });
+  } catch (error) {
+    if (error.response.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };

@@ -25,11 +25,15 @@ export function fetchEffectFactory<T, R, S, F>(
   fail: (error: Error) => Action<F>
 ) {
   return function*(action: Action<T>) {
-    const {
-      payload: { ...params },
-    } = action;
-    const basePath = yield select(getBasePath);
-    const response = yield call(fetch, { ...params, basePath });
-    yield put(success(response));
+    try {
+      const {
+        payload: { ...params },
+      } = action;
+      const basePath = yield select(getBasePath);
+      const response = yield call(fetch, { ...params, basePath });
+      yield put(success(response));
+    } catch (error) {
+      yield put(fail(error));
+    }
   };
 }

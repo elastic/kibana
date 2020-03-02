@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -15,14 +15,15 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MLJobLink } from '../ml_job_link';
-import { MLLink } from '../ml_link';
 import * as labels from '../translations';
+import { UptimeSettingsContext } from '../../../../contexts';
 
 interface Props {
   isCreatingJob: boolean;
@@ -37,6 +38,8 @@ export function MachineLearningFlyoutView({
   onClose,
   hasMLJob,
 }: Props) {
+  const { basePath } = useContext(UptimeSettingsContext);
+
   const isLoadingMLJob = false;
 
   return (
@@ -66,7 +69,9 @@ export function MachineLearningFlyoutView({
               id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
               defaultMessage="Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
               values={{
-                mlJobsPageLink: <MLLink>{labels.ML_MANAGEMENT_PAGE}</MLLink>,
+                mlJobsPageLink: (
+                  <EuiLink href={basePath + '/app/ml'}>{labels.ML_MANAGEMENT_PAGE}</EuiLink>
+                ),
               }}
             />
             <em>{labels.TAKE_SOME_TIME_TEXT}</em>

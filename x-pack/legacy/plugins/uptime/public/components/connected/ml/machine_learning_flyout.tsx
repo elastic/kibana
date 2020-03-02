@@ -6,10 +6,10 @@
 
 import React, { Component, useContext, useEffect, useState } from 'react';
 import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { AppState } from '../../../state';
 import { MachineLearningFlyoutView } from '../../functional';
-import { hasMLJobSelector, isMLJobCreating } from '../../../state/selectors';
+import { hasMLJobSelector, isMLJobCreating, mlSelector } from '../../../state/selectors';
 import { createMLJobAction, getMLJobAction } from '../../../state/actions';
 import { MLJobLink } from '../../functional/ml/ml_job_link';
 import * as labels from './translations';
@@ -36,6 +36,7 @@ export const MLFlyoutContainer: Component<Props> = ({
   mlError,
 }) => {
   const { notifications } = useKibana();
+  const { errors } = useSelector(mlSelector);
   useEffect(() => {
     loadMLJob(ML_JOB_ID);
   }, [loadMLJob]);
@@ -58,14 +59,16 @@ export const MLFlyoutContainer: Component<Props> = ({
   }, [hasMLJob, notifications, onClose, isCreatingJob]);
 
   useEffect(() => {
-    if (isCreatingJob) {
+    if (isCreatingJob && !hasMLJob) {
+      const err = errors?.pop();
       notifications.toasts.warning({
         title: <p>{labels.JOB_CREATION_FAILED}</p>,
-        body: toMountPoint(<p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>),
+        body: err?.body?.message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
+        toastLifeTimeMs: 5000,
       });
       setIsCreatingJob(false);
     }
-  }, [mlError, notifications, isCreatingJob]);
+  }, [hasMLJob, notifications, isCreatingJob, errors]);
 
   if (!isOpen) {
     return null;
@@ -74,6 +77,7 @@ export const MLFlyoutContainer: Component<Props> = ({
   const createAnomalyJob = () => {
     setIsCreatingJob(true);
     createMLJob();
+    onClose();
   };
 
   return (

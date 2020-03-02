@@ -4,16 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { MLLink } from './ml_link';
+import React, { useContext } from 'react';
+import url from 'url';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import rison, { RisonValue } from 'rison-node';
 import { ML_JOB_ID } from '../../../../common/constants';
+import { UptimeSettingsContext } from '../../../contexts';
 
-export const MLJobLink: React.FC = ({ children }) => {
+interface Props {
+  fill: boolean;
+}
+
+export const MLJobLink: React.FC = ({ fill, children }: Props) => {
+  const { basePath } = useContext(UptimeSettingsContext);
+
   const query = {
     ml: { jobIds: [ML_JOB_ID] },
     refreshInterval: { pause: true, value: 0 },
     time: { from: 'now-24h', to: 'now' },
   };
 
-  return <MLLink children={children} query={query} path="/timeseriesexplorer" />;
+  const path = '/timeseriesexplorer';
+
+  const href = url.format({
+    pathname: basePath + '/app/ml',
+    hash: `${path}?_g=${rison.encode(query as RisonValue)}`,
+  });
+
+  return fill ? (
+    <EuiButton size="s" children={children} fill={fill} href={href} target="_blank" />
+  ) : (
+    <EuiButtonEmpty children={children} size="s" href={href} target="_blank" />
+  );
 };

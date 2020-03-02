@@ -88,11 +88,7 @@ export const DurationChartComponent = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MLJobLink>Analyze in ML</MLJobLink>
-
-            <EuiButton fill={true} size="s">
-              Analyze in ML
-            </EuiButton>
+            <MLJobLink fill={true}>Analyze in ML</MLJobLink>
           </EuiFlexItem>
         </EuiFlexGroup>
 

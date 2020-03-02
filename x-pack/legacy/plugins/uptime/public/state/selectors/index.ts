@@ -7,7 +7,7 @@
 import { createSelector } from 'reselect';
 import { AppState } from '../../state';
 
-const mlSelector = (state: AppState) => state.ml;
+export const mlSelector = (state: AppState) => state.ml;
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
