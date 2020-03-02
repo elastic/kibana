@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../core/public/mocks';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+import { SearchStart } from './search/search_service';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export const [getSearchServiceShim, setSearchServiceShim] = createGetterSetter<SearchStart>(
+  'searchShim'
+);
