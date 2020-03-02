@@ -7,6 +7,10 @@
 import { textService } from '../text';
 import { linkToHome } from './links';
 
+import { ManagementAppMountParams } from '../../../../../../../../src/plugins/management/public';
+
+type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
+
 export enum BREADCRUMB_SECTION {
   MANAGEMENT = 'management',
   HOME = 'home',
@@ -24,17 +28,16 @@ type Breadcrumbs = {
 };
 
 class BreadcrumbService {
-  private chrome: any;
   private breadcrumbs: Breadcrumbs = {
     management: [],
     home: [],
     cloneTransform: [],
     createTransform: [],
   };
+  private setBreadcrumbsHandler?: SetBreadcrumbs;
 
-  public init(chrome: any, managementBreadcrumb: any): void {
-    this.chrome = chrome;
-    this.breadcrumbs.management = [managementBreadcrumb];
+  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
+    this.setBreadcrumbsHandler = setBreadcrumbsHandler;
 
     // Home and sections
     this.breadcrumbs.home = [
@@ -59,12 +62,19 @@ class BreadcrumbService {
   }
 
   public setBreadcrumbs(type: BREADCRUMB_SECTION): void {
+    if (!this.setBreadcrumbsHandler) {
+      throw new Error(`BreadcrumbService#setup() must be called first!`);
+    }
+
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]]
       : [...this.breadcrumbs.home];
 
     // Pop off last breadcrumb
-    const lastBreadcrumb = newBreadcrumbs.pop() as BreadcrumbItem;
+    const lastBreadcrumb = newBreadcrumbs.pop() as {
+      text: string;
+      href?: string;
+    };
 
     // Put last breadcrumb back without href
     newBreadcrumbs.push({
@@ -72,7 +82,7 @@ class BreadcrumbService {
       href: undefined,
     });
 
-    this.chrome.setBreadcrumbs(newBreadcrumbs);
+    this.setBreadcrumbsHandler(newBreadcrumbs);
   }
 }
 

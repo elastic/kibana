@@ -12,21 +12,19 @@ import { NUMERALJS } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
   help: i18n.translate('xpack.canvas.functions.formatnumberHelpText', {
-    defaultMessage: 'Formats a number into a formatted number string using {NUMERALJS}. See {url}.',
+    defaultMessage: 'Formats a number into a formatted number string using {NUMERALJS}.',
     values: {
       NUMERALJS,
-      url: 'http://numeraljs.com/#format',
     },
   }),
   args: {
+    // TODO: Find a way to generate the docs URL here
     format: i18n.translate('xpack.canvas.functions.formatnumber.args.formatHelpText', {
-      defaultMessage:
-        'A {NUMERALJS} format string. For example, {example1} or {example2}. See {url}.',
+      defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {
         example1: `"0.0a"`,
         example2: `"0%"`,
         NUMERALJS,
-        url: 'http://numeraljs.com/#format',
       },
     }),
   },
