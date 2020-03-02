@@ -16,11 +16,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/list_custom_actions';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE
+} from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { CustomActionFormData } from '.';
 
 type FiltersType = CustomActionFormData['filters'];
 
-const DEFAULT_OPTION = {
+interface FilterOption {
+  value: 'DEFAULT' | keyof FilterOptionsType;
+  text: string;
+}
+
+const DEFAULT_OPTION: FilterOption = {
   value: 'DEFAULT',
   text: i18n.translate(
     'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
@@ -28,12 +41,12 @@ const DEFAULT_OPTION = {
   )
 };
 
-const filterOptions = [
+const filterOptions: FilterOption[] = [
   DEFAULT_OPTION,
-  { value: 'service.name', text: 'service.name' },
-  { value: 'service.environment', text: 'service.environment' },
-  { value: 'transaction.type', text: 'transaction.type' },
-  { value: 'transaction.name', text: 'transaction.name' }
+  { value: SERVICE_NAME, text: SERVICE_NAME },
+  { value: SERVICE_ENVIRONMENT, text: SERVICE_ENVIRONMENT },
+  { value: TRANSACTION_TYPE, text: TRANSACTION_TYPE },
+  { value: TRANSACTION_NAME, text: TRANSACTION_NAME }
 ];
 
 const getSelectOptions = (filters: FiltersType, idx: number) => {

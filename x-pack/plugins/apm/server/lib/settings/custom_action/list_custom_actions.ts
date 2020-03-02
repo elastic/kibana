@@ -4,15 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
+
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT
+} from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 import { CustomAction } from './custom_action_types';
+
+export const FilterOptions = t.partial({
+  [SERVICE_NAME]: t.string,
+  [SERVICE_ENVIRONMENT]: t.string,
+  [TRANSACTION_NAME]: t.string,
+  [TRANSACTION_TYPE]: t.string
+});
+
+export type FilterOptionsType = t.TypeOf<typeof FilterOptions>;
 
 export async function listCustomActions({
   setup,
   filters = {}
 }: {
   setup: Setup;
-  filters: Record<string, string>;
+  filters?: FilterOptionsType;
 }) {
   const { internalClient, indices } = setup;
 

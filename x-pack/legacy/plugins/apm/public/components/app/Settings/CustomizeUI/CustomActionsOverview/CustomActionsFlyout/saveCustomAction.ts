@@ -26,7 +26,6 @@ export async function saveCustomAction({
 }) {
   try {
     const customAction = {
-      actionId: 'trace',
       label,
       url,
       filters

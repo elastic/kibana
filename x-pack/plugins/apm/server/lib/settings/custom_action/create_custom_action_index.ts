@@ -37,9 +37,6 @@ const mappings: Mappings = {
     url: {
       type: 'keyword'
     },
-    actionId: {
-      type: 'keyword'
-    },
     filters: {
       dynamic: true,
       properties: {}

@@ -26,8 +26,7 @@ export async function createOrUpdateCustomAction({
       '@timestamp': Date.now(),
       label: customAction.label,
       url: customAction.url,
-      filters: customAction.filters,
-      actionId: customAction.actionId
+      filters: customAction.filters
     }
   };
 

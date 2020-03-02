@@ -8,19 +8,25 @@ import { createRoute } from '../create_route';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomAction } from '../../lib/settings/custom_action/create_or_update_custom_action';
 import { deleteCustomAction } from '../../lib/settings/custom_action/delete_custom_action';
-import { listCustomActions } from '../../lib/settings/custom_action/list_custom_actions';
+import {
+  listCustomActions,
+  FilterOptions
+} from '../../lib/settings/custom_action/list_custom_actions';
 
 export const listCustomActionsRoute = createRoute(core => ({
   path: '/api/apm/settings/custom-actions',
+  params: {
+    query: FilterOptions
+  },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await listCustomActions({ setup });
+    const { params } = context;
+    return await listCustomActions({ setup, filters: params.query });
   }
 }));
 
 const payload = t.intersection([
   t.type({
-    actionId: t.string,
     label: t.string,
     url: t.string
   }),
