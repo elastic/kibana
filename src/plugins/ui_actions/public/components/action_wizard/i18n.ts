@@ -19,6 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtChangeButton = i18n.translate('ui_actions.components.actionWizard.changeButton', {
+export const txtChangeButton = i18n.translate('uiActions.components.actionWizard.changeButton', {
   defaultMessage: 'change',
 });
