@@ -10,7 +10,11 @@ import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
-import { IngestManagerSetupDeps, IngestManagerConfigType } from '../../plugin';
+import {
+  IngestManagerSetupDeps,
+  IngestManagerConfigType,
+  IngestManagerStartDeps,
+} from '../../plugin';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
 import { DefaultLayout } from './layouts';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
@@ -66,19 +70,21 @@ const IngestManagerRoutes = ({ ...rest }) => {
 const IngestManagerApp = ({
   basepath,
   coreStart,
-  deps,
+  setupDeps,
+  startDeps,
   config,
 }: {
   basepath: string;
   coreStart: CoreStart;
-  deps: IngestManagerSetupDeps;
+  setupDeps: IngestManagerSetupDeps;
+  startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
     <coreStart.i18n.Context>
       <CoreContext.Provider value={coreStart}>
-        <DepsContext.Provider value={deps}>
+        <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <IngestManagerRoutes basepath={basepath} />
@@ -94,11 +100,18 @@ export function renderApp(
   coreStart: CoreStart,
   { element, appBasePath }: AppMountParameters,
   deps: IngestManagerSetupDeps,
+  startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
 ) {
   setHttpClient(coreStart.http);
   ReactDOM.render(
-    <IngestManagerApp basepath={appBasePath} coreStart={coreStart} deps={deps} config={config} />,
+    <IngestManagerApp
+      basepath={appBasePath}
+      coreStart={coreStart}
+      setupDeps={deps}
+      startDeps={startDeps}
+      config={config}
+    />,
     element
   );
 
