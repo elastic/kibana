@@ -71,7 +71,9 @@ describe('ReindexPollingService', () => {
       const service = new ReindexPollingService('myIndex', mockClient);
       await service.startReindex();
 
-      expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex');
+      expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex', {
+        body: JSON.stringify({ openAndClose: false }),
+      });
     });
   });
 
