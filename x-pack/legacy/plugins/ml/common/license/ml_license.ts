@@ -23,7 +23,7 @@ export class MlLicense {
   private _isSecurityEnabled: boolean = false;
   private _hasLicenseExpired: boolean = false;
   private _isMlEnabled: boolean = false;
-  private _isReducedLicense: boolean = false;
+  private _isMinimumLicense: boolean = false;
   private _isFullLicense: boolean = false;
   private _initialized: boolean = false;
 
@@ -38,7 +38,7 @@ export class MlLicense {
       this._isSecurityEnabled = securityIsEnabled;
       this._hasLicenseExpired = this._license.status === 'expired';
       this._isMlEnabled = this._license.getFeature(PLUGIN_ID).isEnabled;
-      this._isReducedLicense =
+      this._isMinimumLicense =
         this._license.check(PLUGIN_ID, MINIMUM_LICENSE).state === LICENSE_CHECK_STATE.Valid;
       this._isFullLicense =
         this._license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid;
@@ -67,8 +67,8 @@ export class MlLicense {
     return this._isMlEnabled;
   }
 
-  public isReducedLicense() {
-    return this._isReducedLicense;
+  public isMinimumLicense() {
+    return this._isMinimumLicense;
   }
 
   public isFullLicense() {

@@ -17,7 +17,7 @@ export class MlServerLicense extends MlLicense {
     return guard(() => this.isFullLicense(), handler);
   }
   public basicLicenseAPIGuard(handler: RequestHandler<any, any, any>) {
-    return guard(() => this.isReducedLicense(), handler);
+    return guard(() => this.isMinimumLicense(), handler);
   }
 }
 
