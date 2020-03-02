@@ -16,6 +16,9 @@ const FlexGroup = styled(EuiFlexGroup)`
   bottom: ${lightTheme.gutterTypes.gutterLarge};
   position: absolute;
   width: 100%;
+  transition: opacity ${lightTheme.euiAnimSpeedFast}
+    ${lightTheme.euiAnimSlightResistance};
+  z-index: 1;
 `;
 
 export function EdgeInfoPanel() {
@@ -59,18 +62,19 @@ export function EdgeInfoPanel() {
     };
   });
 
+  const style = { opacity: 1 };
   if (!focusedEdge || focusedEdge.length === 0) {
-    return null;
+    style.opacity = 0;
   }
 
   // TODO : REAL DATA!
-  const { avgResponseTime, callsPerMin } = {
+  const { avgResponseTime = 0, callsPerMin = 0 } = {
     avgResponseTime: Math.random() * Math.floor(1000000),
     callsPerMin: Math.random() * Math.floor(10000)
   }; // focusedEdge.data();
 
   return (
-    <FlexGroup justifyContent="spaceAround">
+    <FlexGroup justifyContent="spaceAround" style={style}>
       <Contents avgResponseTime={avgResponseTime} callsPerMin={callsPerMin} />
     </FlexGroup>
   );
