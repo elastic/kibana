@@ -46,6 +46,7 @@ export class MlLicense {
       if (this._initialized === false && postInitFunctions !== undefined) {
         postInitFunctions.forEach(f => f(this));
       }
+      this._initialized = true;
     });
   }
 
