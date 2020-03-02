@@ -44,14 +44,7 @@ export function createFieldChooserDirective($location, config) {
     link: function($scope) {
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
-
-      $scope.selectedIndexPattern = $scope.indexPatternList.find(
-        pattern => pattern.id === $scope.indexPattern.id
-      );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function(id) {
-        $scope.state.index = id;
-      };
 
       const filter = ($scope.filter = {
         props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],

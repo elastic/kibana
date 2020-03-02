@@ -166,7 +166,7 @@ export function getState({
     startSync: start,
     stopSync: stop,
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
-    replaceUrlAppState: async (newPartial: AppState) => {
+    replaceUrlAppState: async (newPartial: AppState = {}) => {
       const state = { ...appStateContainer.getState(), newPartial };
       await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     },

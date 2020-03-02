@@ -203,6 +203,7 @@ function discoverController(
     stopSync: stopStateSync,
     setAppState,
     replaceUrlState,
+    replaceUrlAppState,
     isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
@@ -247,13 +248,12 @@ function discoverController(
           $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
           $scope.opts.timefield = getTimeField();
           $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
-          /**
+
           const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
-          console.log(sort, newStatePartial.sort);
-          if (!_.isEqual(sort, newStatePartial.sort)) {
-            return replaceUrlAppState(sort);
+          if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
+            return await replaceUrlAppState(sort);
           }
-           **/
+          // is needed to rerender the histogram
           $scope.vis = undefined;
         }
 
@@ -264,11 +264,9 @@ function discoverController(
     }
   });
 
-  $scope.$watch('state.index', (index, prevIndex) => {
-    if (prevIndex == null || prevIndex === index) return;
-    setAppState({ index });
-    $route.reload();
-  });
+  $scope.setIndexPattern = id => {
+    setAppState({ index: id });
+  };
 
   // update data source when filters update
   subscriptions.add(
