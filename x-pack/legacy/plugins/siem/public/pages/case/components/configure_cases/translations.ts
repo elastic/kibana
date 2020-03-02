@@ -114,3 +114,24 @@ export const FIELD_MAPPING_THIRD_COL = i18n.translate(
     defaultMessage: 'On edit and update',
   }
 );
+
+export const FIELD_MAPPING_EDIT_NOTHING = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingEditNothing',
+  {
+    defaultMessage: 'Nothing',
+  }
+);
+
+export const FIELD_MAPPING_EDIT_OVERWRITE = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingEditOverwrite',
+  {
+    defaultMessage: 'Overwrite',
+  }
+);
+
+export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingEditAppend',
+  {
+    defaultMessage: 'Append',
+  }
+);

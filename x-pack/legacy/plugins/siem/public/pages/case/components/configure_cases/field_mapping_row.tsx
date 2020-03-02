@@ -7,6 +7,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 
+import * as i18n from './translations';
+
 interface ThirdPartyField {
   value: string;
   label: string;
@@ -19,17 +21,17 @@ interface RowProps {
 const editUpdateOptions = [
   {
     value: 'nothing',
-    inputDisplay: <span>{'Nothing'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_NOTHING}</span>,
     'data-test-subj': 'edit-update-option-nothing',
   },
   {
     value: 'overwrite',
-    inputDisplay: <span>{'Overwrite'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_OVERWRITE}</span>,
     'data-test-subj': 'edit-update-option-overwrite',
   },
   {
     value: 'append',
-    inputDisplay: <span>{'Append'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_APPEND}</span>,
     'data-test-subj': 'edit-update-option-append',
   },
 ];
