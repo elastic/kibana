@@ -53,6 +53,9 @@ export default function({ getService }) {
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          openAndClose: false,
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -101,6 +104,9 @@ export default function({ getService }) {
       await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          openAndClose: false,
+        })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
 
@@ -125,6 +131,9 @@ export default function({ getService }) {
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/7.0-data`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          openAndClose: false,
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('7.0-data');

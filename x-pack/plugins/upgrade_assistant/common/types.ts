@@ -174,7 +174,7 @@ export interface ClusterStateIndexAPIResponse {
     };
   };
   mappings: any;
-  aliases: any[];
+  aliases: string[];
 }
 
 export interface ClusterStateAPIResponse {

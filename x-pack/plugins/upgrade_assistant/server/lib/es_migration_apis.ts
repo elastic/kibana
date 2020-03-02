@@ -11,6 +11,7 @@ import {
   EnrichedDeprecationInfo,
   UpgradeAssistantStatus,
 } from '../../common/types';
+import { getIndexStateFromClusterState } from '../../common/get_index_state_from_cluster_state';
 
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
@@ -33,7 +34,7 @@ export async function getUpgradeAssistantStatus(
     // The response from this call is considered internal and subject to change. We have an API
     // integration test for asserting that the current ES version still returns what we expect.
     // This lives in x-pack/test/upgrade_assistant_integration
-    const indicesMetadata: ClusterStateAPIResponse = await dataClient.callAsCurrentUser(
+    const clusterState: ClusterStateAPIResponse = await dataClient.callAsCurrentUser(
       'cluster.state',
       {
         index: indexNames,
@@ -43,7 +44,7 @@ export async function getUpgradeAssistantStatus(
 
     indices.forEach(indexData => {
       indexData.blockerForReindexing =
-        indicesMetadata.metadata.indices[indexData.index!].state === 'close'
+        getIndexStateFromClusterState(indexData.index!, clusterState) === 'close'
           ? 'index-closed'
           : undefined;
     });

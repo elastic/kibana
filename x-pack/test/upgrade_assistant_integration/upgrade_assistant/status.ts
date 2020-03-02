@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { getIndexStateFromClusterState } from '../../../plugins/upgrade_assistant/common/get_index_state_from_cluster_state';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
@@ -33,12 +34,12 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       try {
-        if (result.body.metadata.indices['7.0-data'].state === 'close') {
+        if (getIndexStateFromClusterState('7.0-data', result.body) === 'close') {
           return;
         }
       } catch (e) {
         expect().fail(
-          `Can no longer access index open/closed state. Please update Upgrade Assistant checkup.`
+          `Can no longer access index open/closed state. Please update Upgrade Assistant checkup. (${e.message})`
         );
         return;
       }
