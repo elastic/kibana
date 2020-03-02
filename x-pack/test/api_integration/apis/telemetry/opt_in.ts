@@ -97,6 +97,6 @@ async function updateSavedObjectAttributes(supertest: any, attributes: any): Pro
 }
 
 async function getSavedObjectAttributes(supertest: any): Promise<any> {
-  const { body } = await supertest.get('/api/saved_objects/telemetry/telemetry');
+  const { body } = await supertest.get('/api/saved_objects/telemetry/telemetry').expect(200);
   return body.attributes;
 }
