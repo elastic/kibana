@@ -50,6 +50,7 @@ export interface LogPositionCallbacks {
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
+  updateTimestamps: () => void;
 }
 
 const DEFAULT_DATE_RANGE: DateRange = { startDate: 'now-1d', endDate: 'now' };
@@ -86,6 +87,11 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   const initialize = useCallback(() => {
     setInitialized(true);
   }, [setInitialized]);
+
+  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
+  const updateTimestamps = useCallback(() => {
+    setLastUpdate(Date.now());
+  }, [setLastUpdate]);
 
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -154,16 +160,21 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [dateRange, targetPosition]
   );
 
+  // `lastUpdate` needs to be a dependency for the timestamps.
+  // ESLint complains it's unnecessary, but we know better.
+  /* eslint-disable react-hooks/exhaustive-deps */
   const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDate), [
     dateRange.startDate,
+    lastUpdate,
   ]);
 
   // endTimestamp needs to be synced to `now` to allow auto-streaming
   const endTimestampDep = dateRange.endDate === 'now' ? Date.now() : dateRange.endDate;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate, 'up'), [
     endTimestampDep,
+    lastUpdate,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const state = {
     initialized,
@@ -193,6 +204,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     stopLiveStreaming: useCallback(() => setIsStreaming(false), [setIsStreaming]),
     updateDateRange,
     setLiveStreamingInterval,
+    updateTimestamps,
   };
 
   return { ...state, ...callbacks };

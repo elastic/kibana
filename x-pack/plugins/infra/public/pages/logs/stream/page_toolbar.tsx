@@ -52,6 +52,7 @@ export const LogsToolbar = () => {
     startDate,
     endDate,
     updateDateRange,
+    updateTimestamps,
     liveStreamingInterval,
     setLiveStreamingInterval,
   } = useContext(LogPositionState.Context);
@@ -126,7 +127,7 @@ export const LogsToolbar = () => {
             onTimeChange={handleTimeChange}
             isPaused={!isStreaming}
             refreshInterval={liveStreamingInterval}
-            onRefresh={() => {}}
+            onRefresh={updateTimestamps}
             onRefreshChange={({ refreshInterval, isPaused }) => {
               if (isPaused) {
                 stopLiveStreaming();
