@@ -21,7 +21,8 @@ else
   cd "kibana${CI_GROUP}"
 
   echo " -> running tests from the clone folder"
-  yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+  #yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --config test/functional/config.coverage.js;
 
   if [[ -d target/kibana-coverage/functional ]]; then
     echo " -> replacing kibana${CI_GROUP} with kibana in json files"

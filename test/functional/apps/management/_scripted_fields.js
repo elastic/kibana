@@ -119,6 +119,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
+      this.tags('skipCoverage');
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function() {
