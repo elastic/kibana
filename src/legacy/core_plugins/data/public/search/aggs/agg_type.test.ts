@@ -19,11 +19,16 @@
 
 import { AggType, AggTypeConfig } from './agg_type';
 import { IAggConfig } from './agg_config';
-import { npStart } from 'ui/new_platform';
-
-jest.mock('ui/new_platform');
+import { mockDataServices } from './test_helpers';
+import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setFieldFormats } from '../../../../../../plugins/data/public/services';
 
 describe('AggType Class', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
   describe('constructor', () => {
     it("requires a valid config object as it's first param", () => {
       expect(() => {
@@ -153,7 +158,10 @@ describe('AggType Class', () => {
       });
 
       it('returns default formatter', () => {
-        npStart.plugins.data.fieldFormats.getDefaultInstance = jest.fn(() => 'default') as any;
+        setFieldFormats({
+          ...dataPluginMock.createStartContract().fieldFormats,
+          getDefaultInstance: jest.fn(() => 'default') as any,
+        });
 
         const aggType = new AggType({
           name: 'name',

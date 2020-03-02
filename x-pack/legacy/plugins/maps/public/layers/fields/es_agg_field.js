@@ -21,13 +21,17 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getName() {
-    return this._source.formatMetricKey(this.getAggType(), this.getESDocFieldName());
+    return this._source.getAggKey(this.getAggType(), this.getRootName());
+  }
+
+  getRootName() {
+    return this._getESDocFieldName();
   }
 
   async getLabel() {
     return this._label
-      ? await this._label
-      : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
+      ? this._label
+      : this._source.getAggLabel(this.getAggType(), this.getRootName());
   }
 
   getAggType() {
@@ -42,13 +46,13 @@ export class ESAggMetricField extends AbstractField {
     return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
-  getESDocFieldName() {
+  _getESDocFieldName() {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
   getRequestDescription() {
     return this.getAggType() !== AGG_TYPE.COUNT
-      ? `${this.getAggType()} ${this.getESDocFieldName()}`
+      ? `${this.getAggType()} ${this.getRootName()}`
       : AGG_TYPE.COUNT;
   }
 
@@ -64,7 +68,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getValueAggDsl(indexPattern) {
-    const field = getField(indexPattern, this.getESDocFieldName());
+    const field = getField(indexPattern, this.getRootName());
     const aggType = this.getAggType();
     const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
     return {
@@ -75,6 +79,11 @@ export class ESAggMetricField extends AbstractField {
   supportsFieldMeta() {
     // count and sum aggregations are not within field bounds so they do not support field meta.
     return !isMetricCountable(this.getAggType());
+  }
+
+  canValueBeFormatted() {
+    // Do not use field formatters for counting metrics
+    return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
   }
 
   async getOrdinalFieldMetaRequest(config) {
