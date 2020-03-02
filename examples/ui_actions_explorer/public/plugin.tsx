@@ -88,14 +88,12 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       createEditUserAction(async () => (await startServices)[0].overlays.openModal)
     );
 
-    // What's missing here is type analysis to ensure the context emitted by the trigger
-    // is the same context that the action requires.
     deps.uiActions.attachAction(COUNTRY_TRIGGER, viewInMapsAction);
     deps.uiActions.attachAction(COUNTRY_TRIGGER, lookUpWeatherAction);
     deps.uiActions.attachAction(COUNTRY_TRIGGER, showcasePluggability);
     deps.uiActions.attachAction(PHONE_TRIGGER, makePhoneCallAction);
     deps.uiActions.attachAction(PHONE_TRIGGER, showcasePluggability);
-    deps.uiActions.attachAction(USER_TRIGGER, showcasePluggability);
+    deps.uiActions.attachAction(USER_TRIGGER, viewInMapsAction);
 
     core.application.register({
       id: 'uiActionsExplorer',

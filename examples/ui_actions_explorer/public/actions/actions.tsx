@@ -53,7 +53,7 @@ export const lookUpWeatherAction = createAction<typeof TRAVEL_GUIDE_ACTION>({
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
   execute: async country => {
-    window.open(`https://www.worldtravelguide.net/?s=${country},`, '_blank');
+    window.open(`https://www.worldtravelguide.net/?s=${country}`, '_blank');
   },
 });
 
