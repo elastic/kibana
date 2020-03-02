@@ -6,7 +6,6 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { fireEvent, waitForElement, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { appStoreFactory } from '../../store';
@@ -46,7 +45,7 @@ describe('when on the managing page', () => {
     };
 
     queryByTestSubjId = async (renderResult, testSubjId) => {
-      return await waitForElement(
+      return await reactTestingLibrary.waitForElement(
         () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
         {
           container: renderResult.container,
@@ -90,7 +89,9 @@ describe('when on the managing page', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
-          fireEvent.click(await queryByTestSubjId(renderResult, 'hostnameCellLink'));
+          reactTestingLibrary.fireEvent.click(
+            await queryByTestSubjId(renderResult, 'hostnameCellLink')
+          );
         });
 
         it('should show the flyout', () => {

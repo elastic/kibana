@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useManagementListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { uiQueryParams, detailsData } from './../../store/managing/selectors';

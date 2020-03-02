@@ -51,7 +51,6 @@ export const mockHostResultList: (options?: {
           version: '6.2',
         },
       },
-      thread: {},
     });
   }
   const mock: EndpointResultList = {

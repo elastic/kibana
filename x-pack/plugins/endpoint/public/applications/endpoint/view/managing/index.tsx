@@ -67,17 +67,17 @@ export const ManagementList = () => {
   const columns = useMemo(() => {
     return [
       {
-        field: 'host',
+        field: '',
         name: i18n.translate('xpack.endpoint.management.list.host', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ hostname, id }: { hostname: string; id: string }) => {
+        render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
           return (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiLink
               data-test-subj="hostnameCellLink"
               href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
-              onClick={ev => {
+              onClick={(ev: React.MouseEvent) => {
                 ev.preventDefault();
                 history.push(urlFromQueryParams({ ...queryParams, selected_host: id }));
               }}
