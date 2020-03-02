@@ -40,7 +40,7 @@ export class AlertNavigationRegistry {
   public register(consumer: string, alertType: AlertType, handler: AlertNavigationHandler) {
     if (this.has(consumer, alertType)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertNavigationRegistry.get.missingNavigationError', {
+        i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
           defaultMessage:
             'Navigation for Alert type "{alertType}" within "{consumer}" is already registered.',
           values: {
