@@ -21,7 +21,7 @@
 import fetch from 'node-fetch';
 import Joi from 'joi';
 import moment from 'moment';
-import { CoreSetup } from 'src/core/server';
+import { Legacy } from 'kibana';
 import { telemetryCollectionManager, StatsGetterConfig } from '../collection_manager';
 
 interface SendTelemetryOptInStatusConfig {
@@ -45,9 +45,7 @@ export async function sendTelemetryOptInStatus(
   });
 }
 
-export function registerTelemetryOptInStatsRoutes(core: CoreSetup) {
-  const { server } = core.http as any;
-
+export function registerTelemetryOptInStatsRoutes(server: Legacy.Server) {
   server.route({
     method: 'POST',
     path: '/api/telemetry/v2/clusters/_opt_in_stats',

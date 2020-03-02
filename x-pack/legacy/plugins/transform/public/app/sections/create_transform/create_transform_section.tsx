@@ -22,8 +22,9 @@ import {
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+
+import { useDocumentationLinks } from '../../app_dependencies';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { documentationLinksService } from '../../services/documentation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { KibanaProvider, RenderOnlyWithInitializedKibanaContext } from '../../lib/kibana';
 
@@ -36,6 +37,8 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
     docTitleService.setTitle('createTransform');
   }, []);
+
+  const { esTransform } = useDocumentationLinks();
 
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
@@ -65,7 +68,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href={documentationLinksService.getTransformsDocUrl()}
+                  href={esTransform}
                   target="_blank"
                   iconType="help"
                   data-test-subj="documentationLink"
