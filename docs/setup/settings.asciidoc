@@ -156,11 +156,11 @@ store saved searches, visualizations, and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 +
-When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
-you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
-to grant access to {kib}. 
-You must create custom roles that authorize the user for that specific tenant. 
-Although multi-tenant installations are supported, the recommended approach 
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`,
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles
+to grant access to {kib}.
+You must create custom roles that authorize the user for that specific tenant.
+Although multi-tenant installations are supported, the recommended approach
 to securing access to {kib} segments is to grant users access to specific spaces.
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
@@ -257,16 +257,10 @@ following example shows a valid regionmap configuration.
                 description: "INSEE numeric identifier"
 --
 
-[[regionmap-ES-map]]`map.regionmap.includeElasticMapsService:`:: Turns on or off
-whether layers from the Elastic Maps Service should be included in the vector
-<<<<<<< HEAD
-layer option list. Supported on {ece}. By turning this off, only the layers that
-are configured here will be included. The default is `true`.
-=======
-layer option list. Supported on Elastic Cloud Enterprise. By turning this off,
-only the layers that are configured here will be included. The default is `true`.
-This also affects whether tile-service from the Elastic Maps Service will be available.
->>>>>>> 235b3535e2f... [DOCS] Consolidates map content (#57736)
+[[regionmap-ES-map]]`map.regionmap.includeElasticMapsService:`:: Specifies
+the option to include layers from the Elastic Maps Service in the vector
+layer option list. Supported on {ece}. When off, only the configured layers are included.
+The default is `true`. This option also specifies if the tile-service from the Elastic Maps Service is available.
 
 [[regionmap-attribution]]`map.regionmap.layers[].attribution:`:: Optional.
 References the originating source of the geojson file. Supported on {ece}.
