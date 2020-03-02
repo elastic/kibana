@@ -143,7 +143,7 @@ export type AlertEvent = Immutable<{
       entity_id?: string;
     };
   };
-}>
+}>;
 
 interface AlertMetadata {
   id: string;
