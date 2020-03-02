@@ -9,7 +9,7 @@ import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
 
   const kibanaServerConfig = config.get('servers.kibana');
@@ -25,7 +25,7 @@ export default function({ getService }: FtrProviderContext) {
       return response;
     };
     const getSessionInfo = async () =>
-      supertest
+      supertestWithoutAuth
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('kbn-system-request', 'true')
@@ -33,7 +33,7 @@ export default function({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
     const extendSession = async () =>
-      supertest
+      supertestWithoutAuth
         .post('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
@@ -42,7 +42,7 @@ export default function({ getService }: FtrProviderContext) {
         .then(saveCookie);
 
     beforeEach(async () => {
-      await supertest
+      await supertestWithoutAuth
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
