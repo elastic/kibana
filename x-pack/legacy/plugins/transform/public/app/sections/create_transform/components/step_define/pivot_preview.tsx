@@ -106,6 +106,8 @@ interface PivotPreviewProps {
   query: PivotQuery;
 }
 
+const defaultPagination = { pageIndex: 0, pageSize: 5 };
+
 export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const indexPattern = useCurrentIndexPattern();
 
@@ -132,7 +134,13 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(columnKeys)]);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+  const [pagination, setPagination] = useState(defaultPagination);
+
+  // Reset pagination if data changes. This is to avoid ending up with an empty table
+  // when for example the user selected a page that is not available with the updated data.
+  useEffect(() => {
+    setPagination(defaultPagination);
+  }, [data.length]);
 
   // EuiDataGrid State
   const dataGridColumns = columnKeys.map(id => ({ id }));

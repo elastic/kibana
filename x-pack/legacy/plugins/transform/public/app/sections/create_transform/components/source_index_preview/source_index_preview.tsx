@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -52,6 +52,8 @@ interface Props {
   query: PivotQuery;
 }
 
+const defaultPagination = { pageIndex: 0, pageSize: 5 };
+
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   const indexPattern = useCurrentIndexPattern();
   const allFields = indexPattern.fields.map(f => f.name);
@@ -72,7 +74,11 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+  const [pagination, setPagination] = useState(defaultPagination);
+
+  useEffect(() => {
+    setPagination(defaultPagination);
+  }, [query]);
 
   const { errorMessage, status, rowCount, tableItems: data } = useSourceIndexData(
     indexPattern,
