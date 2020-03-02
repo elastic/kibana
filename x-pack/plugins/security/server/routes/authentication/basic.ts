@@ -25,16 +25,13 @@ export function defineBasicRoutes({ router, authc, config }: RouteDefinitionPara
       options: { authRequired: false },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { username, password } = request.body;
+      // We should prefer `token` over `basic` if possible.
+      const loginAttempt = authc.isProviderEnabled('token')
+        ? { provider: 'token', value: request.body }
+        : { provider: 'basic', value: request.body };
 
       try {
-        // We should prefer `token` over `basic` if possible.
-        const providerToLoginWith = config.authc.providers.includes('token') ? 'token' : 'basic';
-        const authenticationResult = await authc.login(request, {
-          provider: providerToLoginWith,
-          value: { username, password },
-        });
-
+        const authenticationResult = await authc.login(request, loginAttempt);
         if (!authenticationResult.succeeded()) {
           return response.unauthorized({ body: authenticationResult.error });
         }
