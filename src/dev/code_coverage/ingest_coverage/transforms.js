@@ -18,7 +18,7 @@
  */
 
 import { left, right } from './either';
-import { always } from './utils';
+import { always, id } from './utils';
 import { XPACK, STATIC_SITE_URL_PROP_NAME } from './constants';
 
 const maybeTotal = x =>
@@ -66,8 +66,15 @@ export const distro = obj => {
   };
 };
 
-const dropFront = staticSiteUrl =>
-  trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
+
+const endsInDotJs = /.js$/;
+
+const suffix = x => {
+  const maybeAppend = endsInDotJs.test(x) ? right(x) : left(x);
+  const appendDotHtml = x => `${x}.html`;
+  return maybeAppend
+    .fold(id, appendDotHtml);
+}
 
 const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
   [
@@ -76,13 +83,16 @@ const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
     `/${liveAppPath}/`,
     'coverage_data/',
     `${testRunnerType.toLowerCase()}-combined`,
-    trimmed,
+    `${suffix(trimmed)}`,
   ].join('');
 
 const assignUrl = obj => name => value => {
   obj[name] = value;
   return obj;
 };
+
+const dropFront = staticSiteUrl =>
+  trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
 
 export const staticSite = (urlBase, liveAppPath) => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
