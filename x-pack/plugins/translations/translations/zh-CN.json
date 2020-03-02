@@ -5734,7 +5734,6 @@
     "xpack.graph.listing.table.entityNamePlural": "图表",
     "xpack.graph.listing.table.titleColumnName": "标题",
     "xpack.graph.loadWorkspace.missingIndexPatternErrorMessage": "未找到索引模式",
-    "xpack.graph.missingWorkspaceErrorMessage": "缺少工作空间",
     "xpack.graph.newGraphTitle": "未保存图表",
     "xpack.graph.noDataSourceNotificationMessageText": "未找到数据源。前往 {managementIndexPatternsLink}，为您的 Elasticsearch 索引创建索引模式。",
     "xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText": "管理 > 索引模式",
