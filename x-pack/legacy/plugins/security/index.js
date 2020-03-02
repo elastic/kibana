@@ -138,11 +138,6 @@ export const security = kibana =>
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
         auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
-        serverConfig: {
-          protocol: server.info.protocol,
-          hostname: config.get('server.host'),
-          port: config.get('server.port'),
-        },
       });
 
       // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`

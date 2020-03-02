@@ -153,6 +153,10 @@ export class DashboardPlugin implements Plugin {
           savedQueryService: dataStart.query.savedQueries,
           embeddable,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          embeddableCapabilities: {
+            visualizeCapabilities: coreStart.application.capabilities.visualize,
+            mapsCapabilities: coreStart.application.capabilities.maps,
+          },
           localStorage: new Storage(localStorage),
         };
         const { renderApp } = await import('./np_ready/application');
