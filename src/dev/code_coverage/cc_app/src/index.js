@@ -26,13 +26,17 @@ import { tryCatch as tc } from './utils/either';
 import './styles/tailwind.css';
 
 const rootEl = document.getElementById.bind(document, 'root');
-const initialData = window.initialData;
+const { initialData } = window;
 const tryInit = () => tc(() => initialData);
 const tryOneProp = () => tc(() => initialData.testRunnerTypes);
 
 tryInit()
   .chain(tryOneProp)
-  .map(boot);
+  .fold(noDataLoaded, boot)
+
+function noDataLoaded() {
+  console.log('\n### NO DATA');
+}
 
 function boot(testRunnerTypes) {
   const {
