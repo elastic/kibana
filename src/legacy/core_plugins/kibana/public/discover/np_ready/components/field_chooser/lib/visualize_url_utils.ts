@@ -86,6 +86,7 @@ export function getMapsAppUrl(
   const hasColumns = columns && columns.length && columns[0] !== '_source';
   mapAppParams.set(
     'initialLayers',
+    // @ts-ignore
     rison.encode_array([
       {
         id: uuid(),
