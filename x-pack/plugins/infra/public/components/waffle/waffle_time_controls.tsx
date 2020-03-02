@@ -7,12 +7,17 @@
 import { EuiButtonEmpty, EuiDatePicker, EuiFormControlLayout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
-import React from 'react';
-import { Action } from 'typescript-fsa';
+import React, { useCallback } from 'react';
 import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
 
 export const WaffleTimeControls = () => {
-  const { currentTime, isAutoReloading, startAutoReload, stopAutoReload } = useWaffleTime();
+  const {
+    currentTime,
+    isAutoReloading,
+    startAutoReload,
+    stopAutoReload,
+    jumpToTime,
+  } = useWaffleTime();
 
   const currentMoment = moment(currentTime);
 
@@ -32,11 +37,14 @@ export const WaffleTimeControls = () => {
     </EuiButtonEmpty>
   );
 
-  const handleChangeDate = useCallback((time: Moment | null) => {
-    if (time) {
-      jumpToTime(time.valueOf());
-    }
-  }, []);
+  const handleChangeDate = useCallback(
+    (time: Moment | null) => {
+      if (time) {
+        jumpToTime(time.valueOf());
+      }
+    },
+    [jumpToTime]
+  );
 
   return (
     <EuiFormControlLayout append={liveStreamingButton} data-test-subj="waffleDatePicker">

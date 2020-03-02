@@ -8,7 +8,6 @@ import React from 'react';
 
 import { WithWaffleFilter } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
-import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../../containers/with_options';
 import { WithSource } from '../../../containers/with_source';
 import { Layout } from '../../../components/inventory/layout';

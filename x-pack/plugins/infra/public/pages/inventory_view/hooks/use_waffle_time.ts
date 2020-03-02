@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useCallback } from 'react';
-import { useInterval } from 'react-use';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -39,13 +38,6 @@ export const useWaffleTime = () => {
       setState({ ...state, currentTime: time });
     },
     [state, setState]
-  );
-
-  useInterval(
-    () => {
-      jumpToTime(Date.now());
-    },
-    isAutoReloading ? 5000 : null
   );
 
   const currentTimeRange = {

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useInterval } from 'react-use';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 
@@ -35,7 +36,7 @@ export interface LayoutProps {
 
 export const Layout = (props: LayoutProps) => {
   const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
-  const { currentTime } = useWaffleTime();
+  const { currentTime, jumpToTime, isAutoReloading } = useWaffleTime();
   const { loading, nodes, reload, interval } = useSnapshot(
     props.filterQuery,
     props.metric,
@@ -45,6 +46,15 @@ export const Layout = (props: LayoutProps) => {
     currentTime,
     props.accountId,
     props.region
+  );
+
+  useInterval(
+    () => {
+      if (!loading) {
+        jumpToTime(Date.now());
+      }
+    },
+    isAutoReloading ? 5000 : null
   );
 
   return (
