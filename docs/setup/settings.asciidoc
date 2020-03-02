@@ -156,11 +156,11 @@ store saved searches, visualizations, and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 +
-When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
-you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
-to grant access to {kib}. 
-You must create custom roles that authorize the user for that specific tenant. 
-Although multi-tenant installations are supported, the recommended approach 
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`,
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles
+to grant access to {kib}.
+You must create custom roles that authorize the user for that specific tenant.
+Although multi-tenant installations are supported, the recommended approach
 to securing access to {kib} segments is to grant users access to specific spaces.
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
@@ -228,14 +228,14 @@ requests. Supported on {ece}.
 Set to false to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
 and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
-<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
+<<tilemap, Coordinate map visualizations>>, and <<visualize-maps, Region map visualizations>>.
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
 Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
-This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
+This setting does not impact <<tilemap, Coordinate map visualizations>> and <<visualize-maps, Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
+use in <<visualize-maps, Region Map>> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
@@ -257,10 +257,10 @@ following example shows a valid regionmap configuration.
                 description: "INSEE numeric identifier"
 --
 
-[[regionmap-ES-map]]`map.regionmap.includeElasticMapsService:`:: Turns on or off
-whether layers from the Elastic Maps Service should be included in the vector
-layer option list. Supported on {ece}. By turning this off, only the layers that
-are configured here will be included. The default is `true`.
+[[regionmap-ES-map]]`map.regionmap.includeElasticMapsService:`:: Specifies
+the option to include layers from the Elastic Maps Service in the vector
+layer option list. Supported on {ece}. When off, only the configured layers are included.
+The default is `true`. This option also specifies if the tile-service from the Elastic Maps Service is available.
 
 [[regionmap-attribution]]`map.regionmap.layers[].attribution:`:: Optional.
 References the originating source of the geojson file. Supported on {ece}.
