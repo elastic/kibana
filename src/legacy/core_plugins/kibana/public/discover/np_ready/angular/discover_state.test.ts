@@ -32,7 +32,8 @@ describe('Test discover state', () => {
       defaultAppState: { index: 'test' },
       hashHistory: history,
     });
-    await state.replaceUrlState(true);
+    await state.replaceUrlAppState({});
+    await state.startSync();
   });
   afterEach(() => {
     state.stopSync();

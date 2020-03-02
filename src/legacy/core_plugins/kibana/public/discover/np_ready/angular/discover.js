@@ -200,9 +200,9 @@ function discoverController(
 
   const {
     appStateContainer,
+    startSync: startStateSync,
     stopSync: stopStateSync,
     setAppState,
-    replaceUrlState,
     replaceUrlAppState,
     isAppStateDirty,
     kbnUrlStateStorage,
@@ -229,8 +229,6 @@ function discoverController(
     { filters: esFilters.FilterStateStore.APP_STATE }
   );
 
-  $scope.filters = filterManager.getFilters();
-
   const appStateUnsubscribe = appStateContainer.subscribe(async newState => {
     const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState(getPreviousAppState());
@@ -240,24 +238,30 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const queryChanged = !_.isEqual(newStatePartial.query, oldStatePartial.query);
-        const sortChanged = !_.isEqual(oldStatePartial.sort, newStatePartial.sort);
-        const intervalChanged = !_.isEqual(newStatePartial.interval, oldStatePartial.interval);
-        const indexPatternChanged = !_.isEqual(newStatePartial.index, oldStatePartial.index);
-        if (indexPatternChanged) {
-          $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
-          $scope.opts.timefield = getTimeField();
-          $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
+        const changes = ['interval', 'sort', 'index', 'query'].filter(
+          prop => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
+        );
+        if (changes.indexOf('index') !== -1) {
+          try {
+            $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
+            $scope.opts.timefield = getTimeField();
+            $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
+            // is needed to rerender the histogram
+            $scope.vis = undefined;
 
-          const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
-          if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
-            return await replaceUrlAppState(sort);
+            // Taking care of sort when switching index pattern:
+            // Old indexPattern: sort by A
+            // If A is not available in the new index pattern, sort has to be adapted and propagated to URL
+            const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
+            if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
+              return await replaceUrlAppState({ sort });
+            }
+          } catch (e) {
+            toastNotifications.addWarning({ text: getIndexPatternWarning(newStatePartial.index) });
           }
-          // is needed to rerender the histogram
-          $scope.vis = undefined;
         }
 
-        if (queryChanged || sortChanged || intervalChanged || indexPatternChanged) {
+        if (changes.length) {
           $fetchObservable.next();
         }
       });
@@ -272,7 +276,6 @@ function discoverController(
   subscriptions.add(
     subscribeWithScope($scope, filterManager.getUpdates$(), {
       next: () => {
-        $scope.filters = filterManager.getFilters();
         $scope.state.filters = filterManager.getAppFilters();
         $scope.updateDataSource();
       },
@@ -1036,6 +1039,15 @@ function discoverController(
     });
   }
 
+  function getIndexPatternWarning(index) {
+    return i18n.translate('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
+      defaultMessage: '{stateVal} is not a configured index pattern ID',
+      values: {
+        stateVal: `"${index}"`,
+      },
+    });
+  }
+
   function resolveIndexPatternLoading() {
     const {
       loaded: loadedIndexPattern,
@@ -1050,15 +1062,7 @@ function discoverController(
     }
 
     if (stateVal && !stateValFound) {
-      const warningTitle = i18n.translate(
-        'kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
-        {
-          defaultMessage: '{stateVal} is not a configured index pattern ID',
-          values: {
-            stateVal: `"${stateVal}"`,
-          },
-        }
-      );
+      const warningTitle = getIndexPatternWarning();
 
       if (ownIndexPattern) {
         toastNotifications.addWarning({
@@ -1105,5 +1109,6 @@ function discoverController(
   addHelpMenuToAppChrome(chrome);
 
   init();
-  replaceUrlState(true);
+  // Propagate current app state to url, then start syncing
+  replaceUrlAppState().then(() => startStateSync());
 }

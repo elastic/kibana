@@ -115,10 +115,6 @@ export interface GetStateReturn {
    * Returns whether the current app state is different to the initial state
    */
   isAppStateDirty: () => void;
-  /**
-   * Replace the current URL with the current state without adding another browser history entry
-   */
-  replaceUrlState: (startSync: boolean) => Promise<void>;
 }
 const APP_STATE_URL_KEY = '_a';
 
@@ -167,7 +163,7 @@ export function getState({
     stopSync: stop,
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState: async (newPartial: AppState = {}) => {
-      const state = { ...appStateContainer.getState(), newPartial };
+      const state = { ...appStateContainer.getState(), ...newPartial };
       await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     },
     getAppFilters: () => getFilters(appStateContainer.getState()),
@@ -177,14 +173,6 @@ export function getState({
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    replaceUrlState: async (startSync = true) => {
-      if (appStateContainer.getState()) {
-        await stateStorage.set(APP_STATE_URL_KEY, appStateContainer.getState(), { replace: true });
-      }
-      if (startSync) {
-        start();
-      }
-    },
   };
 }
 
