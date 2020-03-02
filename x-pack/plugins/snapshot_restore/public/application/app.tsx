@@ -24,12 +24,12 @@ import { useConfig } from './app_context';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
-  const { slmUiEnabled } = useConfig();
+  const { slmUi } = useConfig();
   const { apiError } = useContext(AuthorizationContext);
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
 
-  if (slmUiEnabled) {
+  if (slmUi.enabled) {
     sections.push('policies' as Section);
   }
 
@@ -79,10 +79,10 @@ export const App: React.FunctionComponent = () => {
                 path={`${BASE_PATH}/restore/:repositoryName/:snapshotId*`}
                 component={RestoreSnapshot}
               />
-              {slmUiEnabled && (
+              {slmUi.enabled && (
                 <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
               )}
-              {slmUiEnabled && (
+              {slmUi.enabled && (
                 <Route exact path={`${BASE_PATH}/edit_policy/:name*`} component={PolicyEdit} />
               )}
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />

@@ -52,10 +52,6 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       .pipe(first())
       .toPromise();
 
-    // console.log('---------------------------------');
-    // console.log('SR plugin config:', JSON.stringify(pluginConfig, null, 2));
-    // console.log('---------------------------------');
-
     if (!pluginConfig.enabled) {
       return;
     }

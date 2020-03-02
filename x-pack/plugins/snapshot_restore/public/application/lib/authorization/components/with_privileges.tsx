@@ -6,7 +6,8 @@
 
 import { useContext } from 'react';
 
-import { AuthorizationContext, MissingPrivileges } from './authorization_provider';
+import { MissingPrivileges } from '../../../../../common/types';
+import { AuthorizationContext } from './authorization_provider';
 
 interface Props {
   /**

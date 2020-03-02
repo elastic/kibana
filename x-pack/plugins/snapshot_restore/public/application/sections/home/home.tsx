@@ -41,7 +41,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const { slmUiEnabled } = useConfig();
+  const { slmUi } = useConfig();
 
   const tabs: Array<{
     id: Section;
@@ -76,7 +76,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     },
   ];
 
-  if (slmUiEnabled) {
+  if (slmUi.enabled) {
     tabs.splice(2, 0, {
       id: 'policies',
       name: (

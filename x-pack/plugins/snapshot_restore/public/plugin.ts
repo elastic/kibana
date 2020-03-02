@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { CoreSetup } from '../../../../src/core/public';
 import { PLUGIN } from '../common/constants';
 import { AppDependencies } from './application';
+import { ClientConfigType } from './types';
 
 import { breadcrumbService, docTitleService } from './application/services/navigation';
 import { documentationLinksService } from './application/services/documentation';
@@ -26,12 +27,13 @@ interface PluginsDependencies {
 export class SnapshotRestoreUIPlugin {
   private uiMetricService = new UiMetricService(UIM_APP_NAME);
 
-  constructor() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
     setUiMetricService(this.uiMetricService);
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
+    const config = this.initializerContext.config.get<ClientConfigType>();
     const { http, getStartServices } = coreSetup;
     const { management, usageCollection } = plugins;
 
@@ -58,6 +60,7 @@ export class SnapshotRestoreUIPlugin {
 
         const appDependencies: AppDependencies = {
           core,
+          config,
           plugins: {
             usageCollection,
           },
@@ -65,9 +68,6 @@ export class SnapshotRestoreUIPlugin {
             httpService,
             uiMetricService: this.uiMetricService,
             i18n,
-          },
-          config: {
-            slmUiEnabled: true, // TODO
           },
         };
 
