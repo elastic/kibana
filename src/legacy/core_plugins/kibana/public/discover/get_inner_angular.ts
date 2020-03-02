@@ -70,7 +70,6 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
-import { PersistedState } from '../../../../../plugins/visualizations/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -111,7 +110,6 @@ export function initializeInnerAngularModule(
     createLocalPromiseModule();
     createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
-    createLocalPersistedStateModule();
     createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createElasticSearchModule(data);
@@ -130,7 +128,7 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
-        'discoverPersistedState',
+        'discoverPromise',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
@@ -148,7 +146,7 @@ export function initializeInnerAngularModule(
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
-      'discoverPersistedState',
+      'discoverPromise',
       'discoverTopNav',
       'discoverLocalStorageProvider',
       'discoverEs',
@@ -170,18 +168,6 @@ export function initializeInnerAngularModule(
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('discoverPersistedState', ['discoverPrivate', 'discoverPromise'])
-    .factory('PersistedState', () => {
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path);
-        }
-      };
-    });
 }
 
 function createLocalKbnUrlModule() {
