@@ -158,8 +158,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
+      const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      setEstimatedModelMemoryLimit(resp.memory_estimation?.expected_memory_without_disk);
+      setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -174,7 +175,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         }
 
         setFormState({
-          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
           excludesOptions: analyzedFieldsOptions,
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
@@ -182,7 +183,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       } else {
         setFormState({
-          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
         });
       }
     } catch (e) {
