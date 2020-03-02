@@ -7,7 +7,6 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertAdd } from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppDeps } from '../../app';

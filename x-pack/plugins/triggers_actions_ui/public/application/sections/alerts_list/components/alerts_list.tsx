@@ -226,7 +226,11 @@ export const AlertsList: React.FunctionComponent = () => {
             {
               render: (item: AlertTableItem) => {
                 return (
-                  <EuiLink color="primary" onClick={() => editItem(item)}>
+                  <EuiLink
+                    color="primary"
+                    data-test-subj={`alertEditLink-${item.id}`}
+                    onClick={() => editItem(item)}
+                  >
                     <FormattedMessage
                       defaultMessage="Edit"
                       id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"

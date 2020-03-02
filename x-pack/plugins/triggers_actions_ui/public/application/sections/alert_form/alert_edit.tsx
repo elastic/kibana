@@ -96,7 +96,7 @@ export const AlertEdit = ({
       if (toastNotifications) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
-            defaultMessage: "Saved '{alertName}'",
+            defaultMessage: "Updated '{alertName}'",
             values: {
               alertName: newAlert.name,
             },
@@ -114,7 +114,7 @@ export const AlertEdit = ({
     <EuiPortal>
       <EuiFlyout
         onClose={closeFlyout}
-        aria-labelledby="flyoutAlertAddTitle"
+        aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
         ownFocus
@@ -124,13 +124,13 @@ export const AlertEdit = ({
             <h3 id="flyoutTitle">
               <FormattedMessage
                 defaultMessage="Edit Alert"
-                id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
+                id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
               &emsp;
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
+                  'xpack.triggersActionsUI.sections.alertEdit.betaBadgeTooltipContent',
                   {
                     defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
                   }
@@ -152,7 +152,7 @@ export const AlertEdit = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+                {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
                   defaultMessage: 'Cancel',
                 })}
               </EuiButtonEmpty>
@@ -161,7 +161,7 @@ export const AlertEdit = ({
               <EuiButton
                 fill
                 color="secondary"
-                data-test-subj="saveAlertButton"
+                data-test-subj="saveEditedAlertButton"
                 type="submit"
                 iconType="check"
                 isDisabled={hasErrors || hasActionErrors}
@@ -179,7 +179,7 @@ export const AlertEdit = ({
                 }}
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                  id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
                   defaultMessage="Save"
                 />
               </EuiButton>

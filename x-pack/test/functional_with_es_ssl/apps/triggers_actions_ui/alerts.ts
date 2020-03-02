@@ -75,13 +75,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
 
-      await testSubjects.click('slackAddVariableButton');
-      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
-      await variableMenuButton.click();
+      // TODO: uncomment variables test when server API will be ready
+      // await testSubjects.click('slackAddVariableButton');
+      // const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      // await variableMenuButton.click();
 
       await testSubjects.click('selectIf.index-threshold-SelectOptionndexExpression');
 
-      await find.clickByCssSelector('[data-test-subj="cancelSaveAlertButton"]');
+      await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
 
       // TODO: implement saving to the server, when threshold API will be ready
     });
@@ -95,6 +96,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults).to.eql([
         {
           name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+    });
+
+    it('should edit an alert', async () => {
+      const createdAlert = await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+
+      await find.clickByCssSelector(`[data-test-subj="alertEditLink-${createdAlert.id}"] button`);
+
+      const updatedAlertName = 'Changed Alert Name';
+      const nameInputToUpdate = await testSubjects.find('alertNameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.clearValue();
+      await nameInputToUpdate.type(updatedAlertName);
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+
+      await pageObjects.triggersActionsUI.searchAlerts(updatedAlertName);
+
+      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterEdit).to.eql([
+        {
+          name: updatedAlertName,
           tagsText: 'foo, bar',
           alertType: 'Test: Noop',
           interval: '1m',
