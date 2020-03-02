@@ -17,7 +17,27 @@
  * under the License.
  */
 
-import './legacy/styles.scss';
-import { fooLibFn } from '../../foo/public/index';
-export * from './lib';
-export { fooLibFn };
+import normalizePath from 'normalize-path';
+
+/**
+ * Parse an absolute path, supporting normalized paths from webpack,
+ * into a list of directories and root
+ */
+export function parseDirPath(path: string) {
+  const filePath = parseFilePath(path);
+  return {
+    ...filePath,
+    dirs: [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
+    filename: undefined,
+  };
+}
+
+export function parseFilePath(path: string) {
+  const normalized = normalizePath(path);
+  const [root, ...others] = normalized.split('/');
+  return {
+    root: root === '' ? '/' : root,
+    dirs: others.slice(0, -1),
+    filename: others[others.length - 1] || undefined,
+  };
+}
