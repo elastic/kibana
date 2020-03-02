@@ -33,8 +33,8 @@ import './index.scss';
 // TODO: this interface is temporary for just moving forward with the component
 // and it will be imported from the ../ui_actions when implemented properly
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type BaseConfig = {};
-export interface ActionFactory<Config extends BaseConfig, Context = null> {
+export type ActionFactoryBaseConfig = {};
+export interface ActionFactory<Config extends ActionFactoryBaseConfig, Context = null> {
   type: string;
   displayName: string;
   iconType?: string;
@@ -42,7 +42,7 @@ export interface ActionFactory<Config extends BaseConfig, Context = null> {
   context: Context;
 }
 
-export interface ActionFactoryWizardProps<Config extends BaseConfig, Context = void> {
+export interface ActionFactoryWizardProps<Config extends ActionFactoryBaseConfig, Context = void> {
   /**
    * Context represents environment where this component is being rendered.
    */
@@ -66,7 +66,7 @@ export interface ActionWizardProps {
   /**
    * List of available action factories
    */
-  actionFactories: Array<ActionFactory<BaseConfig, unknown>>;
+  actionFactories: Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
 
   /**
    * Notifies when wizard's state changes because of user's interaction
@@ -75,14 +75,14 @@ export interface ActionWizardProps {
    * @param config - current config for current action factory. null if no action factory or if wizard's inputs are invalid or incomplete
    */
   onChange: (
-    actionFactory: ActionFactory<BaseConfig, unknown> | null,
-    config: BaseConfig | null
+    actionFactory: ActionFactory<ActionFactoryBaseConfig, unknown> | null,
+    config: ActionFactoryBaseConfig | null
   ) => void;
 }
 export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onChange }) => {
   // eslint-disable-next-line prefer-const
   let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory<
-    BaseConfig,
+    ActionFactoryBaseConfig,
     unknown
   > | null>(null);
 
@@ -118,20 +118,20 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onC
   );
 };
 
-interface SelectedActionFactoryProps<Config extends BaseConfig, Context = unknown> {
+interface SelectedActionFactoryProps<Config extends ActionFactoryBaseConfig, Context = unknown> {
   actionFactory: ActionFactory<Config, Context>;
   onConfigChange: (config: Config | null) => void;
   showDeselect: boolean;
   onDeselect: () => void;
 }
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
-const SelectedActionFactory: React.FC<SelectedActionFactoryProps<BaseConfig>> = ({
+const SelectedActionFactory: React.FC<SelectedActionFactoryProps<ActionFactoryBaseConfig>> = ({
   actionFactory,
   onDeselect,
   showDeselect,
   onConfigChange,
 }) => {
-  const [config, setConfig] = useState<BaseConfig | null>(null);
+  const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(null);
   return (
     <div
       className="uiActions__SelectedActionFactory"
@@ -174,8 +174,8 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps<BaseConfig>> = 
 };
 
 interface ActionFactorySelectorProps {
-  actionFactories: Array<ActionFactory<BaseConfig, unknown>>;
-  onActionFactorySelected: (actionFactory: ActionFactory<BaseConfig, unknown>) => void;
+  actionFactories: Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
+  onActionFactorySelected: (actionFactory: ActionFactory<ActionFactoryBaseConfig, unknown>) => void;
 }
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
 const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({

@@ -23,7 +23,7 @@ import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import {
   ActionFactory,
   ActionWizard,
-  BaseConfig,
+  ActionFactoryBaseConfig,
   TEST_SUBJ_ACTION_FACTORY_ITEM,
   TEST_SUBJ_SELECTED_ACTION_FACTORY,
 } from './action_wizard';
@@ -44,7 +44,7 @@ test('Pick and configure action', () => {
     <ActionWizard
       actionFactories={
         [DashboardDrilldownActionFactory, UrlDrilldownActionFactory] as Array<
-          ActionFactory<BaseConfig, unknown>
+          ActionFactory<ActionFactoryBaseConfig, unknown>
         >
       }
       onChange={wizardChangeFn}
