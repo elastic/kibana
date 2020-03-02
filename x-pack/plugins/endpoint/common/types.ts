@@ -253,6 +253,7 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
+  '@timestamp': string;
   event: {
     created: Date;
   };

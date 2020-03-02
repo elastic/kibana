@@ -11,7 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiDescriptionList,
-  EuiLoadingSpinner,
   EuiLoadingContent,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -23,6 +22,7 @@ import { uiQueryParams, detailsData } from './../../store/managing/selectors';
 
 const HostDetails = () => {
   const details = useManagementListSelector(detailsData);
+
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -31,7 +31,7 @@ const HostDetails = () => {
       },
       {
         title: 'Last Seen',
-        description: 'time',
+        description: details['@timestamp'],
       },
       {
         title: 'Alerts',
@@ -55,21 +55,29 @@ const HostDetails = () => {
         description: details.host.ip,
       },
       {
-        title: 'Domain Name',
-        description: 'domain',
+        title: 'Hostname',
+        description: details.host.hostname,
       },
       {
         title: 'Sensor Version',
         description: details.agent.version,
       },
     ];
-  }, [details.agent.version, details.endpoint.policy.id, details.host.ip]);
+  }, [details.agent.version, details.endpoint.policy.id, details.host.hostname, details.host.ip]);
 
   return (
     <>
-      <EuiDescriptionList type="column" listItems={detailsResultsUpper} />
+      <EuiDescriptionList
+        type="column"
+        listItems={detailsResultsUpper}
+        data-test-subj="managementDetailsUpperList"
+      />
       <EuiHorizontalRule margin="s" />
-      <EuiDescriptionList type="column" listItems={detailsResultsLower} />
+      <EuiDescriptionList
+        type="column"
+        listItems={detailsResultsLower}
+        data-test-subj="managementDetailsLowerList"
+      />
     </>
   );
 };
@@ -85,20 +93,17 @@ export const ManagementDetails = () => {
   }, [history, queryParamsWithoutSelectedHost]);
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose}>
+    <EuiFlyout onClose={handleFlyoutClose} data-test-subj="managementDetailsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
+        <EuiTitle size="s">
+          <h2 data-test-subj="managementDetailsTitle">
             {details === undefined ? (
               <FormattedMessage
                 id="xpack.endpoint.management.detailsLoadingTitle"
                 defaultMessage="Details"
               />
             ) : (
-              <FormattedMessage
-                id="xpack.endpoint.management.detailsLoadingTitle"
-                defaultMessage={details.host.hostname}
-              />
+              details.host.hostname
             )}
           </h2>
         </EuiTitle>

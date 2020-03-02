@@ -21,6 +21,7 @@ describe('endpoint list saga', () => {
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
     return {
+      '@timestamp': new Date(1582231151055).toString(),
       event: {
         created: new Date(0),
       },

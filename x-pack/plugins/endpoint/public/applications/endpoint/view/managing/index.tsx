@@ -71,7 +71,12 @@ export const ManagementList = () => {
         }),
         render: ({ hostname, id }: { hostname: string; id: string }) => {
           return (
-            <Link to={urlFromQueryParams({ ...queryParams, selected_host: id })}>{hostname}</Link>
+            <Link
+              data-test-subj="hostnameCellLink"
+              to={urlFromQueryParams({ ...queryParams, selected_host: id })}
+            >
+              {hostname}
+            </Link>
           );
         },
       },
