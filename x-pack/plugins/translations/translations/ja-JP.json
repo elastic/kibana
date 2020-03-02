@@ -6841,7 +6841,6 @@
     "xpack.lens.indexPatterns.filterByTypeLabel": "タイプでフィルタリング",
     "xpack.lens.indexPatterns.noFieldsLabel": "このインデックスパターンにはフィールドがありません。",
     "xpack.lens.indexPatterns.noFilteredFieldsLabel": "現在のフィルターと一致するフィールドはありません。フィルターまたは時間範囲を変更してください。",
-    "xpack.lens.indexPatterns.showAllFields.buttonText": "すべてのフィールドを表示",
     "xpack.lens.indexPatterns.toggleEmptyFieldsSwitch": "データがあるフィールドだけを表示",
     "xpack.lens.indexPatterns.toggleFiltersPopover": "フィルタリングされたフィールド",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "{indexPatternTitle}のみを表示",

@@ -368,14 +368,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 >
                   <FormattedMessage
                     id="xpack.lens.indexPatterns.toggleFiltersPopover"
-                    defaultMessage="Filter by type"
+                    defaultMessage="Filter fields by type"
                   />
                 </EuiFacetButton>
               }
             >
               <EuiPopoverTitle>
                 {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
-                  defaultMessage: 'Filter by type',
+                  defaultMessage: 'Filter fields by type',
                 })}
               </EuiPopoverTitle>
               <FixedEuiContextMenuPanel

@@ -6841,7 +6841,6 @@
     "xpack.lens.indexPatterns.filterByTypeLabel": "按类型筛选",
     "xpack.lens.indexPatterns.noFieldsLabel": "在此索引模式中不存在任何字段。",
     "xpack.lens.indexPatterns.noFilteredFieldsLabel": "没有任何字段匹配当前筛选。请尝试更改筛选或时间范围。",
-    "xpack.lens.indexPatterns.showAllFields.buttonText": "显示所有字段",
     "xpack.lens.indexPatterns.toggleEmptyFieldsSwitch": "仅显示具有数据的字段",
     "xpack.lens.indexPatterns.toggleFiltersPopover": "已筛选字段",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "仅显示 {indexPatternTitle}",
