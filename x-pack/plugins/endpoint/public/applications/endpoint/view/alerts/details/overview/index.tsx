@@ -64,7 +64,7 @@ export const AlertDetailsOverview = memo(() => {
           <p>
             <FormattedMessage
               id="xpack.endpoint.application.endpoint.alertDetails.overview.summary"
-              defaultMessage="Endgame MalwareScore detected the opening of a document on {hostname} on {date}"
+              defaultMessage="MalwareScore detected the opening of a document on {hostname} on {date}"
               values={{
                 hostname: alertDetailsData.host.hostname,
                 date: <FormattedDate timestamp={alertDetailsData['@timestamp']} />,
