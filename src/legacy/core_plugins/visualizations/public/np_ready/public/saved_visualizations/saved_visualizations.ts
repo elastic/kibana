@@ -27,7 +27,7 @@ import { TypesStart } from '../vis_types';
 export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
   visualizationTypes: TypesStart;
 }
-
+export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
 export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 
@@ -78,5 +78,3 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
   const SavedVis = createSavedVisClass(services);
   return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient, services.chrome);
 }
-
-export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;

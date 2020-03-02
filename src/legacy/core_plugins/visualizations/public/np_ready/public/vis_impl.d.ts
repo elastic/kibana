@@ -44,6 +44,8 @@ export declare class VisImpl implements Vis {
     aggs: Array<{ [key: string]: any }>;
   };
 
+  private initializeDefaultsFromSchemas(configStates: any, schemas: any);
+
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition
   // has been completed. But that way we at least have typing for a couple of

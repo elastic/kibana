@@ -33,7 +33,9 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const { schema } = action.payload;
-      const defaultConfig = (schema as any).defaults.slice(0, schema.max);
+      const defaultConfig = schema.defaults
+        ? (schema as any).defaults.slice(0, schema.max)
+        : { schema: schema.name };
       const aggConfig = state.aggs.createAggConfig(defaultConfig, {
         addToAggConfigs: false,
       });

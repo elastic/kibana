@@ -68,7 +68,7 @@ class VisImpl extends EventEmitter {
     // of defaults (not sure why a someone define more...
     // but whatever). Also if a schema.name is already set then don't
     // set anything.
-    const newConfigs = [];
+    const newConfigs = [...configStates];
     _(schemas)
       .filter(schema => {
         return Array.isArray(schema.defaults) && schema.defaults.length > 0;

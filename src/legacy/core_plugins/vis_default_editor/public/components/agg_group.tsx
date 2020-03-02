@@ -69,9 +69,12 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
+  const schemaNames = schemas.filter(s => s.group === groupName).map(s => s.name);
   const group: IAggConfig[] = useMemo(
-    () => state.aggs.aggs.filter((agg: IAggConfig) => agg.schema === groupName) || [],
-    [groupName, state.aggs.aggs]
+    () =>
+      state.aggs.aggs.filter((agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)) ||
+      [],
+    [state.aggs.aggs, schemaNames]
   );
 
   const stats = {
