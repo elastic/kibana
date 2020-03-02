@@ -37,6 +37,7 @@ describe('utils', () => {
       const fullRule = getResult();
       const rule = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -354,6 +355,7 @@ describe('utils', () => {
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -419,6 +421,7 @@ describe('utils', () => {
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -484,6 +487,7 @@ describe('utils', () => {
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
@@ -633,6 +637,7 @@ describe('utils', () => {
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -714,6 +719,7 @@ describe('utils', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -886,6 +892,7 @@ describe('utils', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformOrBulkError('rule-1', getResult());
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',

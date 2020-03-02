@@ -26,7 +26,6 @@ import * as I18n from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  isNew: boolean;
 }
 
 const stepActionsDefaultValue = {
@@ -46,13 +45,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 }) => {
   const actionTypes = [
     { id: '.email', name: 'Email', enabled: true },
-    { id: '.index', name: 'Index', enabled: true },
+    { id: '.index', name: 'Index', enabled: false },
     { id: '.pagerduty', name: 'PagerDuty', enabled: true },
-    { id: '.server-log', name: 'Server log', enabled: true },
-    { id: '.servicenow', name: 'servicenow', enabled: true },
+    { id: '.server-log', name: 'Server log', enabled: false },
+    { id: '.servicenow', name: 'servicenow', enabled: false },
     { id: '.slack', name: 'Slack', enabled: true },
-    { id: '.webhook', name: 'Webhook', enabled: true },
-    { id: '.example-action', name: 'Example Action', enabled: true },
+    { id: '.webhook', name: 'Webhook', enabled: false },
+    { id: '.example-action', name: 'Example Action', enabled: false },
   ];
   const { http, triggers_actions_ui } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
@@ -96,8 +95,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form]);
 
-  console.error('aa', myStepData);
-
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
@@ -106,7 +103,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="StepRuleActions">
-          <UseField path="actions" defaultValue={myStepData.actions} />
+          <UseField path="actions" defaultValue={myStepData.actions}>
+            {() => <div />}
+          </UseField>
         </Form>
       </StepContentWrapper>
       <ActionForm
@@ -114,16 +113,15 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         messageVariables={['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId', 'ruleLink']}
         defaultActionGroupId={'default'}
         setActionIdByIndex={(id: string, index: number) => {
-          console.error('setActionIdByIndex', id, index);
-          myStepData.actions[index].id = id;
+          const updatedActions = [...myStepData];
+          updatedActions[index].id = id;
+          setMyStepData({ ...myStepData, actions: updatedActions });
         }}
         setAlertProperty={(updatedActions: AlertAction[]) => {
-          console.error('setAlertProperty', updatedActions);
           setMyStepData({ ...myStepData, actions: updatedActions });
         }}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setActionParamsProperty={(key: string, value: any, index: number) => {
-          console.error('setActionParamsProperty', key, value, index);
           const newActions = [...myStepData.actions];
           newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
 

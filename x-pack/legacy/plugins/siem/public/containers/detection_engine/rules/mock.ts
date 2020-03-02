@@ -35,6 +35,7 @@ export const ruleMock: NewRule = {
 };
 
 export const savedRuleMock: Rule = {
+  actions: [],
   created_at: 'mm/dd/yyyyTHH:MM:sssz',
   created_by: 'mockUser',
   description: 'some desc',
@@ -75,6 +76,7 @@ export const rulesMock: FetchRulesResponse = {
   total: 2,
   data: [
     {
+      actions: [],
       created_at: '2020-02-14T19:49:28.178Z',
       updated_at: '2020-02-14T19:49:28.320Z',
       created_by: 'elastic',
@@ -106,6 +108,7 @@ export const rulesMock: FetchRulesResponse = {
       version: 1,
     },
     {
+      actions: [],
       created_at: '2020-02-14T19:49:28.189Z',
       updated_at: '2020-02-14T19:49:28.326Z',
       created_by: 'elastic',

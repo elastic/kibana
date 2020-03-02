@@ -18,6 +18,7 @@ export const installPrepackagedRules = (
 ): Array<Promise<Alert>> =>
   rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
     const {
+      actions,
       description,
       enabled,
       false_positives: falsePositives,
@@ -47,6 +48,7 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
+        actions,
         alertsClient,
         actionsClient,
         description,

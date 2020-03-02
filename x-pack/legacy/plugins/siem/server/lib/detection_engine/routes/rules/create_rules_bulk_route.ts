@@ -53,6 +53,7 @@ export const createCreateRulesBulkRoute = (
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              actions,
               description,
               enabled,
               false_positives: falsePositives,
@@ -103,6 +104,7 @@ export const createCreateRulesBulkRoute = (
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                actions,
                 description,
                 enabled,
                 falsePositives,

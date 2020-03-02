@@ -25,11 +25,23 @@ import { StepRuleActions } from '../components/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import { redirectToDetections } from '../helpers';
-import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
+import {
+  AboutStepRule,
+  DefineStepRule,
+  RuleStep,
+  RuleStepData,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
 
-const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
+const stepsRuleOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions,
+];
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -109,7 +121,7 @@ const CreateRulePageComponent: React.FC = () => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
       if (isValid) {
         const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
-        if ([0, 1].includes(stepRuleIdx)) {
+        if ([0, 1, 2].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
             setIsStepRuleInEditView({
@@ -126,15 +138,17 @@ const CreateRulePageComponent: React.FC = () => {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
           }
         } else if (
-          stepRuleIdx === 2 &&
+          stepRuleIdx === 3 &&
           stepsData.current[RuleStep.defineRule].isValid &&
-          stepsData.current[RuleStep.aboutRule].isValid
+          stepsData.current[RuleStep.aboutRule].isValid &&
+          stepsData.current[RuleStep.scheduleRule].isValid
         ) {
           setRule(
             formatRule(
               stepsData.current[RuleStep.defineRule].data as DefineStepRule,
               stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
-              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule
+              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule,
+              stepsData.current[RuleStep.ruleActions].data as ActionsStepRule
             )
           );
         }
@@ -185,6 +199,14 @@ const CreateRulePageComponent: React.FC = () => {
     />
   );
 
+  const ruleActionsButton = (
+    <AccordionTitle
+      name="4"
+      title={RuleI18n.RULE_ACTIONS}
+      type={getAccordionType(RuleStep.ruleActions)}
+    />
+  );
+
   const openCloseAccordion = (accordionId: RuleStep | null) => {
     if (accordionId != null) {
       if (accordionId === RuleStep.defineRule && defineRuleRef.current != null) {
@@ -193,6 +215,8 @@ const CreateRulePageComponent: React.FC = () => {
         aboutRuleRef.current.onToggle();
       } else if (accordionId === RuleStep.scheduleRule && scheduleRuleRef.current != null) {
         scheduleRuleRef.current.onToggle();
+      } else if (accordionId === RuleStep.ruleActions && ruleActionsRef.current != null) {
+        ruleActionsRef.current.onToggle();
       }
     }
   };
@@ -368,7 +392,7 @@ const CreateRulePageComponent: React.FC = () => {
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.ruleActions}
-            buttonContent={scheduleRuleButton}
+            buttonContent={ruleActionsButton}
             paddingSize="xs"
             ref={ruleActionsRef}
             onToggle={manageAccordions.bind(null, RuleStep.ruleActions)}
@@ -387,9 +411,6 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepRuleActions
               addPadding={true}
-              defaultValues={
-                (stepsData.current[RuleStep.ruleActions].data as ActionsStepRule) ?? null
-              }
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
               isLoading={isLoading || loading}

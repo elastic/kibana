@@ -7,6 +7,7 @@
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 
 export const mockRule = (id: string): Rule => ({
+  actions: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',

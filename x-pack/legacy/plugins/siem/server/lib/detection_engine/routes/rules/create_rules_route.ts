@@ -38,6 +38,7 @@ export const createCreateRulesRoute = (
     },
     async handler(request: RulesRequest, headers) {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -100,6 +101,7 @@ export const createCreateRulesRoute = (
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          actions,
           description,
           enabled,
           falsePositives,

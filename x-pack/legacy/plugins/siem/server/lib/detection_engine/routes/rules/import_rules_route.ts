@@ -117,6 +117,7 @@ export const createImportRulesRoute = (
                     return null;
                   }
                   const {
+                    actions,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -164,6 +165,7 @@ export const createImportRulesRoute = (
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        actions,
                         description,
                         enabled,
                         falsePositives,
@@ -196,6 +198,7 @@ export const createImportRulesRoute = (
                       await patchRules({
                         alertsClient,
                         actionsClient,
+                        actions,
                         savedObjectsClient,
                         description,
                         enabled,

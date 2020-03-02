@@ -50,6 +50,7 @@ export const createUpdateRulesBulkRoute = (
       const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -83,6 +84,7 @@ export const createUpdateRulesBulkRoute = (
             const rule = await updateRules({
               alertsClient,
               actionsClient,
+              actions,
               description,
               enabled,
               immutable: false,

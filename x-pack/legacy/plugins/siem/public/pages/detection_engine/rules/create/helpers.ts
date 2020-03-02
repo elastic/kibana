@@ -122,6 +122,5 @@ export const formatRule = (
     ...formatActionsStepData(actionsData),
   };
 
-  console.error('sss', persistData);
   return ruleId != null ? { id: ruleId, ...persistData } : persistData;
 };

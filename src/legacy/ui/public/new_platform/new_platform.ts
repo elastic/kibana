@@ -52,6 +52,11 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -71,6 +76,7 @@ export interface PluginsSetup {
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
   telemetry?: TelemetryPluginSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface PluginsStart {
@@ -89,6 +95,7 @@ export interface PluginsStart {
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
   telemetry?: TelemetryPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
 export const npSetup = {

@@ -217,8 +217,6 @@ const EditRulePageComponent: FC = () => {
     const activeFormId = selectedTab?.id as RuleStep;
     const activeForm = await stepsForm.current[activeFormId]?.submit();
 
-    console.error('onSubmit', activeForm, myActionsRuleForm);
-
     const invalidForms = [
       RuleStep.aboutRule,
       RuleStep.defineRule,
@@ -306,7 +304,6 @@ const EditRulePageComponent: FC = () => {
               isValid: respForm.isValid,
             });
           } else if (ruleStep === RuleStep.ruleActions) {
-            console.error('onTabClick', respForm);
             setMyActionsRuleForm({
               data: respForm.data as ActionsStepRule,
               isValid: respForm.isValid,
