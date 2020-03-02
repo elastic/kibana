@@ -23,6 +23,7 @@ import * as legacyElasticsearch from 'elasticsearch';
 
 import { CallAPIOptions } from '.';
 import { Logger } from '../logging';
+import { APICaller } from './api_types';
 
 const esErrors = legacyElasticsearch.errors;
 
@@ -35,14 +36,8 @@ const esErrors = legacyElasticsearch.errors;
  *
  * @param apiCaller
  */
-
-// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
 export function migrationsRetryCallCluster(
-  apiCaller: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>,
+  apiCaller: APICaller,
   log: Logger,
   delay: number = 2500
 ) {
