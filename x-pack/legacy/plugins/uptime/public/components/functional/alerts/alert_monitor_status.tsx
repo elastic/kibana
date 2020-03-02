@@ -135,10 +135,8 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       }),
     },
   ]);
-  // const [renotifyChecked, setRenotifyChecked] = useState<boolean>(true);
-  // const [renotifyInterval, setRenotifyInterval] = useState<number>(15);
 
-  const { setAlertParams } = props;
+  const { filters, setAlertParams } = props;
 
   useEffect(() => {
     setAlertParams('numTimes', numTimes);
@@ -161,8 +159,8 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   }, [locations, setAlertParams, allLabels]);
 
   useEffect(() => {
-    setAlertParams('filters', props.filters);
-  }, [props.filters, setAlertParams]);
+    setAlertParams('filters', filters);
+  }, [filters, setAlertParams]);
 
   return (
     <>
@@ -244,7 +242,8 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
           value={
             locations.length === 0 || allLabels
               ? 'any location'
-              : locations
+              : // create a nicely-formatted description string for all `on` locations
+                locations
                   .filter(({ checked }) => checked === 'on')
                   .map(({ label }) => label)
                   .sort()
@@ -279,42 +278,3 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     </>
   );
 };
-
-// <EuiSpacer size="l" />
-
-// <AlertExpressionPopover
-//   id="renotify-interval"
-//   description="renotify every"
-//   value={`${renotifyInterval} minutes`}
-//   content={
-//     <>
-//       {/* <EuiFlexGroup gutterSize="m">
-//         <EuiFlexItem grow={false}> */}
-//       <EuiSwitch
-//         label="Renotify every"
-//         checked={renotifyChecked}
-//         onChange={e => setRenotifyChecked(e.target.checked)}
-//       />
-//       {/* </EuiFlexItem>
-//         <EuiFlexItem> */}
-//       <EuiSpacer size="s" />
-//       <AlertFieldNumber
-//         disabled={!renotifyChecked}
-//         fieldName="renotifyInterval"
-//         fieldValue={renotifyInterval}
-//         setFieldValue={setRenotifyInterval}
-//         setAlertParams={setAlertParams}
-//       />
-//       {/* <EuiFieldNumber
-//         compressed
-//         fullWidth={false}
-//         min={1}
-//         disabled={!renotifyChecked}
-//         value={renotifyInterval}
-//         onChange={e => setRenotifyInterval(parseInt(e.target.value, 10))}
-//       /> */}
-//       {/* </EuiFlexItem>
-//       </EuiFlexGroup> */}
-
-//   </>
-// }
