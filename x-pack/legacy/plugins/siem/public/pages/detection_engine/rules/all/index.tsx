@@ -21,6 +21,7 @@ import {
   CreatePreBuiltRules,
   FilterOptions,
   Rule,
+  PaginationOptions,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -118,11 +119,14 @@ export const AllRules = React.memo<AllRulesProps>(
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
-    const setRules = useCallback((newRules: Rule[], rulesTotal: number) => {
+    const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({
         type: 'setRules',
         rules: newRules,
-        total: rulesTotal,
+      });
+      dispatch({
+        type: 'updatePagination',
+        pagination: newPagination,
       });
     }, []);
 
