@@ -17,11 +17,11 @@ import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
 
 interface Route {
-  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post'>;
+  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
   handler: RequestHandler;
 }
 
-const buildRouterMock = () => {
+const buildRoutingTools = () => {
   const mock = httpServiceMock.createRouter();
   const spy = jest.fn();
 
@@ -41,62 +41,64 @@ const buildRouterMock = () => {
     return { config, handler };
   };
 
-  return { mock, getRoute };
+  return { routerMock: mock, getRoute };
 };
 
-type ValidationResult = ReturnType<typeof buildResultMock>;
 const buildResultMock = () => ({ ok: jest.fn(x => x), badRequest: jest.fn(x => x) });
 
-const createMockServer = () => {
-  const router = buildRouterMock();
-  const responseMock = responseFactoryMock.create();
-  const contextMock = requestContextMock.create();
+class MockServer {
+  public router: ReturnType<typeof httpServiceMock.createRouter>;
 
-  const validateRequest = (request: KibanaRequest): [KibanaRequest, ValidationResult] => {
-    const result = buildResultMock();
-    const validations = router.getRoute().config.validate;
+  constructor(
+    private routing = buildRoutingTools(),
+    private responseMock = responseFactoryMock.create(),
+    private contextMock = requestContextMock.create(),
+    private resultMock = buildResultMock()
+  ) {
+    this.router = this.routing.routerMock;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private maybeValidate(part: any, validator?: any): any {
+    return typeof validator === 'function' ? validator(part, this.resultMock) : part;
+  }
+
+  private validateRequest(request: KibanaRequest): KibanaRequest {
+    const validations = this.routing.getRoute().config.validate;
 
     if (!validations) {
-      return [request, result];
+      return request;
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const maybeValidate = (part: any, validator?: any): any =>
-      typeof validator === 'function' ? validator(part, result) : part;
 
     const validatedRequest = requestMock.create({
       path: request.route.path,
       method: request.route.method,
-      body: maybeValidate(request.body, validations.body),
-      query: maybeValidate(request.query, validations.query),
-      params: maybeValidate(request.params, validations.params),
+      body: this.maybeValidate(request.body, validations.body),
+      query: this.maybeValidate(request.query, validations.query),
+      params: this.maybeValidate(request.params, validations.params),
     });
 
-    return [validatedRequest, result];
-  };
+    return validatedRequest;
+  }
 
-  const validate = (request: KibanaRequest) => {
-    const [, resultMock] = validateRequest(request);
-    return resultMock;
-  };
+  public validate(request: KibanaRequest) {
+    this.validateRequest(request);
+    return this.resultMock;
+  }
 
-  const inject = async (request: KibanaRequest, context: RequestHandlerContext = contextMock) => {
-    const [validatedRequest, result] = validateRequest(request);
-    const [rejection] = result.badRequest.mock.calls;
+  public async inject(request: KibanaRequest, context: RequestHandlerContext = this.contextMock) {
+    const validatedRequest = this.validateRequest(request);
+    const [rejection] = this.resultMock.badRequest.mock.calls;
     if (rejection) {
       throw new Error(`Request was rejected with message: '${rejection}'`);
     }
 
-    await router.getRoute().handler(context, validatedRequest, responseMock);
-    return responseAdapter(responseMock);
-  };
+    await this.routing.getRoute().handler(context, validatedRequest, this.responseMock);
+    return responseAdapter(this.responseMock);
+  }
+}
 
-  return {
-    inject,
-    router: router.mock,
-    validate,
-  };
-};
+const createMockServer = () => new MockServer();
 
 export const serverMock = {
   create: createMockServer,
