@@ -5,9 +5,10 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }) {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DocLinksStart, I18nStart } from 'src/core/public';
+import { I18nStart } from 'src/core/public';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NEXT_MAJOR_VERSION } from '../../common/version';

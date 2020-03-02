@@ -29,7 +29,12 @@ export enum ReindexStatus {
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
 
-export interface ReindexOptions {
+export interface ReindexOptions extends SavedObjectAttributes {
+  /**
+   * Whether to treat the index as if it were closed. This instructs the
+   * reindex strategy to first open the index, perform reindexing and
+   * then close the index again.
+   */
   openAndClose: boolean;
 }
 

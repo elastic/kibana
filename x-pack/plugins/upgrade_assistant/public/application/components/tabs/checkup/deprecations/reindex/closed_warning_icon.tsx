@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiIcon, EuiToolTip, EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, EuiText, EuiLink } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 
 export interface Props {
