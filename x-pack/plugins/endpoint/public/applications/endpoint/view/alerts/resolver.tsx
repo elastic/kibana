@@ -12,26 +12,22 @@ import { Resolver } from '../../../../embeddables/resolver/view';
 import { EndpointPluginServices } from '../../../../plugin';
 import { LegacyEndpointEvent } from '../../../../../common/types';
 import { storeFactory } from '../../../../embeddables/resolver/store';
-import { useAlertListSelector } from './hooks/use_alerts_selector';
-import * as selectors from '../../store/alerts/selectors';
 
 export const AlertDetailResolver = styled(
-  React.memo(({ className }: { className?: string }) => {
-    const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
-    if (alertDetailsData === undefined) {
-      return null;
-    }
-    const context = useKibana<EndpointPluginServices>();
-    const { store } = storeFactory(context);
+  React.memo(
+    ({ className, selectedEvent }: { className?: string; selectedEvent?: LegacyEndpointEvent }) => {
+      const context = useKibana<EndpointPluginServices>();
+      const { store } = storeFactory(context);
 
-    return (
-      <div className={className} data-test-subj="alertResolver" data-testid="alertResolver">
-        <Provider store={store}>
-          <Resolver selectedEvent={(alertDetailsData as unknown) as LegacyEndpointEvent} />
-        </Provider>
-      </div>
-    );
-  })
+      return (
+        <div className={className} data-test-subj="alertResolver" data-testid="alertResolver">
+          <Provider store={store}>
+            <Resolver selectedEvent={selectedEvent} />
+          </Provider>
+        </div>
+      );
+    }
+  )
 )`
   height: 100%;
   width: 100%;
