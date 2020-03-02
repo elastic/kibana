@@ -7,35 +7,26 @@
 
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
 
-export type SourceDescriptor =
-  | EMSTMSSourceDescriptor
-  | EMSFileSourceDescriptor
-  | ESGeoGridSourceDescriptor
-  | ESSearchSourceDescriptor
-  | ESPewPewSourceDescriptor
-  | ESTermSourceDescriptor
-  | KibanaRegionmapSourceDescriptor
-  | KibanaTilemapSourceDescriptor
-  | WMSSourceDescriptor
-  | XYZTMSSourceDescriptor;
-
-export type EMSTMSSourceDescriptor = {
-  id?: string; // EMS TMS layer id. Used when !isAutoSelect
+export type AbstractSourceDescriptor = {
+  id?: string;
   type: string;
+};
+
+export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
+  // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
 };
 
-export type EMSFileSourceDescriptor = {
-  id: string; // EMS file id
-  type: string;
+export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
+  // id: EMS file id
+
   tooltipProperties: string[];
 };
 
-export type ESSourceDescriptor = {
-  id: string; // UUID
-  type: string;
+export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
+  // id: UUID
   indexPatternId: string;
-  geoField: string;
+  geoField?: string;
 };
 
 export type AggDescriptor = {
@@ -44,13 +35,16 @@ export type AggDescriptor = {
   type: AGG_TYPE;
 };
 
-export type ESGeoGridSourceDescriptor = ESSourceDescriptor & {
-  requestType: RENDER_AS;
-  resolution: GRID_RESOLUTION;
+export type AbstractESAggDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
-export type ESSearchSourceDescriptor = ESSourceDescriptor & {
+export type ESGeoGridSourceDescriptor = AbstractESAggDescriptor & {
+  requestType: RENDER_AS;
+  resolution: GRID_RESOLUTION;
+};
+
+export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   filterByMapBounds: boolean;
   tooltipProperties: string[];
   sortField: string;
@@ -60,21 +54,14 @@ export type ESSearchSourceDescriptor = ESSourceDescriptor & {
   topHitsSize: number;
 };
 
-export type ESPewPewSourceDescriptor = {
-  id: string; // UUID
-  type: string;
-  indexPatternId: string;
+export type ESPewPewSourceDescriptor = AbstractESAggDescriptor & {
   sourceGeoField: string;
   destGeoField: string;
-  metrics: AggDescriptor[];
 };
 
-export type ESTermSourceDescriptor = {
-  id: string; // UUID
-  indexPatternId: string;
+export type ESTermSourceDescriptor = AbstractESAggDescriptor & {
   indexPatternTitle: string;
   term: string; // term field name
-  metrics: AggDescriptor[];
 };
 
 export type KibanaRegionmapSourceDescriptor = {
@@ -123,7 +110,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: SourceDescriptor;
+  sourceDescriptor: AbstractSourceDescriptor;
   type?: string;
   visible?: boolean;
 };
