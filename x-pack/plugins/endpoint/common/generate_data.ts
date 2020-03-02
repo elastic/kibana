@@ -92,7 +92,7 @@ function randomChoice<T>(arg: T[]): T {
 }
 
 function randomString(length: number): string {
-  return [...randomNGenerator(36, length)].map(x => x.toString()).join('');
+  return [...randomNGenerator(36, length)].map(x => x.toString(36)).join('');
 }
 
 function randomHostname(): string {
