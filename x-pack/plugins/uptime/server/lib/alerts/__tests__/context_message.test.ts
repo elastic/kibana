@@ -4,10 +4,189 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { contextMessage, uniqueMonitorIds, updateState } from '../status_check';
+import {
+  contextMessage,
+  uniqueMonitorIds,
+  updateState,
+  statusCheckAlertFactory,
+} from '../status_check';
 import { GetMonitorStatusResult } from '../../requests';
+import { AlertType } from '../../../../../alerting/server';
+import { IRouter } from 'kibana/server';
+import { UMServerLibs } from '../../lib';
+import { UptimeCoreSetup } from '../../adapters';
+
+const bootstrapDependencies = (customRequests?: any) => {
+  // these parameters don't have any functionality, but we aren't testing them here
+  const route: IRouter = {} as IRouter;
+  const server: UptimeCoreSetup = { route };
+  const libs: UMServerLibs = { requests: {} } as UMServerLibs;
+  libs.requests = { ...libs.requests, ...customRequests };
+  return { server, libs };
+};
+
+const mockOptions = (
+  params = { foo: 'bar' },
+  services = { callCluster: 'mockESFunction' },
+  state = {}
+): any => ({
+  params,
+  services,
+  state,
+});
 
 describe('status check alert', () => {
+  describe('executor', () => {
+    it('does not trigger when there are no monitors down', async () => {
+      expect.assertions(4);
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([]);
+      const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs);
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(mockOptions());
+
+      expect(state).not.toBeUndefined();
+      expect(state?.isTriggered).toBe(false);
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+      expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": "mockESFunction",
+            "foo": "bar",
+          },
+        ]
+      `);
+    });
+
+    it('triggers when monitors are down and provides expected state', async () => {
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([
+        {
+          monitor_id: 'first',
+          location: 'harrisburg',
+          count: 234,
+          status: 'down',
+        },
+        {
+          monitor_id: 'first',
+          location: 'fairbanks',
+          count: 234,
+          status: 'down',
+        },
+      ]);
+      const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs);
+      const mockInstanceFactory = jest.fn();
+      const mockReplaceState = jest.fn();
+      const mockScheduleActions = jest.fn();
+      mockInstanceFactory.mockReturnValue({
+        replaceState: mockReplaceState,
+        scheduleActions: mockScheduleActions,
+      });
+      const options = mockOptions();
+      options.services = {
+        ...options.services,
+        alertInstanceFactory: mockInstanceFactory,
+      };
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+      expect(mockInstanceFactory).toHaveBeenCalledTimes(1);
+      expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": "mockESFunction",
+            "foo": "bar",
+          },
+        ]
+      `);
+      expect(mockReplaceState).toHaveBeenCalledTimes(1);
+      expect(mockReplaceState.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "monitors": Array [
+              Object {
+                "count": 234,
+                "location": "harrisburg",
+                "monitor_id": "first",
+                "status": "down",
+              },
+              Object {
+                "count": 234,
+                "location": "fairbanks",
+                "monitor_id": "first",
+                "status": "down",
+              },
+            ],
+          },
+        ]
+      `);
+      expect(mockScheduleActions).toHaveBeenCalledTimes(1);
+      expect(mockScheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "xpack.uptime.alerts.actionGroups.downMonitor",
+          Object {
+            "message": "Down monitor:
+        first",
+            "monitors": Array [
+              Object {
+                "count": 234,
+                "location": "harrisburg",
+                "monitor_id": "first",
+                "status": "down",
+              },
+              Object {
+                "count": 234,
+                "location": "fairbanks",
+                "monitor_id": "first",
+                "status": "down",
+              },
+            ],
+            "server": Object {
+              "route": Object {},
+            },
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('alert factory', () => {
+    let alert: AlertType;
+
+    beforeEach(() => {
+      const { server, libs } = bootstrapDependencies();
+      alert = statusCheckAlertFactory(server, libs);
+    });
+
+    it('creates an alert with expected params', () => {
+      // @ts-ignore the `props` key here isn't described
+      expect(Object.keys(alert.validate?.params?.props ?? {})).toMatchInlineSnapshot(`
+        Array [
+          "filters",
+          "numTimes",
+          "timerange",
+          "locations",
+        ]
+      `);
+    });
+
+    it('contains the expected static fields like id, name, etc.', () => {
+      expect(alert.id).toBe('xpack.uptime.alerts.downMonitor');
+      expect(alert.name).toBe('X-Pack Alerting');
+      expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.downMonitor');
+      expect(alert.actionGroups).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "xpack.uptime.alerts.actionGroups.downMonitor",
+            "name": "Uptime Down Monitor",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('updateState', () => {
     let spy: jest.SpyInstance<string, []>;
     beforeEach(() => {
