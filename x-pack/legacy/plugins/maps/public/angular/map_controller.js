@@ -568,6 +568,7 @@ app.controller(
                     title={savedMap.title}
                     showCopyOnSave={savedMap.id ? true : false}
                     objectType={MAP_SAVED_OBJECT_TYPE}
+                    hideDescription={true}
                   />
                 );
                 showSaveModal(saveModal, npStart.core.i18n.Context);

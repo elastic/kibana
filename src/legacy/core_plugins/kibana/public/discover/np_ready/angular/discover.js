@@ -305,6 +305,7 @@ function discoverController(
               defaultMessage:
                 'Save your Discover search so you can use it in visualizations and dashboards',
             })}
+            hideDescription={true}
           />
         );
         showSaveModal(saveModal, core.i18n.Context);

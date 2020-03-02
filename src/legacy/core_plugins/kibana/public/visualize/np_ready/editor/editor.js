@@ -189,6 +189,7 @@ function VisualizeAppController(
                   objectType="visualization"
                   confirmButtonLabel={confirmButtonLabel}
                   description={savedVis.description}
+                  hideDescription={false}
                 />
               );
               showSaveModal(saveModal, I18nContext);

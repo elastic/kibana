@@ -2,6 +2,7 @@
 
 exports[`renders DashboardSaveModal 1`] = `
 <SavedObjectSaveModal
+  hideDescription={true}
   objectType="dashboard"
   onClose={[Function]}
   onSave={[Function]}
