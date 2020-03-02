@@ -28,7 +28,7 @@ const wrapperPageStyle: Record<string, string> = {
   paddingBottom: '0',
 };
 
-export const FormWrapper = styled.div`
+const FormWrapper = styled.div`
   ${({ theme }) => css`
     padding-top: ${theme.eui.paddingSizes.l};
     padding-bottom: ${theme.eui.paddingSizes.l};
