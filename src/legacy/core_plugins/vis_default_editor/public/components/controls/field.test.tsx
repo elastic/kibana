@@ -81,6 +81,7 @@ describe('FieldParamEditor component', () => {
       setTouched,
       state: {} as VisState,
       metricAggs: [] as IAggConfig[],
+      schemas: [],
     };
   });
 

@@ -67,6 +67,7 @@ function DefaultEditorAgg({
   onToggleEnableAgg,
   removeAgg,
   setAggsState,
+  schemas,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
@@ -80,11 +81,11 @@ function DefaultEditorAgg({
 
   let SchemaComponent;
 
-  if (agg.schema.name === 'split') {
+  if (agg.schema === 'split') {
     SchemaComponent = RowsOrColumnsControl;
   }
 
-  if (agg.schema.name === 'radius') {
+  if (agg.schema === 'radius') {
     SchemaComponent = RadiusRatioOptionControl;
   }
 
@@ -258,7 +259,7 @@ function DefaultEditorAgg({
 
   const buttonContent = (
     <>
-      {agg.schema.title} {showDescription && <span>{aggDescription}</span>}
+      {agg.schema} {showDescription && <span>{aggDescription}</span>}
     </>
   );
 
@@ -272,7 +273,7 @@ function DefaultEditorAgg({
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
       aria-label={i18n.translate('visDefaultEditor.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',
-        values: { schema: agg.schema.title },
+        values: { schema: agg.schema },
       })}
       data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}
@@ -303,6 +304,7 @@ function DefaultEditorAgg({
           onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}
           setValidity={setValidity}
+          schemas={schemas}
         />
       </>
     </EuiAccordion>

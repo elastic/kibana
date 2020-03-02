@@ -27,7 +27,8 @@ const filterByName = propFilter('name');
  */
 aggTypeFilters.addFilter(
   (aggType: IAggType, indexPatterns: IndexPattern, aggConfig: IAggConfig) => {
-    const doesSchemaAllowAggType = filterByName([aggType], aggConfig.schema.aggFilter).length !== 0;
+    const { allowedAggs } = aggConfig.params;
+    const doesSchemaAllowAggType = filterByName([aggType], allowedAggs).length !== 0;
     return doesSchemaAllowAggType;
   }
 );

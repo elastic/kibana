@@ -129,10 +129,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: IAggConfig) => {
     let skipMetrics = false;
-    let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
-    if (typeof schemaName === 'object') {
-      schemaName = null;
-    }
+    let schemaName = agg.schema;
     if (!schemaName) {
       if (agg.type.name === 'geo_centroid') {
         schemaName = 'geo_centroid';

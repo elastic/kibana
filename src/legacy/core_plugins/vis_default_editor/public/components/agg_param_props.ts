@@ -19,7 +19,7 @@
 
 import { IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, AggParam } from '../legacy_imports';
+import { IAggConfig, AggParam, Schema } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 
@@ -38,6 +38,7 @@ export interface AggParamCommonProps<T, P = AggParam> {
   state: VisState;
   value?: T;
   metricAggs: IAggConfig[];
+  schemas: Schema[];
 }
 
 export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {

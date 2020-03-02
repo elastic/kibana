@@ -55,7 +55,7 @@ describe('DefaultEditorAgg component', () => {
         id: '1',
         brandNew: true,
         getIndexPattern: () => ({} as IndexPattern),
-        schema: { title: 'Schema name' },
+        schema: 'Schema name',
         title: 'Metrics',
         params: {},
       } as any,
@@ -76,6 +76,7 @@ describe('DefaultEditorAgg component', () => {
       setAggsState,
       onToggleEnableAgg,
       removeAgg,
+      schemas: [],
     };
   });
 

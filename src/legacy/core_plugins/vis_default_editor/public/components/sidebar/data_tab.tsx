@@ -28,6 +28,7 @@ import {
   ISchemas,
   parentPipelineType,
   IMetricAggType,
+  Schema,
 } from '../../legacy_imports';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
@@ -76,8 +77,8 @@ function DefaultEditorDataTab({
   const addSchema: AddSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
 
   const onAggRemove: DefaultEditorAggCommonProps['removeAgg'] = useCallback(
-    aggId => dispatch(removeAgg(aggId)),
-    [dispatch]
+    aggId => dispatch(removeAgg(aggId, (schemas as any) as Schema[])),
+    [dispatch, schemas]
   );
 
   const onReorderAggs: ReorderAggs = useCallback((...props) => dispatch(reorderAggs(...props)), [

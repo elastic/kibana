@@ -35,6 +35,7 @@ function SubAggParamEditor({
   setValue,
   setValidity,
   setTouched,
+  schemas,
 }: AggParamEditorProps<IAggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
@@ -71,6 +72,7 @@ function SubAggParamEditor({
         onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
+        schemas={schemas}
       />
     </>
   );

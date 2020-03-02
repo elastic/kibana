@@ -75,7 +75,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'number',
             },
           },
-          schema: { group: 'metrics' },
+          schema: 'metrics',
         } as IAggConfig,
         {
           id: '3',
@@ -84,7 +84,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'string',
             },
           },
-          schema: { group: 'metrics' },
+          schema: 'metrics',
         } as IAggConfig,
         {
           id: '2',
@@ -93,7 +93,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'number',
             },
           },
-          schema: { group: 'buckets' },
+          schema: 'buckets',
         } as IAggConfig,
       ],
     } as IAggConfigs;

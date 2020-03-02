@@ -72,7 +72,7 @@ function DefaultEditorAggAdd({
       : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
   const isSchemaDisabled = (schema: Schema): boolean => {
-    const count = group.filter(agg => agg.schema.name === schema.name).length;
+    const count = group.filter(agg => agg.schema === schema.name).length;
     return count >= schema.max;
   };
 

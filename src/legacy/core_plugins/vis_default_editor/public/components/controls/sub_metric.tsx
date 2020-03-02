@@ -35,6 +35,7 @@ function SubMetricParamEditor({
   setValue,
   setValidity,
   setTouched,
+  schemas,
 }: AggParamEditorProps<IAggConfig, AggParamType>) {
   const metricTitle = i18n.translate('visDefaultEditor.controls.metrics.metricTitle', {
     defaultMessage: 'Metric',
@@ -83,6 +84,7 @@ function SubMetricParamEditor({
         onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
+        schemas={schemas}
       />
     </>
   );

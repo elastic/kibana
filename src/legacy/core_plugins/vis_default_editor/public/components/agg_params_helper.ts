@@ -33,6 +33,7 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
+  Schema,
 } from '../legacy_imports';
 import { EditorConfig } from './utils';
 
@@ -41,6 +42,7 @@ interface ParamInstanceBase {
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
   state: VisState;
+  schemas: Schema[];
 }
 
 export interface ParamInstance extends ParamInstanceBase {
@@ -50,7 +52,13 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamInstanceBase) {
+function getAggParamsToRender({
+  agg,
+  editorConfig,
+  metricAggs,
+  state,
+  schemas,
+}: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -63,12 +71,13 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         .filter((param: AggParam) => !get(editorConfig, [param.name, 'hidden'], false))) ||
     [];
 
+  const schema = schemas.find(s => s.name === agg.schema);
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
     let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
     let fields: IndexPatternField[];
 
-    if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+    if (!schema || (schema.hideCustomLabel && param.name === 'customLabel')) {
       return;
     }
     // if field param exists, compute allowed fields
@@ -109,6 +118,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         metricAggs,
         state,
         value: agg.params[param.name],
+        schemas,
       });
     }
   });

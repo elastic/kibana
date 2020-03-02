@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IAggConfig, AggGroupNames } from '../legacy_imports';
+import { IAggConfig, AggGroupNames, Schema } from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -57,6 +57,7 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   indexPattern: IndexPattern;
   setValidity: (isValid: boolean) => void;
   setTouched: (isTouched: boolean) => void;
+  schemas: Schema[];
 }
 
 function DefaultEditorAggParams({
@@ -75,6 +76,7 @@ function DefaultEditorAggParams({
   onAggTypeChange,
   setTouched,
   setValidity,
+  schemas,
 }: DefaultEditorAggParamsProps) {
   const groupedAggTypeOptions = useMemo(() => getAggTypeOptions(agg, indexPattern, groupName), [
     agg,
@@ -84,7 +86,7 @@ function DefaultEditorAggParams({
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema.title },
+        values: { schema: agg.schema },
       })
     : '';
   const aggTypeName = agg.type?.name;
@@ -94,12 +96,10 @@ function DefaultEditorAggParams({
     aggTypeName,
     fieldName,
   ]);
-  const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
-    agg,
-    editorConfig,
-    metricAggs,
-    state,
-  ]);
+  const params = useMemo(
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas }),
+    [agg, editorConfig, metricAggs, state, schemas]
+  );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,

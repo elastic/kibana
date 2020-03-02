@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig } from '../legacy_imports';
+import { IAggConfig, Schema } from '../legacy_imports';
 import {
   isAggRemovable,
   calcAggIsTooLow,
@@ -28,6 +28,7 @@ import { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
   let group: IAggConfig[];
+  let schemas: Schema[];
 
   beforeEach(() => {
     group = [
@@ -38,7 +39,7 @@ describe('DefaultEditorGroup helpers', () => {
             type: 'number',
           },
         },
-        schema: { name: 'metric', min: 1, mustBeFirst: true },
+        schema: 'metric',
       } as IAggConfig,
       {
         id: '2',
@@ -47,20 +48,33 @@ describe('DefaultEditorGroup helpers', () => {
             type: 'string',
           },
         },
-        schema: { name: 'metric', min: 2 },
+        schema: 'metric',
       } as IAggConfig,
+    ];
+    schemas = [
+      {
+        name: 'metric',
+        title: 'Metric',
+        group: 'metrics',
+        min: 1,
+        max: 3,
+        aggFilter: [],
+        editor: false,
+        params: [],
+        defaults: null,
+      },
     ];
   });
 
   describe('isAggRemovable', () => {
     it('should return true when the number of aggs with the same schema is above the min', () => {
-      const isRemovable = isAggRemovable(group[0], group);
+      const isRemovable = isAggRemovable(group[0], group, schemas);
 
       expect(isRemovable).toBeTruthy();
     });
 
     it('should return false when the number of aggs with the same schema is not above the min', () => {
-      const isRemovable = isAggRemovable(group[1], group);
+      const isRemovable = isAggRemovable(group[1], group, schemas);
 
       expect(isRemovable).toBeFalsy();
     });
@@ -85,26 +99,26 @@ describe('DefaultEditorGroup helpers', () => {
 
   describe('calcAggIsTooLow', () => {
     it('should return false when agg.schema.mustBeFirst has falsy value', () => {
-      const isRemovable = calcAggIsTooLow(group[1], 0, group);
+      const isRemovable = calcAggIsTooLow(group[1], 0, group, schemas);
 
       expect(isRemovable).toBeFalsy();
     });
 
     it('should return false when there is no different schema', () => {
       group[1].schema = group[0].schema;
-      const isRemovable = calcAggIsTooLow(group[0], 0, group);
+      const isRemovable = calcAggIsTooLow(group[0], 0, group, schemas);
 
       expect(isRemovable).toBeFalsy();
     });
 
     it('should return false when different schema is not less than agg index', () => {
-      const isRemovable = calcAggIsTooLow(group[0], 0, group);
+      const isRemovable = calcAggIsTooLow(group[0], 0, group, schemas);
 
       expect(isRemovable).toBeFalsy();
     });
 
     it('should return true when agg index is greater than different schema index', () => {
-      const isRemovable = calcAggIsTooLow(group[0], 2, group);
+      const isRemovable = calcAggIsTooLow(group[0], 2, group, schemas);
 
       expect(isRemovable).toBeTruthy();
     });

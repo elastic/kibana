@@ -35,6 +35,7 @@ function OrderAggParamEditor({
   setValue,
   setValidity,
   setTouched,
+  schemas,
 }: AggParamEditorProps<IAggConfig, AggParamType>) {
   const orderBy = agg.params.orderBy;
 
@@ -74,6 +75,7 @@ function OrderAggParamEditor({
         onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
+        schemas={schemas}
       />
     </>
   );

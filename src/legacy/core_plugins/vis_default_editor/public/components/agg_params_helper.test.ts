@@ -19,7 +19,7 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES, Schema } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -38,6 +38,7 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
     let agg: IAggConfig;
     let editorConfig: EditorConfig;
+    const schemas: Schema[] = [];
     const state = {} as VisState;
     const metricAggs: IAggConfig[] = [];
     const emptyParams = {
@@ -52,14 +53,14 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: {},
       } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = {} as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -75,21 +76,21 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should skip customLabel param if it is hidden', () => {
-      agg = {
+      agg = ({
         type: {
           params: [{ name: 'customLabel' }],
         },
         schema: {
           hideCustomLabel: true,
         },
-      } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      } as any) as IAggConfig;
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -128,7 +129,7 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       } as any) as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual({
         basic: [

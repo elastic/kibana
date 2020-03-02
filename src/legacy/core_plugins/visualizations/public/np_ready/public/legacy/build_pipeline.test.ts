@@ -376,9 +376,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             type: 'metrics',
             name: 'count',
           },
-          schema: {
-            name: 'metric',
-          },
+          schema: 'metric',
           params: {},
         } as IAggConfig,
       ];

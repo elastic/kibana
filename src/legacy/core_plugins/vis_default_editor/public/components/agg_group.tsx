@@ -70,7 +70,7 @@ function DefaultEditorAggGroup({
   const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
   const group: IAggConfig[] = useMemo(
-    () => state.aggs.aggs.filter((agg: IAggConfig) => agg.schema.group === groupName) || [],
+    () => state.aggs.aggs.filter((agg: IAggConfig) => agg.schema === groupName) || [],
     [groupName, state.aggs.aggs]
   );
 
@@ -162,14 +162,14 @@ function DefaultEditorAggGroup({
                   <DefaultEditorAgg
                     agg={agg}
                     aggIndex={index}
-                    aggIsTooLow={calcAggIsTooLow(agg, index, group)}
+                    aggIsTooLow={calcAggIsTooLow(agg, index, group, schemas)}
                     dragHandleProps={provided.dragHandleProps}
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
-                    isRemovable={isAggRemovable(agg, group)}
-                    isDisabled={agg.schema.name === 'metric' && isMetricAggregationDisabled}
+                    isRemovable={isAggRemovable(agg, group, schemas)}
+                    isDisabled={agg.schema === 'metric' && isMetricAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
@@ -179,6 +179,7 @@ function DefaultEditorAggGroup({
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
                     setAggsState={setAggsState}
+                    schemas={schemas}
                   />
                 )}
               </EuiDraggable>

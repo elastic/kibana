@@ -111,7 +111,8 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       const newAggs = state.aggs.aggs.filter(({ id, schema }) => {
         if (id === action.payload.aggId) {
-          if (schema.group === AggGroupNames.Metrics) {
+          const schemaDef = action.payload.schemas.find(s => s.name === schema);
+          if (schemaDef && schemaDef.group === AggGroupNames.Metrics) {
             isMetric = true;
           }
 
@@ -122,7 +123,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
       });
 
       if (isMetric && getEnabledMetricAggsCount(newAggs) === 0) {
-        const aggToEnable = newAggs.find(agg => agg.schema.name === 'metric');
+        const aggToEnable = newAggs.find(agg => agg.schema === 'metric');
 
         if (aggToEnable) {
           aggToEnable.enabled = true;
