@@ -20,15 +20,14 @@ describe('Create or Update Custom link', () => {
     }
   } as unknown) as Setup;
 
-  const customAction = ({
+  const customLink = ({
     label: 'foo',
     url: 'http://elastic.com/{{trace.id}}',
     filters: {
       'service.name': 'opbeans-java',
       'transaction.type': 'Request'
-    },
-    actionId: 'trace'
-  } as unknown) as CustomAction;
+    }
+  } as unknown) as CustomLink;
   afterEach(() => {
     internalClientIndexMock.mockClear();
   });
@@ -38,7 +37,7 @@ describe('Create or Update Custom link', () => {
   });
 
   it('creates a new custom link', () => {
-    createOrUpdateCustomLink({ customAction, setup: mockedSetup });
+    createOrUpdateCustomLink({ customLink, setup: mockedSetup });
     expect(internalClientIndexMock).toHaveBeenCalledWith({
       refresh: true,
       index: 'apmCustomLinkIndex',
@@ -49,15 +48,14 @@ describe('Create or Update Custom link', () => {
         filters: {
           'service.name': 'opbeans-java',
           'transaction.type': 'Request'
-        },
-        actionId: 'trace'
+        }
       }
     });
   });
   it('update a new custom link', () => {
     createOrUpdateCustomLink({
-      customActionId: 'bar',
-      customAction,
+      customLinkId: 'bar',
+      customLink,
       setup: mockedSetup
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith({
@@ -71,8 +69,7 @@ describe('Create or Update Custom link', () => {
         filters: {
           'service.name': 'opbeans-java',
           'transaction.type': 'Request'
-        },
-        actionId: 'trace'
+        }
       }
     });
   });
