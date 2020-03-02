@@ -96,7 +96,6 @@ export class SearchService {
       aggs: {
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
-            schemas,
             typesRegistry: aggTypesStart,
           });
         },

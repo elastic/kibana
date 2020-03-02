@@ -66,7 +66,6 @@ export const searchStartMock = (): MockedKeys<SearchStart> => ({
   aggs: {
     createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
       return new AggConfigs(indexPattern, configStates, {
-        schemas,
         typesRegistry: mockAggTypesRegistry(),
       });
     }),
