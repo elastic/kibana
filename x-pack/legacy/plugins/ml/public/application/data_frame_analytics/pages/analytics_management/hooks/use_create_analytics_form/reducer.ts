@@ -274,8 +274,17 @@ function validateMinMML(estimatedMml: string) {
   };
 }
 
+/**
+ * Result validator function for the MML.
+ * Re-init only if the estimated mml has been changed.
+ */
 const mmlValidator = memoize((estimatedMml: string) =>
   composeValidators(requiredValidator(), validateMinMML(estimatedMml), memoryInputValidator())
+);
+
+const validateMml = memoize(
+  (estimatedMml: string, mml: string | undefined) => mmlValidator(estimatedMml)(mml),
+  (...args: any) => args.join('_')
 );
 
 const validateForm = (state: State): State => {
@@ -301,7 +310,7 @@ const validateForm = (state: State): State => {
     (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
     dependentVariable === '';
 
-  const mmlValidationResult = mmlValidator(estimatedModelMemoryLimit)(modelMemoryLimit);
+  const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);
 
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
