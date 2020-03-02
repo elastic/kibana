@@ -253,12 +253,6 @@ export interface EndpointEvent {
   };
 }
 
-export interface Node {
-  events: EndpointEvent[];
-  children: Node[];
-  parent_entity_id?: string;
-}
-
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**

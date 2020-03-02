@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EndpointDocGenerator, generateEventAncestry, generateResolverTree } from './generate_data';
-import { Node } from './types';
+import { EndpointEvent } from './types';
+
+interface Node {
+  events: EndpointEvent[];
+  children: Node[];
+  parent_entity_id?: string;
+}
 
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
