@@ -17,15 +17,17 @@
  * under the License.
  */
 
-export * from './assert_never';
-export * from './context';
-export * from './crypto';
-export * from './deep_freeze';
-export * from './get';
-export * from './map_to_object';
-export * from './merge';
-export * from './pick';
-export * from './promise';
-export * from './url';
-export * from './unset';
-export * from './get_flattened_object';
+import { Observable } from 'rxjs';
+// @ts-ignore not typed
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+
+/**
+ * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`
+ * which aborts when the given request is aborted.
+ * @param aborted$ The observable of abort events (usually `request.events.aborted$`)
+ */
+export function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
