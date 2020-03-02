@@ -51,11 +51,6 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
       });
     } else {
       const error = PathReporter.report(decoded).join(', ');
-      // TODO determine if we really need a rich type here. response.badRequest only wants to return
-      // a single string, but we may want to return individual errors for form fields, which would mean
-      // returning a 200 with our own error thing on top of it.
-      // That said, a 400 is considered more restful per https://stackoverflow.com/questions/3290182/rest-http-status-codes-for-failed-validation-or-invalid-duplicate
-      // that said, lots of debate here
       return response.badRequest({
         body: error,
       });
