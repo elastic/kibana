@@ -19,6 +19,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -27,8 +28,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
-  EuiButton,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -93,12 +94,14 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
         <EuiPopover
           anchorPosition="downRight"
           button={
-            <EuiButtonIcon
-              aria-label={linkButtonAriaLabel}
-              data-test-subj="unlinkSavedSearch"
-              iconType="link"
-              onClick={onClickButtonLink}
-            />
+            <EuiToolTip content={linkButtonAriaLabel}>
+              <EuiButtonIcon
+                aria-label={linkButtonAriaLabel}
+                data-test-subj="showUnlinkSavedSearchPopover"
+                iconType="link"
+                onClick={onClickButtonLink}
+              />
+            </EuiToolTip>
           }
           isOpen={showPopover}
           closePopover={closePopover}
@@ -123,17 +126,20 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
               <p>
                 <FormattedMessage
                   id="visDefaultEditor.sidebar.savedSearch.popoverHelpText"
-                  defaultMessage="When you build a visualization from a saved search, any subsequent
-                  modifications to the saved search are automatically reflected in the
-                  visualization. To disable automatic updates, you can disconnect a visualization
-                  from the saved search."
+                  defaultMessage="Subsequent modifications to this saved search are reflected in the visualization. To disable automatic updates, remove the link."
                 />
               </p>
               <p>
-                <EuiButton color="danger" onClick={onClickUnlikFromSavedSearch} size="s" fullWidth>
+                <EuiButton
+                  color="danger"
+                  data-test-subj="unlinkSavedSearch"
+                  fullWidth
+                  onClick={onClickUnlikFromSavedSearch}
+                  size="s"
+                >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.unlinkSavedSearchButtonText"
-                    defaultMessage="Break link to saved search"
+                    defaultMessage="Remove link to saved search"
                   />
                 </EuiButton>
               </p>

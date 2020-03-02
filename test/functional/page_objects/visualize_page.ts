@@ -209,8 +209,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickUnlinkSavedSearch() {
+      await testSubjects.click('showUnlinkSavedSearchPopover');
       await testSubjects.click('unlinkSavedSearch');
-      await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
     }
 
