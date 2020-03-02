@@ -122,28 +122,26 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     await act(async () => {
-      if (deps) {
-        wrapper = mountWithIntl(
-          <AlertsContextProvider
-            value={{
-              reloadAlerts: () => {
-                return new Promise<void>(() => {});
-              },
-              http: deps.http,
-              actionTypeRegistry: deps.actionTypeRegistry,
-              alertTypeRegistry: deps.alertTypeRegistry,
-              toastNotifications: deps.toastNotifications,
-              uiSettings: deps.uiSettings,
-            }}
-          >
-            <AlertEdit
-              editFlyoutVisible={true}
-              setEditFlyoutVisibility={state => {}}
-              initialAlert={alert}
-            />
-          </AlertsContextProvider>
-        );
-      }
+      wrapper = mountWithIntl(
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+          }}
+        >
+          <AlertEdit
+            editFlyoutVisible={true}
+            setEditFlyoutVisibility={state => {}}
+            initialAlert={alert}
+          />
+        </AlertsContextProvider>
+      );
     });
     await waitForRender(wrapper);
   });

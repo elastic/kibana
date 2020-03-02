@@ -84,7 +84,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
 
-      // TODO: implement saving to the server, when threshold API will be ready
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+
+      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterEdit).to.eql([
+        {
+          name: alertName,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
     });
 
     it('should search for alert', async () => {

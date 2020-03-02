@@ -126,7 +126,14 @@ export async function updateAlert({
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
-    body: JSON.stringify(alert),
+    body: JSON.stringify({
+      throttle: alert.throttle,
+      name: alert.name,
+      tags: alert.tags,
+      schedule: alert.schedule,
+      params: alert.params,
+      actions: alert.actions,
+    }),
   });
 }
 
