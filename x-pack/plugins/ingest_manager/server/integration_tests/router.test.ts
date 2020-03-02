@@ -144,8 +144,14 @@ describe('ingestManager', () => {
     });
   });
 
-  describe('manager and Fleet; no EPM)', () => {
+  describe.skip('manager and Fleet; no EPM)', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    /**
+     *
+     * commented out due to hooks being called regardless of skip
+     * https://github.com/facebook/jest/issues/8379
+
     beforeAll(async () => {
       const ingestManagerConfig = {
         enabled: true,
@@ -160,6 +166,8 @@ describe('ingestManager', () => {
     }, 30000);
 
     afterAll(async () => await root.shutdown());
+
+    */
 
     it('has agent config api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
@@ -178,8 +186,14 @@ describe('ingestManager', () => {
     });
   });
 
-  describe('all flags enabled: manager, EPM, and Fleet)', () => {
+  describe.skip('all flags enabled: manager, EPM, and Fleet)', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    /**
+     *
+     * commented out due to hooks being called regardless of skip
+     * https://github.com/facebook/jest/issues/8379
+
     beforeAll(async () => {
       const ingestManagerConfig = {
         enabled: true,
@@ -194,6 +208,8 @@ describe('ingestManager', () => {
     }, 30000);
 
     afterAll(async () => await root.shutdown());
+
+    */
 
     it('has agent config api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
