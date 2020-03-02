@@ -19,9 +19,10 @@
 
 import { IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, AggParam, Schema } from '../legacy_imports';
+import { IAggConfig, AggParam } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
+import { Schema } from '../schemas';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

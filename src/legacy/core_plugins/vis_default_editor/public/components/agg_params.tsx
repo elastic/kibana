@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IAggConfig, AggGroupNames, Schema } from '../legacy_imports';
+import { IAggConfig, AggGroupNames } from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -40,6 +40,7 @@ import {
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
+import { Schema, getSchemaByName } from '../schemas';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -83,10 +84,11 @@ function DefaultEditorAggParams({
     indexPattern,
     groupName,
   ]);
+  const { title } = getSchemaByName(schemas, agg.schema);
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema },
+        values: { schema: title },
       })
     : '';
   const aggTypeName = agg.type?.name;

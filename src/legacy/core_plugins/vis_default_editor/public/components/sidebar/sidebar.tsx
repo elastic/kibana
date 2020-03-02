@@ -22,12 +22,13 @@ import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { AggGroupNames, Schema } from '../../legacy_imports';
+import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
+import { getSchemasByGroup } from '../../schemas';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -50,9 +51,9 @@ function DefaultEditorSideBar({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
-  const metricSchemas = vis.type.schemas.all
-    .filter((s: Schema) => s.group === AggGroupNames.Metrics)
-    .map((s: Schema) => s.name);
+  const metricSchemas = getSchemasByGroup(vis.type.schemas.all, AggGroupNames.Metrics).map(
+    s => s.name
+  );
   const metricAggs = useMemo(
     () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
     [responseAggs, metricSchemas]

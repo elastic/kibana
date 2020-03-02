@@ -21,10 +21,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfigs, IAggConfig, Schema } from '../legacy_imports';
+import { IAggConfigs, IAggConfig } from '../legacy_imports';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
+import { Schema } from '../schemas';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',

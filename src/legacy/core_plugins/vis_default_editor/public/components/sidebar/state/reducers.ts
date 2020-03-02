@@ -110,7 +110,6 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
     case EditorStateActionTypes.REMOVE_AGG: {
       let isMetric = false;
-
       const newAggs = state.aggs.aggs.filter(({ id, schema }) => {
         if (id === action.payload.aggId) {
           const schemaDef = action.payload.schemas.find(s => s.name === schema);

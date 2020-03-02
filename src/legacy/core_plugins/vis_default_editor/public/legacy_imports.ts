@@ -32,8 +32,6 @@ export {
   IFieldParamType,
   BUCKET_TYPES,
   METRIC_TYPES,
-  ISchemas,
-  Schema,
   termsAggFilter,
 } from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types';

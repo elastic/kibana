@@ -28,6 +28,7 @@ import { AggParam } from '../../data/public/search/aggs/agg_params';
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
   [AggGroupNames.Metrics]: Schema[];
+  all: Schema[];
 }
 
 export interface Schema {
@@ -103,3 +104,11 @@ export class Schemas {
       .commit();
   }
 }
+
+export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
+  return schemas.find(s => s.name === schemaName) || ({} as Schema);
+};
+
+export const getSchemasByGroup = (schemas: Schema[], schemaGroup?: string) => {
+  return schemas.filter(s => s.group === schemaGroup);
+};

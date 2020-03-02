@@ -18,8 +18,9 @@
  */
 
 import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, Schema } from '../../../legacy_imports';
+import { IAggConfig } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
+import { Schema } from '../../../schemas';
 
 export interface ActionType<T, P> {
   type: T;

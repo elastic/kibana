@@ -82,4 +82,4 @@ export {
   termsAggFilter,
 } from '../../../core_plugins/data/public';
 
-export { ISchemas, Schemas, Schema } from '../../../core_plugins/vis_default_editor/public';
+export { ISchemas, Schemas, Schema } from '../../../core_plugins/vis_default_editor/public/schemas';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig, Schema } from '../legacy_imports';
+import { IAggConfig } from '../legacy_imports';
 import {
   isAggRemovable,
   calcAggIsTooLow,
@@ -25,6 +25,7 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { AggsState } from './agg_group_state';
+import { Schema } from '../schemas';
 
 describe('DefaultEditorGroup helpers', () => {
   let group: IAggConfig[];

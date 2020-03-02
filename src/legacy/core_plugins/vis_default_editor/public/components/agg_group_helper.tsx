@@ -18,14 +18,12 @@
  */
 
 import { findIndex, isEmpty } from 'lodash';
-import { IAggConfig, Schema } from '../legacy_imports';
+import { IAggConfig } from '../legacy_imports';
 import { AggsState } from './agg_group_state';
+import { Schema, getSchemaByName } from '../schemas';
 
 const isAggRemovable = (agg: IAggConfig, group: IAggConfig[], schemas: Schema[]) => {
-  const schema = schemas.find(s => s.name === agg.schema);
-  if (!schema) {
-    return true;
-  }
+  const schema = getSchemaByName(schemas, agg.schema);
   const metricCount = group.reduce(
     (count, aggregation: IAggConfig) => (aggregation.schema === agg.schema ? ++count : count),
     0
@@ -48,8 +46,8 @@ const calcAggIsTooLow = (
   group: IAggConfig[],
   schemas: Schema[]
 ) => {
-  const schema = schemas.find(s => s.name === agg.schema);
-  if (!schema || !schema.mustBeFirst) {
+  const schema = getSchemaByName(schemas, agg.schema);
+  if (!schema.mustBeFirst) {
     return false;
   }
 

@@ -19,7 +19,7 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES, Schema } from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -27,6 +27,7 @@ import {
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
+import { Schema } from '../schemas';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
