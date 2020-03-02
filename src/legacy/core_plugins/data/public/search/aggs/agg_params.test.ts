@@ -23,8 +23,6 @@ import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { AggParamType } from '../aggs/param_types/agg';
 
-jest.mock('ui/new_platform');
-
 describe('AggParams class', () => {
   describe('constructor args', () => {
     it('accepts an array of param defs', () => {

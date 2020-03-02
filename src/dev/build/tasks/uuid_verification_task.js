@@ -17,12 +17,22 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../core/public/mocks';
+import { read } from '../lib';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
+export const UuidVerificationTask = {
+  description: 'Verify that no UUID file is baked into the build',
+
+  async run(config, log, build) {
+    const uuidFilePath = build.resolvePath('data', 'uuid');
+    await read(uuidFilePath).then(
+      function success() {
+        throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
+      },
+      function error(err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
+      }
+    );
   },
-}));
+};
