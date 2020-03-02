@@ -24,7 +24,7 @@ const FIRED_ACTIONS = {
 
 async function getMetric(
   { callCluster }: AlertServices,
-  { metric, aggType, timeUnit, timeSize, indexPattern }: MetricExpressionParams
+  { metric, filterQuery, aggType, timeUnit, timeSize, indexPattern }: MetricExpressionParams
 ) {
   const interval = `${timeSize}${timeUnit}`;
   const aggregations =
@@ -37,6 +37,21 @@ async function getMetric(
             },
           },
         };
+
+  const parsedFilterQuery = filterQuery
+    ? (() => {
+        try {
+          return JSON.parse(filterQuery).bool;
+        } catch (e) {
+          return {
+            query_string: {
+              query: filterQuery,
+              analyze_wildcard: true,
+            },
+          };
+        }
+      })()
+    : {};
 
   const searchBody = {
     query: {
@@ -54,6 +69,7 @@ async function getMetric(
           },
         ],
       },
+      ...parsedFilterQuery,
     },
     size: 0,
     aggs: {
