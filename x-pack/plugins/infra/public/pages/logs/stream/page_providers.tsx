@@ -29,8 +29,6 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
   const {
-    startDate,
-    endDate,
     startTimestamp,
     endTimestamp,
     targetPosition,
@@ -49,8 +47,6 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   }
 
   const entriesProps = {
-    startDate,
-    endDate,
     startTimestamp,
     endTimestamp,
     liveStreamingInterval,

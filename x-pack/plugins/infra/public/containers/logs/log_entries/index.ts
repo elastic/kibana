@@ -51,8 +51,6 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction | ExpandRangeAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
-  startDate: string;
-  endDate: string;
   startTimestamp: number;
   endTimestamp: number;
   liveStreamingInterval: number;
@@ -109,14 +107,13 @@ const shouldFetchNewEntries = ({
   filterQuery,
   topCursor,
   bottomCursor,
-  startDate,
-  endDate,
   startTimestamp,
   endTimestamp,
 }: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams | undefined }) => {
   const shouldLoadWithNewDates = prevParams
-    ? (startDate !== prevParams.startDate && startTimestamp > prevParams.startTimestamp) ||
-      (endDate !== prevParams.endDate && endTimestamp < prevParams.endTimestamp)
+    ? (startTimestamp !== prevParams.startTimestamp &&
+        startTimestamp > prevParams.startTimestamp) ||
+      (endTimestamp !== prevParams.endTimestamp && endTimestamp < prevParams.endTimestamp)
     : true;
   const shouldLoadWithNewFilter = prevParams ? filterQuery !== prevParams.filterQuery : true;
   const shouldLoadAroundNewPosition =
@@ -322,7 +319,7 @@ const useFetchEntriesEffect = (
     dispatch({ type: Action.ExpandRange, payload: shouldExpand });
   };
 
-  const expandRangeEffectDependencies = [props.startDate, props.endDate];
+  const expandRangeEffectDependencies = [props.startTimestamp, props.endTimestamp];
 
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
