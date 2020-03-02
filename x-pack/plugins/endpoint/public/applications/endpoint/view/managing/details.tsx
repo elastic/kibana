@@ -13,8 +13,10 @@ import {
   EuiDescriptionList,
   EuiLoadingContent,
   EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useManagementListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
@@ -26,15 +28,21 @@ const HostDetails = () => {
   const detailsResultsUpper = useMemo(() => {
     return [
       {
-        title: 'OS',
+        title: i18n.translate('xpack.endpoint.management.details.os', {
+          defaultMessage: 'OS',
+        }),
         description: details.host.os.full,
       },
       {
-        title: 'Last Seen',
+        title: i18n.translate('xpack.endpoint.management.details.lastSeen', {
+          defaultMessage: 'Last Seen',
+        }),
         description: details['@timestamp'],
       },
       {
-        title: 'Alerts',
+        title: i18n.translate('xpack.endpoint.management.details.alerts', {
+          defaultMessage: 'Alerts',
+        }),
         description: '0',
       },
     ];
@@ -43,23 +51,33 @@ const HostDetails = () => {
   const detailsResultsLower = useMemo(() => {
     return [
       {
-        title: 'Policy',
+        title: i18n.translate('xpack.endpoint.management.details.policy', {
+          defaultMessage: 'Policy',
+        }),
         description: details.endpoint.policy.id,
       },
       {
-        title: 'Policy Status',
+        title: i18n.translate('xpack.endpoint.management.details.policyStatus', {
+          defaultMessage: 'Policy Status',
+        }),
         description: 'active',
       },
       {
-        title: 'IP Address',
+        title: i18n.translate('xpack.endpoint.management.details.ipAddress', {
+          defaultMessage: 'IP Address',
+        }),
         description: details.host.ip,
       },
       {
-        title: 'Hostname',
+        title: i18n.translate('xpack.endpoint.management.details.hostname', {
+          defaultMessage: 'Hostname',
+        }),
         description: details.host.hostname,
       },
       {
-        title: 'Sensor Version',
+        title: i18n.translate('xpack.endpoint.management.details.sensorVersion', {
+          defaultMessage: 'Sensor Version',
+        }),
         description: details.agent.version,
       },
     ];
@@ -97,19 +115,18 @@ export const ManagementDetails = () => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 data-test-subj="managementDetailsTitle">
-            {details === undefined ? (
-              <FormattedMessage
-                id="xpack.endpoint.management.detailsLoadingTitle"
-                defaultMessage="Details"
-              />
-            ) : (
-              details.host.hostname
-            )}
+            {details === undefined ? <EuiLoadingContent lines={1} /> : details.host.hostname}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {details === undefined ? <EuiLoadingContent lines={3} /> : <HostDetails />}
+        {details === undefined ? (
+          <>
+            <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
+          </>
+        ) : (
+          <HostDetails />
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
