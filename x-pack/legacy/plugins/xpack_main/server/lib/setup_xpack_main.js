@@ -20,7 +20,7 @@ export function setupXPackMain(server) {
 
   server.expose('info', info);
   server.expose('createXPackInfo', options => {
-    const client = server.newPlatform.setup.core.elasticsearch.createClient(options.clusterSource);
+    const client = server.plugins.elasticsearch.getCluster(options.clusterSource);
     const monitoringLicensing = server.newPlatform.setup.plugins.licensing.createLicensePoller(
       client,
       options.pollFrequencyInMillis
