@@ -45,6 +45,11 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
+
+  /**
+   * Metadata
+   */
+  static ENDPOINT_THRESHOLD_OFFLINE_MS = 5000;
 }
 
 export interface AlertResultList {
@@ -335,6 +340,11 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+
+/*
+ * The EndpointStatus type is used for determining endpoint activity status based on most recent connection
+ */
+export type EndpointStatus = 'Online' | 'Inactive';
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.

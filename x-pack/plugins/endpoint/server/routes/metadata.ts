@@ -12,7 +12,12 @@ import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
 } from '../services/endpoint/metadata_query_builders';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
+import {
+  EndpointAppConstants,
+  EndpointMetadata,
+  EndpointResultList,
+  EndpointStatus,
+} from '../../common/types';
 import { EndpointAppContext } from '../types';
 
 interface HitSource {
@@ -85,7 +90,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           return res.notFound({ body: 'Endpoint Not Found' });
         }
 
-        return res.ok({ body: response.hits.hits[0]._source });
+        const ep = response.hits.hits[0]._source;
+        ep.status = getEndpointStatus(ep);
+        return res.ok({ body: ep });
       } catch (err) {
         return res.internalError({ body: err });
       }
@@ -99,13 +106,17 @@ function mapToEndpointResultList(
 ): EndpointResultList {
   const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {
+    const eps = searchResponse.hits.hits
+      .map(response => response.inner_hits.most_recent.hits.hits)
+      .flatMap(data => data as HitSource)
+      .map(entry => entry._source);
+    eps.forEach(entry => {
+      entry.status = getEndpointStatus(entry);
+    });
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
-      endpoints: searchResponse.hits.hits
-        .map(response => response.inner_hits.most_recent.hits.hits)
-        .flatMap(data => data as HitSource)
-        .map(entry => entry._source),
+      endpoints: eps,
       total: totalNumberOfEndpoints,
     };
   } else {
@@ -116,4 +127,13 @@ function mapToEndpointResultList(
       endpoints: [],
     };
   }
+}
+
+export function getEndpointStatus(ep: EndpointMetadata): EndpointStatus {
+  const lastSeen = ep.event.created;
+  const msSince = new Date().getTime() - new Date(lastSeen || 0).getTime();
+  if (msSince < EndpointAppConstants.ENDPOINT_THRESHOLD_OFFLINE_MS) {
+    return 'online';
+  }
+  return 'offline';
 }
