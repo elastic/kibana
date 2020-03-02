@@ -15,7 +15,8 @@ import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../r
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transform } from './utils';
+import { transformValidate } from './validate';
+
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 
@@ -136,16 +137,16 @@ export const createCreateRulesRoute = (
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
-        if (transformed == null) {
+        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        if (errors != null) {
           return headers
             .response({
-              message: 'Internal error transforming rules',
+              message: errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          return transformed;
+          return validated;
         }
       } catch (err) {
         const error = transformError(err);

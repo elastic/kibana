@@ -7,12 +7,6 @@
 import { InnerJoin } from './inner_join';
 
 jest.mock('../../kibana_services', () => {});
-jest.mock('ui/agg_types', () => {
-  class MockSchemas {}
-  return {
-    Schemas: MockSchemas,
-  };
-});
 jest.mock('ui/timefilter', () => {});
 jest.mock('../vector_layer', () => {});
 
