@@ -92,6 +92,9 @@ include::field-formatters/string-formatter.asciidoc[]
 
 Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
 
+The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
+the <<numeral, Elastic numeral pattern>> syntax that Kibana maintains.
+
 include::field-formatters/url-formatter.asciidoc[]
 
 include::field-formatters/string-formatter.asciidoc[]
@@ -99,9 +102,6 @@ include::field-formatters/string-formatter.asciidoc[]
 include::field-formatters/duration-formatter.asciidoc[]
 
 include::field-formatters/color-formatter.asciidoc[]
-
-The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
-the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
 
 [[scripted-fields]]
 === Scripted Fields
