@@ -9,7 +9,6 @@ import { defaultsDeep, uniq, compact, get } from 'lodash';
 import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
-import { parseElasticsearchConfig } from '../es_client/parse_elasticsearch_config';
 import { hasMonitoringCluster } from '../es_client/instantiate_client';
 
 /*
@@ -52,7 +51,7 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    const directConfig = parseElasticsearchConfig(config, 'elasticsearch');
+    const directConfig = config.elasticsearch;
     if (hasMonitoringCluster(directConfig)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
