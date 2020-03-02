@@ -89,6 +89,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.servicenow',
+    minimumLicenseRequired: 'platinum',
     name: i18n.translate('xpack.actions.builtin.servicenowTitle', {
       defaultMessage: 'ServiceNow',
     }),

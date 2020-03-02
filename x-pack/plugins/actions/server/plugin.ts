@@ -25,10 +25,11 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
 import { ActionsConfig } from './config';
-import { Services } from './types';
+import { Services, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -57,7 +58,7 @@ export const EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: ActionTypeRegistry['register'];
+  registerType: (actionType: ActionType) => void;
 }
 
 export interface PluginStartContract {
@@ -179,7 +180,17 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     executeActionRoute(router, this.licenseState, actionExecutor);
 
     return {
-      registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+      registerType: (actionType: ActionType) => {
+        if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
+        }
+        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
+          throw new Error(
+            `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
+          );
+        }
+        actionTypeRegistry.register(actionType);
+      },
     };
   }
 

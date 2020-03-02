@@ -65,6 +65,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -100,6 +101,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -140,6 +142,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -233,6 +236,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -346,6 +350,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -407,6 +412,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -440,6 +446,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({

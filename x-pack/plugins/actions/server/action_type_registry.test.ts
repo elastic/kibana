@@ -31,6 +31,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -55,12 +56,14 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        minimumLicenseRequired: 'basic',
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -73,6 +76,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -94,6 +98,7 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -101,6 +106,7 @@ describe('get()', () => {
       Object {
         "executor": [Function],
         "id": "my-action-type",
+        "minimumLicenseRequired": "basic",
         "name": "My action type",
       }
     `);
@@ -120,6 +126,7 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -144,6 +151,7 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: 'basic',
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
