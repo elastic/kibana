@@ -801,6 +801,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 >
                   <EuiPanel grow={false} paddingSize="none">
                     <EuiCodeEditor
+                      data-test-subj="transformAdvancedPivotEditor"
                       mode={xJsonMode}
                       width="100%"
                       value={advancedEditorConfig}
