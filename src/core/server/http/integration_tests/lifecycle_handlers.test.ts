@@ -244,7 +244,7 @@ describe('core lifecycle handlers', () => {
         });
 
         it('accepts requests on a route with disabled xsrf protection', async () => {
-          await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+          await getSupertest(method.toLowerCase(), xsrfDisabledTestPath).expect(200, 'ok');
         });
       });
     });

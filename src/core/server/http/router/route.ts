@@ -110,7 +110,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
 
   /**
    * Defines xsrf protection requirements for a route:
-   * - true. Requires an incoming request to contain `kbn-xsrf` header.
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
    * - false. Disables xsrf protection.
    *
    * Set to true by default

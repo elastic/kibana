@@ -70,7 +70,6 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
 
   return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
-      app: kibanaRouteState,
       headers,
       params,
       query,
@@ -84,7 +83,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
         search: queryString ? `?${queryString}` : queryString,
       },
       route: {
-        settings: { tags: routeTags, auth: routeAuthRequired },
+        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteState },
       },
       raw: {
         req: { socket },
