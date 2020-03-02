@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
@@ -20,108 +20,78 @@ interface Props {
   restores: SnapshotRestore[];
 }
 
-export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
+export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restores }) => {
   const { i18n, uiMetricService } = useServices();
 
-  // Track restores to show based on sort and pagination state
-  const [currentRestores, setCurrentRestores] = useState<SnapshotRestore[]>([]);
-
-  // Sort state
-  const [sorting, setSorting] = useState<{
-    sort: {
-      field: keyof SnapshotRestore;
-      direction: 'asc' | 'desc';
-    };
-  }>({
-    sort: {
-      field: 'isComplete',
-      direction: 'asc',
-    },
-  });
-
-  // Pagination state
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-    totalItemCount: restores.length,
-    pageSizeOptions: [10, 20, 50],
-  });
+  const [tableState, setTableState] = useState<{ page: any; sort: any }>({ page: {}, sort: {} });
 
   // Track expanded indices
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
+  const [expandedIndices, setExpandedIndices] = useState<{
     [key: string]: React.ReactNode;
   }>({});
 
+  const getPagination = () => {
+    const { index: pageIndex, size: pageSize } = tableState.page;
+    return {
+      pageIndex: pageIndex ?? 0,
+      pageSize: pageSize ?? 20,
+      totalItemCount: restores.length,
+      pageSizeOptions: [10, 20, 50],
+    };
+  };
+
+  const getSorting = () => {
+    const { field: sortField, direction: sortDirection } = tableState.sort;
+    return {
+      sort: {
+        field: sortField ?? 'isComplete',
+        direction: sortDirection ?? 'asc',
+      },
+    };
+  };
+
+  const getRestores = () => {
+    const newRestoresList = [...restores];
+
+    const {
+      sort: { field, direction },
+    } = getSorting();
+    const { pageIndex, pageSize } = getPagination();
+
+    const sortedRestores = sortByOrder(newRestoresList, [field], [direction]);
+    return sortedRestores.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  };
+
   // On sorting and pagination change
   const onTableChange = ({ page = {}, sort = {} }: any) => {
-    const { index: pageIndex, size: pageSize } = page;
-    const { field: sortField, direction: sortDirection } = sort;
-    setSorting({
-      sort: {
-        field: sortField,
-        direction: sortDirection,
-      },
-    });
-    setPagination({
-      ...pagination,
-      pageIndex,
-      pageSize,
-    });
+    setTableState({ page, sort });
   };
 
   // Expand or collapse index details
   const toggleIndexRestoreDetails = (restore: SnapshotRestore) => {
-    const { index, shards } = restore;
-    const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
+    const { index } = restore;
 
-    if (newItemIdToExpandedRowMap[index]) {
-      delete newItemIdToExpandedRowMap[index];
-    } else {
+    const isExpanded = Boolean(itemIdToExpandedRowMap[index]) ? false : true;
+
+    if (isExpanded === true) {
       uiMetricService.trackUiMetric(UIM_RESTORE_LIST_EXPAND_INDEX);
-      newItemIdToExpandedRowMap[index] = <ShardsTable shards={shards} />;
     }
-    setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+
+    setExpandedIndices({
+      ...itemIdToExpandedRowMap,
+      [index]: isExpanded,
+    });
   };
 
-  // Refresh expanded index details
-  const refreshIndexRestoreDetails = useCallback(() => {
-    const newItemIdToExpandedRowMap: typeof itemIdToExpandedRowMap = {};
-    restores.forEach(restore => {
+  const itemIdToExpandedRowMap = useMemo(() => {
+    return restores.reduce((acc, restore) => {
       const { index, shards } = restore;
-      if (!itemIdToExpandedRowMap[index]) {
-        return;
+      if (expandedIndices[index]) {
+        acc[index] = <ShardsTable shards={shards} />;
       }
-      newItemIdToExpandedRowMap[index] = <ShardsTable shards={shards} />;
-      setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
-    });
-  }, [itemIdToExpandedRowMap, restores]);
-
-  // Get restores to show based on sort and pagination state
-  const getCurrentRestores = useCallback((): SnapshotRestore[] => {
-    const newRestoresList = [...restores];
-    const {
-      sort: { field, direction },
-    } = sorting;
-    const { pageIndex, pageSize } = pagination;
-    const sortedRestores = sortByOrder(newRestoresList, [field], [direction]);
-    return sortedRestores.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [pagination, restores, sorting]);
-
-  // Update current restores to show if table changes
-  useEffect(() => {
-    setCurrentRestores(getCurrentRestores());
-  }, [getCurrentRestores]);
-
-  // Update current restores to show if data changes
-  // as well as any expanded index details
-  useEffect(() => {
-    setPagination({
-      ...pagination,
-      totalItemCount: restores.length,
-    });
-    setCurrentRestores(getCurrentRestores());
-    refreshIndexRestoreDetails();
-  }, [getCurrentRestores, pagination, refreshIndexRestoreDetails, restores]);
+      return acc;
+    }, {} as typeof expandedIndices);
+  }, [expandedIndices, restores]);
 
   const columns = [
     {
@@ -212,13 +182,13 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
 
   return (
     <EuiBasicTable
-      items={currentRestores}
+      items={getRestores()}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
       columns={columns}
-      sorting={sorting}
-      pagination={pagination}
+      sorting={getSorting()}
+      pagination={getPagination()}
       onChange={onTableChange}
       rowProps={(restore: SnapshotRestore) => ({
         'data-test-subj': 'row',
@@ -230,4 +200,4 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
       data-test-subj="restoresTable"
     />
   );
-};
+});
