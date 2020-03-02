@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { PageHeader, BaseBreadcrumb } from '../page_header';
+import { PageHeader, makeBaseBreadcrumb } from '../page_header';
 import { mountWithRouter, renderWithRouter } from '../../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { UptimeUrlParams } from '../../lib/helper';
 
 describe('PageHeader', () => {
   const simpleBreadcrumbs: ChromeBreadcrumb[] = [
@@ -54,7 +55,10 @@ describe('PageHeader', () => {
       </KibanaContextProvider>
     );
 
-    expect(getBreadcrumbs()).toStrictEqual([BaseBreadcrumb].concat(simpleBreadcrumbs));
+    const urlParams: UptimeUrlParams = {};
+    expect(getBreadcrumbs()).toStrictEqual(
+      [makeBaseBreadcrumb(urlParams)].concat(simpleBreadcrumbs)
+    );
   });
 });
 
