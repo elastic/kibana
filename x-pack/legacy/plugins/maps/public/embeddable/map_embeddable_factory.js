@@ -12,7 +12,6 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 
@@ -24,6 +23,9 @@ import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
+import { bindCoreAndPlugins } from '../plugin';
+import { npStart } from '../../../../../../src/legacy/ui/public/new_platform';
+import { setup as embeddableSetup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -39,6 +41,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       },
     });
   }
+
   isEditable() {
     return capabilities.get().maps.save;
   }
@@ -148,4 +151,9 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 }
 
-setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+// Will be called from setup/start in NP after migration
+((core, plugins) => {
+  bindCoreAndPlugins(core, plugins);
+  const mapEmbeddableFactory = new MapEmbeddableFactory();
+  embeddableSetup.registerEmbeddableFactory(mapEmbeddableFactory.type, mapEmbeddableFactory);
+})(npStart.core, { np: npStart.plugins });

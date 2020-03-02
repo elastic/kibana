@@ -33,6 +33,11 @@ interface MapsPluginSetupDependencies {
   };
 }
 
+export const bindCoreAndPlugins = ({ injectedMetadata }, { inspector }) => {
+  setInspector(inspector);
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
+};
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
@@ -48,11 +53,10 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     np.home.featureCatalogue.register(featureCatalogueEntry);
 
     // NP setup
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
     np.inspector.registerView(MapView);
+
+    bindCoreAndPlugins(core, np);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    setInspector(plugins.np.inspector);
-  }
+  public start(core: CoreStart, plugins: any) {}
 }
