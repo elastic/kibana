@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { AggConfigOptions } from '../agg_config';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -57,7 +56,7 @@ export const geoTileBucketAgg = new BucketAggType({
     aggs.push(agg);
 
     if (useGeocentroid) {
-      const aggConfig: AggConfigOptions = {
+      const aggConfig = {
         type: METRIC_TYPES.GEO_CENTROID,
         enabled: true,
         params: {
