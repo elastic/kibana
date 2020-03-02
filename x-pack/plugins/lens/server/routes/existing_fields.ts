@@ -54,6 +54,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
           indexPatternId: schema.string(),
         }),
         query: schema.object({
+          dslQuery: schema.string(),
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
@@ -91,12 +92,14 @@ export async function existingFieldsRoute(setup: CoreSetup) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  dslQuery,
   fromDate,
   toDate,
   timeFieldName,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  dslQuery: string;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
@@ -113,6 +116,7 @@ async function fetchFieldExistence({
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
+    dslQuery: JSON.parse(dslQuery),
     client: context.core.elasticsearch.dataClient,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
@@ -197,6 +201,7 @@ export function buildFieldList(
 async function fetchIndexPatternStats({
   client,
   index,
+  dslQuery,
   timeFieldName,
   fromDate,
   toDate,
@@ -204,17 +209,15 @@ async function fetchIndexPatternStats({
 }: {
   client: IScopedClusterClient;
   index: string;
+  dslQuery: string;
   timeFieldName?: string;
   fromDate?: string;
   toDate?: string;
   fields: Field[];
 }) {
-  let query;
-
-  if (timeFieldName && fromDate && toDate) {
-    query = {
-      bool: {
-        filter: [
+  const filter =
+    timeFieldName && fromDate && toDate
+      ? [
           {
             range: {
               [timeFieldName]: {
@@ -223,14 +226,16 @@ async function fetchIndexPatternStats({
               },
             },
           },
-        ],
-      },
-    };
-  } else {
-    query = {
-      match_all: {},
-    };
-  }
+          dslQuery,
+        ]
+      : [dslQuery];
+
+  const query = {
+    bool: {
+      filter,
+    },
+  };
+
   const scriptedFields = fields.filter(f => f.isScript);
 
   const result = await client.callAsCurrentUser('search', {

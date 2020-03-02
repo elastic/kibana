@@ -40,6 +40,15 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
+import {
+  indexPatterns as indexPatternsUtils,
+  IFieldType,
+  Filter,
+  Query,
+  IndexPatternTypeMeta,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -113,6 +122,15 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
+  const dslQuery = JSON.stringify(
+    esQuery.buildEsQuery(
+      indexPatterns[currentIndexPatternId] as IIndexPattern,
+      query,
+      filters,
+      esQuery.getEsQueryConfig(core.uiSettings)
+    )
+  );
+
   return (
     <>
       <Loader
@@ -122,9 +140,12 @@ export function IndexPatternDataPanel({
             setState,
             indexPatterns: indexPatternList,
             fetchJson: core.http.get,
+            dslQuery,
           })
         }
         loadDeps={[
+          query,
+          filters,
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),

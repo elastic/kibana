@@ -215,15 +215,18 @@ export async function syncExistingFields({
   dateRange,
   fetchJson,
   setState,
+  dslQuery,
 }: {
   dateRange: DateRange;
   indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
   fetchJson: HttpSetup['get'];
   setState: SetState;
+  dslQuery: string;
 }) {
   const emptinessInfo = await Promise.all(
     indexPatterns.map(pattern => {
       const query: Record<string, string> = {
+        dslQuery,
         fromDate: dateRange.fromDate,
         toDate: dateRange.toDate,
       };
