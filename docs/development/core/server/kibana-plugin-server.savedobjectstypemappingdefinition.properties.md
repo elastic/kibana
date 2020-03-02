@@ -4,6 +4,8 @@
 
 ## SavedObjectsTypeMappingDefinition.properties property
 
+The underlying properties of the type mapping
+
 <b>Signature:</b>
 
 ```typescript

@@ -104,6 +104,7 @@ export const npSetup = {
         getProvider: sinon.fake(),
       },
       query: {
+        state$: mockObservable(),
         filterManager: {
           getFetches$: sinon.fake(),
           getFilters: sinon.fake(),
@@ -217,6 +218,9 @@ export const npSetup = {
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
+      },
+      colors: {
+        seedColors: ['white', 'black'],
       },
     },
     management: {

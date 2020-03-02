@@ -8,9 +8,6 @@
 // Import the uiExports that the application uses
 // These will go away as these plugins are converted to NP
 import 'ui/autoload/all';
-import 'uiExports/visTypes';
-import 'uiExports/visResponseHandlers';
-import 'uiExports/visRequestHandlers';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/embeddableFactories';

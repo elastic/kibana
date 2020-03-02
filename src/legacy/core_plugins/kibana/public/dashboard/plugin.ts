@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -29,7 +30,11 @@ import {
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './np_ready/application';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  esFilters,
+} from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -46,7 +51,6 @@ import {
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import { getQueryStateContainer } from '../../../../../plugins/data/public';
 
 export interface DashboardPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -78,24 +82,35 @@ export class DashboardPlugin implements Plugin {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, kibanaLegacy, data }: DashboardPluginSetupDependencies) {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      data.query
-    );
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/dashboards',
+      defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
+      shouldTrackUrlUpdate: pathname => {
+        const targetAppName = pathname.split('/')[1];
+        return (
+          targetAppName === DashboardConstants.DASHBOARDS_ID ||
+          targetAppName === DashboardConstants.DASHBOARD_ID
+        );
+      },
       storageKey: 'lastUrl:dashboard',
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
+          ),
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
     const app: App = {
@@ -138,6 +153,10 @@ export class DashboardPlugin implements Plugin {
           savedQueryService: dataStart.query.savedQueries,
           embeddable,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          embeddableCapabilities: {
+            visualizeCapabilities: coreStart.application.capabilities.visualize,
+            mapsCapabilities: coreStart.application.capabilities.maps,
+          },
           localStorage: new Storage(localStorage),
         };
         const { renderApp } = await import('./np_ready/application');
@@ -150,15 +169,15 @@ export class DashboardPlugin implements Plugin {
     };
     kibanaLegacy.registerLegacyApp({
       ...app,
-      id: 'dashboard',
+      id: DashboardConstants.DASHBOARD_ID,
       // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:dashboard',
     });
-    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboards' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: DashboardConstants.DASHBOARDS_ID });
 
     home.featureCatalogue.register({
-      id: 'dashboard',
+      id: DashboardConstants.DASHBOARD_ID,
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
         defaultMessage: 'Dashboard',
       }),

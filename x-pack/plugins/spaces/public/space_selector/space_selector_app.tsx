@@ -29,7 +29,10 @@ export const spaceSelectorApp = Object.freeze({
           getStartServices(),
           import('./space_selector'),
         ]);
-        return renderSpaceSelectorApp(coreStart.i18n, params.element, { spacesManager });
+        return renderSpaceSelectorApp(coreStart.i18n, params.element, {
+          spacesManager,
+          serverBasePath: coreStart.http.basePath.serverBasePath,
+        });
       },
     });
   },

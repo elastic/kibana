@@ -37,7 +37,7 @@ const D3_SCALING_FUNCTIONS = {
 };
 
 export class TagCloud extends EventEmitter {
-  constructor(domNode, colors) {
+  constructor(domNode, colorScale) {
     super();
 
     //DOM
@@ -54,7 +54,6 @@ export class TagCloud extends EventEmitter {
     this._spiral = 'archimedean'; //layout shape
     this._timeInterval = 1000; //time allowed for layout algorithm
     this._padding = 5;
-    this._seedColors = colors.seedColors;
 
     //OPTIONS
     this._orientation = 'single';
@@ -67,6 +66,7 @@ export class TagCloud extends EventEmitter {
     this._words = null;
 
     //UTIL
+    this._colorScale = colorScale;
     this._setTimeoutId = null;
     this._pendingJob = null;
     this._layoutIsUpdating = null;
@@ -371,8 +371,7 @@ export class TagCloud extends EventEmitter {
   }
 
   getFill(tag) {
-    const colorScale = d3.scale.ordinal().range(this._seedColors);
-    return colorScale(tag.text);
+    return this._colorScale(tag.text);
   }
 }
 

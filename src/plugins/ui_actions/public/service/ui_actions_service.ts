@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import {
+  TriggerRegistry,
+  ActionRegistry,
+  TriggerToActionsRegistry,
+  TriggerId,
+  TriggerContextMapping,
+} from '../types';
 import { Action } from '../actions';
-import { Trigger } from '../triggers/trigger';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
+import { Trigger, TriggerContext } from '../triggers/trigger';
+import { TriggerInternal } from '../triggers/trigger_internal';
+import { TriggerContract } from '../triggers/trigger_contract';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -52,21 +59,23 @@ export class UiActionsService {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
 
-    this.triggers.set(trigger.id, trigger);
+    const triggerInternal = new TriggerInternal(this, trigger);
+
+    this.triggers.set(trigger.id, triggerInternal);
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = (id: string) => {
-    const trigger = this.triggers.get(id);
+  public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
+    const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
-      throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+      throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
     }
 
-    return trigger;
+    return trigger.contract;
   };
 
-  public readonly registerAction = (action: Action) => {
+  public readonly registerAction = <Context>(action: Action<Context>) => {
     if (this.actions.has(action.id)) {
       throw new Error(`Action [action.id = ${action.id}] already registered.`);
     }
@@ -74,7 +83,10 @@ export class UiActionsService {
     this.actions.set(action.id, action);
   };
 
-  public readonly attachAction = (triggerId: string, actionId: string): void => {
+  // TODO: make this
+  // <T extends TriggerId>(triggerId: T, action: Action<TriggerContextMapping[T]>): \
+  // to get type checks here!
+  public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -90,7 +102,7 @@ export class UiActionsService {
     }
   };
 
-  public readonly detachAction = (triggerId: string, actionId: string) => {
+  public readonly detachAction = (triggerId: TriggerId, actionId: string) => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -107,62 +119,45 @@ export class UiActionsService {
     );
   };
 
-  public readonly getTriggerActions = (triggerId: string) => {
+  public readonly getTriggerActions = <T extends TriggerId>(
+    triggerId: T
+  ): Array<Action<TriggerContextMapping[T]>> => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
-    const actions = actionIds!
-      .map(actionId => this.actions.get(actionId))
-      .filter(Boolean) as Action[];
 
-    return actions;
+    const actions = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
+      Action<TriggerContextMapping[T]>
+    >;
+
+    return actions as Array<Action<TriggerContext<T>>>;
   };
 
-  public readonly getTriggerCompatibleActions = async <C>(triggerId: string, context: C) => {
+  public readonly getTriggerCompatibleActions = async <T extends TriggerId>(
+    triggerId: T,
+    context: TriggerContextMapping[T]
+  ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
-    return actions.reduce<Action[]>(
-      (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
+    return actions.reduce(
+      (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
+        isCompatibles[i] ? [...acc, action] : acc,
       []
     );
   };
 
-  private async executeSingleAction<A>(action: Action<A>, actionContext: A) {
-    const href = action.getHref && action.getHref(actionContext);
-
-    if (href) {
-      window.location.href = href;
-      return;
-    }
-
-    await action.execute(actionContext);
-  }
-
-  private async executeMultipleActions<C>(actions: Action[], actionContext: C) {
-    const panel = await buildContextMenuForActions({
-      actions,
-      actionContext,
-      closeMenu: () => session.close(),
-    });
-    const session = openContextMenu([panel]);
-  }
-
-  public readonly executeTriggerActions = async <C>(triggerId: string, actionContext: C) => {
-    const actions = await this.getTriggerCompatibleActions!(triggerId, actionContext);
-
-    if (!actions.length) {
-      throw new Error(
-        `No compatible actions found to execute for trigger [triggerId = ${triggerId}].`
-      );
-    }
-
-    if (actions.length === 1) {
-      await this.executeSingleAction(actions[0], actionContext);
-      return;
-    }
-
-    await this.executeMultipleActions(actions, actionContext);
+  /**
+   * @deprecated
+   *
+   * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
+   */
+  public readonly executeTriggerActions = async <T extends TriggerId>(
+    triggerId: T,
+    context: TriggerContext<T>
+  ) => {
+    const trigger = this.getTrigger<T>(triggerId);
+    await trigger.exec(context);
   };
 
   /**
