@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bucketRulesResponse, getRulesTotal, showRulesTable } from './helpers';
+import { bucketRulesResponse, showRulesTable } from './helpers';
 import { mockRule, mockRuleError } from './__mocks__/mock';
 import uuid from 'uuid';
 import { Rule, RuleError } from '../../../../containers/detection_engine/rules';
@@ -84,62 +84,6 @@ describe('AllRulesTable Helpers', () => {
         rulesInstalled: 5,
       });
       expect(result).toBeTruthy();
-    });
-  });
-
-  describe('getRulesTotal', () => {
-    test('returns 0 when rulesCustomInstalled and rulesInstalled are null', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: null,
-        rulesInstalled: null,
-        filterOptions: { showCustomRules: false, showElasticRules: false },
-      });
-      expect(result).toEqual(0);
-    });
-
-    test('returns rulesCustomInstalled when rulesInstalled is null', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: 5,
-        rulesInstalled: null,
-        filterOptions: { showCustomRules: false, showElasticRules: false },
-      });
-      expect(result).toEqual(5);
-    });
-
-    test('returns rulesInstalled when rulesCustomInstalled is null', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: null,
-        rulesInstalled: 5,
-        filterOptions: { showCustomRules: false, showElasticRules: false },
-      });
-      expect(result).toEqual(5);
-    });
-
-    test('returns sum of rulesInstalled and rulesCustomInstalled when no filter', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: 6,
-        rulesInstalled: 5,
-        filterOptions: { showCustomRules: false, showElasticRules: false },
-      });
-      expect(result).toEqual(11);
-    });
-
-    test('returns rulesCustomInstalled when showCustomRules is true', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: 6,
-        rulesInstalled: 5,
-        filterOptions: { showCustomRules: true, showElasticRules: false },
-      });
-      expect(result).toEqual(6);
-    });
-
-    test('returns rulesInstalled when showElasticRules is true', () => {
-      const result = getRulesTotal({
-        rulesCustomInstalled: 6,
-        rulesInstalled: 5,
-        filterOptions: { showCustomRules: false, showElasticRules: true },
-      });
-      expect(result).toEqual(5);
     });
   });
 });

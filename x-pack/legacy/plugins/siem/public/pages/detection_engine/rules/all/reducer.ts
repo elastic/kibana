@@ -26,7 +26,7 @@ export type Action =
   | { type: 'exportRuleIds'; ids: string[] }
   | { type: 'loadingRuleIds'; ids: string[]; actionType: LoadingRuleAction }
   | { type: 'selectedRuleIds'; ids: string[] }
-  | { type: 'setRules'; rules: Rule[] }
+  | { type: 'setRules'; rules: Rule[]; total: number }
   | { type: 'updateRules'; rules: Rule[] }
   | { type: 'updatePagination'; pagination: Partial<PaginationOptions> }
   | {
@@ -76,6 +76,10 @@ export const allRulesReducer = (
         selectedRuleIds: [],
         loadingRuleIds: [],
         loadingRulesAction: null,
+        pagination: {
+          ...state.pagination,
+          total: action.total,
+        },
       };
     }
     case 'updateRules': {

@@ -40,7 +40,7 @@ import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
 import { getColumns } from './columns';
-import { showRulesTable, getRulesTotal } from './helpers';
+import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
@@ -118,10 +118,11 @@ export const AllRules = React.memo<AllRulesProps>(
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
-    const setRules = useCallback((newRules: Rule[]) => {
+    const setRules = useCallback((newRules: Rule[], rulesTotal: number) => {
       dispatch({
         type: 'setRules',
         rules: newRules,
+        total: rulesTotal,
       });
     }, []);
 
@@ -324,11 +325,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   pagination={{
                     pageIndex: pagination.page - 1,
                     pageSize: pagination.perPage,
-                    totalItemCount: getRulesTotal({
-                      rulesCustomInstalled,
-                      rulesInstalled,
-                      filterOptions,
-                    }),
+                    totalItemCount: pagination.total,
                     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
                   }}
                   ref={tableRef}

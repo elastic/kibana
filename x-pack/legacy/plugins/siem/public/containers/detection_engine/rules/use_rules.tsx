@@ -23,7 +23,7 @@ export interface UseRules {
   pagination: PaginationOptions;
   filterOptions: FilterOptions;
   refetchPrePackagedRulesStatus?: () => void;
-  dispatchRulesInReducer?: (rules: Rule[]) => void;
+  dispatchRulesInReducer?: (rules: Rule[], rulesTotal: number) => void;
 }
 
 /**
@@ -59,7 +59,7 @@ export const useRules = ({
         if (isSubscribed) {
           setRules(fetchRulesResult);
           if (dispatchRulesInReducer != null) {
-            dispatchRulesInReducer(fetchRulesResult.data);
+            dispatchRulesInReducer(fetchRulesResult.data, fetchRulesResult.total);
           }
         }
       } catch (error) {
