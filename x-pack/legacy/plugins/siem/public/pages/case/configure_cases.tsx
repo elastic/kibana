@@ -52,6 +52,8 @@ const ConfigureCasesPageComponent: React.FC = () => (
           </SectionWrapper>
           <SectionWrapper>
             <ClosureOptions />
+          </SectionWrapper>
+          <SectionWrapper>
             <FieldMapping />
           </SectionWrapper>
           <SectionWrapper>
