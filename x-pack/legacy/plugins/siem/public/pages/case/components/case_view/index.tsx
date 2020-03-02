@@ -31,6 +31,7 @@ import { UserList } from '../user_list';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
+import { WhitePageWrapper } from '../wrappers';
 
 interface Props {
   caseId: string;
@@ -51,14 +52,6 @@ const MyWrapper = styled(WrapperPage)`
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
-`;
-
-const BackgroundWrapper = styled.div`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorEmptyShade};
-    border-top: ${theme.eui.euiBorderThin};
-    height: 100%;
-  `}
 `;
 
 export interface CaseProps {
@@ -206,7 +199,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </HeaderPage>
       </MyWrapper>
-      <BackgroundWrapper>
+      <WhitePageWrapper>
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
@@ -231,7 +224,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             </EuiFlexItem>
           </EuiFlexGroup>
         </MyWrapper>
-      </BackgroundWrapper>
+      </WhitePageWrapper>
     </>
   );
 });

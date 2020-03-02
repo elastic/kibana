@@ -64,15 +64,6 @@ export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseView.updatedAt',
   defaultMessage: 'Last updated',
 });
 
-export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.case.caseView.pageBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.caseView.pageBadgeTooltip', {
-  defaultMessage:
-    'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-});
-
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
   defaultMessage: 'Cases within the Elastic SIEM',
 });
