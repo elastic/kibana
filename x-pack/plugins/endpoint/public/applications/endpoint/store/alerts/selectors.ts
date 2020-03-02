@@ -9,13 +9,13 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import { Immutable } from '../../../../../common/types';
 import {
   AlertListState,
   AlertingIndexUIQueryParams,
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
+import { Immutable, LegacyEndpointEvent } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
@@ -91,4 +91,25 @@ export const apiQueryParams: (
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
+);
+
+/**
+ * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
+ */
+function isAlertEventLegacyEndpointEvent(event: { endgame?: {} }): event is LegacyEndpointEvent {
+  return event.endgame !== undefined && 'unique_pid' in event.endgame;
+}
+
+export const selectedEvent: (
+  state: AlertListState
+) => LegacyEndpointEvent | undefined = createSelector(
+  uiQueryParams,
+  alertListData,
+  ({ selected_alert: selectedAlert }, alertList) => {
+    const found = alertList.find(alert => alert.event.id === selectedAlert);
+    if (!found) {
+      return found;
+    }
+    return isAlertEventLegacyEndpointEvent(found) ? found : undefined;
+  }
 );
