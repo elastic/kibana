@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
@@ -13,8 +13,7 @@ import { ReindexStatus } from '../../../common/types';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
-
-export const SYMBOL_FORBIDDEN = Symbol('Forbidden');
+import { error } from '../../lib/reindexing/error';
 
 interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
@@ -42,7 +41,12 @@ export const reindexHandler = async ({
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 
   if (!(await reindexService.hasRequiredPrivileges(indexName))) {
-    throw SYMBOL_FORBIDDEN;
+    throw error.accessForbidden(
+      i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+        defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
+        values: { indexName },
+      })
+    );
   }
 
   const existingOp = await reindexService.findReindexOperation(indexName);
