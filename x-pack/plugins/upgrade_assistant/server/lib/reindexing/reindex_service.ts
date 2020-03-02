@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
 import { APICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
@@ -25,6 +23,8 @@ import {
 } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+
+import { error } from './error';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
@@ -287,7 +287,7 @@ export const reindexServiceFactory = (
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
@@ -301,7 +301,7 @@ export const reindexServiceFactory = (
     });
 
     if (!createIndex.acknowledged) {
-      throw Boom.badImplementation(`Index could not be created: ${newIndexName}`);
+      throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -370,7 +370,7 @@ export const reindexServiceFactory = (
       if (taskResponse.task.status.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
-        throw Boom.badData(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
+        throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
       }
 
       // Update the status
@@ -387,7 +387,7 @@ export const reindexServiceFactory = (
     });
 
     if (deleteTaskResp.result !== 'deleted') {
-      throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
+      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
     }
 
     return reindexOp;
@@ -421,7 +421,7 @@ export const reindexServiceFactory = (
     });
 
     if (!aliasResponse.acknowledged) {
-      throw Boom.badImplementation(`Index aliases could not be created.`);
+      throw error.cannotCreateIndex(`Index aliases could not be created.`);
     }
 
     if (reindexOptions?.openAndClose) {
@@ -531,7 +531,7 @@ export const reindexServiceFactory = (
     async createReindexOperation(indexName: string, opts = { openAndClose: false }) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
-        throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);
@@ -544,7 +544,9 @@ export const reindexServiceFactory = (
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
         } else {
-          throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
+          throw error.reindexAlreadyInProgress(
+            `A reindex operation already in-progress for ${indexName}`
+          );
         }
       }
 
@@ -558,7 +560,9 @@ export const reindexServiceFactory = (
       if (findResponse.total === 0) {
         return null;
       } else if (findResponse.total > 1) {
-        throw Boom.badImplementation(`More than one reindex operation found for ${indexName}`);
+        throw error.multipleReindexJobsFound(
+          `More than one reindex operation found for ${indexName}`
+        );
       }
 
       return findResponse.saved_objects[0];

@@ -15,3 +15,4 @@ export { SAMLAuthenticationProvider, isSAMLRequestQuery, SAMLLoginStep } from '.
 export { TokenAuthenticationProvider } from './token';
 export { OIDCAuthenticationProvider, OIDCAuthenticationFlow } from './oidc';
 export { PKIAuthenticationProvider } from './pki';
+export { HTTPAuthenticationProvider } from './http';
