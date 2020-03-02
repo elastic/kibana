@@ -22,6 +22,7 @@ import moment from 'moment';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 import { Legacy } from 'kibana';
+import { getTelemetrySavedObject } from '../telemetry_repository';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
@@ -35,6 +36,13 @@ interface RegisterOptInRoutesParams {
   currentKibanaVersion: string;
   server: Legacy.Server;
 }
+
+const getInternalRepository = (server: Legacy.Server) => {
+  const { getSavedObjectsRepository } = server.savedObjects;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+  return internalRepository;
+};
 
 export function registerTelemetryOptInRoutes({
   server,
@@ -58,15 +66,17 @@ export function registerTelemetryOptInRoutes({
           lastVersionChecked: currentKibanaVersion,
         };
         const config = req.server.config();
-        const savedObjectsClient = req.getSavedObjectsClient();
+        const internalRepository = getInternalRepository(server);
+        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
         const configTelemetryAllowChangingOptInStatus = config.get(
           'telemetry.allowChangingOptInStatus'
         );
 
         const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
-          telemetrySavedObject: savedObjectsClient,
+          telemetrySavedObject,
           configTelemetryAllowChangingOptInStatus,
         });
+
         if (!allowChangingOptInStatus) {
           return h.response({ error: 'Not allowed to change Opt-in Status.' }).code(400);
         }
@@ -87,7 +97,7 @@ export function registerTelemetryOptInRoutes({
           );
         }
 
-        await updateTelemetrySavedObject(savedObjectsClient, attributes);
+        await updateTelemetrySavedObject(internalRepository, attributes);
         return h.response({}).code(200);
       } catch (err) {
         return boomify(err);

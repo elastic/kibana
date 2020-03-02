@@ -13,28 +13,58 @@ export default function optInTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('/api/telemetry/v2/optIn API', () => {
+    let defaultAttributes: any;
     let kibanaVersion: any;
 
     before(async () => {
       const kibanaVersionAccessor = kibanaServer.version;
       kibanaVersion = await kibanaVersionAccessor.get();
+      defaultAttributes = (await getSavedObjectAttributes(supertest)) || {};
 
       expect(typeof kibanaVersion).to.eql('string');
       expect(kibanaVersion.length).to.be.greaterThan(0);
     });
 
-    it('should support sending false', async () => {
+    afterEach(async () => {
+      await updateSavedObjectAttributes(supertest, defaultAttributes);
+    });
+
+    it('should support sending false with allowChangingOptInStatus true', async () => {
+      await updateSavedObjectAttributes(supertest, {
+        ...defaultAttributes,
+        allowChangingOptInStatus: true,
+      });
       await postTelemetryV2Optin(supertest, false, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
       expect(enabled).to.be(false);
       expect(lastVersionChecked).to.be(kibanaVersion);
     });
 
-    it('should support sending true', async () => {
+    it('should support sending true with allowChangingOptInStatus true', async () => {
+      await updateSavedObjectAttributes(supertest, {
+        ...defaultAttributes,
+        allowChangingOptInStatus: true,
+      });
       await postTelemetryV2Optin(supertest, true, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
       expect(enabled).to.be(true);
       expect(lastVersionChecked).to.be(kibanaVersion);
+    });
+
+    it('should not support sending false with allowChangingOptInStatus false', async () => {
+      await updateSavedObjectAttributes(supertest, {
+        ...defaultAttributes,
+        allowChangingOptInStatus: false,
+      });
+      await postTelemetryV2Optin(supertest, false, 400);
+    });
+
+    it('should not support sending true with allowChangingOptInStatus false', async () => {
+      await updateSavedObjectAttributes(supertest, {
+        ...defaultAttributes,
+        allowChangingOptInStatus: false,
+      });
+      await postTelemetryV2Optin(supertest, true, 400);
     });
 
     it('should not support sending null', async () => {
@@ -57,7 +87,16 @@ async function postTelemetryV2Optin(supertest: any, value: any, statusCode: numb
   return body;
 }
 
+async function updateSavedObjectAttributes(supertest: any, attributes: any): Promise<any> {
+  return await supertest
+    .post('/api/saved_objects/telemetry/telemetry')
+    .query({ overwrite: true })
+    .set('kbn-xsrf', 'xxx')
+    .send({ attributes })
+    .expect(200);
+}
+
 async function getSavedObjectAttributes(supertest: any): Promise<any> {
-  const { body } = await supertest.get('/api/saved_objects/telemetry/telemetry').expect(200);
+  const { body } = await supertest.get('/api/saved_objects/telemetry/telemetry');
   return body.attributes;
 }

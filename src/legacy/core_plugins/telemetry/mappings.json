@@ -24,6 +24,9 @@
       "reportFailureVersion": {
         "ignore_above": 256,
         "type": "keyword"
+      },
+      "allowChangingOptInStatus": {
+        "type": "boolean"
       }
     }
   }
