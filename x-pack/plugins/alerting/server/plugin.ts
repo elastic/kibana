@@ -86,7 +86,6 @@ export interface AlertingPluginsStart {
 export class AlertingPlugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
-  private alertNavigationRegistry?: AlertNavigationRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private adminClient?: IClusterClient;
   private serverBasePath?: string;
@@ -134,7 +133,6 @@ export class AlertingPlugin {
     });
     this.alertTypeRegistry = alertTypeRegistry;
     const alertNavigationRegistry = new AlertNavigationRegistry();
-    this.alertNavigationRegistry = alertNavigationRegistry;
 
     this.serverBasePath = core.http.basePath.serverBasePath;
 
