@@ -21,34 +21,40 @@ interface Route {
   handler: RequestHandler;
 }
 
-const getRoute = (routeSpy: jest.Mock): Route => {
-  const [route] = routeSpy.mock.calls;
-  if (!route) {
-    throw new Error('No route registered!');
-  }
+const buildRouterMock = () => {
+  const mock = httpServiceMock.createRouter();
+  const spy = jest.fn();
 
-  const [config, handler] = route;
-  return { config, handler };
+  mock.get.mockImplementation(spy);
+  mock.post.mockImplementation(spy);
+  mock.patch.mockImplementation(spy);
+  mock.put.mockImplementation(spy);
+  mock.delete.mockImplementation(spy);
+
+  const getRoute = (): Route => {
+    const [route] = spy.mock.calls;
+    if (!route) {
+      throw new Error('No route registered!');
+    }
+
+    const [config, handler] = route;
+    return { config, handler };
+  };
+
+  return { mock, getRoute };
 };
 
 type ValidationResult = ReturnType<typeof buildResultMock>;
 const buildResultMock = () => ({ ok: jest.fn(x => x), badRequest: jest.fn(x => x) });
 
 const createMockServer = () => {
-  const routeSpy = jest.fn();
-  const routerMock = httpServiceMock.createRouter();
+  const router = buildRouterMock();
   const responseMock = responseFactoryMock.create();
   const contextMock = requestContextMock.create();
 
-  routerMock.get.mockImplementation(routeSpy);
-  routerMock.post.mockImplementation(routeSpy);
-  routerMock.patch.mockImplementation(routeSpy);
-  routerMock.put.mockImplementation(routeSpy);
-  routerMock.delete.mockImplementation(routeSpy);
-
   const validateRequest = (request: KibanaRequest): [KibanaRequest, ValidationResult] => {
     const result = buildResultMock();
-    const validations = getRoute(routeSpy).config.validate;
+    const validations = router.getRoute().config.validate;
 
     if (!validations) {
       return [request, result];
@@ -81,13 +87,13 @@ const createMockServer = () => {
       throw new Error(`Request was rejected with message: '${rejection}'`);
     }
 
-    await getRoute(routeSpy).handler(context, validatedRequest, responseMock);
+    await router.getRoute().handler(context, validatedRequest, responseMock);
     return responseAdapter(responseMock);
   };
 
   return {
     inject,
-    router: routerMock,
+    router: router.mock,
     validate,
   };
 };
