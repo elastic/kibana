@@ -138,6 +138,13 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  /**
+   * Indicate what blockers have been detected for calling reindex
+   * against this index.
+   *
+   * @remark
+   * In future this could be an array of blockers.
+   */
   blockerForReindexing?: 'index-closed';
 }
 

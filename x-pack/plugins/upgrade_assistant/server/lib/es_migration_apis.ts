@@ -42,11 +42,10 @@ export async function getUpgradeAssistantStatus(
     );
 
     indices.forEach(indexData => {
-      indexData.blockerForReindexing = Boolean(
-        indicesMetadata.metadata.indices[indexData.index!].state !== 'open'
-      )
-        ? 'index-closed'
-        : undefined;
+      indexData.blockerForReindexing =
+        indicesMetadata.metadata.indices[indexData.index!].state === 'close'
+          ? 'index-closed'
+          : undefined;
     });
   }
 
