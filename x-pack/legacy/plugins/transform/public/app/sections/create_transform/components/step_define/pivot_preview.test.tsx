@@ -19,8 +19,6 @@ import {
 
 import { PivotPreview } from './pivot_preview';
 
-jest.mock('ui/new_platform');
-
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');
