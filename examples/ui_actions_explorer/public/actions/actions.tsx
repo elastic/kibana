@@ -40,31 +40,35 @@ export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABI
   execute: async () => alert("Isn't that cool?!"),
 });
 
-export type PhoneContext = string;
+export interface PhoneContext {
+  phone: string;
+}
 
 export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
   type: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
-  execute: async phone => alert(`Pretend calling ${phone}...`),
+  execute: async context => alert(`Pretend calling ${context.phone}...`),
 });
 
 export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
   type: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
-  execute: async country => {
-    window.open(`https://www.worldtravelguide.net/?s=${country}`, '_blank');
+  execute: async context => {
+    window.open(`https://www.worldtravelguide.net/?s=${context.country}`, '_blank');
   },
 });
 
-export type CountryContext = string;
+export interface CountryContext {
+  country: string;
+}
 
 export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
   type: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
-  execute: async country => {
-    window.open(`https://www.google.com/maps/place/${country}`, '_blank');
+  execute: async context => {
+    window.open(`https://www.google.com/maps/place/${context.country}`, '_blank');
   },
 });
 
@@ -130,7 +134,7 @@ export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsSt
       // TODO: we need to figure out the best way to handle these nested actions however, since
       // we don't want multiple context menu's to pop up.
       if (user.phone !== undefined) {
-        (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, user.phone);
+        (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, { phone: user.phone });
       }
     },
   });
