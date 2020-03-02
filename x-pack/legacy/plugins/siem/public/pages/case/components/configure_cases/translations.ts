@@ -36,6 +36,28 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.
   defaultMessage: 'Add new connector option',
 });
 
+export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.caseClosureOptionsTitle',
+  {
+    defaultMessage: 'Cases Closures',
+  }
+);
+
+export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.caseClosureOptionsDesc',
+  {
+    defaultMessage:
+      'Define how you wish SIEM cases to be closed. Automated case closures require an established connection to a third-party incident management system.',
+  }
+);
+
+export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
+  'xpack.siem.case.configureCases.caseClosureOptionsLabel',
+  {
+    defaultMessage: 'Case closure options',
+  }
+);
+
 export const CASE_CLOSURE_OPTIONS_MANUAL = i18n.translate(
   'xpack.siem.case.configureCases.caseClosureOptionsManual',
   {
