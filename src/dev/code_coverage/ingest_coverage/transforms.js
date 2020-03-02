@@ -68,13 +68,11 @@ export const distro = obj => {
 
 
 const endsInDotJs = /.js$/;
-
-const suffix = x => {
-  const maybeAppend = endsInDotJs.test(x) ? right(x) : left(x);
-  const appendDotHtml = x => `${x}.html`;
-  return maybeAppend
+const appendDotHtml = x => `${x}.html`;
+const maybeAppend = x => endsInDotJs.test(x) ? right(x) : left(x);
+const suffix = x =>
+  maybeAppend(x)
     .fold(id, appendDotHtml);
-}
 
 const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
   [
