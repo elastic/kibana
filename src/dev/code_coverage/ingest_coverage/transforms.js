@@ -89,8 +89,11 @@ const assignUrl = obj => name => value => {
   return obj;
 };
 
-const dropFront = staticSiteUrl =>
-  trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
+const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/
+const afterJobNameAndRootFolder = x =>
+  captureAfterJobNameAndRootFolder.exec(x)[1];
+const fixFront = x =>
+  afterJobNameAndRootFolder(x);
 
 export const staticSite = (urlBase, liveAppPath) => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
@@ -101,7 +104,7 @@ export const staticSite = (urlBase, liveAppPath) => obj => {
   const assignStaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
 
   return maybeTotal(staticSiteUrl)
-    .map(dropFront)
+    .map(fixFront)
     .map(buildFinalStaticSiteUrl)
     .fold(always(assignStaticSiteUrl(undefined)), assignStaticSiteUrl);
 
