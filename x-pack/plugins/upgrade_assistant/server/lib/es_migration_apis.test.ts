@@ -33,7 +33,6 @@ describe('getUpgradeAssistantStatus', () => {
           },
         },
       };
-      return indicesMetadata.metadata.indices[indexData.index!]?.state !== 'open';
     } else if (api === 'indices.getMapping') {
       return {};
     } else {
