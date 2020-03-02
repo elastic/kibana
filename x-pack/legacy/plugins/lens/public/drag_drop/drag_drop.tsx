@@ -39,6 +39,12 @@ interface Props {
   value?: unknown;
 
   /**
+   * When component has been dropped to the text field (eg. query field)
+   * text field will receive the label value.
+   */
+  label?: string;
+
+  /**
    * The React children.
    */
   children: React.ReactNode;
@@ -86,7 +92,7 @@ export function DragDrop(props: Props) {
       return;
     }
 
-    e.dataTransfer.setData('text', 'dragging');
+    e.dataTransfer.setData('text', props.label || 'dragging');
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.
