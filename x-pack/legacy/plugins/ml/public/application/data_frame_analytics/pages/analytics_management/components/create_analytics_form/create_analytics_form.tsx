@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect } from 'react';
+import React, { Fragment, FC, useEffect, useMemo } from 'react';
 
 import {
   EuiComboBox,
@@ -88,6 +88,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     trainingPercent,
   } = form;
   const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
+
+  const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
+    modelMemoryLimitValidationResult,
+  ]);
 
   const isJobTypeWithDepVar =
     jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
@@ -645,7 +649,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               defaultMessage: 'Model memory limit',
             })}
             isInvalid={modelMemoryLimitValidationResult !== null}
-            error={getModelMemoryLimitErrors(modelMemoryLimitValidationResult)}
+            error={mmlErrors}
           >
             <EuiFieldText
               placeholder={
