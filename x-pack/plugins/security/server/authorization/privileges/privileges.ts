@@ -56,7 +56,6 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             actions.login,
             actions.version,
             ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
-            ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
           ];
         }
 
@@ -68,7 +67,6 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
               actions.login,
               actions.version,
               ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
-              ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
             ];
           }
         }
@@ -97,12 +95,11 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
             ...allActions,
-            actions.allHack,
           ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions, actions.allHack],
+          all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {

@@ -39,6 +39,10 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
               !feature.validLicenses.length ||
               getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
           )
+          .sort(
+            (f1, f2) =>
+              (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)
+          )
           .map(feature => feature.toRaw()),
       });
     }

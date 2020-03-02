@@ -36,7 +36,7 @@ export const rolesManagementApp = Object.freeze({
       async mount({ basePath, element, setBreadcrumbs }) {
         const [
           { application, docLinks, http, i18n: i18nStart, injectedMetadata, notifications },
-          { data },
+          { data, features },
         ] = await getStartServices();
 
         const rolesBreadcrumbs = [
@@ -77,6 +77,7 @@ export const rolesManagementApp = Object.freeze({
               userAPIClient={new UserAPIClient(http)}
               indicesAPIClient={new IndicesAPIClient(http)}
               privilegesAPIClient={new PrivilegesAPIClient(http)}
+              getFeatures={features.getFeatures}
               http={http}
               notifications={notifications}
               fatalErrors={fatalErrors}

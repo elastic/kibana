@@ -60,6 +60,7 @@ export class MlServerPlugin {
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
+      order: 500,
       icon: 'machineLearningApp',
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],

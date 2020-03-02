@@ -12,6 +12,8 @@ import { SpacesManager } from '../../spaces_manager';
 import { SpacesGridPage } from './spaces_grid_page';
 import { httpServiceMock } from 'src/core/public/mocks';
 import { notificationServiceMock } from 'src/core/public/mocks';
+import { featuresPluginMock } from '../../../../features/public/mocks';
+import { Feature } from '../../../../features/public';
 
 const spaces = [
   {
@@ -38,6 +40,17 @@ const spaces = [
 const spacesManager = spacesManagerMock.create();
 spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
+const featuresStart = featuresPluginMock.createStart();
+featuresStart.getFeatures.mockResolvedValue([
+  new Feature({
+    id: 'feature-1',
+    name: 'feature 1',
+    icon: 'spacesApp',
+    app: [],
+    privileges: null,
+  }),
+]);
+
 describe('SpacesGridPage', () => {
   it('renders as expected', () => {
     const httpStart = httpServiceMock.createStartContract();
@@ -47,7 +60,7 @@ describe('SpacesGridPage', () => {
       shallowWithIntl(
         <SpacesGridPage
           spacesManager={(spacesManager as unknown) as SpacesManager}
-          http={httpStart}
+          getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
           securityEnabled={true}
           capabilities={{
@@ -68,7 +81,7 @@ describe('SpacesGridPage', () => {
     const wrapper = mountWithIntl(
       <SpacesGridPage
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        http={httpStart}
+        getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
         capabilities={{

@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
-import { Feature } from '../../../../features/public';
+import { Capabilities, NotificationsStart } from 'src/core/public';
+import { Feature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
@@ -36,7 +36,7 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 interface Props {
   spacesManager: SpacesManager;
   notifications: NotificationsStart;
-  http: HttpStart;
+  getFeatures: FeaturesPluginStart['getFeatures'];
   capabilities: Capabilities;
   securityEnabled: boolean;
 }
@@ -211,7 +211,7 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public loadGrid = async () => {
-    const { spacesManager, http } = this.props;
+    const { spacesManager, getFeatures } = this.props;
 
     this.setState({
       loading: true,
@@ -220,10 +220,9 @@ export class SpacesGridPage extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = http.get('/api/features');
 
     try {
-      const [spaces, features] = await Promise.all([getSpaces, getFeatures]);
+      const [spaces, features] = await Promise.all([getSpaces, getFeatures()]);
       this.setState({
         loading: false,
         spaces,

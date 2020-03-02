@@ -25,6 +25,22 @@ describe('GET /api/features', () => {
     });
 
     featureRegistry.register({
+      id: 'feature_2',
+      name: 'Feature 2',
+      order: 2,
+      app: [],
+      privileges: null,
+    });
+
+    featureRegistry.register({
+      id: 'feature_3',
+      name: 'Feature 2',
+      order: 1,
+      app: [],
+      privileges: null,
+    });
+
+    featureRegistry.register({
       id: 'licensed_feature',
       name: 'Licensed Feature',
       app: ['bar-app'],
@@ -51,7 +67,7 @@ describe('GET /api/features', () => {
     routeHandler = routerMock.get.mock.calls[0][1];
   });
 
-  it('returns a list of available features', async () => {
+  it('returns a list of available features, sorted by their configured order', async () => {
     const mockResponse = httpServerMock.createResponseFactory();
     routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
@@ -60,6 +76,20 @@ describe('GET /api/features', () => {
         Array [
           Object {
             "body": Array [
+              Object {
+                "app": Array [],
+                "id": "feature_3",
+                "name": "Feature 2",
+                "order": 1,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
+                "id": "feature_2",
+                "name": "Feature 2",
+                "order": 2,
+                "privileges": null,
+              },
               Object {
                 "app": Array [],
                 "id": "feature_1",
@@ -97,6 +127,20 @@ describe('GET /api/features', () => {
             "body": Array [
               Object {
                 "app": Array [],
+                "id": "feature_3",
+                "name": "Feature 2",
+                "order": 1,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
+                "id": "feature_2",
+                "name": "Feature 2",
+                "order": 2,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
                 "privileges": null,
@@ -121,6 +165,20 @@ describe('GET /api/features', () => {
             "body": Array [
               Object {
                 "app": Array [],
+                "id": "feature_3",
+                "name": "Feature 2",
+                "order": 1,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
+                "id": "feature_2",
+                "name": "Feature 2",
+                "order": 2,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
                 "privileges": null,
@@ -143,6 +201,20 @@ describe('GET /api/features', () => {
         Array [
           Object {
             "body": Array [
+              Object {
+                "app": Array [],
+                "id": "feature_3",
+                "name": "Feature 2",
+                "order": 1,
+                "privileges": null,
+              },
+              Object {
+                "app": Array [],
+                "id": "feature_2",
+                "name": "Feature 2",
+                "order": 2,
+                "privileges": null,
+              },
               Object {
                 "app": Array [],
                 "id": "feature_1",

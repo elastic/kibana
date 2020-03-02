@@ -18,8 +18,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
-import { Feature } from '../../../../features/public';
+import { Capabilities, NotificationsStart } from 'src/core/public';
+import { Feature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
@@ -33,7 +33,7 @@ import { EnabledFeatures } from './enabled_features';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 
 interface Props {
-  http: HttpStart;
+  getFeatures: FeaturesPluginStart['getFeatures'];
   notifications: NotificationsStart;
   spacesManager: SpacesManager;
   spaceId?: string;
@@ -75,14 +75,12 @@ export class ManageSpacePage extends Component<Props, State> {
       return;
     }
 
-    const { spaceId, http } = this.props;
-
-    const getFeatures = http.get('/api/features');
+    const { spaceId, getFeatures } = this.props;
 
     if (spaceId) {
-      await this.loadSpace(spaceId, getFeatures);
+      await this.loadSpace(spaceId, getFeatures());
     } else {
-      const features = await getFeatures;
+      const features = await getFeatures();
       this.setState({ isLoading: false, features });
     }
   }
@@ -318,7 +316,7 @@ export class ManageSpacePage extends Component<Props, State> {
 
         this.setState({
           space,
-          features: await features,
+          features,
           originalSpace: space,
           isLoading: false,
         });
