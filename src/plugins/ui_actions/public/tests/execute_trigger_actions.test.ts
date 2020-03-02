@@ -30,6 +30,8 @@ const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
 const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
 const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionType;
 
 function createTestAction<C extends object>(

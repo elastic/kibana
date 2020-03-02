@@ -25,6 +25,8 @@ import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
 export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE' as ActionType;
 
 interface ActionContext {

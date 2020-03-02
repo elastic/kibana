@@ -21,6 +21,8 @@ import { createAction, ActionType } from '../../ui_actions';
 import { ViewMode } from '../../types';
 import { IEmbeddable } from '../..';
 
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION' as ActionType;
 
 export function createEditModeAction() {

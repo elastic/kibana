@@ -24,6 +24,8 @@ import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/em
 import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
 export const SAMPLE_PANEL_ACTION = 'SAMPLE_PANEL_ACTION' as ActionType;
 
 export interface SamplePanelActionContext {

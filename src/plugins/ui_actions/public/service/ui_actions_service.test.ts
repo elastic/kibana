@@ -23,9 +23,8 @@ import { createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
 import { Trigger } from '../triggers';
 
-// I tried redeclaring the module in here to extend the `TriggerContextMapping` but
-// that seems to overwrite all other plugins extending it, I suspect because it's inside
-// the main plugin.
+// Casting to ActionType or TriggerId is a hack - in a real situation use
+// declare module and add this id to the appropriate context mapping.
 const FOO_TRIGGER: TriggerId = 'FOO_TRIGGER' as TriggerId;
 const BAR_TRIGGER: TriggerId = 'BAR_TRIGGER' as TriggerId;
 const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
