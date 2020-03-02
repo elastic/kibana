@@ -29,6 +29,6 @@ else
     sed -i "s|kibana${CI_GROUP}|kibana|g" target/kibana-coverage/functional/*.json
     echo " -> copying coverage to the original folder"
     mkdir -p ../kibana/target/kibana-coverage/functional
-    cp -R target/kibana-coverage/functional/. ../kibana/target/kibana-coverage/functional/
+    mv target/kibana-coverage/functional/* ../kibana/target/kibana-coverage/functional/
   fi
 fi
