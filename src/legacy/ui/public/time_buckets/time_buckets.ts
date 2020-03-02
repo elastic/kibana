@@ -24,7 +24,7 @@ import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_inte
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
-  // @ts-ignore
+  EsInterval,
 } from './calc_es_interval';
 import { fieldFormats, parseInterval } from '../../../../plugins/data/public';
 
@@ -33,14 +33,13 @@ interface Bounds {
   max: Date | number | null;
 }
 
-type Interval = null | string | Record<string, any> | moment.Duration;
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
   description: string;
-  esValue: number;
-  esUnit: string;
-  expression: string;
-  overflow: moment.Duration | false;
+  esValue: EsInterval['value'];
+  esUnit: EsInterval['unit'];
+  expression: EsInterval['expression'];
+  overflow: moment.Duration | boolean;
   preScaled?: moment.Duration;
   scale?: number;
   scaled?: boolean;
@@ -71,8 +70,8 @@ function isValidMoment(m: any): boolean {
 export class TimeBuckets {
   private _lb: Bounds['min'] = null;
   private _ub: Bounds['max'] = null;
-  private _i: Interval = null;
-  private _originalInterval: Interval = null;
+  private _originalInterval: string | null = null;
+  private _i?: moment.Duration | 'auto';
   [key: string]: any;
 
   static __cached__(self: TimeBuckets) {
@@ -276,12 +275,8 @@ export class TimeBuckets {
    *
    * @param {object|string|moment.duration} input - see desc
    */
-  setInterval(input: Record<string, any> | string | moment.Duration) {
-    // Preserve the original units because they're lost when the interval is converted to a
-    // moment duration object.
-    this._originalInterval = input;
-
-    let interval: Interval = input;
+  setInterval(input: null | string | Record<string, any> | moment.Duration) {
+    let interval = input;
 
     // selection object -> val
     if (isObject(input) && !moment.isDuration(input)) {
@@ -295,6 +290,11 @@ export class TimeBuckets {
 
     if (isString(interval)) {
       input = interval;
+
+      // Preserve the original units because they're lost when the interval is converted to a
+      // moment duration object.
+      this._originalInterval = input;
+
       interval = parseInterval(interval);
       if (interval === null || +interval === 0) {
         interval = null;
@@ -380,11 +380,10 @@ export class TimeBuckets {
     const decorateInterval = (interval: moment.Duration): TimeBucketsInterval => {
       const esInterval = useNormalizedEsInterval
         ? convertDurationToNormalizedEsInterval(interval)
-        : convertIntervalToEsInterval(this._originalInterval);
+        : convertIntervalToEsInterval(String(this._originalInterval));
       const prettyUnits = moment.normalizeUnits(esInterval.unit);
 
-      return {
-        ...interval,
+      return Object.assign(interval, {
         description:
           esInterval.value === 1 ? prettyUnits : esInterval.value + ' ' + prettyUnits + 's',
         esValue: esInterval.value,
@@ -394,7 +393,7 @@ export class TimeBuckets {
           Number(duration) > Number(interval)
             ? moment.duration(Number(interval) - Number(duration))
             : false,
-      };
+      });
     };
 
     if (useNormalizedEsInterval) {
