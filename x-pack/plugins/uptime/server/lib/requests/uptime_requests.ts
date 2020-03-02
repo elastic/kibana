@@ -29,7 +29,10 @@ import {
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
-import { HistogramResult, MonitorChart } from '../../../../../legacy/plugins/uptime/common/types';
+import {
+  HistogramResult,
+  MonitorDurationResult,
+} from '../../../../../legacy/plugins/uptime/common/types';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
@@ -38,7 +41,7 @@ export interface UptimeRequests {
   getIndexPattern: ESQ<any, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
   getMonitor: ESQ<GetMonitorParams, Ping>;
-  getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorChart>;
+  getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
   getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;

@@ -31,7 +31,7 @@ export interface LocationDurationLine {
 }
 
 /** The data used to populate the monitor charts. */
-export interface MonitorChart {
+export interface MonitorDurationResult {
   /** The average values for the monitor duration. */
   locationDurationLines: LocationDurationLine[];
   /** The counts of up/down checks for the monitor. */
