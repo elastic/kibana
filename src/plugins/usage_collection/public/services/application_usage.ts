@@ -17,12 +17,23 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../core/public/mocks';
+import { Observable } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { Reporter } from '@kbn/analytics';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+/**
+ * List of appIds not to report usage from (due to legacy hacks)
+ */
+const DO_NOT_REPORT = ['kibana'];
+
+export function reportApplicationUsage(
+  currentAppId$: Observable<string | undefined>,
+  reporter: Reporter
+) {
+  currentAppId$
+    .pipe(
+      filter(appId => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
+      distinctUntilChanged()
+    )
+    .subscribe(appId => appId && reporter.reportApplicationUsage(appId));
+}
