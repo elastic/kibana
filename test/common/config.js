@@ -54,7 +54,7 @@ export default function() {
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
-        `--monitoring.ui.elasticsearch.hosts=["${formatUrl(servers.elasticsearch)}"]`,
+        `--monitoring.ui.elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--monitoring.ui.elasticsearch.username=${kibanaServerTestUser.username}`,
         `--monitoring.ui.elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
