@@ -47,11 +47,17 @@ export interface ReindexOperation extends SavedObjectAttributes {
   reindexTaskId: string | null;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-
-  reindexOptions: ReindexOptions;
-
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+
+  /**
+   * Options for the reindexing strategy.
+   *
+   * @remark
+   * Marked as optional for backwards compatibility. We should still
+   * be able to handle older ReindexOperation objects.
+   */
+  reindexOptions?: ReindexOptions;
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;

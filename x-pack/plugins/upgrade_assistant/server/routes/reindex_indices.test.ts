@@ -156,12 +156,14 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
+        createRequestMock({ params: { indexName: 'theIndex' }, body: { openAndClose: false } }),
         kibanaResponseFactory
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex');
+      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', {
+        openAndClose: false,
+      });
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -179,7 +181,7 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
+        createRequestMock({ params: { indexName: 'theIndex' }, body: { openAndClose: false } }),
         kibanaResponseFactory
       );
 
@@ -202,6 +204,7 @@ describe('reindex API', () => {
             'kbn-auth-x': 'HERE!',
           },
           params: { indexName: 'theIndex' },
+          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -224,6 +227,7 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'theIndex' },
+          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -247,6 +251,7 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'theIndex' },
+          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -266,6 +271,7 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'cancelMe' },
+          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );

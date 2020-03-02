@@ -316,7 +316,7 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName, reindexOptions } = reindexOp.attributes;
 
-    if (reindexOptions.openAndClose) {
+    if (reindexOptions?.openAndClose) {
       await callAsUser('indices.open', { index: indexName });
     }
 
@@ -424,7 +424,7 @@ export const reindexServiceFactory = (
       throw Boom.badImplementation(`Index aliases could not be created.`);
     }
 
-    if (reindexOptions.openAndClose) {
+    if (reindexOptions?.openAndClose) {
       await callAsUser('indices.close', { index: indexName });
     }
 
