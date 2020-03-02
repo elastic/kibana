@@ -511,7 +511,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         <li>
                           {i18n.translate('xpack.lens.indexPatterns.noFields.fieldFilterBullet', {
                             defaultMessage:
-                              'Using the Filter by type option {arrow} to show fields without data',
+                              'Using Filter by type {arrow} to show fields without data',
                             values: { arrow: '↑' },
                           })}
                         </li>
