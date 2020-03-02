@@ -118,7 +118,10 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
   } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
   const groupByArr = dictionaryToArray(groupBy);
 
-  const columnKeys = Object.keys(previewMappings.properties);
+  // Filters mapping properties of type `object`, which get returned for nested field parents.
+  const columnKeys = Object.keys(previewMappings.properties).filter(
+    key => previewMappings.properties[key].type !== 'object'
+  );
   columnKeys.sort(sortColumns(groupByArr));
 
   // Column visibility
