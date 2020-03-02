@@ -76,3 +76,8 @@ This page has moved. Please see <<reporting-getting-started>>.
 == Coordinate map
 
 This page has moved. Please see <<coordinate-map>>.
+
+[role="exclude",id="regionmap"]
+== Region map
+
+This page has moved. Please see <<region-map>>.
