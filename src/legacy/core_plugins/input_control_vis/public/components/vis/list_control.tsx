@@ -67,8 +67,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
 
   componentDidMount = () => {
     if (this.textInput) {
-	  // remove when #59039 is fixed
-      this.textInput.setAttribute('focusable', 'false');
+      this.textInput.setAttribute('focusable', 'false'); // remove when #59039 is fixed
     }
     this.isMounted = true;
   };
