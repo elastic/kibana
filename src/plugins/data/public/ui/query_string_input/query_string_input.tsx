@@ -31,7 +31,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, SuggestionsComponent, Query } from '../..';
@@ -44,7 +44,6 @@ import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../q
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  intl: InjectedIntl;
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
@@ -356,8 +355,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: this.props.intl.formatMessage({
-            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+          title: i18n.translate('data.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
             defaultMessage: 'KQL nested query syntax',
           }),
           text: toMountPoint(
@@ -584,4 +582,4 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryStringInput = injectI18n(withKibana(QueryStringInputUI));
+export const QueryStringInput = withKibana(QueryStringInputUI);
