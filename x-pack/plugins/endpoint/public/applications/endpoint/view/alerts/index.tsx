@@ -93,7 +93,6 @@ export const AlertIndex = memo(() => {
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
-  const selectedEvent = useAlertListSelector(selectors.selectedEvent);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {

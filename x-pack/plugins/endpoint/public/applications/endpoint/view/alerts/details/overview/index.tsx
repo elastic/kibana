@@ -11,12 +11,16 @@ import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
+import { AlertDetailResolver } from '../../resolver';
 
 export const AlertDetailsOverview = memo(() => {
   const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
   if (alertDetailsData === undefined) {
     return null;
   }
+  const selectedAlertIsLegacyEndpointEvent = useAlertListSelector(
+    selectors.selectedAlertIsLegacyEndpointEvent
+  );
 
   const tabs = useMemo(() => {
     return [
@@ -43,10 +47,15 @@ export const AlertDetailsOverview = memo(() => {
             defaultMessage: 'Resolver',
           }
         ),
-        content: 'Resolver',
+        content: (
+          <>
+            <EuiSpacer />
+            {selectedAlertIsLegacyEndpointEvent && <AlertDetailResolver />}
+          </>
+        ),
       },
     ];
-  }, []);
+  }, [selectedAlertIsLegacyEndpointEvent]);
 
   return (
     <>

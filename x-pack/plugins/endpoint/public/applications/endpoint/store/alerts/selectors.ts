@@ -15,7 +15,7 @@ import {
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
-import { Immutable, LegacyEndpointEvent } from '../../../../../common/types';
+import { Immutable } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
@@ -98,6 +98,11 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
 /**
  * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
  */
-function isAlertEventLegacyEndpointEvent(event: { endgame?: {} }): event is LegacyEndpointEvent {
-  return event.endgame !== undefined && 'unique_pid' in event.endgame;
-}
+export const selectedAlertIsLegacyEndpointEvent: (
+  state: AlertListState
+) => boolean = createSelector(selectedAlertDetailsData, function(event) {
+  if (event === undefined) {
+    return false;
+  }
+  return 'endgame' in event;
+});
