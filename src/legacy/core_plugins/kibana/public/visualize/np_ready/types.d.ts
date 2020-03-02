@@ -25,9 +25,10 @@ import {
   SavedQuery,
 } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { VisSavedObject, PersistedState } from '../legacy_imports';
+import { VisSavedObject } from '../legacy_imports';
 
 export type PureVisState = ReturnType<Vis['getCurrentState']>;
 
