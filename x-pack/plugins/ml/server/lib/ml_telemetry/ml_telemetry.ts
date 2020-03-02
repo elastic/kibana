@@ -40,7 +40,10 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> {
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    const { attributes } = await savedObjectsClient.get<{ enabled: boolean }>(
+      'telemetry',
+      'telemetry'
+    );
 
     if (attributes.enabled === false) {
       return;
