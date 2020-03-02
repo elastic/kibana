@@ -145,7 +145,7 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexNames } = request.body;
         const results = {
-          successes: [] as ReindexOperation[],
+          started: [] as ReindexOperation[],
           errors: [] as Array<{ indexName: string; message: string }>,
         };
         for (const indexName of indexNames) {
@@ -160,7 +160,7 @@ export function registerReindexIndicesRoutes(
               credentialStore,
               getWorker,
             });
-            results.successes.push(result);
+            results.started.push(result);
           } catch (e) {
             results.errors.push({
               indexName,

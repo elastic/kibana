@@ -292,7 +292,7 @@ describe('reindex API', () => {
       const data = resp.payload;
       expect(data).toEqual({
         errors: [],
-        successes: [
+        started: [
           { indexName: 'theIndex1' },
           { indexName: 'theIndex2' },
           { indexName: 'theIndex3' },
@@ -337,7 +337,7 @@ describe('reindex API', () => {
           },
           { indexName: 'theIndex3', message: 'oops!' },
         ],
-        successes: [{ indexName: 'theIndex1' }],
+        started: [{ indexName: 'theIndex1' }],
       });
     });
   });
