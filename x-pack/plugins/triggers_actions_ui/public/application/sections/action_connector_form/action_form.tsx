@@ -80,8 +80,6 @@ export const ActionForm = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
-  console.error('index', actionTypesIndex, actionTypeRegistry);
-
   // load action types
   useEffect(() => {
     (async () => {

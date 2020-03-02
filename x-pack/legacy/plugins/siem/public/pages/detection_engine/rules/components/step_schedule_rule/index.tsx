@@ -14,6 +14,7 @@ import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
+import * as RuleI18n from '../../translations';
 import { schema } from './schema';
 import * as I18n from './translations';
 
@@ -118,23 +119,8 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={false}
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit.bind(null, false)}
-              >
-                {I18n.COMPLETE_WITHOUT_ACTIVATING}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit.bind(null, true)}
-              >
-                {I18n.COMPLETE_WITH_ACTIVATING}
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                {RuleI18n.CONTINUE}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
