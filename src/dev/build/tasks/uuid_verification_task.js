@@ -17,15 +17,22 @@
  * under the License.
  */
 
-export * from './assert_never';
-export * from './context';
-export * from './crypto';
-export * from './deep_freeze';
-export * from './get';
-export * from './map_to_object';
-export * from './merge';
-export * from './pick';
-export * from './promise';
-export * from './url';
-export * from './unset';
-export * from './get_flattened_object';
+import { read } from '../lib';
+
+export const UuidVerificationTask = {
+  description: 'Verify that no UUID file is baked into the build',
+
+  async run(config, log, build) {
+    const uuidFilePath = build.resolvePath('data', 'uuid');
+    await read(uuidFilePath).then(
+      function success() {
+        throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
+      },
+      function error(err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
+      }
+    );
+  },
+};
