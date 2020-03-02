@@ -20,10 +20,9 @@
 import { dropRight, last } from 'lodash';
 import { topHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-
-jest.mock('ui/new_platform');
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
@@ -37,6 +36,7 @@ describe('Top hit metric', () => {
     fieldType = KBN_FIELD_TYPES.NUMBER,
     size = 1,
   }: any) => {
+    const typesRegistry = mockAggTypesRegistry([topHitMetricAgg]);
     const field = {
       name: fieldName,
       displayName: fieldName,
@@ -81,7 +81,7 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      null
+      { typesRegistry }
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
