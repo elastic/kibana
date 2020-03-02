@@ -10,7 +10,7 @@ import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { umDynamicSettings } from './lib/saved_object_mappings';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export interface KibanaRouteOptions {
   path: string;

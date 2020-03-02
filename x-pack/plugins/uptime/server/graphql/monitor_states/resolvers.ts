@@ -13,7 +13,7 @@ import {
   StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants/context_defaults';
-import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,

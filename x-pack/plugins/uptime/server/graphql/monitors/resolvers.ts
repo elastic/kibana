@@ -12,7 +12,7 @@ import {
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
-import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
 

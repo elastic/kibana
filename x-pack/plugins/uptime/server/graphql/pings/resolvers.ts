@@ -12,7 +12,7 @@ import {
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
-import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMAllPingsResolver = UMResolver<
   PingResults | Promise<PingResults>,

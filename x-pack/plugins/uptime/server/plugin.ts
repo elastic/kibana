@@ -7,7 +7,7 @@
 import { PluginInitializerContext, CoreStart, CoreSetup } from '../../../../src/core/server';
 import { initServerWithKibana } from './kibana.index';
 import { UptimeCorePlugins } from './lib/adapters';
-import { umDynamicSettings } from './lib/saved_object_mappings';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export class Plugin {
   constructor(_initializerContext: PluginInitializerContext) {}

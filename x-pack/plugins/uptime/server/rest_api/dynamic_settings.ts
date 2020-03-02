@@ -13,7 +13,7 @@ import {
   DynamicSettingsType,
 } from '../../../../legacy/plugins/uptime/common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
-import { savedObjectsAdapter } from '../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../lib/saved_objects';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',

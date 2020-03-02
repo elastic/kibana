@@ -5,7 +5,7 @@
  */
 
 import { UMKibanaRouteWrapper } from './types';
-import { savedObjectsAdapter } from '../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../lib/saved_objects';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = uptimeRoute => {
   return {
