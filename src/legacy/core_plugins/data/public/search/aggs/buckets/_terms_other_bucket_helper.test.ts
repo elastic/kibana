@@ -22,10 +22,10 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
 } from './_terms_other_bucket_helper';
-import { AggConfigOptions } from '../agg_config';
 import { AggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 
 const indexPattern = {
   id: '1234',
@@ -220,9 +220,15 @@ const nestedOtherResponse = {
 jest.mock('ui/new_platform');
 
 describe('Terms Agg Other bucket helper', () => {
-  const getAggConfigs = (aggs: Array<Partial<AggConfigOptions>> = []) => {
-    return new AggConfigs(indexPattern, [...aggs], null);
+  const typesRegistry = mockAggTypesRegistry();
+  const getAggConfigs = (aggs: Array<Record<string, any>> = []) => {
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
   };
+
+  beforeEach(() => {
+    mockDataServices();
+  });
+
   describe('buildOtherBucketAgg', () => {
     test('returns a function', () => {
       const aggConfigs = getAggConfigs(singleTerm.aggs);
