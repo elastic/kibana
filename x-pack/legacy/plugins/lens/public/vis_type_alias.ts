@@ -5,10 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { setup as visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { getBasePath, getEditPath } from '../../../../plugins/lens/common';
+import { VisTypeAlias } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/vis_types';
 
-visualizations.types.registerAlias({
+export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasUrl: getBasePath(),
   name: 'lens',
   promotion: {
