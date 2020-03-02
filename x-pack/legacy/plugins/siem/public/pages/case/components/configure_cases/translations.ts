@@ -79,3 +79,38 @@ export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
   }
 );
 
+export const FIELD_MAPPING_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingTitle',
+  {
+    defaultMessage: 'Field mappings',
+  }
+);
+
+export const FIELD_MAPPING_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingDesc',
+  {
+    defaultMessage:
+      'Map SIEM case fields when pushing data to a third-party. Field mappings require an established connection to a third-party incident management system.',
+  }
+);
+
+export const FIELD_MAPPING_FIRST_COL = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFirstCol',
+  {
+    defaultMessage: 'SIEM case field',
+  }
+);
+
+export const FIELD_MAPPING_SECOND_COL = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingSecondCol',
+  {
+    defaultMessage: 'Third-party incident field',
+  }
+);
+
+export const FIELD_MAPPING_THIRD_COL = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingThirdCol',
+  {
+    defaultMessage: 'On edit and update',
+  }
+);
