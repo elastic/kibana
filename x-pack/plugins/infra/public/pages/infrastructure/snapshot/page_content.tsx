@@ -20,45 +20,40 @@ export const SnapshotPageContent: React.FC = () => (
         {({ wafflemap }) => (
           <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
             {({ filterQueryAsJson, applyFilterQuery }) => (
-              <WithWaffleTime>
-                {({ currentTime }) => (
-                  <WithWaffleOptions>
-                    {({
+              <WithWaffleOptions>
+                {({
+                  metric,
+                  groupBy,
+                  nodeType,
+                  view,
+                  changeView,
+                  autoBounds,
+                  boundsOverride,
+                  accountId,
+                  region,
+                }) => (
+                  <Layout
+                    filterQuery={filterQueryAsJson}
+                    metric={metric}
+                    groupBy={groupBy}
+                    nodeType={nodeType}
+                    sourceId={sourceId}
+                    options={{
+                      ...wafflemap,
                       metric,
+                      fields: configuration && configuration.fields,
                       groupBy,
-                      nodeType,
-                      view,
-                      changeView,
-                      autoBounds,
-                      boundsOverride,
-                      accountId,
-                      region,
-                    }) => (
-                      <Layout
-                        currentTime={currentTime}
-                        filterQuery={filterQueryAsJson}
-                        metric={metric}
-                        groupBy={groupBy}
-                        nodeType={nodeType}
-                        sourceId={sourceId}
-                        options={{
-                          ...wafflemap,
-                          metric,
-                          fields: configuration && configuration.fields,
-                          groupBy,
-                        }}
-                        onDrilldown={applyFilterQuery}
-                        view={view}
-                        onViewChange={changeView}
-                        autoBounds={autoBounds}
-                        boundsOverride={boundsOverride}
-                        accountId={accountId}
-                        region={region}
-                      />
-                    )}
-                  </WithWaffleOptions>
+                    }}
+                    onDrilldown={applyFilterQuery}
+                    view={view}
+                    onViewChange={changeView}
+                    autoBounds={autoBounds}
+                    boundsOverride={boundsOverride}
+                    accountId={accountId}
+                    region={region}
+                  />
                 )}
-              </WithWaffleTime>
+              </WithWaffleOptions>
             )}
           </WithWaffleFilter>
         )}

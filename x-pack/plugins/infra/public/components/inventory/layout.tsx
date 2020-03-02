@@ -15,17 +15,16 @@ import { useSnapshot } from '../../containers/waffle/use_snaphot';
 import { useInventoryMeta } from '../../containers/inventory_metadata/use_inventory_meta';
 import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
 
 export interface LayoutProps {
   options: InfraWaffleMapOptions;
   nodeType: InventoryItemType;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
-
   filterQuery: string | null | undefined;
   metric: SnapshotMetricInput;
   groupBy: SnapshotGroupBy;
@@ -36,13 +35,14 @@ export interface LayoutProps {
 
 export const Layout = (props: LayoutProps) => {
   const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
+  const { currentTime } = useWaffleTime();
   const { loading, nodes, reload, interval } = useSnapshot(
     props.filterQuery,
     props.metric,
     props.groupBy,
     props.nodeType,
     props.sourceId,
-    props.currentTime,
+    currentTime,
     props.accountId,
     props.region
   );
@@ -58,7 +58,7 @@ export const Layout = (props: LayoutProps) => {
           loading={loading}
           reload={reload}
           onDrilldown={props.onDrilldown}
-          currentTime={props.currentTime}
+          currentTime={currentTime}
           onViewChange={props.onViewChange}
           view={props.view}
           autoBounds={props.autoBounds}

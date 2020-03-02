@@ -80,17 +80,7 @@ export const SnapshotToolbar = () => (
         </WithSource>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <WithWaffleTime resetOnUnmount>
-          {({ currentTime, isAutoReloading, jumpToTime, startAutoReload, stopAutoReload }) => (
-            <WaffleTimeControls
-              currentTime={currentTime}
-              isLiveStreaming={isAutoReloading}
-              onChangeTime={jumpToTime}
-              startLiveStreaming={startAutoReload}
-              stopLiveStreaming={stopAutoReload}
-            />
-          )}
-        </WithWaffleTime>
+        <WaffleTimeControls />
       </EuiFlexItem>
     </EuiFlexGroup>
   </Toolbar>
