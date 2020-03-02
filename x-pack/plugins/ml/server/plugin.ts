@@ -81,7 +81,7 @@ export class MlServerPlugin {
     });
 
     this.mlLicense.setup(plugins.licensing.license$, [
-      (license: MlLicense) => initSampleDataSets(license, plugins),
+      (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
     ]);
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient

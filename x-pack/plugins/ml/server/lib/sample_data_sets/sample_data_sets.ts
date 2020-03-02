@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 import { PluginsSetup } from '../../types';
 
-export function initSampleDataSets(license: MlLicense, plugins: PluginsSetup) {
-  if (license.isMlEnabled() && license.isFullLicense()) {
+export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) {
+  if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
     const sampleDataLinkLabel = i18n.translate('xpack.ml.sampleDataLinkLabel', {
       defaultMessage: 'ML jobs',
     });

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { LicensingPluginSetup } from '../../../../../../plugins/licensing/public';
@@ -63,10 +64,13 @@ export async function checkBasicLicense() {
 
 function showExpiredLicenseWarning() {
   if (expiredLicenseBannerId === undefined) {
+    const message = i18n.translate('xpack.ml.checkLicense.licenseHasExpiredMessage', {
+      defaultMessage: 'Your Machine Learning license has expired.',
+    });
     // Only show the banner once with no way to dismiss it
     const overlays = getOverlays();
     expiredLicenseBannerId = overlays.banners.add(
-      toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={''} />)
+      toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={message} />)
     );
   }
 }
