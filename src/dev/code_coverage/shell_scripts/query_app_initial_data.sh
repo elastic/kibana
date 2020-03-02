@@ -24,3 +24,8 @@ queryDataStore() {
 }
 queryDataStore
 
+cat $OUT_FILE
+echo ""
+echo "### Printing App Initial Data - Complete"
+echo ""
+
