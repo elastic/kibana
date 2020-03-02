@@ -6,11 +6,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { flatten } from 'lodash';
 import { AuthenticatedUser } from '../../../security/server';
-import {
-  DEFAULT_AGENT_CONFIG_ID,
-  DEFAULT_AGENT_CONFIG,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-} from '../constants';
+import { DEFAULT_AGENT_CONFIG, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import { NewAgentConfig, AgentConfig, AgentConfigStatus, ListWithKuery } from '../types';
 import { DeleteAgentConfigsResponse } from '../../common';
 import { datasourceService } from './datasource';
@@ -46,24 +42,17 @@ class AgentConfigService {
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    let defaultAgentConfig;
+    const configs = await soClient.find({
+      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+      filter: 'agent_configs.attributes.is_default:true',
+    });
 
-    try {
-      defaultAgentConfig = await this.get(soClient, DEFAULT_AGENT_CONFIG_ID);
-    } catch (err) {
-      if (!err.isBoom || err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    if (!defaultAgentConfig) {
+    if (configs.total === 0) {
       const newDefaultAgentConfig: NewAgentConfig = {
         ...DEFAULT_AGENT_CONFIG,
       };
 
-      await this.create(soClient, newDefaultAgentConfig, {
-        id: DEFAULT_AGENT_CONFIG_ID,
-      });
+      await this.create(soClient, newDefaultAgentConfig);
     }
   }
 
@@ -215,13 +204,27 @@ class AgentConfigService {
     );
   }
 
+  public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
+    const configs = await soClient.find({
+      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+      filter: 'agent_configs.attributes.is_default:true',
+    });
+
+    if (configs.saved_objects.length === 0) {
+      throw new Error('No default agent config');
+    }
+
+    return configs.saved_objects[0].id;
+  }
+
   public async delete(
     soClient: SavedObjectsClientContract,
     ids: string[]
   ): Promise<DeleteAgentConfigsResponse> {
     const result: DeleteAgentConfigsResponse = [];
+    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
 
-    if (ids.includes(DEFAULT_AGENT_CONFIG_ID)) {
+    if (ids.includes(defaultConfigId)) {
       throw new Error('The default agent configuration cannot be deleted');
     }
 
@@ -281,17 +284,16 @@ class AgentConfigService {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[await outputService.get(soClient, 'default')].reduce(
-          (outputs, { config: outputConfig, ...output }) => {
-            outputs[output.id] = {
-              ...output,
-              type: output.type as any,
-              ...outputConfig,
-            };
-            return outputs;
-          },
-          {} as any
-        ),
+        ...[
+          await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
+        ].reduce((outputs, { config: outputConfig, ...output }) => {
+          outputs[output.is_default ? 'default' : output.id] = {
+            ...output,
+            type: output.type as any,
+            ...outputConfig,
+          };
+          return outputs;
+        }, {} as any),
       },
       streams:
         config.datasources && config.datasources.length

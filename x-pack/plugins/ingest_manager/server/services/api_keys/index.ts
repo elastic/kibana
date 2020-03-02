@@ -11,9 +11,13 @@ import { createAPIKey, authenticate } from './security';
 
 export * from './enrollment_api_key';
 
-export async function generateOutputApiKey(outputId: string, agentId: string): Promise<string> {
+export async function generateOutputApiKey(
+  soClient: SavedObjectsClientContract,
+  outputId: string,
+  agentId: string
+): Promise<string> {
   const name = `${agentId}:${outputId}`;
-  const key = await createAPIKey(name, {
+  const key = await createAPIKey(soClient, name, {
     'fleet-output': {
       cluster: ['monitor'],
       index: [
@@ -32,8 +36,12 @@ export async function generateOutputApiKey(outputId: string, agentId: string): P
   return `${key.id}:${key.api_key}`;
 }
 
-export async function generateAccessApiKey(agentId: string, configId: string) {
-  const key = await createAPIKey(agentId, {
+export async function generateAccessApiKey(
+  soClient: SavedObjectsClientContract,
+  agentId: string,
+  configId: string
+) {
+  const key = await createAPIKey(soClient, agentId, {
     'fleet-agent': {},
   });
 

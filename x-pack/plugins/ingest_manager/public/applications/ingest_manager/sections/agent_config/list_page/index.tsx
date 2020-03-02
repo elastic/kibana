@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../types';
-import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 // import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
@@ -258,7 +258,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         columns={columns}
         isSelectable={true}
         selection={{
-          selectable: (agentConfig: AgentConfig) => agentConfig.id !== DEFAULT_AGENT_CONFIG_ID,
+          selectable: (agentConfig: AgentConfig) => !agentConfig.is_default,
           onSelectionChange: (newSelectedAgentConfigs: AgentConfig[]) => {
             setSelectedAgentConfigs(newSelectedAgentConfigs);
           },

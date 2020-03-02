@@ -5,7 +5,6 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { DEFAULT_OUTPUT_ID } from '../../constants';
 import { outputService, agentConfigService } from '../../services';
 import { CreateFleetSetupRequestSchema, CreateFleetSetupResponse } from '../../types';
 
@@ -14,8 +13,8 @@ export const getFleetSetupHandler: RequestHandler = async (context, request, res
   const successBody: CreateFleetSetupResponse = { isInitialized: true };
   const failureBody: CreateFleetSetupResponse = { isInitialized: false };
   try {
-    const output = await outputService.get(soClient, DEFAULT_OUTPUT_ID);
-    if (output) {
+    const adminUser = await outputService.getAdminUser(soClient);
+    if (adminUser) {
       return response.ok({
         body: successBody,
       });
