@@ -8,7 +8,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiSuperSelect, EuiIcon, EuiSuperSelectOption } from '@elastic/eui';
 import styled from 'styled-components';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
 const ICON_SIZE = 'm';
 
