@@ -92,6 +92,10 @@ export interface GetStateReturn {
    */
   setAppState: (newState: Partial<AppState>) => void;
   /**
+   * Set state in Url using history.replace
+   */
+  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
+  /**
    * Get global filters
    */
   getAppFilters: () => Filter[];
@@ -162,6 +166,10 @@ export function getState({
     startSync: start,
     stopSync: stop,
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
+    replaceUrlAppState: async (newPartial: AppState) => {
+      const state = { ...appStateContainer.getState(), newPartial };
+      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    },
     getAppFilters: () => getFilters(appStateContainer.getState()),
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
