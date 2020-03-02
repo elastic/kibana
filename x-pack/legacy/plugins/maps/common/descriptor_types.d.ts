@@ -45,13 +45,13 @@ export type ESGeoGridSourceDescriptor = AbstractESAggDescriptor & {
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
-  filterByMapBounds: boolean;
-  tooltipProperties: string[];
-  sortField: string;
-  sortOrder: SORT_ORDER;
-  useTopHits: boolean;
-  topHitsSplitField: string;
-  topHitsSize: number;
+  filterByMapBounds?: boolean;
+  tooltipProperties?: string[];
+  sortField?: string;
+  sortOrder?: SORT_ORDER;
+  useTopHits?: boolean;
+  topHitsSplitField?: string;
+  topHitsSize?: number;
 };
 
 export type ESPewPewSourceDescriptor = AbstractESAggDescriptor & {
@@ -117,4 +117,5 @@ export type LayerDescriptor = {
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   joins?: JoinDescriptor[];
+  style?: unknown;
 };
