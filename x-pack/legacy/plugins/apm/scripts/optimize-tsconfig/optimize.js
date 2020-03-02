@@ -11,7 +11,6 @@ const { promisify } = require('util');
 const path = require('path');
 const json5 = require('json5');
 const execa = require('execa');
-const { assign } = require('lodash');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -55,7 +54,7 @@ async function addApmFilesToXpackTsConfig() {
 
   await writeFile(
     xpackTsConfig,
-    JSON.stringify(assign(config, template), null, 2),
+    JSON.stringify({ ...config, ...template }, null, 2),
     { encoding: 'utf-8' }
   );
 }
