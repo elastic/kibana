@@ -9,7 +9,8 @@
     "management"
   ],
   "optionalPlugins": [
-    "usageCollection"
+    "usageCollection",
+    "security"
   ],
   "configPath": ["xpack", "snapshot_restore"]
 }
