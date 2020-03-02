@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { AggConfig } from '../agg_config';
+import { AggConfig, IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
-export class AggParamType<TAggConfig extends AggConfig = AggConfig> extends BaseParamType<
+export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends BaseParamType<
   TAggConfig
 > {
   makeAgg: (agg: TAggConfig, state?: any) => TAggConfig;
