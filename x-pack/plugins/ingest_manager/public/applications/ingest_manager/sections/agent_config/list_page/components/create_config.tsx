@@ -133,7 +133,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           >
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.submitButtonLabel"
-              defaultMessage="Continue"
+              defaultMessage="Create agent configuration"
             />
           </EuiButton>
         </EuiFlexItem>
