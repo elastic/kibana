@@ -82,7 +82,9 @@ export function validateCoreQueryBody(anyParams: any): string | undefined {
 const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
 
 function validateAggType(aggType: string): string | undefined {
-  if (AggTypes.has(aggType)) return;
+  if (AggTypes.has(aggType)) {
+    return;
+  }
 
   return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidAggTypeErrorMessage', {
     defaultMessage: 'invalid aggType: "{aggType}"',
@@ -93,7 +95,10 @@ function validateAggType(aggType: string): string | undefined {
 }
 
 export function validateGroupBy(groupBy: string): string | undefined {
-  if (groupBy === 'all' || groupBy === 'top') return;
+  if (groupBy === 'all' || groupBy === 'top') {
+    return;
+  }
+
   return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidGroupByErrorMessage', {
     defaultMessage: 'invalid groupBy: "{groupBy}"',
     values: {
@@ -105,7 +110,10 @@ export function validateGroupBy(groupBy: string): string | undefined {
 const TimeWindowUnits = new Set(['s', 'm', 'h', 'd']);
 
 export function validateTimeWindowUnits(timeWindowUnit: string): string | undefined {
-  if (TimeWindowUnits.has(timeWindowUnit)) return;
+  if (TimeWindowUnits.has(timeWindowUnit)) {
+    return;
+  }
+
   return i18n.translate(
     'xpack.alertingBuiltins.indexThreshold.invalidTimeWindowUnitsErrorMessage',
     {
