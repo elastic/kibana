@@ -112,7 +112,7 @@ export class UrlPanelContent extends Component<Props, State> {
                 fullWidth
                 onClick={copy}
                 disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-                data-share-url={(this.state.url as unknown) as undefined}
+                data-share-url={this.state.url}
                 data-test-subj="copyShareUrlButton"
                 size="s"
               >

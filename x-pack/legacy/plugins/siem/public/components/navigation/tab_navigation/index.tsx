@@ -25,7 +25,7 @@ const TabNavigationItemComponent = ({
 
   return (
     <EuiTab
-      data-href={(href as unknown) as undefined}
+      data-href={href}
       data-test-subj={`navigation-${id}`}
       disabled={disabled}
       href={hrefWithSearch}

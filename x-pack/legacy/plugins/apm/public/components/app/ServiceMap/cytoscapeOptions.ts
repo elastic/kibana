@@ -38,14 +38,13 @@ const style: cytoscape.Stylesheet[] = [
       // The DefinitelyTyped definitions don't specify that a function can be
       // used here.
       //
-      // @ts-ignore
       'background-image': (el: cytoscape.NodeSingular) =>
         iconForNode(el) ?? defaultIcon,
       'background-height': (el: cytoscape.NodeSingular) =>
         isService(el) ? '85%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
-        // @ts-ignore no function allowed
         isService(el) ? '80%' : '40%',
+      // @ts-ignore no function allowed
       'border-color': (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected()
           ? theme.euiColorPrimary
