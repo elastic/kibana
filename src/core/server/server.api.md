@@ -2059,7 +2059,7 @@ export interface SavedObjectsType {
 
 // @public
 export interface SavedObjectsTypeMappingDefinition {
-    // (undocumented)
+    dynamic?: false | 'strict';
     properties: SavedObjectsMappingProperties;
 }
 
