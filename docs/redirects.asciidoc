@@ -76,13 +76,3 @@ This page has moved. Please see <<reporting-getting-started>>.
 == Add sample data
 
 This page has moved. Please see <<get-data-in>>.
-
-[role="exclude",id="tilemap"]
-== Coordinate map
-
-This page has moved. Please see <<coordinate-map>>.
-
-[role="exclude",id="regionmap"]
-== Region map
-
-This page has moved. Please see <<region-map>>.
