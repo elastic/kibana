@@ -17,6 +17,11 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import {
+  PrePackagedRulesSchema,
+  prePackagedRulesSchema,
+} from '../schemas/response/prepackaged_rules_schema';
+import { validate } from './validate';
 
 export const createAddPrepackedRulesRoute = (
   config: LegacyServices['config'],
@@ -78,10 +83,21 @@ export const createAddPrepackedRulesRoute = (
           rulesToUpdate,
           spaceIndex
         );
-        return {
+        const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
         };
+        const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
+        if (errors != null) {
+          return headers
+            .response({
+              message: errors,
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return validated;
+        }
       } catch (err) {
         const error = transformError(err);
         return headers

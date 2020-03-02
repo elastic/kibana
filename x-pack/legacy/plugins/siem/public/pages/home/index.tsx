@@ -21,6 +21,7 @@ import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning'
 import { UseUrlState } from '../../components/url_state';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { useShowTimeline } from '../../utils/timeline/use_show_timeline';
 import { NotFoundPage } from '../404';
 import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
@@ -68,6 +69,8 @@ export const HomePage: React.FC = () => {
     windowHeight,
   });
 
+  const [showTimeline] = useShowTimeline();
+
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
@@ -77,7 +80,7 @@ export const HomePage: React.FC = () => {
           {({ browserFields, indexPattern, indicesExist }) => (
             <DragDropContextWrapper browserFields={browserFields}>
               <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && showTimeline && (
                 <>
                   <AutoSaveWarningMsg />
                   <Flyout

@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutBody,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
@@ -146,6 +147,17 @@ export const ConnectorAddFlyout = () => {
                         actionTypeName: actionType.name,
                       }}
                     />
+                    &emsp;
+                    <EuiBetaBadge
+                      label="Beta"
+                      tooltipContent={i18n.translate(
+                        'xpack.triggersActionsUI.sections.addConnectorForm.betaBadgeTooltipContent',
+                        {
+                          defaultMessage:
+                            'This module is not GA. Please help us by reporting any bugs.',
+                        }
+                      )}
+                    />
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
@@ -158,6 +170,17 @@ export const ConnectorAddFlyout = () => {
                   <FormattedMessage
                     defaultMessage="Select a connector"
                     id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
+                  />
+                  &emsp;
+                  <EuiBetaBadge
+                    label="Beta"
+                    tooltipContent={i18n.translate(
+                      'xpack.triggersActionsUI.sections.addFlyout.betaBadgeTooltipContent',
+                      {
+                        defaultMessage:
+                          'This module is not GA. Please help us by reporting any bugs.',
+                      }
+                    )}
                   />
                 </h3>
               </EuiTitle>

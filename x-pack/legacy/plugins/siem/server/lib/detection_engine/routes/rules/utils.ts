@@ -5,8 +5,10 @@
  */
 
 import { pickBy, countBy } from 'lodash/fp';
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
+
+import { PartialAlert, FindResult } from '../../../../../../../../plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -155,26 +157,38 @@ export const transformAlertsToRules = (
 };
 
 export const transformFindAlerts = (
-  findResults: { data: unknown[] },
-  ruleStatuses?: unknown[]
-): unknown | null => {
+  findResults: FindResult,
+  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+): {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<Partial<OutputRuleAlertRest>>;
+} | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
-    return findResults;
-  }
-  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    findResults.data = findResults.data.map((alert, idx) =>
-      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
-    );
-    return findResults;
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map(alert => transformAlertToRule(alert)),
+    };
+  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map((alert, idx) =>
+        transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+      ),
+    };
   } else {
     return null;
   }
 };
 
 export const transform = (
-  alert: unknown,
-  ruleStatus?: unknown
+  alert: PartialAlert,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
@@ -188,7 +202,7 @@ export const transform = (
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
@@ -208,7 +222,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {
