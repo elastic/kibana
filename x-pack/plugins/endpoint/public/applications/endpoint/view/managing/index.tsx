@@ -6,6 +6,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -16,11 +17,11 @@ import {
   EuiTitle,
   EuiBasicTable,
   EuiTextColor,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
-import { Link } from 'react-router-dom';
 import { ManagementDetails } from './details';
 import * as selectors from '../../store/managing/selectors';
 import { ManagementAction } from '../../store/managing/action';
@@ -31,6 +32,7 @@ import { urlFromQueryParams } from './url_from_query_params';
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const ManagementList = () => {
   const dispatch = useDispatch<(a: ManagementAction) => void>();
+  const history = useHistory();
   const {
     listData,
     pageIndex,
@@ -71,12 +73,17 @@ export const ManagementList = () => {
         }),
         render: ({ hostname, id }: { hostname: string; id: string }) => {
           return (
-            <Link
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiLink
               data-test-subj="hostnameCellLink"
-              to={urlFromQueryParams({ ...queryParams, selected_host: id })}
+              href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
+              onClick={ev => {
+                ev.preventDefault();
+                history.push(urlFromQueryParams({ ...queryParams, selected_host: id }));
+              }}
             >
               {hostname}
-            </Link>
+            </EuiLink>
           );
         },
       },
@@ -138,7 +145,7 @@ export const ManagementList = () => {
         },
       },
     ];
-  }, [queryParams]);
+  }, [queryParams, history]);
 
   return (
     <>

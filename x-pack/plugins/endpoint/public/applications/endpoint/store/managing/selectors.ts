@@ -32,6 +32,7 @@ export const uiQueryParams: (
   (location: ManagementListState['location']) => {
     const data: ManagingIndexUIQueryParams = {};
     if (location) {
+      // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
       // do pagination later?
