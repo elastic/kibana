@@ -155,7 +155,7 @@ export interface UpgradeAssistantStatus {
 }
 
 export interface ClusterStateIndexAPIResponse {
-  state: 'open' | 'closed';
+  state: 'open' | 'close';
   settings: {
     index: {
       verified_before_close: string;

@@ -22,7 +22,7 @@ describe('getUpgradeAssistantStatus', () => {
       return {
         metadata: {
           indices: {
-            ...index.reduce((acc, i) => {
+            ...index.reduce((acc: any, i: any) => {
               return {
                 ...acc,
                 [i]: {
