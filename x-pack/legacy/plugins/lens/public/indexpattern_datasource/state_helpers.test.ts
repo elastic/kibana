@@ -173,6 +173,47 @@ describe('state_helpers', () => {
         params: { interval: 'M' },
       });
     });
+
+    it('should set optional params', () => {
+      const currentColumn: AvgIndexPatternColumn = {
+        label: 'Avg of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        // Private
+        operationType: 'avg',
+        sourceField: 'bytes',
+      };
+
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        showEmptyFields: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: currentColumn,
+            },
+          },
+        },
+      };
+
+      expect(
+        updateColumnParam({
+          state,
+          layerId: 'first',
+          currentColumn,
+          paramName: 'format',
+          value: { id: 'bytes' },
+        }).layers.first.columns.col1
+      ).toEqual({
+        ...currentColumn,
+        params: { format: { id: 'bytes' } },
+      });
+    });
   });
 
   describe('changeColumn', () => {

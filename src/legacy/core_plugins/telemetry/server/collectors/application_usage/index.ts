@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './_agg_config';
-import './_agg_configs';
+export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
