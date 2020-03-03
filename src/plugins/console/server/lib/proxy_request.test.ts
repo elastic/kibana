@@ -107,7 +107,7 @@ describe(`Console's send request`, () => {
     const [httpRequestOptions2] = stub.secondCall.args;
     expect((httpRequestOptions2 as any).headers).toEqual({
       'content-type': 'application/json',
-      Host: 'myhost', // Does not set any host name
+      Host: 'myhost', // Uses provided host name
       'transfer-encoding': 'chunked',
     });
   });
