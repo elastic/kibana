@@ -13,66 +13,42 @@ import {
   ISearchContext,
   TSearchStrategyProvider,
   ISearch,
-  ICancel,
   ISearchOptions,
   getDefaultSearchParams,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 
-export interface AsyncSearchResponse<T> {
-  id: string;
-  response: SearchResponse<T>;
-}
-
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
   caller: APICaller
 ) => {
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (request, options) => {
+  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
+    request: IEnhancedEsSearchRequest,
+    options
+  ) => {
     const config = await context.config$.pipe(first()).toPromise();
-    const params = { ...getDefaultSearchParams(config), ...request.params };
+    const defaultParams = getDefaultSearchParams(config);
+    const params = { ...defaultParams, ...request.params };
 
-    if (request.isRollup) {
-      return rollupSearch(caller, { ...request, params }, options);
-    }
+    const rawResponse = (await (request.isRollup
+      ? rollupSearch(caller, { ...request, params }, options)
+      : caller('search', params, options))) as SearchResponse<any>;
 
-    // If we have an ID, then just poll for that ID, otherwise send the entire request body
-    const method = request.id ? 'GET' : 'POST';
-    const path = request.id
-      ? `_async_search/${request.id}`
-      : `${request.params.index}/_async_search`;
-
-    // Wait up to 1s for the initial response to return
-    const { body, ...query } = request.id ? {} : { waitForCompletion: '1s', ...params };
-
-    const esSearchResponse = (await caller(
-      'transport.request',
-      { method, path, body, query: mapKeys(query, (value, key) => snakeCase(key)) },
-      options
-    )) as AsyncSearchResponse<any>;
-
-    const { id, response: rawResponse } = esSearchResponse;
     const { total, failed, skipped, successful } = rawResponse._shards;
     const loaded = failed + skipped + successful;
-    return { id, total, loaded, rawResponse };
+    return { total, loaded, rawResponse };
   };
 
-  const cancel: ICancel<typeof ES_SEARCH_STRATEGY> = id => {
-    const method = 'DELETE';
-    const path = `_async_search/${id}`;
-    return void caller('transport.request', { method, path });
-  };
-
-  return { search, cancel };
+  return { search };
 };
 
-async function rollupSearch(
+function rollupSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
   options: ISearchOptions
 ) {
   const { body, ...query } = request.params;
-  const rawResponse = (await caller(
+  return caller(
     'transport.request',
     {
       method: 'POST',
@@ -81,8 +57,5 @@ async function rollupSearch(
       query: mapKeys(query, (value, key) => snakeCase(key)),
     },
     options
-  )) as AsyncSearchResponse<any>;
-  const { total, failed, skipped, successful } = rawResponse._shards;
-  const loaded = failed + skipped + successful;
-  return { total, loaded, rawResponse };
+  ) as SearchResponse<any>;
 }
