@@ -7,6 +7,7 @@
 import React, { FC } from 'react';
 
 import { EuiCodeEditor } from '@elastic/eui';
+import { expandLiteralStrings } from '../../../../../../shared_imports';
 import { xJsonMode } from '../../../../components/custom_hooks';
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: xJsonMode };
@@ -31,6 +32,10 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   theme = 'textmate',
   onChange = () => {},
 }) => {
+  if (mode === ML_EDITOR_MODE.XJSON) {
+    value = expandLiteralStrings(value);
+  }
+
   return (
     <EuiCodeEditor
       value={value}

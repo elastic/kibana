@@ -18,10 +18,7 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import {
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from '../../../../../../../../shared_imports';
+import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
 import { Datafeed } from '../../../../common/job_creator/configs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -187,7 +184,6 @@ const Contents: FC<{
   editJson: boolean;
   onChange(s: string): void;
 }> = ({ title, value, editJson, onChange }) => {
-  const formattedValue = expandLiteralStrings(value);
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -195,7 +191,7 @@ const Contents: FC<{
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor
-        value={formattedValue}
+        value={value}
         height={EDITOR_HEIGHT}
         mode={ML_EDITOR_MODE.XJSON}
         readOnly={editJson === false}
