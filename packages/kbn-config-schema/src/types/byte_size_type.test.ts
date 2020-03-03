@@ -138,19 +138,19 @@ describe('#max', () => {
 
 test('returns error when not valid string or positive safe integer', () => {
   expect(() => byteSize().validate(-123)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer, but provided [-123]."`
+    `"Value in bytes is expected to be a safe positive integer."`
   );
 
   expect(() => byteSize().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer, but provided [NaN]."`
+    `"Value in bytes is expected to be a safe positive integer."`
   );
 
   expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer, but provided [Infinity]."`
+    `"Value in bytes is expected to be a safe positive integer."`
   );
 
   expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer, but provided [9007199254740992]."`
+    `"Value in bytes is expected to be a safe positive integer."`
   );
 
   expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(

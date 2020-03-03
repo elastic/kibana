@@ -148,19 +148,19 @@ describe('#defaultValue', () => {
 
 test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer, but provided [-123]."`
+    `"Value in milliseconds is expected to be a safe positive integer."`
   );
 
   expect(() => duration().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer, but provided [NaN]."`
+    `"Value in milliseconds is expected to be a safe positive integer."`
   );
 
   expect(() => duration().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer, but provided [Infinity]."`
+    `"Value in milliseconds is expected to be a safe positive integer."`
   );
 
   expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer, but provided [9007199254740992]."`
+    `"Value in milliseconds is expected to be a safe positive integer."`
   );
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(

@@ -51,19 +51,19 @@ describe('parsing units', () => {
 describe('#constructor', () => {
   test('throws if number of bytes is negative', () => {
     expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingInlineSnapshot(
-      `"Value in bytes is expected to be a safe positive integer, but provided [-1024]."`
+      `"Value in bytes is expected to be a safe positive integer."`
     );
   });
 
   test('throws if number of bytes is not safe', () => {
     expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingInlineSnapshot(
-      `"Value in bytes is expected to be a safe positive integer, but provided [NaN]."`
+      `"Value in bytes is expected to be a safe positive integer."`
     );
     expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingInlineSnapshot(
-      `"Value in bytes is expected to be a safe positive integer, but provided [Infinity]."`
+      `"Value in bytes is expected to be a safe positive integer."`
     );
     expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-      `"Value in bytes is expected to be a safe positive integer, but provided [9007199254740992]."`
+      `"Value in bytes is expected to be a safe positive integer."`
     );
   });
 

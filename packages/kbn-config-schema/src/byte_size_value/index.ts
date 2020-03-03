@@ -53,9 +53,7 @@ export class ByteSizeValue {
 
   constructor(private readonly valueInBytes: number) {
     if (!Number.isSafeInteger(valueInBytes) || valueInBytes < 0) {
-      throw new Error(
-        `Value in bytes is expected to be a safe positive integer, but provided [${valueInBytes}].`
-      );
+      throw new Error(`Value in bytes is expected to be a safe positive integer.`);
     }
   }
 

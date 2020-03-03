@@ -43,9 +43,7 @@ function stringToDuration(text: string) {
 
 function numberToDuration(numberMs: number) {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
-    throw new Error(
-      `Value in milliseconds is expected to be a safe positive integer, but provided [${numberMs}].`
-    );
+    throw new Error(`Value in milliseconds is expected to be a safe positive integer.`);
   }
 
   return momentDuration(numberMs);
