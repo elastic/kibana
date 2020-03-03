@@ -36,7 +36,10 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, dateRangeStart, dateRangeEnd, location },
       { APICaller, savedObjectsClient }
     ): Promise<MonitorChart> {
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient,
+        undefined
+      );
       return await libs.requests.getMonitorCharts({
         callES: APICaller,
         dynamicSettings,

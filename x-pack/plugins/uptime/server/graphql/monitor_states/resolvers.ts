@@ -44,8 +44,10 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
         { APICaller, savedObjectsClient }
       ): Promise<MonitorSummaryResult> {
-
-        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+          savedObjectsClient,
+          undefined
+        );
 
         const decodedPagination = pagination
           ? JSON.parse(decodeURIComponent(pagination))
@@ -78,8 +80,15 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(_resolver, {}, { APICaller, savedObjectsClient }): Promise<StatesIndexStatus> {
-        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient, undefined);
+      async getStatesIndexStatus(
+        _resolver,
+        {},
+        { APICaller, savedObjectsClient }
+      ): Promise<StatesIndexStatus> {
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+          savedObjectsClient,
+          undefined
+        );
         return await libs.requests.getIndexStatus({ callES: APICaller, dynamicSettings });
       },
     },
