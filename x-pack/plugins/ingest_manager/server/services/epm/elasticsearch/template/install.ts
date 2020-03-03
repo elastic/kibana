@@ -10,6 +10,7 @@ import {
   RegistryPackage,
   IngestAssetType,
   ElasticsearchAssetType,
+  IndexTemplate,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
@@ -24,7 +25,6 @@ export const installTemplates = async (
 ) => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global template
-
   installPreBuiltTemplates(pkgkey, callCluster);
 
   // build templates per dataset from yml files
@@ -45,12 +45,15 @@ export const installTemplates = async (
   return [];
 };
 
+interface IndexTemplates {
+  [key: string]: IndexTemplate;
+}
 // this is temporary until we update the registry to use index templates v2 structure
 const installPreBuiltTemplates = async (pkgkey: string, callCluster: CallESAsCurrentUser) => {
   const templatePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
     isTemplate(entry)
   );
-  const templates = templatePaths.reduce<any>((acc, path) => {
+  const templates = templatePaths.reduce<IndexTemplates>((acc, path) => {
     const { file } = Registry.pathParts(path);
     const templateType = file.split('-')[0];
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -58,7 +61,6 @@ const installPreBuiltTemplates = async (pkgkey: string, callCluster: CallESAsCur
     acc[templateType] = acc[templateType] ? { ...acc[templateType], ...content } : content;
     return acc;
   }, {});
-
   for (const templateName in templates) {
     if (templates.hasOwnProperty(templateName)) {
       await callCluster('indices.putTemplate', {

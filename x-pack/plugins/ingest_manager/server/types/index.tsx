@@ -41,6 +41,7 @@ export {
   CategoryId,
   CategorySummaryList,
   RegistrySearchResults,
+  IndexTemplate,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
