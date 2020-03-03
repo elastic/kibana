@@ -6,6 +6,7 @@
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,7 +32,10 @@ export const ToggleAlertFlyoutButton = ({ setAlertFlyoutVisibility }: Props) => 
             icon="plusInCircle"
             onClick={() => setAlertFlyoutVisibility(true)}
           >
-            Create alert
+            <FormattedMessage
+              id="xpack.uptime.toggleAlertButton.content"
+              defaultMessage="Create alert"
+            />
           </EuiContextMenuItem>,
         ]}
       />
