@@ -123,7 +123,7 @@ export const useRequest = <D = any, E = Error>(
       body,
     };
 
-    const response = await sendRequest(httpClient, requestBody);
+    const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
