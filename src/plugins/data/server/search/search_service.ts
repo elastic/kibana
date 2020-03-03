@@ -22,6 +22,7 @@ import {
   Plugin,
   CoreSetup,
   IContextContainer,
+  SavedObjectsType,
 } from '../../../../core/server';
 import { registerSearchRoute } from './routes';
 import { ISearchSetup } from './i_search_setup';
@@ -34,7 +35,7 @@ import {
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 import { esSearchService } from './es_search';
 
-import * as migrations from '../../migrations';
+import { migrations } from './migrations';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -55,7 +56,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
 
     this.contextContainer = core.context.createContextContainer();
 
-    const searchSavedObjectType = {
+    const searchSavedObjectType: SavedObjectsType = {
       name: 'search',
       hidden: false,
       namespaceAgnostic: false,
@@ -74,7 +75,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
           version: { type: 'integer' },
         },
       },
-      migrations: migrations.search,
+      migrations,
     };
 
     core.savedObjects.registerType(searchSavedObjectType);

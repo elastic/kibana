@@ -86,7 +86,7 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
   };
 };
 
-export const search = {
+export const migrations = {
   '7.0.0': flow<SavedObjectMigrationFn>(setNewReferences),
   '7.4.0': flow<SavedObjectMigrationFn>(migrateSearchSortToNestedArray),
 };

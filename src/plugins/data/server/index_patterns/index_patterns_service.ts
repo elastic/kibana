@@ -19,7 +19,7 @@
 
 import { CoreSetup, Plugin, SavedObjectsType } from 'kibana/server';
 import { registerRoutes } from './routes';
-import * as migrations from '../../migrations';
+import { migrations } from './migrations';
 
 export class IndexPatternsService implements Plugin<void> {
   public setup(core: CoreSetup) {
@@ -40,7 +40,7 @@ export class IndexPatternsService implements Plugin<void> {
           typeMeta: { type: 'keyword' },
         },
       },
-      migrations: migrations.indexPatterns,
+      migrations,
     };
 
     core.savedObjects.registerType(indexPatternSavedObjectType);

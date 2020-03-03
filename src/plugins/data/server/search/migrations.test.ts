@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { search } from './search';
+import { migrations } from './migrations';
 import { SavedObjectMigrationContext } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration search', () => {
   describe('7.0.0', () => {
-    const migrationFn = search['7.0.0'];
+    const migrationFn = migrations['7.0.0'];
 
     test('skips errors when searchSourceJSON is null', () => {
       const doc = {
@@ -246,7 +246,7 @@ Object {
   });
 
   describe('7.4.0', function() {
-    const migrationFn = search['7.4.0'];
+    const migrationFn = migrations['7.4.0'];
 
     test('transforms one dimensional sort arrays into two dimensional arrays', () => {
       const doc = {
