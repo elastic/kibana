@@ -80,7 +80,7 @@ export const AlertAdd = ({
     return null;
   }
 
-  const alertType = alertTypeRegistry.get(alert.alertTypeId);
+  const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
   const errors = {
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,

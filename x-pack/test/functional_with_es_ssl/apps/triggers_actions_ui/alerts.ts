@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
 
-  async function createAlert(alertTypeId?: string, name?: string) {
+  async function createAlert(alertTypeId?: string, name?: string, params?: any) {
     const { body: createdAlert } = await supertest
       .post(`/api/alert`)
       .set('kbn-xsrf', 'foo')
@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
-        params: {},
+        params: params ?? {},
       })
       .expect(200);
     return createdAlert;
@@ -113,7 +113,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should edit an alert', async () => {
-      const createdAlert = await createAlert('.index-threshold', 'new alert');
+      const createdAlert = await createAlert('.index-threshold', 'new alert', {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000, 5000],
+        index: ['.kibana_1'],
+        timeField: 'alert',
+      });
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 

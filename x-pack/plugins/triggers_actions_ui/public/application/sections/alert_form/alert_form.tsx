@@ -105,7 +105,7 @@ export const AlertForm = ({
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alertTypeRegistry.get(alert.alertTypeId)
+    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
   );
 
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
