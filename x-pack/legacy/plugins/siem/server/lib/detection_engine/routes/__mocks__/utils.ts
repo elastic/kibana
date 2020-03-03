@@ -64,11 +64,14 @@ export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
  */
 export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiReadableStream => {
   const HapiStream = class extends Readable {
-    public hapi!: { filename: string };
+    public readonly hapi: { filename: string };
+    constructor(fileName: string) {
+      super();
+      this.hapi = { filename: fileName };
+    }
   };
 
-  const stream = new HapiStream();
-  stream.hapi = { filename };
+  const stream = new HapiStream(filename);
   stream.push(string);
   stream.push(null);
 
