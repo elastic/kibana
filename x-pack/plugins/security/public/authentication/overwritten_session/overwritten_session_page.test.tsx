@@ -26,6 +26,9 @@ describe('OverwrittenSessionPage', () => {
       <OverwrittenSessionPage basePath={basePathMock} authc={authenticationSetupMock} />
     );
 
+    // Shouldn't render anything if username isn't yet available.
+    expect(wrapper.isEmptyRender()).toBe(true);
+
     await act(async () => {
       await nextTick();
       wrapper.update();
