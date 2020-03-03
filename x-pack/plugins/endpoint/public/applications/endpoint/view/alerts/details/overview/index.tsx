@@ -12,6 +12,7 @@ import * as selectors from '../../../../store/alerts/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
 import { AlertDetailResolver } from '../../resolver';
+import { TakeActionDropdown } from './take_action_dropdown';
 
 export const AlertDetailsOverview = memo(() => {
   const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
@@ -86,6 +87,8 @@ export const AlertDetailsOverview = memo(() => {
           Endpoint Status: <EuiHealth color="success">Online</EuiHealth>
         </EuiText>
         <EuiText>Alert Status: Open</EuiText>
+        <EuiSpacer />
+        <TakeActionDropdown />
         <EuiSpacer />
       </section>
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
