@@ -10,23 +10,29 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { MAX_GROUPS } from '../index';
-import { parseDuration } from '../../../../../alerting/server';
 
 export const CoreQueryParamsSchemaProperties = {
-  // name of the index to search
-  index: schema.string({ minLength: 1 }),
+  // name of the indices to search
+  index: schema.oneOf([
+    schema.string({ minLength: 1 }),
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+  ]),
   // field in index used for date/time
   timeField: schema.string({ minLength: 1 }),
   // aggregation type
   aggType: schema.string({ validate: validateAggType }),
   // aggregation field
   aggField: schema.maybe(schema.string({ minLength: 1 })),
-  // group field
-  groupField: schema.maybe(schema.string({ minLength: 1 })),
+  // how to group
+  groupBy: schema.string({ validate: validateGroupBy }),
+  // field to group on (for groupBy: top)
+  termField: schema.maybe(schema.string({ minLength: 1 })),
   // limit on number of groups returned
-  groupLimit: schema.maybe(schema.number()),
+  termSize: schema.maybe(schema.number({ min: 1 })),
   // size of time window for date range aggregations
-  window: schema.string({ validate: validateDuration }),
+  timeWindowSize: schema.number({ min: 1 }),
+  // units of time window for date range aggregations
+  timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
 };
 
 const CoreQueryParamsSchema = schema.object(CoreQueryParamsSchemaProperties);
@@ -37,17 +43,7 @@ export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 // above.
 // Using direct type not allowed, circular reference, so body is typed to any.
 export function validateCoreQueryBody(anyParams: any): string | undefined {
-  const { aggType, aggField, groupLimit }: CoreQueryParams = anyParams;
-
-  if (aggType === 'count' && aggField) {
-    return i18n.translate('xpack.alertingBuiltins.indexThreshold.aggTypeNotEmptyErrorMessage', {
-      defaultMessage: '[aggField]: must not have a value when [aggType] is "{aggType}"',
-      values: {
-        aggType,
-      },
-    });
-  }
-
+  const { aggType, aggField, groupBy, termField, termSize }: CoreQueryParams = anyParams;
   if (aggType !== 'count' && !aggField) {
     return i18n.translate('xpack.alertingBuiltins.indexThreshold.aggTypeRequiredErrorMessage', {
       defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
@@ -57,21 +53,23 @@ export function validateCoreQueryBody(anyParams: any): string | undefined {
     });
   }
 
-  // schema.number doesn't seem to check the max value ...
-  if (groupLimit != null) {
-    if (groupLimit <= 0) {
-      return i18n.translate(
-        'xpack.alertingBuiltins.indexThreshold.invalidGroupMinimumErrorMessage',
-        {
-          defaultMessage: '[groupLimit]: must be greater than 0',
-        }
-      );
+  // check grouping
+  if (groupBy === 'top') {
+    if (termField == null) {
+      return i18n.translate('xpack.alertingBuiltins.indexThreshold.termFieldRequiredErrorMessage', {
+        defaultMessage: '[termField]: termField required when [groupBy] is top',
+      });
     }
-    if (groupLimit > MAX_GROUPS) {
+    if (termSize == null) {
+      return i18n.translate('xpack.alertingBuiltins.indexThreshold.termSizeRequiredErrorMessage', {
+        defaultMessage: '[termSize]: termSize required when [groupBy] is top',
+      });
+    }
+    if (termSize > MAX_GROUPS) {
       return i18n.translate(
-        'xpack.alertingBuiltins.indexThreshold.invalidGroupMaximumErrorMessage',
+        'xpack.alertingBuiltins.indexThreshold.invalidTermSizeMaximumErrorMessage',
         {
-          defaultMessage: '[groupLimit]: must be less than or equal to {maxGroups}',
+          defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
           values: {
             maxGroups: MAX_GROUPS,
           },
@@ -81,10 +79,12 @@ export function validateCoreQueryBody(anyParams: any): string | undefined {
   }
 }
 
-const AggTypes = new Set(['count', 'average', 'min', 'max', 'sum']);
+const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
 
 function validateAggType(aggType: string): string | undefined {
-  if (AggTypes.has(aggType)) return;
+  if (AggTypes.has(aggType)) {
+    return;
+  }
 
   return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidAggTypeErrorMessage', {
     defaultMessage: 'invalid aggType: "{aggType}"',
@@ -94,15 +94,33 @@ function validateAggType(aggType: string): string | undefined {
   });
 }
 
-export function validateDuration(duration: string): string | undefined {
-  try {
-    parseDuration(duration);
-  } catch (err) {
-    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDurationErrorMessage', {
-      defaultMessage: 'invalid duration: "{duration}"',
-      values: {
-        duration,
-      },
-    });
+export function validateGroupBy(groupBy: string): string | undefined {
+  if (groupBy === 'all' || groupBy === 'top') {
+    return;
   }
+
+  return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidGroupByErrorMessage', {
+    defaultMessage: 'invalid groupBy: "{groupBy}"',
+    values: {
+      groupBy,
+    },
+  });
+}
+
+const TimeWindowUnits = new Set(['s', 'm', 'h', 'd']);
+
+export function validateTimeWindowUnits(timeWindowUnit: string): string | undefined {
+  if (TimeWindowUnits.has(timeWindowUnit)) {
+    return;
+  }
+
+  return i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.invalidTimeWindowUnitsErrorMessage',
+    {
+      defaultMessage: 'invalid timeWindowUnit: "{timeWindowUnit}"',
+      values: {
+        timeWindowUnit,
+      },
+    }
+  );
 }
