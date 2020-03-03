@@ -404,6 +404,10 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     xJson: advancedEditorConfig,
   } = useXJsonMode(stringifiedPivotConfig);
 
+  useEffect(() => {
+    setAdvancedEditorConfig(stringifiedPivotConfig);
+  }, [setAdvancedEditorConfig, stringifiedPivotConfig]);
+
   // source config
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
   const [
@@ -797,6 +801,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 >
                   <EuiPanel grow={false} paddingSize="none">
                     <EuiCodeEditor
+                      data-test-subj="transformAdvancedPivotEditor"
                       mode={xJsonMode}
                       width="100%"
                       value={advancedEditorConfig}
