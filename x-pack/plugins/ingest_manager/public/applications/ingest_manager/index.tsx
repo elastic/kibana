@@ -58,7 +58,7 @@ const IngestManagerRoutes = ({ ...rest }) => {
         setIsIntialized(true);
       } catch (err) {
         notifications.toasts.addError(err, {
-          title: 'Unable to initialized ingestManager',
+          title: 'Unable to initialize Ingest Manager',
         });
       }
     })();
