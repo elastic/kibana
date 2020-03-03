@@ -16,15 +16,30 @@ import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
 
+/**
+ * The alert takes some dependencies as parameters; these are things like
+ * kibana core services and plugins. This funciton helps reduce the amount of
+ * boilerplate required.
+ * @param customRequests client tests can use this paramter to provide their own request mocks,
+ * so we don't have to mock them all for each test.
+ */
 const bootstrapDependencies = (customRequests?: any) => {
-  // these parameters don't have any functionality, but we aren't testing them here
   const route: IRouter = {} as IRouter;
+  // these server/libs parameters don't have any functionality, which is fine
+  // because we aren't testing them here
   const server: UptimeCoreSetup = { route };
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
   return { server, libs };
 };
 
+/**
+ * This function aims to provide an easy way to give mock props that will
+ * reduce boilerplate for tests.
+ * @param params the params received at alert creation time
+ * @param services the core services provided by kibana/alerting platforms
+ * @param state the state the alert maintains
+ */
 const mockOptions = (
   params = { foo: 'bar' },
   services = { callCluster: 'mockESFunction' },
