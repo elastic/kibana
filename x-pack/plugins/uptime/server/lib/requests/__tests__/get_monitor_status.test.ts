@@ -6,6 +6,7 @@
 
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
+import { ScopedClusterClient } from 'src/core/server/elasticsearch';
 
 interface BucketItemCriteria {
   monitor_id: string;
@@ -44,11 +45,11 @@ const genBucketItem = ({
   doc_count,
 });
 
-const deepEqual = (a: any, b: any) => {
-  return JSON.stringify(a) === JSON.stringify(b);
-};
+type MockCallES = (method: any, params: any) => Promise<any>;
 
-const setupMock = (criteria: MultiPageCriteria[]) => {
+const setupMock = (
+  criteria: MultiPageCriteria[]
+): [MockCallES, jest.Mocked<Pick<ScopedClusterClient, 'callAsCurrentUser'>>] => {
   const esMock = elasticsearchServiceMock.createScopedClusterClient();
 
   criteria.forEach(({ after_key, bucketCriteria }) => {
@@ -112,12 +113,91 @@ describe('getMonitorStatus', () => {
     expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
     const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
     expect(method).toEqual('search');
-    expect(params?.body?.query?.bool?.should).toBeTruthy();
-    const rootShould = params?.body?.query?.bool?.should;
-    expect(rootShould).toHaveLength(2);
-    const ids = rootShould.map((clause: any) => clause.bool.should[0].match_phrase['monitor.id']);
-    expect(ids.some((id: string) => id === 'apm-dev'));
-    expect(ids.some((id: string) => id === 'auto-http-0X8D6082B94BBE3B8A'));
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitor_id": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-10m",
+                      "lte": "now-1m",
+                    },
+                  },
+                },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "monitor.id": "apm-dev",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*",
+      }
+    `);
   });
 
   it('applies locations to params', async () => {
@@ -134,16 +214,80 @@ describe('getMonitorStatus', () => {
     expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
     const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
     expect(method).toEqual('search');
-    const filter = params?.body?.query?.bool?.filter;
-    expect(filter).toBeTruthy();
-    expect(Array.isArray(filter)).toBeTruthy();
-    const locationClause = filter.find((clause: any) => !!clause.bool);
-    expect(locationClause.bool.should).toHaveLength(2);
-    const locations = locationClause.bool.should.map(
-      (location: any) => location?.term?.['observer.geo.name']
-    );
-    expect(locations.some((location: string) => location === 'fairbanks'));
-    expect(locations.some((location: string) => location === 'harrisburg'));
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitor_id": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-2m",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "observer.geo.name": "fairbanks",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "observer.geo.name": "harrisburg",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*",
+      }
+    `);
   });
 
   it('fetches single page of results', async () => {
@@ -187,51 +331,87 @@ describe('getMonitorStatus', () => {
     expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
     const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
     expect(method).toEqual('search');
-    expect(params.body.query.bool.filter).toHaveLength(2);
-    expect(
-      params.body.query.bool.filter.some((filter: any) =>
-        deepEqual(filter, { term: { 'monitor.status': 'down' } })
-      )
-    ).toBeTruthy();
-    expect(
-      params.body.query.bool.filter.some((filter: any) =>
-        deepEqual(filter, { range: { '@timestamp': { gte: 'now-12m', lte: 'now-2m' } } })
-      )
-    ).toBeTruthy();
-    expect(params.body.aggs.monitors.composite.size).toBe(2000);
-    expect(
-      params.body.aggs.monitors.composite.sources.some((source: any) =>
-        deepEqual(source, { monitor_id: { terms: { field: 'monitor.id' } } })
-      )
-    ).toBeTruthy();
-    expect(
-      params.body.aggs.monitors.composite.sources.some((source: any) =>
-        deepEqual(source, { status: { terms: { field: 'monitor.status' } } })
-      )
-    ).toBeTruthy();
-    expect(
-      params.body.aggs.monitors.composite.sources.some((source: any) =>
-        deepEqual(source, {
-          location: { terms: { field: 'observer.geo.name', missing_bucket: true } },
-        })
-      )
-    ).toBeTruthy();
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitor_id": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-12m",
+                      "lte": "now-2m",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*",
+      }
+    `);
 
-    expect(
-      result.some((e: any) =>
-        deepEqual(e, { monitor_id: 'foo', status: 'down', location: 'fairbanks', count: 43 })
-      )
-    ).toBeTruthy();
-    expect(
-      result.some((e: any) =>
-        deepEqual(e, { monitor_id: 'bar', status: 'down', location: 'harrisburg', count: 53 })
-      )
-    ).toBeTruthy();
-    expect(
-      result.some((e: any) =>
-        deepEqual(e, { monitor_id: 'foo', status: 'down', location: 'harrisburg', count: 44 })
-      )
-    ).toBeTruthy();
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 43,
+          "location": "fairbanks",
+          "monitor_id": "foo",
+          "status": "down",
+        },
+        Object {
+          "count": 53,
+          "location": "harrisburg",
+          "monitor_id": "bar",
+          "status": "down",
+        },
+        Object {
+          "count": 44,
+          "location": "harrisburg",
+          "monitor_id": "foo",
+          "status": "down",
+        },
+      ]
+    `);
   });
 
   it('fetches multiple pages of results in the thing', async () => {
@@ -317,20 +497,57 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
-    expect(Array.isArray(result)).toBeTruthy();
-    expect(result).toHaveLength(8);
-    const expectedValues = criteria
-      .map(({ bucketCriteria }) => [
-        ...bucketCriteria.map(({ monitor_id, status, location, doc_count }) => ({
-          monitor_id,
-          status,
-          location,
-          count: doc_count,
-        })),
-      ])
-      .reduce((acc, cur) => acc.concat(cur), []);
-    expectedValues.forEach(val => {
-      expect(result.find((r: any) => deepEqual(r, val))).toBeTruthy();
-    });
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 43,
+          "location": "fairbanks",
+          "monitor_id": "foo",
+          "status": "down",
+        },
+        Object {
+          "count": 53,
+          "location": "harrisburg",
+          "monitor_id": "bar",
+          "status": "down",
+        },
+        Object {
+          "count": 44,
+          "location": "harrisburg",
+          "monitor_id": "foo",
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "fairbanks",
+          "monitor_id": "sna",
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "fairbanks",
+          "monitor_id": "fu",
+          "status": "down",
+        },
+        Object {
+          "count": 45,
+          "location": "fairbanks",
+          "monitor_id": "bar",
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "harrisburg",
+          "monitor_id": "sna",
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "harrisburg",
+          "monitor_id": "fu",
+          "status": "down",
+        },
+      ]
+    `);
   });
 });
