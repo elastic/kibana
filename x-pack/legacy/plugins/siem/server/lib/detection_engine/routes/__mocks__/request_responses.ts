@@ -291,9 +291,7 @@ export const getCreateRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...typicalPayload(),
-    },
+    body: typicalPayload(),
   });
 
 export const getSetSignalStatusByIdsRequest = () =>
