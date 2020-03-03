@@ -9,6 +9,8 @@ import { IVectorSource } from '../sources/vector_source';
 
 export interface IField {
   getName(): string;
+  getRootName(): string;
+  canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
 }
@@ -34,6 +36,14 @@ export class AbstractField implements IField {
 
   getName(): string {
     return this._fieldName;
+  }
+
+  getRootName(): string {
+    return this.getName();
+  }
+
+  canValueBeFormatted(): boolean {
+    return true;
   }
 
   getSource(): IVectorSource {
