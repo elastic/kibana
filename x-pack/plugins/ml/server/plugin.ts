@@ -6,14 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } from 'src/core/server';
-import { PluginsSetup, RouteInitialization } from './types';
+import { LicenseCheckResult, PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { VALID_FULL_LICENSE_MODES } from '../../../legacy/plugins/ml/common/constants/license';
 
 // @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { makeMlUsageCollector } from './lib/ml_telemetry';
 import { initMlServerLog } from './client/log';
-import { initSampleDataSets } from './lib/sample_data_sets';
+import { addLinksToSampleDatasets } from './lib/sample_data_sets';
 
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
@@ -32,8 +33,6 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
-import { MlServerLicense } from './lib/license';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -44,17 +43,25 @@ declare module 'kibana/server' {
 }
 
 export class MlServerPlugin {
+  private readonly pluginId: string = PLUGIN_ID;
   private log: Logger;
   private version: string;
-  private mlLicense: MlServerLicense;
+
+  private licenseCheckResults: LicenseCheckResult = {
+    isAvailable: false,
+    isActive: false,
+    isEnabled: false,
+    isSecurityDisabled: false,
+  };
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
-    this.mlLicense = new MlServerLicense();
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+    let sampleLinksInitialized = false;
+
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -80,10 +87,6 @@ export class MlServerPlugin {
       },
     });
 
-    this.mlLicense.setup(plugins.licensing.license$, [
-      (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
-    ]);
-
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
       plugins: [elasticsearchJsPlugin],
@@ -97,7 +100,7 @@ export class MlServerPlugin {
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      mlLicense: this.mlLicense,
+      getLicenseCheckResults: () => this.licenseCheckResults,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -124,11 +127,42 @@ export class MlServerPlugin {
     coreSetup.getStartServices().then(([core]) => {
       makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
     });
+
+    plugins.licensing.license$.subscribe(async license => {
+      const { isEnabled: securityIsEnabled } = license.getFeature('security');
+      // @ts-ignore isAvailable is not read
+      const { isAvailable, isEnabled } = license.getFeature(this.pluginId);
+
+      this.licenseCheckResults = {
+        isActive: license.isActive,
+        // This `isAvailable` check for the ml plugin returns false for a basic license
+        // ML should be available on basic with reduced functionality (only file data visualizer)
+        // TODO: This will need to be updated in the second step of this cutover to NP.
+        isAvailable: isEnabled,
+        isEnabled,
+        isSecurityDisabled: securityIsEnabled === false,
+        type: license.type,
+      };
+
+      if (sampleLinksInitialized === false) {
+        sampleLinksInitialized = true;
+        // Add links to the Kibana sample data sets if ml is enabled
+        // and license is trial or platinum.
+        if (isEnabled === true && plugins.home) {
+          if (
+            this.licenseCheckResults.type &&
+            VALID_FULL_LICENSE_MODES.includes(this.licenseCheckResults.type)
+          ) {
+            addLinksToSampleDatasets({
+              addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
+            });
+          }
+        }
+      }
+    });
   }
 
   public start() {}
 
-  public stop() {
-    this.mlLicense.unsubscribe();
-  }
+  public stop() {}
 }

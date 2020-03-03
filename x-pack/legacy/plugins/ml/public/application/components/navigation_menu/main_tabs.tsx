@@ -81,18 +81,13 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   return (
     <EuiTabs display="condensed">
       {tabs.map((tab: Tab) => {
-        const { id, disabled } = tab;
+        const id = tab.id;
         const testSubject = TAB_DATA[id].testSubject;
         const defaultPathId = TAB_DATA[id].pathId || id;
         // globalState (e.g. selected jobs and time range) should be retained when changing pages.
         // appState will not be considered.
         const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
-
-        return disabled ? (
-          <EuiTab key={`${id}-key`} className={'mlNavigationMenu__mainTab'} disabled={true}>
-            {tab.name}
-          </EuiTab>
-        ) : (
+        return (
           <EuiLink
             data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
             href={`#/${defaultPathId}${fullGlobalStateString}`}
@@ -103,6 +98,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
               className={'mlNavigationMenu__mainTab'}
               onClick={() => onSelectedTabChanged(id)}
               isSelected={id === selectedTabId}
+              disabled={tab.disabled}
             >
               {tab.name}
             </EuiTab>

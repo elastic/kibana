@@ -10,7 +10,7 @@ jest.mock('../../../components/navigation_menu', () => ({
 jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true,
 }));
-jest.mock('../../../license', () => ({
+jest.mock('../../../license/check_license', () => ({
   hasLicenseExpired: () => false,
   isFullLicense: () => false,
 }));
