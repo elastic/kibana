@@ -1952,10 +1952,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@20.0.1":
-  version "20.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-20.0.1.tgz#e59f92bbafdcba39791452111afe693c4cb55db2"
-  integrity sha512-+wKlpAGzF76Kt4yxUAHLh7ODaDWislMKY0NmCMnzVFUiYMRV/YmBrzrEq6/sMElerWPLdi7iMXHof+GWmmQrIw==
+"@elastic/eui@20.0.2":
+  version "20.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-20.0.2.tgz#c64b16fef15da6aa9e627d45cdd372f1fc676359"
+  integrity sha512-8TtazI7RO1zJH4Qkl6TZKvAxaFG9F8BEdwyGmbGhyvXOJbkvttRzoaEg9jSQpKr+z7w2vsjGNbza/fEAE41HOA==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/enzyme" "^3.1.13"
