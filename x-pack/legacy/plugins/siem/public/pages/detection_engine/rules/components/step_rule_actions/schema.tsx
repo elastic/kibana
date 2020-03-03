@@ -6,37 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { OptionalFieldLabel } from '../optional_field_label';
-import { FormSchema } from '../../../../shared_imports';
+import { FormSchema } from '../../../../../shared_imports';
 
 export const schema: FormSchema = {
-  interval: {
+  throttle: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalLabel',
+      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
       {
-        defaultMessage: 'Runs every',
+        defaultMessage: 'Actions frequency',
       }
     ),
     helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalHelpText',
+      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
       {
         defaultMessage:
-          'Rules run periodically and detect signals within the specified time frame.',
-      }
-    ),
-  },
-  from: {
-    label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackLabel',
-      {
-        defaultMessage: 'Additional look-back time',
-      }
-    ),
-    labelAppend: OptionalFieldLabel,
-    helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
-      {
-        defaultMessage: 'Adds time to the look-back period to prevent missed signals.',
+          'Select when automated actions should be performed if a rule evaluates as true.',
       }
     ),
   },

@@ -77,6 +77,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -139,6 +140,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -203,6 +205,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -267,6 +270,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -329,6 +333,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -395,6 +400,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -461,6 +467,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -527,6 +534,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -679,6 +687,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -761,6 +770,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -934,6 +944,7 @@ describe('utils', () => {
             ],
           },
         ],
+        throttle: null,
         filters: [
           {
             query: {
@@ -1054,6 +1065,7 @@ describe('utils', () => {
               ],
             },
           ],
+          throttle: null,
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',

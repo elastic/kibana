@@ -19,10 +19,31 @@ import { AlertAction } from '../../../../../../../../../plugins/triggers_actions
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ActionsStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm, SelectField } from '../../../../shared_imports';
+import { Form, UseField, useForm, SelectField } from '../../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { schema } from './schema';
 import * as I18n from './translations';
+
+const ACTION_TYPES = [
+  { id: '.email', name: 'Email', enabled: true },
+  { id: '.index', name: 'Index', enabled: false },
+  { id: '.pagerduty', name: 'PagerDuty', enabled: true },
+  { id: '.server-log', name: 'Server log', enabled: false },
+  { id: '.servicenow', name: 'servicenow', enabled: false },
+  { id: '.slack', name: 'Slack', enabled: true },
+  { id: '.webhook', name: 'Webhook', enabled: false },
+  { id: '.example-action', name: 'Example Action', enabled: false },
+];
+
+const MESSAGE_VARIABLES = ['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId', 'ruleLink'];
+
+const THROTTLE_OPTIONS = [
+  // { value: 'signal', text: 'On each signal detected' },
+  { value: null, text: 'On each rule execution' },
+  { value: '6m', text: '6 minutes' },
+  { value: '1h', text: 'Hourly' },
+  { value: '1d', text: 'Daily' },
+];
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -45,16 +66,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setStepData,
   setForm,
 }) => {
-  const actionTypes = [
-    { id: '.email', name: 'Email', enabled: true },
-    { id: '.index', name: 'Index', enabled: false },
-    { id: '.pagerduty', name: 'PagerDuty', enabled: true },
-    { id: '.server-log', name: 'Server log', enabled: false },
-    { id: '.servicenow', name: 'servicenow', enabled: false },
-    { id: '.slack', name: 'Slack', enabled: true },
-    { id: '.webhook', name: 'Webhook', enabled: false },
-    { id: '.example-action', name: 'Example Action', enabled: false },
-  ];
   const { http, triggers_actions_ui } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
@@ -79,6 +90,36 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }
     },
     [form]
+  );
+
+  const setActionIdByIndex = useCallback(
+    (id: string, index: number) => {
+      const updatedActions = [...myStepData.actions];
+      updatedActions[index].id = id;
+      setMyStepData({ ...myStepData, actions: updatedActions });
+    },
+    [myStepData, setMyStepData]
+  );
+
+  const setAlertProperty = useCallback(
+    (updatedActions: AlertAction[]) => {
+      setMyStepData({ ...myStepData, actions: updatedActions });
+    },
+    [myStepData, setMyStepData]
+  );
+
+  const setActionParamsProperty = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (key: string, value: any, index: number) => {
+      const newActions = [...myStepData.actions];
+      newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
+
+      setMyStepData({
+        ...myStepData,
+        actions: newActions,
+      });
+    },
+    [myStepData, setMyStepData]
   );
 
   useEffect(() => {
@@ -114,13 +155,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               idAria: 'detectionEngineStepRuleActionsThrottle',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
+              hasNoInitialSelection: false,
               euiFieldProps: {
-                options: [
-                  // { value: 'null', text: 'Perform no actions' },
-                  { value: null, text: 'On each rule execution' },
-                  { value: '1h', text: 'Hourly' },
-                  { value: '1d', text: 'Daily' },
-                ],
+                defaultVaule: null,
+                options: THROTTLE_OPTIONS,
               },
             }}
           />
@@ -128,37 +166,15 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             {() => (
               <ActionForm
                 actions={myStepData.actions}
-                messageVariables={[
-                  'inputIndexes',
-                  'outputIndex',
-                  'name',
-                  'alertId',
-                  'ruleId',
-                  'ruleLink',
-                ]}
+                messageVariables={MESSAGE_VARIABLES}
                 defaultActionGroupId={'default'}
-                setActionIdByIndex={(id: string, index: number) => {
-                  const updatedActions = [...myStepData];
-                  updatedActions[index].id = id;
-                  setMyStepData({ ...myStepData, actions: updatedActions });
-                }}
-                setAlertProperty={(updatedActions: AlertAction[]) => {
-                  setMyStepData({ ...myStepData, actions: updatedActions });
-                }}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                setActionParamsProperty={(key: string, value: any, index: number) => {
-                  const newActions = [...myStepData.actions];
-                  newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
-
-                  setMyStepData({
-                    ...myStepData,
-                    actions: newActions,
-                  });
-                }}
+                setActionIdByIndex={setActionIdByIndex}
+                setAlertProperty={setAlertProperty}
+                setActionParamsProperty={setActionParamsProperty}
                 http={http}
                 actionTypeRegistry={actionTypeRegistry}
-                actionTypes={actionTypes}
-                defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+                actionTypes={ACTION_TYPES}
+                defaultActionMessage={'Rule [{{context.metadata.name}}] has exceeded the threshold'}
               />
             )}
           </UseField>

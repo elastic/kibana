@@ -17,6 +17,7 @@ interface ScheduledExecutionOptions {
   actionGroup: string;
   context: Context;
   state: State;
+  clearState?: boolean;
 }
 export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {
@@ -62,11 +63,11 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: Context = {}) {
+  scheduleActions(actionGroup: string, context: Context = {}, clearState: boolean = false) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state, clearState };
     return this;
   }
 

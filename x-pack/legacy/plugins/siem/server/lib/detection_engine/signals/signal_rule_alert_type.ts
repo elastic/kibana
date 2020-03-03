@@ -94,8 +94,6 @@ export const signalRulesAlertType = ({
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
-      const alertInstance = await services.alertInstanceFactory(alertId);
-      console.log('saved', savedObject);
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -212,21 +210,27 @@ export const signalRulesAlertType = ({
           );
           const noReIndexResult = await services.callCluster('search', noReIndex);
           if (noReIndexResult.hits.total.value !== 0) {
-            const signalsCount = noReIndexResult.hits.total.value;
+            const alertInstance = services.alertInstanceFactory(ruleId!);
+            const newSignalsCount = noReIndexResult.hits.total.value;
             const inputIndexes = inputIndex.join(', ');
+            const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
+            const signalsCount = currentSignalsCount + newSignalsCount;
 
             alertInstance
               .replaceState({
                 signalsCount,
               })
-              .scheduleActions('default', {
-                signalsCount,
-                inputIndexes,
-                outputIndex,
-                name,
-                alertId,
-                ruleId,
-              });
+              .scheduleActions(
+                'default',
+                {
+                  inputIndexes,
+                  outputIndex,
+                  name,
+                  alertId,
+                  ruleId,
+                },
+                true
+              );
             logger.info(
               `Found ${signalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );

@@ -101,6 +101,7 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
 
 const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const { actions = [], enabled, throttle = null } = actionsStepData;
+
   return {
     actions,
     enabled,

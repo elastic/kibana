@@ -63,7 +63,7 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       return res.ok({
         body: await alertsClient.update({
           id,
-          data: { name, actions, params, schedule, tags },
+          data: { name, actions, throttle, params, schedule, tags },
         }),
       });
     })
