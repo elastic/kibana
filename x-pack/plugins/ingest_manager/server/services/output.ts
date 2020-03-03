@@ -11,10 +11,7 @@ import { appContextService } from './app_context';
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
-  public async createDefaultOutput(
-    soClient: SavedObjectsClientContract,
-    adminUser: { username: string; password: string }
-  ) {
+  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       filter: 'outputs.attributes.is_default:true',
@@ -25,12 +22,18 @@ class OutputService {
         ...DEFAULT_OUTPUT,
         hosts: [appContextService.getConfig()!.fleet.elasticsearch.host],
         ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
-        admin_username: adminUser.username,
-        admin_password: adminUser.password,
       } as NewOutput;
 
       await this.create(soClient, newDefaultOutput);
     }
+  }
+
+  public async updateOutput(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<NewOutput>
+  ) {
+    await soClient.update<NewOutput>(SAVED_OBJECT_TYPE, id, data);
   }
 
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
@@ -51,6 +54,10 @@ class OutputService {
     const so = await appContextService
       .getEncryptedSavedObjects()
       ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
+
+    if (!so || !so.attributes.admin_username || !so.attributes.admin_password) {
+      return null;
+    }
 
     return {
       username: so!.attributes.admin_username,

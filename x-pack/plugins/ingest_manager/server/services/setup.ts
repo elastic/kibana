@@ -6,8 +6,13 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { agentConfigService } from './agent_config';
+import { outputService } from './output';
 
 export async function setup(soClient: SavedObjectsClientContract) {
   // TODO install default packages
-  await agentConfigService.ensureDefaultAgentConfig(soClient);
+
+  await Promise.all([
+    outputService.ensureDefaultOutput(soClient),
+    agentConfigService.ensureDefaultAgentConfig(soClient),
+  ]);
 }
