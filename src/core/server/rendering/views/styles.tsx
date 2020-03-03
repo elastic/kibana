@@ -32,6 +32,26 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
     <style
       dangerouslySetInnerHTML={{
         __html: `
+
+            @keyframes scaleElastic {
+              0% {
+                  transform: scale3d(0, 0, -0.7);
+                  opacity: 0;
+              }
+              40% {
+                  transform: scale3d(1.1, 1.1, 2);
+                  opacity: 1;
+              }
+              50%{
+                  transform: scale3d(1.05, 1.05, 2);
+              }
+              70% {
+                  transform: scale3d(0.98, 0.98, -2.5);
+              }
+              100% {
+                  transform: scale3d(1, 1, 2);
+              }
+          }
           * {
             box-sizing: border-box;
           }
@@ -65,16 +85,6 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             -webkit-justify-content: center;
                 -ms-flex-pack: center;
                     justify-content: center;
-          }
-
-          .kibanaWelcomeLogo {
-            width: 60px;
-            height: 60px;
-            margin: 10px;
-            background-repeat: no-repeat;
-            background-size: contain;
-            /* SVG optimized according to http://codepen.io/tigt/post/optimizing-svgs-in-data-uris */
-            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIj4KICAgIDxwYXRoIGZpbGw9IiNGREQwMDkiIGQ9Ik0xMS45MzM4MTcxLDEzLjE1MjI3NjEgTDE5LjI4NzIzNTMsMTYuNTA4MDk3MiBMMjYuNzA2NTY2NCwxMC4wMDA1MTQ3IEMyNi44MTM5NTkyLDkuNDYzODQ0OTUgMjYuODY2Mzc3LDguOTI4NTk3MjUgMjYuODY2Mzc3LDguMzY4NDY0MjIgQzI2Ljg2NjM3NywzLjc4OTg0OTU0IDIzLjE0NTk4NjQsMC4wNjQ3MzAyNzUyIDE4LjU3MTk5NDEsMC4wNjQ3MzAyNzUyIEMxNS44MzU3NTI2LDAuMDY0NzMwMjc1MiAxMy4yODM2MTI5LDEuNDEzMzcyNDggMTEuNzMyMzg0NywzLjY3NDgwODI2IEwxMC40OTgzNjI4LDEwLjA4Mzk4NzIgTDExLjkzMzgxNzEsMTMuMTUyMjc2MSBaIi8+CiAgICA8cGF0aCBmaWxsPSIjMjNCQUIxIiBkPSJNNC4zMjIxNDUwMSwyMC45NDczMzk5IEM0LjIxNDc1MjI5LDIxLjQ4NDE1MTggNC4xNTk2MzU0LDIyLjA0MTAxNDIgNC4xNTk2MzU0LDIyLjYwNDQxNzkgQzQuMTU5NjM1NCwyNy4xOTQ4MzUzIDcuODkwOTY0MTksMzAuOTMwMDUwOSAxMi40Nzc0NTcyLDMwLjkzMDA1MDkgQzE1LjIzNjE0MzIsMzAuOTMwMDUwOSAxNy44MDA3ODM3LDI5LjU2ODc1MjggMTkuMzQ5NTk2OSwyNy4yODQxMzgxIEwyMC41NzQzODUzLDIwLjg5NjU3MzkgTDE4LjkzOTkxMzYsMTcuNzY5ODM5OSBMMTEuNTU3Mzc0NCwxNC40MDE1MDUgTDQuMzIyMTQ1MDEsMjAuOTQ3MzM5OSBaIi8+CiAgICA8cGF0aCBmaWxsPSIjRUU1MDk3IiBkPSJNNC4yNzU1MzcxNCw4LjIwODQ3Mjk0IEw5LjMxNTAzOTk1LDkuMzk5NTU1NSBMMTAuNDE5MDgyNiwzLjY2Mzk4NjcgQzkuNzMwNDA1NDUsMy4xMzcxMjg5IDguODgwMzU1MTMsMi44NDg3NDM1OCA4LjAwNjAxMzYxLDIuODQ4NzQzNTggQzUuODE1OTY5MjIsMi44NDg3NDM1OCA0LjAzNDg5NzksNC42MzI1MjMzOSA0LjAzNDg5NzksNi44MjQ4NDkwOCBDNC4wMzQ4OTc5LDcuMzA5MDQ2MzMgNC4xMTU3MjY1NSw3Ljc3MzMzNTMyIDQuMjc1NTM3MTQsOC4yMDg0NzI5NCIvPgogICAgPHBhdGggZmlsbD0iIzE3QTdFMCIgZD0iTTMuODM4MDY4MDcsOS40MDk5NjQ2OCBDMS41ODY1MTQzNSwxMC4xNTY4MDg3IDAuMDIxMDgwNzkzMSwxMi4zMTcyODEyIDAuMDIxMDgwNzkzMSwxNC42OTM3NTgzIEMwLjAyMTA4MDc5MzEsMTcuMDA3ODA4NyAxLjQ1MDcxMDg2LDE5LjA3NDE0MzYgMy41OTY1NzY1LDE5Ljg5MTgwNDEgTDEwLjY2Njg4MTMsMTMuNDk0NDI4IEw5LjM2ODc5MzEzLDEwLjcxNzc5NSBMMy44MzgwNjgwNyw5LjQwOTk2NDY4IFoiLz4KICAgIDxwYXRoIGZpbGw9IiM5MkM3M0QiIGQ9Ik0yMC42NDIxNzM0LDI3LjI4Mzg1MzcgQzIxLjMzMzQwNzUsMjcuODE1Njg4NSAyMi4xNzkzMzgzLDI4LjEwNTc4MDMgMjMuMDQyODgzNywyOC4xMDU3ODAzIEMyNS4yMzI3ODYsMjguMTA1NzgwMyAyNy4wMTM4NTc0LDI2LjMyMjg1MzcgMjcuMDEzODU3NCwyNC4xMzA1MjggQzI3LjAxMzg1NzQsMjMuNjQ3MDQxNyAyNi45MzMxNzA4LDIzLjE4Mjc1MjggMjYuNzczMjE4MSwyMi43NDc3NTczIEwyMS43Mzc5NzY5LDIxLjU2ODE5MzEgTDIwLjY0MjE3MzQsMjcuMjgzODUzNyBaIi8+CiAgICA8cGF0aCBmaWxsPSIjMDY3OEEwIiBkPSJNMjEuNjY2NzIyNywyMC4yNDY5NTMyIEwyNy4yMDk5NDg1LDIxLjU0NDY4NzIgQzI5LjQ2MjM1NDUsMjAuNzk5NTQ5NSAzMS4wMjc3ODgxLDE4LjYzODIyMzkgMzEuMDI3Nzg4MSwxNi4yNjA4OTM2IEMzMS4wMjc3ODgxLDEzLjk1MTEwOTIgMjkuNTk0NzQ4NywxMS44ODcxOTE3IDI3LjQ0NDc2MzUsMTEuMDcxOTQ4NiBMMjAuMTk0NjE4NSwxNy40MzAzNjE1IEwyMS42NjY3MjI3LDIwLjI0Njk1MzIgWiIvPgogIDwvZz4KPC9zdmc+Cg==")
           }
 
           .kibanaWelcomeTitle {
@@ -113,35 +123,53 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             animation: pulse 1s infinite;
           }
 
-          @keyframes rotation {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(359deg);
-            }
+          .kibanaWelcomeLogoCircle path {
+            stroke: white;
+            animation-name: scaleElastic;
+            animation-fill-mode: forwards;
+            animation-direction: alternate;
+            transform-style: preserve-3d;
+            animation-duration: 0.95s;
+            animation-timing-function: cubic-bezier(0, 0.63, 0.49, 1);
+            animation-iteration-count: infinite;
+            transform-origin: 50% 50%;
           }
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(1) {
+            fill: #EE5097;
+            animation-delay: 0s;
           }
-          @keyframes pulse {
-            0% {
-              transform: scale(0.9);
-            }
 
-            70% {
-              transform: scale(1);
-            }
-
-            100% {
-              transform: scale(0.9);
-            }
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(2) {
+            fill: #17A7E0;
+            animation-delay: 0.035s;
           }
+
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(3) {
+            fill: #23BAB1;
+            animation-delay: 0.125s;
+          }
+
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(4) {
+            fill: #92C73D;
+            animation-delay: 0.155s;
+          }
+
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(5) {
+            fill: #0678A0;
+            animation-delay: 0.075s;
+          }
+
+          
+          .kibanaWelcomeLogoCircle path:nth-of-type(6) {
+            fill: #FDD009;
+            animation-delay: 0.06s;
+          };
+
         `,
       }}
     />
