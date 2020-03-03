@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { BaseActionContext, addMessages } from './action_context';
+import { TimeSeriesQuery } from './lib/time_series_query';
 
 export const ID = '.index-threshold';
 
@@ -46,24 +47,26 @@ export function getAlertType(service: Service): AlertType {
     const { alertId, name, services } = options;
     const params: Params = options.params as Params;
 
-    const compareFn = ComparatorFns.get(params.comparator);
+    const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
-      throw new Error(getInvalidComparatorMessage(params.comparator));
+      throw new Error(getInvalidComparatorMessage(params.thresholdComparator));
     }
 
     const callCluster = services.callCluster;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
-    const queryParams = {
+    const queryParams: TimeSeriesQuery = {
       index: params.index,
       timeField: params.timeField,
       aggType: params.aggType,
       aggField: params.aggField,
-      groupField: params.groupField,
-      groupLimit: params.groupLimit,
+      groupBy: params.groupBy,
+      termField: params.termField,
+      termSize: params.termSize,
       dateStart: date,
       dateEnd: date,
-      window: params.window,
+      timeWindowSize: params.timeWindowSize,
+      timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
     };
     const result = await service.indexThreshold.timeSeriesQuery({
@@ -100,7 +103,7 @@ export function getAlertType(service: Service): AlertType {
 
 export function getInvalidComparatorMessage(comparator: string) {
   return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid comparator specified: {comparator}',
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
     values: {
       comparator,
     },
@@ -111,10 +114,10 @@ type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 function getComparatorFns(): Map<string, ComparatorFn> {
   const fns: Record<string, ComparatorFn> = {
-    lessThan: (value: number, threshold: number[]) => value < threshold[0],
-    lessThanOrEqual: (value: number, threshold: number[]) => value <= threshold[0],
-    greaterThanOrEqual: (value: number, threshold: number[]) => value >= threshold[0],
-    greaterThan: (value: number, threshold: number[]) => value > threshold[0],
+    '<': (value: number, threshold: number[]) => value < threshold[0],
+    '<=': (value: number, threshold: number[]) => value <= threshold[0],
+    '>=': (value: number, threshold: number[]) => value >= threshold[0],
+    '>': (value: number, threshold: number[]) => value > threshold[0],
     between: (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
     notBetween: (value: number, threshold: number[]) =>
       value < threshold[0] || value > threshold[1],
