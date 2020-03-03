@@ -3,8 +3,5 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": [
-    "data",
-    "search"
-  ]
+  "requiredPlugins": ["data", "search", "expressions", "uiActions"]
 }

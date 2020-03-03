@@ -103,11 +103,12 @@ export function generateFilters(
       filter = existing;
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
-
+      // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
+      const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
       filter = buildFilter(
         tmpIndexPattern,
-        fieldObj,
+        actualFieldObj,
         filterType,
         negate,
         false,

@@ -19,11 +19,9 @@
 
 import { Action } from './action';
 
-export function createAction<ActionContext extends {} = {}>(
-  action: { type: string; execute: Action<ActionContext>['execute'] } & Partial<
-    Action<ActionContext>
-  >
-): Action<ActionContext> {
+export function createAction<Context = undefined>(
+  action: { type: string; execute: Action<Context>['execute'] } & Partial<Action<Context>>
+): Action<Context> {
   return {
     getIconType: () => undefined,
     order: 0,
