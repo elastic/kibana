@@ -6,8 +6,8 @@
 
 import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'kibana/server';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { CallESAsCurrentUser, EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
-import { createAPIKey, authenticate } from './security';
+import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
+import { createAPIKey } from './security';
 
 export * from './enrollment_api_key';
 
@@ -52,72 +52,22 @@ export async function generateAccessApiKey(
   return { id: key.id, key: Buffer.from(`${key.id}:${key.api_key}`).toString('base64') };
 }
 
-/**
- * Verify if an an access api key is valid
- */
-export async function verifyAccessApiKey({
-  headers,
-  callCluster,
-}: {
-  headers: KibanaRequest['headers'];
-  callCluster: CallESAsCurrentUser;
-}): Promise<{ valid: boolean; accessApiKeyId?: string; reason?: string }> {
-  try {
-    const { apiKeyId } = _parseApiKey(headers);
+export async function getEnrollmentAPIKeyById(
+  soClient: SavedObjectsClientContract,
+  apiKeyId: string
+) {
+  const [enrollmentAPIKey] = (
+    await soClient.find<EnrollmentAPIKeySOAttributes>({
+      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+      searchFields: ['api_key_id'],
+      search: apiKeyId,
+    })
+  ).saved_objects.map(_savedObjectToEnrollmentApiKey);
 
-    await authenticate(callCluster);
-
-    return {
-      valid: true,
-      accessApiKeyId: apiKeyId,
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      reason: error.message || 'ApiKey is not valid',
-    };
-  }
+  return enrollmentAPIKey;
 }
 
-export async function verifyEnrollmentAPIKey({
-  soClient,
-  headers,
-  callCluster,
-}: {
-  soClient: SavedObjectsClientContract;
-  headers: KibanaRequest['headers'];
-  callCluster: CallESAsCurrentUser;
-}) {
-  try {
-    const { apiKeyId } = _parseApiKey(headers);
-
-    await authenticate(callCluster);
-
-    const [enrollmentAPIKey] = (
-      await soClient.find<EnrollmentAPIKeySOAttributes>({
-        type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-        searchFields: ['api_key_id'],
-        search: apiKeyId,
-      })
-    ).saved_objects.map(_savedObjectToEnrollmentApiKey);
-
-    if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
-      throw new Error('Enrollement api key does not exists or is not active');
-    }
-
-    return {
-      valid: true,
-      enrollmentAPIKey,
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      reason: error.message || 'ApiKey is not valid',
-    };
-  }
-}
-
-function _parseApiKey(headers: KibanaRequest['headers']) {
+export function parseApiKey(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;
 
   if (!authorizationHeader) {

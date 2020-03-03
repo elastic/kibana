@@ -10,9 +10,8 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsLegacyService,
+  SavedObjectsServiceStart,
 } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -43,19 +42,11 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
 }
 
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  savedObjects: SavedObjectsLegacyService;
-}
-
 export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
-  internalSavedObjectsClient: SavedObjectsClient;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export class IngestManagerPlugin implements Plugin {
@@ -139,14 +130,11 @@ export class IngestManagerPlugin implements Plugin {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
-    const internalSavedObjectsClient = new SavedObjectsClient(
-      core.savedObjects.createInternalRepository()
-    );
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
-      internalSavedObjectsClient,
+      savedObjects: core.savedObjects,
     });
   }
 

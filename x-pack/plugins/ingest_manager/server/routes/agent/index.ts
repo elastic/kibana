@@ -79,7 +79,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
       validate: PostAgentCheckinRequestSchema,
-      options: { tags: [], authRequired: false },
+      options: { tags: [] },
     },
     postAgentCheckinHandler
   );
@@ -89,7 +89,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.ENROLL_PATTERN,
       validate: PostAgentEnrollRequestSchema,
-      options: { tags: [], authRequired: false },
+      options: { tags: [] },
     },
     postAgentEnrollHandler
   );
@@ -99,7 +99,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
       validate: PostAgentAcksRequestSchema,
-      options: { tags: [], authRequired: false },
+      options: { tags: [] },
     },
     postAgentAcksHandler
   );
