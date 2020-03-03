@@ -46,7 +46,11 @@ interface AlertNumberFieldProps {
   setFieldValue: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const AlertFieldNumber = ({ disabled, fieldValue, setFieldValue }: AlertNumberFieldProps) => {
+export const AlertFieldNumber = ({
+  disabled,
+  fieldValue,
+  setFieldValue,
+}: AlertNumberFieldProps) => {
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
   return (
@@ -58,7 +62,7 @@ const AlertFieldNumber = ({ disabled, fieldValue, setFieldValue }: AlertNumberFi
         if (isNaN(num) || num < 1) {
           setIsInvalid(true);
         } else {
-          if (!isNaN(num) && num > 0) setIsInvalid(false);
+          if (isInvalid) setIsInvalid(false);
           setFieldValue(num);
         }
       }}
