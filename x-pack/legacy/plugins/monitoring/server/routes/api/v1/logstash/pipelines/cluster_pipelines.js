@@ -10,7 +10,6 @@ import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
-//import { getPaginatedPipelinesNew } from '../../../../../lib/logstash/get_paginated_pipelines_new';
 
 /**
  * Retrieve pipelines for a cluster
@@ -68,7 +67,7 @@ export function logstashClusterPipelinesRoute(server) {
           req,
           lsIndexPattern,
           { clusterUuid },
-          sortMetricSetMap,
+          { throughputMetric, nodesCountMetric },
           pagination,
           sort,
           queryText

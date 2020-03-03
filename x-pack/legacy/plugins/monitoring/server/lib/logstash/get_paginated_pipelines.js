@@ -31,7 +31,7 @@ export async function getPaginatedPipelines(
   req,
   lsIndexPattern,
   { clusterUuid, logstashUuid },
-  { latestThroughput: throughputMetric, latestNodesCount: nodesCountMetric },
+  { throughputMetric, nodesCountMetric },
   pagination,
   sort,
   queryText

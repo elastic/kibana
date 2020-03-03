@@ -68,7 +68,7 @@ export function logstashNodePipelinesRoute(server) {
           req,
           lsIndexPattern,
           { clusterUuid, logstashUuid },
-          sortMetricSetMap,
+          { throughputMetric, nodesCountMetric },
           pagination,
           sort,
           queryText
