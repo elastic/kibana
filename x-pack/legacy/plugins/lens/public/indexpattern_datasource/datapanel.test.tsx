@@ -206,6 +206,9 @@ const initialState: IndexPatternPrivateState = {
     },
   },
 };
+
+const dslQuery = '{"bool":{"must":[{"match_all":{}}],"filter":[],"should":[],"must_not":[]}}';
+
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
   let core: ReturnType<typeof coreMock['createSetup']>;
@@ -400,6 +403,7 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.get).toHaveBeenCalledWith({
         path: '/api/lens/existing_fields/a',
         query: {
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
@@ -409,6 +413,7 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.get).toHaveBeenCalledWith({
         path: '/api/lens/existing_fields/a',
         query: {
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
           timeFieldName: 'atime',
@@ -441,6 +446,7 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.get).toHaveBeenCalledWith({
         path: '/api/lens/existing_fields/a',
         query: {
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
@@ -450,6 +456,7 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.get).toHaveBeenCalledWith({
         path: '/api/lens/existing_fields/b',
         query: {
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'btime',
