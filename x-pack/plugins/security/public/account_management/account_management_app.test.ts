@@ -27,8 +27,8 @@ describe('accountManagementApp', () => {
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'security',
-      appRoute: '/security/account',
+      id: 'security/account',
+      appRoute: '/app/security/account',
       navLinkStatus: AppNavLinkStatus.hidden,
       title: 'Account Management',
       mount: expect.any(Function),

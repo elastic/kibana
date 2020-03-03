@@ -70,7 +70,7 @@ export class SecurityNavControlService {
 
         const props = {
           user: currentUserPromise,
-          editProfileUrl: core.http.basePath.prepend('/security/account'),
+          editProfileUrl: core.http.basePath.prepend('/app/security/account'),
           logoutUrl: this.logoutUrl,
         };
         ReactDOM.render(

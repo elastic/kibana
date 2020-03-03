@@ -185,6 +185,8 @@ export class Plugin {
         license,
 
         // We should stop exposing this config as soon as only new platform plugin consumes it.
+        // This is only currently required because we use legacy code to inject this as metadata
+        // for consumption by public code in the new platform.
         config: { secureCookies: config.secureCookies },
       },
     });

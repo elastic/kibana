@@ -26,10 +26,10 @@ describe('overwrittenSessionApp', () => {
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'overwritten_session',
+      id: 'security/overwritten_session',
       title: 'Overwritten Session',
       chromeless: true,
-      appRoute: '/overwritten_session',
+      appRoute: '/app/security/overwritten_session',
       mount: expect.any(Function),
     });
   });

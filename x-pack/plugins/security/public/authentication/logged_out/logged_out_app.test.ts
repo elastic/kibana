@@ -18,15 +18,17 @@ describe('loggedOutApp', () => {
     loggedOutApp.create(coreSetupMock);
 
     expect(coreSetupMock.http.anonymousPaths.register).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.http.anonymousPaths.register).toHaveBeenCalledWith('/logged_out');
+    expect(coreSetupMock.http.anonymousPaths.register).toHaveBeenCalledWith(
+      '/app/security/logged_out'
+    );
 
     expect(coreSetupMock.application.register).toHaveBeenCalledTimes(1);
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'logged_out',
+      id: 'security/logged_out',
       chromeless: true,
-      appRoute: '/logged_out',
+      appRoute: '/app/security/logged_out',
       title: 'Logged out',
       mount: expect.any(Function),
     });

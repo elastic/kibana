@@ -11,7 +11,7 @@ import { RouteDefinitionParams } from '..';
  */
 export function defineOverwrittenSessionRoutes({ router, csp }: RouteDefinitionParams) {
   router.get(
-    { path: '/overwritten_session', validate: false },
+    { path: '/app/security/overwritten_session', validate: false },
     async (context, request, response) => {
       return response.ok({
         body: await context.core.rendering.render({ includeUserSettings: true }),

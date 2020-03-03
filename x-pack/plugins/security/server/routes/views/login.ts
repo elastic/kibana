@@ -39,7 +39,7 @@ export function defineLoginRoutes({
 
       // Authentication flow isn't triggered automatically for this route, so we should explicitly
       // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) != null;
+      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) !== null;
       if (isUserAlreadyLoggedIn || !shouldShowLogin) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({

@@ -13,7 +13,7 @@ interface CreateDeps {
 }
 
 export const logoutApp = Object.freeze({
-  id: 'logout',
+  id: 'security/logout',
   create({ application, http }: CreateDeps) {
     http.anonymousPaths.register('/logout');
     application.register({

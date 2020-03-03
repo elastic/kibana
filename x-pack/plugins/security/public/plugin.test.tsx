@@ -5,6 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
+import BroadcastChannel from 'broadcast-channel';
 import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { SessionTimeout } from './session';
@@ -16,6 +17,13 @@ import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 
 describe('Security Plugin', () => {
+  beforeAll(() => {
+    BroadcastChannel.enforceOptions({ type: 'simulate' });
+  });
+  afterAll(() => {
+    BroadcastChannel.enforceOptions(null);
+  });
+
   describe('#setup', () => {
     it('should be able to setup if optional plugins are not available', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
@@ -113,6 +121,11 @@ describe('Security Plugin', () => {
   describe('#stop', () => {
     it('does not fail if called before `start`.', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(
+        coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
+        { licensing: licensingMock.createSetup() }
+      );
+
       expect(() => plugin.stop()).not.toThrow();
     });
 

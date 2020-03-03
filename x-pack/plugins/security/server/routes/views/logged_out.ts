@@ -24,14 +24,14 @@ export function defineLoggedOutRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/logged_out',
+      path: '/app/security/logged_out',
       validate: false,
       options: { authRequired: false },
     },
     async (context, request, response) => {
       // Authentication flow isn't triggered automatically for this route, so we should explicitly
       // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) != null;
+      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) !== null;
       if (isUserAlreadyLoggedIn) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({

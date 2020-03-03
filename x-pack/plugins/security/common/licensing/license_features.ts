@@ -52,9 +52,4 @@ export interface SecurityLicenseFeatures {
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;
-
-  /**
-   * Message to show when security links are clicked throughout the kibana app.
-   */
-  readonly linksMessage?: string;
 }

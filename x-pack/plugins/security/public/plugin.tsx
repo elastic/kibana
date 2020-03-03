@@ -144,10 +144,7 @@ export class SecurityPlugin
   }
 
   public stop() {
-    if (this.sessionTimeout) {
-      this.sessionTimeout.stop();
-    }
-
+    this.sessionTimeout.stop();
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();

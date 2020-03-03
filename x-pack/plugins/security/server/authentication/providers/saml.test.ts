@@ -365,13 +365,16 @@ describe('SAMLAuthenticationProvider', () => {
             state
           )
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/base-path/overwritten_session', {
-            state: {
-              username: 'new-user',
-              accessToken: 'new-valid-token',
-              refreshToken: 'new-valid-refresh-token',
-            },
-          })
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/app/security/overwritten_session',
+            {
+              state: {
+                username: 'new-user',
+                accessToken: 'new-valid-token',
+                refreshToken: 'new-valid-refresh-token',
+              },
+            }
+          )
         );
 
         expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
@@ -959,7 +962,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /logged_out if `redirect` field in SAML logout response is null.', async () => {
+    it('redirects to /app/security/logged_out if `redirect` field in SAML logout response is null.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -968,7 +971,9 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { username: 'user', accessToken, refreshToken })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out'));
+      ).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -976,7 +981,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /logged_out if `redirect` field in SAML logout response is not defined.', async () => {
+    it('redirects to /app/security/logged_out if `redirect` field in SAML logout response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -985,7 +990,9 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { username: 'user', accessToken, refreshToken })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out'));
+      ).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1004,7 +1011,9 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { username: 'user', accessToken, refreshToken })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out'));
+      ).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
+      );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1023,21 +1032,8 @@ describe('SAMLAuthenticationProvider', () => {
           accessToken: 'x-saml-token',
           refreshToken: 'x-saml-refresh-token',
         })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out'));
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
-      });
-    });
-
-    it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
-
-      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
-
-      await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+      ).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -1046,13 +1042,28 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
+    it('redirects to /app/security/logged_out if `redirect` field in SAML invalidate response is null.', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
+
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
+
+      await expect(provider.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+      });
+    });
+
+    it('redirects to /app/security/logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+        DeauthenticationResult.redirectTo('/mock-server-basepath/app/security/logged_out')
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);

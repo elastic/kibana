@@ -79,7 +79,6 @@ describe('license features', function() {
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
-            "linksMessage": "Access is denied because Security is disabled in Elasticsearch.",
             "showLinks": false,
             "showLogin": false,
             "showRoleMappingsManagement": false,
@@ -130,7 +129,6 @@ describe('license features', function() {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
     });
   });
 

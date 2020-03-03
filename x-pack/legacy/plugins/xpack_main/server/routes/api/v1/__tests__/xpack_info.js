@@ -58,7 +58,6 @@ describe('XPackInfo routes', () => {
           showLinks: false,
           allowRoleDocumentLevelSecurity: false,
           allowRoleFieldLevelSecurity: false,
-          linksMessage: 'Message',
         },
       },
     });

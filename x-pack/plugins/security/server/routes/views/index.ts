@@ -12,10 +12,7 @@ import { defineOverwrittenSessionRoutes } from './overwritten_session';
 import { RouteDefinitionParams } from '..';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
-  if (
-    params.config.authc.providers.includes('basic') ||
-    params.config.authc.providers.includes('token')
-  ) {
+  if (params.authc.isProviderEnabled('basic') || params.authc.isProviderEnabled('token')) {
     defineLoginRoutes(params);
   }
 

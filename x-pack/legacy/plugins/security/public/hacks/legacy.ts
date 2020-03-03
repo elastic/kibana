@@ -15,7 +15,7 @@ const securityPluginSetup = (npSetup.plugins as any).security as SecurityPluginS
 if (securityPluginSetup) {
   routes.when('/account', {
     template: '<div />',
-    controller: () => npStart.core.application.navigateToApp('security'),
+    controller: () => npStart.core.application.navigateToApp('security/account'),
   });
 
   const getNextParameter = () => {
@@ -37,7 +37,6 @@ if (securityPluginSetup) {
 
       function interceptorFactory(responseHandler: (response: ng.IHttpResponse<unknown>) => any) {
         return function interceptor(response: ng.IHttpResponse<unknown>) {
-          // TODO: SHOULD WE CHECK THAT IT'S NOT ERROR RESPONSE (&& response.status !== 401)?
           if (!isAnonymous && !isSystemApiRequest(response.config)) {
             securityPluginSetup.sessionTimeout.extend(response.config.url);
           }
