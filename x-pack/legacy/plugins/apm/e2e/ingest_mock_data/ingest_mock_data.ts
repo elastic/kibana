@@ -6,16 +6,21 @@
 
 /* eslint-disable no-console */
 
-import fetch, { HeadersInit } from 'node-fetch';
+import axios from 'axios';
 import path from 'path';
 import pLimit from 'p-limit';
 import fs from 'fs';
 
 interface Item {
   url: string;
+  method: string;
+  body: unknown;
 }
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function insertItem({
   apmServerUrl,
   secretToken,
@@ -27,7 +32,6 @@ async function insertItem({
 }) {
   try {
     const url = `${apmServerUrl}${item.url}`;
-    console.log(Date.now(), url);
 
     const headers: HeadersInit = {
       'content-type': 'application/x-ndjson'
@@ -37,25 +41,23 @@ async function insertItem({
       headers.Authorization = `Bearer ${secretToken}`;
     }
 
-    await fetch(url, {
-      method: item.method,
-      body: JSON.stringify(item.body),
-      headers
+    await axios({
+      method: item.method as 'GET',
+      url,
+      headers,
+      data: item.body
     });
+
+    console.log(`✅ ${item.method} ${url}`);
 
     // add delay to avoid flooding the queue
     return delay(500);
   } catch (e) {
-    console.log('an error occurred');
-    if (e.response) {
-      console.log(e.response.data);
-    } else {
-      console.log('error', e);
-    }
+    console.log(`❌ ${e.response ? e.response.data : e.message}`);
   }
 }
 
-async function parseEventsFile(eventsFilePath: string) {
+async function parseEventsFile(eventsFilePath: string): Promise<Item[]> {
   const content = await fs.promises.readFile(
     path.resolve(__dirname, eventsFilePath)
   );
@@ -67,16 +69,21 @@ async function parseEventsFile(eventsFilePath: string) {
     .filter(item => item.url === '/intake/v2/events');
 }
 
-async function init(
-  apmServerUrl: string,
-  secretToken: string,
-  eventsFilePath: string
-) {
-  const items = parseEventsFile(eventsFilePath);
+export async function ingestMockData({
+  apmServerUrl,
+  secretToken,
+  eventsFilePath
+}: {
+  apmServerUrl: string;
+  secretToken: string;
+  eventsFilePath: string;
+}) {
+  const items = await parseEventsFile(eventsFilePath);
   const limit = pLimit(20); // number of concurrent requests
+
   await Promise.all(
-    items.map(item =>
-      limit(() => insertItem({ apmServerUrl, secretToken, item }))
-    )
+    items
+      .slice(0, 100)
+      .map(item => limit(() => insertItem({ apmServerUrl, secretToken, item })))
   );
 }

@@ -1,0 +1,9 @@
+logging.verbose: true
+
+# Elasticsearch
+elasticsearch.username: 'kibana_system_user'
+elasticsearch.password: 'changeme'
+
+server.port: 5701
+xpack.security.encryptionKey: 'something_at_least_32_characters'
+csp.strict: false

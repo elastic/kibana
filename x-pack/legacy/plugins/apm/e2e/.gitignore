@@ -1,4 +1,4 @@
-cypress/ingest-data/events.json
-cypress/screenshots/*
+cypress-project/cypress/screenshots/*
 
-cypress/test-results
+cypress-project/cypress/test-results
+task_manager/task/tmp/*

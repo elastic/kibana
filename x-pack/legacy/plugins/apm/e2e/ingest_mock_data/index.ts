@@ -20,22 +20,24 @@
  *
  ************/
 
-const { argv } = require('yargs');
+import { argv } from 'yargs';
+import { ingestMockData } from './ingest_mock_data';
 
-const APM_SERVER_URL = argv.serverUrl;
-const SECRET_TOKEN = argv.secretToken;
-const EVENTS_PATH = argv.events;
+const apmServerUrl = argv.serverUrl as string;
+const secretToken = argv.secretToken as string;
+const eventsFilePath = argv.events as string;
 
-if (!APM_SERVER_URL) {
+if (!apmServerUrl) {
   console.log('`--server-url` is required');
   process.exit(1);
 }
 
-if (!EVENTS_PATH) {
+if (!eventsFilePath) {
   console.log('`--events` is required');
   process.exit(1);
 }
 
-init().catch(e => {
-  console.log('An error occurred:', e);
+ingestMockData({ apmServerUrl, eventsFilePath, secretToken }).catch(e => {
+  console.log('Ingestion failed:', e);
+  process.exit(1);
 });

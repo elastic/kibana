@@ -1,0 +1,17 @@
+{
+  "name": "task_manager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/blessed": "^0.1.17",
+    "ts-node": "^8.6.2"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.19",
+    "neo-blessed": "^0.2.0",
+    "safe-json-stringify": "^1.2.0"
+  }
+}
