@@ -102,6 +102,52 @@ export interface OSFields {
   version: string;
   variant: string;
 }
+export interface HostFields {
+  id: string;
+  hostname: string;
+  ip: string[];
+  mac: string[];
+  os: OSFields;
+}
+export interface HashFields {
+  md5: string;
+  sha1: string;
+  sha256: string;
+}
+export interface MalwareClassifierFields {
+  identifier: string;
+  score: number;
+  threshold: number;
+  version: string;
+}
+export interface PrivilegesFields {
+  description: string;
+  name: string;
+  enabled: boolean;
+}
+export interface ThreadFields {
+  id: number;
+  service_name: string;
+  start: number;
+  start_address: number;
+  start_address_module: string;
+}
+export interface DllFields {
+  pe: {
+    architecture: string;
+    imphash: string;
+  };
+  code_signature: {
+    subject_name: string;
+    trusted: boolean;
+  };
+  compile_time: number;
+  hash: HashFields;
+  malware_classifier: MalwareClassifierFields;
+  mapped_address: number;
+  mapped_size: number;
+  path: string;
+}
 
 /**
  * Describes an Alert Event.
@@ -117,32 +163,78 @@ export type AlertEvent = Immutable<{
   event: {
     id: string;
     action: string;
-    kind: string;
     category: string;
-  };
-  endpoint: {
-    policy: {
-      id: string;
-    };
-  };
-  file: {
-    malware_classifier: {
-      score: number;
-    };
-  };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: OSFields;
+    kind: string;
+    dataset: string;
+    module: string;
+    type: string;
   };
   process: {
+    code_signature: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    command_line: string;
+    domain: string;
+    pid: number;
+    ppid: number;
     entity_id: string;
-    parent?: {
+    parent: {
+      pid: number;
       entity_id: string;
     };
+    name: string;
+    hash: HashFields;
+    pe: {
+      imphash: string;
+    };
+    executable: string;
+    sid: string;
+    start: number;
+    malware_classifier: MalwareClassifierFields;
+    token: {
+      domain: string;
+      type: string;
+      user: string;
+      sid: string;
+      integrity_level: number;
+      integrity_level_name: string;
+      privileges: PrivilegesFields[];
+    };
+    thread: ThreadFields[];
+    uptime: number;
+    user: string;
   };
+  file: {
+    owner: string;
+    name: string;
+    path: string;
+    accessed: number;
+    mtime: number;
+    created: number;
+    size: number;
+    hash: HashFields;
+    pe: {
+      imphash: string;
+    };
+    code_signature: {
+      trusted: boolean;
+      subject_name: string;
+    };
+    malware_classifier: {
+      features: {
+        data: {
+          buffer: string;
+          decompressed_size: number;
+          encoding: string;
+        };
+      };
+    } & MalwareClassifierFields;
+    temp_file_path: string;
+  };
+  host: HostFields;
+  thread: {};
+  dll: DllFields[];
 }>;
 
 interface AlertMetadata {
@@ -173,13 +265,7 @@ export interface EndpointMetadata {
     version: string;
     name: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: OSFields;
-  };
+  host: HostFields;
 }
 
 /**
