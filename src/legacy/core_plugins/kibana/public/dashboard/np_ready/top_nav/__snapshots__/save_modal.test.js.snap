@@ -59,6 +59,7 @@ exports[`renders DashboardSaveModal 1`] = `
     </React.Fragment>
   }
   showCopyOnSave={true}
+  showDescription={false}
   title="dash title"
 />
 `;
