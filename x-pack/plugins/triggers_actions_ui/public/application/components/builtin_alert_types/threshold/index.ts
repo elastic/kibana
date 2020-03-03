@@ -11,7 +11,7 @@ import { builtInGroupByTypes, builtInAggregationTypes } from '../../../../common
 
 export function getAlertType(): AlertTypeModel {
   return {
-    id: 'threshold',
+    id: '.index-threshold',
     name: 'Index Threshold',
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,

@@ -61,6 +61,7 @@ export const GroupByExpression = ({
   const groupByTypes = customGroupByTypes ?? builtInGroupByTypes;
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const MIN_TERM_SIZE = 1;
+  const MAX_TERM_SIZE = 1000;
   const firstFieldOption = {
     text: i18n.translate(
       'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
@@ -159,6 +160,7 @@ export const GroupByExpression = ({
                       onChangeSelectedTermSize(termSizeVal);
                     }}
                     min={MIN_TERM_SIZE}
+                    max={MAX_TERM_SIZE}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
