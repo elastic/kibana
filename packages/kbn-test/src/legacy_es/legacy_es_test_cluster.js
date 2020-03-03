@@ -22,7 +22,7 @@ import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
-import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_tag';
+import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';

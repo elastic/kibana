@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_tag';
+import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export function makeJunitReportPath(rootDirectory: string, reportName: string) {
   return resolve(
