@@ -17,8 +17,22 @@
  * under the License.
  */
 
-declare function NormalizePath(path: string, stripTrailing?: boolean): string;
+import { read } from '../lib';
 
-declare module 'normalize-path' {
-  export = NormalizePath;
-}
+export const UuidVerificationTask = {
+  description: 'Verify that no UUID file is baked into the build',
+
+  async run(config, log, build) {
+    const uuidFilePath = build.resolvePath('data', 'uuid');
+    await read(uuidFilePath).then(
+      function success() {
+        throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
+      },
+      function error(err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
+      }
+    );
+  },
+};
