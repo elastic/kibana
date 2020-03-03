@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getFileUpload } from '../../../kibana_services';
+import { getFileUploadComponent } from '../../../kibana_services';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
@@ -14,7 +14,7 @@ export function ClientFileCreateSourceEditor({
   onRemove,
   onIndexReady,
 }) {
-  const FileUpload = getFileUpload();
+  const FileUpload = getFileUploadComponent();
   return (
     <FileUpload
       appName={'Maps'}
