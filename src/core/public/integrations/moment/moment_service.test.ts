@@ -61,10 +61,8 @@ describe('MomentService', () => {
 
   it('sets timezone when a zone is defined', async () => {
     const tz$ = new BehaviorSubject('tz3');
-    const dow$ = new BehaviorSubject('dow1');
-
     const uiSettings = uiSettingsServiceMock.createSetupContract();
-    uiSettings.get$.mockReturnValueOnce(tz$).mockReturnValueOnce(dow$);
+    uiSettings.get$.mockReturnValueOnce(tz$);
 
     service.start({ uiSettings });
     await flushPromises();
