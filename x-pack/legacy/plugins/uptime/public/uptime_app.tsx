@@ -13,7 +13,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBadge } from './lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
@@ -48,10 +48,10 @@ export interface UptimeAppProps {
   kibanaBreadcrumbs: ChromeBreadcrumb[];
   plugins: PluginsSetup;
   routerBasename: string;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -65,7 +65,6 @@ const Application = (props: UptimeAppProps) => {
     plugins,
     renderGlobalHelpControls,
     routerBasename,
-    setBreadcrumbs,
     setBadge,
   } = props;
 
@@ -103,7 +102,6 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <PageHeader setBreadcrumbs={setBreadcrumbs} />
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>

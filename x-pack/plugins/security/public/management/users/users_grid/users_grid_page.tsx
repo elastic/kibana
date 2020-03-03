@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   EuiButton,
-  EuiIcon,
   EuiLink,
   EuiFlexGroup,
   EuiInMemoryTable,
@@ -18,25 +17,36 @@ import {
   EuiPageContentBody,
   EuiEmptyPrompt,
   EuiBasicTableColumn,
+  EuiSwitchEvent,
+  EuiSwitch,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { User } from '../../../../common/model';
+import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
+import { isUserReserved } from '../user_utils';
+import { DisabledBadge, ReservedBadge } from '../../badges';
+import { RoleTableDisplay } from '../../role_table_display';
+import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '..';
 
 interface Props {
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
 }
 
 interface State {
   users: User[];
+  visibleUsers: User[];
+  roles: null | Role[];
   selection: User[];
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
   filter: string;
+  includeReservedUsers: boolean;
 }
 
 export class UsersGridPage extends Component<Props, State> {
@@ -44,19 +54,22 @@ export class UsersGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       users: [],
+      visibleUsers: [],
+      roles: [],
       selection: [],
       showDeleteConfirmation: false,
       permissionDenied: false,
       filter: '',
+      includeReservedUsers: true,
     };
   }
 
   public componentDidMount() {
-    this.loadUsers();
+    this.loadUsersAndRoles();
   }
 
   public render() {
-    const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
@@ -87,17 +100,6 @@ export class UsersGridPage extends Component<Props, State> {
     const path = '#/management/security/';
     const columns: Array<EuiBasicTableColumn<User>> = [
       {
-        field: 'full_name',
-        name: i18n.translate('xpack.security.management.users.fullNameColumnName', {
-          defaultMessage: 'Full Name',
-        }),
-        sortable: true,
-        truncateText: true,
-        render: (fullName: string) => {
-          return <div data-test-subj="userRowFullName">{fullName}</div>;
-        },
-      },
-      {
         field: 'username',
         name: i18n.translate('xpack.security.management.users.userNameColumnName', {
           defaultMessage: 'User Name',
@@ -110,6 +112,18 @@ export class UsersGridPage extends Component<Props, State> {
           </EuiLink>
         ),
       },
+      {
+        field: 'full_name',
+        name: i18n.translate('xpack.security.management.users.fullNameColumnName', {
+          defaultMessage: 'Full Name',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (fullName: string) => {
+          return <div data-test-subj="userRowFullName">{fullName}</div>;
+        },
+      },
+
       {
         field: 'email',
         name: i18n.translate('xpack.security.management.users.emailAddressColumnName', {
@@ -126,34 +140,27 @@ export class UsersGridPage extends Component<Props, State> {
         name: i18n.translate('xpack.security.management.users.rolesColumnName', {
           defaultMessage: 'Roles',
         }),
+        width: '30%',
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
-            return (
-              <Fragment key={rolename}>
-                <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
-                {index === rolenames.length - 1 ? null : ', '}
-              </Fragment>
-            );
+            const roleDefinition = roles?.find(role => role.name === rolename) ?? rolename;
+            return <RoleTableDisplay role={roleDefinition} key={rolename} />;
           });
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
       },
       {
         field: 'metadata',
-        name: i18n.translate('xpack.security.management.users.reservedColumnName', {
-          defaultMessage: 'Reserved',
+        name: i18n.translate('xpack.security.management.users.statusColumnName', {
+          defaultMessage: 'Status',
         }),
+        width: '10%',
         sortable: ({ metadata }: User) => Boolean(metadata && metadata._reserved),
-        width: '100px',
-        align: 'right',
         description: i18n.translate('xpack.security.management.users.reservedColumnDescription', {
           defaultMessage:
             'Reserved users are built-in and cannot be removed. Only the password can be changed.',
         }),
-        render: (metadata: User['metadata']) =>
-          metadata && metadata._reserved ? (
-            <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
-          ) : null,
+        render: (metadata: User['metadata'], record: User) => this.getUserStatusBadges(record),
       },
     ];
     const pagination = {
@@ -170,18 +177,24 @@ export class UsersGridPage extends Component<Props, State> {
     };
     const search = {
       toolsLeft: this.renderToolsLeft(),
+      toolsRight: this.renderToolsRight(),
       box: {
         incremental: true,
       },
       onChange: (query: any) => {
         this.setState({
           filter: query.queryText,
+          visibleUsers: this.getVisibleUsers(
+            this.state.users,
+            query.queryText,
+            this.state.includeReservedUsers
+          ),
         });
       },
     };
     const sorting = {
       sort: {
-        field: 'full_name',
+        field: 'username',
         direction: 'asc',
       },
     } as const;
@@ -190,13 +203,7 @@ export class UsersGridPage extends Component<Props, State> {
         'data-test-subj': 'userRow',
       };
     };
-    const usersToShow = filter
-      ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
-          const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
-          const normalizedQuery = filter.toLowerCase();
-          return normalized.indexOf(normalizedQuery) !== -1;
-        })
-      : users;
+
     return (
       <div className="secUsersListingPage">
         <EuiPageContent className="secUsersListingPage__content">
@@ -226,7 +233,7 @@ export class UsersGridPage extends Component<Props, State> {
                 onCancel={this.onCancelDelete}
                 usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}
-                apiClient={this.props.apiClient}
+                userAPIClient={this.props.userAPIClient}
                 notifications={this.props.notifications}
               />
             ) : null}
@@ -237,7 +244,7 @@ export class UsersGridPage extends Component<Props, State> {
                 columns={columns}
                 selection={selectionConfig}
                 pagination={pagination}
-                items={usersToShow}
+                items={this.state.visibleUsers}
                 loading={users.length === 0}
                 search={search}
                 sorting={sorting}
@@ -262,10 +269,34 @@ export class UsersGridPage extends Component<Props, State> {
     });
   };
 
-  private async loadUsers() {
+  private getVisibleUsers = (users: User[], filter: string, includeReservedUsers: boolean) => {
+    return users.filter(
+      ({ username, roles: userRoles, full_name: fullName = '', email = '', metadata = {} }) => {
+        const normalized = `${username} ${userRoles.join(' ')} ${fullName} ${email}`.toLowerCase();
+        const normalizedQuery = filter.toLowerCase();
+        return (
+          normalized.indexOf(normalizedQuery) !== -1 &&
+          (includeReservedUsers || !metadata._reserved)
+        );
+      }
+    );
+  };
+
+  private async loadUsersAndRoles() {
     try {
-      const users = await this.props.apiClient.getUsers();
-      this.setState({ users });
+      const [users, roles] = await Promise.all([
+        this.props.userAPIClient.getUsers(),
+        this.props.rolesAPIClient.getRoles(),
+      ]);
+      this.setState({
+        users,
+        roles,
+        visibleUsers: this.getVisibleUsers(
+          users,
+          this.state.filter,
+          this.state.includeReservedUsers
+        ),
+      });
     } catch (e) {
       if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
@@ -302,6 +333,62 @@ export class UsersGridPage extends Component<Props, State> {
       </EuiButton>
     );
   }
+
+  private onIncludeReservedUsersChange = (e: EuiSwitchEvent) => {
+    this.setState({
+      includeReservedUsers: e.target.checked,
+      visibleUsers: this.getVisibleUsers(this.state.users, this.state.filter, e.target.checked),
+    });
+  };
+
+  private renderToolsRight() {
+    return (
+      <EuiSwitch
+        data-test-subj="showReservedUsersSwitch"
+        label={
+          <FormattedMessage
+            id="xpack.security.management.users.showReservedUsersLabel"
+            defaultMessage="Show reserved users"
+          />
+        }
+        checked={this.state.includeReservedUsers}
+        onChange={this.onIncludeReservedUsersChange}
+      />
+    );
+  }
+
+  private getUserStatusBadges = (user: User) => {
+    const enabled = user.enabled;
+    const reserved = isUserReserved(user);
+
+    const badges = [];
+    if (!enabled) {
+      badges.push(<DisabledBadge data-test-subj="userDisabled" />);
+    }
+    if (reserved) {
+      badges.push(
+        <ReservedBadge
+          data-test-subj="userReserved"
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.security.management.users.reservedUserBadgeTooltip"
+              defaultMessage="Reserved users are built-in and cannot be edited or removed."
+            />
+          }
+        />
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        {badges.map((badge, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            {badge}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  };
 
   private onCancelDelete = () => {
     this.setState({ showDeleteConfirmation: false });
