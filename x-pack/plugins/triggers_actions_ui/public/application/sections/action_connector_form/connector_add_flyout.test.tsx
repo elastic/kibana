@@ -11,7 +11,6 @@ import { ActionsConnectorsContextProvider } from '../../context/actions_connecto
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppContextProvider } from '../../app_context';
-import { AppDeps } from '../../app';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
