@@ -53,7 +53,7 @@ describe('roleMappingsManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Role Mappings' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mappings Page: {"notifications":{"toasts":{}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"}}
+        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"}}
       </div>
     `);
 

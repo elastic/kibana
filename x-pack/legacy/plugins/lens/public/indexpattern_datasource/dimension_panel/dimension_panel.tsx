@@ -14,6 +14,8 @@ import {
   DatasourceDimensionDropProps,
   DatasourceDimensionDropHandlerProps,
 } from '../../types';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor, PopoverTrigger } from './popover_editor';
@@ -37,6 +39,7 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpSetup;
+  data: DataPublicPluginStart;
   uniqueLabel: string;
   dateRange: DateRange;
 };

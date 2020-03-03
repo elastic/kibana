@@ -32,12 +32,13 @@ import {
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn } from '../state_helpers';
+import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { FormatSelector } from './format_selector';
 
 const operationPanels = getOperationDisplay();
 
@@ -150,6 +151,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       op: operationType,
                       indexPattern: currentIndexPattern,
                       field: fieldMap[possibleFields[0]],
+                      previousColumn: selectedColumn,
                     }),
                   })
                 );
@@ -172,7 +174,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
               op: operationType,
               indexPattern: currentIndexPattern,
               field: fieldMap[selectedColumn.sourceField],
+              previousColumn: selectedColumn,
             });
+
             trackUiEvent(
               `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
             );

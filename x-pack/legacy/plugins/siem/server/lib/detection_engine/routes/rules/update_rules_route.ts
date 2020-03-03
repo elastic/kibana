@@ -10,7 +10,9 @@ import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '.
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transform } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError, getIndex } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
@@ -114,16 +116,16 @@ export const createUpdateRulesRoute = (
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
             return headers
               .response({
-                message: 'Internal error transforming rules',
+                message: errors,
                 status_code: 500,
               })
               .code(500);
           } else {
-            return transformed;
+            return validated;
           }
         } else {
           const error = getIdError({ id, ruleId });
