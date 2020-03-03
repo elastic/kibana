@@ -63,7 +63,7 @@ describe('alert_details', () => {
       ).containsMatchingElement(
         <EuiTitle size="m">
           <h1>
-            {alert.name}
+            <span>{alert.name}</span>
             &emsp;
             <EuiBetaBadge
               label="Beta"
