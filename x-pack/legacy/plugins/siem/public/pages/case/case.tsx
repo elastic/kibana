@@ -32,10 +32,10 @@ export const CasesPage = React.memo(() => (
       <CaseHeaderPage title={i18n.PAGE_TITLE}>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
-            <OpenClosedStats open={105} />
+            <OpenClosedStats caseState={'open'} />
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
-            <OpenClosedStats closed={2} />
+            <OpenClosedStats caseState={'closed'} />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
             <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">

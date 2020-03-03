@@ -49,7 +49,7 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const [
-    { data, isLoading, queryParams, filterOptions, selectedCases },
+    { data, isLoading, loading, queryParams, filterOptions, selectedCases },
     setFilters,
     setQueryParams,
     setSelectedCases,
@@ -119,7 +119,7 @@ export const AllCases = React.memo(() => {
   );
 
   return (
-    <Panel loading={isLoading}>
+    <Panel loading={isLoading && loading.indexOf('cases') > -1}>
       <CasesTableFilters
         onFilterChanged={onFilterChangedCallback}
         initial={{
@@ -128,10 +128,10 @@ export const AllCases = React.memo(() => {
           state: filterOptions.state,
         }}
       />
-      {isLoading && isEmpty(data.cases) && (
+      {isLoading && loading.indexOf('cases') > -1 && isEmpty(data.cases) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
       )}
-      {!isLoading && !isEmpty(data.cases) && (
+      {(!isLoading || loading.indexOf('cases') === -1) && !isEmpty(data.cases) && (
         <Div>
           <UtilityBar border>
             <UtilityBarSection>
