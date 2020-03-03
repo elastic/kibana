@@ -16,6 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertNavigationRegistry } from '../alert_navigation_registry';
 import { AlertTypeRegistry } from '../alert_type_registry';
+import { AlertNavigation } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -41,17 +42,21 @@ export const getAlertNavigationRoute = (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse<AlertNavigation>> {
       verifyApiAccess(licenseState);
       const { id } = req.params;
       const alertsClient = context.alerting.getAlertsClient();
       const alert = await alertsClient.get({ id });
       const alertType = alertTypeRegistry.get(alert.alertTypeId);
-      const navigationHandler = alertNavigationRegistry.get(alert.consumer, alertType);
-      const state = navigationHandler(alert, alertType);
-      return res.ok({
-        body: typeof state === 'string' ? { url: state } : { state },
-      });
+      if (alertNavigationRegistry.has(alert.consumer, alertType)) {
+        const navigationHandler = alertNavigationRegistry.get(alert.consumer, alertType);
+        const state = navigationHandler(alert, alertType);
+        return res.custom<AlertNavigation>({
+          statusCode: 200,
+          body: typeof state === 'string' ? { url: state } : { state },
+        });
+      }
+      return res.noContent();
     })
   );
 };

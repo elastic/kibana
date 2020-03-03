@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { alertStateSchema } from '../../../../alerting/common';
+import { alertStateSchema, AlertNavigation } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
@@ -24,6 +24,16 @@ export async function loadAlert({
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+}
+
+export async function loadAlertNavigation({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<AlertNavigation> {
+  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}/navigation`);
 }
 
 type EmptyHttpResponse = '';

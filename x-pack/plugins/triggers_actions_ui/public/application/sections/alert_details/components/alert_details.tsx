@@ -33,6 +33,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { ViewInAppWithApi as ViewInApp } from './view_in_app';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -95,12 +96,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="popout">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-                      defaultMessage="View in app"
-                    />
-                  </EuiButtonEmpty>
+                  <ViewInApp alert={alert} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty disabled={true} iconType="menuLeft">

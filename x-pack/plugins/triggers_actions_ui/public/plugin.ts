@@ -28,6 +28,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
+  navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
 export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup, Start> {
@@ -58,7 +59,7 @@ export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup,
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    const { capabilities } = core.application;
+    const { capabilities, navigateToApp } = core.application;
 
     const canShowActions = hasShowActionsCapability(capabilities);
     const canShowAlerts = hasShowAlertsCapability(capabilities);
@@ -87,7 +88,8 @@ export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup,
           chrome: core.chrome,
           savedObjects: core.savedObjects.client,
           I18nContext: core.i18n.Context,
-          capabilities: core.application.capabilities,
+          capabilities,
+          navigateToApp,
           setBreadcrumbs: params.setBreadcrumbs,
           actionTypeRegistry: this.actionTypeRegistry,
           alertTypeRegistry: this.alertTypeRegistry,

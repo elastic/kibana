@@ -15,7 +15,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('navigation', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const consumer = 'consumer.noop';
 
     afterEach(() => objectRemover.removeAll());
 
@@ -26,7 +25,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             alertTypeId: 'test.noop',
-            consumer,
           })
         )
         .expect(200);
@@ -40,6 +38,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         url: 'about:blank',
       });
+    });
+
+    it('should handle get alert navigation request when there is no navigation appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.always-firing',
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/navigation`
+      );
+
+      expect(response.statusCode).to.eql(204);
     });
 
     it(`shouldn't get navigation for an alert from another space`, async () => {

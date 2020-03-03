@@ -13,6 +13,7 @@ import {
   IUiSettingsClient,
   ApplicationStart,
   ChromeBreadcrumb,
+  CoreStart,
 } from 'kibana/public';
 import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { TriggersActionsUIHome } from './home';
@@ -28,6 +29,7 @@ export interface AppDeps {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
+  navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
   injectedMetadata: any;
