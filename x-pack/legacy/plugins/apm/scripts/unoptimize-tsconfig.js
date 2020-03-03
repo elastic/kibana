@@ -7,7 +7,6 @@
 const { unoptimizeTsConfig } = require('./optimize-tsconfig/unoptimize');
 
 unoptimizeTsConfig().catch(err => {
-  // eslint-disable-next-line no-console
-  console.log(err);
+  console.error(err);
   process.exit(1);
 });
