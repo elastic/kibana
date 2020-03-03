@@ -11,6 +11,7 @@ import {
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
   getSignalsAggsAndQueryRequest,
+  getEmptySignalsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
@@ -23,7 +24,7 @@ describe('query for signal', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    // clients.clusterClient.callAsCurrentUser.mockResolvedValue(true); // TODO: what is the return value of a successful query?
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptySignalsResponse());
 
     querySignalsRoute(server.router);
   });

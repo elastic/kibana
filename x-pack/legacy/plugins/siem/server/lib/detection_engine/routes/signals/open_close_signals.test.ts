@@ -11,6 +11,7 @@ import {
   typicalSetStatusSignalByIdsPayload,
   typicalSetStatusSignalByQueryPayload,
   setStatusSignalMissingIdsAndQueryPayload,
+  getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
@@ -23,7 +24,7 @@ describe('set signal status', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true); // TODO: what is the return value of a successful update?
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getSuccessfulSignalUpdateResponse());
 
     setSignalsStatusRoute(server.router);
   });

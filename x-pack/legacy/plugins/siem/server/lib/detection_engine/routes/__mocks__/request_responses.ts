@@ -6,7 +6,11 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../../../plugins/actions/server';
-import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  SignalsStatusRestParams,
+  SignalsQueryRestParams,
+  SignalSearchResponse,
+} from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -513,6 +517,32 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
       version: 'WzMyLDFd',
     },
   ],
+});
+
+export const getEmptySignalsResponse = (): SignalSearchResponse => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+  aggregations: {
+    signalsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+  },
+});
+
+export const getSuccessfulSignalUpdateResponse = () => ({
+  took: 18,
+  timed_out: false,
+  total: 1,
+  updated: 1,
+  deleted: 0,
+  batches: 1,
+  version_conflicts: 0,
+  noops: 0,
+  retries: { bulk: 0, search: 0 },
+  throttled_millis: 0,
+  requests_per_second: -1,
+  throttled_until_millis: 0,
+  failures: [],
 });
 
 export const getIndexName = () => 'index-name';
