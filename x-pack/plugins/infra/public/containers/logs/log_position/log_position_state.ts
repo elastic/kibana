@@ -12,8 +12,8 @@ import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath'
 type TimeKeyOrNull = TimeKey | null;
 
 interface DateRange {
-  startDate: string;
-  endDate: string;
+  startDateExpression: string;
+  endDateExpression: string;
 }
 
 interface VisiblePositions {
@@ -35,8 +35,8 @@ export interface LogPositionStateParams {
   visibleMidpoint: TimeKeyOrNull;
   visibleMidpointTime: number | null;
   visibleTimeInterval: { start: number; end: number } | null;
-  startDate: string;
-  endDate: string;
+  startDateExpression: string;
+  endDateExpression: string;
   startTimestamp: number | null;
   endTimestamp: number | null;
 }
@@ -53,7 +53,7 @@ export interface LogPositionCallbacks {
   updateTimestamps: () => void;
 }
 
-const DEFAULT_DATE_RANGE: DateRange = { startDate: 'now-1d', endDate: 'now' };
+const DEFAULT_DATE_RANGE: DateRange = { startDateExpression: 'now-1d', endDateExpression: 'now' };
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
   // Of the two dependencies `middleKey` and `targetPosition`, return
@@ -121,26 +121,27 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   const updateDateRange = useCallback(
     (newDateRange: Partial<DateRange>) => {
       // Prevent unnecessary re-renders
-      if (!('startDate' in newDateRange) && !('endDate' in newDateRange)) {
+      if (!('startDateExpression' in newDateRange) && !('endDateExpression' in newDateRange)) {
         return;
       }
       if (
-        newDateRange.startDate === dateRange.startDate &&
-        newDateRange.endDate === dateRange.endDate
+        newDateRange.startDateExpression === dateRange.startDateExpression &&
+        newDateRange.endDateExpression === dateRange.endDateExpression
       ) {
         return;
       }
 
-      const nextStartDate = newDateRange.startDate || dateRange.startDate;
-      const nextEndDate = newDateRange.endDate || dateRange.endDate;
+      const nextStartDateExpression =
+        newDateRange.startDateExpression || dateRange.startDateExpression;
+      const nextEndDateExpression = newDateRange.endDateExpression || dateRange.endDateExpression;
 
-      if (!isValidDatemath(nextStartDate) || !isValidDatemath(nextEndDate)) {
+      if (!isValidDatemath(nextStartDateExpression) || !isValidDatemath(nextEndDateExpression)) {
         return;
       }
 
       // Dates are valid, so the function cannot return `null`
-      const nextStartTimestamp = datemathToEpochMillis(nextStartDate)!;
-      const nextEndTimestamp = datemathToEpochMillis(nextEndDate, 'up')!;
+      const nextStartTimestamp = datemathToEpochMillis(nextStartDateExpression)!;
+      const nextEndTimestamp = datemathToEpochMillis(nextEndDateExpression, 'up')!;
 
       // Reset the target position if it doesn't fall within the new range.
       if (
@@ -152,8 +153,9 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
       setDateRange(previousDateRange => {
         return {
-          startDate: newDateRange.startDate || previousDateRange.startDate,
-          endDate: newDateRange.endDate || previousDateRange.endDate,
+          startDateExpression:
+            newDateRange.startDateExpression || previousDateRange.startDateExpression,
+          endDateExpression: newDateRange.endDateExpression || previousDateRange.endDateExpression,
         };
       });
     },
@@ -163,14 +165,15 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   // `lastUpdate` needs to be a dependency for the timestamps.
   // ESLint complains it's unnecessary, but we know better.
   /* eslint-disable react-hooks/exhaustive-deps */
-  const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDate), [
-    dateRange.startDate,
+  const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDateExpression), [
+    dateRange.startDateExpression,
     lastUpdate,
   ]);
 
   // endTimestamp needs to be synced to `now` to allow auto-streaming
-  const endTimestampDep = dateRange.endDate === 'now' ? Date.now() : dateRange.endDate;
-  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate, 'up'), [
+  const endTimestampDep =
+    dateRange.endDateExpression === 'now' ? Date.now() : dateRange.endDateExpression;
+  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDateExpression, 'up'), [
     endTimestampDep,
     lastUpdate,
   ]);

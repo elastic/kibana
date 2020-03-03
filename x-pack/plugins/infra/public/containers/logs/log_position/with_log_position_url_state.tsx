@@ -30,8 +30,8 @@ export const WithLogPositionUrlState = () => {
     jumpToTargetPosition,
     startLiveStreaming,
     stopLiveStreaming,
-    startDate,
-    endDate,
+    startDateExpression,
+    endDateExpression,
     updateDateRange,
     initialize,
   } = useContext(LogPositionState.Context);
@@ -39,10 +39,10 @@ export const WithLogPositionUrlState = () => {
     () => ({
       position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,
       streamLive: isStreaming,
-      start: startDate,
-      end: endDate,
+      start: startDateExpression,
+      end: endDateExpression,
     }),
-    [visibleMidpoint, isStreaming, startDate, endDate]
+    [visibleMidpoint, isStreaming, startDateExpression, endDateExpression]
   );
   return (
     <UrlStateContainer
@@ -55,7 +55,10 @@ export const WithLogPositionUrlState = () => {
         }
 
         if (newUrlState.start || newUrlState.end) {
-          updateDateRange({ startDate: newUrlState.start, endDate: newUrlState.end });
+          updateDateRange({
+            startDateExpression: newUrlState.start,
+            endDateExpression: newUrlState.end,
+          });
         }
 
         if (newUrlState.position) {
@@ -71,30 +74,33 @@ export const WithLogPositionUrlState = () => {
       onInitialize={(initialUrlState: LogPositionUrlState | undefined) => {
         if (initialUrlState) {
           const initialPosition = initialUrlState.position;
-          let initialStartDate = initialUrlState.start || 'now-1d';
-          let initialEndDate = initialUrlState.end || 'now';
+          let initialStartDateExpression = initialUrlState.start || 'now-1d';
+          let initialEndDateExpression = initialUrlState.end || 'now';
 
           if (initialPosition) {
-            const initialStartTimestamp = initialStartDate
-              ? datemathToEpochMillis(initialStartDate)
+            const initialStartTimestamp = initialStartDateExpression
+              ? datemathToEpochMillis(initialStartDateExpression)
               : undefined;
-            const initialEndTimestamp = initialEndDate
-              ? datemathToEpochMillis(initialEndDate, 'up')
+            const initialEndTimestamp = initialEndDateExpression
+              ? datemathToEpochMillis(initialEndDateExpression, 'up')
               : undefined;
 
             // Adjust the start-end range if the target position falls outside
             if (initialStartTimestamp && initialStartTimestamp > initialPosition.time) {
-              initialStartDate = new Date(initialPosition.time - ONE_HOUR).toISOString();
+              initialStartDateExpression = new Date(initialPosition.time - ONE_HOUR).toISOString();
             }
             if (initialEndTimestamp && initialEndTimestamp < initialPosition.time) {
-              initialEndDate = new Date(initialPosition.time + ONE_HOUR).toISOString();
+              initialEndDateExpression = new Date(initialPosition.time + ONE_HOUR).toISOString();
             }
 
             jumpToTargetPosition(initialPosition);
           }
 
-          if (initialStartDate || initialEndDate) {
-            updateDateRange({ startDate: initialStartDate, endDate: initialEndDate });
+          if (initialStartDateExpression || initialEndDateExpression) {
+            updateDateRange({
+              startDateExpression: initialStartDateExpression,
+              endDateExpression: initialEndDateExpression,
+            });
           }
 
           if (initialUrlState.streamLive) {

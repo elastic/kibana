@@ -56,9 +56,9 @@ interface ScrollableLogTextStreamViewProps {
   setFlyoutVisibility: (visible: boolean) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
-  startDate: string;
-  endDate: string;
-  updateDateRange: (range: { startDate?: string; endDate?: string }) => void;
+  startDateExpression: string;
+  endDateExpression: string;
+  updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
 }
 
@@ -137,8 +137,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       isStreaming,
       scale,
       wrap,
-      startDate,
-      endDate,
+      startDateExpression,
+      endDateExpression,
       updateDateRange,
       startLiveStreaming,
     } = this.props;
@@ -203,8 +203,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 items.length > 0 ? items[0].logEntry.cursor.time : undefined
                               }
                               isStreaming={false}
-                              rangeEdge={startDate}
-                              onExtendRange={newDate => updateDateRange({ startDate: newDate })}
+                              rangeEdge={startDateExpression}
+                              onExtendRange={newDateExpression =>
+                                updateDateRange({ startDateExpression: newDateExpression })
+                              }
                             />
                             {items.map((item, idx) => {
                               const currentTimestamp = item.logEntry.cursor.time;
@@ -257,8 +259,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                   ? items[items.length - 1].logEntry.cursor.time
                                   : undefined
                               }
-                              rangeEdge={endDate}
-                              onExtendRange={newDate => updateDateRange({ endDate: newDate })}
+                              rangeEdge={endDateExpression}
+                              onExtendRange={newDateExpression =>
+                                updateDateRange({ endDateExpression: newDateExpression })
+                              }
                               onStreamStart={() => startLiveStreaming()}
                             />
                             {isScrollLocked && (

@@ -28,7 +28,7 @@ interface LogTextStreamLoadingItemViewProps {
   position: Position;
   /** topCursor.time || bottomCursor.time */
   timestamp?: number;
-  /** startDate || endDate */
+  /** startDateExpression || endDateExpression */
   rangeEdge?: string;
   className?: string;
   hasMore: boolean;

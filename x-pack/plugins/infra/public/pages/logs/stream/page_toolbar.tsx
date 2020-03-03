@@ -49,8 +49,8 @@ export const LogsToolbar = () => {
     isStreaming,
     startLiveStreaming,
     stopLiveStreaming,
-    startDate,
-    endDate,
+    startDateExpression,
+    endDateExpression,
     updateDateRange,
     updateTimestamps,
     liveStreamingInterval,
@@ -60,7 +60,7 @@ export const LogsToolbar = () => {
   const handleTimeChange = useCallback(
     ({ start, end, isInvalid }) => {
       if (!isInvalid) {
-        updateDateRange({ startDate: start, endDate: end });
+        updateDateRange({ startDateExpression: start, endDateExpression: end });
       }
     },
     [updateDateRange]
@@ -122,8 +122,8 @@ export const LogsToolbar = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
-            start={startDate}
-            end={endDate}
+            start={startDateExpression}
+            end={endDateExpression}
             onTimeChange={handleTimeChange}
             isPaused={!isStreaming}
             refreshInterval={liveStreamingInterval}
