@@ -387,7 +387,7 @@ export class EditUserPage extends Component<Props, State> {
       <span data-test-subj="hasDeprecatedRolesAssignedHelpText">
         <FormattedMessage
           id="xpack.security.management.users.editUser.deprecatedRolesAssignedWarning"
-          defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role as soon as possible."
+          defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role."
         />
       </span>
     ) : (

@@ -138,7 +138,7 @@ export class RoleSelector extends React.Component<Props, State> {
         <span data-test-subj="deprecatedRolesAssigned">
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.deprecatedRolesAssigned"
-            defaultMessage="This mapping is assigned a deprecated role. Please migrate to a supported role as soon as possible."
+            defaultMessage="This mapping is assigned a deprecated role. Please migrate to a supported role."
           />
         </span>
       );

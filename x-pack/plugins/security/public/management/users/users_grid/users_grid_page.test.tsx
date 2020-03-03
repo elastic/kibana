@@ -161,7 +161,7 @@ describe('UsersGridPage', () => {
             type="alert"
           />
         </div>,
-        "content": "This role is deprecated and should no longer be assigned. I don't like you.",
+        "content": "The kibana_user role is deprecated. I don't like you.",
         "data-test-subj": "roleDeprecationTooltip",
         "delay": "regular",
         "position": "top",

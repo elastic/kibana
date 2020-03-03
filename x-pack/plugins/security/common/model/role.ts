@@ -78,8 +78,9 @@ export function isRoleDeprecated(role: Partial<Role>) {
  */
 export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
   return i18n.translate('xpack.security.common.extendedRoleDeprecationNotice', {
-    defaultMessage: `This role is deprecated and should no longer be assigned. {reason}`,
+    defaultMessage: `The {roleName} role is deprecated. {reason}`,
     values: {
+      roleName: role.name,
       reason: getRoleDeprecatedReason(role),
     },
   });
