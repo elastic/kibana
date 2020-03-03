@@ -40,6 +40,8 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         getIconForSavedObject: () => APP_ICON,
       },
     });
+    // Will be called from setup/start in NP after migration
+    bindCoreAndPlugins(npStart.core, npStart.plugins);
   }
 
   isEditable() {
@@ -151,9 +153,5 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 }
 
-// Will be called from setup/start in NP after migration
-((core, plugins) => {
-  bindCoreAndPlugins(core, plugins);
-  const mapEmbeddableFactory = new MapEmbeddableFactory();
-  embeddableSetup.registerEmbeddableFactory(mapEmbeddableFactory.type, mapEmbeddableFactory);
-})(npStart.core, { np: npStart.plugins });
+const mapEmbeddableFactory = new MapEmbeddableFactory();
+embeddableSetup.registerEmbeddableFactory(mapEmbeddableFactory.type, mapEmbeddableFactory);
