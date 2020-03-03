@@ -30,7 +30,7 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       key={i18n.BULK_ACTION_DUPLICATE_SELECTED}
       icon="copy"
-      disabled={selectedCases.length === 0}
+      disabled={true} // TO DO
       onClick={async () => {
         closePopover();
         // await duplicateCasesAction(
@@ -47,7 +47,7 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      disabled={selectedCases.length === 0}
+      disabled={true} // TO DO
       onClick={async () => {
         closePopover();
         // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);

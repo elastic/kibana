@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 export const BULK_ACTION_DUPLICATE_SELECTED = i18n.translate(
   'xpack.siem.case.caseTable.bulkActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Duplicate selected…',
+    defaultMessage: 'Duplicate selected',
   }
 );
 
 export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
   'xpack.siem.case.caseTable.bulkActions.deleteSelectedTitle',
   {
-    defaultMessage: 'Delete selected…',
+    defaultMessage: 'Delete selected',
   }
 );
