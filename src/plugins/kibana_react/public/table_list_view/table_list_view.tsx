@@ -94,9 +94,12 @@ export interface TableListViewState {
 class TableListView extends React.Component<TableListViewProps, TableListViewState> {
   private pagination = {};
   private _isMounted = false;
-  private visualizationEntityName = i18n.translate('kbn.visualize.listing.table.entityName', {
-    defaultMessage: 'visualization',
-  });
+  private visualizationEntityName = i18n.translate(
+    'kibana-react.tableListView.listing.visualizationEntityName',
+    {
+      defaultMessage: 'visualization',
+    }
+  );
 
   constructor(props: TableListViewProps) {
     super(props);
