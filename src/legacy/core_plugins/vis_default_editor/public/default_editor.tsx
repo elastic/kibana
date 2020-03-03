@@ -112,6 +112,7 @@ function DefaultEditor({
         initialWidth={editorInitialWidth}
       >
         <DefaultEditorSideBar
+          timeRange={timeRange}
           isCollapsed={isCollapsed}
           onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}

@@ -42,7 +42,12 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
       };
     }
 
@@ -65,7 +70,12 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
       };
     }
 
@@ -90,7 +100,12 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
       };
     }
 
@@ -131,7 +146,12 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
       };
     }
 
@@ -143,7 +163,12 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
       };
     }
 
@@ -165,7 +190,26 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          newAggs,
+          state.aggs.schemas,
+          state.aggs.timeRange
+        ),
+      };
+    }
+
+    case EditorStateActionTypes.TIMERANGE_CHANGE: {
+      const { timeRange: timeRange } = action.payload;
+
+      return {
+        ...state,
+        aggs: createAggConfigs(
+          state.aggs.indexPattern,
+          state.aggs.aggs,
+          state.aggs.schemas,
+          timeRange
+        ),
       };
     }
 

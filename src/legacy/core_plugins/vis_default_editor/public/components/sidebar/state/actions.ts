@@ -18,6 +18,7 @@
  */
 
 import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { IAggConfig, Schema } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 
@@ -60,6 +61,10 @@ type UpdateStateParams = ActionType<
   EditorStateActionTypes.UPDATE_STATE_PARAMS,
   { params: VisParams }
 >;
+type TimeRangeChange = ActionType<
+  EditorStateActionTypes.TIMERANGE_CHANGE,
+  { timeRange: TimeRange }
+>;
 
 export type EditorAction =
   | AddNewAgg
@@ -70,7 +75,8 @@ export type EditorAction =
   | RemoveAgg
   | ReorderAggs
   | ToggleEnabledAgg
-  | UpdateStateParams;
+  | UpdateStateParams
+  | TimeRangeChange;
 
 export interface EditorActions {
   addNewAgg(schema: Schema): AddNewAgg;
@@ -89,6 +95,7 @@ export interface EditorActions {
   reorderAggs(sourceAgg: IAggConfig, destinationAgg: IAggConfig): ReorderAggs;
   toggleEnabledAgg(aggId: AggId, enabled: IAggConfig['enabled']): ToggleEnabledAgg;
   updateStateParams(params: VisParams): UpdateStateParams;
+  timeRangeChange(timeRange: TimeRange): TimeRangeChange;
 }
 
 const addNewAgg: EditorActions['addNewAgg'] = schema => ({
@@ -158,6 +165,13 @@ const updateStateParams: EditorActions['updateStateParams'] = params => ({
   },
 });
 
+const timeRangeChange: EditorActions['timeRangeChange'] = (timeRange: TimeRange) => ({
+  type: EditorStateActionTypes.TIMERANGE_CHANGE,
+  payload: {
+    timeRange,
+  },
+});
+
 export {
   addNewAgg,
   discardChanges,
@@ -168,4 +182,5 @@ export {
   reorderAggs,
   toggleEnabledAgg,
   updateStateParams,
+  timeRangeChange,
 };

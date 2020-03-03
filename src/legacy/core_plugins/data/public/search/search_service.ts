@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { IndexPattern } from '../../../../../plugins/data/public';
+import { IndexPattern, TimeRange } from '../../../../../plugins/data/public';
 import {
   aggTypes,
   AggType,
@@ -55,7 +55,8 @@ interface AggsStart {
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
-    schemas?: Record<string, any>
+    schemas?: Record<string, any>,
+    timeRange?: TimeRange
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;
   __LEGACY: AggsStartLegacy;
@@ -94,11 +95,20 @@ export class SearchService {
     const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
-        createAggConfigs: (indexPattern, configStates = [], schemas) => {
-          return new AggConfigs(indexPattern, configStates, {
+        createAggConfigs: (
+          indexPattern,
+          configStates = [],
+          schemas,
+          timeRange: TimeRange | undefined
+        ) => {
+          const aggConfigs = new AggConfigs(indexPattern, configStates, {
             schemas,
             typesRegistry: aggTypesStart,
           });
+          if (timeRange) {
+            aggConfigs.setTimeRange(timeRange);
+          }
+          return aggConfigs;
         },
         types: aggTypesStart,
         __LEGACY: {

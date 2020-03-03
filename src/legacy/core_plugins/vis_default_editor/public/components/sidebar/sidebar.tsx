@@ -21,11 +21,18 @@ import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect 
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { TimeRange } from 'src/plugins/data/public';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
+import {
+  setStateParamValue,
+  useEditorReducer,
+  useEditorFormState,
+  discardChanges,
+  timeRangeChange,
+} from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 
@@ -35,6 +42,7 @@ interface DefaultEditorSideBarProps {
   optionTabs: OptionTab[];
   uiState: PersistedState;
   vis: Vis;
+  timeRange?: TimeRange | undefined;
 }
 
 function DefaultEditorSideBar({
@@ -43,6 +51,7 @@ function DefaultEditorSideBar({
   optionTabs,
   uiState,
   vis,
+  timeRange,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
@@ -64,6 +73,12 @@ function DefaultEditorSideBar({
     },
     [setValidity]
   );
+
+  useEffect(() => {
+    if (timeRange) {
+      dispatch(timeRangeChange(timeRange));
+    }
+  }, [dispatch, timeRange]);
 
   const setStateValue: DefaultEditorAggCommonProps['setStateParamValue'] = useCallback(
     (paramName, value) => {
