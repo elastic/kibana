@@ -8,15 +8,35 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
+
   describe('uptime REST endpoints', () => {
+    beforeEach('clear settings', async () => {
+      try {
+        const res = await es.delete({
+          index: '.kibana',
+          id: 'uptime-dynamic-settings:uptime-dynamic-settings-singleton',
+        });
+      } catch (e) {
+        // a 404 just means the doc is already missing
+        if (e.statuscode !== 404) {
+          throw new Error(
+            `error attempting to delete settings (${e.statuscode}): ${json.stringify(e)}`
+          );
+        }
+      }
+    });
+
     describe('with generated data', () => {
-      before('load heartbeat data', () => esArchiver.load('uptime/blank'));
-      after('unload', () => esArchiver.unload('uptime/blank'));
+      before('load heartbeat data', async () => await esArchiver.load('uptime/blank'));
+      after('unload', async () => await esArchiver.unload('uptime/blank'));
+
       loadTestFile(require.resolve('./snapshot'));
+      loadTestFile(require.resolve('./dynamic_settings'));
     });
     describe('with real-world data', () => {
-      before('load heartbeat data', () => esArchiver.load('uptime/full_heartbeat'));
-      after('unload', () => esArchiver.unload('uptime/full_heartbeat'));
+      before('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
+      after('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
       loadTestFile(require.resolve('./monitor_latest_status'));
       loadTestFile(require.resolve('./selected_monitor'));
       loadTestFile(require.resolve('./ping_histogram'));
