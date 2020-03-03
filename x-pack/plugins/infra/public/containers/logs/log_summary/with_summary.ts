@@ -24,7 +24,7 @@ export const WithSummary = ({
 }) => {
   const { sourceId } = useContext(Source.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
-  const { startDate, endDate, startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
   const throttledStartTimestamp = useThrottle(startTimestamp, 3000);
