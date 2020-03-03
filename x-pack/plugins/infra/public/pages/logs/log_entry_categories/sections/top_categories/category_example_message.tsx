@@ -96,8 +96,8 @@ const columnWidths = {
   [datasetColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,
-    // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px - 8 px
-    baseWidth: '392px',
+    // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
+    baseWidth: '432px',
   },
 };
 
