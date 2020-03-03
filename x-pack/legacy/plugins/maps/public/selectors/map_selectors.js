@@ -14,6 +14,7 @@ import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { timefilter } from 'ui/timefilter';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { InnerJoin } from '../layers/joins/inner_join';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -24,7 +25,14 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     case VectorLayer.type:
       return new VectorLayer({ layerDescriptor, source });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source });
+      const joins = [];
+      if (layerDescriptor.joins) {
+        layerDescriptor.joins.forEach(joinDescriptor => {
+          const join = new InnerJoin(joinDescriptor, this._source);
+          joins.push(join);
+        });
+      }
+      return new VectorTileLayer({ layerDescriptor, source, joins });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     default:
