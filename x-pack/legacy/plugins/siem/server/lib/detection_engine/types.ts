@@ -53,6 +53,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
+  throttle: string | null;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
@@ -96,6 +97,7 @@ export type RuleAlertParamsRest = Omit<
     last_success_at?: IRuleStatusAttributes['lastSuccessAt'] | undefined;
     last_failure_message?: IRuleStatusAttributes['lastFailureMessage'] | undefined;
     last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
+    throttle: RuleAlertParams['throttle'];
   };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {

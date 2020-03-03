@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
+import deepMerge from 'deepmerge';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -217,6 +218,8 @@ const EditRulePageComponent: FC = () => {
     const activeFormId = selectedTab?.id as RuleStep;
     const activeForm = await stepsForm.current[activeFormId]?.submit();
 
+    console.error('submit', myActionsRuleForm, activeForm);
+
     const invalidForms = [
       RuleStep.aboutRule,
       RuleStep.defineRule,
@@ -248,7 +251,8 @@ const EditRulePageComponent: FC = () => {
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
             : myScheduleRuleForm.data) as ScheduleStepRule,
-          (activeFormId === RuleStep.ruleActions && myActionsRuleForm.data) as ActionsStepRule,
+          (activeFormId === RuleStep.ruleActions &&
+            deepMerge(myActionsRuleForm.data, activeForm.data)) as ActionsStepRule,
           ruleId
         )
       );

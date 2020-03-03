@@ -80,13 +80,20 @@ export const getStepsData = ({
     rule != null
       ? {
           isNew: false,
-          ...pick(['enabled', 'interval'], rule),
+          interval: rule.interval,
           from: fromHumanize,
         }
       : null;
 
   const ruleActionsData: ActionsStepRule | null =
-    rule != null ? { isNew: false, actions: (rule.actions || []) as AlertAction[] } : null;
+    rule != null
+      ? {
+          isNew: false,
+          throttle: rule.throttle ?? null,
+          enabled: rule.enabled,
+          actions: (rule.actions ?? []) as AlertAction[],
+        }
+      : null;
 
   return { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData };
 };

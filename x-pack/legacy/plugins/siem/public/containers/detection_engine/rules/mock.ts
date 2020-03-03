@@ -32,6 +32,7 @@ export const ruleMock: NewRule = {
   to: 'now',
   type: 'query',
   threat: [],
+  throttle: null,
 };
 
 export const savedRuleMock: Rule = {
@@ -66,6 +67,7 @@ export const savedRuleMock: Rule = {
   to: 'now',
   type: 'query',
   threat: [],
+  throttle: null,
   updated_at: 'mm/dd/yyyyTHH:MM:sssz',
   updated_by: 'mockUser',
 };
@@ -105,6 +107,7 @@ export const rulesMock: FetchRulesResponse = {
       to: 'now',
       type: 'query',
       threat: [],
+      throttle: null,
       version: 1,
     },
     {
@@ -136,6 +139,7 @@ export const rulesMock: FetchRulesResponse = {
       to: 'now',
       type: 'query',
       threat: [],
+      throttle: null,
       version: 1,
     },
   ],

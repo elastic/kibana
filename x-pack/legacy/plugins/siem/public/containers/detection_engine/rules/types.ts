@@ -32,6 +32,7 @@ export const NewRuleSchema = t.intersection([
     saved_id: t.string,
     tags: t.array(t.string),
     threat: t.array(t.unknown),
+    throttle: t.union([t.string, t.null]),
     to: t.string,
     updated_by: t.string,
   }),
@@ -77,6 +78,7 @@ export const RuleSchema = t.intersection([
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(t.unknown),
+    throttle: t.union([t.string, t.null]),
   }),
   t.partial({
     last_failure_at: t.string,

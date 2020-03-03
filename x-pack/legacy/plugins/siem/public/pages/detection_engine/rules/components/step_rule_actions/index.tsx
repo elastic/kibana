@@ -19,7 +19,7 @@ import { AlertAction } from '../../../../../../../../../plugins/triggers_actions
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ActionsStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm, SelectField } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { schema } from './schema';
 import * as I18n from './translations';
@@ -29,8 +29,10 @@ interface StepRuleActionsProps extends RuleStepProps {
 }
 
 const stepActionsDefaultValue = {
+  enabled: true,
   isNew: true,
   actions: [],
+  throttle: null,
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
@@ -62,6 +64,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
+
+  console.error('form', form, myStepData);
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {
@@ -103,38 +107,64 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="StepRuleActions">
+          <UseField
+            path="throttle"
+            component={SelectField}
+            componentProps={{
+              idAria: 'detectionEngineStepRuleActionsThrottle',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
+              euiFieldProps: {
+                options: [
+                  // { value: 'null', text: 'Perform no actions' },
+                  { value: null, text: 'On each rule execution' },
+                  { value: '1h', text: 'Hourly' },
+                  { value: '1d', text: 'Daily' },
+                ],
+              },
+            }}
+          />
           <UseField path="actions" defaultValue={myStepData.actions}>
-            {() => <div />}
+            {() => (
+              <ActionForm
+                actions={myStepData.actions}
+                messageVariables={[
+                  'inputIndexes',
+                  'outputIndex',
+                  'name',
+                  'alertId',
+                  'ruleId',
+                  'ruleLink',
+                ]}
+                defaultActionGroupId={'default'}
+                setActionIdByIndex={(id: string, index: number) => {
+                  const updatedActions = [...myStepData];
+                  updatedActions[index].id = id;
+                  setMyStepData({ ...myStepData, actions: updatedActions });
+                }}
+                setAlertProperty={(updatedActions: AlertAction[]) => {
+                  setMyStepData({ ...myStepData, actions: updatedActions });
+                }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setActionParamsProperty={(key: string, value: any, index: number) => {
+                  const newActions = [...myStepData.actions];
+                  newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
+
+                  setMyStepData({
+                    ...myStepData,
+                    actions: newActions,
+                  });
+                }}
+                http={http}
+                actionTypeRegistry={actionTypeRegistry}
+                actionTypes={actionTypes}
+                defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+              />
+            )}
           </UseField>
         </Form>
       </StepContentWrapper>
-      <ActionForm
-        actions={myStepData.actions}
-        messageVariables={['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId', 'ruleLink']}
-        defaultActionGroupId={'default'}
-        setActionIdByIndex={(id: string, index: number) => {
-          const updatedActions = [...myStepData];
-          updatedActions[index].id = id;
-          setMyStepData({ ...myStepData, actions: updatedActions });
-        }}
-        setAlertProperty={(updatedActions: AlertAction[]) => {
-          setMyStepData({ ...myStepData, actions: updatedActions });
-        }}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setActionParamsProperty={(key: string, value: any, index: number) => {
-          const newActions = [...myStepData.actions];
-          newActions[index].params = { ...myStepData.actions[index].params, [key]: value };
 
-          setMyStepData({
-            ...myStepData,
-            actions: newActions,
-          });
-        }}
-        http={http}
-        actionTypeRegistry={actionTypeRegistry}
-        actionTypes={actionTypes}
-        defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
-      />
       {!isUpdateView && (
         <>
           <EuiHorizontalRule margin="m" />

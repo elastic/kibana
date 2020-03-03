@@ -44,6 +44,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
       const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -68,6 +69,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
             to,
             type,
             threat,
+            throttle,
             references,
             version,
           } = payloadRule;
@@ -76,6 +78,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
             const rule = await patchRules({
               alertsClient,
               actionsClient,
+              actions,
               description,
               enabled,
               falsePositives,
@@ -101,6 +104,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
               to,
               type,
               threat,
+              throttle,
               references,
               version,
             });

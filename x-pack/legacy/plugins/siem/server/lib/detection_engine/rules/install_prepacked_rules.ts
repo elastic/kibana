@@ -42,15 +42,16 @@ export const installPrepackagedRules = (
       to,
       type,
       threat,
+      throttle,
       references,
       version,
     } = rule;
     return [
       ...acc,
       createRules({
-        actions,
         alertsClient,
         actionsClient,
+        actions,
         description,
         enabled,
         falsePositives,
@@ -75,6 +76,7 @@ export const installPrepackagedRules = (
         to,
         type,
         threat,
+        throttle,
         references,
         version,
       }),

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,16 +13,14 @@ import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import * as RuleI18n from '../../translations';
+import { NextStep } from '../next_step';
 import { schema } from './schema';
-import * as I18n from './translations';
 
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
 
 const stepScheduleDefaultValue = {
-  enabled: true,
   interval: '5m',
   isNew: true,
   from: '1m',
@@ -47,19 +44,16 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     schema,
   });
 
-  const onSubmit = useCallback(
-    async (enabled: boolean) => {
-      if (setStepData) {
-        setStepData(RuleStep.scheduleRule, null, false);
-        const { isValid: newIsValid, data } = await form.submit();
-        if (newIsValid) {
-          setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);
-          setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
-        }
+  const onSubmit = useCallback(async () => {
+    if (setStepData) {
+      setStepData(RuleStep.scheduleRule, null, false);
+      const { isValid: newIsValid, data } = await form.submit();
+      if (newIsValid) {
+        setStepData(RuleStep.scheduleRule, { ...data }, newIsValid);
+        setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
       }
-    },
-    [form]
-  );
+    }
+  }, [form]);
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
@@ -109,23 +103,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         </Form>
       </StepContentWrapper>
 
-      {!isUpdateView && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                {RuleI18n.CONTINUE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+      {!isUpdateView && <NextStep onClick={onSubmit} isDisabled={isLoading} />}
     </>
   );
 };

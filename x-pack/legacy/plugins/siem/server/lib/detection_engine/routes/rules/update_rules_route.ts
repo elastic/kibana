@@ -34,8 +34,8 @@ export const createUpdateRulesRoute = (
       },
     },
     async handler(request: UpdateRulesRequest, headers) {
-      console.error('update');
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -60,9 +60,9 @@ export const createUpdateRulesRoute = (
         to,
         type,
         threat,
+        throttle,
         references,
         version,
-        actions,
       } = request.payload;
 
       try {
@@ -105,6 +105,7 @@ export const createUpdateRulesRoute = (
           to,
           type,
           threat,
+          throttle,
           references,
           version,
         });

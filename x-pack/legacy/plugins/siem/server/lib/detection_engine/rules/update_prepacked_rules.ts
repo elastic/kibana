@@ -19,6 +19,7 @@ export const updatePrepackagedRules = async (
 ): Promise<void> => {
   await rules.forEach(async rule => {
     const {
+      actions,
       description,
       false_positives: falsePositives,
       from,
@@ -39,6 +40,7 @@ export const updatePrepackagedRules = async (
       to,
       type,
       threat,
+      throttle,
       references,
       version,
     } = rule;
@@ -48,6 +50,7 @@ export const updatePrepackagedRules = async (
     return patchRules({
       alertsClient,
       actionsClient,
+      actions,
       description,
       falsePositives,
       from,
@@ -71,6 +74,7 @@ export const updatePrepackagedRules = async (
       to,
       type,
       threat,
+      throttle,
       references,
       version,
     });

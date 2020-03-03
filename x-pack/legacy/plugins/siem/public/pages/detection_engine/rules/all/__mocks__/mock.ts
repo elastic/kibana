@@ -38,6 +38,7 @@ export const mockRule = (id: string): Rule => ({
   to: 'now',
   type: 'saved_query',
   threat: [],
+  throttle: null,
   version: 1,
 });
 

@@ -190,6 +190,7 @@ export const createImportRulesRoute = (
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         version,
                       });
@@ -225,6 +226,7 @@ export const createImportRulesRoute = (
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         version,
                       });

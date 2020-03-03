@@ -35,6 +35,7 @@ export const createRules = ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
@@ -73,7 +74,7 @@ export const createRules = ({
       schedule: { interval },
       enabled,
       actions,
-      throttle: null,
+      throttle,
     },
   });
 };

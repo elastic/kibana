@@ -39,6 +39,7 @@ export const updateRules = async ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
@@ -50,6 +51,7 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
     description,
     falsePositives,
     query,
@@ -69,6 +71,7 @@ export const updateRules = async ({
     severity,
     tags,
     threat,
+    throttle,
     to,
     type,
     references,
@@ -81,7 +84,8 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: actions || rule.actions,
+      actions,
+      throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

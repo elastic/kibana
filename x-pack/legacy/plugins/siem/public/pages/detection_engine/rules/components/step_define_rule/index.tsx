@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -21,11 +15,11 @@ import { useFetchIndexPatterns } from '../../../../../containers/detection_engin
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue } from '../../helpers';
-import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { NextStep } from '../next_step';
 import {
   Field,
   Form,
@@ -228,23 +222,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </FormDataProvider>
         </Form>
       </StepContentWrapper>
-      {!isUpdateView && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                {RuleI18n.CONTINUE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+
+      {!isUpdateView && <NextStep onClick={onSubmit} isDisabled={isLoading} />}
     </>
   );
 };

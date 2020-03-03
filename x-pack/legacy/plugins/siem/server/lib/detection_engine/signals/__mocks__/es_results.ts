@@ -35,6 +35,7 @@ export const sampleRuleAlertParams = (
   timelineTitle: undefined,
   meta: undefined,
   threat: undefined,
+  throttle: null,
   version: 1,
 });
 

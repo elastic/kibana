@@ -75,6 +75,7 @@ export const createUpdateRulesBulkRoute = (
             to,
             type,
             threat,
+            throttle,
             references,
             version,
           } = payloadRule;
@@ -111,6 +112,7 @@ export const createUpdateRulesBulkRoute = (
               to,
               type,
               threat,
+              throttle,
               references,
               version,
             });

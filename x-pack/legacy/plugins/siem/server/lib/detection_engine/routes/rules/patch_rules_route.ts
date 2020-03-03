@@ -33,6 +33,7 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
     },
     async handler(request: PatchRulesRequest, headers) {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -57,6 +58,7 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
         to,
         type,
         threat,
+        throttle,
         references,
         version,
       } = request.payload;
@@ -71,6 +73,7 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
         const rule = await patchRules({
           actionsClient,
           alertsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -96,6 +99,7 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
           to,
           type,
           threat,
+          throttle,
           references,
           version,
         });

@@ -32,6 +32,7 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   id,
   version,
@@ -77,6 +78,7 @@ export const updateRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
   version,
 }).xor('id', 'rule_id');

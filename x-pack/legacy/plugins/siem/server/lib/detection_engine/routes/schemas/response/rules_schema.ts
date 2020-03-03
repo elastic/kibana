@@ -40,6 +40,7 @@ import {
   timeline_title,
   type,
   threat,
+  throttle,
   job_status,
   status_date,
   last_success_at,
@@ -106,6 +107,7 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  throttle,
   status: job_status,
   status_date,
   last_success_at,
