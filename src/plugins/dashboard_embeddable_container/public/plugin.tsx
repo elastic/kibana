@@ -47,7 +47,7 @@ declare module '../../share/public' {
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   uiActions: UiActionsSetup;
-  share: SharePluginSetup;
+  share?: SharePluginSetup;
 }
 
 interface StartDependencies {
@@ -63,21 +63,20 @@ export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    { share: { urlGenerators }, embeddable, uiActions }: SetupDependencies
-  ): Setup {
+  public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
 
-    urlGenerators.registerUrlGenerator(
-      createDirectAccessDashboardLinkGenerator(async () => ({
-        appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
-        useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
-      }))
-    );
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createDirectAccessDashboardLinkGenerator(async () => ({
+          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
+          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+        }))
+      );
+    }
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {

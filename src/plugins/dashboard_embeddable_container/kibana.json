@@ -5,7 +5,9 @@
     "data",
     "embeddable",
     "inspector",
-    "uiActions",
+    "uiActions"
+  ],
+  "optionalPlugins": [
     "share"
   ],
   "server": false,
