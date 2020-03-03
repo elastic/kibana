@@ -17,8 +17,8 @@ storiesOf('components/FlyoutCreateDrilldown', module)
   })
   .add('open in flyout', () => {
     return (
-      <EuiFlyout>
-        <FlyoutCreateDrilldown context={{} as any} />
+      <EuiFlyout onClose={() => {}}>
+        <FlyoutCreateDrilldown context={{} as any} onClose={() => {}} />
       </EuiFlyout>
     );
   });

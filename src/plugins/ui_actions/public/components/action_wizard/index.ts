@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ActionFactory, ActionWizard } from './action_wizard';
+export { ActionFactory, ActionWizard, ActionFactoryBaseConfig } from './action_wizard';

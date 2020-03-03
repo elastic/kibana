@@ -34,7 +34,10 @@ import './index.scss';
 // and it will be imported from the ../ui_actions when implemented properly
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ActionFactoryBaseConfig = {};
-export interface ActionFactory<Config extends ActionFactoryBaseConfig, Context = null> {
+export interface ActionFactory<
+  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
+  Context = unknown
+> {
   type: string;
   displayName: string;
   iconType?: string;
@@ -42,7 +45,10 @@ export interface ActionFactory<Config extends ActionFactoryBaseConfig, Context =
   context: Context;
 }
 
-export interface ActionFactoryWizardProps<Config extends ActionFactoryBaseConfig, Context = void> {
+export interface ActionFactoryWizardProps<
+  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
+  Context = unknown
+> {
   /**
    * Context represents environment where this component is being rendered.
    */
@@ -66,7 +72,7 @@ export interface ActionWizardProps {
   /**
    * List of available action factories
    */
-  actionFactories: Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
+  actionFactories: ActionFactory[];
 
   /**
    * Notifies when wizard's state changes because of user's interaction
@@ -74,17 +80,11 @@ export interface ActionWizardProps {
    * @param actionFactory - current selected action factory. null if none is selected
    * @param config - current config for current action factory. null if no action factory or if wizard's inputs are invalid or incomplete
    */
-  onChange: (
-    actionFactory: ActionFactory<ActionFactoryBaseConfig, unknown> | null,
-    config: ActionFactoryBaseConfig | null
-  ) => void;
+  onChange: (actionFactory: ActionFactory | null, config: ActionFactoryBaseConfig | null) => void;
 }
 export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onChange }) => {
   // eslint-disable-next-line prefer-const
-  let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory<
-    ActionFactoryBaseConfig,
-    unknown
-  > | null>(null);
+  let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory | null>(null);
 
   // auto pick action factory if there is only 1 available
   if (!selectedActionFactory && actionFactories.length === 1) {
@@ -118,14 +118,17 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onC
   );
 };
 
-interface SelectedActionFactoryProps<Config extends ActionFactoryBaseConfig, Context = unknown> {
+interface SelectedActionFactoryProps<
+  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
+  Context = unknown
+> {
   actionFactory: ActionFactory<Config, Context>;
   onConfigChange: (config: Config | null) => void;
   showDeselect: boolean;
   onDeselect: () => void;
 }
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
-const SelectedActionFactory: React.FC<SelectedActionFactoryProps<ActionFactoryBaseConfig>> = ({
+const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   actionFactory,
   onDeselect,
   showDeselect,
@@ -134,7 +137,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps<ActionFactoryBa
   const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(null);
   return (
     <div
-      className="uiActions__SelectedActionFactory"
+      className="uiActions__selectedActionFactoryContainer"
       data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
     >
       <header>
@@ -174,8 +177,8 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps<ActionFactoryBa
 };
 
 interface ActionFactorySelectorProps {
-  actionFactories: Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
-  onActionFactorySelected: (actionFactory: ActionFactory<ActionFactoryBaseConfig, unknown>) => void;
+  actionFactories: ActionFactory[];
+  onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
 const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({

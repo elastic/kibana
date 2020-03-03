@@ -9,6 +9,6 @@ import { i18n } from '@kbn/i18n';
 export const txtCreateDrilldown = i18n.translate(
   'xpack.drilldowns.components.FlyoutCreateDrilldown.CreateDrilldown',
   {
-    defaultMessage: 'Create drilldown',
+    defaultMessage: 'Create Drilldown',
   }
 );

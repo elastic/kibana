@@ -23,13 +23,13 @@ import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import {
   ActionFactory,
   ActionWizard,
-  ActionFactoryBaseConfig,
   TEST_SUBJ_ACTION_FACTORY_ITEM,
   TEST_SUBJ_SELECTED_ACTION_FACTORY,
 } from './action_wizard';
 import {
   DashboardDrilldownActionFactory,
   UrlDrilldownActionFactory,
+  ACTION_FACTORIES,
   dashboards,
 } from './test_data';
 
@@ -41,14 +41,7 @@ test('Pick and configure action', () => {
   const wizardChangeFn = jest.fn();
 
   const screen = render(
-    <ActionWizard
-      actionFactories={
-        [DashboardDrilldownActionFactory, UrlDrilldownActionFactory] as Array<
-          ActionFactory<ActionFactoryBaseConfig, unknown>
-        >
-      }
-      onChange={wizardChangeFn}
-    />
+    <ActionWizard actionFactories={ACTION_FACTORIES} onChange={wizardChangeFn} />
   );
 
   // check that all factories are displayed to pick

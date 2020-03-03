@@ -19,7 +19,7 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { ActionFactory, ActionFactoryBaseConfig } from './action_wizard';
+import { ActionFactory } from './action_wizard';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -157,7 +157,7 @@ export const UrlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
   context: null,
 };
 
-export const ACTION_FACTORIES = [
+export const ACTION_FACTORIES = ([
   DashboardDrilldownActionFactory,
   UrlDrilldownActionFactory,
-] as Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
+] as unknown) as ActionFactory[];

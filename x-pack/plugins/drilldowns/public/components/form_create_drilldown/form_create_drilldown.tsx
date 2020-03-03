@@ -5,24 +5,38 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import './index.scss';
+import { EuiForm, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { txtNameOfDrilldown, txtUntitledDrilldown, txtDrilldownAction } from './i18n';
-import { DrilldownPicker } from '../drilldown_picker';
+import {
+  ActionWizard,
+  ActionFactory,
+  ActionFactoryBaseConfig,
+} from '../../../../../../src/plugins/ui_actions/public';
+
+// TODO: this should be actual input to the component and should not be using test data
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ACTION_FACTORIES } from '../../../../../../src/plugins/ui_actions/public/components/action_wizard/test_data';
 
 const noop = () => {};
 
 export interface FormCreateDrilldownProps {
   name?: string;
   onNameChange?: (name: string) => void;
+  onActionChange?: (
+    actionFactory: ActionFactory<ActionFactoryBaseConfig, unknown> | null,
+    config: ActionFactoryBaseConfig | null
+  ) => void;
 }
 
 export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
   name = '',
   onNameChange = noop,
+  onActionChange = noop,
 }) => {
   const nameFragment = (
-    <EuiFormRow label={txtNameOfDrilldown}>
+    <EuiFormRow label={txtNameOfDrilldown} className={'drilldowns__formCreateDrillDownEuiFormRow'}>
       <EuiFieldText
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
@@ -34,19 +48,30 @@ export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
     </EuiFormRow>
   );
 
-  const triggerPicker = <div>Trigger Picker will be here</div>;
-  const actionPicker = (
-    <EuiFormRow label={txtDrilldownAction}>
-      <DrilldownPicker />
+  const actionWizard = (
+    <EuiFormRow
+      label={txtDrilldownAction}
+      fullWidth={true}
+      className={'drilldowns__formCreateDrillDownEuiFormRow'}
+    >
+      <ActionWizard
+        actionFactories={ACTION_FACTORIES}
+        onChange={(actionFactory, config) => {
+          onActionChange(actionFactory, config);
+        }}
+      />
     </EuiFormRow>
   );
 
   return (
     <>
       <DrilldownHelloBar />
-      <EuiForm>{nameFragment}</EuiForm>
-      {triggerPicker}
-      {actionPicker}
+      <EuiSpacer size={'l'} />
+      <EuiForm>
+        {nameFragment}
+        <EuiSpacer size={'xl'} />
+        {actionWizard}
+      </EuiForm>
     </>
   );
 };

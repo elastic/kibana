@@ -30,3 +30,4 @@ export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping, TriggerId } from './types';
+export { ActionWizard, ActionFactory, ActionFactoryBaseConfig } from './components/action_wizard';

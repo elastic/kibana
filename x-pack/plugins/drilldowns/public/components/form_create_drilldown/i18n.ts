@@ -23,6 +23,6 @@ export const txtUntitledDrilldown = i18n.translate(
 export const txtDrilldownAction = i18n.translate(
   'xpack.drilldowns.components.FormCreateDrilldown.drilldownAction',
   {
-    defaultMessage: 'Drilldown action',
+    defaultMessage: 'Drilldown action:',
   }
 );

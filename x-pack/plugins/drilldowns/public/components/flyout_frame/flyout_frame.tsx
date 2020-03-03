@@ -33,7 +33,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
 }) => {
   const headerFragment = title && (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
+      <EuiTitle size="m">
         <h1>{title}</h1>
       </EuiTitle>
     </EuiFlyoutHeader>
