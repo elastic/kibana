@@ -57,10 +57,10 @@ export const proxyRequest = ({
     reject = rej;
   });
 
-  const finalHeaders = { ...headers };
-  const hasHostHeader = Object.keys(headers).some(key => key.toLowerCase() === 'host');
+  const finalUserHeaders = { ...headers };
+  const hasHostHeader = Object.keys(finalUserHeaders).some(key => key.toLowerCase() === 'host');
   if (!hasHostHeader) {
-    finalHeaders.host = hostname;
+    finalUserHeaders.host = hostname;
   }
 
   const req = client.request({
@@ -72,7 +72,7 @@ export const proxyRequest = ({
     protocol,
     path: `${pathname}${search || ''}`,
     headers: {
-      ...finalHeaders,
+      ...finalUserHeaders,
       'content-type': 'application/json',
       'transfer-encoding': 'chunked',
     },
