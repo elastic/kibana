@@ -20,7 +20,9 @@
 import { resolve } from 'path';
 
 const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
-const num = process.env.CI_WORKER_NUMBER ? `worker-${process.env.CI_WORKER_NUMBER}-` : '';
+const num = process.env.CI_PARALLEL_PROCESS_NUMBER
+  ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
+  : '';
 
 export function makeJunitReportPath(rootDirectory: string, reportName: string) {
   return resolve(

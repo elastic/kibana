@@ -26,8 +26,6 @@ import { npSetup } from 'ui/new_platform';
 
 // import the uiExports that we want to "use"
 import 'uiExports/home';
-import 'uiExports/visTypes';
-
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormatEditors';

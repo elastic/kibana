@@ -9,19 +9,21 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import { Immutable } from '../../../../../common/types';
 import {
   AlertListState,
   AlertingIndexUIQueryParams,
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
+import { Immutable } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
  * Returns the Alert Data array from state
  */
 export const alertListData = (state: AlertListState) => state.alerts;
+
+export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
 /**
  * Returns the alert list pagination data from state
@@ -92,3 +94,15 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
+
+/**
+ * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
+ */
+export const selectedAlertIsLegacyEndpointEvent: (
+  state: AlertListState
+) => boolean = createSelector(selectedAlertDetailsData, function(event) {
+  if (event === undefined) {
+    return false;
+  }
+  return 'endgame' in event;
+});

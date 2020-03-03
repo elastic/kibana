@@ -30,6 +30,7 @@ import {
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
+import { InternalMetricsServiceSetup } from './metrics';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -40,6 +41,7 @@ export interface InternalCoreSetup {
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   uuid: UuidServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**
