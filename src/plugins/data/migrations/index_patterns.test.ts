@@ -24,9 +24,11 @@ const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationCon
 
 describe('migration index-pattern', () => {
   describe('6.5.0', () => {
+    const migrationFn = indexPatterns['6.5.0'];
+
     test('adds "type" and "typeMeta" properties to object when not declared', () => {
       expect(
-        indexPatterns['6.5.0'](
+        migrationFn(
           {
             type: 'index-pattern',
             attributes: {},
@@ -46,7 +48,7 @@ Object {
 
     test('keeps "type" and "typeMeta" properties as is when declared', () => {
       expect(
-        indexPatterns['6.5.0'](
+        migrationFn(
           {
             type: 'index-pattern',
             attributes: {
@@ -69,6 +71,8 @@ Object {
   });
 
   describe('7.6.0', () => {
+    const migrationFn = indexPatterns['7.6.0'];
+
     test('should remove the parent property and update the subType prop on every field that has them', () => {
       const input = {
         type: 'index-pattern',
@@ -87,7 +91,7 @@ Object {
         },
       };
 
-      expect(indexPatterns['7.6.0'](input, savedObjectMigrationContext)).toEqual(expected);
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
     });
   });
 });

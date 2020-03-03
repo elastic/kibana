@@ -23,7 +23,7 @@ import * as migrations from '../../migrations';
 
 export class IndexPatternsService implements Plugin<void> {
   public setup(core: CoreSetup) {
-    const indexPatternType: SavedObjectsType = {
+    const indexPatternSavedObjectType: SavedObjectsType = {
       name: 'index-pattern',
       hidden: false,
       namespaceAgnostic: false,
@@ -43,7 +43,7 @@ export class IndexPatternsService implements Plugin<void> {
       migrations: migrations.indexPatterns,
     };
 
-    core.savedObjects.registerType(indexPatternType);
+    core.savedObjects.registerType(indexPatternSavedObjectType);
 
     registerRoutes(core.http);
   }

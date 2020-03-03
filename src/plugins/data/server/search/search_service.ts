@@ -34,6 +34,8 @@ import {
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 import { esSearchService } from './es_search';
 
+import * as migrations from '../../migrations';
+
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     search?: IRouteHandlerSearchContext;
@@ -52,6 +54,30 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     registerSearchRoute(router);
 
     this.contextContainer = core.context.createContextContainer();
+
+    const searchSavedObjectType = {
+      name: 'search',
+      hidden: false,
+      namespaceAgnostic: false,
+      mappings: {
+        properties: {
+          columns: { type: 'keyword' },
+          description: { type: 'text' },
+          hits: { type: 'integer' },
+          kibanaSavedObjectMeta: {
+            properties: {
+              searchSourceJSON: { type: 'text' },
+            },
+          },
+          sort: { type: 'keyword' },
+          title: { type: 'text' },
+          version: { type: 'integer' },
+        },
+      },
+      migrations: migrations.search,
+    };
+
+    core.savedObjects.registerType(searchSavedObjectType);
 
     core.http.registerRouteHandlerContext<'search'>('search', context => {
       return createApi({

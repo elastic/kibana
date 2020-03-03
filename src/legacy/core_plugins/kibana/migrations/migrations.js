@@ -409,24 +409,6 @@ function replaceMovAvgToMovFn(doc, logger) {
   return doc;
 }
 
-function migrateSearchSortToNestedArray(doc) {
-  const sort = get(doc, 'attributes.sort');
-  if (!sort) return doc;
-
-  // Don't do anything if we already have a two dimensional array
-  if (Array.isArray(sort) && sort.length > 0 && Array.isArray(sort[0])) {
-    return doc;
-  }
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      sort: [doc.attributes.sort],
-    },
-  };
-}
-
 function migrateFiltersAggQueryStringQueries(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
 
@@ -471,8 +453,6 @@ const executeMigrations730 = flow(
 );
 
 const executeVisualizationMigrations731 = flow(migrateFiltersAggQueryStringQueries);
-
-const executeSearchMigrations740 = flow(migrateSearchSortToNestedArray);
 
 const executeMigrations742 = flow(transformSplitFiltersStringToQueryObject);
 
@@ -617,15 +597,5 @@ export const migrations = {
       return doc;
     },
     '7.3.0': dashboardMigrations730,
-  },
-  search: {
-    '7.0.0': doc => {
-      // Set new "references" attribute
-      doc.references = doc.references || [];
-      // Migrate index pattern
-      migrateIndexPattern(doc);
-      return doc;
-    },
-    '7.4.0': executeSearchMigrations740,
   },
 };

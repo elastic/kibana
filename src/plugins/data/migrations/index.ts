@@ -18,3 +18,4 @@
  */
 
 export { indexPatterns } from './index_patterns';
+export { search } from './search';
