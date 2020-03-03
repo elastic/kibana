@@ -18,13 +18,13 @@
  */
 
 import { resolve } from 'path';
-import { CI_PARALLEL_PROCESS_TAG } from './ci_parallel_process_tag';
+import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_tag';
 
 export function makeJunitReportPath(rootDirectory: string, reportName: string) {
   return resolve(
     rootDirectory,
     'target/junit',
     process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_TAG}${reportName}.xml`
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
   );
 }

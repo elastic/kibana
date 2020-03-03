@@ -22,7 +22,7 @@ import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
-import { CI_PARALLEL_PROCESS_TAG_PREFIX } from '@kbn/test';
+import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_tag';
 import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';
@@ -45,7 +45,7 @@ export function createLegacyEsTestCluster(options = {}) {
     ssl,
   } = options;
 
-  const clusterName = `${CI_PARALLEL_PROCESS_TAG_PREFIX}${customClusterName}`;
+  const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
   const esArgs = [
     `cluster.name=${clusterName}`,
