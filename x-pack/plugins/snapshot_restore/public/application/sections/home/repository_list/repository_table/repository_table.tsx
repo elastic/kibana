@@ -17,6 +17,7 @@ import {
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
+import { Error } from '../../../../components/section_error';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
@@ -27,7 +28,7 @@ import { SendRequestResponse } from '../../../../../shared_imports';
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  reload: () => Promise<SendRequestResponse>;
+  reload: () => Promise<SendRequestResponse<any, Error>>;
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }

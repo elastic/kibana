@@ -7,16 +7,11 @@
 import React, { createContext } from 'react';
 import { useRequest } from '../../../services/http/use_request';
 import { Privileges } from '../../../../../common/types';
+import { Error } from '../../../components/section_error';
 
 interface Authorization {
   isLoading: boolean;
-  apiError: {
-    data: {
-      error: string;
-      cause?: string[];
-      message?: string;
-    };
-  } | null;
+  apiError: Error | null;
   privileges: Privileges;
 }
 

@@ -28,12 +28,13 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
+import { Error } from '../../../../components/section_error';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   policies: SlmPolicy[];
-  reload: () => Promise<SendRequestResponse>;
+  reload: () => Promise<SendRequestResponse<any, Error>>;
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
   onPolicyExecuted: () => void;
