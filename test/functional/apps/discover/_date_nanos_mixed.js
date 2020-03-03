@@ -36,8 +36,9 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos_mixed');
+    after(async () => {
+      await security.testUser.restoreDefaults();
+      esArchiver.unload('date_nanos_mixed');
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function() {
