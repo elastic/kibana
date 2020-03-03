@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+// @ts-ignore
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
