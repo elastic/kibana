@@ -124,6 +124,14 @@
         ],
       },
       {
+        groupSlug: 'browserslist-useragent',
+        groupName: 'browserslist-useragent related packages',
+        packageNames: [
+          'browserslist-useragent',
+          '@types/browserslist-useragent',
+        ],
+      },
+      {
         groupSlug: 'chance',
         groupName: 'chance related packages',
         packageNames: [
@@ -658,6 +666,14 @@
         ],
       },
       {
+        groupSlug: 'normalize-path',
+        groupName: 'normalize-path related packages',
+        packageNames: [
+          'normalize-path',
+          '@types/normalize-path',
+        ],
+      },
+      {
         groupSlug: 'numeral',
         groupName: 'numeral related packages',
         packageNames: [
@@ -906,6 +922,14 @@
         ],
       },
       {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
+        ],
+      },
+      {
         groupSlug: 'uuid',
         groupName: 'uuid related packages',
         packageNames: [
@@ -927,6 +951,14 @@
         packageNames: [
           'vinyl-fs',
           '@types/vinyl-fs',
+        ],
+      },
+      {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
         ],
       },
       {

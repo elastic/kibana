@@ -41,7 +41,7 @@ export const ConfigSchema = schema.object(
     secureCookies: schema.boolean({ defaultValue: false }),
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-      oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
+      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
       saml: providerOptionsSchema(
         'saml',
         schema.object({
@@ -49,6 +49,11 @@ export const ConfigSchema = schema.object(
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
         })
       ),
+      http: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+        schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      }),
     }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.

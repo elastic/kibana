@@ -67,7 +67,7 @@ export function DynamicColorForm({
           color={styleOptions.color}
           customColorMap={styleOptions.customColorRamp}
           useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
-          compressed
+          styleProperty={styleProperty}
         />
       );
     }
@@ -83,15 +83,17 @@ export function DynamicColorForm({
         color={styleOptions.colorCategory}
         customColorMap={styleOptions.customColorPalette}
         useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
-        compressed
+        styleProperty={styleProperty}
       />
     );
   };
 
   return (
     <Fragment>
-      <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+        <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+          {staticDynamicSelect}
+        </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
             fields={fields}

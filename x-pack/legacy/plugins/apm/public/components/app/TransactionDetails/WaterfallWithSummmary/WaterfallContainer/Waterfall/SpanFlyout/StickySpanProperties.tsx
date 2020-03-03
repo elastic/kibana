@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   SPAN_NAME,
   TRANSACTION_NAME,
   SERVICE_NAME
-} from '../../../../../../../../common/elasticsearch_fieldnames';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+} from '../../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../../../../../plugins/apm/common/i18n';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 import { TransactionOverviewLink } from '../../../../../../shared/Links/apm/TransactionOverviewLink';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';

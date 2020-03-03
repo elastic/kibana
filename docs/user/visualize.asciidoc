@@ -45,17 +45,17 @@ data sets.
 [horizontal]
 <<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
 
-<<tilemap,Coordinate map>>:: Displays points on a map using a geohash aggregation.
+<<visualize-maps,Coordinate map>>:: Displays points on a map using a geohash aggregation.
 
-<<regionmap,Region map>>:: Merge any structured map data onto a shape.
+<<visualize-maps,Region map>>:: Merge any structured map data onto a shape.
 
-<<heatmap,Heat map>>:: Display shaded cells within a matrix.
+<<visualize-maps,Heat map>>:: Display shaded cells within a matrix.
 
 * *<<for-dashboard,Dashboard tools>>*
 [horizontal]
-<<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
+Controls:: Adds interactive inputs to a Dashboard.
 
-<<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
+Markdown widget:: Display free-form information or instructions.
 
 * *For developers*
 [horizontal]
@@ -136,8 +136,6 @@ include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
 include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
-include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
-include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 

@@ -6,10 +6,9 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, ProcessEvent } from '../types';
-import * as selectors from '../store/selectors';
+import { Vector2, Matrix3 } from '../types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 /**
  * A placeholder view for a process node.
@@ -20,6 +19,7 @@ export const ProcessEventDot = styled(
       className,
       position,
       event,
+      projectionMatrix,
     }: {
       /**
        * A `className` string provided by `styled`
@@ -32,20 +32,24 @@ export const ProcessEventDot = styled(
       /**
        * An event which contains details about the process node.
        */
-      event: ProcessEvent;
+      event: LegacyEndpointEvent;
+      /**
+       * projectionMatrix which can be used to convert `position` to screen coordinates.
+       */
+      projectionMatrix: Matrix3;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
        */
-      const projectionMatrix = useSelector(selectors.projectionMatrix);
       const [left, top] = applyMatrix3(position, projectionMatrix);
+
       const style = {
         left: (left - 20).toString() + 'px',
         top: (top - 20).toString() + 'px',
       };
       return (
         <span className={className} style={style}>
-          name: {event.data_buffer.process_name}
+          name: {event.endgame.process_name}
           <br />
           x: {position[0]}
           <br />

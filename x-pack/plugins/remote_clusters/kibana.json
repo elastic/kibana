@@ -1,9 +1,18 @@
 {
   "id": "remote_clusters",
   "version": "kibana",
+  "configPath": [
+    "xpack",
+    "remote_clusters"
+  ],
   "requiredPlugins": [
-    "licensing"
+    "licensing",
+    "management",
+    "indexManagement"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
   ],
   "server": true,
-  "ui": false
+  "ui": true
 }

@@ -8,10 +8,8 @@ import React, { useEffect, FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +20,9 @@ import {
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+
+import { useDocumentationLinks } from '../../app_dependencies';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { documentationLinksService } from '../../services/documentation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { KibanaProvider, RenderOnlyWithInitializedKibanaContext } from '../../lib/kibana';
 
@@ -37,6 +36,8 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
     docTitleService.setTitle('createTransform');
   }, []);
 
+  const { esTransform } = useDocumentationLinks();
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
       <KibanaProvider savedObjectId={match.params.savedObjectId}>
@@ -49,23 +50,11 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
                     id="xpack.transform.transformsWizard.createTransformTitle"
                     defaultMessage="Create transform"
                   />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
-                      defaultMessage: `Beta`,
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.transform.transformsWizard.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
-                  />
                 </h1>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href={documentationLinksService.getTransformsDocUrl()}
+                  href={esTransform}
                   target="_blank"
                   iconType="help"
                   data-test-subj="documentationLink"

@@ -20,14 +20,13 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
+  Filter,
   TimeRange,
   FilterManager,
-  onlyDisabledFiltersChanged,
-  generateFilters,
   getTime,
   Query,
   IFieldType,
@@ -97,7 +96,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
-  private prevFilters?: esFilters.Filter[];
+  private prevFilters?: Filter[];
   private prevQuery?: Query;
 
   constructor(
@@ -111,7 +110,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: ExecuteTriggerActions,
+    private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
     super(
@@ -236,7 +235,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id!);
+      let filters = esFilters.generateFilters(
+        this.filterManager,
+        field,
+        value,
+        operator,
+        indexPattern.id!
+      );
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
@@ -316,7 +321,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     const isFetchRequired =
-      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
       !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);

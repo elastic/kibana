@@ -38,6 +38,19 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
+const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (
+    has(settings, 'server.xsrf.whitelist') &&
+    get<unknown[]>(settings, 'server.xsrf.whitelist').length > 0
+  ) {
+    log(
+      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
+        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
+    );
+  }
+  return settings;
+};
+
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
@@ -115,6 +128,9 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
   renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
   renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
+  renameFromRoot('xpack.xpack_main.telemetry.config', 'telemetry.config'),
+  renameFromRoot('xpack.xpack_main.telemetry.url', 'telemetry.url'),
+  renameFromRoot('xpack.xpack_main.telemetry.enabled', 'telemetry.enabled'),
   renameFromRoot('xpack.telemetry.enabled', 'telemetry.enabled'),
   renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
   renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
@@ -174,4 +190,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
+  xsrfDeprecation,
 ];

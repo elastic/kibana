@@ -4,6 +4,7 @@
 /test/functional/failure_debug
 /test/functional/screenshots
 /test/functional/apps/reporting/reports/session
+/test/reporting/configs/failure_debug/
 /legacy/plugins/reporting/.chromium/
 /legacy/plugins/reporting/.phantom/
 /.aws-config.json

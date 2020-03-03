@@ -19,7 +19,7 @@
 
 import { get, isEmpty } from 'lodash';
 
-import { IndexPattern, Field } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
@@ -45,7 +45,7 @@ interface ParamInstanceBase {
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: ComboBoxGroupedOptions<Field>;
+  indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -65,15 +65,17 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: ComboBoxGroupedOptions<Field> = [];
-    let fields: Field[];
+    let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
+    let fields: IndexPatternField[];
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: Field[] = (param as IFieldParamType).getAvailableFields(agg);
+      const availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(
+        agg
+      );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
 

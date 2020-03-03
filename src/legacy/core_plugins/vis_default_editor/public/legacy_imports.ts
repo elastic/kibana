@@ -22,12 +22,12 @@ export {
   AggType,
   IAggType,
   IAggConfig,
-  AggConfigs,
   IAggConfigs,
   AggParam,
   AggGroupNames,
   aggGroupNamesMap,
   aggTypes,
+  createAggConfigs,
   FieldParamType,
   IFieldParamType,
   BUCKET_TYPES,
@@ -48,8 +48,4 @@ export { isValidJson, isValidInterval } from 'ui/agg_types';
 export { AggParamOption } from 'ui/agg_types';
 export { CidrMask } from 'ui/agg_types';
 
-export { PersistedState } from 'ui/persisted_state';
-export { getDocLink } from 'ui/documentation_links';
-export { documentationLinks } from 'ui/documentation_links/documentation_links';
-export { move } from 'ui/utils/collection';
 export * from 'ui/vis/lib';

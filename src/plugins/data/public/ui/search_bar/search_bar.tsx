@@ -29,24 +29,21 @@ import {
   IDataPluginServices,
   TimeRange,
   Query,
-  esFilters,
+  Filter,
   IIndexPattern,
-  TimeHistoryContract,
   FilterBar,
   SavedQuery,
-  SavedQueryMeta,
-  SaveQueryForm,
-  SavedQueryManagementComponent,
-  SavedQueryAttributes,
 } from '../..';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+import { SavedQueryAttributes, TimeHistoryContract } from '../../query';
+import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm } from '..';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
@@ -63,7 +60,7 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;

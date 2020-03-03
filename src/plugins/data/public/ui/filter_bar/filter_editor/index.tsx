@@ -48,12 +48,21 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { esFilters, IIndexPattern, IFieldType } from '../../..';
+import { IIndexPattern, IFieldType } from '../../..';
+import {
+  Filter,
+  getIndexPatternFromFilter,
+  FieldFilter,
+  buildFilter,
+  buildCustomFilter,
+  cleanFilter,
+  getFilterParams,
+} from '../../../../common';
 
 interface Props {
-  filter: esFilters.Filter;
+  filter: Filter;
   indexPatterns: IIndexPattern[];
-  onSubmit: (filter: esFilters.Filter) => void;
+  onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
 }
@@ -76,10 +85,10 @@ class FilterEditorUI extends Component<Props, State> {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
-      params: esFilters.getFilterParams(props.filter),
+      params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
-      queryDsl: JSON.stringify(esFilters.cleanFilter(props.filter), null, 2),
+      queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }
@@ -372,14 +381,12 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private getIndexPatternFromFilter() {
-    return esFilters.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
   private getFieldFromFilter() {
     const indexPattern = this.getIndexPatternFromFilter();
-    return (
-      indexPattern && getFieldFromFilter(this.props.filter as esFilters.FieldFilter, indexPattern)
-    );
+    return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
   }
 
   private getSelectedOperator() {
@@ -470,17 +477,10 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = esFilters.buildCustomFilter(
-        newIndex,
-        body,
-        disabled,
-        negate,
-        alias,
-        $state.store
-      );
+      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = esFilters.buildFilter(
+      const filter = buildFilter(
         indexPattern,
         field,
         operator.type,

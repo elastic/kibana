@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormLabel,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
@@ -45,8 +46,6 @@ const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
-  TRIGGER_INTERVAL_SIZE: 1,
-  TRIGGER_INTERVAL_UNIT: 'm',
   THRESHOLD: [1000, 5000],
   GROUP_BY: 'all',
 };
@@ -140,7 +139,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
       groupBy: DEFAULT_VALUES.GROUP_BY,
       threshold: DEFAULT_VALUES.THRESHOLD,
     });
@@ -327,7 +325,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiSpacer size="l" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Select Index to query:"
+          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="indexPopover"
@@ -340,7 +346,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                     defaultMessage: 'index',
                   }
                 )}
-                value={index || firstFieldOption.text}
+                value={index ? index.join(' ') : firstFieldOption.text}
                 isActive={indexPopoverOpen}
                 onClick={() => {
                   setIndexPopoverOpen(true);
@@ -370,6 +376,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             </div>
           </EuiPopover>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <WhenExpression
             aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
@@ -391,6 +399,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             />
           </EuiFlexItem>
         ) : null}
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <GroupByExpression
             groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
@@ -407,6 +417,16 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             }
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Define the alert condition:"
+          id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <ThresholdExpression
             thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}

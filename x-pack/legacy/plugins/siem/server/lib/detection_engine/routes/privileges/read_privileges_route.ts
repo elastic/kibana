@@ -6,13 +6,19 @@
 
 import Hapi from 'hapi';
 import { merge } from 'lodash/fp';
+
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
 import { RulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
-import { callWithRequestFactory, transformError, getIndex } from '../utils';
+import { GetScopedClients } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
-export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createReadPrivilegesRulesRoute = (
+  config: LegacyServices['config'],
+  usingEphemeralEncryptionKey: boolean,
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: DETECTION_ENGINE_PRIVILEGES_URL,
@@ -24,23 +30,34 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         },
       },
     },
-    async handler(request: RulesRequest) {
+    async handler(request: RulesRequest, headers) {
       try {
-        const callWithRequest = callWithRequestFactory(request, server);
-        const index = getIndex(request, server);
-        const permissions = await readPrivileges(callWithRequest, index);
-        const usingEphemeralEncryptionKey = server.usingEphemeralEncryptionKey;
+        const { clusterClient, spacesClient } = await getClients(request);
+
+        const index = getIndex(spacesClient.getSpaceId, config);
+        const permissions = await readPrivileges(clusterClient.callAsCurrentUser, index);
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const readPrivilegesRoute = (server: ServerFacade): void => {
-  server.route(createReadPrivilegesRulesRoute(server));
+export const readPrivilegesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  usingEphemeralEncryptionKey: boolean,
+  getClients: GetScopedClients
+) => {
+  route(createReadPrivilegesRulesRoute(config, usingEphemeralEncryptionKey, getClients));
 };
