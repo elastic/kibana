@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { EndpointConfigType } from '../../../config';
 
 /**
  * Abstract Pagination class for determining next/prev urls,
@@ -13,7 +12,6 @@ import { EndpointConfigType } from '../../../config';
  */
 export abstract class Pagination<T, Z> {
   constructor(
-    protected config: EndpointConfigType,
     protected requestContext: RequestHandlerContext,
     protected state: T,
     protected data: Z

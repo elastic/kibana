@@ -36,9 +36,9 @@ export type AlertSort = [AlertSortParam, AlertSortParam];
 export type SearchCursor = [string, string];
 
 /**
- * Parsed request parameters for searching and sorting.
+ * Parsed request parameters for searching, sorting, and paginating alerts
  */
-export interface AlertSearchAndSortParams {
+export interface AlertSearchParams {
   // Filtering
   query?: string;
   filters: Filter[];
@@ -47,13 +47,8 @@ export interface AlertSearchAndSortParams {
   // Sorting
   sort: string;
   order: Direction;
-}
 
-/**
- * Parsed request parameters for paginating.
- */
-export interface AlertPaginationParams {
-  pageSize: number;
+  pageSize?: number; // TODO: this should not be optional
 
   // Simple pagination
   pageIndex?: number;
@@ -64,11 +59,6 @@ export interface AlertPaginationParams {
   searchBefore?: SearchCursor;
   emptyStringIsUndefined?: boolean;
 }
-
-/**
- * All alert parameters.
- */
-export type AlertSearchParams = AlertSearchAndSortParams & AlertPaginationParams;
 
 /**
  * ES request body for alerts.
@@ -101,7 +91,6 @@ export interface AlertDetailsRequestParams {
  * Common query params for alerts.
  */
 export interface AlertRequestQuery {
-  page_size?: number;
   query?: string;
   filters?: string;
   date_range: string;
@@ -113,6 +102,7 @@ export interface AlertRequestQuery {
  * Request params for paginating alerts.
  */
 export interface AlertListRequestQueryPagination {
+  page_size?: number; // TODO: this shouldn't be optional?
   page_index?: number;
   after?: SearchCursor;
   before?: SearchCursor;

@@ -37,9 +37,8 @@ export async function mapToAlertResultList(
       .warn('Total hits not counted accurately. Pagination numbers may be inaccurate.');
   }
 
-  const config = await endpointAppContext.config();
   const hits = searchResponse.hits.hits;
-  const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
+  const pagination: AlertListPagination = new AlertListPagination(reqCtx, reqData, hits);
 
   function mapHit(entry: AlertHits[0]): AlertData {
     return {
@@ -49,7 +48,7 @@ export async function mapToAlertResultList(
   }
 
   return {
-    request_page_size: reqData.pageSize,
+    request_page_size: reqData.pageSize!,
     request_page_index: reqData.pageIndex,
     result_from_index: reqData.fromIndex,
     next: await pagination.getNextUrl(),

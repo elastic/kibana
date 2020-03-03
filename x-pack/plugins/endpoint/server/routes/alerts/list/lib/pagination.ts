@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { AlertHits } from '../../../../../common/types';
-import { EndpointConfigType } from '../../../../config';
 import { AlertSearchParams } from '../../types';
 import { Pagination, buildQueryString } from '../../lib';
 import { BASE_ALERTS_ROUTE } from '../..';
@@ -18,13 +17,8 @@ import { BASE_ALERTS_ROUTE } from '../..';
 export class AlertListPagination extends Pagination<AlertSearchParams, AlertHits> {
   protected hitLen: number;
 
-  constructor(
-    config: EndpointConfigType,
-    requestContext: RequestHandlerContext,
-    state: AlertSearchParams,
-    data: AlertHits
-  ) {
-    super(config, requestContext, state, data);
+  constructor(requestContext: RequestHandlerContext, state: AlertSearchParams, data: AlertHits) {
+    super(requestContext, state, data);
     this.hitLen = data.length;
   }
 
@@ -33,7 +27,7 @@ export class AlertListPagination extends Pagination<AlertSearchParams, AlertHits
    */
   async getNextUrl(): Promise<string | null> {
     const state = this.state;
-    if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
+    if (this.hitLen > 0 && this.hitLen <= this.state.pageSize!) {
       const lastCustomSortValue: string = get(
         this.data[this.hitLen - 1]._source,
         this.state.sort

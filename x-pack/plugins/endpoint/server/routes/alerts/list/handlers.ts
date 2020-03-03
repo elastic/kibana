@@ -26,8 +26,8 @@ export const alertListHandlerWrapper = function(
       const mappedBody = await mapToAlertResultList(
         ctx,
         endpointAppContext,
-        reqData,
-        alertSearchParams
+        alertSearchParams,
+        response
       );
       return res.ok({ body: mappedBody });
     } catch (err) {

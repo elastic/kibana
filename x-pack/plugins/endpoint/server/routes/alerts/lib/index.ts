@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { decode, encode } from 'rison-node';
+import { RisonValue, decode, encode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { stringify } from 'query-string';
 import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
@@ -13,15 +13,12 @@ import { AlertEvent, Direction, EndpointAppConstants } from '../../../../common/
 import { EndpointAppContext } from '../../../types';
 import {
   AlertListRequestQuery,
-  AlertSearchAndSortParams,
-  AlertPaginationParams,
   AlertSearchParams,
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
   UndefinedResultPosition,
 } from '../types';
-import { alertListReqSchema } from '../list/schemas';
 export { Pagination } from './pagination';
 
 /**
@@ -62,7 +59,7 @@ export const getAlertSearchParams = async (
     if (reqData.pageIndex === undefined) {
       reqData.pageIndex = 0;
     }
-    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
+    reqData.fromIndex = reqData.pageIndex * reqData.pageSize!;
   }
 
   // See: https://github.com/elastic/elasticsearch-js/issues/662
@@ -85,11 +82,6 @@ export const getAlertSearchParams = async (
 
   return reqData;
 };
-
-export const getAlertPaginationParams = async (
-  request: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
-  endpointAppContext: EndpointAppContext
-): Promise<AlertPaginationParams> => {};
 
 /**
  * Reverses the sort direction.
@@ -187,6 +179,51 @@ function buildSort(query: AlertSearchParams): AlertSort {
 }
 
 /**
+ * Builds a query string from AlertSearchParams.
+ */
+export function buildQueryString(params: Partial<AlertSearchParams>): string {
+  const urlParams: Partial<AlertListRequestQuery> = {};
+
+  if (params.query) {
+    urlParams.query = params.query;
+  }
+
+  if (params.filters !== undefined && params.filters.length > 0) {
+    urlParams.filters = encode((params.filters as unknown) as RisonValue);
+  }
+
+  if (params.dateRange) {
+    urlParams.date_range = encode((params.dateRange as unknown) as RisonValue);
+  }
+
+  if (params.sort) {
+    urlParams.sort = params.sort;
+  }
+
+  if (params.order) {
+    urlParams.order = params.order;
+  }
+
+  if (params.pageIndex !== undefined) {
+    urlParams.page_index = params.pageIndex;
+  }
+
+  if (params.searchAfter !== undefined) {
+    urlParams.after = params.searchAfter;
+  }
+
+  if (params.searchBefore !== undefined) {
+    urlParams.before = params.searchBefore;
+  }
+
+  if (params.emptyStringIsUndefined !== undefined) {
+    urlParams.empty_string_is_undefined = params.emptyStringIsUndefined;
+  }
+
+  return stringify(urlParams);
+}
+
+/**
  * Builds a request body for Elasticsearch, given a set of query params.
  **/
 const buildAlertSearchParams = async (
@@ -197,7 +234,7 @@ const buildAlertSearchParams = async (
   // Calculate minimum total hits set to indicate there's a next page
   if (query.fromIndex) {
     totalHitsMin = Math.max(
-      query.fromIndex + query.pageSize * 2,
+      query.fromIndex + query.pageSize! * 2,
       EndpointAppConstants.DEFAULT_TOTAL_HITS
     );
   }
@@ -217,7 +254,7 @@ const buildAlertSearchParams = async (
   }
 
   const reqWrapper: AlertSearchRequestWrapper = {
-    size: query.pageSize,
+    size: query.pageSize!,
     index: EndpointAppConstants.ALERT_INDEX_NAME,
     body: reqBody,
   };
