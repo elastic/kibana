@@ -10,6 +10,7 @@ import { ILicense } from '../../licensing/public';
 export interface ServiceConnectionNode {
   'service.name': string;
   'service.environment': string | null;
+  'service.framework.name': string | null;
   'agent.name': string;
 }
 export interface ExternalConnectionNode {

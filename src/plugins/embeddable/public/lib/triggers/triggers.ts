@@ -20,6 +20,10 @@
 import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
+export interface EmbeddableContext {
+  embeddable: IEmbeddable;
+}
+
 export interface EmbeddableVisTriggerContext {
   embeddable: IEmbeddable;
   timeFieldName: string;

@@ -21,53 +21,47 @@ def workerFailures = []
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
 currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
 
-stage("Kibana Pipeline") {
-  timeout(time: 180, unit: 'MINUTES') {
-    timestamps {
-      ansiColor('xterm') {
-        def agents = [:]
-        for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
-          def agentNumberInside = agentNumber
-          def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
-          agents["agent-${agentNumber}"] = {
-            catchError {
-              print "Agent ${agentNumberInside} - ${agentExecutions} executions"
+kibanaPipeline(timeoutMinutes: 180) {
+  def agents = [:]
+  for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
+    def agentNumberInside = agentNumber
+    def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
+    agents["agent-${agentNumber}"] = {
+      catchErrors {
+        print "Agent ${agentNumberInside} - ${agentExecutions} executions"
 
-              kibanaPipeline.withWorkers('flaky-test-runner', {
-                if (NEED_BUILD) {
-                  if (!IS_XPACK) {
-                    kibanaPipeline.buildOss()
-                    if (CI_GROUP == '1') {
-                      runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
-                    }
-                  } else {
-                    kibanaPipeline.buildXpack()
-                  }
-                }
-              }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
+        workers.functional('flaky-test-runner', {
+          if (NEED_BUILD) {
+            if (!IS_XPACK) {
+              kibanaPipeline.buildOss()
+              if (CI_GROUP == '1') {
+                runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+              }
+            } else {
+              kibanaPipeline.buildXpack()
             }
           }
-        }
-
-        parallel(agents)
-
-        currentBuild.description += ", Failures: ${workerFailures.size()}"
-
-        if (workerFailures.size() > 0) {
-          print "There were ${workerFailures.size()} test suite failures."
-          print "The executions that failed were:"
-          print workerFailures.join("\n")
-          print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
-        }
+        }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
       }
     }
+  }
+
+  parallel(agents)
+
+  currentBuild.description += ", Failures: ${workerFailures.size()}"
+
+  if (workerFailures.size() > 0) {
+    print "There were ${workerFailures.size()} test suite failures."
+    print "The executions that failed were:"
+    print workerFailures.join("\n")
+    print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
   }
 }
 
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'serverMocha') {
-      return kibanaPipeline.getPostBuildWorker('serverMocha', {
+      return kibanaPipeline.functionalTestProcess('serverMocha', {
         kibanaPipeline.bash(
           """
             source src/dev/ci_setup/setup_env.sh
@@ -77,20 +71,20 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
         )
       })
     } else if (job == 'firefoxSmoke') {
-      return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') })
+      return kibanaPipeline.functionalTestProcess('firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh')
     } else if(job == 'visualRegression') {
-      return kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') })
+      return kibanaPipeline.functionalTestProcess('visualRegression', './test/scripts/jenkins_visual_regression.sh')
     } else {
-      return kibanaPipeline.getOssCiGroupWorker(ciGroup)
+      return kibanaPipeline.ossCiGroupProcess(ciGroup)
     }
   }
 
   if (job == 'firefoxSmoke') {
-    return kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') })
+    return kibanaPipeline.functionalTestProcess('xpack-firefoxSmoke', './test/scripts/jenkins_xpack_firefox_smoke.sh')
   } else if(job == 'visualRegression') {
-    return kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') })
+    return kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')
   } else {
-    return kibanaPipeline.getXpackCiGroupWorker(ciGroup)
+    return kibanaPipeline.xpackCiGroupProcess(ciGroup)
   }
 }
 
@@ -105,10 +99,9 @@ def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWor
       for(def j = 0; j < workerExecutions; j++) {
         print "Execute agent-${agentNumber} worker-${workerNumber}: ${j}"
         withEnv([
-          "JOB=agent-${agentNumber}-worker-${workerNumber}-${j}",
           "REMOVE_KIBANA_INSTALL_DIR=1",
         ]) {
-          catchError {
+          catchErrors {
             try {
               worker(workerNumber)
             } catch (ex) {
