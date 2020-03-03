@@ -21,8 +21,8 @@ import { cloneDeep, get } from 'lodash';
 import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
 import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
-import { IAggConfig, setBounds, isDateHistogramBucketAggConfig } from '../../../legacy_imports';
 import { Vis, VisParams } from '../types';
+import { IAggConfig, isDateHistogramBucketAggConfig, setBounds } from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;
