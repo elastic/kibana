@@ -17,5 +17,19 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { searchSourceMock } from '../../../../plugins/data/public/search/search_source/mocks';
+import { ISearchSource } from '../../../data/public';
+
+export type SortOrder = [string, string];
+export interface SavedSearch {
+  readonly id: string;
+  title: string;
+  searchSource: ISearchSource;
+  description?: string;
+  columns: string[];
+  sort: SortOrder[];
+  destroy: () => void;
+}
+export interface SavedSearchLoader {
+  get: (id: string) => Promise<SavedSearch>;
+  urlFor: (id: string) => string;
+}
