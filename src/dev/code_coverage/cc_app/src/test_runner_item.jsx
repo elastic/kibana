@@ -1,29 +1,23 @@
 import React from "react";
 
+import timestamp from './utils/timestamp';
+
 export default function TestRunnerItem ({historicalItem, testRunnerItem}) {
   const { type } = testRunnerItem;
   const typeHref = href(type);
 
   return (
-    <div>
-      <div>
-        {type}
-      </div>
+    <div className="flex justify-center text-black">
       <a
         className="App-link"
         href={typeHref(historicalItem)}
         target="_blank"
         rel="noopener noreferrer"
       >
-        {timestamp(historicalItem)}
+        {type}
       </a>
     </div>
   );
-}
-
-const findTimeStampRe = () => /coverage\/(\d*-.*Z)/gm;
-function timestamp(item) {
-  return [...findTimeStampRe().exec(item)][1];
 }
 
 function href(type) {

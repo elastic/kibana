@@ -13259,6 +13259,10 @@ video {
           transition-duration: 1000ms;
 }
 
+body {
+  background-color: #e6e6e6;
+}
+
 .App {
   text-align: center;
 }

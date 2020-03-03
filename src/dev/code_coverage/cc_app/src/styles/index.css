@@ -4,6 +4,10 @@
 
 @tailwind utilities;
 
+body {
+  background-color: #e6e6e6;
+}
+
 .App {
   text-align: center;
 }

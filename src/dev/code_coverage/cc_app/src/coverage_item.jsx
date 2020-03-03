@@ -29,13 +29,18 @@ function ciRunLabel(isCurrent, currentCiRunUrl) {
 }
 
 function anchor(currentCiRunUrl) {
-  return (<a
-    className="App-link"
-    href={currentCiRunUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Current Job
-  </a>);
+  return (
+    <>
+      <a
+        className="App-link flex justify-center"
+        href={currentCiRunUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Current Job
+      </a>
+      <hr />
+    </>
+  );
 }
 

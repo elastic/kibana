@@ -1,12 +1,13 @@
 import React from "react";
 import TestRunnerItem from './test_runner_item';
+import timestamp from './utils/timestamp';
 
 export default function TestRunnerItemList ({historicalItem, testRunnerTypes}) {
   const renderWithHistorical = renderItem(historicalItem);
   return (
     <div className="App-TestRunner-List">
       <ul>
-        <span className="flex justify-center text-black">Test Runners</span>
+        {timestamp(historicalItem)}
         {testRunnerTypes.map(renderWithHistorical)}
       </ul>
     </div>
