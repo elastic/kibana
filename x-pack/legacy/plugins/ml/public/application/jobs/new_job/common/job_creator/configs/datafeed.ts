@@ -45,8 +45,8 @@ interface Aggregation {
 }
 
 interface IndicesOptions {
-  expand_wildcards: string[];
-  ignore_unavailable: boolean;
-  allow_no_indices: boolean;
-  ignore_throttled: boolean;
+  expand_wildcards?: string[];
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  ignore_throttled?: boolean;
 }
