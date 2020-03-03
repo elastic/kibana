@@ -4864,6 +4864,11 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
   integrity sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==
 
+"@types/normalize-path@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/normalize-path/-/normalize-path-3.0.0.tgz#bb5c46cab77b93350b4cf8d7ff1153f47189ae31"
+  integrity sha512-Nd8y/5t/7CRakPYiyPzr/IAfYusy1FkcZYFEAcoMZkwpJv2n4Wm+olW+e7xBdHEXhOnWdG9ddbar0gqZWS4x5Q==
+
 "@types/numeral@^0.0.25":
   version "0.0.25"
   resolved "https://registry.yarnpkg.com/@types/numeral/-/numeral-0.0.25.tgz#b6f55062827a4787fe4ab151cf3412a468e65271"
@@ -7121,10 +7126,10 @@ aws4@^1.6.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.6.0.tgz#83ef5ca860b2b32e4a0deedee8c771b9db57471e"
   integrity sha1-g+9cqGCysy5KDe7e6MdxudtXRx4=
 
-axe-core@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-3.3.2.tgz#7baf3c55a5cf1621534a2c38735f5a1bf2f7e1a8"
-  integrity sha512-lRdxsRt7yNhqpcXQk1ao1BL73OZDzmFCWOG0mC4tGR/r14ohH2payjHwCMQjHGbBKm924eDlmG7utAGHiX/A6g==
+axe-core@^3.4.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-3.5.1.tgz#d8d5aaef73f003e8b766ea28bb078343f3622201"
+  integrity sha512-mwpDgPwWB+5kMHyLjlxh4w25ClJfqSxi+c6LQ4ix349TdCUctMwJNPTkhPD1qP9SYIjFgjeVpVZWCvK9oBGwCg==
 
 axios@^0.18.0, axios@^0.18.1:
   version "0.18.1"

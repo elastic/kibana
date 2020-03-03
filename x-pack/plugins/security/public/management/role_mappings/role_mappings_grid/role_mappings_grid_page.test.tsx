@@ -16,6 +16,7 @@ import { DocumentationLinksService } from '../documentation_links';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
+import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('RoleMappingsGridPage', () => {
   it('renders an empty prompt when no role mappings exist', async () => {
@@ -29,6 +30,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -55,6 +57,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -89,6 +92,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -104,7 +108,7 @@ describe('RoleMappingsGridPage', () => {
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(1);
   });
 
-  it('renders links to mapped roles', async () => {
+  it('renders links to mapped roles, even if the roles API call returns nothing', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
@@ -122,6 +126,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -155,6 +160,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -192,6 +198,7 @@ describe('RoleMappingsGridPage', () => {
     const { docLinks, notifications } = coreMock.createStart();
     const wrapper = mountWithIntl(
       <RoleMappingsGridPage
+        rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
@@ -215,5 +222,71 @@ describe('RoleMappingsGridPage', () => {
     expect(roleMappingsAPI.deleteRoleMappings).toHaveBeenCalledWith(['some-realm']);
     // Expect an additional API call to refresh the grid
     expect(roleMappingsAPI.getRoleMappings).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders a warning when a mapping is assigned a deprecated role', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some-realm',
+        enabled: true,
+        roles: ['superuser', 'kibana_user'],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
+    roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+      {
+        name: 'some-realm',
+        success: true,
+      },
+    ]);
+
+    const roleAPIClient = rolesAPIClientMock.create();
+    roleAPIClient.getRoles.mockResolvedValue([
+      {
+        name: 'kibana_user',
+        metadata: {
+          _deprecated: true,
+          _deprecated_reason: `I don't like you.`,
+        },
+      },
+    ]);
+
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        rolesAPIClient={roleAPIClient}
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
+    await nextTick();
+    wrapper.update();
+
+    const deprecationTooltip = wrapper.find('[data-test-subj="roleDeprecationTooltip"]').props();
+
+    expect(deprecationTooltip).toMatchInlineSnapshot(`
+      Object {
+        "children": <div>
+          kibana_user
+           
+          <EuiIcon
+            className="eui-alignTop"
+            color="warning"
+            size="s"
+            type="alert"
+          />
+        </div>,
+        "content": "The kibana_user role is deprecated. I don't like you.",
+        "data-test-subj": "roleDeprecationTooltip",
+        "delay": "regular",
+        "position": "top",
+      }
+    `);
   });
 });
