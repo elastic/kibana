@@ -30,7 +30,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { ContextValue, ServicesContextProvider } from '../../contexts';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 import { useRequestActionContext } from '../../contexts/request_context';
-import { instance } from '../../contexts/editor_context/editor_registry';
+import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 
 import { sendRequestToES } from './send_request_to_es';
 import { useSendCurrentRequestToES } from './use_send_current_request_to_es';
@@ -57,7 +57,7 @@ describe('useSendCurrentRequestToES', () => {
     (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
     // This request should succeed
     (sendRequestToES as jest.Mock).mockResolvedValue([]);
-    (instance.getInputEditor as jest.Mock).mockImplementation(() => ({
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
@@ -66,14 +66,14 @@ describe('useSendCurrentRequestToES', () => {
     expect(sendRequestToES).toHaveBeenCalledWith({ requests: ['test'] });
 
     // Second call should be the request success
-    const [, [requestFailedCall]] = (dispatch as jest.Mock).mock.calls;
-    expect(requestFailedCall).toEqual({ type: 'requestSuccess', payload: { data: [] } });
+    const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;
+    expect(requestSucceededCall).toEqual({ type: 'requestSuccess', payload: { data: [] } });
   });
 
   it('handles known errors', async () => {
     // Set up mocks
     (sendRequestToES as jest.Mock).mockRejectedValue({ response: 'nada' });
-    (instance.getInputEditor as jest.Mock).mockImplementation(() => ({
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
@@ -89,7 +89,7 @@ describe('useSendCurrentRequestToES', () => {
   it('handles unknown errors', async () => {
     // Set up mocks
     (sendRequestToES as jest.Mock).mockRejectedValue(NaN /* unexpected error value */);
-    (instance.getInputEditor as jest.Mock).mockImplementation(() => ({
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
