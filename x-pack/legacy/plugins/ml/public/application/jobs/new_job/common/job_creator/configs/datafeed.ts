@@ -45,7 +45,7 @@ interface Aggregation {
 }
 
 interface IndicesOptions {
-  expand_wildcards?: string[];
+  expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   ignore_throttled?: boolean;
