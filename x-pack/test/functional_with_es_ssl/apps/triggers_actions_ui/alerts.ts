@@ -60,6 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
+      await nameInput.click();
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
@@ -128,6 +129,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
+      await nameInput.click();
+      await nameInput.click();
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
@@ -140,6 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await slackWebhookUrlInput.clearValue();
       await slackWebhookUrlInput.type('https://test');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      await pageObjects.common.closeToast();
       const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
@@ -162,15 +166,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(updatedAlertName);
 
       const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterEdit).to.eql([
         {
           name: updatedAlertName,
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
+          tagsText: '',
+          alertType: 'Index Threshold',
           interval: '1m',
         },
       ]);
