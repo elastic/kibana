@@ -11,8 +11,6 @@ import { KibanaContext } from '../../../../lib/kibana';
 
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('ui/new_platform');
-
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');

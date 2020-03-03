@@ -1,0 +1,9 @@
+{
+  "id": "ml",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["ml"],
+  "requiredPlugins": ["cloud", "features", "home", "licensing", "security", "spaces", "usageCollection"],
+  "server": true,
+  "ui": false
+}

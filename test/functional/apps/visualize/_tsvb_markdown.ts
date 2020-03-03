@@ -121,7 +121,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.cloneSeries();
 
-        retry.try(async function seriesCountCheck() {
+        await retry.try(async function seriesCountCheck() {
           const seriesLength = (await visualBuilder.getSeries()).length;
           expect(seriesLength).to.be.equal(2);
         });
@@ -131,7 +131,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.createNewAgg();
 
-        retry.try(async function aggregationCountCheck() {
+        await retry.try(async function aggregationCountCheck() {
           const aggregationLength = await visualBuilder.getAggregationCount();
           expect(aggregationLength).to.be.equal(2);
         });
