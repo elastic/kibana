@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3 } from '../types';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent, isLegacyEvent } from '../../../../common/types';
 
 /**
  * A placeholder view for a process node.
@@ -32,7 +32,7 @@ export const ProcessEventDot = styled(
       /**
        * An event which contains details about the process node.
        */
-      event: LegacyEndpointEvent;
+      event: ResolverEvent;
       /**
        * projectionMatrix which can be used to convert `position` to screen coordinates.
        */
@@ -42,14 +42,14 @@ export const ProcessEventDot = styled(
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
        */
       const [left, top] = applyMatrix3(position, projectionMatrix);
-
+      const eventName = isLegacyEvent(event) ? event.endgame.process_name : event.process.name;
       const style = {
         left: (left - 20).toString() + 'px',
         top: (top - 20).toString() + 'px',
       };
       return (
         <span className={className} style={style}>
-          name: {event.endgame.process_name}
+          name: {eventName}
           <br />
           x: {position[0]}
           <br />

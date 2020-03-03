@@ -11,7 +11,7 @@ import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent, isLegacyEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -38,7 +38,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   interface ProcessTableView {
     name: string;
     timestamp?: Date;
-    event: LegacyEndpointEvent;
+    event: ResolverEvent;
   }
 
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
@@ -48,14 +48,20 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () =>
       [...processNodePositions.keys()].map(processEvent => {
         let dateTime;
-        if (processEvent.endgame.timestamp_utc) {
-          const date = new Date(processEvent.endgame.timestamp_utc);
+        const eventTimestamp = isLegacyEvent(processEvent)
+          ? processEvent.endgame.timestamp_utc
+          : processEvent['@timestamp'];
+        const name = isLegacyEvent(processEvent)
+          ? processEvent.endgame.process_name
+          : processEvent.process.name;
+        if (eventTimestamp) {
+          const date = new Date(eventTimestamp);
           if (isFinite(date.getTime())) {
             dateTime = date;
           }
         }
         return {
-          name: processEvent.endgame.process_name ? processEvent.endgame.process_name : '',
+          name: name ? name : '',
           timestamp: dateTime,
           event: processEvent,
         };

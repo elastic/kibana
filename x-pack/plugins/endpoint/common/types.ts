@@ -315,22 +315,33 @@ export interface EndpointEvent {
     category: string;
     type: string;
     id: string;
+    kind: string;
   };
   endpoint: {
     process: {
       entity_id: string;
-      parent: {
+      parent?: {
         entity_id: string;
       };
+      name: string;
     };
   };
   agent: {
     id: string;
     type: string;
   };
+  process: {
+    name: string;
+  };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+export function isLegacyEvent(
+  event: EndpointEvent | LegacyEndpointEvent
+): event is LegacyEndpointEvent {
+  return (event as LegacyEndpointEvent).endgame !== undefined;
+}
 
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
