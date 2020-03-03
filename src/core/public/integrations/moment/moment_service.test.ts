@@ -47,7 +47,7 @@ describe('MomentService', () => {
     expect(momentMock.updateLocale).toHaveBeenCalledWith('default-locale', { week: { dow: 0 } });
   });
 
-  it('uses the default timezone when a zone is not defined', async () => {
+  it('does not set unknkown zone', async () => {
     const tz$ = new BehaviorSubject('timezone/undefined');
     const dow$ = new BehaviorSubject('dow1');
 
