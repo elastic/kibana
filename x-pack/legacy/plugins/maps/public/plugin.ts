@@ -31,26 +31,27 @@ interface MapsPluginSetupDependencies {
   };
 }
 
+export const bindCoreAndPlugins = (core, plugins) => {
+  const { licensing, inspector } = plugins;
+  setInspector(inspector);
+  if (licensing) {
+    licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
+  }
+};
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup(
-    core: any,
-    { __LEGACY: { uiModules }, np: { licensing, home } }: MapsPluginSetupDependencies
-  ) {
+  public setup(core: any, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
       .directive('mapListing', function(reactDirective: any) {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    if (licensing) {
-      licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
-    }
+    bindCoreAndPlugins(core, np);
 
-    home.featureCatalogue.register(featureCatalogueEntry);
+    np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    setInspector(plugins.np.inspector);
-  }
+  public start(core: CoreStart, plugins: any) {}
 }
