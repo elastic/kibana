@@ -10,16 +10,16 @@ import {
   TSearchStrategyProvider,
   ISearchContext,
   ISearch,
-  SYNC_SEARCH_STRATEGY,
   getEsPreference,
 } from '../../../../../src/plugins/data/public';
 import { IEnhancedEsSearchRequest } from '../../common';
+import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext
 ) => {
-  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
-  const { search: syncSearch } = syncStrategyProvider(context);
+  const asyncStrategyProvider = context.getSearchStrategy(ASYNC_SEARCH_STRATEGY);
+  const { search: asyncSearch } = asyncStrategyProvider(context);
 
   const search: ISearch<typeof ES_SEARCH_STRATEGY> = (
     request: IEnhancedEsSearchRequest,
@@ -31,7 +31,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
       ...request.params,
     };
 
-    return syncSearch(
+    return asyncSearch(
       {
         ...request,
         params,
