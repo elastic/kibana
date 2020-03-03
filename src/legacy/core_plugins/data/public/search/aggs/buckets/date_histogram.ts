@@ -21,8 +21,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-// TODO need to move TimeBuckets
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
@@ -32,8 +31,12 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import { KBN_FIELD_TYPES, TimefilterContract } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getQueryService, getUiSettings } from '../../../../../../../plugins/data/public/services';
+import {
+  getFieldFormats,
+  getQueryService,
+  getUiSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/data/public/services';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
@@ -97,7 +100,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
   },
   createFilter: createFilterDateHistogram,
   decorateAggConfig() {
+    const fieldFormats = getFieldFormats();
     const { timefilter } = getQueryService().timefilter;
+    const uiSettings = getUiSettings();
     let buckets: any;
 
     return {
@@ -106,7 +111,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         get() {
           if (buckets) return buckets;
 
-          buckets = new TimeBuckets();
+          buckets = new TimeBuckets({ fieldFormats, uiSettings });
           buckets.setInterval(getInterval(this));
           setAggTimeRangeBounds(this, { timefilter });
 

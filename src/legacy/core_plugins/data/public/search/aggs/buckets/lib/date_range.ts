@@ -17,15 +17,21 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
+import { TimeBuckets } from './time_buckets';
+import { TimeRange } from '../../../../../../../../plugins/data/public';
+import {
+  getFieldFormats,
+  getUiSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/data/public/services';
+
 export interface DateRangeKey {
   from: number;
   to: number;
 }
 
-export const convertDateRangeToString = (
-  { from, to }: DateRangeKey,
-  format: (val: any) => string
-) => {
+export function convertDateRangeToString({ from, to }: DateRangeKey, format: (val: any) => string) {
   if (!from) {
     return 'Before ' + format(to);
   } else if (!to) {
@@ -33,4 +39,42 @@ export const convertDateRangeToString = (
   } else {
     return format(from) + ' to ' + format(to);
   }
-};
+}
+
+export function toAbsoluteDates(range?: TimeRange) {
+  if (!range) {
+    return;
+  }
+
+  const fromDate = dateMath.parse(range.from);
+  const toDate = dateMath.parse(range.to, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    from: fromDate.toDate(),
+    to: toDate.toDate(),
+  };
+}
+
+export function getAutoIntervalFromTimeRange(range?: TimeRange, defaultValue: string = '1h') {
+  const dates = toAbsoluteDates(range);
+  if (!dates) {
+    return defaultValue;
+  }
+
+  const buckets = new TimeBuckets({
+    fieldFormats: getFieldFormats(),
+    uiSettings: getUiSettings(),
+  });
+
+  buckets.setInterval('auto');
+  buckets.setBounds({
+    min: dates.from,
+    max: dates.to,
+  });
+
+  return buckets.getInterval().expression;
+}

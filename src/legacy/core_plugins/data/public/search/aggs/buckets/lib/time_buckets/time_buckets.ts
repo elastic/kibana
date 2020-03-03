@@ -19,8 +19,14 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { npStart } from 'ui/new_platform';
-import { fieldFormats, parseInterval } from '../../../../../../../../../plugins/data/public';
+
+import { IUiSettingsClient } from '../../../../../../../../../core/public';
+import {
+  fieldFormats as fieldFormatsHelpers,
+  parseInterval,
+} from '../../../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FieldFormatsStart } from '../../../../../../../../../plugins/data/public/field_formats';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
@@ -45,9 +51,6 @@ interface TimeBucketsInterval extends moment.Duration {
   scaled?: boolean;
 }
 
-const getConfig = (key: string, defaultOverride?: any) =>
-  npStart.core.uiSettings.get(key, defaultOverride);
-
 function isObject(o: any): o is Record<string, any> {
   return _.isObject(o);
 }
@@ -60,6 +63,11 @@ function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
 }
 
+interface TimeBucketsConfig {
+  fieldFormats: FieldFormatsStart;
+  uiSettings: IUiSettingsClient;
+}
+
 /**
  * Helper class for wrapping the concept of an "Interval",
  * which describes a timespan that will separate moments.
@@ -68,10 +76,15 @@ function isValidMoment(m: any): boolean {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
+  private getConfig: (key: string) => any;
+  private fieldFormats: FieldFormatsStart;
+
   private _lb: Bounds['min'] = null;
   private _ub: Bounds['max'] = null;
   private _originalInterval: string | null = null;
   private _i?: moment.Duration | 'auto';
+
+  // because other parts of Kibana arbitrarily add properties
   [key: string]: any;
 
   static __cached__(self: TimeBuckets) {
@@ -163,7 +176,9 @@ export class TimeBuckets {
     return Object.create(self, desc);
   }
 
-  constructor() {
+  constructor({ uiSettings, fieldFormats }: TimeBucketsConfig) {
+    this.getConfig = (key: string) => uiSettings.get(key);
+    this.fieldFormats = fieldFormats;
     return TimeBuckets.__cached__(this);
   }
 
@@ -344,7 +359,7 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(getConfig('histogram:barTarget'), Number(duration));
+      return calcAutoIntervalNear(this.getConfig('histogram:barTarget'), Number(duration));
     };
 
     const parsedInterval = readInterval();
@@ -355,7 +370,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = getConfig('histogram:maxBars');
+      const maxLength: number = this.getConfig('histogram:maxBars');
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;
@@ -416,7 +431,7 @@ export class TimeBuckets {
    */
   getScaledDateFormat() {
     const interval = this.getInterval();
-    const rules = getConfig('dateFormat:scaled');
+    const rules = this.getConfig('dateFormat:scaled');
 
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
@@ -425,12 +440,11 @@ export class TimeBuckets {
       }
     }
 
-    return getConfig('dateFormat');
+    return this.getConfig('dateFormat');
   }
 
   getScaledDateFormatter() {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
-    const DateFieldFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+    const DateFieldFormat = this.fieldFormats.getType(fieldFormatsHelpers.FIELD_FORMAT_IDS.DATE);
 
     if (!DateFieldFormat) {
       throw new Error('Unable to retrieve Date Field Format');
@@ -440,7 +454,7 @@ export class TimeBuckets {
       {
         pattern: this.getScaledDateFormat(),
       },
-      getConfig
+      this.getConfig
     );
   }
 }

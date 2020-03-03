@@ -29,6 +29,7 @@ import {
   AggConfigs,
   CreateAggConfigParams,
   FieldParamType,
+  getAutoIntervalFromTimeRange,
   MetricAggType,
   aggTypeFieldFilters,
   parentPipelineAggHelper,
@@ -55,6 +56,7 @@ interface AggsStart {
     configStates?: CreateAggConfigParams[],
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
+  getAutoIntervalFromTimeRange: typeof getAutoIntervalFromTimeRange;
   types: AggTypesRegistryStart;
   __LEGACY: AggsStartLegacy;
 }
@@ -98,6 +100,7 @@ export class SearchService {
             typesRegistry: aggTypesStart,
           });
         },
+        getAutoIntervalFromTimeRange,
         types: aggTypesStart,
         __LEGACY: {
           AggConfig, // TODO make static

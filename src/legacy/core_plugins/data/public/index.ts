@@ -79,6 +79,7 @@ export {
   Schemas,
   siblingPipelineType,
   termsAggFilter,
+  toAbsoluteDates,
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,

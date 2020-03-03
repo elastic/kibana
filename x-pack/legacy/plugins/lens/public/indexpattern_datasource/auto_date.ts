@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeBuckets } from 'ui/time_buckets';
-import dateMath from '@elastic/datemath';
+import { toAbsoluteDates as toAbsolute } from '../../../../../../src/legacy/core_plugins/data/public';
 import {
   ExpressionFunctionDefinition,
   KibanaContext,
@@ -21,17 +20,10 @@ export function toAbsoluteDates(dateRange?: DateRange) {
     return;
   }
 
-  const fromDate = dateMath.parse(dateRange.fromDate);
-  const toDate = dateMath.parse(dateRange.toDate, { roundUp: true });
-
-  if (!fromDate || !toDate) {
-    return;
-  }
-
-  return {
-    fromDate: fromDate.toDate(),
-    toDate: toDate.toDate(),
-  };
+  return toAbsolute({
+    from: dateRange.fromDate,
+    to: dateRange.toDate,
+  });
 }
 
 export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: string = '1h') {
@@ -44,8 +36,8 @@ export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: s
 
   buckets.setInterval('auto');
   buckets.setBounds({
-    min: dates.fromDate,
-    max: dates.toDate,
+    min: dates.from,
+    max: dates.to,
   });
 
   return buckets.getInterval().expression;
