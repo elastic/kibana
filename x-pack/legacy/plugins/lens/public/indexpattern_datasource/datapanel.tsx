@@ -40,15 +40,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import {
-  indexPatterns as indexPatternsUtils,
-  IFieldType,
-  Filter,
-  Query,
-  IndexPatternTypeMeta,
-  esQuery,
-  IIndexPattern,
-} from '../../../../../../src/plugins/data/public';
+import { esQuery, IIndexPattern } from '../../../../../../src/plugins/data/public';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
