@@ -18,10 +18,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter, ISavedObjectsRepository } from 'kibana/server';
 import { storeReport, reportSchema } from '../report';
 
-export function registerUiMetricRoute(router: IRouter, getLegacySavedObjects: () => any) {
+export function registerUiMetricRoute(
+  router: IRouter,
+  getSavedObjects: () => ISavedObjectsRepository | undefined
+) {
   router.post(
     {
       path: '/api/ui_metric/report',
@@ -34,7 +37,10 @@ export function registerUiMetricRoute(router: IRouter, getLegacySavedObjects: ()
     async (context, req, res) => {
       const { report } = req.body;
       try {
-        const internalRepository = getLegacySavedObjects();
+        const internalRepository = getSavedObjects();
+        if (!internalRepository) {
+          throw Error(`The saved objects client hasn't been initialised yet`);
+        }
         await storeReport(internalRepository, report);
         return res.ok({ body: { status: 'ok' } });
       } catch (error) {

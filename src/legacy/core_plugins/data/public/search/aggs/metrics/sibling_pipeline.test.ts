@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { spy } from 'sinon';
 import { bucketSumMetricAgg } from './bucket_sum';
 import { bucketAvgMetricAgg } from './bucket_avg';
 import { bucketMinMetricAgg } from './bucket_min';
@@ -25,6 +24,7 @@ import { bucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 
 jest.mock('../schemas', () => {
   class MockedSchemas {
@@ -35,9 +35,13 @@ jest.mock('../schemas', () => {
   };
 });
 
-jest.mock('ui/new_platform');
-
 describe('sibling pipeline aggs', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry();
+
   const metrics = [
     { name: 'sum_bucket', title: 'Overall Sum', provider: bucketSumMetricAgg },
     { name: 'avg_bucket', title: 'Overall Average', provider: bucketAvgMetricAgg },
@@ -96,7 +100,7 @@ describe('sibling pipeline aggs', () => {
               },
             },
           ],
-          null
+          { typesRegistry }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -162,8 +166,8 @@ describe('sibling pipeline aggs', () => {
         init();
 
         const searchSource: any = {};
-        const customMetricSpy = spy();
-        const customBucketSpy = spy();
+        const customMetricSpy = jest.fn();
+        const customBucketSpy = jest.fn();
         const { customMetric, customBucket } = aggConfig.params;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
@@ -171,11 +175,11 @@ describe('sibling pipeline aggs', () => {
         customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
 
-        expect(customMetricSpy.calledWith(customMetric, searchSource)).toBe(true);
-        expect(customBucketSpy.calledWith(customBucket, searchSource)).toBe(true);
+        expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);
+        expect(customBucketSpy.mock.calls[0]).toEqual([customBucket, searchSource, {}]);
       });
     });
   });
