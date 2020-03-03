@@ -255,10 +255,13 @@ export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
-    const defaultedHeaders = {
+    const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
-      ...headers,
-    } as CustomHttpResponseOptions<T>['headers']; // https://github.com/microsoft/TypeScript/issues/27273
+    };
+    const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
+      ...contentType,
+      ...(headers ?? {}),
+    };
 
     return this.response.custom({
       headers: defaultedHeaders,
