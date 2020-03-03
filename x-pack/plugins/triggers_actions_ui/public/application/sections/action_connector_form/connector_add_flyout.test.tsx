@@ -12,32 +12,22 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppContextProvider } from '../../app_context';
 import { AppDeps } from '../../app';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let deps: AppDeps | null;
+  let deps: any;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
       toastNotifications: mocks.notifications.toasts,
-      injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
-      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
@@ -46,7 +36,6 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
@@ -82,7 +71,17 @@ describe('connector_add_flyout', () => {
             },
           }}
         >
-          <ConnectorAddFlyout addFlyoutVisible={true} setAddFlyoutVisibility={state => {}} />
+          <ConnectorAddFlyout
+            addFlyoutVisible={true}
+            setAddFlyoutVisibility={state => {}}
+            actionTypes={[
+              {
+                id: actionType.id,
+                enabled: true,
+                name: 'Test',
+              },
+            ]}
+          />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );

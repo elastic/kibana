@@ -19,18 +19,11 @@ describe('connector_add_flyout', () => {
     const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
-      uiSettings: mockes.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
@@ -39,11 +32,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
     };
   });
 
@@ -76,11 +65,19 @@ describe('connector_add_flyout', () => {
           },
         }}
       >
-        <ActionTypeMenu onActionTypeChange={onActionTypeChange} />
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: true,
+              name: 'Test',
+            },
+          ]}
+        />
       </ActionsConnectorsContextProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="second-action-type-card"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
   });
 });

@@ -12,18 +12,19 @@ import { useActionsConnectorsContext } from '../../context/actions_connectors_co
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
+  actionTypes?: ActionType[];
 }
 
-export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
+export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
   const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
       try {
-        const actionTypes = await loadActionTypes({ http });
+        const availableActionTypes = actionTypes ?? (await loadActionTypes({ http }));
         const index: ActionTypeIndex = {};
-        for (const actionTypeItem of actionTypes) {
+        for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
@@ -41,7 +42,7 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const actionTypes = Object.entries(actionTypesIndex ?? [])
+  const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([index]) => actionTypeRegistry.has(index))
     .map(([index, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(index);
@@ -54,7 +55,7 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
       };
     });
 
-  const cardNodes = actionTypes
+  const cardNodes = registeredActionTypes
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((item, index) => {
       return (

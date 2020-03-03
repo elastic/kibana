@@ -31,11 +31,13 @@ import { useActionsConnectorsContext } from '../../context/actions_connectors_co
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  actionTypes?: ActionType[];
 }
 
 export const ConnectorAddFlyout = ({
   addFlyoutVisible,
   setAddFlyoutVisibility,
+  actionTypes,
 }: ConnectorAddFlyoutProps) => {
   let hasErrors = false;
   const {
@@ -86,7 +88,9 @@ export const ConnectorAddFlyout = ({
   let currentForm;
   let actionTypeModel;
   if (!actionType) {
-    currentForm = <ActionTypeMenu onActionTypeChange={onActionTypeChange} />;
+    currentForm = (
+      <ActionTypeMenu onActionTypeChange={onActionTypeChange} actionTypes={actionTypes} />
+    );
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
