@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { boomify, isBoom } from 'boom';
+
 import { i18n } from '@kbn/i18n';
+
+import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
+
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../public/app/hooks/use_api_types';
+} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -70,4 +75,13 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     }
     return accumResults;
   }, newResults);
+}
+
+export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
+  const boom = isBoom(error) ? error : boomify(error, { statusCode: error.status });
+  return {
+    body: boom,
+    headers: boom.output.headers,
+    statusCode: boom.output.statusCode,
+  };
 }
