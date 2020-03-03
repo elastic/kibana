@@ -39,10 +39,10 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
 export const responseAdapter = (response: ResponseMock): Response => {
   const methods = Object.keys(response) as Method[];
   const calls = methods
-    .reduce((responses, method) => {
+    .reduce<Response['calls']>((responses, method) => {
       const methodMock = response[method];
       return [...responses, ...buildResponses(method, methodMock.mock.calls)];
-    }, [] as Response['calls'])
+    }, [])
     .sort((call, other) => other.status - call.status);
 
   const [{ body, status }] = calls;
