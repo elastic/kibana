@@ -8,19 +8,21 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingContent,
   EuiTableSortingType,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import styled from 'styled-components';
-import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
+import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
-import { SortFieldCase, Case, FilterOptions } from '../../../../containers/case/types';
+import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
@@ -34,11 +36,23 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/utility_bar';
-import { getCreateCaseUrl } from '../../../../components/link_to';
+import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
 import { getBulkItems } from '../bulk_actions';
+import { CaseHeaderPage } from '../case_header_page';
+import { OpenClosedStats } from '../open_closed_stats';
+import { getActions } from './actions';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+`;
+const FlexItemDivider = styled(EuiFlexItem)`
+  ${({ theme }) => css`
+    .euiFlexGroup--gutterMedium > &.euiFlexItem {
+      border-right: ${theme.eui.euiBorderThin};
+      padding-right: ${theme.eui.euiSize};
+      margin-right: ${theme.eui.euiSize};
+    }
+  `}
 `;
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
@@ -50,10 +64,12 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const [
-    { data, isLoading, loading, queryParams, filterOptions, selectedCases },
+    { caseCount, data, isLoading, loading, queryParams, filterOptions, selectedCases },
     setFilters,
     setQueryParams,
     setSelectedCases,
+    getCaseCount,
+    dispatchUpdateCaseProperty,
   ] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
@@ -85,44 +101,15 @@ export const AllCases = React.memo(() => {
     [filterOptions, setFilters]
   );
 
-  const actions: Array<DefaultItemIconButtonAction<Case>> = useMemo(
-    () => [
-      {
-        description: 'Delete',
-        icon: 'trash',
-        name: 'Delete',
-        onClick: (theCase: Case) => console.log('Delete case', theCase),
-        type: 'icon',
-        'data-test-subj': 'action-delete',
-      },
-      filterOptions.state === 'open'
-        ? {
-            description: 'Close case',
-            icon: 'magnet',
-            name: 'Close case',
-            onClick: (theCase: Case) => console.log('Close case', theCase),
-            type: 'icon',
-            'data-test-subj': 'action-close',
-          }
-        : {
-            description: 'Reopen case',
-            icon: 'magnet',
-            name: 'Reopen case',
-            onClick: (theCase: Case) => console.log('Reopen case', theCase),
-            type: 'icon',
-            'data-test-subj': 'action-open',
-          },
-      {
-        description: 'To do',
-        icon: 'magnet',
-        name: 'To do',
-        onClick: (theCase: Case) => console.log('To do', theCase),
-        type: 'icon',
-        'data-test-subj': 'action-to-do',
-      },
-    ],
-    [filterOptions.state]
+  const updateTheState = useCallback(
+    ({ caseId, version }: Case, updateValue: 'open' | 'closed') => {
+      dispatchUpdateCaseProperty({ updateKey: 'state', updateValue, caseId, version });
+    },
+    []
   );
+  const actions = useMemo(() => getActions(filterOptions.state, updateTheState), [
+    filterOptions.state,
+  ]);
 
   const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
   const memoizedPagination = useMemo(
@@ -157,70 +144,115 @@ export const AllCases = React.memo(() => {
     }),
     [selectedCases]
   );
+  const isCasesLoading = useMemo(
+    () =>
+      (isLoading && (loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1)) ||
+      (isLoading && isEmpty(data.cases)),
+    [isLoading, loading, data]
+  );
+  const isCasesReady = useMemo(
+    () =>
+      !isLoading &&
+      !isEmpty(data.cases) &&
+      !(loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1),
+    [isLoading, loading, data]
+  );
 
   return (
-    <Panel loading={isLoading && loading.indexOf('cases') > -1}>
-      <CasesTableFilters
-        onFilterChanged={onFilterChangedCallback}
-        initial={{
-          search: filterOptions.search,
-          tags: filterOptions.tags,
-          state: filterOptions.state,
-        }}
-      />
-      {isLoading && loading.indexOf('cases') > -1 && isEmpty(data.cases) && (
-        <Div>
-          <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
-        </Div>
-      )}
-      {(!isLoading || loading.indexOf('cases') === -1) && !isEmpty(data.cases) && (
-        <Div>
-          <UtilityBar border>
-            <UtilityBarSection>
-              <UtilityBarGroup>
-                <UtilityBarText data-test-subj="case-table-case-count">
-                  {i18n.SHOWING_CASES(data.total ?? 0)}
-                </UtilityBarText>
-              </UtilityBarGroup>
-              <UtilityBarGroup>
-                <UtilityBarText data-test-subj="case-table-selected-case-count">
-                  {i18n.SELECTED_CASES(selectedCases.length)}
-                </UtilityBarText>
-                <UtilityBarAction
-                  iconSide="right"
-                  iconType="arrowDown"
-                  popoverContent={getBulkItemsPopoverContent}
-                >
-                  {i18n.BULK_ACTIONS}
-                </UtilityBarAction>
-              </UtilityBarGroup>
-            </UtilityBarSection>
-          </UtilityBar>
-          <EuiBasicTable
-            columns={memoizedGetCasesColumns}
-            isSelectable
-            itemId="caseId"
-            items={data.cases}
-            noItemsMessage={
-              <EuiEmptyPrompt
-                title={<h3>{i18n.NO_CASES}</h3>}
-                titleSize="xs"
-                body={i18n.NO_CASES_BODY}
-                actions={
-                  <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
-                    {i18n.ADD_NEW_CASE}
-                  </EuiButton>
-                }
-              />
-            }
-            onChange={tableOnChangeCallback}
-            pagination={memoizedPagination}
-            selection={euiBasicTableSelectionProps}
-            sorting={sorting}
-          />
-        </Div>
-      )}
-    </Panel>
+    <>
+      <CaseHeaderPage title={i18n.PAGE_TITLE}>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
+          <EuiFlexItem grow={false}>
+            <OpenClosedStats
+              caseCount={caseCount}
+              caseState={'open'}
+              getCaseCount={getCaseCount}
+              isLoading={isLoading}
+              loading={loading}
+            />
+          </EuiFlexItem>
+          <FlexItemDivider grow={false}>
+            <OpenClosedStats
+              caseCount={caseCount}
+              caseState={'closed'}
+              getCaseCount={getCaseCount}
+              isLoading={isLoading}
+              loading={loading}
+            />
+          </FlexItemDivider>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
+              {i18n.CREATE_TITLE}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon href={getConfigureCasesUrl()} iconType="gear" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </CaseHeaderPage>
+      <Panel loading={isCasesLoading}>
+        <CasesTableFilters
+          onFilterChanged={onFilterChangedCallback}
+          initial={{
+            search: filterOptions.search,
+            tags: filterOptions.tags,
+            state: filterOptions.state,
+          }}
+        />
+        {isCasesLoading && (
+          <Div>
+            <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
+          </Div>
+        )}
+        {isCasesReady && (
+          <Div>
+            <UtilityBar border>
+              <UtilityBarSection>
+                <UtilityBarGroup>
+                  <UtilityBarText data-test-subj="case-table-case-count">
+                    {i18n.SHOWING_CASES(data.total ?? 0)}
+                  </UtilityBarText>
+                </UtilityBarGroup>
+                <UtilityBarGroup>
+                  <UtilityBarText data-test-subj="case-table-selected-case-count">
+                    {i18n.SELECTED_CASES(selectedCases.length)}
+                  </UtilityBarText>
+                  <UtilityBarAction
+                    iconSide="right"
+                    iconType="arrowDown"
+                    popoverContent={getBulkItemsPopoverContent}
+                  >
+                    {i18n.BULK_ACTIONS}
+                  </UtilityBarAction>
+                </UtilityBarGroup>
+              </UtilityBarSection>
+            </UtilityBar>
+            <EuiBasicTable
+              columns={memoizedGetCasesColumns}
+              isSelectable
+              itemId="caseId"
+              items={data.cases}
+              noItemsMessage={
+                <EuiEmptyPrompt
+                  title={<h3>{i18n.NO_CASES}</h3>}
+                  titleSize="xs"
+                  body={i18n.NO_CASES_BODY}
+                  actions={
+                    <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
+                      {i18n.ADD_NEW_CASE}
+                    </EuiButton>
+                  }
+                />
+              }
+              onChange={tableOnChangeCallback}
+              pagination={memoizedPagination}
+              selection={euiBasicTableSelectionProps}
+              sorting={sorting}
+            />
+          </Div>
+        )}
+      </Panel>
+    </>
   );
 });
 

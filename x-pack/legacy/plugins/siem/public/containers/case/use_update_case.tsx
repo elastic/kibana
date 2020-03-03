@@ -22,7 +22,7 @@ interface NewCaseState {
   updateKey: UpdateKey | null;
 }
 
-interface UpdateByKey {
+export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: Case[UpdateKey];
 }

@@ -57,3 +57,15 @@ export const CLOSED_CASES = i18n.translate('xpack.siem.case.caseTable.closedCase
 export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
   defaultMessage: 'Closed',
 });
+export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
+  defaultMessage: 'Delete',
+});
+export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseTable.reopenCase', {
+  defaultMessage: 'Open cases',
+});
+export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseTable.closeCase', {
+  defaultMessage: 'Close case',
+});
+export const DUPLICATE_CASE = i18n.translate('xpack.siem.case.caseTable.duplicateCase', {
+  defaultMessage: 'Duplicate case',
+});
