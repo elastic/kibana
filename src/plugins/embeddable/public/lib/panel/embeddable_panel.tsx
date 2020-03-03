@@ -253,11 +253,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         return bOrder - aOrder;
       });
 
-    const contextMenu = await buildContextMenuForActions({
+    return await buildContextMenuForActions({
       actions: sorted,
       actionContext: { embeddable: this.props.embeddable },
       closeMenu: this.closeMyContextMenuPanel,
     });
-    return contextMenu;
   };
 }

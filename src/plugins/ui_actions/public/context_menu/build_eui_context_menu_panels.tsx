@@ -47,7 +47,6 @@ export async function buildContextMenuForActions<A>({
     title: i18n.translate('uiActions.actionPanel.title', {
       defaultMessage: 'Options',
     }),
-    // needs to take content instead of items
     items: menuItems,
   };
 }
@@ -55,7 +54,6 @@ export async function buildContextMenuForActions<A>({
 /**
  * Transform an array of Actions into the shape needed to build an EUIContextMenu
  */
-// needs to render content instead of array of items
 async function buildEuiContextMenuPanelItems<A>({
   actions,
   actionContext,
