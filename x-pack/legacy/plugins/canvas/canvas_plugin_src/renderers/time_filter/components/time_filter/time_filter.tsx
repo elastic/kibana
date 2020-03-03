@@ -3,29 +3,40 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { TimePicker } from '../time_picker';
-import { TimePickerPopover } from '../time_picker_popover';
+import { UnitStrings } from '../../../../../i18n/units';
+
+const { quickRanges: strings } = UnitStrings;
+
+const quickRanges: EuiSuperDatePickerCommonRange[] = [
+  { start: 'now/d', end: 'now', label: strings.getTodayLabel() },
+  { start: 'now-24h', end: 'now', label: strings.getLast24HoursLabel() },
+  { start: 'now-7d', end: 'now', label: strings.getLast7DaysLabel() },
+  { start: 'now-14d', end: 'now', label: strings.getLast2WeeksLabel() },
+  { start: 'now-30d', end: 'now', label: strings.getLast30DaysLabel() },
+  { start: 'now-90d', end: 'now', label: strings.getLast90DaysLabel() },
+  { start: 'now-1y', end: 'now', label: strings.getLast1YearLabel() },
+];
 
 export interface FilterMeta {
   /** Name of datetime column to be filtered  */
   column: string;
   /** Start date string of filtered date range */
-  from: string;
+  start: string;
   /** End date string of filtered date range */
-  to: string;
+  end: string;
 }
 
 function getFilterMeta(filter: string): FilterMeta {
   const ast = fromExpression(filter);
   const column = get<string>(ast, 'chain[0].arguments.column[0]');
-  const from = get<string>(ast, 'chain[0].arguments.from[0]');
-  const to = get<string>(ast, 'chain[0].arguments.to[0]');
-  return { column, from, to };
+  const start = get<string>(ast, 'chain[0].arguments.from[0]');
+  const end = get<string>(ast, 'chain[0].arguments.to[0]');
+  return { column, start, end };
 }
 
 export interface Props {
@@ -33,22 +44,30 @@ export interface Props {
   filter: string;
   /** Function invoked when the filter changes */
   commit: (filter: string) => void;
-  /** Determines if compact or full-sized time picker is displayed */
-  compact?: boolean;
+  /** Datemath format string used to display dates */
+  dateFormat?: string;
 }
 
-export const TimeFilter = ({ filter, commit, compact }: Props) => {
-  const setFilter = (column: string) => (from: string, to: string) => {
-    commit(`timefilter from="${from}" to=${to} column=${column}`);
+export const TimeFilter = ({ filter, commit, dateFormat }: Props) => {
+  const setFilter = (column: string) => ({ start, end }: OnTimeChangeProps) => {
+    commit(`timefilter from="${start}" to=${end} column=${column}`);
   };
 
-  const { column, from, to } = getFilterMeta(filter);
+  const { column, start, end } = getFilterMeta(filter);
 
-  if (compact) {
-    return <TimePickerPopover from={from} to={to} onSelect={setFilter(column)} />;
-  } else {
-    return <TimePicker from={from} to={to} onSelect={setFilter(column)} />;
-  }
+  return (
+    <div className="canvasTimeFilter">
+      <EuiSuperDatePicker
+        start={start}
+        end={end}
+        isPaused={false}
+        onTimeChange={setFilter(column)}
+        showUpdateButton={false}
+        dateFormat={dateFormat}
+        commonlyUsedRanges={quickRanges}
+      />
+    </div>
+  );
 };
 
 TimeFilter.propTypes = {
