@@ -19,11 +19,17 @@
 
 import { RouteValidatorFullConfig } from './validator';
 
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
+}
+
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+export type SafeRouteMethod = 'get' | 'options';
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
  */
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 /**
  * The set of valid body.output
@@ -115,7 +121,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *
    * Set to true by default
    */
-  xsrfRequired?: boolean;
+  xsrfRequired?: Method extends 'get' ? never : boolean;
 
   /**
    * Additional metadata tag strings to attach to the route.

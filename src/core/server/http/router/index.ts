@@ -30,6 +30,7 @@ export {
   ensureRawRequest,
 } from './request';
 export {
+  isSafeMethod,
   RouteMethod,
   RouteConfig,
   RouteConfigOptions,

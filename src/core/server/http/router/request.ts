@@ -24,7 +24,7 @@ import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
@@ -193,7 +193,7 @@ export class KibanaRequest<
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
-      body: ['get', 'options'].includes(method)
+      body: isSafeMethod(method)
         ? undefined
         : {
             parse,

@@ -27,7 +27,7 @@ import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_p
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 
-import { IRouter, KibanaRouteState } from './router';
+import { IRouter, KibanaRouteState, isSafeMethod } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -147,10 +147,13 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {}, xsrfRequired = true } = route.options;
+        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+        const { authRequired = true, tags, body = {} } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
-        const kibanaRouteState: KibanaRouteState = { xsrfRequired };
+
+        const kibanaRouteState: KibanaRouteState = {
+          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+        };
 
         this.server.route({
           handler: route.handler,

@@ -811,7 +811,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       path: '/',
       options: {
         authRequired: true,
-        xsrfRequired: true,
+        xsrfRequired: false,
         tags: [],
       },
     });
