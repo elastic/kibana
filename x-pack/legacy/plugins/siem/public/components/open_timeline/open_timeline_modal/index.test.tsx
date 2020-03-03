@@ -7,9 +7,8 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from '@apollo/client/testing';
+import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
-import { act } from '@testing-library/react';
 
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
@@ -18,6 +17,9 @@ import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 import { OpenTimelineModal } from '.';
 
 jest.mock('../../../lib/kibana');
+jest.mock('../../../utils/apollo_context', () => ({
+  useApolloClient: () => ({}),
+}));
 
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -33,7 +35,7 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    await act(() => wait());
+    await wait();
 
     wrapper.update();
 

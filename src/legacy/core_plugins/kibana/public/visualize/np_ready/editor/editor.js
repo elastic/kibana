@@ -382,7 +382,7 @@ function VisualizeAppController(
     $scope.showQueryBarTimePicker = () => {
       // tsvb loads without an indexPattern initially (TODO investigate).
       // hide timefilter only if timeFieldName is explicitly undefined.
-      const hasTimeField = $scope.indexPattern ? !!$scope.indexPattern.timeFieldName : true;
+      const hasTimeField = vis.indexPattern ? !!vis.indexPattern.timeFieldName : true;
       return vis.type.options.showTimePicker && hasTimeField;
     };
 
@@ -551,6 +551,20 @@ function VisualizeAppController(
     updateStateFromSavedQuery(newSavedQuery);
   });
 
+  $scope.$watch('linked', linked => {
+    if (linked && !savedVis.savedSearchId) {
+      savedVis.savedSearchId = savedVis.searchSource.id;
+      vis.savedSearchId = savedVis.searchSource.id;
+
+      $scope.$broadcast('render');
+    } else if (!linked && savedVis.savedSearchId) {
+      delete savedVis.savedSearchId;
+      delete vis.savedSearchId;
+
+      $scope.$broadcast('render');
+    }
+  });
+
   /**
    * Called when the user clicks "Save" button.
    */
@@ -638,9 +652,7 @@ function VisualizeAppController(
     );
   }
 
-  $scope.unlink = function() {
-    if (!$scope.linked) return;
-
+  const unlinkFromSavedSearch = () => {
     const searchSourceParent = searchSource.getParent();
     const searchSourceGrandparent = searchSourceParent.getParent();
 
@@ -680,6 +692,8 @@ function VisualizeAppController(
       vis.type.feedbackMessage
     );
   };
+
+  vis.on('unlinkFromSavedSearch', unlinkFromSavedSearch);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

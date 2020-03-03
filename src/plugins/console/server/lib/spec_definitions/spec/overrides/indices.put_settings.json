@@ -1,5 +1,5 @@
 {
-  "put_settings": {
+  "indices.put_settings": {
     "data_autocomplete_rules": {
       "refresh_interval": "1s",
       "number_of_shards": 1,

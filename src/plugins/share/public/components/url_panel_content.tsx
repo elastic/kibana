@@ -183,7 +183,11 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private getSnapshotUrl = () => {
-    return this.props.shareableUrl || window.location.href;
+    let url = this.props.shareableUrl || window.location.href;
+    if (this.props.isEmbedded) {
+      url = this.makeUrlEmbeddable(url);
+    }
+    return url;
   };
 
   private makeUrlEmbeddable = (url: string) => {
@@ -200,8 +204,7 @@ export class UrlPanelContent extends Component<Props, State> {
       return;
     }
 
-    const embeddableUrl = this.makeUrlEmbeddable(url);
-    return `<iframe src="${embeddableUrl}" height="600" width="800"></iframe>`;
+    return `<iframe src="${url}" height="600" width="800"></iframe>`;
   };
 
   private setUrl = () => {
