@@ -4,6 +4,7 @@
 }
 
 .uiaActionWizard__actionFactoryItem {
-  width: #{$euiSize * 7.5};
-  min-height: #{$euiSize * 6};
+  .euiKeyPadMenuItem__label {
+    height: #{$euiSizeXL};
+  }
 }
