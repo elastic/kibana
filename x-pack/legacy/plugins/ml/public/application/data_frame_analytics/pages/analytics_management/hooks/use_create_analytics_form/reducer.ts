@@ -58,7 +58,7 @@ export function getModelMemoryLimitErrors(mmlValidationResult: any): string[] | 
     if (errorKey === 'min') {
       acc.push(
         i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryUnitsMinError', {
-          defaultMessage: 'Model memory limit can not be lower than {mml}',
+          defaultMessage: 'Model memory limit cannot be lower than {mml}',
           values: {
             mml: mmlValidationResult.min.minValue,
           },
@@ -267,6 +267,10 @@ export const validateAdvancedEditor = (state: State): State => {
  */
 export function validateMinMML(estimatedMml: string) {
   return (mml: string) => {
+    if (!mml || !estimatedMml) {
+      return null;
+    }
+
     // @ts-ignore
     const mmlInBytes = numeral(mml.toUpperCase()).value();
     // @ts-ignore

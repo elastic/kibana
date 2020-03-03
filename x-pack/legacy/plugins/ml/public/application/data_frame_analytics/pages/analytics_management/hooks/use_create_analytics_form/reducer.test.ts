@@ -161,4 +161,8 @@ describe('validateMinMML', () => {
   test('should allow the same value', () => {
     expect(validateMinMML('1024mb')('1gb')).toEqual(null);
   });
+
+  test('should ignore empty parameters', () => {
+    expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
+  });
 });
