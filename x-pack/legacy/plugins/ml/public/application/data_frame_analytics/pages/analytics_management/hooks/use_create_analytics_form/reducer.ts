@@ -261,12 +261,15 @@ export const validateAdvancedEditor = (state: State): State => {
   return state;
 };
 
-function validateMinMML(estimatedMml: string) {
+/**
+ * Validates provided MML isn't lower than the estimated one.
+ */
+export function validateMinMML(estimatedMml: string) {
   return (mml: string) => {
     // @ts-ignore
-    const mmlInBytes = numeral(mml).value();
+    const mmlInBytes = numeral(mml.toUpperCase()).value();
     // @ts-ignore
-    const estimatedMmlInBytes = numeral(estimatedMml).value();
+    const estimatedMmlInBytes = numeral(estimatedMml.toUpperCase()).value();
 
     return estimatedMmlInBytes > mmlInBytes
       ? { min: { minValue: estimatedMml, actualValue: mml } }

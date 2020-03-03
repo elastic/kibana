@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
-import { reducer, validateAdvancedEditor } from './reducer';
+import { reducer, validateAdvancedEditor, validateMinMML } from './reducer';
 import { getInitialState, JOB_TYPES } from './state';
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
@@ -144,5 +144,21 @@ describe('useCreateAnalyticsForm', () => {
       validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: 100 }))
         .isValid
     ).toBe(false);
+  });
+});
+
+describe('validateMinMML', () => {
+  test('should detect a lower value', () => {
+    expect(validateMinMML('10mb')('100kb')).toEqual({
+      min: { minValue: '10mb', actualValue: '100kb' },
+    });
+  });
+
+  test('should allow a bigger value', () => {
+    expect(validateMinMML('10mb')('1GB')).toEqual(null);
+  });
+
+  test('should allow the same value', () => {
+    expect(validateMinMML('1024mb')('1gb')).toEqual(null);
   });
 });

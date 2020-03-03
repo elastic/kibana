@@ -71,6 +71,8 @@ export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
       return null;
     }
     const regexp = new RegExp(`\\d+(${allowedUnits.join('|')})$`, 'i');
-    return regexp.test(value) ? null : { invalidUnits: { allowedUnits: allowedUnits.join(', ') } };
+    return regexp.test(value.trim())
+      ? null
+      : { invalidUnits: { allowedUnits: allowedUnits.join(', ') } };
   };
 }
