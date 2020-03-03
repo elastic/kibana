@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -11,8 +11,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore
-  EuiSearchBar,
   EuiBasicTable,
   EuiLink,
   EuiTableActionsColumnType,
@@ -34,16 +32,15 @@ import {
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-// import { SearchBar } from '../../../components';
 import { useGetAgentConfigs, usePagination, useLink, useConfig } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../components/search_bar';
 
-const NO_WRAP_TRUNCATE_STYLE = Object.freeze({
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
-  'text-overflow': 'ellipsis',
-  'white-space': 'nowrap',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
@@ -191,12 +188,18 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         width: '20%',
         // FIXME: use version once available - see: https://github.com/elastic/kibana/issues/56750
         render: (name: string, agentConfig: AgentConfig) => (
-          <EuiFlexGroup gutterSize="s" wrap={true} alignItems="baseline">
-            <EuiFlexItem grow={false}>
-              <EuiLink href={`${DETAILS_URI}${agentConfig.id}`}>{name || agentConfig.id}</EuiLink>
+          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+              <EuiLink
+                href={`${DETAILS_URI}${agentConfig.id}`}
+                style={NO_WRAP_TRUNCATE_STYLE}
+                title={name || agentConfig.id}
+              >
+                {name || agentConfig.id}
+              </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs">
+            <EuiFlexItem grow={true}>
+              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                 <FormattedMessage
                   id="xpack.ingestManager.agentConfigList.revisionNumber"
                   defaultMessage="rev. {revNumber}"
