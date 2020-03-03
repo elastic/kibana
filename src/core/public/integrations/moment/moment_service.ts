@@ -19,7 +19,6 @@
 
 import moment from 'moment-timezone';
 import { merge, Subscription } from 'rxjs';
-import { get } from 'lodash';
 
 import { tap } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
@@ -37,8 +36,8 @@ export class MomentService implements CoreService {
 
   public async start({ uiSettings }: StartDeps) {
     const setDefaultTimezone = (tz: string) => {
-      const zone: string | undefined = get(moment.tz.zone(tz), 'name');
-      if (zone) moment.tz.setDefault(zone);
+      const zone = moment.tz.zone(tz);
+      if (zone) moment.tz.setDefault(zone.name);
     };
     const setStartDayOfWeek = (day: string) => {
       const dow = moment.weekdays().indexOf(day);
