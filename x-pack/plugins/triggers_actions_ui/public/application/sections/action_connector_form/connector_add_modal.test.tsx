@@ -24,7 +24,7 @@ describe('connector_add_modal', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mocks.getStartServices();
     deps = {
@@ -36,6 +36,7 @@ describe('connector_add_modal', () => {
       injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
       uiSettings: mocks.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         actions: {

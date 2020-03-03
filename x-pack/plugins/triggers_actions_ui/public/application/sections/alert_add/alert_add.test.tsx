@@ -29,7 +29,7 @@ describe('alert_add', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     deps = {
@@ -41,6 +41,7 @@ describe('alert_add', () => {
       uiSettings: mockes.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      navigateToApp,
       capabilities: {
         ...capabilities,
         alerting: {

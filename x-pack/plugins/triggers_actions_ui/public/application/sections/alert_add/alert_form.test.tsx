@@ -50,7 +50,7 @@ describe('alert_form', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     deps = {
@@ -62,6 +62,7 @@ describe('alert_form', () => {
       uiSettings: mockes.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {

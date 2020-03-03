@@ -83,7 +83,7 @@ describe('alerts_list component empty', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -101,6 +101,7 @@ describe('alerts_list component empty', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -208,7 +209,7 @@ describe('alerts_list component with items', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -226,6 +227,7 @@ describe('alerts_list component with items', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -295,7 +297,7 @@ describe('alerts_list component empty with show only capability', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -313,6 +315,7 @@ describe('alerts_list component empty with show only capability', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -417,7 +420,7 @@ describe('alerts_list with show only capability', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -435,6 +438,7 @@ describe('alerts_list with show only capability', () => {
       } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {

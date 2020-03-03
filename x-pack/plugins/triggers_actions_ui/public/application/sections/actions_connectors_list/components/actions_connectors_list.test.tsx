@@ -49,7 +49,7 @@ describe('actions_connectors_list component empty', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -61,6 +61,7 @@ describe('actions_connectors_list component empty', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -146,7 +147,7 @@ describe('actions_connectors_list component with items', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -158,6 +159,7 @@ describe('actions_connectors_list component with items', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -230,7 +232,7 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -242,6 +244,7 @@ describe('actions_connectors_list component empty with show only capability', ()
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -319,7 +322,7 @@ describe('actions_connectors_list with show only capability', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -331,6 +334,7 @@ describe('actions_connectors_list with show only capability', () => {
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
