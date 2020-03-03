@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
+const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
+const num = process.env.CI_PARALLEL_PROCESS_NUMBER
+  ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
+  : '';
 
-export function makeJunitReportPath(rootDirectory: string, reportName: string) {
-  return resolve(
-    rootDirectory,
-    'target/junit',
-    process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
-  );
-}
+/**
+ * A prefix string that is unique for each parallel CI process that
+ * is an empty string outside of CI, so it can be safely injected
+ * into strings as a prefix
+ */
+export const CI_PARALLEL_PROCESS_PREFIX = `${job}${num}`;
