@@ -41,6 +41,7 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
+import { TimeRange } from '../../../../../plugins/data/common';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
@@ -48,6 +49,7 @@ export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps 
   reorderAggs: ReorderAggs;
   setValidity(modelName: string, value: boolean): void;
   setTouched(isTouched: boolean): void;
+  timeRange?: TimeRange;
 }
 
 function DefaultEditorAggGroup({
@@ -66,6 +68,7 @@ function DefaultEditorAggGroup({
   reorderAggs,
   setTouched,
   setValidity,
+  timeRange,
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
@@ -179,6 +182,7 @@ function DefaultEditorAggGroup({
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
                     setAggsState={setAggsState}
+                    timeRange={timeRange}
                   />
                 )}
               </EuiDraggable>

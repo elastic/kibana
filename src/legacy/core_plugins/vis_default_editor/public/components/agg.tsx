@@ -34,6 +34,7 @@ import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { TimeRange } from '../../../../../plugins/data/common';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -45,6 +46,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   isLastBucket: boolean;
   isRemovable: boolean;
   setAggsState: React.Dispatch<AggsAction>;
+  timeRange?: TimeRange;
 }
 
 function DefaultEditorAgg({
@@ -67,6 +69,7 @@ function DefaultEditorAgg({
   onToggleEnableAgg,
   removeAgg,
   setAggsState,
+  timeRange,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
@@ -113,6 +116,12 @@ function DefaultEditorAgg({
       aggDescription = '';
     }
   }
+
+  // Passed timeRange value is required to update agg.params.timeRange to the actual data,
+  // so makeLabel could return the relevant interval description.
+  useEffect(() => {
+    agg.params.timeRange = timeRange;
+  }, [agg.params.timeRange, timeRange]);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {

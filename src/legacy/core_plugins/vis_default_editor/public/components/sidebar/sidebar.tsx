@@ -31,6 +31,7 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
+import { TimeRange } from '../../../../../../plugins/data/common';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -40,6 +41,7 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   savedSearch?: SavedSearch;
+  timeRange: TimeRange;
 }
 
 function DefaultEditorSideBar({
@@ -50,6 +52,7 @@ function DefaultEditorSideBar({
   vis,
   isLinkedSearch,
   savedSearch,
+  timeRange,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
@@ -193,6 +196,7 @@ function DefaultEditorSideBar({
                   <Editor
                     isTabSelected={isTabSelected}
                     {...(name === 'data' ? dataTabProps : optionTabProps)}
+                    timeRange={timeRange}
                   />
                 </div>
               );
