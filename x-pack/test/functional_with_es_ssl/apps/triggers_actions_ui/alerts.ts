@@ -156,7 +156,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterEdit).to.eql([
         {
           name: updatedAlertName,
-          tagsText: '',
+          tagsText: 'foo, bar',
           alertType: 'Index Threshold',
           interval: '1m',
         },
