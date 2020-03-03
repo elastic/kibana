@@ -36,7 +36,6 @@ export interface DependencyCache {
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
   XSRF: string | null;
-  APP_URL: string | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginSetup | null;
@@ -56,7 +55,6 @@ const cache: DependencyCache = {
   basePath: null,
   savedObjectsClient: null,
   XSRF: null,
-  APP_URL: null,
   application: null,
   http: null,
   security: null,
@@ -76,9 +74,9 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.basePath = deps.basePath || null;
   cache.savedObjectsClient = deps.savedObjectsClient || null;
   cache.XSRF = deps.XSRF || null;
-  cache.APP_URL = deps.APP_URL || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
+  cache.security = deps.security || null;
 }
 
 export function getTimefilter() {
@@ -169,13 +167,6 @@ export function getXSRF() {
     throw new Error("xsrf hasn't been initialized");
   }
   return cache.XSRF;
-}
-
-export function getAppUrl() {
-  if (cache.APP_URL === null) {
-    throw new Error("app url hasn't been initialized");
-  }
-  return cache.APP_URL;
 }
 
 export function getApplication() {

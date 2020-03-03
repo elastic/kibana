@@ -68,7 +68,7 @@ export function QueryLanguageSwitcher(props: Props) {
 
   return (
     <EuiPopover
-      id="popover"
+      id="queryLanguageSwitcherPopover"
       anchorClassName="euiFormControlLayout__append"
       ownFocus
       anchorPosition={props.anchorPosition || 'downRight'}
