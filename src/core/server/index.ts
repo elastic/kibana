@@ -245,6 +245,14 @@ export {
   StringValidationRegexString,
 } from './ui_settings';
 
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
+
 export { RecursiveReadonly } from '../utils';
 
 export {
