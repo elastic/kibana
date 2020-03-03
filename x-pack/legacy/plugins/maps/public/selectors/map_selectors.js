@@ -23,16 +23,16 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source });
-    case VectorTileLayer.type:
       const joins = [];
       if (layerDescriptor.joins) {
         layerDescriptor.joins.forEach(joinDescriptor => {
-          const join = new InnerJoin(joinDescriptor, this._source);
+          const join = new InnerJoin(joinDescriptor, source);
           joins.push(join);
         });
       }
-      return new VectorTileLayer({ layerDescriptor, source, joins });
+      return new VectorLayer({ layerDescriptor, source, joins });
+    case VectorTileLayer.type:
+      return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     default:
