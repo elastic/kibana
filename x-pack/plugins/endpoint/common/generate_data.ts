@@ -104,7 +104,7 @@ export function generateRelatedEvents(
   generator: EndpointDocGenerator,
   numRelatedEvents = 10
 ): EndpointEvent[] {
-  const ts = new Date(node['@timestamp'].getTime() + 1000);
+  const ts = node['@timestamp'] + 1000;
   const relatedEvents: EndpointEvent[] = [];
   for (let i = 0; i < numRelatedEvents; i++) {
     relatedEvents.push(
@@ -137,7 +137,7 @@ export function generateResolverTree(
       // const numChildren = randomN(maxChildrenPerNode);
       const numChildren = maxChildrenPerNode;
       for (let j = 0; j < numChildren; j++) {
-        timestamp = new Date(timestamp.getTime() + 1000);
+        timestamp = timestamp + 1000;
         const child = generator.generateEvent(timestamp, undefined, element.process.entity_id);
         newParents.push(child);
       }
@@ -149,7 +149,7 @@ export function generateResolverTree(
   let relatedEvents: EndpointEvent[] = [];
   events.forEach(element => {
     if (randomN(100) < percentChildrenTerminated) {
-      timestamp = new Date(timestamp.getTime() + 1000);
+      timestamp = timestamp + 1000;
       terminationEvents.push(
         generator.generateEvent(
           timestamp,
@@ -176,13 +176,13 @@ export function generateEventAncestry(
   alertAncestors = 3
 ): Array<AlertEvent | EndpointEvent> {
   const events = [];
-  const startDate = new Date();
-  const root = generator.generateEvent(new Date(startDate.getTime() + 1000));
+  const startDate = new Date().getTime();
+  const root = generator.generateEvent(startDate + 1000);
   events.push(root);
   let ancestor = root;
   for (let i = 0; i < alertAncestors; i++) {
     ancestor = generator.generateEvent(
-      new Date(startDate.getTime() + 1000 * (i + 1)),
+      startDate + 1000 * (i + 1),
       undefined,
       ancestor.process.entity_id
     );
@@ -190,7 +190,7 @@ export function generateEventAncestry(
   }
   events.push(
     generator.generateAlert(
-      new Date(startDate.getTime() + 1000 * alertAncestors),
+      startDate + 1000 * alertAncestors,
       ancestor.process.entity_id,
       ancestor.process.parent?.entity_id
     )
@@ -203,7 +203,7 @@ export class EndpointDocGenerator {
   agentName: string;
   hostId: string;
   hostname: string;
-  lastDHCPLeaseAt: Date;
+  lastDHCPLeaseAt: number;
   macAddress: string[];
   ip: string[];
   agentVersion: string;
@@ -215,7 +215,7 @@ export class EndpointDocGenerator {
     this.agentId = uuid.v4();
     this.agentName = 'Elastic Endpoint';
     this.hostname = randomHostname();
-    this.lastDHCPLeaseAt = new Date();
+    this.lastDHCPLeaseAt = new Date().getTime();
     this.ip = randomArray(3, () => randomIP());
     this.macAddress = randomArray(3, () => randomMac());
     this.agentVersion = randomVersion();
@@ -223,8 +223,8 @@ export class EndpointDocGenerator {
     this.policy = randomChoice(POLICIES);
   }
 
-  generateEndpointMetadata(ts: Date): EndpointMetadata {
-    if (Math.abs(ts.getTime() - this.lastDHCPLeaseAt.getTime()) > 3600 * 12 * 1000) {
+  generateEndpointMetadata(ts: number): EndpointMetadata {
+    if (Math.abs(ts - this.lastDHCPLeaseAt) > 3600 * 12 * 1000) {
       this.lastDHCPLeaseAt = ts;
       this.ip = randomArray(3, () => randomIP());
     }
@@ -253,7 +253,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  generateAlert(ts: Date, entityID?: string, parentEntityID?: string): AlertEvent {
+  generateAlert(ts: number, entityID?: string, parentEntityID?: string): AlertEvent {
     return {
       '@timestamp': ts,
       agent: {
@@ -266,6 +266,9 @@ export class EndpointDocGenerator {
         kind: 'alert',
         category: 'malware',
         id: uuid.v4(),
+        dataset: 'endpoint',
+        module: 'endpoint',
+        type: 'creation',
       },
       endpoint: {
         policy: {
@@ -273,9 +276,29 @@ export class EndpointDocGenerator {
         },
       },
       file: {
-        malware_classifier: {
-          score: Math.random(),
+        owner: 'SYSTEM',
+        name: 'fake_malware.exe',
+        path: 'C:/fake_malware.exe',
+        accessed: ts,
+        mtime: ts,
+        created: ts,
+        size: 3456,
+        hash: {
+          md5: 'fake file md5',
+          sha1: 'fake file sha1',
+          sha256: 'fake file sha256',
         },
+        code_signature: {
+          trusted: false,
+          subject_name: 'bad signer',
+        },
+        malware_classifier: {
+          identifier: 'endpointpe',
+          score: 1,
+          threshold: 0.66,
+          version: '3.0.33',
+        },
+        temp_file_path: 'C:/temp/fake_malware.exe',
       },
       host: {
         id: this.hostId,
@@ -285,14 +308,70 @@ export class EndpointDocGenerator {
         os: this.os,
       },
       process: {
+        pid: 2,
+        name: 'malware writer',
+        start: ts,
+        uptime: 0,
+        user: 'SYSTEM',
         entity_id: entityID ? entityID : randomString(10),
-        parent: parentEntityID ? { entity_id: parentEntityID } : undefined,
+        parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
+        token: {
+          domain: 'NT AUTHORITY',
+          integrity_level: 16384,
+          integrity_level_name: 'system',
+          privileges: [
+            {
+              description: 'Replace a process level token',
+              enabled: false,
+              name: 'SeAssignPrimaryTokenPrivilege',
+            },
+          ],
+          sid: 'S-1-5-18',
+          type: 'tokenPrimary',
+          user: 'SYSTEM',
+        },
+        code_signature: {
+          trusted: false,
+          subject_name: 'bad signer',
+        },
+        hash: {
+          md5: 'fake md5',
+          sha1: 'fake sha1',
+          sha256: 'fake sha256',
+        },
       },
+      dll: [
+        {
+          pe: {
+            architecture: 'x64',
+            imphash: 'c30d230b81c734e82e86e2e2fe01cd01',
+          },
+          code_signature: {
+            subject_name: 'Cybereason Inc',
+            trusted: true,
+          },
+          compile_time: 1534424710,
+          hash: {
+            md5: '1f2d082566b0fc5f2c238a5180db7451',
+            sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+            sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+          },
+          malware_classifier: {
+            identifier: 'Whitelisted',
+            score: 0,
+            threshold: 0,
+            version: '3.0.0',
+          },
+          mapped_address: 5362483200,
+          mapped_size: 0,
+          path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+        },
+      ],
     };
   }
 
   generateEvent(
-    ts: Date,
+    ts: number,
     entityID?: string,
     parentEntityID?: string,
     eventCategory?: string,
@@ -304,6 +383,7 @@ export class EndpointDocGenerator {
         id: this.agentId,
         name: this.agentName,
         version: this.agentVersion,
+        type: 'endpoint',
       },
       ecs: {
         version: '1.4.0',

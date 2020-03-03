@@ -154,7 +154,7 @@ export interface DllFields {
  * Should be in line with ECS schema.
  */
 export type AlertEvent = Immutable<{
-  '@timestamp': Date;
+  '@timestamp': number;
   agent: {
     id: string;
     version: string;
@@ -169,29 +169,34 @@ export type AlertEvent = Immutable<{
     module: string;
     type: string;
   };
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
   process: {
     code_signature: {
       subject_name: string;
       trusted: boolean;
     };
-    command_line: string;
-    domain: string;
+    command_line?: string;
+    domain?: string;
     pid: number;
-    ppid: number;
+    ppid?: number;
     entity_id: string;
-    parent: {
+    parent?: {
       pid: number;
       entity_id: string;
     };
     name: string;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
-    executable: string;
-    sid: string;
+    executable?: string;
+    sid?: string;
     start: number;
-    malware_classifier: MalwareClassifierFields;
+    malware_classifier?: MalwareClassifierFields;
     token: {
       domain: string;
       type: string;
@@ -199,9 +204,9 @@ export type AlertEvent = Immutable<{
       sid: string;
       integrity_level: number;
       integrity_level_name: string;
-      privileges: PrivilegesFields[];
+      privileges?: PrivilegesFields[];
     };
-    thread: ThreadFields[];
+    thread?: ThreadFields[];
     uptime: number;
     user: string;
   };
@@ -214,27 +219,18 @@ export type AlertEvent = Immutable<{
     created: number;
     size: number;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
     code_signature: {
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: {
-      features: {
-        data: {
-          buffer: string;
-          decompressed_size: number;
-          encoding: string;
-        };
-      };
-    } & MalwareClassifierFields;
+    malware_classifier: MalwareClassifierFields;
     temp_file_path: string;
   };
   host: HostFields;
-  thread: {};
-  dll: DllFields[];
+  dll?: DllFields[];
 }>;
 
 interface AlertMetadata {
@@ -251,9 +247,9 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
-  '@timestamp': Date;
+  '@timestamp': number;
   event: {
-    created: Date;
+    created: number;
   };
   endpoint: {
     policy: {
@@ -309,11 +305,12 @@ export interface LegacyEndpointEvent {
 }
 
 export interface EndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': number;
   agent: {
     id: string;
     version: string;
     name: string;
+    type: string;
   };
   ecs: {
     version: string;

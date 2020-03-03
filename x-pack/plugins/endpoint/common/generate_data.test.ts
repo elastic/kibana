@@ -19,7 +19,7 @@ describe('data generator', () => {
   });
 
   it('creates endpoint metadata documents', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     const metadata = generator.generateEndpointMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
@@ -29,7 +29,7 @@ describe('data generator', () => {
   });
 
   it('creates alert event documents', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     const alert = generator.generateAlert(timestamp);
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event.action).not.toBeNull();
@@ -40,7 +40,7 @@ describe('data generator', () => {
   });
 
   it('creates process event documents', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent(timestamp);
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('process');
@@ -52,7 +52,7 @@ describe('data generator', () => {
   });
 
   it('creates other event documents', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent(timestamp, undefined, undefined, 'dns');
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
@@ -82,7 +82,7 @@ describe('data generator', () => {
   });
 
   it('creates tree of process children', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     const root = generator.generateEvent(timestamp);
     const generations = 2;
     const events = generateResolverTree(root, generator, generations);
@@ -100,7 +100,7 @@ describe('data generator', () => {
       }
     });
     // Second pass add child references to each node
-    for (const [key, value] of Object.entries(tree)) {
+    for (const value of Object.values(tree)) {
       if (value.parent_entity_id) {
         tree[value.parent_entity_id].children.push(value);
       }
