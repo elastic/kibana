@@ -11,37 +11,45 @@ import {
   ValidationResult,
 } from '../../../../../../plugins/triggers_actions_ui/public/types';
 import { AlertMonitorStatus } from '../../components/connected';
+import { AlertTypeInitializer } from '.';
 
-export const initMonitorStatusAlertType = (autocomplete: any): AlertTypeModel => ({
+export const validate = (alertParams: any): ValidationResult => {
+  const errors: Record<string, any> = {};
+  const timerange = alertParams?.timerange;
+  if (!timerange) {
+    errors.noTimeRange = 'No time range specified';
+  }
+  if (timerange) {
+    const from = timerange?.from;
+    const to = timerange?.to;
+    if (!from) {
+      errors.noTimeRangeStart = 'Specified time range has no start time';
+    }
+    if (!to) {
+      errors.noTimeRangeEnd = 'Specified time range has no end time';
+    }
+    const mFrom = DateMath.parse(from);
+    const mTo = DateMath.parse(to);
+    if (mFrom && mTo && mFrom.valueOf() > mTo.valueOf()) {
+      errors.invalidTimeRange = 'Time range start cannot exceed time range end';
+    }
+  }
+  const { numTimes } = alertParams;
+  if (!numTimes || isNaN(numTimes) || numTimes < 1) {
+    errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
+  }
+  return { errors };
+};
+
+export const initMonitorStatusAlertType: AlertTypeInitializer = ({
+  autocomplete,
+}): AlertTypeModel => ({
   id: 'xpack.uptime.alerts.downMonitor',
   name: 'Uptime Monitor Status',
   iconClass: 'uptimeApp',
   alertParamsExpression: params => {
     return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;
   },
-  validate: (alertParams: any): ValidationResult => {
-    const errors: Record<string, any> = {};
-    const timerange = alertParams?.timerange;
-    if (!timerange) {
-      errors.noTimeRange = 'No time range specified';
-    }
-    if (!timerange.start) {
-      errors.noTimeRangeStart = 'Specified time range has no start time';
-    }
-    if (!timerange.end) {
-      errors.noTimeRangeEnd = 'Specified time range has no end time';
-    }
-    if (
-      (DateMath.parse(timerange.start)?.valueOf() ?? 0) >
-      (DateMath.parse(timerange.end)?.valueOf() ?? 1)
-    ) {
-      errors.invalidTimeRange = 'Time range start cannot exceed time range end';
-    }
-    const { numTimes } = alertParams;
-    if (!numTimes || isNaN(numTimes) || numTimes < 1) {
-      errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
-    }
-    return { errors };
-  },
+  validate,
   defaultActionMessage: 'Monitor [{{ctx.metadata.name}}] is down',
 });

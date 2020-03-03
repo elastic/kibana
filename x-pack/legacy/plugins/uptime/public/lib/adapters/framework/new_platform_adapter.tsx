@@ -39,7 +39,7 @@ export const getKibanaFrameworkAdapter = (
     triggers_actions_ui,
   } = plugins;
   alertTypeInitializers.forEach(init =>
-    triggers_actions_ui.alertTypeRegistry.register(init(autocomplete))
+    triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }))
   );
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
@@ -85,7 +85,6 @@ export const getKibanaFrameworkAdapter = (
   };
 
   return {
-    // TODO: these parameters satisfy the interface but are no longer needed
     render: async (element: any) => {
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
