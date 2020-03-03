@@ -52,7 +52,11 @@ export class BulkUploader {
     });
 
     const directConfig = config.elasticsearch;
-    if (hasMonitoringCluster(directConfig)) {
+    // TODO: NP
+    // The config reuses the default ES one so it has the default
+    // default values which means it will _always_ be defined
+    // We can't properly detect if this is configured or not
+    if (false && hasMonitoringCluster(directConfig)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
       this._cluster = elasticsearch.createClient('monitoring-direct', directConfig);
