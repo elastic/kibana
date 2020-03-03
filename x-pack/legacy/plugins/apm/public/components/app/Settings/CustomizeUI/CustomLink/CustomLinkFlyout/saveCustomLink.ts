@@ -7,21 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
-import { APMClient } from '../../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveCustomLink({
   id,
   label,
   url,
   filters,
-  callApmApi,
   toasts
 }: {
   id?: string;
   label: string;
   url: string;
   filters?: CustomLink['filters'];
-  callApmApi: APMClient;
   toasts: NotificationsStart['toasts'];
 }) {
   try {

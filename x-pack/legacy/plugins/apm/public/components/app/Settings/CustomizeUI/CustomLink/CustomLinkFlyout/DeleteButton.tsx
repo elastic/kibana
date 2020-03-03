@@ -8,8 +8,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
-import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
-import { APMClient } from '../../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 
 interface Props {
@@ -20,7 +19,6 @@ interface Props {
 export function DeleteButton({ onDelete, customLinkId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
-  const callApmApi = useCallApmApi();
 
   return (
     <EuiButtonEmpty
@@ -29,7 +27,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(callApmApi, customLinkId, toasts);
+        await deleteConfig(customLinkId, toasts);
         setIsDeleting(false);
         onDelete();
       }}
@@ -42,7 +40,6 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
 }
 
 async function deleteConfig(
-  callApmApi: APMClient,
   customLinkId: string,
   toasts: NotificationsStart['toasts']
 ) {

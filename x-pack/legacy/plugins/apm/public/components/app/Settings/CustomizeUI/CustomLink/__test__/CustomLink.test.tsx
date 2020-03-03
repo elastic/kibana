@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fireEvent,
-  render,
-  wait,
-  waitForElement
-} from '@testing-library/react';
+import { fireEvent, render, wait } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '../';
 import * as hooks from '../../../../../../hooks/useFetcher';
-import * as callApmApi from '../../../../../../hooks/useCallApmApi';
+// import * as callApmApi from '../../../../../../hooks/useCallApmApi';
+
 import {
   expectTextsInDocument,
   MockApmPluginContextWrapper
 } from '../../../../../../utils/testHelpers';
 import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
+import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
 const data = [
   {
@@ -115,7 +112,7 @@ describe('CustomLink', () => {
     let callApmApiSpy: Function;
     let saveCustomLinkSpy: Function;
     beforeAll(() => {
-      callApmApiSpy = spyOn(callApmApi, 'useCallApmApi');
+      callApmApiSpy = spyOn(apmApi, 'callApmApi');
       saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
       spyOn(hooks, 'useFetcher').and.returnValue({
         data,
@@ -175,7 +172,7 @@ describe('CustomLink', () => {
       });
       expect(component.queryByText('Create link')).toBeInTheDocument();
       await act(async () => {
-        await wait(() => fireEvent.submit(component.getByText('Delete')));
+        await wait(() => fireEvent.click(component.getByText('Delete')));
       });
       expect(callApmApiSpy).toHaveBeenCalled();
       expect(refetch).toHaveBeenCalled();

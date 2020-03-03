@@ -17,7 +17,6 @@ import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
-import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { LinkSection } from './LinkSection';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
@@ -58,7 +57,6 @@ export const CustomLinkFlyout = ({
   onSave,
   onDelete
 }: Props) => {
-  const callApmApiFromHook = useCallApmApi();
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -83,7 +81,6 @@ export const CustomLinkFlyout = ({
       label,
       url,
       filters: convertFiltersToObject(filters),
-      callApmApi: callApmApiFromHook,
       toasts
     });
     setIsSaving(false);
