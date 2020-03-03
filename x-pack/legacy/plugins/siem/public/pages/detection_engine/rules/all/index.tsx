@@ -123,9 +123,6 @@ export const AllRules = React.memo<AllRulesProps>(
       dispatch({
         type: 'setRules',
         rules: newRules,
-      });
-      dispatch({
-        type: 'updatePagination',
         pagination: newPagination,
       });
     }, []);
