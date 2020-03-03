@@ -36,7 +36,6 @@ describe('endpoint list saga', () => {
       agent: {
         version: '',
         id: '',
-        name: '',
       },
       host: {
         id: '',

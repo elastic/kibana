@@ -28,7 +28,7 @@ export const mockHostResultList: (options?: {
     endpoints.push({
       '@timestamp': new Date(1582231151055).toString(),
       event: {
-        created: '2020-02-20T20:39:11.055Z',
+        created: new Date('2020-02-20T20:39:11.055Z'),
       },
       endpoint: {
         policy: {
@@ -44,11 +44,11 @@ export const mockHostResultList: (options?: {
         hostname: 'bea-0.example.com',
         ip: ['10.154.150.114', '10.43.37.62', '10.217.73.149'],
         mac: ['ea-5a-a8-c0-5-95', '7e-d8-fe-7f-b6-4e', '23-31-5d-af-e6-2b'],
-        architecture: 'x86_64',
         os: {
           name: 'windows 6.2',
           full: 'Windows Server 2012',
           version: '6.2',
+          variant: 'Windows Server Release 2',
         },
       },
     });

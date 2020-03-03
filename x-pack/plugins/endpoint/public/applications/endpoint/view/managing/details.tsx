@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -21,8 +21,11 @@ import { useManagementListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { uiQueryParams, detailsData } from './../../store/managing/selectors';
 
-const HostDetails = () => {
+const HostDetails = memo(() => {
   const details = useManagementListSelector(detailsData);
+  if (details === undefined) {
+    return null;
+  }
 
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -97,7 +100,7 @@ const HostDetails = () => {
       />
     </>
   );
-};
+});
 
 export const ManagementDetails = () => {
   const history = useHistory();

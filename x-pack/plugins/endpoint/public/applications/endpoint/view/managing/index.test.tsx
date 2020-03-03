@@ -89,9 +89,10 @@ describe('when on the managing page', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
-          reactTestingLibrary.fireEvent.click(
-            await queryByTestSubjId(renderResult, 'hostnameCellLink')
-          );
+          const detailsLink = await queryByTestSubjId(renderResult, 'hostnameCellLink');
+          if (detailsLink) {
+            reactTestingLibrary.fireEvent.click(detailsLink);
+          }
         });
 
         it('should show the flyout', () => {
