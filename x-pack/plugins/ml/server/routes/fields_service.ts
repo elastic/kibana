@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -29,7 +28,7 @@ function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ router, getLicenseCheckResults }: RouteInitialization) {
+export function fieldsService({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
@@ -44,7 +43,8 @@ export function fieldsService({ router, getLicenseCheckResults }: RouteInitializ
         body: getCardinalityOfFieldsSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getCardinalityOfFields(context, request.body);
 
@@ -71,7 +71,7 @@ export function fieldsService({ router, getLicenseCheckResults }: RouteInitializ
         body: getTimeFieldRangeSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getTimeFieldRange(context, request.body);
 

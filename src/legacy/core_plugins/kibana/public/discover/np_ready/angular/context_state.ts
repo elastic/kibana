@@ -24,9 +24,9 @@ import {
   syncStates,
   BaseStateContainer,
 } from '../../../../../../../plugins/kibana_utils/public';
-import { esFilters, FilterManager, Filter } from '../../../../../../../plugins/data/public';
+import { esFilters, FilterManager, Filter, Query } from '../../../../../../../plugins/data/public';
 
-interface AppState {
+export interface AppState {
   /**
    * Columns displayed in the table, cannot be changed by UI, just in discover's main app
    */
@@ -47,6 +47,7 @@ interface AppState {
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
+  query?: Query;
 }
 
 interface GlobalState {
