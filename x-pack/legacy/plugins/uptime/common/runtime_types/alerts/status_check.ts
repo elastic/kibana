@@ -6,19 +6,34 @@
 
 import * as t from 'io-ts';
 
-const OptionalProps = t.partial({
-  filters: t.string,
-});
-
-const RequiredProps = t.type({
-  locations: t.array(t.string),
-  numTimes: t.number,
-  timerange: t.type({
-    from: t.string,
-    to: t.string,
+export const StatusCheckAlertStateType = t.intersection([
+  t.partial({
+    currentTriggerStarted: t.string,
+    firstTriggeredAt: t.string,
+    lastTriggeredAt: t.string,
+    lastResolvedAt: t.string,
   }),
-});
+  t.type({
+    firstCheckedAt: t.string,
+    lastCheckedAt: t.string,
+    isTriggered: t.boolean,
+  }),
+]);
 
-export const StatusCheckExecutorParamsType = t.intersection([OptionalProps, RequiredProps]);
+export type StatusCheckAlertState = t.TypeOf<typeof StatusCheckAlertStateType>;
+
+export const StatusCheckExecutorParamsType = t.intersection([
+  t.partial({
+    filters: t.string,
+  }),
+  t.type({
+    locations: t.array(t.string),
+    numTimes: t.number,
+    timerange: t.type({
+      from: t.string,
+      to: t.string,
+    }),
+  }),
+]);
 
 export type StatusCheckExecutorParams = t.TypeOf<typeof StatusCheckExecutorParamsType>;

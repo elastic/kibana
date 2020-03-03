@@ -11,7 +11,11 @@ import { AlertExecutorOptions } from '../../../../alerting/server';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
-import { StatusCheckExecutorParamsType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import {
+  StatusCheckExecutorParamsType,
+  StatusCheckAlertStateType,
+  StatusCheckAlertState,
+} from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 const { DOWN_MONITOR } = ACTION_GROUP_DEFINITIONS;
 
@@ -54,29 +58,34 @@ export const contextMessage = (monitorIds: string[], max: number): string => {
   return message;
 };
 
-interface StatusCheckAlertState {
-  currentTriggerStarted?: string;
-  firstCheckedAt: string;
-  firstTriggeredAt?: string;
-  lastCheckedAt: string;
-  lastTriggeredAt?: string;
-  lastResolvedAt?: string;
-  isTriggered: boolean;
-}
-
 export const updateState = (
   state: Record<string, any>,
   isTriggeredNow: boolean
 ): StatusCheckAlertState => {
+  const now = new Date().toISOString();
+  const decoded = StatusCheckAlertStateType.decode(state);
+  if (!isRight(decoded)) {
+    const triggerVal = isTriggeredNow ? now : undefined;
+    return {
+      currentTriggerStarted: triggerVal,
+      firstCheckedAt: now,
+      firstTriggeredAt: triggerVal,
+      isTriggered: isTriggeredNow,
+      lastTriggeredAt: triggerVal,
+      lastCheckedAt: now,
+      lastResolvedAt: undefined,
+    };
+  }
   const {
     currentTriggerStarted,
     firstCheckedAt,
     firstTriggeredAt,
     lastTriggeredAt,
+    // this is the stale trigger status, we're naming it `wasTriggered`
+    // to differentiate it from the `isTriggeredNow` param
     isTriggered: wasTriggered,
     lastResolvedAt,
-  } = state as StatusCheckAlertState;
-  const now = new Date().toISOString();
+  } = decoded.right;
 
   let cts: string | undefined;
   if (isTriggeredNow && !currentTriggerStarted) {
@@ -133,7 +142,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
 
     const params = decoded.right;
 
-    /* This is called `monitorsByLocation` but it's really:
+    /* This is called `monitorsByLocation` but it's really
      * monitors by location by status. The query we run to generate this
      * filters on the status field, so effectively there should be one and only one
      * status represented in the result set. */

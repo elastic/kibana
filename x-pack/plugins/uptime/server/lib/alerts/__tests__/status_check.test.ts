@@ -41,7 +41,7 @@ const bootstrapDependencies = (customRequests?: any) => {
  * @param state the state the alert maintains
  */
 const mockOptions = (
-  params = { foo: 'bar' },
+  params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
   services = { callCluster: 'mockESFunction' },
   state = {}
 ): any => ({
@@ -68,7 +68,12 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
-            "foo": "bar",
+            "locations": Array [],
+            "numTimes": 5,
+            "timerange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
           },
         ]
       `);
@@ -112,7 +117,12 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
-            "foo": "bar",
+            "locations": Array [],
+            "numTimes": 5,
+            "timerange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
           },
         ]
       `);
