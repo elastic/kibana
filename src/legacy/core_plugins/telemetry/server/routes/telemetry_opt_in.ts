@@ -21,6 +21,7 @@ import Joi from 'joi';
 import moment from 'moment';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
+import { Legacy } from 'kibana';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
@@ -32,14 +33,13 @@ import {
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
+  server: Legacy.Server;
 }
 
 export function registerTelemetryOptInRoutes({
-  core,
+  server,
   currentKibanaVersion,
 }: RegisterOptInRoutesParams) {
-  const { server } = core.http as any;
-
   server.route({
     method: 'POST',
     path: '/api/telemetry/v2/optIn',

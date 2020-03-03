@@ -15,6 +15,11 @@ export const NewCommentSchema = schema.object({
   comment: schema.string(),
 });
 
+export const UpdateCommentArguments = schema.object({
+  comment: schema.string(),
+  version: schema.string(),
+});
+
 export const CommentSchema = schema.object({
   comment: schema.string(),
   created_at: schema.string(),
