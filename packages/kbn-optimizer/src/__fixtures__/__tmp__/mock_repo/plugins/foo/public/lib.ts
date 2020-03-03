@@ -17,8 +17,6 @@
  * under the License.
  */
 
-declare function NormalizePath(path: string, stripTrailing?: boolean): string;
-
-declare module 'normalize-path' {
-  export = NormalizePath;
+export function fooLibFn() {
+  return 'foo';
 }
