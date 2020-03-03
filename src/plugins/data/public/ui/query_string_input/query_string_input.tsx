@@ -34,13 +34,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, SuggestionsComponent, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
