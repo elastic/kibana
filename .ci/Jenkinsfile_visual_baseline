@@ -1,0 +1,27 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
+  timeout(time: 120, unit: 'MINUTES') {
+    timestamps {
+      ansiColor('xterm') {
+        catchError {
+          parallel([
+            kibanaPipeline.withWorker('kibana-oss-tests', 'linux && immutable') {
+              kibanaPipeline.buildOss()
+              kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') })(1)
+            },
+            kibanaPipeline.withWorker('kibana-xpack-tests', 'linux && immutable') {
+              kibanaPipeline.buildXpack()
+              kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') })(1)
+            },
+          ])
+        }
+
+        kibanaPipeline.sendMail()
+      }
+    }
+  }
+}
