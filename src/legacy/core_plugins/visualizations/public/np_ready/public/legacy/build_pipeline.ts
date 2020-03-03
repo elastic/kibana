@@ -82,19 +82,16 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (
+const getSchemas = (
   vis: Vis,
   opts: {
-    timefilter: TimefilterContract;
     timeRange?: any;
   }
 ): Schemas => {
-  const { timefilter, timeRange } = opts;
+  const { timeRange } = opts;
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
-      const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-      agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
     }
 
     const hasSubAgg = [
@@ -447,7 +444,6 @@ export const buildVislibDimensions = async (
   }
 ) => {
   const schemas = getSchemas(vis, {
-    timefilter: params.timefilter,
     timeRange: params.timeRange,
   });
   const dimensions = {
@@ -467,8 +463,12 @@ export const buildVislibDimensions = async (
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
       dimensions.x.params.intervalESValue = esValue;
       dimensions.x.params.intervalESUnit = esUnit;
+      const bounds = xAgg.params.timeRange
+        ? params.timefilter.calculateBounds(xAgg.params.timeRange)
+        : null;
+      dimensions.x.params.bounds = xAgg.fieldIsTimeField() && bounds;
+      xAgg.buckets.setBounds(bounds);
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
-      dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
@@ -523,7 +523,6 @@ export const buildPipeline = async (
   }
 
   const schemas = getSchemas(vis, {
-    timefilter: params.timefilter,
     timeRange: params.timeRange,
   });
   if (buildPipelineVisFunction[vis.type.name]) {
