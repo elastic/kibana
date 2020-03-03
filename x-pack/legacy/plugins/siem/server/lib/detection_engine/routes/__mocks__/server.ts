@@ -42,7 +42,7 @@ const buildResultMock = () => ({ ok: jest.fn(x => x), badRequest: jest.fn(x => x
 
 class MockServer {
   constructor(
-    public router = httpServiceMock.createRouter(),
+    public readonly router = httpServiceMock.createRouter(),
     private responseMock = responseFactoryMock.create(),
     private contextMock = requestContextMock.create(),
     private resultMock = buildResultMock()

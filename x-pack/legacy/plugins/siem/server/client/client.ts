@@ -9,7 +9,7 @@ import { Legacy } from 'kibana';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../common/constants';
 
 export class SiemClient {
-  public signalsIndex: string;
+  public readonly signalsIndex: string;
 
   constructor(private spaceId: string, private config: Legacy.Server['config']) {
     const configuredSignalsIndex = this.config().get<string>(
