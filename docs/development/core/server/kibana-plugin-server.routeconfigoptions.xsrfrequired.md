@@ -4,12 +4,12 @@
 
 ## RouteConfigOptions.xsrfRequired property
 
-Defines xsrf protection requirements for a route: - true. Requires an incoming request to contain `kbn-xsrf` header. - false. Disables xsrf protection.
+Defines xsrf protection requirements for a route: - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header. - false. Disables xsrf protection.
 
 Set to true by default
 
 <b>Signature:</b>
 
 ```typescript
-xsrfRequired?: boolean;
+xsrfRequired?: Method extends 'get' ? never : boolean;
 ```

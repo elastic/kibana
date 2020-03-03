@@ -686,6 +686,9 @@ export interface DeprecationSettings {
 }
 
 // @public
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -1397,7 +1400,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean;
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
-    xsrfRequired?: boolean;
+    xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
 // @public
@@ -1412,7 +1415,7 @@ export interface RouteConfigOptionsBody {
 export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 // @public
 export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
@@ -1464,6 +1467,9 @@ export interface RouteValidatorOptions {
         body?: boolean;
     };
 }
+
+// @public
+export type SafeRouteMethod = 'get' | 'options';
 
 // @public (undocumented)
 export interface SavedObject<T = unknown> {

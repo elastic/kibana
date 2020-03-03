@@ -23,8 +23,18 @@ export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
   return method === 'get' || method === 'options';
 }
 
+/**
+ * Set of HTTP methods changing the state of the server.
+ * @public
+ */
 export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+/**
+ * Set of HTTP methods not changing the state of the server.
+ * @public
+ */
 export type SafeRouteMethod = 'get' | 'options';
+
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public

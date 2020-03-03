@@ -30,12 +30,14 @@ export {
   ensureRawRequest,
 } from './request';
 export {
+  DestructiveRouteMethod,
   isSafeMethod,
   RouteMethod,
   RouteConfig,
   RouteConfigOptions,
   RouteContentType,
   RouteConfigOptionsBody,
+  SafeRouteMethod,
   validBodyOutput,
 } from './route';
 export { HapiResponseAdapter } from './response_adapter';
