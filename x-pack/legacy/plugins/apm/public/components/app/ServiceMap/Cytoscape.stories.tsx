@@ -10,7 +10,7 @@ import cytoscape from 'cytoscape';
 import React from 'react';
 import { Cytoscape } from './Cytoscape';
 import { getCytoscapeElements } from './get_cytoscape_elements';
-import serviceMapResponse from './service-map-response.json';
+import serviceMapResponse from './cytoscape-layout-test-response.json';
 import { iconForNode } from './icons';
 
 const elementsFromResponses = getCytoscapeElements([serviceMapResponse], '');
