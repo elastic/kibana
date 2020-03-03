@@ -196,14 +196,16 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       ) {
         errorMessage = e.message;
       }
+      const fallbackModelMemoryLimit =
+        jobType !== undefined
+          ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+          : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
+      setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
       setFormState({
         fieldOptionsFetchFail: true,
         maxDistinctValuesError: errorMessage,
         loadingFieldOptions: false,
-        modelMemoryLimit:
-          jobType !== undefined
-            ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
-            : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
+        modelMemoryLimit: fallbackModelMemoryLimit,
       });
     }
   }, 400);
