@@ -33,7 +33,7 @@ TempNumberComponent.displayName = 'TempNumberComponent';
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
-    name: i18n.CASE_TITLE,
+    name: i18n.NAME,
     render: (theCase: Case) => {
       if (theCase.caseId != null && theCase.title != null) {
         const caseDetailsLinkComponent = (

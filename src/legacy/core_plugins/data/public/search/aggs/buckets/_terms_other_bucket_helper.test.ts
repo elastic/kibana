@@ -17,39 +17,73 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
-} from '../../buckets/_terms_other_bucket_helper';
-import { start as visualizationsStart } from '../../../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+} from './_terms_other_bucket_helper';
+import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { IBucketAggConfig } from './_bucket_agg_type';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 
-const visConfigSingleTerm = {
-  type: 'pie',
+const indexPattern = {
+  id: '1234',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'field',
+    },
+  ],
+} as any;
+
+const singleTerm = {
   aggs: [
     {
-      type: 'terms',
-      schema: 'segment',
-      params: { field: 'machine.os.raw', otherBucket: true, missingBucket: true },
+      id: '1',
+      type: BUCKET_TYPES.TERMS,
+      params: {
+        field: {
+          name: 'machine.os.raw',
+          indexPattern,
+          filterable: true,
+        },
+        otherBucket: true,
+        missingBucket: true,
+      },
     },
   ],
 };
 
-const visConfigNestedTerm = {
-  type: 'pie',
+const nestedTerm = {
   aggs: [
     {
-      type: 'terms',
-      schema: 'segment',
-      params: { field: 'geo.src', size: 2, otherBucket: false, missingBucket: false },
+      id: '1',
+      type: BUCKET_TYPES.TERMS,
+      params: {
+        field: {
+          name: 'geo.src',
+          indexPattern,
+          filterable: true,
+        },
+        size: 2,
+        otherBucket: false,
+        missingBucket: false,
+      },
     },
     {
-      type: 'terms',
-      schema: 'segment',
-      params: { field: 'machine.os.raw', size: 2, otherBucket: true, missingBucket: true },
+      id: '2',
+      type: BUCKET_TYPES.TERMS,
+      params: {
+        field: {
+          name: 'machine.os.raw',
+          indexPattern,
+          filterable: true,
+        },
+        size: 2,
+        otherBucket: true,
+        missingBucket: true,
+      },
     },
   ],
 };
@@ -183,28 +217,36 @@ const nestedOtherResponse = {
   status: 200,
 };
 
+jest.mock('ui/new_platform');
+
 describe('Terms Agg Other bucket helper', () => {
-  let vis;
+  const typesRegistry = mockAggTypesRegistry();
+  const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
+  };
 
-  function init(aggConfig) {
-    ngMock.module('kibana');
-    ngMock.inject(Private => {
-      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-
-      vis = new visualizationsStart.Vis(indexPattern, aggConfig);
-    });
-  }
+  beforeEach(() => {
+    mockDataServices();
+  });
 
   describe('buildOtherBucketAgg', () => {
-    it('returns a function', () => {
-      init(visConfigSingleTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse);
-      expect(agg).to.be.a('function');
+    test('returns a function', () => {
+      const aggConfigs = getAggConfigs(singleTerm.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        singleTermResponse
+      );
+      expect(typeof agg).toBe('function');
     });
 
-    it('correctly builds query with single terms agg', () => {
-      init(visConfigSingleTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse)();
+    test('correctly builds query with single terms agg', () => {
+      const aggConfigs = getAggConfigs(singleTerm.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        singleTermResponse
+      );
       const expectedResponse = {
         aggs: undefined,
         filters: {
@@ -223,13 +265,19 @@ describe('Terms Agg Other bucket helper', () => {
           },
         },
       };
-
-      expect(agg['other-filter']).to.eql(expectedResponse);
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()['other-filter']).toEqual(expectedResponse);
+      }
     });
 
-    it('correctly builds query for nested terms agg', () => {
-      init(visConfigNestedTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponse)();
+    test('correctly builds query for nested terms agg', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        nestedTermResponse
+      );
       const expectedResponse = {
         'other-filter': {
           aggs: undefined,
@@ -267,54 +315,84 @@ describe('Terms Agg Other bucket helper', () => {
           },
         },
       };
-
-      expect(agg).to.eql(expectedResponse);
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
     });
 
-    it('returns false when nested terms agg has no buckets', () => {
-      init(visConfigNestedTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponseNoResults);
-      expect(agg).to.eql(false);
+    test('returns false when nested terms agg has no buckets', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        nestedTermResponseNoResults
+      );
+
+      expect(agg).toEqual(false);
     });
   });
 
   describe('mergeOtherBucketAggResponse', () => {
-    it('correctly merges other bucket with single terms agg', () => {
-      init(visConfigSingleTerm);
-      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse)();
-      const mergedResponse = mergeOtherBucketAggResponse(
-        vis.aggs,
-        singleTermResponse,
-        singleOtherResponse,
-        vis.aggs.aggs[0],
-        otherAggConfig
+    test('correctly merges other bucket with single terms agg', () => {
+      const aggConfigs = getAggConfigs(singleTerm.aggs);
+      const otherAggConfig = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        singleTermResponse
       );
 
-      expect(mergedResponse.aggregations['1'].buckets[3].key).to.equal('__other__');
+      expect(otherAggConfig).toBeDefined();
+      if (otherAggConfig) {
+        const mergedResponse = mergeOtherBucketAggResponse(
+          aggConfigs,
+          singleTermResponse,
+          singleOtherResponse,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          otherAggConfig()
+        );
+        expect(mergedResponse.aggregations['1'].buckets[3].key).toEqual('__other__');
+      }
     });
 
-    it('correctly merges other bucket with nested terms agg', () => {
-      init(visConfigNestedTerm);
-      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponse)();
-      const mergedResponse = mergeOtherBucketAggResponse(
-        vis.aggs,
-        nestedTermResponse,
-        nestedOtherResponse,
-        vis.aggs.aggs[1],
-        otherAggConfig
+    test('correctly merges other bucket with nested terms agg', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      const otherAggConfig = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        nestedTermResponse
       );
 
-      expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).to.equal('__other__');
+      expect(otherAggConfig).toBeDefined();
+      if (otherAggConfig) {
+        const mergedResponse = mergeOtherBucketAggResponse(
+          aggConfigs,
+          nestedTermResponse,
+          nestedOtherResponse,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          otherAggConfig()
+        );
+
+        expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).toEqual(
+          '__other__'
+        );
+      }
     });
   });
 
   describe('updateMissingBucket', () => {
-    it('correctly updates missing bucket key', () => {
-      init(visConfigNestedTerm);
-      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs.aggs[0]);
+    test('correctly updates missing bucket key', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      const updatedResponse = updateMissingBucket(
+        singleTermResponse,
+        aggConfigs,
+        aggConfigs.aggs[0] as IBucketAggConfig
+      );
       expect(
-        updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === '__missing__')
-      ).to.not.be('undefined');
+        updatedResponse.aggregations['1'].buckets.find(
+          (bucket: Record<string, any>) => bucket.key === '__missing__'
+        )
+      ).toBeDefined();
     });
   });
 });
