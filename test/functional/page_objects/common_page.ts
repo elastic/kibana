@@ -435,6 +435,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return title;
     }
 
+    async closeToastIfExists() {
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      if (toastShown) {
+        await this.closeToast();
+      }
+    }
+
     async clearAllToasts() {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
