@@ -9,8 +9,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '../';
 import * as hooks from '../../../../../../hooks/useFetcher';
-// import * as callApmApi from '../../../../../../hooks/useCallApmApi';
-
 import {
   expectTextsInDocument,
   MockApmPluginContextWrapper
