@@ -24,14 +24,20 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         api.dispatch({ type: 'appRequestedResolverData' });
         let response = [];
         let lifecycle: ResolverEvent[];
-        let children: ResolverEvent[];
+        let childEvents: ResolverEvent[];
         let relatedEvents: ResolverEvent[];
         const ancestors: ResolverEvent[] = [];
         const maxAncestors = 5;
         if (isLegacyEvent(action.payload.selectedEvent)) {
           const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
           const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
-          [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
+          [
+            { lifecycle },
+            {
+              children: [{ lifecycle: childEvents }],
+            },
+            { events: relatedEvents },
+          ] = await Promise.all([
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
               query: { legacyEndpointID },
             }),
@@ -54,7 +60,13 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
               }
             }
           }
-          [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
+          [
+            { lifecycle },
+            {
+              children: [{ lifecycle: childEvents }],
+            },
+            { events: relatedEvents },
+          ] = await Promise.all([
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}`),
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}/children`),
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}/related`),
@@ -62,7 +74,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           ]);
         }
 
-        response = [...lifecycle, ...children, ...relatedEvents, ...ancestors];
+        response = [...lifecycle, ...childEvents, ...relatedEvents, ...ancestors];
         api.dispatch({
           type: 'serverReturnedResolverData',
           payload: { data: { result: { search_results: response } } },
