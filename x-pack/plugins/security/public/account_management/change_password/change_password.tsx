@@ -13,7 +13,7 @@ import { ChangePasswordForm } from '../../management/users/components/change_pas
 
 interface Props {
   user: AuthenticatedUser;
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsSetup;
 }
 
@@ -48,7 +48,7 @@ export class ChangePassword extends Component<Props, {}> {
         <ChangePasswordForm
           user={this.props.user}
           isUserChangingOwnPassword={true}
-          apiClient={this.props.apiClient}
+          userAPIClient={this.props.userAPIClient}
           notifications={this.props.notifications}
         />
       </EuiDescribedFormGroup>
