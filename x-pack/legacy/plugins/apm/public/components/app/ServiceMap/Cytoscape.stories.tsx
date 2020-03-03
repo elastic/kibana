@@ -204,4 +204,5 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         source: false
       }
     }
-  );
+  )
+  .addParameters({ options: { showPanel: false } });

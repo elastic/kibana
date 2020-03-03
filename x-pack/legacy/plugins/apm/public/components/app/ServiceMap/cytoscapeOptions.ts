@@ -20,13 +20,6 @@ function isService(el: cytoscape.NodeSingular) {
 }
 
 const style: cytoscape.Stylesheet[] = [
-  // @ts-ignore
-  {
-    selector: '.invisible',
-    style: {
-      visibility: 'hidden'
-    }
-  },
   {
     selector: 'node',
     style: {
@@ -75,7 +68,6 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'edge',
     style: {
-      // 'curve-style': 'bezier',
       'curve-style': 'taxi',
       // @ts-ignore
       'taxi-direction': 'rightward',
@@ -103,6 +95,11 @@ const style: cytoscape.Stylesheet[] = [
       'target-distance-from-node': theme.paddingSizes.xs
     }
   },
+  // @ts-ignore
+  {
+    selector: '.invisible',
+    style: { visibility: 'hidden' }
+  },
   {
     selector: 'edge.nodeHover',
     style: {
@@ -120,7 +117,6 @@ const style: cytoscape.Stylesheet[] = [
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,
   boxSelectionEnabled: false,
-  // layout,
   maxZoom: 3,
   minZoom: 0.2,
   style

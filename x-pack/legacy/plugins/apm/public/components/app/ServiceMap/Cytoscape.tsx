@@ -66,7 +66,7 @@ function getLayoutOptions(
     roots: selectedRoots,
     fit: true,
     padding: nodeHeight,
-    nodeDimensionsIncludeLabels: true,
+    spacingFactor: 0.85,
     animate: true,
     animationEasing: animationOptions.easing,
     animationDuration: animationOptions.duration,
@@ -79,13 +79,10 @@ function getLayoutOptions(
 }
 
 function selectRoots(elements: cytoscape.ElementDefinition[]): string[] {
-  const nodeData = elements
-    .filter(({ group }) => group === 'nodes')
-    .map(({ data }) => data) as cytoscape.NodeDataDefinition[];
-  const clientNodeIds = nodeData
-    .filter(data => isRumAgentName(data.agentName))
-    .map(({ id }) => id) as string[];
-  return clientNodeIds;
+  const nodes = cytoscape({ elements }).nodes();
+  const unconnectedNodes = nodes.roots().intersection(nodes.leaves());
+  const rumNodes = nodes.filter(node => isRumAgentName(node.data('agentName')));
+  return rumNodes.union(unconnectedNodes).map(node => node.id());
 }
 
 export function Cytoscape({
@@ -101,6 +98,7 @@ export function Cytoscape({
     // prevents flash of unstyled elements
     classes: [element.classes, 'invisible'].join(' ').trim()
   }));
+
   const [ref, cy] = useCytoscape({
     ...cytoscapeOptions,
     elements: initialElements
@@ -110,11 +108,8 @@ export function Cytoscape({
   // is required and can trigger rendering when changed.
   const divStyle = { ...style, height };
 
-  const dataHandler = useCallback(
-    (
-      event: cytoscape.EventObject,
-      currentElements: cytoscape.ElementDefinition[]
-    ) => {
+  const dataHandler = useCallback<cytoscape.EventHandler>(
+    event => {
       if (cy) {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
@@ -123,7 +118,7 @@ export function Cytoscape({
         }
 
         if (event.cy.elements().length > 0) {
-          const selectedRoots = selectRoots(currentElements);
+          const selectedRoots = selectRoots(elements);
           const layout = cy.layout(
             getLayoutOptions(selectedRoots, height, width)
           );
@@ -135,14 +130,14 @@ export function Cytoscape({
         }
       }
     },
-    [cy, serviceName, height, width]
+    [cy, serviceName, elements, height, width]
   );
 
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy) {
       cy.add(elements);
-      cy.trigger('data', [elements]);
+      cy.trigger('data');
     }
   }, [cy, elements]);
 
@@ -158,8 +153,8 @@ export function Cytoscape({
     };
 
     if (cy) {
-      cy.on('data', dataHandler as cytoscape.EventHandler);
-      cy.ready(event => dataHandler(event, initialElements));
+      cy.on('data', dataHandler);
+      cy.ready(dataHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
@@ -175,7 +170,6 @@ export function Cytoscape({
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cy, dataHandler, serviceName]);
 
   return (
