@@ -106,7 +106,7 @@ export const updateState = (
 };
 
 // Right now the maximum number of monitors shown in the message is hardcoded here.
-// we will probably want to make this a parameter in the future
+// we might want to make this a parameter in the future
 const DEFAULT_MAX_MESSAGE_ROWS = 3;
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
