@@ -59,10 +59,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     };
   }
 
-  public static getDerivedStateFromProps({ target }: LogMinimapProps) {
-    return { target };
-  }
-
   public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
     const minimapTop = event.currentTarget.getBoundingClientRect().top;
     const clickedYPosition = event.clientY - minimapTop;
