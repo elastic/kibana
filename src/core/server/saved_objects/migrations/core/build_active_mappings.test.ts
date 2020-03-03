@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexMapping } from './../../mappings';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from './../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
@@ -47,6 +47,23 @@ describe('buildActiveMappings', () => {
     expect(() => buildActiveMappings(properties)).toThrow(
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
     );
+  });
+
+  test('handles the `dynamic` property of types', () => {
+    const typeMappings: SavedObjectsTypeMappingDefinitions = {
+      firstType: {
+        dynamic: 'strict',
+        properties: { field: { type: 'keyword' } },
+      },
+      secondType: {
+        dynamic: false,
+        properties: { field: { type: 'long' } },
+      },
+      thirdType: {
+        properties: { field: { type: 'text' } },
+      },
+    };
+    expect(buildActiveMappings(typeMappings)).toMatchSnapshot();
   });
 
   test('generated hashes are stable', () => {
