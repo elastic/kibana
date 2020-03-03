@@ -134,7 +134,7 @@ describe('Events Viewer', () => {
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
-      const filterInput = '4bf34c1c-eaa9-46de-8921-67a4ccc49829'; // this will never match real data
+      const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
         .then(initialNumberOfEvents => {
