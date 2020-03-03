@@ -15,7 +15,7 @@ exports[`EditableTitle it renders 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <StyledEuiButtonIcon
+    <Styled(EuiButtonIcon)
       aria-label="You can edit Test title by clicking"
       data-test-subj="editable-title-edit-icon"
       iconType="pencil"

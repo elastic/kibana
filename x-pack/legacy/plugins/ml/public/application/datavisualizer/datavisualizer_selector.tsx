@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isFullLicense } from '../license/check_license';
+import { isFullLicense } from '../license';
 import { useTimefilter } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
