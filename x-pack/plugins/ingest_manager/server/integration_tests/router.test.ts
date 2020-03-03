@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+test.skip('requires one test', () => {});
+
 /**
  * skipped due to all being flaky: https://github.com/elastic/kibana/issues/58954
  *
