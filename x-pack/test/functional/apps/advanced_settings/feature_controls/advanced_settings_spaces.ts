@@ -41,9 +41,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.contain('Management');
       });
 
       it(`allows settings to be changed`, async () => {
@@ -58,7 +57,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Advanced Settings disabled', () => {
+    describe('space with Advanced Settings disabled', function() {
+      this.tags('skipCoverage');
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects

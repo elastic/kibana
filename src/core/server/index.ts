@@ -39,7 +39,12 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import {
+  ElasticsearchServiceSetup,
+  IScopedClusterClient,
+  configSchema as elasticsearchConfigSchema,
+} from './elasticsearch';
+
 import { HttpServiceSetup } from './http';
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -78,6 +83,7 @@ export {
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
+  ElasticsearchConfig,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
@@ -153,6 +159,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -195,6 +203,7 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -218,6 +227,7 @@ export {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
@@ -236,6 +246,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -346,4 +364,15 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+};
+
+/**
+ * Config schemas for the platform services.
+ *
+ * @alpha
+ */
+export const config = {
+  elasticsearch: {
+    schema: elasticsearchConfigSchema,
+  },
 };
