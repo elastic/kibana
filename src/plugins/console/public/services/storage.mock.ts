@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
+import { Storage } from './storage';
 
-export class EditorRegistry {
-  private inputEditor: SenseEditor | undefined;
-
-  setInputEditor(inputEditor: SenseEditor) {
-    this.inputEditor = inputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor!;
-  }
+export class StorageMock extends Storage {
+  delete = jest.fn();
+  decode = jest.fn();
+  decodeKey = jest.fn();
+  encodeKey = jest.fn();
+  encode = jest.fn();
+  has = jest.fn();
+  keys = jest.fn();
+  get = jest.fn();
+  set = jest.fn();
 }
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
