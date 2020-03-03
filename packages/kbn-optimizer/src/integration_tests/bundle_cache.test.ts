@@ -44,6 +44,7 @@ beforeEach(async () => {
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
     parents: true,
+    deep: true,
   });
 });
 
