@@ -18,8 +18,6 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-jest.mock('ui/new_platform');
-
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';
 const MIN_COUNT = '5';
@@ -206,7 +204,7 @@ describe('<PolicyAdd />', () => {
           snapshotName: SNAPSHOT_NAME,
         };
 
-        expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
 
       it('should surface the API errors from the put HTTP request', async () => {

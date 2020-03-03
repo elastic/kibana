@@ -10,7 +10,7 @@ import { setup as repositoryEditSetup } from './repository_edit.helpers';
 import { setup as policyAddSetup } from './policy_add.helpers';
 import { setup as policyEditSetup } from './policy_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
 export { setupEnvironment } from './setup_environment';
 

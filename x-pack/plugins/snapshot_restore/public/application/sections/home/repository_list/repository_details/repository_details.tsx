@@ -422,7 +422,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
                                   defaultMessage: 'You cannot delete a managed repository.',
                                 }
                               )
-                            : null
+                            : undefined
                         }
                       >
                         <FormattedMessage

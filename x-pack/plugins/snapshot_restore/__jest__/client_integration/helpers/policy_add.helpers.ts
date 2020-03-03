@@ -7,8 +7,8 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { PolicyAdd } from '../../../public/application/sections/policy_add';
-import { WithProviders } from './providers';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -19,7 +19,7 @@ const testBedConfig: TestBedConfig = {
 };
 
 const initTestBed = registerTestBed<PolicyFormTestSubjects>(
-  WithProviders(PolicyAdd),
+  WithAppDependencies(PolicyAdd),
   testBedConfig
 );
 

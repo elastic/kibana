@@ -8,9 +8,9 @@
 import { registerTestBed, TestBed } from '../../../../../test_utils';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
-import { WithProviders } from './providers';
+import { WithAppDependencies } from './setup_environment';
 
-const initTestBed = registerTestBed<RepositoryAddTestSubjects>(WithProviders(RepositoryAdd), {
+const initTestBed = registerTestBed<RepositoryAddTestSubjects>(WithAppDependencies(RepositoryAdd), {
   doMountAsync: true,
 });
 

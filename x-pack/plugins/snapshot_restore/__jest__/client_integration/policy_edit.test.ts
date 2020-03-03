@@ -11,8 +11,6 @@ import { PolicyForm } from '../../public/application/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 
-jest.mock('ui/new_platform');
-
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 
@@ -126,7 +124,7 @@ describe('<PolicyEdit />', () => {
             snapshotName: `${POLICY_EDIT.snapshotName}-edited`,
           },
         };
-        expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
     });
   });

@@ -7,7 +7,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
-import { WithProviders } from './providers';
+import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 
@@ -20,7 +20,7 @@ const testBedConfig: TestBedConfig = {
 };
 
 const initTestBed = registerTestBed<PolicyFormTestSubjects>(
-  WithProviders(PolicyEdit),
+  WithAppDependencies(PolicyEdit),
   testBedConfig
 );
 

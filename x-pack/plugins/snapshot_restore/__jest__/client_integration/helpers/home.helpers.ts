@@ -15,7 +15,7 @@ import {
 } from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
-import { WithProviders } from './providers';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -25,7 +25,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithProviders(SnapshotRestoreHome), testBedConfig);
+const initTestBed = registerTestBed(WithAppDependencies(SnapshotRestoreHome), testBedConfig);
 
 export interface HomeTestBed extends TestBed<HomeTestSubjects> {
   actions: {

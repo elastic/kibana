@@ -7,7 +7,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
-import { WithProviders } from './providers';
+import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';
 
 const testBedConfig: TestBedConfig = {
@@ -19,7 +19,7 @@ const testBedConfig: TestBedConfig = {
 };
 
 export const setup = registerTestBed<RepositoryEditTestSubjects>(
-  WithProviders(RepositoryEdit),
+  WithAppDependencies(RepositoryEdit),
   testBedConfig
 );
 

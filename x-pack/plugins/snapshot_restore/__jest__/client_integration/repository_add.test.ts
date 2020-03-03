@@ -222,16 +222,14 @@ describe('<RepositoryAdd />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        expect(latestRequest.requestBody).toEqual(
-          JSON.stringify({
-            name: repository.name,
-            type: repository.type,
-            settings: {
-              location: repository.settings.location,
-              compress: true,
-            },
-          })
-        );
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: repository.name,
+          type: repository.type,
+          settings: {
+            location: repository.settings.location,
+            compress: true,
+          },
+        });
       });
 
       test('should surface the API errors from the "save" HTTP request', async () => {
@@ -281,16 +279,14 @@ describe('<RepositoryAdd />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        expect(latestRequest.requestBody).toEqual(
-          JSON.stringify({
-            name: repository.name,
-            type: 'source',
-            settings: {
-              delegateType: repository.type,
-              location: repository.settings.location,
-            },
-          })
-        );
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: repository.name,
+          type: 'source',
+          settings: {
+            delegateType: repository.type,
+            location: repository.settings.location,
+          },
+        });
       });
     });
   });

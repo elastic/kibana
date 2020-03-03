@@ -9,7 +9,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 
-const mockResponse = (defaultResponse: HttpResponse, response: HttpResponse) => [
+const mockResponse = (defaultResponse: HttpResponse, response?: HttpResponse) => [
   200,
   { 'Content-Type': 'application/json' },
   JSON.stringify({ ...defaultResponse, ...response }),
@@ -31,15 +31,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith('GET', `${API_BASE_PATH}repository_types`, JSON.stringify(response));
   };
 
-  const setGetRepositoryResponse = (response?: HttpResponse) => {
+  const setGetRepositoryResponse = (response?: HttpResponse, delay = 0) => {
     const defaultResponse = {};
 
     server.respondWith(
       'GET',
       /api\/snapshot_restore\/repositories\/.+/,
-      response
-        ? mockResponse(defaultResponse, response)
-        : [200, { 'Content-Type': 'application/json' }, '']
+      mockResponse(defaultResponse, response)
     );
   };
 
@@ -66,9 +64,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith(
       'GET',
       /\/api\/snapshot_restore\/snapshots\/.+/,
-      response
-        ? mockResponse(defaultResponse, response)
-        : [200, { 'Content-Type': 'application/json' }, '']
+      mockResponse(defaultResponse, response)
     );
   };
 
@@ -78,9 +74,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith(
       'GET',
       `${API_BASE_PATH}policies/indices`,
-      response
-        ? mockResponse(defaultResponse, response)
-        : [200, { 'Content-Type': 'application/json' }, '']
+      mockResponse(defaultResponse, response)
     );
   };
 
@@ -88,7 +82,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('PUT', `${API_BASE_PATH}policies`, [
+    server.respondWith('POST', `${API_BASE_PATH}policies`, [
       status,
       { 'Content-Type': 'application/json' },
       body,
