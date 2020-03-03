@@ -16,11 +16,11 @@ import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
+import { useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
-import { useServices } from '../../../app_context';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];

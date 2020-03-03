@@ -90,7 +90,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
         acc[index] = <ShardsTable shards={shards} />;
       }
       return acc;
-    }, {} as typeof expandedIndices);
+    }, {} as { [key: string]: JSX.Element });
   }, [expandedIndices, restores]);
 
   const columns = [

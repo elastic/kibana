@@ -51,9 +51,8 @@ export const useConfig = () => useAppContext().config;
 
 export const useToastNotifications = () => {
   const {
-    core: {
-      notifications: { toasts: toastNotifications },
-    },
-  } = useAppContext();
+    notifications: { toasts: toastNotifications },
+  } = useCore();
+
   return toastNotifications;
 };
