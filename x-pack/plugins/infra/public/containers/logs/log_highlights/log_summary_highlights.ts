@@ -15,8 +15,6 @@ import { useBucketSize } from '../log_summary/bucket_size';
 export const useLogSummaryHighlights = (
   sourceId: string,
   sourceVersion: string | undefined,
-  startDate: string | null,
-  endDate: string | null,
   startTimestamp: number | null,
   endTimestamp: number | null,
   filterQuery: string | null,
@@ -49,10 +47,7 @@ export const useLogSummaryHighlights = (
         setLogSummaryHighlights(response.data);
       },
     },
-    // Use `*Timestamp` values in the fetch.
-    // Use `*Date` to decide if it should refetch or not. `endTimestamp` updates
-    // frequently when `endDate` is `"now"` and triggers a lot of re-renders.
-    [sourceId, startDate, endDate, filterQuery, highlightTerms]
+    [sourceId, startTimestamp, endTimestamp, filterQuery, highlightTerms]
   );
 
   const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [
@@ -76,11 +71,11 @@ export const useLogSummaryHighlights = (
   }, [
     bucketSize,
     debouncedLoadSummaryHighlights,
-    endTimestamp,
     filterQuery,
     highlightTerms,
     sourceVersion,
     startTimestamp,
+    endTimestamp,
   ]);
 
   return {

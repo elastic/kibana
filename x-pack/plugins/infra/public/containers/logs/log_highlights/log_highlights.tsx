@@ -6,6 +6,7 @@
 
 import createContainer from 'constate';
 import { useState, useContext } from 'react';
+import { useThrottle } from 'react-use';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
@@ -26,14 +27,12 @@ export const useLogHighlightsState = ({
   filterQuery: string | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const {
-    visibleMidpoint,
-    jumpToTargetPosition,
-    startDate,
-    endDate,
-    startTimestamp,
-    endTimestamp,
-  } = useContext(LogPositionState.Context);
+  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
+    LogPositionState.Context
+  );
+
+  const throttledStartTimestamp = useThrottle(startTimestamp, 3000);
+  const throttledEndTimestamp = useThrottle(endTimestamp, 3000);
 
   const {
     logEntryHighlights,
@@ -51,10 +50,8 @@ export const useLogHighlightsState = ({
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,
     sourceVersion,
-    startDate,
-    endDate,
-    startTimestamp,
-    endTimestamp,
+    throttledStartTimestamp,
+    throttledEndTimestamp,
     filterQuery,
     highlightTerms
   );
