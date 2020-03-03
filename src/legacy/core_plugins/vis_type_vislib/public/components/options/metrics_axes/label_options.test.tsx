@@ -21,32 +21,26 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LabelOptions, LabelOptionsProps } from './label_options';
 import { TruncateLabelsOption } from '../../common';
-import { valueAxis, categoryAxis } from './mocks';
+import { valueAxis } from './mocks';
 
 jest.mock('ui/new_platform');
 
 const FILTER = 'filter';
 const ROTATE = 'rotate';
 const DISABLED = 'disabled';
-const CATEGORY_AXES = 'categoryAxes';
 
 describe('LabelOptions component', () => {
-  let setValue: jest.Mock;
+  let setAxisLabel: jest.Mock;
   let defaultProps: LabelOptionsProps;
 
   beforeEach(() => {
-    setValue = jest.fn();
+    setAxisLabel = jest.fn();
 
     defaultProps = {
-      axis: { ...valueAxis },
-      axesName: CATEGORY_AXES,
-      index: 0,
-      stateParams: {
-        categoryAxes: [{ ...categoryAxis }],
-        valueAxes: [{ ...valueAxis }],
-      } as any,
-      setValue,
-    } as any;
+      axisLabels: { ...valueAxis.labels },
+      axisFilterCheckboxName: '',
+      setAxisLabel,
+    };
   });
 
   it('should init with the default set of props', () => {
@@ -64,7 +58,7 @@ describe('LabelOptions component', () => {
   });
 
   it('should disable other fields when axis.labels.show is false', () => {
-    defaultProps.axis.labels.show = false;
+    defaultProps.axisLabels.show = false;
     const comp = shallow(<LabelOptions {...defaultProps} />);
 
     expect(comp.find({ paramName: FILTER }).prop(DISABLED)).toBeTruthy();
@@ -76,25 +70,20 @@ describe('LabelOptions component', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find({ paramName: ROTATE }).prop('setValue')(ROTATE, '5');
 
-    const newAxes = [{ ...categoryAxis, labels: { ...categoryAxis.labels, rotate: 5 } }];
-    expect(setValue).toBeCalledWith(CATEGORY_AXES, newAxes);
+    expect(setAxisLabel).toBeCalledWith('rotate', 5);
   });
 
   it('should set filter value', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
-    expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeTruthy();
     comp.find({ paramName: FILTER }).prop('setValue')(FILTER, false);
 
-    const newAxes = [{ ...categoryAxis, labels: { ...categoryAxis.labels, filter: false } }];
-    expect(setValue).toBeCalledWith(CATEGORY_AXES, newAxes);
+    expect(setAxisLabel).toBeCalledWith(FILTER, false);
   });
 
   it('should set value for valueAxes', () => {
-    defaultProps.axesName = 'valueAxes';
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
 
-    const newAxes = [{ ...valueAxis, labels: { ...valueAxis.labels, truncate: 10 } }];
-    expect(setValue).toBeCalledWith('valueAxes', newAxes);
+    expect(setAxisLabel).toBeCalledWith('truncate', 10);
   });
 });

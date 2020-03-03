@@ -26,14 +26,14 @@ import { YExtents } from './y_extents';
 import { SetScale } from './value_axis_options';
 
 export interface CustomExtentsOptionsProps {
-  axis: ValueAxis;
+  axisScale: ValueAxis['scale'];
   setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
   setValueAxisScale: SetScale;
 }
 
 function CustomExtentsOptions({
-  axis,
+  axisScale,
   setMultipleValidity,
   setValueAxis,
   setValueAxisScale,
@@ -44,7 +44,7 @@ function CustomExtentsOptions({
   );
 
   const isBoundsMarginValid =
-    !axis.scale.defaultYExtents || !axis.scale.boundsMargin || axis.scale.boundsMargin >= 0;
+    !axisScale.defaultYExtents || !axisScale.boundsMargin || axisScale.boundsMargin >= 0;
 
   const setBoundsMargin = useCallback(
     (paramName: 'boundsMargin', value: number | '') =>
@@ -54,25 +54,25 @@ function CustomExtentsOptions({
 
   const onDefaultYExtentsChange = useCallback(
     (paramName: 'defaultYExtents', value: boolean) => {
-      const scale = { ...axis.scale, [paramName]: value };
+      const scale = { ...axisScale, [paramName]: value };
       if (!scale.defaultYExtents) {
         delete scale.boundsMargin;
       }
       setValueAxis('scale', scale);
     },
-    [setValueAxis, axis.scale]
+    [axisScale, setValueAxis]
   );
 
   const onSetYExtentsChange = useCallback(
     (paramName: 'setYExtents', value: boolean) => {
-      const scale = { ...axis.scale, [paramName]: value };
+      const scale = { ...axisScale, [paramName]: value };
       if (!scale.setYExtents) {
         delete scale.min;
         delete scale.max;
       }
       setValueAxis('scale', scale);
     },
-    [setValueAxis, axis.scale]
+    [axisScale, setValueAxis]
   );
 
   useEffect(() => {
@@ -91,11 +91,11 @@ function CustomExtentsOptions({
           }
         )}
         paramName="defaultYExtents"
-        value={axis.scale.defaultYExtents}
+        value={axisScale.defaultYExtents}
         setValue={onDefaultYExtentsChange}
       />
 
-      {axis.scale.defaultYExtents && (
+      {axisScale.defaultYExtents && (
         <>
           <NumberInputOption
             error={!isBoundsMarginValid && invalidBoundsMarginMessage}
@@ -109,7 +109,7 @@ function CustomExtentsOptions({
             step={0.1}
             min={0}
             paramName="boundsMargin"
-            value={axis.scale.boundsMargin}
+            value={axisScale.boundsMargin}
             setValue={setBoundsMargin}
           />
         </>
@@ -121,13 +121,13 @@ function CustomExtentsOptions({
           defaultMessage: 'Set axis extents',
         })}
         paramName="setYExtents"
-        value={axis.scale.setYExtents}
+        value={axisScale.setYExtents}
         setValue={onSetYExtentsChange}
       />
 
-      {axis.scale.setYExtents && (
+      {axisScale.setYExtents && (
         <YExtents
-          scale={axis.scale}
+          scale={axisScale}
           setScale={setValueAxisScale}
           setMultipleValidity={setMultipleValidity}
         />

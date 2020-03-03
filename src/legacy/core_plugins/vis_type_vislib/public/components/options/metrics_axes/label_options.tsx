@@ -23,33 +23,21 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
-import { BasicVislibParams, Axis } from '../../../types';
+import { Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
 
-export interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
-  axis: Axis;
-  axesName: 'categoryAxes' | 'valueAxes';
-  index: number;
+export type SetAxisLabel = <T extends keyof Axis['labels']>(
+  paramName: T,
+  value: Axis['labels'][T]
+) => void;
+export interface LabelOptionsProps {
+  axisLabels: Axis['labels'];
+  axisFilterCheckboxName: string;
+  setAxisLabel: SetAxisLabel;
 }
 
-function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOptionsProps) {
-  const setAxisLabel = useCallback(
-    <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
-      const axes = [...stateParams[axesName]];
-      axes[index] = {
-        ...axes[index],
-        labels: {
-          ...axes[index].labels,
-          [paramName]: value,
-        },
-      };
-      setValue(axesName, axes);
-    },
-    [axesName, index, setValue, stateParams]
-  );
-
+function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Axis['labels']['rotate']) => {
       setAxisLabel(paramName, Number(value));
@@ -77,20 +65,18 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
           defaultMessage: 'Show labels',
         })}
         paramName="show"
-        value={axis.labels.show}
+        value={axisLabels.show}
         setValue={setAxisLabel}
       />
 
       <SwitchOption
-        data-test-subj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${
-          axis.id
-        }`}
-        disabled={!axis.labels.show}
+        data-test-subj={axisFilterCheckboxName}
+        disabled={!axisLabels.show}
         label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.filterLabelsLabel', {
           defaultMessage: 'Filter labels',
         })}
         paramName="filter"
-        value={axis.labels.filter}
+        value={axisLabels.filter}
         setValue={setAxisLabel}
       />
 
@@ -99,20 +85,20 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <SelectOption
-            disabled={!axis.labels.show}
+            disabled={!axisLabels.show}
             label={i18n.translate('visTypeVislib.controls.pointSeries.categoryAxis.alignLabel', {
               defaultMessage: 'Align',
             })}
             options={rotateOptions}
             paramName="rotate"
-            value={axis.labels.rotate}
+            value={axisLabels.rotate}
             setValue={setAxisLabelRotate}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <TruncateLabelsOption
-            disabled={!axis.labels.show}
-            value={axis.labels.truncate}
+            disabled={!axisLabels.show}
+            value={axisLabels.truncate}
             setValue={setAxisLabel}
           />
         </EuiFlexItem>

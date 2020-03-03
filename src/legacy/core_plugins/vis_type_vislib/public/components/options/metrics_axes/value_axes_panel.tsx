@@ -31,31 +31,35 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { BasicVislibParams, ValueAxis } from '../../../types';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { SeriesParam, ValueAxis } from '../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from './';
-import { ValidationVisOptionsProps } from '../../common';
 
-export interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
+export interface ValueAxesPanelProps {
   isCategoryAxisHorizontal: boolean;
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setParamByIndex: SetParamByIndex;
+  seriesParams: SeriesParam[];
+  valueAxes: ValueAxis[];
+  vis: Vis;
+  setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
-  const { stateParams, addValueAxis, removeValueAxis } = props;
+  const { addValueAxis, removeValueAxis, seriesParams, valueAxes } = props;
 
   const getSeries = useCallback(
     (axis: ValueAxis) => {
-      const isFirst = stateParams.valueAxes[0].id === axis.id;
-      const series = stateParams.seriesParams.filter(
+      const isFirst = valueAxes[0].id === axis.id;
+      const series = seriesParams.filter(
         serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
       );
       return series.map(serie => serie.data.label).join(', ');
     },
-    [stateParams.valueAxes, stateParams.seriesParams]
+    [seriesParams, valueAxes]
   );
 
   const removeButtonTooltip = useMemo(
@@ -131,7 +135,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
       <EuiSpacer size="s" />
 
-      {stateParams.valueAxes.map((axis, index) => (
+      {valueAxes.map((axis, index) => (
         <EuiAccordion
           id={`yAxisAccordion${axis.id}`}
           key={axis.id}
@@ -148,11 +152,20 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
               values: { axisName: axis.name },
             }
           )}
-          extraAction={stateParams.valueAxes.length === 1 ? undefined : renderRemoveButton(axis)}
+          extraAction={valueAxes.length === 1 ? undefined : renderRemoveButton(axis)}
         >
           <>
             <EuiSpacer size="m" />
-            <ValueAxisOptions axis={axis} index={index} {...props} />
+            <ValueAxisOptions
+              axis={axis}
+              index={index}
+              valueAxis={valueAxes[index]}
+              isCategoryAxisHorizontal={props.isCategoryAxisHorizontal}
+              onValueAxisPositionChanged={props.onValueAxisPositionChanged}
+              setParamByIndex={props.setParamByIndex}
+              setMultipleValidity={props.setMultipleValidity}
+              vis={props.vis}
+            />
           </>
         </EuiAccordion>
       ))}

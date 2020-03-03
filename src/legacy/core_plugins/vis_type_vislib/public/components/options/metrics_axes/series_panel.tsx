@@ -23,19 +23,20 @@ import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
-import { BasicVislibParams } from '../../../types';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { ValueAxis, SeriesParam } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
 
-export interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
+export interface SeriesPanelProps {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
+  seriesParams: SeriesParam[];
+  valueAxes: ValueAxis[];
+  vis: Vis;
 }
 
-function SeriesPanel(props: SeriesPanelProps) {
-  const { stateParams } = props;
-
+function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -48,7 +49,7 @@ function SeriesPanel(props: SeriesPanelProps) {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {stateParams.seriesParams.map((chart, index) => (
+      {seriesParams.map((chart, index) => (
         <EuiAccordion
           id={`visEditorSeriesAccordion${chart.data.id}`}
           key={index}
@@ -67,7 +68,7 @@ function SeriesPanel(props: SeriesPanelProps) {
           <>
             <EuiSpacer size="m" />
 
-            <ChartOptions index={index} chart={chart} {...props} />
+            <ChartOptions index={index} chart={chart} {...chartProps} />
           </>
         </EuiAccordion>
       ))}

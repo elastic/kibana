@@ -21,15 +21,11 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
-import { BasicVislibParams, ValueAxis } from '../../../types';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { ValueAxis } from '../../../types';
 import { Positions } from '../../../utils/collections';
-import {
-  SelectOption,
-  SwitchOption,
-  TextInputOption,
-  ValidationVisOptionsProps,
-} from '../../common';
-import { LabelOptions } from './label_options';
+import { SelectOption, SwitchOption, TextInputOption } from '../../common';
+import { LabelOptions, SetAxisLabel } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { isAxisHorizontal } from './utils';
 import { SetParamByIndex } from './';
@@ -39,25 +35,27 @@ export type SetScale = <T extends keyof ValueAxis['scale']>(
   value: ValueAxis['scale'][T]
 ) => void;
 
-export interface ValueAxisOptionsParams extends ValidationVisOptionsProps<BasicVislibParams> {
+export interface ValueAxisOptionsParams {
   axis: ValueAxis;
   index: number;
   isCategoryAxisHorizontal: boolean;
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setParamByIndex: SetParamByIndex;
+  valueAxis: ValueAxis;
+  vis: Vis;
+  setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
-function ValueAxisOptions(props: ValueAxisOptionsParams) {
-  const {
-    axis,
-    index,
-    isCategoryAxisHorizontal,
-    stateParams,
-    vis,
-    onValueAxisPositionChanged,
-    setParamByIndex,
-  } = props;
-
+function ValueAxisOptions({
+  axis,
+  index,
+  isCategoryAxisHorizontal,
+  valueAxis,
+  vis,
+  onValueAxisPositionChanged,
+  setParamByIndex,
+  setMultipleValidity,
+}: ValueAxisOptionsParams) {
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
       setParamByIndex('valueAxes', index, paramName, value),
@@ -67,25 +65,37 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   const setValueAxisTitle = useCallback(
     <T extends keyof ValueAxis['title']>(paramName: T, value: ValueAxis['title'][T]) => {
       const title = {
-        ...stateParams.valueAxes[index].title,
+        ...valueAxis.title,
         [paramName]: value,
       };
 
       setParamByIndex('valueAxes', index, 'title', title);
     },
-    [setParamByIndex, index, stateParams.valueAxes]
+    [valueAxis.title, setParamByIndex, index]
   );
 
   const setValueAxisScale: SetScale = useCallback(
     (paramName, value) => {
       const scale = {
-        ...stateParams.valueAxes[index].scale,
+        ...valueAxis.scale,
         [paramName]: value,
       };
 
       setParamByIndex('valueAxes', index, 'scale', scale);
     },
-    [setParamByIndex, index, stateParams.valueAxes]
+    [valueAxis.scale, setParamByIndex, index]
+  );
+
+  const setAxisLabel: SetAxisLabel = useCallback(
+    (paramName, value) => {
+      const labels = {
+        ...valueAxis.labels,
+        [paramName]: value,
+      };
+
+      setParamByIndex('valueAxes', index, 'labels', labels);
+    },
+    [valueAxis.labels, setParamByIndex, index]
   );
 
   const onPositionChanged = useCallback(
@@ -175,7 +185,11 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
             setValue={setValueAxisTitle}
           />
 
-          <LabelOptions axesName="valueAxes" {...props} />
+          <LabelOptions
+            axisLabels={axis.labels}
+            axisFilterCheckboxName={`yAxisFilterLabelsCheckbox${axis.id}`}
+            setAxisLabel={setAxisLabel}
+          />
         </>
       ) : (
         <EuiSpacer size="xs" />
@@ -204,9 +218,10 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         <>
           <EuiSpacer size="m" />
           <CustomExtentsOptions
+            axisScale={axis.scale}
+            setMultipleValidity={setMultipleValidity}
             setValueAxisScale={setValueAxisScale}
             setValueAxis={setValueAxis}
-            {...props}
           />
         </>
       </EuiAccordion>

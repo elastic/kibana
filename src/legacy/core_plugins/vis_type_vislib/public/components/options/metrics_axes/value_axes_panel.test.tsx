@@ -21,15 +21,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../types';
-import { Positions, getScaleTypes, getAxisModes, getPositions } from '../../../utils/collections';
+import { Positions } from '../../../utils/collections';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { valueAxis, seriesParam } from './mocks';
+import { valueAxis, seriesParam, vis } from './mocks';
 
 jest.mock('ui/new_platform');
-
-const positions = getPositions();
-const axisModes = getAxisModes();
-const scaleTypes = getScaleTypes();
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;
@@ -66,24 +62,16 @@ describe('ValueAxesPanel component', () => {
     };
 
     defaultProps = {
-      stateParams: {
-        seriesParams: [seriesParamCount, seriesParamAverage],
-        valueAxes: [axisLeft, axisRight],
-      },
-      vis: {
-        type: {
-          editorConfig: {
-            collections: { scaleTypes, axisModes, positions },
-          },
-        },
-      },
+      seriesParams: [seriesParamCount, seriesParamAverage],
+      valueAxes: [axisLeft, axisRight],
+      vis,
       isCategoryAxisHorizontal: false,
       setParamByIndex,
       onValueAxisPositionChanged,
       addValueAxis,
       removeValueAxis,
       setMultipleValidity,
-    } as any;
+    };
   });
 
   it('should init with the default set of props', () => {
@@ -93,7 +81,7 @@ describe('ValueAxesPanel component', () => {
   });
 
   it('should not allow to remove the last value axis', () => {
-    defaultProps.stateParams.valueAxes = [axisLeft];
+    defaultProps.valueAxes = [axisLeft];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     expect(comp.find('[data-test-subj="removeValueAxisBtn"] button').exists()).toBeFalsy();
   });
@@ -133,7 +121,7 @@ describe('ValueAxesPanel component', () => {
     });
 
     it('should show when multiple series match value axis', () => {
-      defaultProps.stateParams.seriesParams[1].valueAxis = 'ValueAxis-1';
+      defaultProps.seriesParams[1].valueAxis = 'ValueAxis-1';
       const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
       expect(
         comp
@@ -144,7 +132,7 @@ describe('ValueAxesPanel component', () => {
     });
 
     it('should not show when no series match value axis', () => {
-      defaultProps.stateParams.seriesParams[0].valueAxis = 'ValueAxis-2';
+      defaultProps.seriesParams[0].valueAxis = 'ValueAxis-2';
       const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
       expect(
         comp

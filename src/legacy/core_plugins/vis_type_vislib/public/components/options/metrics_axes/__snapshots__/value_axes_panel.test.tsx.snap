@@ -89,7 +89,6 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       size="m"
     />
     <ValueAxisOptions
-      addValueAxis={[MockFunction]}
       axis={
         Object {
           "id": "ValueAxis-1",
@@ -120,93 +119,33 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       index={0}
       isCategoryAxisHorizontal={false}
       onValueAxisPositionChanged={[MockFunction]}
-      removeValueAxis={[MockFunction]}
       setMultipleValidity={[MockFunction]}
       setParamByIndex={[MockFunction]}
-      stateParams={
+      valueAxis={
         Object {
-          "seriesParams": Array [
-            Object {
-              "data": Object {
-                "id": "1",
-                "label": "Count",
-              },
-              "drawLinesBetweenPoints": true,
-              "interpolate": "linear",
-              "lineWidth": 2,
-              "mode": "stacked",
-              "show": true,
-              "showCircles": true,
-              "type": "histogram",
-              "valueAxis": "ValueAxis-1",
-            },
-            Object {
-              "data": Object {
-                "id": "1",
-                "label": "Average",
-              },
-              "drawLinesBetweenPoints": true,
-              "interpolate": "linear",
-              "lineWidth": 2,
-              "mode": "stacked",
-              "show": true,
-              "showCircles": true,
-              "type": "histogram",
-              "valueAxis": "ValueAxis-2",
-            },
-          ],
-          "valueAxes": Array [
-            Object {
-              "id": "ValueAxis-1",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "name": "ValueAxis-1",
-              "position": "left",
-              "scale": Object {
-                "boundsMargin": 1,
-                "defaultYExtents": true,
-                "max": 2,
-                "min": 1,
-                "setYExtents": true,
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "value",
-            },
-            Object {
-              "id": "ValueAxis-2",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "name": "ValueAxis-1",
-              "position": "right",
-              "scale": Object {
-                "boundsMargin": 1,
-                "defaultYExtents": true,
-                "max": 2,
-                "min": 1,
-                "setYExtents": true,
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "value",
-            },
-          ],
+          "id": "ValueAxis-1",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "ValueAxis-1",
+          "position": "left",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
         }
       }
       vis={
@@ -230,6 +169,20 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
                   Object {
                     "text": "Silhouette",
                     "value": "silhouette",
+                  },
+                ],
+                "interpolationModes": Array [
+                  Object {
+                    "text": "Straight",
+                    "value": "linear",
+                  },
+                  Object {
+                    "text": "Smoothed",
+                    "value": "cardinal",
+                  },
+                  Object {
+                    "text": "Stepped",
+                    "value": "step-after",
                   },
                 ],
                 "positions": Array [
@@ -316,7 +269,6 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       size="m"
     />
     <ValueAxisOptions
-      addValueAxis={[MockFunction]}
       axis={
         Object {
           "id": "ValueAxis-2",
@@ -347,93 +299,33 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       index={1}
       isCategoryAxisHorizontal={false}
       onValueAxisPositionChanged={[MockFunction]}
-      removeValueAxis={[MockFunction]}
       setMultipleValidity={[MockFunction]}
       setParamByIndex={[MockFunction]}
-      stateParams={
+      valueAxis={
         Object {
-          "seriesParams": Array [
-            Object {
-              "data": Object {
-                "id": "1",
-                "label": "Count",
-              },
-              "drawLinesBetweenPoints": true,
-              "interpolate": "linear",
-              "lineWidth": 2,
-              "mode": "stacked",
-              "show": true,
-              "showCircles": true,
-              "type": "histogram",
-              "valueAxis": "ValueAxis-1",
-            },
-            Object {
-              "data": Object {
-                "id": "1",
-                "label": "Average",
-              },
-              "drawLinesBetweenPoints": true,
-              "interpolate": "linear",
-              "lineWidth": 2,
-              "mode": "stacked",
-              "show": true,
-              "showCircles": true,
-              "type": "histogram",
-              "valueAxis": "ValueAxis-2",
-            },
-          ],
-          "valueAxes": Array [
-            Object {
-              "id": "ValueAxis-1",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "name": "ValueAxis-1",
-              "position": "left",
-              "scale": Object {
-                "boundsMargin": 1,
-                "defaultYExtents": true,
-                "max": 2,
-                "min": 1,
-                "setYExtents": true,
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "value",
-            },
-            Object {
-              "id": "ValueAxis-2",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "name": "ValueAxis-1",
-              "position": "right",
-              "scale": Object {
-                "boundsMargin": 1,
-                "defaultYExtents": true,
-                "max": 2,
-                "min": 1,
-                "setYExtents": true,
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "value",
-            },
-          ],
+          "id": "ValueAxis-2",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "ValueAxis-1",
+          "position": "right",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
         }
       }
       vis={
@@ -457,6 +349,20 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
                   Object {
                     "text": "Silhouette",
                     "value": "silhouette",
+                  },
+                ],
+                "interpolationModes": Array [
+                  Object {
+                    "text": "Straight",
+                    "value": "linear",
+                  },
+                  Object {
+                    "text": "Smoothed",
+                    "value": "cardinal",
+                  },
+                  Object {
+                    "text": "Stepped",
+                    "value": "step-after",
                   },
                 ],
                 "positions": Array [
