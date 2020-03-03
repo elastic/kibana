@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  agentConfigRouteService,
-  fleetSetupRouteService,
-  agentRouteService,
-  enrollmentAPIKeyRouteService,
-  epmRouteService,
-  setupRouteService,
-} from '../../../../common';
+import { sendRequest } from './use_request';
+import { setupRouteService } from '../../services';
+
+export const sendSetup = () => {
+  return sendRequest({
+    path: setupRouteService.getSetupPath(),
+    method: 'post',
+  });
+};

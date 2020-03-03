@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
@@ -18,8 +18,16 @@ import {
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
 import { DefaultLayout } from './layouts';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
-import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
+import {
+  CoreContext,
+  DepsContext,
+  ConfigContext,
+  setHttpClient,
+  useConfig,
+  useCore,
+} from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
+import { sendSetup } from './hooks/use_request/setup';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -36,6 +44,30 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 
 const IngestManagerRoutes = ({ ...rest }) => {
   const { epm, fleet } = useConfig();
+  const { notifications } = useCore();
+
+  const [isInitialized, setIsIntialized] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await sendSetup();
+        if (res.error) {
+          throw res.error;
+        }
+        setIsIntialized(true);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: 'Unable to initialized ingestManager',
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <EuiErrorBoundary>
