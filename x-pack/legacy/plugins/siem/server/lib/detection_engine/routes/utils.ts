@@ -221,7 +221,7 @@ export const transformBulkError = (
   }
 };
 
-export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidationFunction<T> => (
+export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
   payload: T,
   { ok, badRequest }
 ) => {
@@ -229,7 +229,7 @@ export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidatio
   if (error) {
     return badRequest(error.message);
   }
-  return ok(value as T); // TODO: infer type from our schema
+  return ok(value);
 };
 
 const statusToErrorMessage = (statusCode: number) => {
