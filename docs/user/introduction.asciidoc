@@ -65,9 +65,10 @@ image::images/intro-discover.png[]
 === Visualize & analyze
 
 A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use <<visualize, Visualize>> to create
-classic line charts, bar graphs, pie charts, histograms, and tables
-(just to name a few).
+many options for showcasing your data. Use <<lens, Lens>> to analyze your data
+with classic charts, tables, metrics, and more. If there
+is a better visualization for your data, Lens suggests it, allowing for quick
+switching between visualization types.
 
 Once your visualizations are just the way you want,
 use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
@@ -79,10 +80,10 @@ image::images/intro-dashboard.png[]
 
 {kib} also offers these features that address specific visualization needs.
 
-* <<lens, Lens>> provides a drag-and-drop experience that helps
-you get insights from your data in just a few clicks. If there is a
-better visualization for your data, Lens suggests it, allowing
-for quick switching between visualization types.
+* <<visualize, Visualize>> allows you to display your data in
+classic line charts, bar graphs, pie charts, histograms, and tables
+(just to name a few). Visualize also supports the ability to add interactive
+controls to your dashboard, and filter dashboard content in real time. 
 
 * <<canvas, Canvas>> gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
@@ -93,7 +94,7 @@ questions of your location-based data. Elastic Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<TSVB, Time Series Visual Builder>> (TSVB) allows you to combine
+* <<TSVB, TSVB>> allows you to combine
 an infinite number of aggregations to display complex data in a meaningful way.
 With TSVB, you can analyze multiple index patterns and customize
 every aspect of your visualization. Choose your own date format and color
