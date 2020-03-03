@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiTableSortingType,
@@ -27,11 +28,13 @@ import { CasesTableFilters } from './table_filters';
 
 import {
   UtilityBar,
+  UtilityBarAction,
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { getCreateCaseUrl } from '../../../../components/link_to';
+import { getBulkItems } from '../bulk_actions';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -92,6 +95,18 @@ export const AllCases = React.memo(() => {
     [data, queryParams]
   );
 
+  const getBulkItemsPopoverContent = useCallback(
+    (closePopover: () => void) => (
+      <EuiContextMenuPanel
+        items={getBulkItems({
+          closePopover,
+          selectedCases,
+        })}
+      />
+    ),
+    [selectedCases]
+  );
+
   const sorting: EuiTableSortingType<Case> = {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
@@ -124,6 +139,18 @@ export const AllCases = React.memo(() => {
                 <UtilityBarText data-test-subj="case-table-case-count">
                   {i18n.SHOWING_CASES(data.total ?? 0)}
                 </UtilityBarText>
+              </UtilityBarGroup>
+              <UtilityBarGroup>
+                <UtilityBarText data-test-subj="case-table-selected-case-count">
+                  {i18n.SELECTED_CASES(selectedCases.length)}
+                </UtilityBarText>
+                <UtilityBarAction
+                  iconSide="right"
+                  iconType="arrowDown"
+                  popoverContent={getBulkItemsPopoverContent}
+                >
+                  {i18n.BULK_ACTIONS}
+                </UtilityBarAction>
               </UtilityBarGroup>
             </UtilityBarSection>
           </UtilityBar>

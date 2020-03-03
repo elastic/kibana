@@ -8,7 +8,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../mock';
 import {
   UtilityBar,
   UtilityBarAction,

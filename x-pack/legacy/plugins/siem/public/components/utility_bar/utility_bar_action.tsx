@@ -7,7 +7,7 @@
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { LinkIcon, LinkIconProps } from '../../link_icon';
+import { LinkIcon, LinkIconProps } from '../link_icon';
 import { BarAction } from './styles';
 
 const Popover = React.memo<UtilityBarActionProps>(

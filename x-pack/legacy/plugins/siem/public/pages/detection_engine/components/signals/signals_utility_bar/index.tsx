@@ -13,7 +13,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../../components/detection_engine/utility_bar';
+} from '../../../../../components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
