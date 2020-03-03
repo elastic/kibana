@@ -93,19 +93,22 @@ export type AlertListData = AlertResultList;
 
 export interface AlertListState {
   /** Array of alert items. */
-  alerts: ImmutableArray<AlertData>;
+  readonly alerts: ImmutableArray<AlertData>;
 
   /** The total number of alerts on the page. */
-  total: number;
+  readonly total: number;
 
   /** Number of alerts per page. */
-  pageSize: number;
+  readonly pageSize: number;
 
   /** Page number, starting at 0. */
-  pageIndex: number;
+  readonly pageIndex: number;
 
   /** Current location object from React Router history. */
   readonly location?: Immutable<EndpointAppLocation>;
+
+  /** Specific Alert data to be shown in the details view */
+  readonly alertDetails?: Immutable<AlertData>;
 }
 
 /**
