@@ -19,9 +19,8 @@
 
 import React, { useState } from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -36,17 +35,19 @@ function RawJsonParamEditor({
   const [isFormValid, setFormValidity] = useState(true);
   const [editorReady, setEditorReady] = useState(false);
 
+  const editorTooltipText = i18n.translate('visDefaultEditor.controls.jsonInputTooltip', {
+    defaultMessage:
+      "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
+  });
+
+  const jsonEditorLabelText = i18n.translate('visDefaultEditor.controls.jsonInputLabel', {
+    defaultMessage: 'JSON input',
+  });
+
   const label = (
     <>
-      <FormattedMessage id="visDefaultEditor.controls.jsonInputLabel" defaultMessage="JSON input" />{' '}
-      <EuiIconTip
-        position="right"
-        content={i18n.translate('visDefaultEditor.controls.jsonInputTooltip', {
-          defaultMessage:
-            "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
-        })}
-        type="questionInCircle"
-      />
+      {jsonEditorLabelText}{' '}
+      <EuiIconTip position="right" content={editorTooltipText} type="questionInCircle" />
     </>
   );
 
@@ -54,7 +55,7 @@ function RawJsonParamEditor({
     setValue(newValue);
   };
 
-  const onEditorValidate = (annotations: any[]) => {
+  const onEditorValidate = (annotations: unknown[]) => {
     // The first onValidate returned from EuiCodeEditor is a false positive
     if (editorReady) {
       const validity = annotations.length === 0;
@@ -72,22 +73,28 @@ function RawJsonParamEditor({
       fullWidth={true}
       compressed
     >
-      <EuiCodeEditor
-        id={`visEditorRawJson${agg.id}`}
-        mode="json"
-        theme="github"
-        width="100%"
-        height="250px"
-        value={value}
-        onValidate={onEditorValidate}
-        setOptions={{
-          fontSize: '14px',
-        }}
-        onChange={onChange}
-        fullWidth={true}
-        onBlur={setTouched}
-        aria-label="Code Editor"
-      />
+      <>
+        <EuiCodeEditor
+          id={`visEditorRawJson${agg.id}`}
+          mode="json"
+          theme="github"
+          width="100%"
+          height="250px"
+          value={value}
+          onValidate={onEditorValidate}
+          setOptions={{
+            fontSize: '14px',
+          }}
+          onChange={onChange}
+          fullWidth={true}
+          onBlur={setTouched}
+          aria-label={jsonEditorLabelText}
+          aria-describedby="jsonEditorDescription"
+        />
+        <EuiScreenReaderOnly>
+          <p id="jsonEditorDescription">{editorTooltipText}</p>
+        </EuiScreenReaderOnly>
+      </>
     </EuiFormRow>
   );
 }
