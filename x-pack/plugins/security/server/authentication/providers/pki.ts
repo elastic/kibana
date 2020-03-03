@@ -99,7 +99,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/app/security/logged_out`
+      `${this.options.basePath.serverBasePath}/security/logged_out`
     );
   }
 

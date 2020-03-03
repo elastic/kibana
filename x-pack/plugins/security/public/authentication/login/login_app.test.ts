@@ -27,7 +27,7 @@ describe('loginApp', () => {
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'security/login',
+      id: 'security_login',
       chromeless: true,
       appRoute: '/login',
       title: 'Login',

@@ -15,7 +15,7 @@ const securityPluginSetup = (npSetup.plugins as any).security as SecurityPluginS
 if (securityPluginSetup) {
   routes.when('/account', {
     template: '<div />',
-    controller: () => npStart.core.application.navigateToApp('security/account'),
+    controller: () => npStart.core.application.navigateToApp('security_account'),
   });
 
   const getNextParameter = () => {

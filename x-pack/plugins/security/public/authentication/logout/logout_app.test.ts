@@ -38,7 +38,7 @@ describe('logoutApp', () => {
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'security/logout',
+      id: 'security_logout',
       chromeless: true,
       appRoute: '/logout',
       title: 'Logout',

@@ -29,7 +29,7 @@ describe('LoggedOut view routes', () => {
       loggedOutRouteConfig,
       loggedOutRouteHandler,
     ] = routeParamsMock.router.get.mock.calls.find(
-      ([{ path }]) => path === '/app/security/logged_out'
+      ([{ path }]) => path === '/security/logged_out'
     )!;
 
     routeConfig = loggedOutRouteConfig;

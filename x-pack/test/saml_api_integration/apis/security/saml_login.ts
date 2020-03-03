@@ -728,7 +728,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
-          .expect('location', '/app/security/overwritten_session')
+          .expect('location', '/security/overwritten_session')
           .expect(302);
 
         const newSessionCookie = request.cookie(

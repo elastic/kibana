@@ -16,7 +16,7 @@ interface CreateDeps {
 }
 
 export const loginApp = Object.freeze({
-  id: 'security/login',
+  id: 'security_login',
   create({ application, http, getStartServices, config }: CreateDeps) {
     http.anonymousPaths.register('/login');
     application.register({

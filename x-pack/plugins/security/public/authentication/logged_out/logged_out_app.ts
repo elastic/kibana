@@ -14,14 +14,14 @@ interface CreateDeps {
 }
 
 export const loggedOutApp = Object.freeze({
-  id: 'security/logged_out',
+  id: 'security_logged_out',
   create({ application, http, getStartServices }: CreateDeps) {
-    http.anonymousPaths.register('/app/security/logged_out');
+    http.anonymousPaths.register('/security/logged_out');
     application.register({
       id: this.id,
       title: i18n.translate('xpack.security.loggedOutAppTitle', { defaultMessage: 'Logged out' }),
       chromeless: true,
-      appRoute: '/app/security/logged_out',
+      appRoute: '/security/logged_out',
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderLoggedOutPage }] = await Promise.all([
           getStartServices(),

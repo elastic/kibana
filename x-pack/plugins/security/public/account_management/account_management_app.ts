@@ -16,7 +16,7 @@ interface CreateDeps {
 }
 
 export const accountManagementApp = Object.freeze({
-  id: 'security/account',
+  id: 'security_account',
   create({ application, authc, getStartServices }: CreateDeps) {
     const title = i18n.translate('xpack.security.account.breadcrumb', {
       defaultMessage: 'Account Management',
@@ -26,7 +26,7 @@ export const accountManagementApp = Object.freeze({
       title,
       // TODO: switch to proper enum once https://github.com/elastic/kibana/issues/58327 is resolved.
       navLinkStatus: 3,
-      appRoute: '/app/security/account',
+      appRoute: '/security/account',
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderAccountManagementPage }] = await Promise.all([
           getStartServices(),

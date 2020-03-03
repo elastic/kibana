@@ -15,7 +15,7 @@ interface CreateDeps {
 }
 
 export const overwrittenSessionApp = Object.freeze({
-  id: 'security/overwritten_session',
+  id: 'security_overwritten_session',
   create({ application, authc, getStartServices }: CreateDeps) {
     application.register({
       id: this.id,
@@ -23,7 +23,7 @@ export const overwrittenSessionApp = Object.freeze({
         defaultMessage: 'Overwritten Session',
       }),
       chromeless: true,
-      appRoute: '/app/security/overwritten_session',
+      appRoute: '/security/overwritten_session',
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderOverwrittenSessionPage }] = await Promise.all([
           getStartServices(),

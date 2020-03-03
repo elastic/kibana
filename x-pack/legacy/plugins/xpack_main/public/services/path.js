@@ -12,7 +12,7 @@ export const Path = {
     return (
       path === '/login' ||
       path === '/logout' ||
-      path === '/app/security/logged_out' ||
+      path === '/security/logged_out' ||
       path === '/status'
     );
   },

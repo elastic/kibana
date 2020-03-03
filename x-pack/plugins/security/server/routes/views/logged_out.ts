@@ -24,7 +24,7 @@ export function defineLoggedOutRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/app/security/logged_out',
+      path: '/security/logged_out',
       validate: false,
       options: { authRequired: false },
     },

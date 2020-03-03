@@ -10,13 +10,10 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Account Management view.
  */
 export function defineAccountManagementRoutes({ router, csp }: RouteDefinitionParams) {
-  router.get(
-    { path: '/app/security/account', validate: false },
-    async (context, request, response) => {
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: true }),
-        headers: { 'content-security-policy': csp.header },
-      });
-    }
-  );
+  router.get({ path: '/security/account', validate: false }, async (context, request, response) => {
+    return response.ok({
+      body: await context.core.rendering.render({ includeUserSettings: true }),
+      headers: { 'content-security-policy': csp.header },
+    });
+  });
 }

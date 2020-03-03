@@ -19,10 +19,10 @@ describe('View routes', () => {
 
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/app/security/account",
-        "/app/security/logged_out",
+        "/security/account",
+        "/security/logged_out",
         "/logout",
-        "/app/security/overwritten_session",
+        "/security/overwritten_session",
       ]
     `);
   });
@@ -37,10 +37,10 @@ describe('View routes', () => {
       Array [
         "/login",
         "/internal/security/login_state",
-        "/app/security/account",
-        "/app/security/logged_out",
+        "/security/account",
+        "/security/logged_out",
         "/logout",
-        "/app/security/overwritten_session",
+        "/security/overwritten_session",
       ]
     `);
   });
@@ -55,10 +55,10 @@ describe('View routes', () => {
       Array [
         "/login",
         "/internal/security/login_state",
-        "/app/security/account",
-        "/app/security/logged_out",
+        "/security/account",
+        "/security/logged_out",
         "/logout",
-        "/app/security/overwritten_session",
+        "/security/overwritten_session",
       ]
     `);
   });
