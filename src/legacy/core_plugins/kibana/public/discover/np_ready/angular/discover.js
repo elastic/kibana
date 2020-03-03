@@ -224,7 +224,7 @@ function discoverController(
   );
 
   // sync initial app filters from state to filterManager
-  filterManager.setAppFilters(appStateContainer.getState().filters);
+  filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
 
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
