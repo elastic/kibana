@@ -484,6 +484,25 @@ function migrateSubTypeAndParentFieldProperties(doc) {
   };
 }
 
+// add visible flag to visualization Saved Object
+function migrateVisibleField(doc) {
+  if (!doc.attributes) {
+    return doc;
+  }
+  const visible = doc.attributes.visible;
+  // visible already has a value
+  if (visible !== undefined) {
+    return doc;
+  }
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      visible: true,
+    },
+  };
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -500,6 +519,8 @@ const executeVisualizationMigrations731 = flow(migrateFiltersAggQueryStringQueri
 const executeSearchMigrations740 = flow(migrateSearchSortToNestedArray);
 
 const executeMigrations742 = flow(transformSplitFiltersStringToQueryObject);
+
+const executeMigrations770 = flow(migrateVisibleField);
 
 export const migrations = {
   'index-pattern': {
@@ -610,6 +631,7 @@ export const migrations = {
     '7.3.1': executeVisualizationMigrations731,
     // migrate split_filters that were not migrated in 7.3.0 (transformFilterStringToQueryObject).
     '7.4.2': executeMigrations742,
+    '7.7.0': executeMigrations770,
   },
   dashboard: {
     '7.0.0': doc => {

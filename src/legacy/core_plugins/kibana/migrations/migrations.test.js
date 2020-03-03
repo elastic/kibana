@@ -1323,6 +1323,33 @@ Array [
       expect(timeSeriesParams.series[0].split_filters[0].filter.language).toEqual('lucene');
     });
   });
+  describe('7.7.0 add visible field migration', () => {
+    const migrate = doc => migrations.visualization['7.7.0'](doc);
+    const generateDoc = () => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: {},
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+    it('should migrate doc', () => {
+      const originalDoc = generateDoc();
+      const migratedDoc = migrate(originalDoc);
+      expect(migratedDoc.attributes.visible).toEqual(true);
+    });
+    it('should not migrate doc if the field exists', () => {
+      const originalDoc = generateDoc();
+      console.dir(originalDoc);
+      originalDoc.attributes.visible = false;
+      const migratedDoc = migrate(originalDoc);
+      expect(migratedDoc.attributes.visible).toEqual(false);
+    });
+  });
 });
 
 describe('dashboard', () => {

@@ -35,4 +35,5 @@ export interface VisSavedObject extends SavedObject {
   savedSearchId?: string;
   savedSearch?: SavedSearch;
   visState: VisState;
+  visible?: boolean;
 }

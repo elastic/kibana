@@ -133,6 +133,7 @@ export default function({ getService }) {
                           resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                             .searchSourceJSON,
                       },
+                      visible: true,
                     },
                     references: [
                       {

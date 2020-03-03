@@ -103,6 +103,7 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
       description: 'text',
       savedSearchId: 'keyword',
       version: 'integer',
+      visible: 'boolean',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -129,6 +130,7 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
           description: '',
           savedSearchId: opts.savedSearchId,
           version: 1,
+          visible: true,
         },
         afterESResp: (savedObject: SavedObject) => {
           return _afterEsResp(savedObject as VisSavedObject, services) as Promise<SavedObject>;

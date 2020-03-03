@@ -64,6 +64,7 @@ export interface VisObjectAttributesJSON {
   type: string;
   params: any;
   uiStateJSON: string; // also JSON string
+  visible: boolean;
   aggs: any[];
   sort: any[];
   kibanaSavedObjectMeta: SavedObjectMeta;
