@@ -27,9 +27,9 @@ import {
   AggTypesRegistryStart,
   AggConfig,
   AggConfigs,
+  calculateAutoTimeExpression,
   CreateAggConfigParams,
   FieldParamType,
-  getAutoIntervalFromTimeRange,
   MetricAggType,
   aggTypeFieldFilters,
   parentPipelineAggHelper,
@@ -51,12 +51,12 @@ interface AggsStartLegacy {
 }
 
 interface AggsStart {
+  calculateAutoTimeExpression: typeof calculateAutoTimeExpression;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
-  getAutoIntervalFromTimeRange: typeof getAutoIntervalFromTimeRange;
   types: AggTypesRegistryStart;
   __LEGACY: AggsStartLegacy;
 }
@@ -94,13 +94,13 @@ export class SearchService {
     const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
+        calculateAutoTimeExpression,
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             schemas,
             typesRegistry: aggTypesStart,
           });
         },
-        getAutoIntervalFromTimeRange,
         types: aggTypesStart,
         __LEGACY: {
           AggConfig, // TODO make static
