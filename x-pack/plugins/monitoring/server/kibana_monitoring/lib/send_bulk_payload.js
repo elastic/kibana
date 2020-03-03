@@ -61,7 +61,7 @@ export async function sendBulkPayload(
     });
   }
 
-  return cluster.callWithInternalUser('monitoring.bulk', {
+  return cluster.callAsInternalUser('monitoring.bulk', {
     system_id: KIBANA_SYSTEM_ID,
     system_api_version: MONITORING_SYSTEM_API_VERSION,
     interval: interval + 'ms',
