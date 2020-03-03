@@ -28,4 +28,5 @@ export const datafeedConfigSchema = schema.object({
   script_fields: schema.maybe(schema.any()),
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
+  indices_options: schema.maybe(schema.any()),
 });
