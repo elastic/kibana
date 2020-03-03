@@ -28,7 +28,7 @@ import {
   registerEPMRoutes,
   registerDatasourceRoutes,
   registerAgentConfigRoutes,
-  registerFleetSetupRoutes,
+  registerSetupRoutes,
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
@@ -122,7 +122,7 @@ export class IngestManagerPlugin implements Plugin {
     }
 
     if (config.fleet.enabled) {
-      registerFleetSetupRoutes(router);
+      registerSetupRoutes(router);
       registerAgentRoutes(router);
       registerEnrollmentApiKeyRoutes(router);
       registerInstallScriptRoutes({
