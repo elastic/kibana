@@ -18,12 +18,6 @@
  */
 
 var hook = require('require-in-the-middle');
-var create = require('object-prototype').create;
-
-// Ensure `process.env` doesn't inherit from `Object.prototype`. This gives
-// partial protection against similar RCE vulnerabilities as described in
-// CVE-2019-7609
-process.env = Object.assign(create(), process.env);
 
 hook(['child_process'], function(exports, name) {
   return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
