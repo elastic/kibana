@@ -1344,7 +1344,6 @@ Array [
     });
     it('should not migrate doc if the field exists', () => {
       const originalDoc = generateDoc();
-      console.dir(originalDoc);
       originalDoc.attributes.visible = false;
       const migratedDoc = migrate(originalDoc);
       expect(migratedDoc.attributes.visible).toEqual(false);
