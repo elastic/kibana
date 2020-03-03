@@ -6,6 +6,7 @@
 
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
+import { Params } from './alert_type_params';
 
 describe('alertType', () => {
   const service = {
@@ -24,12 +25,14 @@ describe('alertType', () => {
   });
 
   it('validator succeeds with valid params', async () => {
-    const params = {
+    const params: Partial<Writable<Params>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'count',
-      window: '5m',
-      comparator: 'greaterThan',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '<',
       threshold: [0],
     };
 
@@ -40,12 +43,14 @@ describe('alertType', () => {
     const paramsSchema = alertType.validate?.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
-    const params = {
+    const params: Partial<Writable<Params>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
-      window: '5m',
-      comparator: 'greaterThan',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
       threshold: [0],
     };
 

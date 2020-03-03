@@ -66,6 +66,10 @@ export interface EditorRenderProps {
   uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }
 
 export interface SavedVisualizations {

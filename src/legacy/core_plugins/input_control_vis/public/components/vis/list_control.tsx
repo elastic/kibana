@@ -58,13 +58,26 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
   state = {
     isLoading: false,
   };
+  private textInput: HTMLElement | null;
+
+  constructor(props: ListControlUiProps) {
+    super(props);
+    this.textInput = null;
+  }
 
   componentDidMount = () => {
+    if (this.textInput) {
+      this.textInput.setAttribute('focusable', 'false'); // remove when #59039 is fixed
+    }
     this.isMounted = true;
   };
 
   componentWillUnmount = () => {
     this.isMounted = false;
+  };
+
+  setTextInputRef = (ref: HTMLElement) => {
+    this.textInput = ref;
   };
 
   handleOnChange = (selectedOptions: any[]) => {
@@ -143,6 +156,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
         onChange={this.handleOnChange}
         singleSelection={!this.props.multiselect}
         data-test-subj={`listControlSelect${this.props.controlIndex}`}
+        inputRef={this.setTextInputRef}
       />
     );
   }
