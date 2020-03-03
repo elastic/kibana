@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
   EmptyState,
   MonitorList,
@@ -20,6 +21,7 @@ import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plug
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
+import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -71,31 +73,39 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   const linkParameters = stringifyUrlParams(params, true);
 
+  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
+    defaultMessage: 'Overview',
+    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+  });
+
   return (
-    <EmptyState implementsCustomErrorState={true} variables={{}}>
-      <EuiFlexGroup gutterSize="xs" wrap responsive>
-        <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
-          <KueryBar autocomplete={autocomplete} />
-        </EuiFlexItem>
-        <EuiFlexItemStyled grow={true}>
-          <FilterGroup esFilters={esFilters} />
-        </EuiFlexItemStyled>
-        {error && <OverviewPageParsingErrorCallout error={error} />}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <StatusPanel />
-      <EuiSpacer size="s" />
-      <MonitorList
-        dangerColor={colors.danger}
-        hasActiveFilters={!!esFilters}
-        implementsCustomErrorState={true}
-        linkParameters={linkParameters}
-        successColor={colors.success}
-        variables={{
-          ...sharedProps,
-          pagination,
-        }}
-      />
-    </EmptyState>
+    <>
+      <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
+      <EmptyState implementsCustomErrorState={true} variables={{}}>
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
+            <KueryBar autocomplete={autocomplete} />
+          </EuiFlexItem>
+          <EuiFlexItemStyled grow={true}>
+            <FilterGroup esFilters={esFilters} />
+          </EuiFlexItemStyled>
+          {error && <OverviewPageParsingErrorCallout error={error} />}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <StatusPanel />
+        <EuiSpacer size="s" />
+        <MonitorList
+          dangerColor={colors.danger}
+          hasActiveFilters={!!esFilters}
+          implementsCustomErrorState={true}
+          linkParameters={linkParameters}
+          successColor={colors.success}
+          variables={{
+            ...sharedProps,
+            pagination,
+          }}
+        />
+      </EmptyState>
+    </>
   );
 };
