@@ -20,6 +20,7 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { UiActionsPlugin } from './plugin';
 import { UiActionsService } from './service';
+import './_index.scss';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);

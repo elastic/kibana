@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import * as React from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  toMountPoint,
+  reactToUiComponent,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldown } from '../../components/flyout_create_drilldown';
 
@@ -25,22 +29,41 @@ export interface OpenFlyoutAddDrilldownParams {
 export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldownActionContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 5;
+  public order = 100;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
     return i18n.translate('xpack.drilldowns.FlyoutCreateDrilldownAction.displayName', {
-      defaultMessage: 'Create Drilldown',
+      defaultMessage: 'Create drilldown',
     });
   }
+
+  /*
+  MenuItem: UiComponent<{}> = {
+    render(el: HTMLElement) {
+      const item = <EuiContextMenuItem>HI</EuiContextMenuItem>;
+      ReactDOM.render(item, el);
+    },
+    unmount() {},
+  };
+
+
+  private ReactComp: React.FC<{ cnt?: number; context: FlyoutCreateDrilldownActionContext }> = ({
+    cnt = 0,
+  }) => {
+    // return <div>cnt: {cnt}</div>;
+    return <EuiContextMenuItem style={{ color: 'blue' }}>HI</EuiContextMenuItem>;
+  };
+  MenuItem = reactToUiComponent(this.ReactComp);
+  */
 
   public getIconType() {
     return 'plusInCircle';
   }
 
   public async isCompatible({ embeddable }: FlyoutCreateDrilldownActionContext) {
-    return true;
+    return embeddable.getInput().viewMode === 'edit';
   }
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {
