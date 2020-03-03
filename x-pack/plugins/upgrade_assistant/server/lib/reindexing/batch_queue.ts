@@ -5,12 +5,16 @@
  */
 
 export class BatchQueue {
-  private queue: string[] = [];
+  private queue: Set<string> = new Set();
+
+  constructor(items: string[]) {
+    this.enqueue(items);
+  }
 
   private runChecks(items: string[]): void {
     const errors: string[] = [];
     items.forEach(item => {
-      if (this.queue.includes(item)) {
+      if (this.queue.has(item)) {
         errors.push(item);
       }
     });
@@ -20,30 +24,39 @@ export class BatchQueue {
     }
   }
 
-  public addItems(items: string[]): void {
+  public enqueue(items: string[]): void {
     this.runChecks(items);
     items.forEach(item => {
-      this.queue.push(item);
+      this.queue.add(item);
     });
   }
 
   public readNextItem(): string | undefined {
-    return this.queue[0];
+    return this.toArray()[0];
   }
 
-  public getQueue(): string[] {
-    return this.queue.slice();
+  public toArray(): string[] {
+    return Array.from(this.queue.values());
   }
 
   public shiftQueue(): string | undefined {
-    return this.queue.shift();
+    const nextItem = this.readNextItem();
+    if (nextItem) {
+      this.queue.delete(nextItem);
+      return nextItem;
+    }
+    return;
   }
 
   public has(item: string): boolean {
-    return this.queue.includes(item);
+    return this.queue.has(item);
   }
 
   public size() {
-    return this.queue.length;
+    return this.queue.size;
   }
 }
+
+export const createBatchQueue = (items: string[]): BatchQueue => {
+  return new BatchQueue(items);
+};
