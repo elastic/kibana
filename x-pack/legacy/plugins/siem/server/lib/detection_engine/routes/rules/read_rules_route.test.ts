@@ -47,7 +47,7 @@ describe('read_signals', () => {
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
-        message: expect.stringMatching(/rule_id.*not found/),
+        message: 'rule_id: "rule-1" not found',
         status_code: 404,
       });
     });
