@@ -5,8 +5,30 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { Network } from '../../lib/network';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+type QueryNetworkTopCountriesResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkTopCountriesResolver>,
+  QuerySourceResolver
+>;
+
+type QueryNetworkTopNFlowResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkTopNFlowResolver>,
+  QuerySourceResolver
+>;
+
+type QueryNetworkHttpResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkHttpResolver>,
+  QuerySourceResolver
+>;
+
+type QueryDnsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkDnsResolver>,
+  QuerySourceResolver
+>;
 
 export interface NetworkResolversDeps {
   network: Network;
@@ -16,10 +38,10 @@ export const createNetworkResolvers = (
   libs: NetworkResolversDeps
 ): {
   Source: {
-    NetworkHttp: SourceResolvers['NetworkHttp'];
-    NetworkTopCountries: SourceResolvers['NetworkTopCountries'];
-    NetworkTopNFlow: SourceResolvers['NetworkTopNFlow'];
-    NetworkDns: SourceResolvers['NetworkDns'];
+    NetworkHttp: QueryNetworkHttpResolver;
+    NetworkTopCountries: QueryNetworkTopCountriesResolver;
+    NetworkTopNFlow: QueryNetworkTopNFlowResolver;
+    NetworkDns: QueryDnsResolver;
   };
 } => ({
   Source: {
