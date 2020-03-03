@@ -21,12 +21,8 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { IUiSettingsClient } from '../../../../../../../../../core/public';
-import {
-  fieldFormats as fieldFormatsHelpers,
-  parseInterval,
-} from '../../../../../../../../../plugins/data/public';
+import { parseInterval } from '../../../../../../../../../plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldFormatsStart } from '../../../../../../../../../plugins/data/public/field_formats';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
@@ -64,7 +60,6 @@ function isValidMoment(m: any): boolean {
 }
 
 interface TimeBucketsConfig {
-  fieldFormats: FieldFormatsStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -77,7 +72,6 @@ interface TimeBucketsConfig {
  */
 export class TimeBuckets {
   private getConfig: (key: string) => any;
-  private fieldFormats: FieldFormatsStart;
 
   private _lb: Bounds['min'] = null;
   private _ub: Bounds['max'] = null;
@@ -176,10 +170,24 @@ export class TimeBuckets {
     return Object.create(self, desc);
   }
 
-  constructor({ uiSettings, fieldFormats }: TimeBucketsConfig) {
+  constructor({ uiSettings }: TimeBucketsConfig) {
     this.getConfig = (key: string) => uiSettings.get(key);
-    this.fieldFormats = fieldFormats;
     return TimeBuckets.__cached__(this);
+  }
+
+  /**
+   * Get a moment duration object representing
+   * the distance between the bounds, if the bounds
+   * are set.
+   *
+   * @return {moment.duration|undefined}
+   */
+  private getDuration(): moment.Duration | undefined {
+    if (this._ub === null || this._lb === null || !this.hasBounds()) {
+      return;
+    }
+    const difference = (this._ub as number) - (this._lb as number);
+    return moment.duration(difference, 'ms');
   }
 
   /**
@@ -261,21 +269,6 @@ export class TimeBuckets {
       min: this._lb,
       max: this._ub,
     };
-  }
-
-  /**
-   * Get a moment duration object representing
-   * the distance between the bounds, if the bounds
-   * are set.
-   *
-   * @return {moment.duration|undefined}
-   */
-  getDuration(): moment.Duration | undefined {
-    if (this._ub === null || this._lb === null || !this.hasBounds()) {
-      return;
-    }
-    const difference = (this._ub as number) - (this._lb as number);
-    return moment.duration(difference, 'ms');
   }
 
   /**
@@ -441,20 +434,5 @@ export class TimeBuckets {
     }
 
     return this.getConfig('dateFormat');
-  }
-
-  getScaledDateFormatter() {
-    const DateFieldFormat = this.fieldFormats.getType(fieldFormatsHelpers.FIELD_FORMAT_IDS.DATE);
-
-    if (!DateFieldFormat) {
-      throw new Error('Unable to retrieve Date Field Format');
-    }
-
-    return new DateFieldFormat(
-      {
-        pattern: this.getScaledDateFormat(),
-      },
-      this.getConfig
-    );
   }
 }
