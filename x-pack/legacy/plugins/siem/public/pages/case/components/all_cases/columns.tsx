@@ -8,9 +8,11 @@ import {
   EuiBadge,
   EuiTableFieldDataColumnType,
   EuiTableComputedColumnType,
+  EuiTableActionsColumnType,
   EuiAvatar,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
@@ -18,7 +20,10 @@ import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
 
-export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
+export type CasesColumns =
+  | EuiTableFieldDataColumnType<Case>
+  | EuiTableComputedColumnType<Case>
+  | EuiTableActionsColumnType<Case>;
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
@@ -31,7 +36,9 @@ const Spacer = styled.span`
 const TempNumberComponent = () => <span>{1}</span>;
 TempNumberComponent.displayName = 'TempNumberComponent';
 
-export const getCasesColumns = (): CasesColumns[] => [
+export const getCasesColumns = (
+  actions: Array<DefaultItemIconButtonAction<Case>>
+): CasesColumns[] => [
   {
     name: i18n.NAME,
     render: (theCase: Case) => {
@@ -117,5 +124,9 @@ export const getCasesColumns = (): CasesColumns[] => [
       }
       return getEmptyTagValue();
     },
+  },
+  {
+    name: 'Actions',
+    actions,
   },
 ];

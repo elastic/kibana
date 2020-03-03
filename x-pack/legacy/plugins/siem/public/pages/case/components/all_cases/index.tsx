@@ -16,6 +16,7 @@ import {
 import { isEmpty } from 'lodash/fp';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import styled from 'styled-components';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
@@ -84,7 +85,46 @@ export const AllCases = React.memo(() => {
     [filterOptions, setFilters]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(), []);
+  const actions: Array<DefaultItemIconButtonAction<Case>> = useMemo(
+    () => [
+      {
+        description: 'Delete',
+        icon: 'trash',
+        name: 'Delete',
+        onClick: (theCase: Case) => console.log('Delete case', theCase),
+        type: 'icon',
+        'data-test-subj': 'action-delete',
+      },
+      filterOptions.state === 'open'
+        ? {
+            description: 'Close case',
+            icon: 'magnet',
+            name: 'Close case',
+            onClick: (theCase: Case) => console.log('Close case', theCase),
+            type: 'icon',
+            'data-test-subj': 'action-close',
+          }
+        : {
+            description: 'Reopen case',
+            icon: 'magnet',
+            name: 'Reopen case',
+            onClick: (theCase: Case) => console.log('Reopen case', theCase),
+            type: 'icon',
+            'data-test-subj': 'action-open',
+          },
+      {
+        description: 'To do',
+        icon: 'magnet',
+        name: 'To do',
+        onClick: (theCase: Case) => console.log('To do', theCase),
+        type: 'icon',
+        'data-test-subj': 'action-to-do',
+      },
+    ],
+    [filterOptions.state]
+  );
+
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
@@ -129,7 +169,9 @@ export const AllCases = React.memo(() => {
         }}
       />
       {isLoading && loading.indexOf('cases') > -1 && isEmpty(data.cases) && (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
+        <Div>
+          <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
+        </Div>
       )}
       {(!isLoading || loading.indexOf('cases') === -1) && !isEmpty(data.cases) && (
         <Div>
