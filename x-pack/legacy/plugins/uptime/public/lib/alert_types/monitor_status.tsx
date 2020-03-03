@@ -46,29 +46,23 @@ export const validate = (alertParams: any): ValidationResult => {
 
   if (isRight(decoded)) {
     const { numTimes, timerange } = decoded.right;
-    const from = timerange?.from;
-    const mFrom = DateMath.parse(from);
-    const to = timerange?.to;
-    const mTo = DateMath.parse(to);
-    if (!from) {
-      errors.noTimeRangeStart = 'Specified time range has no start time';
-    } else if (isNaN(mFrom?.valueOf() ?? 0)) {
+    const { from, to } = timerange;
+    const fromAbs = DateMath.parse(from)?.valueOf();
+    const toAbs = DateMath.parse(to)?.valueOf();
+    if (!fromAbs || isNaN(fromAbs)) {
       errors.timeRangeStartValueNaN = 'Specified time range start is invalid';
     }
-
-    if (!to) {
-      errors.noTimeRangeEnd = 'Specified time range has no end time';
-    } else if (isNaN(mTo?.valueOf() ?? 0)) {
+    if (!toAbs && isNaN(toAbs)) {
       errors.timeRangeEndValueNaN = 'Specified time range end is invalid';
     }
 
     // the default values for this test will pass, we only want to specify an error
     // in the case that `from` is more recent than `to`
-    if ((mFrom?.valueOf() ?? 0) > (mTo?.valueOf() ?? 1)) {
+    if ((fromAbs ?? 0) > (toAbs ?? 1)) {
       errors.invalidTimeRange = 'Time range start cannot exceed time range end';
     }
 
-    if (!numTimes || isNaN(numTimes) || numTimes < 1) {
+    if (numTimes < 1) {
       errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
     }
   }
