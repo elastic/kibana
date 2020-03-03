@@ -33,12 +33,10 @@ import {
   IIndexPattern,
   FilterBar,
   SavedQuery,
-  SavedQueryMeta,
-  SaveQueryForm,
-  SavedQueryManagementComponent,
 } from '../..';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract } from '../../query';
+import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm } from '..';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
