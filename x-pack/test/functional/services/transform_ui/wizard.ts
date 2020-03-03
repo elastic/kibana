@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
+  const aceEditor = getService('aceEditor');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -273,6 +274,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertAggregationEntryExists(index, expectedLabel);
     },
 
+    async assertAdvancedPivotEditorContent(expectedValue: Record<string, any>) {
+      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const advancedEditorValue = JSON.parse(advancedEditorString);
+      expect(advancedEditorValue).to.eql(expectedValue);
+    },
+
     async assertAdvancedPivotEditorSwitchExists() {
       await testSubjects.existOrFail(`transformAdvancedPivotEditorSwitch`, { allowHidden: true });
     },
@@ -285,6 +292,13 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         expectedCheckState,
         `Advanced pivot editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
       );
+    },
+
+    async enabledAdvancedPivotEditor() {
+      await this.assertAdvancedPivotEditorSwitchCheckState(false);
+      await testSubjects.click('transformAdvancedPivotEditorSwitch');
+      await this.assertAdvancedPivotEditorSwitchCheckState(true);
+      await testSubjects.existOrFail('transformAdvancedPivotEditor');
     },
 
     async assertTransformIdInputExists() {
