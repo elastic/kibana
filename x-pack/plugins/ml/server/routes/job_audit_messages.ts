@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
@@ -12,7 +13,7 @@ import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitialization) {
+export function jobAuditMessagesRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup JobAuditMessages
    *
@@ -28,7 +29,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         query: schema.maybe(schema.object({ from: schema.maybe(schema.any()) })),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getJobAuditMessages } = jobAuditMessagesProvider(
           context.ml!.mlClient.callAsCurrentUser
@@ -61,7 +62,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         query: schema.maybe(schema.object({ from: schema.maybe(schema.any()) })),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getJobAuditMessages } = jobAuditMessagesProvider(
           context.ml!.mlClient.callAsCurrentUser
