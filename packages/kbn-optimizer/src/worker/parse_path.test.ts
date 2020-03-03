@@ -17,8 +17,20 @@
  * under the License.
  */
 
-declare function NormalizePath(path: string, stripTrailing?: boolean): string;
+import { parseFilePath, parseDirPath } from './parse_path';
 
-declare module 'normalize-path' {
-  export = NormalizePath;
-}
+const DIRS = ['/', '/foo/bar/baz/', 'c:\\', 'c:\\foo\\bar\\baz\\'];
+const AMBIGUOUS = ['/foo', '/foo/bar/baz', 'c:\\foo', 'c:\\foo\\bar\\baz'];
+const FILES = ['/foo/bar/baz.json', 'c:/foo/bar/baz.json', 'c:\\foo\\bar\\baz.json'];
+
+describe('parseFilePath()', () => {
+  it.each([...FILES, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseFilePath(path)).toMatchSnapshot();
+  });
+});
+
+describe('parseDirPath()', () => {
+  it.each([...DIRS, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseDirPath(path)).toMatchSnapshot();
+  });
+});
