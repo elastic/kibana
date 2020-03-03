@@ -61,9 +61,7 @@ export const AlertEdit = ({
   }
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
-  if (!alertType) {
-    return null;
-  }
+
   const errors = {
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
