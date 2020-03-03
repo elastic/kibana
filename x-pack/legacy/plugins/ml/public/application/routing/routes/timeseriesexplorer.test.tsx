@@ -52,7 +52,7 @@ jest.mock('../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
 }));
 
-jest.mock('../../../../../shared_imports');
+jest.mock('../../../../shared_imports');
 
 describe('TimeSeriesExplorerUrlStateManager', () => {
   test('Initial render shows "No single metric jobs found"', () => {
