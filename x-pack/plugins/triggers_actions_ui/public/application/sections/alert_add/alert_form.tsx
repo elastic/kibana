@@ -155,7 +155,6 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypes = await loadAlertTypes({ http });
-        console.log('alert types', JSON.stringify(alertTypes, null, 2));
         // temp hack of API result
         alertTypes.push({
           id: 'threshold',
@@ -171,10 +170,6 @@ export const AlertForm = ({
         const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
-        }
-        console.log('alert', JSON.stringify(alert, null, 2));
-        if (alert.alertTypeId) {
-          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
         }
         setAlertTypesIndex(index);
       } catch (e) {
