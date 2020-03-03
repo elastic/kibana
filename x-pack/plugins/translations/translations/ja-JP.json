@@ -10984,7 +10984,6 @@
     "xpack.siem.editDataProvider.doesNotExistLabel": "存在しません",
     "xpack.siem.editDataProvider.existsLabel": "存在する",
     "xpack.siem.editDataProvider.fieldLabel": "フィールド",
-    "xpack.siem.editDataProvider.fieldPlaceholder": "フィールドを選択",
     "xpack.siem.editDataProvider.isLabel": "が",
     "xpack.siem.editDataProvider.isNotLabel": "is not",
     "xpack.siem.editDataProvider.operatorLabel": "演算子",
