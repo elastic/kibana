@@ -39,6 +39,12 @@ import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../components/search_bar';
 
+const NO_WRAP_TRUNCATE_STYLE = Object.freeze({
+  overflow: 'hidden',
+  'text-overflow': 'ellipsis',
+  'white-space': 'nowrap',
+});
+
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
     leftColumn={
@@ -172,15 +178,16 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const FLEET_URI = useLink(FLEET_PATH);
 
   // Some configs retrieved, set up table props
-  const columns = useMemo((): Array<
-    EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
-  > => {
-    const cols = [
+  const columns = useMemo(() => {
+    const cols: Array<
+      EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
+    > = [
       {
         field: 'name',
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
+        width: '20%',
         // FIXME: use version once available - see: https://github.com/elastic/kibana/issues/56750
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" wrap={true} alignItems="baseline">
@@ -204,10 +211,13 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
+        width: '35%',
+        truncateText: true,
         render: (description: AgentConfig['description']) => (
-          <EuiTextColor color="subdued">{description}</EuiTextColor>
+          <EuiTextColor color="subdued" style={NO_WRAP_TRUNCATE_STYLE}>
+            {description}
+          </EuiTextColor>
         ),
-        width: '30%',
       },
       {
         field: 'updated_on',
@@ -215,7 +225,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Last updated on',
         }),
         render: (date: AgentConfig['updated_on']) => (
-          <FormattedDate value={date} year="numeric" month="long" day="2-digit" />
+          <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
         ),
       },
       {
@@ -223,9 +233,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
+        dataType: 'number',
         render: (agents: unknown, config: AgentConfig) => {
           // FIXME: implement agents once known in API/Schema
-          const agentCount = 99;
+          const agentCount = [99, 100000, 0][Math.floor(Math.random() * 3)];
           const displayValue = (
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.agentsText"
@@ -247,13 +258,13 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
           defaultMessage: 'Data sources',
         }),
+        dataType: 'number',
         render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
       },
       {
         name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
-        width: '100px',
         actions: [
           {
             render: (config: AgentConfig) => (
@@ -266,7 +277,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
     // If Fleet is not enabled, then remove the `agents` column
     if (!isFleetEnabled) {
-      return cols.filter(col => col.field !== 'agents');
+      return cols.filter(col => ('field' in col ? col.field !== 'agents' : true));
     }
 
     return cols;
@@ -350,7 +361,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
+          <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
               defaultMessage="Reload"
