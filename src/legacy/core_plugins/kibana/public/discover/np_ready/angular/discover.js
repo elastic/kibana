@@ -223,6 +223,9 @@ function discoverController(
     kbnUrlStateStorage
   );
 
+  // sync initial app filters from state to filterManager
+  filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
+
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
     appStateContainer,
