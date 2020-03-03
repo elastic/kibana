@@ -219,6 +219,7 @@ describe('Timeline', () => {
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              eventType="all" // CAUTION: `eventType` is an optional prop in post-`7.6.x` branches. In later branches, `eventType` is omitted from this test, to truly verify the new default from redux. In this branch, we must specify `eventType` to pass the type check, but this is not the true intent of this test.
               filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
