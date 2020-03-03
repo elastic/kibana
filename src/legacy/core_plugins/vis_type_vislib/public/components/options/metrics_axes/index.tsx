@@ -92,14 +92,14 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const updateAxisTitle = useCallback(
     (seriesParams?: SeriesParam[]) => {
       const series = seriesParams || stateParams.seriesParams;
-      const axes = cloneDeep(stateParams.valueAxes);
       let isAxesChanged = false;
       let lastValuesChanged = false;
       const lastLabels = { ...lastCustomLabels };
       const lastMatchingSeriesAgg = { ...lastSeriesAgg };
 
-      stateParams.valueAxes.forEach((axis, axisNumber) => {
+      const axes = stateParams.valueAxes.map((axis, axisNumber) => {
         let newCustomLabel = '';
+        let updatedAxis;
         const matchingSeries: IAggConfig[] = [];
 
         series.forEach((serie, seriesIndex) => {
@@ -135,16 +135,19 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
             (aggTypeIsChanged ||
               aggFieldIsChanged ||
               axis.title.text === '' ||
-              lastCustomLabels[axis.id] === axis.title.text)
+              lastCustomLabels[axis.id] === axis.title.text) &&
+            newCustomLabel !== axis.title.text
           ) {
             // Override axis title with new custom label
-            axes[axisNumber] = {
+            updatedAxis = {
               ...axis,
               title: { ...axis.title, text: newCustomLabel },
             };
             isAxesChanged = true;
           }
         }
+
+        return updatedAxis || axis;
       });
 
       if (isAxesChanged) {
