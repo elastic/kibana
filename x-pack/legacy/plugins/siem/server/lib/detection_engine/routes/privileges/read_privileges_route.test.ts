@@ -26,7 +26,7 @@ describe('read_privileges', () => {
       expect(response.status).toEqual(200);
     });
 
-    test('returns the payload when doing a normal request', async () => {
+    test.skip('returns the payload when doing a normal request', async () => {
       const response = await server.inject(getPrivilegeRequest(), context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(getMockPrivileges());

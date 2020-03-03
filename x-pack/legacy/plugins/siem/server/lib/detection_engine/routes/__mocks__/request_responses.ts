@@ -463,7 +463,7 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  is_authenticated: true,
+  is_authenticated: false,
   has_encryption_key: true,
 });
 
