@@ -19,11 +19,12 @@ import { ReactWrapper } from 'enzyme';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
-describe('alert_add', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/58970
+describe.skip('alert_add', () => {
   let deps: AppDeps | null;
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const mockes = coreMock.createSetup();
     const [
       {
@@ -108,9 +109,10 @@ describe('alert_add', () => {
       }
     });
     await waitForRender(wrapper);
-  });
+  }
 
-  it('renders alert add flyout', () => {
+  it('renders alert add flyout', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
   });

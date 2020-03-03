@@ -77,6 +77,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   return (
     <PickEventContainer>
       <EuiSuperSelect
+        data-test-subj="pick-event-type"
         fullWidth={false}
         valueOfSelected={eventType}
         onChange={onChangeEventType}

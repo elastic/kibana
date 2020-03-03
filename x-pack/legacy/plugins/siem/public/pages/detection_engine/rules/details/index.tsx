@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks, complexity */
+/* eslint-disable react-hooks/rules-of-hooks */
 
 import {
   EuiButton,
@@ -32,7 +32,10 @@ import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { useRule } from '../../../../containers/detection_engine/rules';
 
-import { useWithSource } from '../../../../containers/source';
+import {
+  indicesExistOrDataTemporarilyUnavailable,
+  WithSource,
+} from '../../../../containers/source';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
@@ -53,7 +56,7 @@ import { StepPanel } from '../components/step_panel';
 import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
-import { useGlobalTime } from '../../../../containers/global_time';
+import { GlobalTime } from '../../../../containers/global_time';
 import { signalsHistogramOptions } from '../../components/signals_histogram_panel/config';
 import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
@@ -215,10 +218,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
-  const { contentAvailable, indexPattern } = useWithSource(indexToAdd);
-
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
-
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
@@ -227,147 +226,155 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
       {userHasNoPermissions && <ReadOnlyCallOut />}
-      {contentAvailable ? (
-        <StickyContainer>
-          <FiltersGlobal>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
-          </FiltersGlobal>
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
+        {({ indicesExist, indexPattern }) => {
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <GlobalTime>
+              {({ to, from, deleteQuery, setQuery }) => (
+                <StickyContainer>
+                  <FiltersGlobal>
+                    <SiemSearchBar id="global" indexPattern={indexPattern} />
+                  </FiltersGlobal>
 
-          <WrapperPage>
-            <DetectionEngineHeaderPage
-              backOptions={{
-                href: getRulesUrl(),
-                text: i18n.BACK_TO_RULES,
-              }}
-              border
-              subtitle={subTitle}
-              subtitle2={[
-                ...(lastSignals != null
-                  ? [
+                  <WrapperPage>
+                    <DetectionEngineHeaderPage
+                      backOptions={{
+                        href: getRulesUrl(),
+                        text: i18n.BACK_TO_RULES,
+                      }}
+                      border
+                      subtitle={subTitle}
+                      subtitle2={[
+                        ...(lastSignals != null
+                          ? [
+                              <>
+                                {detectionI18n.LAST_SIGNAL}
+                                {': '}
+                                {lastSignals}
+                              </>,
+                            ]
+                          : []),
+                        <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                      ]}
+                      title={title}
+                    >
+                      <EuiFlexGroup alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <RuleSwitch
+                            id={rule?.id ?? '-1'}
+                            isDisabled={userHasNoPermissions}
+                            enabled={rule?.enabled ?? false}
+                            optionLabel={i18n.ACTIVATE_RULE}
+                            onChange={handleOnChangeEnabledRule}
+                          />
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                href={getEditRuleUrl(ruleId ?? '')}
+                                iconType="visControls"
+                                isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
+                              >
+                                {ruleI18n.EDIT_RULE_SETTINGS}
+                              </EuiButton>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <RuleActionsOverflow
+                                rule={rule}
+                                userHasNoPermissions={userHasNoPermissions}
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </DetectionEngineHeaderPage>
+                    {ruleError}
+                    {tabs}
+                    <EuiSpacer />
+                    {ruleDetailTab === RuleDetailTabs.signals && (
                       <>
-                        {detectionI18n.LAST_SIGNAL}
-                        {': '}
-                        {lastSignals}
-                      </>,
-                    ]
-                  : []),
-                <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
-              ]}
-              title={title}
-            >
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <RuleSwitch
-                    id={rule?.id ?? '-1'}
-                    isDisabled={userHasNoPermissions}
-                    enabled={rule?.enabled ?? false}
-                    optionLabel={i18n.ACTIVATE_RULE}
-                    onChange={handleOnChangeEnabledRule}
-                  />
-                </EuiFlexItem>
+                        <EuiFlexGroup>
+                          <EuiFlexItem component="section" grow={1}>
+                            <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                              {defineRuleData != null && (
+                                <StepDefineRule
+                                  descriptionDirection="column"
+                                  isReadOnlyView={true}
+                                  isLoading={false}
+                                  defaultValues={defineRuleData}
+                                />
+                              )}
+                            </StepPanel>
+                          </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        href={getEditRuleUrl(ruleId ?? '')}
-                        iconType="visControls"
-                        isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
-                      >
-                        {ruleI18n.EDIT_RULE_SETTINGS}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <RuleActionsOverflow
-                        rule={rule}
-                        userHasNoPermissions={userHasNoPermissions}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </DetectionEngineHeaderPage>
-            {ruleError}
-            {tabs}
-            <EuiSpacer />
-            {ruleDetailTab === RuleDetailTabs.signals && (
-              <>
-                <EuiFlexGroup>
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                      {defineRuleData != null && (
-                        <StepDefineRule
-                          descriptionDirection="column"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={defineRuleData}
+                          <EuiFlexItem component="section" grow={2}>
+                            <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
+                              {aboutRuleData != null && (
+                                <StepAboutRule
+                                  descriptionDirection="row"
+                                  isReadOnlyView={true}
+                                  isLoading={false}
+                                  defaultValues={aboutRuleData}
+                                />
+                              )}
+                            </StepPanel>
+                          </EuiFlexItem>
+
+                          <EuiFlexItem component="section" grow={1}>
+                            <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                              {scheduleRuleData != null && (
+                                <StepScheduleRule
+                                  descriptionDirection="column"
+                                  isReadOnlyView={true}
+                                  isLoading={false}
+                                  defaultValues={scheduleRuleData}
+                                />
+                              )}
+                            </StepPanel>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer />
+                        <SignalsHistogramPanel
+                          deleteQuery={deleteQuery}
+                          filters={signalMergedFilters}
+                          query={query}
+                          from={from}
+                          signalIndexName={signalIndexName}
+                          setQuery={setQuery}
+                          stackByOptions={signalsHistogramOptions}
+                          to={to}
+                          updateDateRange={updateDateRangeCallback}
                         />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
+                        <EuiSpacer />
+                        {ruleId != null && (
+                          <SignalsTable
+                            canUserCRUD={canUserCRUD ?? false}
+                            defaultFilters={signalDefaultFilters}
+                            hasIndexWrite={hasIndexWrite ?? false}
+                            from={from}
+                            loading={loading}
+                            signalsIndex={signalIndexName ?? ''}
+                            to={to}
+                          />
+                        )}
+                      </>
+                    )}
+                    {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
+                  </WrapperPage>
+                </StickyContainer>
+              )}
+            </GlobalTime>
+          ) : (
+            <WrapperPage>
+              <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
-                  <EuiFlexItem component="section" grow={2}>
-                    <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                      {aboutRuleData != null && (
-                        <StepAboutRule
-                          descriptionDirection="row"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={aboutRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                      {scheduleRuleData != null && (
-                        <StepScheduleRule
-                          descriptionDirection="column"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={scheduleRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-                <SignalsHistogramPanel
-                  deleteQuery={deleteQuery}
-                  filters={signalMergedFilters}
-                  query={query}
-                  from={from}
-                  signalIndexName={signalIndexName}
-                  setQuery={setQuery}
-                  stackByOptions={signalsHistogramOptions}
-                  to={to}
-                  updateDateRange={updateDateRangeCallback}
-                />
-                <EuiSpacer />
-                {ruleId != null && (
-                  <SignalsTable
-                    canUserCRUD={canUserCRUD ?? false}
-                    defaultFilters={signalDefaultFilters}
-                    hasIndexWrite={hasIndexWrite ?? false}
-                    from={from}
-                    loading={loading}
-                    signalsIndex={signalIndexName ?? ''}
-                    to={to}
-                  />
-                )}
-              </>
-            )}
-            {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
-          </WrapperPage>
-        </StickyContainer>
-      ) : (
-        <WrapperPage>
-          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-
-          <DetectionEngineEmptyPage />
-        </WrapperPage>
-      )}
+              <DetectionEngineEmptyPage />
+            </WrapperPage>
+          );
+        }}
+      </WithSource>
 
       <SpyRoute state={{ ruleName: rule?.name }} />
     </>
