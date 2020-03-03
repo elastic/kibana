@@ -18,9 +18,16 @@
  */
 
 export { ConfigService, IConfigService } from './config_service';
-export { RawConfigService } from './raw_config_service';
+export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env } from './env';
+export {
+  ConfigDeprecation,
+  ConfigDeprecationLogger,
+  ConfigDeprecationProvider,
+  ConfigDeprecationFactory,
+  coreDeprecationProvider,
+} from './deprecation';
 
 export { EnvironmentMode, PackageInfo } from './types';

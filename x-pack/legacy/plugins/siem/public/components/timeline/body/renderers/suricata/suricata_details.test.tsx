@@ -5,16 +5,17 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
 
 describe('SuricataDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
       const wrapper = shallow(
@@ -24,11 +25,11 @@ describe('SuricataDetails', () => {
           timelineId="test"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns text if the data does contain suricata data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <SuricataDetails
             data={mockTimelineData[2].ecs}
@@ -43,14 +44,12 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns null for text if the data contains no suricata data', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <SuricataDetails
-            data={mockTimelineData[0].ecs}
-            browserFields={mockBrowserFields}
-            timelineId="test"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <SuricataDetails
+          data={mockTimelineData[0].ecs}
+          browserFields={mockBrowserFields}
+          timelineId="test"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

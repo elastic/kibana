@@ -3,27 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get, isEmpty, noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 
-import { BrowserFields } from '../../../containers/source';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
+import { EventType } from '../../../store/timeline/model';
 import { OnPinEvent, OnUnPinEvent } from '../events';
-import { ColumnHeader } from './column_headers/column_header';
+
 import * as i18n from './translations';
-
-/** The (fixed) width of the Actions column */
-export const DEFAULT_ACTIONS_COLUMN_WIDTH = 115; // px;
-/**
- * The (fixed) width of the Actions column when the timeline body is used as
- * an events viewer, which has fewer actions than a regular events viewer
- */
-export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 32; // px;
-/** The default minimum width of a column (when a width for the column type is not specified) */
-export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
-/** The default minimum width of a column of type `date` */
-export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 190; // px
-
-export const DEFAULT_TIMELINE_WIDTH = 1100; // px
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -71,27 +57,33 @@ export const getPinOnClick = ({
   return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
 };
 
-export const getColumnWidthFromType = (type: string): number =>
-  type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
-
-/** Enriches the column headers with field details from the specified browserFields */
-export const getColumnHeaders = (
-  headers: ColumnHeader[],
-  browserFields: BrowserFields
-): ColumnHeader[] => {
-  return headers.map(header => {
-    const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
-
+/**
+ * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
+ * data necessary for custom timeline actions in conjunction with selection state
+ * @param timelineData
+ * @param eventIds
+ * @param fieldsToKeep
+ */
+export const getEventIdToDataMapping = (
+  timelineData: TimelineItem[],
+  eventIds: string[],
+  fieldsToKeep: string[]
+): Record<string, TimelineNonEcsData[]> => {
+  return timelineData.reduce((acc, v) => {
+    const fvm = eventIds.includes(v._id)
+      ? { [v._id]: v.data.filter(ti => fieldsToKeep.includes(ti.field)) }
+      : {};
     return {
-      ...header,
-      ...get(
-        [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
-        browserFields
-      ),
+      ...acc,
+      ...fvm,
     };
-  });
+  }, {});
 };
 
-/** Returns the (fixed) width of the Actions column */
-export const getActionsColumnWidth = (isEventViewer: boolean): number =>
-  isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH;
+/** Return eventType raw or signal */
+export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
+  if (!isEmpty(event.signal?.rule?.id)) {
+    return 'signal';
+  }
+  return 'raw';
+};

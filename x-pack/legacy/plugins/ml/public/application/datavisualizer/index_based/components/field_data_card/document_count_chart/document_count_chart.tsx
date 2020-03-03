@@ -12,8 +12,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getAxisId,
-  getSpecId,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -23,7 +21,7 @@ import {
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
+import { useUiSettings } from '../../../../../contexts/kibana/use_ui_settings_context';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -58,9 +56,7 @@ export const DocumentCountChart: FC<Props> = ({
 
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
-  const IS_DARK_THEME = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode');
+  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
   const EVENT_RATE_COLOR = themeName.euiColorVis2;
 
@@ -76,14 +72,14 @@ export const DocumentCountChart: FC<Props> = ({
           }}
         />
         <Axis
-          id={getAxisId('bottom')}
+          id="bottom"
           position={Position.Bottom}
           showOverlappingTicks={true}
           tickFormat={dateFormatter}
         />
-        <Axis id={getAxisId('left')} position={Position.Left} />
+        <Axis id="left" position={Position.Left} />
         <BarSeries
-          id={getSpecId(SPEC_ID)}
+          id={SPEC_ID}
           name={seriesName}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}

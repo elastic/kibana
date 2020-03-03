@@ -22,7 +22,7 @@ import { npSetup } from 'ui/new_platform';
 const newPlatformUiSettingsClient = npSetup.core.uiSettings;
 
 export function initUiSettingsApi(chrome) {
-  chrome.getUiSettingsClient = function () {
+  chrome.getUiSettingsClient = function() {
     return newPlatformUiSettingsClient;
   };
 }

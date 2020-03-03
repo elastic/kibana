@@ -61,13 +61,16 @@ export class IfVertex extends Vertex {
   }
 
   get next() {
-    const trueDescendants = this.trueOutgoingVertex ? this.trueOutgoingVertex.descendants().vertices : [];
-    const falseDescendants = this.falseOutgoingVertex ? this.falseOutgoingVertex.descendants().vertices : [];
+    const trueDescendants = this.trueOutgoingVertex
+      ? this.trueOutgoingVertex.descendants().vertices
+      : [];
+    const falseDescendants = this.falseOutgoingVertex
+      ? this.falseOutgoingVertex.descendants().vertices
+      : [];
 
     trueDescendants.unshift(this.trueOutgoingVertex);
     falseDescendants.unshift(this.falseOutgoingVertex);
 
     return intersection(trueDescendants, falseDescendants)[0];
   }
-
 }

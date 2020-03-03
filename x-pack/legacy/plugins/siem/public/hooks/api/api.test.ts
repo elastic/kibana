@@ -13,6 +13,10 @@ describe('api', () => {
   });
 
   describe('#throwIfNotOk', () => {
+    test('throws a network error if there is no response', async () => {
+      await expect(throwIfNotOk()).rejects.toThrow('Network Error');
+    });
+
     test('does a throw if it is given response that is not ok and the body is not parsable', async () => {
       fetchMock.mock('http://example.com', 500);
       const response = await fetch('http://example.com');

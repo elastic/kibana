@@ -21,7 +21,7 @@ import { ElasticsearchMetric } from '../metrics';
  * @returns {boolean} true to keep
  */
 export function filterOldShardActivity(startMs) {
-  return (activity) => {
+  return activity => {
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
     return !_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs;
   };
@@ -37,7 +37,9 @@ export function filterOldShardActivity(startMs) {
  */
 export function handleLastRecoveries(resp, start) {
   if (resp.hits.hits.length === 1) {
-    const data = _.get(resp.hits.hits[0], '_source.index_recovery.shards', []).filter(filterOldShardActivity(start.getTime()));
+    const data = _.get(resp.hits.hits[0], '_source.index_recovery.shards', []).filter(
+      filterOldShardActivity(start.getTime())
+    );
     data.sort((a, b) => b.start_time_in_millis - a.start_time_in_millis);
     return data;
   }
@@ -58,16 +60,14 @@ export function getLastRecovery(req, esIndexPattern) {
     size: 1,
     ignoreUnavailable: true,
     body: {
-      _source: [ 'index_recovery.shards' ],
+      _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc' } },
-      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric })
-    }
+      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then((resp) => {
-      return handleLastRecoveries(resp, start);
-    });
-
+  return callWithRequest(req, 'search', params).then(resp => {
+    return handleLastRecoveries(resp, start);
+  });
 }

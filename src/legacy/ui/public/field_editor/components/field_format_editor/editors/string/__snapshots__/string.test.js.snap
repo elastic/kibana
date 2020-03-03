@@ -20,12 +20,8 @@ exports[`StringFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="stringEditorTransform"
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [

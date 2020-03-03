@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from '../../../../../../src/plugins/saved_objects/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
@@ -37,7 +37,7 @@ export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'ic
   encoderID: string;
   iconClass?: string;
 }
-export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type'> {
+export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 'aggregatable'> {
   iconClass: string;
 }
 

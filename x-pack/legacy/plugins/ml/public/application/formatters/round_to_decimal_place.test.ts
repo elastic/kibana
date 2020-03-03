@@ -20,6 +20,7 @@ describe('ML - roundToDecimalPlace formatter', () => {
     expect(roundToDecimalPlace(0.0005)).toBe('5.00e-4');
     expect(roundToDecimalPlace(-0.0005)).toBe('-5.00e-4');
     expect(roundToDecimalPlace(-12.045)).toBe(-12.04);
+    expect(roundToDecimalPlace(0)).toBe(0);
   });
 
   it('returns the correct format using specified decimal place', () => {
@@ -31,5 +32,6 @@ describe('ML - roundToDecimalPlace formatter', () => {
     expect(roundToDecimalPlace(0.0005, 4)).toBe(0.0005);
     expect(roundToDecimalPlace(0.00005, 4)).toBe('5.00e-5');
     expect(roundToDecimalPlace(-0.00005, 4)).toBe('-5.00e-5');
+    expect(roundToDecimalPlace(0, 4)).toBe(0);
   });
 });

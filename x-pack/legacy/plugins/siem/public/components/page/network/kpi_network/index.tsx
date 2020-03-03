@@ -6,9 +6,16 @@
 
 import React from 'react';
 
-import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiSpacer,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { chunk as _chunk } from 'lodash/fp';
+
 import {
   StatItemsComponent,
   StatItemsProps,
@@ -23,9 +30,10 @@ import { UpdateDateRange } from '../../../charts/common';
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
 
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
+const euiVisColorPalette = euiPaletteColorBlind();
+const euiColorVis1 = euiVisColorPalette[1];
+const euiColorVis2 = euiVisColorPalette[2];
+const euiColorVis3 = euiVisColorPalette[3];
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
@@ -145,6 +153,8 @@ export const KpiNetworkBaseComponent = React.memo<{
     </EuiFlexGroup>
   );
 });
+
+KpiNetworkBaseComponent.displayName = 'KpiNetworkBaseComponent';
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
   ({ data, from, id, loading, to, narrowDateRange }) => {

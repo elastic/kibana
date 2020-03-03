@@ -16,6 +16,17 @@ describe('object_utils', () => {
       },
     };
 
+    const falseyObj = {
+      the: {
+        nested: {
+          value: false,
+        },
+        other_nested: {
+          value: 0,
+        },
+      },
+    };
+
     const test1 = getNestedProperty(testObj, 'the');
     expect(typeof test1).toBe('object');
     expect(Object.keys(test1)).toStrictEqual(['nested']);
@@ -47,5 +58,13 @@ describe('object_utils', () => {
     const test9 = getNestedProperty(testObj, 'the.nested.value.doesntExist', 'the-default-value');
     expect(typeof test9).toBe('string');
     expect(test9).toBe('the-default-value');
+
+    const test10 = getNestedProperty(falseyObj, 'the.nested.value');
+    expect(typeof test10).toBe('boolean');
+    expect(test10).toBe(false);
+
+    const test11 = getNestedProperty(falseyObj, 'the.other_nested.value');
+    expect(typeof test11).toBe('number');
+    expect(test11).toBe(0);
   });
 });

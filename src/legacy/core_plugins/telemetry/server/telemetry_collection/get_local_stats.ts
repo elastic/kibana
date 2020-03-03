@@ -17,29 +17,32 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash';
-// @ts-ignore
-import { getClusterInfo } from './get_cluster_info';
+import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-// @ts-ignore
-import { getKibana, handleKibanaStats } from './get_kibana';
+import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
 import { StatsGetter } from '../collection_manager';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
  * "cluster_stats" document from X-Pack monitoring.
  *
+ * @param {Object} server ??
  * @param {Object} clusterInfo Cluster info (GET /)
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
- * @return {Object} A combined object containing the different responses.
+ * @param {Object} kibana The Kibana Usage stats
  */
-export function handleLocalStats(server: any, clusterInfo: any, clusterStats: any, kibana: any) {
+export function handleLocalStats(
+  server: any,
+  { cluster_name, cluster_uuid, version }: ESClusterInfo,
+  { _nodes, cluster_name: clusterName, ...clusterStats }: any,
+  kibana: KibanaUsageStats
+) {
   return {
     timestamp: new Date().toISOString(),
-    cluster_uuid: get(clusterInfo, 'cluster_uuid'),
-    cluster_name: get(clusterInfo, 'cluster_name'),
-    version: get(clusterInfo, 'version.number'),
-    cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
+    cluster_uuid,
+    cluster_name,
+    version: version.number,
+    cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {
       kibana: handleKibanaStats(server, kibana),
@@ -47,14 +50,12 @@ export function handleLocalStats(server: any, clusterInfo: any, clusterStats: an
   };
 }
 
+export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
+
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
- *
- * @param {Object} server The Kibana server instance used to call ES as the internal user
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
-export const getLocalStats: StatsGetter = async (clustersDetails, config) => {
+export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (clustersDetails, config) => {
   const { server, callCluster, usageCollection } = config;
 
   return await Promise.all(

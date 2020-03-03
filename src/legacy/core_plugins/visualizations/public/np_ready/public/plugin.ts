@@ -16,9 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { TypesService, TypesSetup, TypesStart } from './types';
-import { setUISettings, setTypes, setI18n } from './services';
+
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../../../core/public';
+import { TypesService, TypesSetup, TypesStart } from './vis_types';
+import {
+  setUISettings,
+  setTypes,
+  setI18n,
+  setCapabilities,
+  setHttp,
+  setIndexPatterns,
+  setSavedObjects,
+  setUsageCollector,
+  setFilterManager,
+  setExpressions,
+  setUiActions,
+  setSavedVisualizationsLoader,
+  setTimeFilter,
+} from './services';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
+import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { visualization as visualizationFunction } from './expressions/visualization_function';
+import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
+import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
+import { VisImpl, VisImplConstructor } from './vis_impl';
+import { showNewVisModal } from './wizard';
+import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -29,9 +63,24 @@ export interface VisualizationsSetup {
   types: TypesSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisualizationsStart {
   types: TypesStart;
+  savedVisualizationsLoader: SavedVisualizationsLoader;
+  Vis: VisImplConstructor;
+  showNewVisModal: typeof showNewVisModal;
+}
+
+export interface VisualizationsSetupDeps {
+  expressions: ExpressionsSetup;
+  embeddable: IEmbeddableSetup;
+  usageCollection: UsageCollectionSetup;
+  data: DataPublicPluginSetup;
+}
+
+export interface VisualizationsStartDeps {
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -42,24 +91,65 @@ export interface VisualizationsStart {
  *
  * @internal
  */
-export class VisualizationsPlugin implements Plugin<VisualizationsSetup, VisualizationsStart> {
+export class VisualizationsPlugin
+  implements
+    Plugin<
+      VisualizationsSetup,
+      VisualizationsStart,
+      VisualizationsSetupDeps,
+      VisualizationsStartDeps
+    > {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup,
+    { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
+  ): VisualizationsSetup {
     setUISettings(core.uiSettings);
+    setUsageCollector(usageCollection);
+
+    expressions.registerFunction(visualizationFunction);
+    expressions.registerRenderer(visualizationRenderer);
+
+    const embeddableFactory = new VisualizeEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+
     return {
       types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart) {
-    setI18n(core.i18n);
+  public start(
+    core: CoreStart,
+    { data, expressions, uiActions }: VisualizationsStartDeps
+  ): VisualizationsStart {
     const types = this.types.start();
+    setI18n(core.i18n);
     setTypes(types);
+    setCapabilities(core.application.capabilities);
+    setHttp(core.http);
+    setSavedObjects(core.savedObjects);
+    setIndexPatterns(data.indexPatterns);
+    setFilterManager(data.query.filterManager);
+    setExpressions(expressions);
+    setUiActions(uiActions);
+    setTimeFilter(data.query.timefilter.timefilter);
+    const savedVisualizationsLoader = createSavedVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      chrome: core.chrome,
+      overlays: core.overlays,
+      visualizationTypes: types,
+    });
+    setSavedVisualizationsLoader(savedVisualizationsLoader);
+
     return {
       types,
+      showNewVisModal,
+      Vis: VisImpl,
+      savedVisualizationsLoader,
     };
   }
 

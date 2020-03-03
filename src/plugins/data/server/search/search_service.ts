@@ -83,6 +83,11 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     };
 
     api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
+    api.registerSearchStrategyContext(
+      this.initializerContext.opaqueId,
+      'config$',
+      () => this.initializerContext.config.legacy.globalConfig$
+    );
 
     // ES search capabilities are written in a way that it could easily be a separate plugin,
     // however these two plugins are tightly coupled due to the default search strategy using

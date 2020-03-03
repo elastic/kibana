@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ILLEGAL_CHARACTERS, validateIndexPattern } from 'ui/index_patterns';
 
 import { ValidationFunc } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
+
+import { indexPatterns } from '../../../../../data/public';
 
 export const indexPatternField = (i18n: any) => (
   ...args: Parameters<ValidationFunc>
@@ -45,9 +46,9 @@ export const indexPatternField = (i18n: any) => (
   }
 
   // Validate illegal characters
-  const errors = validateIndexPattern(value);
+  const errors = indexPatterns.validate(value);
 
-  if (errors[ILLEGAL_CHARACTERS]) {
+  if (errors[indexPatterns.ILLEGAL_CHARACTERS_KEY]) {
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_PATTERN',
@@ -55,8 +56,8 @@ export const indexPatternField = (i18n: any) => (
         defaultMessage:
           'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
         values: {
-          characterList: errors[ILLEGAL_CHARACTERS].join(' '),
-          characterListLength: errors[ILLEGAL_CHARACTERS].length,
+          characterList: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' '),
+          characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
         },
       }),
     };

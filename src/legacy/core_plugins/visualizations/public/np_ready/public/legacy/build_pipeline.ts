@@ -18,18 +18,11 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-// @ts-ignore
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import {
-  AggConfig,
-  setBounds,
-  isDateHistogramBucketAggConfig,
-  createFormat,
-} from '../../../legacy_imports';
-// eslint-disable-next-line
-import { SearchSourceContract } from '../../../../../../ui/public/courier/search_source/search_source';
-import { Vis, VisParams, VisState } from '..';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
+import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
+import { IAggConfig, setBounds, isDateHistogramBucketAggConfig } from '../../../legacy_imports';
+import { Vis, VisParams } from '../types';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -59,7 +52,12 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
+type buildVisFunction = (
+  visState: ReturnType<Vis['getCurrentState']>,
+  schemas: Schemas,
+  uiState: any,
+  meta?: { savedObjectId?: string }
+) => string;
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
@@ -81,7 +79,7 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
+  const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
@@ -98,7 +96,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       'max_bucket',
     ].includes(agg.type.name);
 
-    const format = createFormat(
+    const format = fieldFormats.serialize(
       hasSubAgg
         ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
         : agg
@@ -126,10 +124,10 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const schemas: Schemas = {
     metric: [],
   };
-  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
   const isHierarchical = vis.isHierarchical();
-  const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
-  responseAggs.forEach((agg: AggConfig) => {
+  const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
+  responseAggs.forEach((agg: IAggConfig) => {
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -220,7 +218,7 @@ export const prepareDimension = (variable: string, data: any) => {
 const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
   const visState = vis.getCurrentState();
   const visConfig = visState.params;
-  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
 
   (dimensions.y || []).forEach(yDimension => {
     const yAgg = responseAggs[yDimension.accessor];
@@ -248,11 +246,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: (visState, schemas, uiState = {}) => {
+  metrics: (visState, schemas, uiState = {}, meta) => {
     const paramsJson = prepareJson('params', visState.params);
     const uiStateJson = prepareJson('uiState', uiState);
+    const savedObjectIdParam = prepareString('savedObjectId', meta?.savedObjectId);
 
-    return `tsvb ${paramsJson} ${uiStateJson}`;
+    const params = [paramsJson, uiStateJson, savedObjectIdParam].filter(param => Boolean(param));
+    return `tsvb ${params.join(' ')}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);
@@ -298,8 +298,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
 
     let expr = `metricvis `;
-    expr += prepareValue('percentage', percentageMode);
-    expr += prepareValue('colorScheme', colorSchema);
+    expr += prepareValue('percentageMode', percentageMode);
+    expr += prepareValue('colorSchema', colorSchema);
     expr += prepareValue('colorMode', metricColorMode);
     expr += prepareValue('useRanges', useRanges);
     expr += prepareValue('invertColors', invertColors);
@@ -445,6 +445,8 @@ export const buildVislibDimensions = async (
       dimensions.x.params.date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
+      dimensions.x.params.intervalESValue = esValue;
+      dimensions.x.params.intervalESUnit = esUnit;
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
@@ -466,7 +468,7 @@ export const buildVislibDimensions = async (
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
 export const getVisParams = async (
   vis: Vis,
-  params: { searchSource: SearchSourceContract; timeRange?: any; abortSignal?: AbortSignal }
+  params: { searchSource: ISearchSource; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
@@ -484,8 +486,9 @@ export const getVisParams = async (
 export const buildPipeline = async (
   vis: Vis,
   params: {
-    searchSource: SearchSourceContract;
+    searchSource: ISearchSource;
     timeRange?: any;
+    savedObjectId?: string;
   }
 ) => {
   const { searchSource } = params;
@@ -519,7 +522,9 @@ export const buildPipeline = async (
 
   const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState, {
+      savedObjectId: params.savedObjectId,
+    });
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);

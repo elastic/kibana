@@ -18,8 +18,7 @@ export class Cluster {
 
   static fromUpstreamJSON(cluster) {
     return new Cluster({
-      uuid: cluster.uuid
+      uuid: cluster.uuid,
     });
   }
-
 }

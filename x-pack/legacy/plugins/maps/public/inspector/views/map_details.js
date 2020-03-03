@@ -18,25 +18,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 const DETAILS_TAB_ID = 'details';
 const STYLE_TAB_ID = 'mapStyle';
 
 class MapDetails extends Component {
-
-  tabs = [{
-    id: DETAILS_TAB_ID,
-    name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
-      defaultMessage: 'Map details'
-    }),
-    dataTestSubj: 'mapDetailsTab',
-  }, {
-    id: STYLE_TAB_ID,
-    name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
-      defaultMessage: 'Mapbox style'
-    }),
-    dataTestSubj: 'mapboxStyleTab',
-  }];
+  tabs = [
+    {
+      id: DETAILS_TAB_ID,
+      name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
+        defaultMessage: 'Map details',
+      }),
+      dataTestSubj: 'mapDetailsTab',
+    },
+    {
+      id: STYLE_TAB_ID,
+      name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
+        defaultMessage: 'Mapbox style',
+      }),
+      dataTestSubj: 'mapboxStyleTab',
+    },
+  ];
 
   state = {
     selectedTabId: DETAILS_TAB_ID,
@@ -46,17 +47,14 @@ class MapDetails extends Component {
     this.setState({
       selectedTabId: id,
     });
-  }
+  };
 
   renderTab = () => {
     if (STYLE_TAB_ID === this.state.selectedTabId) {
       return (
         <div data-test-subj="mapboxStyleContainer">
-          <EuiCodeBlock
-            language="json"
-            paddingSize="s"
-          >
-            { JSON.stringify(this.props.mapStyle, null, 2) }
+          <EuiCodeBlock language="json" paddingSize="s">
+            {JSON.stringify(this.props.mapStyle, null, 2)}
           </EuiCodeBlock>
         </div>
       );
@@ -87,17 +85,14 @@ class MapDetails extends Component {
 
           <EuiTableRow>
             <EuiTableRowCell>
-              <FormattedMessage
-                id="xpack.maps.inspector.zoomLabel"
-                defaultMessage="Zoom"
-              />
+              <FormattedMessage id="xpack.maps.inspector.zoomLabel" defaultMessage="Zoom" />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="zoom">{this.props.zoom}</EuiTableRowCell>
           </EuiTableRow>
         </EuiTableBody>
       </EuiTable>
     );
-  }
+  };
 
   renderTabs() {
     return this.tabs.map((tab, index) => (
@@ -115,12 +110,9 @@ class MapDetails extends Component {
   render() {
     return (
       <div>
-        <EuiTabs size="s">
-          {this.renderTabs()}
-        </EuiTabs>
+        <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
 
         {this.renderTab()}
-
       </div>
     );
   }

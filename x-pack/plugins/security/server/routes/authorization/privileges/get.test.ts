@@ -81,7 +81,7 @@ describe('GET privileges', () => {
   };
 
   describe('failure', () => {
-    getPrivilegesTest(`returns result of routePreCheckLicense`, {
+    getPrivilegesTest('returns result of license checker', {
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });

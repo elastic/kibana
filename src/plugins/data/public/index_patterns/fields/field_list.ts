@@ -24,14 +24,14 @@ import { Field, FieldSpec } from './field';
 
 type FieldMap = Map<Field['name'], Field>;
 
-export interface FieldListInterface extends Array<Field> {
+export interface IFieldList extends Array<Field> {
   getByName(name: Field['name']): Field | undefined;
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
   remove(field: IFieldType): void;
 }
 
-export class FieldList extends Array<Field> implements FieldListInterface {
+export class FieldList extends Array<Field> implements IFieldList {
   private byName: FieldMap = new Map();
   private groups: Map<Field['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;

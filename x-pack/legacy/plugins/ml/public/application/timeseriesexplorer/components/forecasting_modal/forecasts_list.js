@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Lists details of previously run forecasts in a table.
  */
@@ -13,13 +11,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiText,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { i18n } from '@kbn/i18n';
@@ -30,40 +22,43 @@ function getColumns(viewForecast) {
     {
       field: 'forecast_create_timestamp',
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.createdColumnName', {
-        defaultMessage: 'Created'
+        defaultMessage: 'Created',
       }),
       dataType: 'date',
-      render: (date) => formatHumanReadableDateTimeSeconds(date),
-      sortable: true
+      render: date => formatHumanReadableDateTimeSeconds(date),
+      sortable: true,
     },
     {
       field: 'forecast_start_timestamp',
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.fromColumnName', {
-        defaultMessage: 'From'
+        defaultMessage: 'From',
       }),
       dataType: 'date',
-      render: (date) => formatHumanReadableDateTimeSeconds(date),
-      sortable: true
+      render: date => formatHumanReadableDateTimeSeconds(date),
+      sortable: true,
     },
     {
       field: 'forecast_end_timestamp',
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.toColumnName', {
-        defaultMessage: 'To'
+        defaultMessage: 'To',
       }),
       dataType: 'date',
-      render: (date) => formatHumanReadableDateTimeSeconds(date),
-      sortable: true
+      render: date => formatHumanReadableDateTimeSeconds(date),
+      sortable: true,
     },
     {
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
-        defaultMessage: 'View'
+        defaultMessage: 'View',
       }),
       width: '60px',
-      render: (forecast) => {
+      render: forecast => {
         const viewForecastAriaLabel = i18n.translate(
-          'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel', {
+          'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel',
+          {
             defaultMessage: 'View forecast created at {createdDate}',
-            values: { createdDate: formatHumanReadableDateTimeSeconds(forecast.forecast_create_timestamp) }
+            values: {
+              createdDate: formatHumanReadableDateTimeSeconds(forecast.forecast_create_timestamp),
+            },
           }
         );
 
@@ -74,8 +69,8 @@ function getColumns(viewForecast) {
             aria-label={viewForecastAriaLabel}
           />
         );
-      }
-    }
+      },
+    },
   ];
 }
 
@@ -95,15 +90,14 @@ export function ForecastsList({ forecasts, viewForecast }) {
       </h3>
       <EuiToolTip
         position="right"
-        content={<FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
-          defaultMessage="Lists a maximum of five of the most recently run forecasts."
-        />}
+        content={
+          <FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
+            defaultMessage="Lists a maximum of five of the most recently run forecasts."
+          />
+        }
       >
-        <EuiIcon
-          type="questionInCircle"
-          size="s"
-        />
+        <EuiIcon type="questionInCircle" size="s" />
       </EuiToolTip>
       <EuiInMemoryTable
         items={forecasts}
@@ -117,5 +111,5 @@ export function ForecastsList({ forecasts, viewForecast }) {
 
 ForecastsList.propType = {
   forecasts: PropTypes.array,
-  viewForecast: PropTypes.func.isRequired
+  viewForecast: PropTypes.func.isRequired,
 };

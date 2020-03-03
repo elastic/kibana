@@ -19,12 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
@@ -41,72 +41,76 @@ export default function ({ getService, getPageObjects }) {
 
     before(initGaugeVis);
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show Count', function () {
+    it('should show Count', function() {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
       return retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getGaugeValue();
+        const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedCount).to.eql(metricValue);
       });
     });
 
-    it('should show Split Gauges', async function () {
+    it('should show Split Gauges', async function() {
       log.debug('Bucket = Split Group');
-      await PageObjects.visualize.clickBucket('Split group');
+      await PageObjects.visEditor.clickBucket('Split group');
       log.debug('Aggregation = Terms');
-      await PageObjects.visualize.selectAggregation('Terms');
+      await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = machine.os.raw');
-      await PageObjects.visualize.selectField('machine.os.raw');
+      await PageObjects.visEditor.selectField('machine.os.raw');
       log.debug('Size = 4');
-      await PageObjects.visualize.setSize('4');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setSize('4');
+      await PageObjects.visEditor.clickGo();
 
       await retry.try(async () => {
-        expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          '2,904', 'win 8',
-          '2,858', 'win xp',
-          '2,814', 'win 7',
-          '2,784', 'ios',
+        expect(await PageObjects.visChart.getGaugeValue()).to.eql([
+          '2,904',
+          'win 8',
+          '2,858',
+          'win xp',
+          '2,814',
+          'win 7',
+          '2,784',
+          'ios',
         ]);
       });
     });
 
-    it('should show correct values for fields with fieldFormatters', async function () {
-      const expectedTexts = [ '2,904', 'win 8: Count', '0B', 'win 8: Min bytes' ];
+    it('should show correct values for fields with fieldFormatters', async function() {
+      const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
 
-      await PageObjects.visualize.selectAggregation('Terms');
-      await PageObjects.visualize.selectField('machine.os.raw');
-      await PageObjects.visualize.setSize('1');
-      await PageObjects.visualize.clickBucket('Metric', 'metrics');
-      await PageObjects.visualize.selectAggregation('Min', 'metrics');
-      await PageObjects.visualize.selectField('bytes', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectAggregation('Terms');
+      await PageObjects.visEditor.selectField('machine.os.raw');
+      await PageObjects.visEditor.setSize('1');
+      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Min', 'metrics');
+      await PageObjects.visEditor.selectField('bytes', 'metrics');
+      await PageObjects.visEditor.clickGo();
 
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getGaugeValue();
+        const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });
     });
 
-    it('should format the metric correctly in percentage mode', async function () {
+    it('should format the metric correctly in percentage mode', async function() {
       await initGaugeVis();
-      await PageObjects.visualize.clickMetricEditor();
-      await PageObjects.visualize.selectAggregation('Average', 'metrics');
-      await PageObjects.visualize.selectField('bytes', 'metrics');
-      await PageObjects.visualize.clickOptionsTab();
+      await PageObjects.visEditor.clickMetricEditor();
+      await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+      await PageObjects.visEditor.selectField('bytes', 'metrics');
+      await PageObjects.visEditor.clickOptionsTab();
       await testSubjects.setValue('gaugeColorRange2__to', '10000');
       await testSubjects.click('gaugePercentageMode');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.visEditor.clickGo();
 
       await retry.try(async function tryingForTime() {
-        const expectedTexts = [ '57.273%', 'Average bytes' ];
-        const metricValue = await PageObjects.visualize.getGaugeValue();
+        const expectedTexts = ['57.273%', 'Average bytes'];
+        const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });
     });

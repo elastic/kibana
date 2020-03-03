@@ -17,14 +17,11 @@
  * under the License.
  */
 
-export { PersistedState } from '../../../ui/public/persisted_state';
-export { SearchError } from '../../../ui/public/courier/search_strategy/search_error';
-export { AggConfig } from '../../../ui/public/agg_types/agg_config';
-export { AggConfigs } from '../../../ui/public/agg_types/agg_configs';
 export {
+  IAggConfig,
+  IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
-} from '../../../ui/public/agg_types/buckets/date_histogram';
-export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-export { I18nContext } from '../../../ui/public/i18n';
-import '../../../ui/public/directives/bind';
+} from '../../data/public';
+export { createAggConfigs } from 'ui/agg_types';
+export { createSavedSearchesLoader } from '../../../../plugins/discover/public';

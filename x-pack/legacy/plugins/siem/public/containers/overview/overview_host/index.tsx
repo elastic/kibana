@@ -7,12 +7,11 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { pure } from 'recompose';
+import { connect, ConnectedProps } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
@@ -30,10 +29,6 @@ export interface OverviewHostArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OverviewHostReducer {
-  isInspected: boolean;
-}
-
 export interface OverviewHostProps extends QueryTemplateProps {
   children: (args: OverviewHostArgs) => React.ReactNode;
   sourceId: string;
@@ -41,35 +36,37 @@ export interface OverviewHostProps extends QueryTemplateProps {
   startDate: number;
 }
 
-const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
-      query={overviewHostQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const overviewHost = getOr({}, `source.OverviewHost`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.OverviewHost.inspect', data),
-          overviewHost,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
+const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    return (
+      <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
+        query={overviewHostQuery}
+        fetchPolicy={getDefaultFetchPolicy()}
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
+        }}
+      >
+        {({ data, loading, refetch }) => {
+          const overviewHost = getOr({}, `source.OverviewHost`, data);
+          return children({
+            id,
+            inspect: getOr(null, 'source.OverviewHost.inspect', data),
+            overviewHost,
+            loading,
+            refetch,
+          });
+        }}
+      </Query>
+    );
+  }
 );
 
 OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
@@ -85,4 +82,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const OverviewHostQuery = connect(makeMapStateToProps)(OverviewHostComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const OverviewHostQuery = connector(OverviewHostComponentQuery);

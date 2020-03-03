@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { once } from 'lodash';
+import { getDataClient } from '../kibana_server_services';
 
-const callWithRequest = once(elasticsearchPlugin => {
-  const cluster = elasticsearchPlugin.getCluster('data');
-  return cluster.callWithRequest;
-});
+const callWithRequest = once(() => getDataClient());
 
-export const callWithRequestFactory = (elasticsearchPlugin, request) => {
+export const callWithRequestFactory = request => {
   return (...args) => {
-    return callWithRequest(elasticsearchPlugin)(request, ...args);
+    return (
+      callWithRequest()
+        .asScoped(request)
+        // @ts-ignore
+        .callAsCurrentUser(...args)
+    );
   };
 };

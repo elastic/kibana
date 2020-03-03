@@ -6,7 +6,6 @@
 
 import { noop } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 
 import { DataProvider, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
@@ -15,7 +14,7 @@ interface OwnProps {
   dataProvider: DataProvider;
 }
 
-export const Provider = pure<OwnProps>(({ dataProvider }) => (
+export const Provider = React.memo<OwnProps>(({ dataProvider }) => (
   <ProviderItemBadge
     deleteProvider={noop}
     field={dataProvider.queryMatch.displayField || dataProvider.queryMatch.field}

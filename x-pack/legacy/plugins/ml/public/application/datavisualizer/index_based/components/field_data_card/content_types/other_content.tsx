@@ -36,30 +36,34 @@ export const OtherContent: FC<FieldDataCardProps> = ({ config }) => {
         <Fragment>
           <EuiSpacer size="s" />
           <div>
-            <EuiIcon type="document" />
-            &nbsp;
-            <FormattedMessage
-              id="xpack.ml.fieldDataCard.cardOther.documentsCountDescription"
-              defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-              values={{
-                count,
-                docsPercent,
-              }}
-            />
+            <EuiText size="xs" color="subdued">
+              <EuiIcon type="document" />
+              &nbsp;
+              <FormattedMessage
+                id="xpack.ml.fieldDataCard.cardOther.documentsCountDescription"
+                defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+                values={{
+                  count,
+                  docsPercent,
+                }}
+              />
+            </EuiText>
           </div>
 
           <EuiSpacer size="xs" />
 
           <div>
-            <EuiIcon type="database" />
-            &nbsp;
-            <FormattedMessage
-              id="xpack.ml.fieldDataCard.cardOther.distinctCountDescription"
-              defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-              values={{
-                cardinality,
-              }}
-            />
+            <EuiText size="xs" color="subdued">
+              <EuiIcon type="database" />
+              &nbsp;
+              <FormattedMessage
+                id="xpack.ml.fieldDataCard.cardOther.distinctCountDescription"
+                defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
+                values={{
+                  cardinality,
+                }}
+              />
+            </EuiText>
           </div>
         </Fragment>
       )}

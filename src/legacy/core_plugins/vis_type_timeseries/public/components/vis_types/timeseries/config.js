@@ -44,7 +44,7 @@ import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
-export const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const defaults = {
@@ -64,11 +64,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const { intl } = props;
   const stackedOptions = [
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.noneLabel', defaultMessage: 'None' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.noneLabel',
+        defaultMessage: 'None',
+      }),
       value: STACKED_OPTIONS.NONE,
     },
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.stackedLabel', defaultMessage: 'Stacked' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.stackedLabel',
+        defaultMessage: 'Stacked',
+      }),
       value: STACKED_OPTIONS.STACKED,
     },
     {
@@ -79,7 +85,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
       value: STACKED_OPTIONS.STACKED_WITHIN_SERIES,
     },
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.percentLabel', defaultMessage: 'Percent' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.percentLabel',
+        defaultMessage: 'Percent',
+      }),
       value: STACKED_OPTIONS.PERCENT,
       disabled: isPercentDisabled(props.seriesQuantity[model.id]),
     },
@@ -90,11 +99,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const positionOptions = [
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.rightLabel', defaultMessage: 'Right' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.rightLabel',
+        defaultMessage: 'Right',
+      }),
       value: 'right',
     },
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.leftLabel', defaultMessage: 'Left' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.leftLabel',
+        defaultMessage: 'Left',
+      }),
       value: 'left',
     },
   ];
@@ -104,11 +119,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const chartTypeOptions = [
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.barLabel', defaultMessage: 'Bar' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.barLabel',
+        defaultMessage: 'Bar',
+      }),
       value: 'bar',
     },
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.lineLabel', defaultMessage: 'Line' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.lineLabel',
+        defaultMessage: 'Line',
+      }),
       value: 'line',
     },
   ];
@@ -125,7 +146,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
       value: 'gradient',
     },
     {
-      label: intl.formatMessage({ id: 'visTypeTimeseries.timeSeries.rainbowLabel', defaultMessage: 'Rainbow' }),
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.rainbowLabel',
+        defaultMessage: 'Rainbow',
+      }),
       value: 'rainbow',
     },
   ];
@@ -227,7 +251,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormLabel>
-            <FormattedMessage id="visTypeTimeseries.timeSeries.chartLine.stepsLabel" defaultMessage="Steps" />
+            <FormattedMessage
+              id="visTypeTimeseries.timeSeries.chartLine.stepsLabel"
+              defaultMessage="Steps"
+            />
           </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo value={model.steps} name="steps" onChange={props.onChange} />
@@ -330,7 +357,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <EuiFormRow
             id={htmlId('template')}
             label={
-              <FormattedMessage id="visTypeTimeseries.timeSeries.templateLabel" defaultMessage="Template" />
+              <FormattedMessage
+                id="visTypeTimeseries.timeSeries.templateLabel"
+                defaultMessage="Template"
+              />
             }
             helpText={
               <span>
@@ -357,7 +387,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('series_filter')}
-          label={<FormattedMessage id="visTypeTimeseries.timeSeries.filterLabel" defaultMessage="Filter" />}
+          label={
+            <FormattedMessage
+              id="visTypeTimeseries.timeSeries.filterLabel"
+              defaultMessage="Filter"
+            />
+          }
           fullWidth
         >
           <QueryBarWrapper
@@ -445,7 +480,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMin')}
-            label={<FormattedMessage id="visTypeTimeseries.timeSeries.axisMinLabel" defaultMessage="Axis min" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.timeSeries.axisMinLabel"
+                defaultMessage="Axis min"
+              />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -463,7 +503,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMax')}
-            label={<FormattedMessage id="visTypeTimeseries.timeSeries.axisMaxLabel" defaultMessage="Axis max" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.timeSeries.axisMaxLabel"
+                defaultMessage="Axis max"
+              />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.

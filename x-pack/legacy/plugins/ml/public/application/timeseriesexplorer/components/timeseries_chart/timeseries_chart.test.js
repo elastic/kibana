@@ -6,35 +6,22 @@
 
 //import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
-import './timeseries_chart.test.mocks';
 import moment from 'moment-timezone';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';
 
-// mocking the following files because they import some core kibana
-// code which the jest setup isn't happy with.
-jest.mock('ui/chrome', () => ({
-  addBasePath: path => path,
-  getBasePath: path => path,
-  // returns false for mlAnnotationsEnabled
-  getInjected: () => false,
-  getUiSettingsClient: () => ({
-    get: jest.fn()
-  }),
-}));
-
 jest.mock('../../../util/time_buckets', () => ({
-  TimeBuckets: function () {
+  TimeBuckets: function() {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();
-  }
+  },
 }));
 
 jest.mock('../../../services/field_format_service', () => ({
-  mlFieldFormatService: {}
+  mlFieldFormatService: {},
 }));
 
 function getTimeseriesChartPropsMock() {
@@ -46,7 +33,6 @@ function getTimeseriesChartPropsMock() {
     showModelBounds: true,
     svgWidth: 1600,
     timefilter: {},
-    skipRefresh: false
   };
 }
 
@@ -65,11 +51,8 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mountWithIntl(<TimeseriesChart {...props}/>);
+    const wrapper = mountWithIntl(<TimeseriesChart {...props} />);
 
-    expect(wrapper.html()).toBe(
-      `<div class="ml-timeseries-chart-react"></div>`
-    );
+    expect(wrapper.html()).toBe(`<div class="ml-timeseries-chart-react"></div>`);
   });
-
 });

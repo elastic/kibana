@@ -33,17 +33,16 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({
-        enableExternalUrls: server.config().get('vega.enableExternalUrls'),
-      }),
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+        };
+      },
     },
     init: (server: Legacy.Server) => ({}),
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        enableExternalUrls: Joi.boolean().default(false),
-      }).default();
-    },
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

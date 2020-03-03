@@ -12,12 +12,6 @@ An object that handles registration of context providers and configuring handler
 export interface ContextSetup 
 ```
 
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [createContextContainer()](./kibana-plugin-server.contextsetup.createcontextcontainer.md) | Creates a new [IContextContainer](./kibana-plugin-server.icontextcontainer.md) for a service owner. |
-
 ## Remarks
 
 A [IContextContainer](./kibana-plugin-server.icontextcontainer.md) can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and configuring a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
@@ -135,4 +129,10 @@ class VizRenderingPlugin {
 }
 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [createContextContainer()](./kibana-plugin-server.contextsetup.createcontextcontainer.md) | Creates a new [IContextContainer](./kibana-plugin-server.icontextcontainer.md) for a service owner. |
 

@@ -23,12 +23,10 @@ export const createTileMapFn = () => ({
   name: 'tilemap',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('tileMap.function.help', {
-    defaultMessage: 'Tilemap visualization'
+    defaultMessage: 'Tilemap visualization',
   }),
   args: {
     visConfig: {
@@ -45,6 +43,10 @@ export const createTileMapFn = () => ({
       geocentroid,
     });
 
+    if (geohash && geohash.accessor) {
+      convertedData.meta.geohash = context.columns[geohash.accessor].meta;
+    }
+
     return {
       type: 'render',
       as: 'visualization',
@@ -54,9 +56,8 @@ export const createTileMapFn = () => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
 });
-

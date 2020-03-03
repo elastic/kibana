@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { MLJobEditor, EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 
 export function FileContents({ data, format, numberOfLines }) {
-  let mode = EDITOR_MODE.TEXT;
-  if (format === EDITOR_MODE.JSON) {
-    mode = EDITOR_MODE.JSON;
+  let mode = ML_EDITOR_MODE.TEXT;
+  if (format === ML_EDITOR_MODE.JSON) {
+    mode = ML_EDITOR_MODE.JSON;
   }
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
@@ -26,12 +22,12 @@ export function FileContents({ data, format, numberOfLines }) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle"
             defaultMessage="File contents"
           />
-        </h3>
+        </h2>
       </EuiTitle>
 
       <div>
@@ -58,5 +54,8 @@ export function FileContents({ data, format, numberOfLines }) {
 }
 
 function limitByNumberOfLines(data, numberOfLines) {
-  return data.split('\n').slice(0, numberOfLines).join('\n');
+  return data
+    .split('\n')
+    .slice(0, numberOfLines)
+    .join('\n');
 }

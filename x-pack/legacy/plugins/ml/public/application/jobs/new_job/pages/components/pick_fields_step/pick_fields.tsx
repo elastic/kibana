@@ -10,11 +10,12 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
+import { CategorizationView } from './components/categorization_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 
@@ -30,7 +31,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
         (jobCreator.type === JOB_TYPE.ADVANCED && jobValidator.modelMemoryLimit.valid)) &&
       jobValidator.bucketSpan.valid &&
       jobValidator.duplicateDetectors.valid &&
-      jobValidator.validating === false;
+      jobValidator.validating === false &&
+      (jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (jobCreator.type === JOB_TYPE.CATEGORIZATION && jobValidator.categorizationField));
     setNextActive(active);
   }, [jobValidatorUpdated]);
 
@@ -49,6 +52,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           )}
           {jobType === JOB_TYPE.ADVANCED && (
             <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+          )}
+          {jobType === JOB_TYPE.CATEGORIZATION && (
+            <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
           <WizardNav
             previous={() =>

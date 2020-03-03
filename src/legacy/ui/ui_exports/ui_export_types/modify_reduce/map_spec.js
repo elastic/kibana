@@ -25,6 +25,5 @@
  *  @param  {Function} mapFn receives `(specs, type, pluginSpec)`
  *  @return {Function}
  */
-export const mapSpec = (mapFn) => (next) => (acc, spec, type, pluginSpec) => (
-  next(acc, mapFn(spec, type, pluginSpec), type, pluginSpec)
-);
+export const mapSpec = mapFn => next => (acc, spec, type, pluginSpec) =>
+  next(acc, mapFn(spec, type, pluginSpec), type, pluginSpec);

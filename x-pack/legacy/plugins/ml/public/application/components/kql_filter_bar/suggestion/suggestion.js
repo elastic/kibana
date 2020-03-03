@@ -46,17 +46,14 @@ const ListItem = styled.li`
   height: ${theme.euiSizeXL};
   align-items: center;
   display: flex;
-  background: ${props =>
-    props.selected ? theme.euiColorLightestShade : 'initial'};
+  background: ${props => (props.selected ? theme.euiColorLightestShade : 'initial')};
   cursor: pointer;
   border-radius: ${theme.euiSizeXS};
 
   ${Description} {
     p span {
       background: ${props =>
-    props.selected
-      ? theme.euiColorEmptyShade
-      : theme.euiColorLightestShade};
+        props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
   }
 `;
@@ -94,7 +91,7 @@ function getEuiIconType(type) {
   }
 }
 
-export const Suggestion = (props) => {
+export const Suggestion = props => {
   return (
     <ListItem
       innerRef={props.innerRef}
@@ -116,6 +113,5 @@ Suggestion.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired
+  innerRef: PropTypes.func.isRequired,
 };
-

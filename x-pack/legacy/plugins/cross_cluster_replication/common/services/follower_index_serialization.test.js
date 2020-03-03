@@ -52,11 +52,14 @@ describe('[CCR] follower index serialization', () => {
       const serializedFollowerIndex = {
         index: 'follower index name',
         status: 'active',
-        shards: [{
-          shard_id: 'shard 1',
-        }, {
-          shard_id: 'shard 2',
-        }],
+        shards: [
+          {
+            shard_id: 'shard 1',
+          },
+          {
+            shard_id: 'shard 2',
+          },
+        ],
       };
 
       expect(deserializeFollowerIndex(serializedFollowerIndex)).toMatchSnapshot();
@@ -65,80 +68,87 @@ describe('[CCR] follower index serialization', () => {
 
   describe('deserializeListFollowerIndices()', () => {
     it('deserializes list of Elasticsearch follower index objects', () => {
-      const serializedFollowerIndexList = [{
-        follower_index: 'follower index 1',
-        remote_cluster: 'cluster 1',
-        leader_index: 'leader 1',
-        status: 'active',
-        parameters: {
-          max_read_request_operation_count: 1,
-          max_outstanding_read_requests: 1,
-          max_read_request_size: 1,
-          max_write_request_operation_count: 1,
-          max_write_request_size: 1,
-          max_outstanding_write_requests: 1,
-          max_write_buffer_count: 1,
-          max_write_buffer_size: 1,
-          max_retry_delay: 1,
-          read_poll_timeout: 1,
+      const serializedFollowerIndexList = [
+        {
+          follower_index: 'follower index 1',
+          remote_cluster: 'cluster 1',
+          leader_index: 'leader 1',
+          status: 'active',
+          parameters: {
+            max_read_request_operation_count: 1,
+            max_outstanding_read_requests: 1,
+            max_read_request_size: 1,
+            max_write_request_operation_count: 1,
+            max_write_request_size: 1,
+            max_outstanding_write_requests: 1,
+            max_write_buffer_count: 1,
+            max_write_buffer_size: 1,
+            max_retry_delay: 1,
+            read_poll_timeout: 1,
+          },
+          shards: [],
         },
-        shards: [],
-      }, {
-        follower_index: 'follower index 2',
-        remote_cluster: 'cluster 2',
-        leader_index: 'leader 2',
-        status: 'paused',
-        parameters: {
-          max_read_request_operation_count: 2,
-          max_outstanding_read_requests: 2,
-          max_read_request_size: 2,
-          max_write_request_operation_count: 2,
-          max_write_request_size: 2,
-          max_outstanding_write_requests: 2,
-          max_write_buffer_count: 2,
-          max_write_buffer_size: 2,
-          max_retry_delay: 2,
-          read_poll_timeout: 2,
+        {
+          follower_index: 'follower index 2',
+          remote_cluster: 'cluster 2',
+          leader_index: 'leader 2',
+          status: 'paused',
+          parameters: {
+            max_read_request_operation_count: 2,
+            max_outstanding_read_requests: 2,
+            max_read_request_size: 2,
+            max_write_request_operation_count: 2,
+            max_write_request_size: 2,
+            max_outstanding_write_requests: 2,
+            max_write_buffer_count: 2,
+            max_write_buffer_size: 2,
+            max_retry_delay: 2,
+            read_poll_timeout: 2,
+          },
+          shards: [],
         },
-        shards: [],
-      }];
+      ];
 
-      const deserializedFollowerIndexList = [{
-        name: 'follower index 1',
-        remoteCluster: 'cluster 1',
-        leaderIndex: 'leader 1',
-        status: 'active',
-        maxReadRequestOperationCount: 1,
-        maxOutstandingReadRequests: 1,
-        maxReadRequestSize: 1,
-        maxWriteRequestOperationCount: 1,
-        maxWriteRequestSize: 1,
-        maxOutstandingWriteRequests: 1,
-        maxWriteBufferCount: 1,
-        maxWriteBufferSize: 1,
-        maxRetryDelay: 1,
-        readPollTimeout: 1,
-        shards: [],
-      }, {
-        name: 'follower index 2',
-        remoteCluster: 'cluster 2',
-        leaderIndex: 'leader 2',
-        status: 'paused',
-        maxReadRequestOperationCount: 2,
-        maxOutstandingReadRequests: 2,
-        maxReadRequestSize: 2,
-        maxWriteRequestOperationCount: 2,
-        maxWriteRequestSize: 2,
-        maxOutstandingWriteRequests: 2,
-        maxWriteBufferCount: 2,
-        maxWriteBufferSize: 2,
-        maxRetryDelay: 2,
-        readPollTimeout: 2,
-        shards: [],
-      }];
+      const deserializedFollowerIndexList = [
+        {
+          name: 'follower index 1',
+          remoteCluster: 'cluster 1',
+          leaderIndex: 'leader 1',
+          status: 'active',
+          maxReadRequestOperationCount: 1,
+          maxOutstandingReadRequests: 1,
+          maxReadRequestSize: 1,
+          maxWriteRequestOperationCount: 1,
+          maxWriteRequestSize: 1,
+          maxOutstandingWriteRequests: 1,
+          maxWriteBufferCount: 1,
+          maxWriteBufferSize: 1,
+          maxRetryDelay: 1,
+          readPollTimeout: 1,
+          shards: [],
+        },
+        {
+          name: 'follower index 2',
+          remoteCluster: 'cluster 2',
+          leaderIndex: 'leader 2',
+          status: 'paused',
+          maxReadRequestOperationCount: 2,
+          maxOutstandingReadRequests: 2,
+          maxReadRequestSize: 2,
+          maxWriteRequestOperationCount: 2,
+          maxWriteRequestSize: 2,
+          maxOutstandingWriteRequests: 2,
+          maxWriteBufferCount: 2,
+          maxWriteBufferSize: 2,
+          maxRetryDelay: 2,
+          readPollTimeout: 2,
+          shards: [],
+        },
+      ];
 
-      expect(deserializeListFollowerIndices(serializedFollowerIndexList))
-        .toEqual(deserializedFollowerIndexList);
+      expect(deserializeListFollowerIndices(serializedFollowerIndexList)).toEqual(
+        deserializedFollowerIndexList
+      );
     });
   });
 

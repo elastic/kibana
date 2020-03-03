@@ -65,5 +65,6 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
     await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }
 
-  lifecycle.on('testFailure', onFailure).on('testHookFailure', onFailure);
+  lifecycle.testFailure.add(onFailure);
+  lifecycle.testHookFailure.add(onFailure);
 }

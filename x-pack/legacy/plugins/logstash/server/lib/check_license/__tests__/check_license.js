@@ -8,13 +8,12 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicense } from '../check_license';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   let mockLicenseInfo;
-  beforeEach(() => mockLicenseInfo = {});
+  beforeEach(() => (mockLicenseInfo = {}));
 
   describe('license information is undefined', () => {
-    beforeEach(() => mockLicenseInfo = undefined);
+    beforeEach(() => (mockLicenseInfo = undefined));
 
     it('should set isAvailable to false', () => {
       expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
@@ -34,7 +33,7 @@ describe('check_license', function () {
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set isAvailable to false', () => {
       expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
@@ -59,7 +58,7 @@ describe('check_license', function () {
       set(mockLicenseInfo, 'license.getType', () => 'basic');
     });
 
-    describe('& license is trial, standard, gold, platinum', () => {
+    describe('& license is > basic', () => {
       beforeEach(() => {
         set(mockLicenseInfo, 'license.isOneOf', () => true);
         mockLicenseInfo.feature = () => ({ isEnabled: () => true }); // Security feature is enabled
@@ -72,11 +71,11 @@ describe('check_license', function () {
           expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
         });
 
-        it ('should set enableLinks to true', () => {
+        it('should set enableLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
         });
 
-        it ('should set isReadOnly to false', () => {
+        it('should set isReadOnly to false', () => {
           expect(checkLicense(mockLicenseInfo).isReadOnly).to.be(false);
         });
 
@@ -92,11 +91,11 @@ describe('check_license', function () {
           expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
         });
 
-        it ('should set enableLinks to true', () => {
+        it('should set enableLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
         });
 
-        it ('should set isReadOnly to true', () => {
+        it('should set isReadOnly to true', () => {
           expect(checkLicense(mockLicenseInfo).isReadOnly).to.be(true);
         });
 
@@ -119,11 +118,11 @@ describe('check_license', function () {
           expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
         });
 
-        it ('should set enableLinks to false', () => {
+        it('should set enableLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
         });
 
-        it ('should set isReadOnly to false', () => {
+        it('should set isReadOnly to false', () => {
           expect(checkLicense(mockLicenseInfo).isReadOnly).to.be(false);
         });
 
@@ -139,11 +138,11 @@ describe('check_license', function () {
           expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
         });
 
-        it ('should set enableLinks to false', () => {
+        it('should set enableLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
         });
 
-        it ('should set isReadOnly to false', () => {
+        it('should set isReadOnly to false', () => {
           expect(checkLicense(mockLicenseInfo).isReadOnly).to.be(false);
         });
 
@@ -164,11 +163,11 @@ describe('check_license', function () {
         expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
       });
 
-      it ('should set enableLinks to false', () => {
+      it('should set enableLinks to false', () => {
         expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
       });
 
-      it ('should set isReadOnly to false', () => {
+      it('should set isReadOnly to false', () => {
         expect(checkLicense(mockLicenseInfo).isReadOnly).to.be(false);
       });
 

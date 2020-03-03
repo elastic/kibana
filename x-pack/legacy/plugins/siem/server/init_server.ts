@@ -6,7 +6,6 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
-import { createAnomaliesResolvers } from './graphql/anomalies';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
@@ -19,6 +18,7 @@ import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
+import { createScalarToAnyValueResolvers } from './graphql/scalar_to_any';
 import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
 import { createScalarToDateArrayValueResolvers } from './graphql/scalar_to_date_array';
 import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_number_array';
@@ -29,17 +29,18 @@ import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 import { createTlsResolvers } from './graphql/tls';
+import { createMatrixHistogramResolvers } from './graphql/matrix_histogram';
 
 export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,
       createIpDetailsResolvers(libs) as IResolvers,
       createKpiNetworkResolvers(libs) as IResolvers,
+      createMatrixHistogramResolvers(libs) as IResolvers,
       createNoteResolvers(libs) as IResolvers,
       createPinnedEventResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
@@ -48,6 +49,7 @@ export const initServer = (libs: AppBackendLibs) => {
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
+      createScalarToAnyValueResolvers() as IResolvers,
       createScalarToBooleanArrayValueResolvers() as IResolvers,
       createScalarToNumberArrayValueResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,

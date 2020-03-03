@@ -4,33 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React popover for editing the description of a filter list.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-
-export const EditDescriptionPopover = injectI18n(class extends Component {
+export class EditDescriptionPopover extends Component {
   static displayName = 'EditDescriptionPopover';
   static propTypes = {
     description: PropTypes.string,
     updateDescription: PropTypes.func.isRequired,
-    canCreateFilter: PropTypes.bool.isRequired
+    canCreateFilter: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -38,11 +29,11 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
 
     this.state = {
       isPopoverOpen: false,
-      value: props.description
+      value: props.description,
     };
   }
 
-  onChange = (e) => {
+  onChange = e => {
     this.setState({
       value: e.target.value,
     });
@@ -52,12 +43,12 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
     if (this.state.isPopoverOpen === false) {
       this.setState({
         isPopoverOpen: !this.state.isPopoverOpen,
-        value: this.props.description
+        value: this.props.description,
       });
     } else {
       this.closePopover();
     }
-  }
+  };
 
   closePopover = () => {
     if (this.state.isPopoverOpen === true) {
@@ -66,11 +57,10 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
       });
       this.props.updateDescription(this.state.value);
     }
-  }
+  };
 
   render() {
     const { isPopoverOpen, value } = this.state;
-    const { intl } = this.props;
 
     const button = (
       <EuiButtonIcon
@@ -78,10 +68,12 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
         color="primary"
         onClick={this.onButtonClick}
         iconType="pencil"
-        aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.filterLists.editDescriptionPopover.editDescriptionAriaLabel',
-          defaultMessage: 'Edit description',
-        })}
+        aria-label={i18n.translate(
+          'xpack.ml.settings.filterLists.editDescriptionPopover.editDescriptionAriaLabel',
+          {
+            defaultMessage: 'Edit description',
+          }
+        )}
         isDisabled={this.props.canCreateFilter === false}
       />
     );
@@ -98,10 +90,12 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
           <div style={{ width: '300px' }}>
             <EuiForm>
               <EuiFormRow
-                label={<FormattedMessage
-                  id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-                  defaultMessage="Filter list description"
-                />}
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+                    defaultMessage="Filter list description"
+                  />
+                }
               >
                 <EuiFieldText
                   name="filter_list_description"
@@ -115,4 +109,4 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
       </div>
     );
   }
-});
+}

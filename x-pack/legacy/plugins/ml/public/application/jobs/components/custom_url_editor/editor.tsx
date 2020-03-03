@@ -228,6 +228,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             onChange={onLabelChange}
             isInvalid={isInvalidLabel}
             compressed
+            data-test-subj="mlJobCustomUrlLabelInput"
           />
         </EuiFormRow>
         <EuiFormRow

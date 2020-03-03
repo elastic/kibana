@@ -19,13 +19,7 @@
 
 import React from 'react';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import panelHtml from './panel.html';
 import panelWithToolBarHtml from './panel_with_toolbar.html';
@@ -35,46 +29,45 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Panel"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: panelHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: panelHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={panelHtml}
-      />
+      <GuideDemo html={panelHtml} />
     </GuideSection>
 
     <GuideSection
       title="Panel with PanelHeaderSections"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: panelWithHeaderSectionsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: panelWithHeaderSectionsHtml,
+        },
+      ]}
     >
-      <GuideText>
-        PanelHeaders can have sections.
-      </GuideText>
+      <GuideText>PanelHeaders can have sections.</GuideText>
 
-      <GuideDemo
-        html={panelWithHeaderSectionsHtml}
-      />
+      <GuideDemo html={panelWithHeaderSectionsHtml} />
     </GuideSection>
 
     <GuideSection
       title="Panel with Toolbar"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: panelWithToolBarHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: panelWithToolBarHtml,
+        },
+      ]}
     >
       <GuideText>
-        Panels can live within toolbar sections. This is normally used as replacement for an empty table.
+        Panels can live within toolbar sections. This is normally used as replacement for an empty
+        table.
       </GuideText>
 
-      <GuideDemo
-        html={panelWithToolBarHtml}
-      />
+      <GuideDemo html={panelWithToolBarHtml} />
     </GuideSection>
   </GuidePage>
 );

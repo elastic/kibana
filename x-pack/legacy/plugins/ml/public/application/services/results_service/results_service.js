@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import _ from 'lodash';
@@ -25,7 +23,7 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      results: {}
+      results: {},
     };
 
     // Build the criteria to use in the bool filter part of the request.
@@ -36,10 +34,10 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
+            format: 'epoch_millis',
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -54,8 +52,8 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -65,17 +63,20 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:bucket',
-                analyze_wildcard: false
-              }
-            }, {
-              bool: {
-                must: boolCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:bucket',
+                  analyze_wildcard: false,
+                },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           jobId: {
@@ -83,14 +84,14 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
               field: 'job_id',
               size: maxResults !== undefined ? maxResults : 5,
               order: {
-                anomalyScore: 'desc'
-              }
+                anomalyScore: 'desc',
+              },
             },
             aggs: {
               anomalyScore: {
                 max: {
-                  field: 'anomaly_score'
-                }
+                  field: 'anomaly_score',
+                },
               },
               byTime: {
                 date_histogram: {
@@ -99,31 +100,31 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
                   min_doc_count: 1,
                   extended_bounds: {
                     min: earliestMs,
-                    max: latestMs
-                  }
+                    max: latestMs,
+                  },
                 },
                 aggs: {
                   anomalyScore: {
                     max: {
-                      field: 'anomaly_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'anomaly_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobId', 'buckets'], []);
-        _.each(dataByJobId, (dataForJob) => {
+        _.each(dataByJobId, dataForJob => {
           const jobId = dataForJob.key;
 
           const resultsForTime = {};
 
           const dataByTime = _.get(dataForJob, ['byTime', 'buckets'], []);
-          _.each(dataByTime, (dataForTime) => {
+          _.each(dataByTime, dataForTime => {
             const value = _.get(dataForTime, ['anomalyScore', 'value']);
             if (value !== undefined) {
               const time = dataForTime.key;
@@ -135,7 +136,7 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -153,7 +154,8 @@ export function getTopInfluencers(
   latestMs,
   maxFieldValues = 10,
   influencers = [],
-  influencersFilterQuery) {
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -165,17 +167,17 @@ export function getTopInfluencers(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           influencer_score: {
-            gt: 0
-          }
-        }
-      }
+            gt: 0,
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -190,8 +192,8 @@ export function getTopInfluencers(
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -203,18 +205,18 @@ export function getTopInfluencers(
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map((influencer) => {
+          should: influencers.map(influencer => {
             return {
               bool: {
                 must: [
                   { term: { influencer_field_name: influencer.fieldName } },
-                  { term: { influencer_field_value: influencer.fieldValue } }
-                ]
-              }
+                  { term: { influencer_field_value: influencer.fieldValue } },
+                ],
+              },
             };
           }),
           minimum_should_match: 1,
-        }
+        },
       });
     }
 
@@ -228,16 +230,16 @@ export function getTopInfluencers(
               {
                 query_string: {
                   query: 'result_type:influencer',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldNames: {
@@ -245,53 +247,57 @@ export function getTopInfluencers(
               field: 'influencer_field_name',
               size: 5,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               influencerFieldValues: {
                 terms: {
                   field: 'influencer_field_value',
                   size: maxFieldValues,
                   order: {
-                    maxAnomalyScore: 'desc'
-                  }
+                    maxAnomalyScore: 'desc',
+                  },
                 },
                 aggs: {
                   maxAnomalyScore: {
                     max: {
-                      field: 'influencer_score'
-                    }
+                      field: 'influencer_score',
+                    },
                   },
                   sumAnomalyScore: {
                     sum: {
-                      field: 'influencer_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'influencer_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
-        const fieldNameBuckets = _.get(resp, ['aggregations', 'influencerFieldNames', 'buckets'], []);
-        _.each(fieldNameBuckets, (nameBucket) => {
+      .then(resp => {
+        const fieldNameBuckets = _.get(
+          resp,
+          ['aggregations', 'influencerFieldNames', 'buckets'],
+          []
+        );
+        _.each(fieldNameBuckets, nameBucket => {
           const fieldName = nameBucket.key;
           const fieldValues = [];
 
           const fieldValueBuckets = _.get(nameBucket, ['influencerFieldValues', 'buckets'], []);
-          _.each(fieldValueBuckets, (valueBucket) => {
+          _.each(fieldValueBuckets, valueBucket => {
             const fieldValueResult = {
               influencerFieldValue: valueBucket.key,
               maxAnomalyScore: valueBucket.maxAnomalyScore.value,
-              sumAnomalyScore: valueBucket.sumAnomalyScore.value
+              sumAnomalyScore: valueBucket.sumAnomalyScore.value,
             };
             fieldValues.push(fieldValueResult);
           });
@@ -301,7 +307,7 @@ export function getTopInfluencers(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -312,21 +318,29 @@ export function getTopInfluencers(
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a results property, which is an array of objects
 // containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-export function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestMs, maxResults) {
+export function getTopInfluencerValues(
+  jobIds,
+  influencerFieldName,
+  earliestMs,
+  latestMs,
+  maxResults
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: [] };
 
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
-    const boolCriteria = [{
-      range: {
-        timestamp: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    }];
+    const boolCriteria = [
+      {
+        range: {
+          timestamp: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
@@ -340,8 +354,8 @@ export function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, 
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -354,17 +368,19 @@ export function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, 
             filter: [
               {
                 query_string: {
-                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(influencerFieldName)}`,
-                  analyze_wildcard: false
-                }
+                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                    influencerFieldName
+                  )}`,
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldValues: {
@@ -372,38 +388,39 @@ export function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, 
               field: 'influencer_field_value',
               size: maxResults !== undefined ? maxResults : 2,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               sumAnomalyScore: {
                 sum: {
-                  field: 'influencer_score'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'influencer_score',
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const buckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.each(buckets, (bucket) => {
+        _.each(buckets, bucket => {
           const result = {
             influencerFieldValue: bucket.key,
             maxAnomalyScore: bucket.maxAnomalyScore.value,
-            sumAnomalyScore: bucket.sumAnomalyScore.value };
+            sumAnomalyScore: bucket.sumAnomalyScore.value,
+          };
           obj.results.push(result);
         });
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -421,11 +438,11 @@ export function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, inter
       topN: topN,
       bucketSpan: interval,
       start: earliestMs,
-      end: latestMs
+      end: latestMs,
     })
       .then(resp => {
         const dataByTime = _.get(resp, ['overall_buckets'], []);
-        _.each(dataByTime, (dataForTime) => {
+        _.each(dataByTime, dataForTime => {
           const value = _.get(dataForTime, ['overall_score']);
           if (value !== undefined) {
             obj.results[dataForTime.timestamp] = value;
@@ -453,7 +470,8 @@ export function getInfluencerValueMaxScoreByTime(
   latestMs,
   interval,
   maxResults,
-  influencersFilterQuery) {
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -465,17 +483,17 @@ export function getInfluencerValueMaxScoreByTime(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           influencer_score: {
-            gt: 0
-          }
-        }
-      }
+            gt: 0,
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -489,8 +507,8 @@ export function getInfluencerValueMaxScoreByTime(
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -510,13 +528,12 @@ export function getInfluencerValueMaxScoreByTime(
           // Wrap whitespace influencer field values in quotes for the query_string query.
           influencerFilterStr += `influencer_field_value:"${value}"`;
         }
-
       });
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: influencerFilterStr
-        }
+          query: influencerFilterStr,
+        },
       });
     }
 
@@ -529,17 +546,19 @@ export function getInfluencerValueMaxScoreByTime(
             filter: [
               {
                 query_string: {
-                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(influencerFieldName)}`,
-                  analyze_wildcard: false
-                }
+                  query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                    influencerFieldName
+                  )}`,
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           influencerFieldValues: {
@@ -547,42 +566,46 @@ export function getInfluencerValueMaxScoreByTime(
               field: 'influencer_field_value',
               size: maxResults !== undefined ? maxResults : 10,
               order: {
-                maxAnomalyScore: 'desc'
-              }
+                maxAnomalyScore: 'desc',
+              },
             },
             aggs: {
               maxAnomalyScore: {
                 max: {
-                  field: 'influencer_score'
-                }
+                  field: 'influencer_score',
+                },
               },
               byTime: {
                 date_histogram: {
                   field: 'timestamp',
                   interval,
-                  min_doc_count: 1
+                  min_doc_count: 1,
                 },
                 aggs: {
                   maxAnomalyScore: {
                     max: {
-                      field: 'influencer_score'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      field: 'influencer_score',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
-        const fieldValueBuckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.each(fieldValueBuckets, (valueBucket) => {
+      .then(resp => {
+        const fieldValueBuckets = _.get(
+          resp,
+          ['aggregations', 'influencerFieldValues', 'buckets'],
+          []
+        );
+        _.each(fieldValueBuckets, valueBucket => {
           const fieldValue = valueBucket.key;
           const fieldValues = {};
 
           const timeBuckets = _.get(valueBucket, ['byTime', 'buckets'], []);
-          _.each(timeBuckets, (timeBucket) => {
+          _.each(timeBuckets, timeBucket => {
             const time = timeBucket.key;
             const score = timeBucket.maxAnomalyScore.value;
             fieldValues[time] = score;
@@ -593,7 +616,7 @@ export function getInfluencerValueMaxScoreByTime(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -619,29 +642,29 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
             bool: {
               must: [
                 {
-                  exists: { field: 'influencers' }
-                }
-              ]
-            }
-          }
-        }
+                  exists: { field: 'influencers' },
+                },
+              ],
+            },
+          },
+        },
       },
       {
         range: {
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -656,8 +679,8 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -673,36 +696,33 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
 // for the specified job(s), time range, and record score threshold.
@@ -710,7 +730,15 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-export function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
+export function getRecordsForInfluencer(
+  jobIds,
+  influencers,
+  threshold,
+  earliestMs,
+  latestMs,
+  maxResults,
+  influencersFilterQuery
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -722,17 +750,17 @@ export function getRecordsForInfluencer(jobIds, influencers, threshold, earliest
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
@@ -747,8 +775,8 @@ export function getRecordsForInfluencer(jobIds, influencers, threshold, earliest
       boolCriteria.push({
         query_string: {
           analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
+          query: jobIdFilterStr,
+        },
       });
     }
 
@@ -760,7 +788,7 @@ export function getRecordsForInfluencer(jobIds, influencers, threshold, earliest
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map((influencer) => {
+          should: influencers.map(influencer => {
             return {
               nested: {
                 path: 'influencers',
@@ -769,22 +797,22 @@ export function getRecordsForInfluencer(jobIds, influencers, threshold, earliest
                     must: [
                       {
                         match: {
-                          'influencers.influencer_field_name': influencer.fieldName
-                        }
+                          'influencers.influencer_field_name': influencer.fieldName,
+                        },
                       },
                       {
                         match: {
-                          'influencers.influencer_field_values': influencer.fieldValue
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
+                          'influencers.influencer_field_values': influencer.fieldValue,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             };
           }),
           minimum_should_match: 1,
-        }
+        },
       });
     }
 
@@ -799,36 +827,33 @@ export function getRecordsForInfluencer(jobIds, influencers, threshold, earliest
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ]
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
 }
-
 
 // Queries Elasticsearch to obtain the record level results for the specified job and detector,
 // time range, record score threshold, and whether to only return results containing influencers.
@@ -842,7 +867,8 @@ export function getRecordsForDetector(
   threshold,
   earliestMs,
   latestMs,
-  maxResults) {
+  maxResults
+) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -854,23 +880,23 @@ export function getRecordsForDetector(
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
       {
-        term: { job_id: jobId }
+        term: { job_id: jobId },
       },
       {
-        term: { detector_index: detectorIndex }
+        term: { detector_index: detectorIndex },
       },
       {
         range: {
           record_score: {
             gte: threshold,
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     // Add a nested query to filter for the specified influencer field name and value.
@@ -883,18 +909,18 @@ export function getRecordsForDetector(
               must: [
                 {
                   match: {
-                    'influencers.influencer_field_name': influencerFieldName
-                  }
+                    'influencers.influencer_field_name': influencerFieldName,
+                  },
                 },
                 {
                   match: {
-                    'influencers.influencer_field_values': influencerFieldValue
-                  }
-                }
-              ]
-            }
-          }
-        }
+                    'influencers.influencer_field_values': influencerFieldValue,
+                  },
+                },
+              ],
+            },
+          },
+        },
       });
     } else {
       if (checkForInfluencers === true) {
@@ -905,12 +931,12 @@ export function getRecordsForDetector(
               bool: {
                 must: [
                   {
-                    exists: { field: 'influencers' }
-                  }
-                ]
-              }
-            }
-          }
+                    exists: { field: 'influencers' },
+                  },
+                ],
+              },
+            },
+          },
         });
       }
     }
@@ -926,31 +952,29 @@ export function getRecordsForDetector(
               {
                 query_string: {
                   query: 'result_type:record',
-                  analyze_wildcard: false
-                }
+                  analyze_wildcard: false,
+                },
               },
               {
                 bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
+                  must: boolCriteria,
+                },
+              },
+            ],
+          },
         },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
+        sort: [{ record_score: { order: 'desc' } }],
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, hit => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -970,28 +994,24 @@ export function getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) 
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-export function getEventRateData(
-  index,
-  query,
-  timeFieldName,
-  earliestMs,
-  latestMs,
-  interval) {
+export function getEventRateData(index, query, timeFieldName, earliestMs, latestMs, interval) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
-    const mustCriteria = [{
-      range: {
-        [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    }];
+    const mustCriteria = [
+      {
+        range: {
+          [timeFieldName]: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
 
     if (query) {
       mustCriteria.push(query);
@@ -1004,11 +1024,11 @@ export function getEventRateData(
       body: {
         query: {
           bool: {
-            must: mustCriteria
-          }
+            must: mustCriteria,
+          },
         },
         _source: {
-          excludes: []
+          excludes: [],
         },
         aggs: {
           eventRate: {
@@ -1019,15 +1039,15 @@ export function getEventRateData(
               extended_bounds: {
                 min: earliestMs,
                 max: latestMs,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const dataByTimeBucket = _.get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-        _.each(dataByTimeBucket, (dataForTime) => {
+        _.each(dataByTimeBucket, dataForTime => {
           const time = dataForTime.key;
           obj.results[time] = dataForTime.doc_count;
         });
@@ -1035,7 +1055,7 @@ export function getEventRateData(
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1061,7 +1081,8 @@ export function getEventDistributionData(
   timeFieldName,
   earliestMs,
   latestMs,
-  interval) {
+  interval
+) {
   return new Promise((resolve, reject) => {
     if (splitField === undefined) {
       return resolve([]);
@@ -1077,9 +1098,9 @@ export function getEventDistributionData(
         [timeFieldName]: {
           gte: earliestMs,
           lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     });
 
     if (query) {
@@ -1089,8 +1110,8 @@ export function getEventDistributionData(
     if (filterField !== null) {
       mustCriteria.push({
         term: {
-          [filterField.fieldName]: filterField.fieldValue
-        }
+          [filterField.fieldName]: filterField.fieldValue,
+        },
       });
     }
 
@@ -1102,49 +1123,49 @@ export function getEventDistributionData(
         function_score: {
           query: {
             bool: {
-              must: mustCriteria
-            }
+              must: mustCriteria,
+            },
           },
           functions: [
             {
               random_score: {
                 // static seed to get same randomized results on every request
                 seed: 10,
-                field: '_seq_no'
-              }
-            }
-          ]
-        }
+                field: '_seq_no',
+              },
+            },
+          ],
+        },
       },
       size: 0,
       _source: {
-        excludes: []
+        excludes: [],
       },
       aggs: {
         sample: {
           sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
           },
           aggs: {
             byTime: {
               date_histogram: {
                 field: timeFieldName,
                 interval: interval,
-                min_doc_count: AGGREGATION_MIN_DOC_COUNT
+                min_doc_count: AGGREGATION_MIN_DOC_COUNT,
               },
               aggs: {
                 entities: {
                   terms: {
                     field: splitField.fieldName,
                     size: ENTITY_AGGREGATION_SIZE,
-                    min_doc_count: AGGREGATION_MIN_DOC_COUNT
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    min_doc_count: AGGREGATION_MIN_DOC_COUNT,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     };
 
     if (metricFieldName !== undefined && metricFieldName !== '') {
@@ -1152,8 +1173,8 @@ export function getEventDistributionData(
 
       const metricAgg = {
         [metricFunction]: {
-          field: metricFieldName
-        }
+          field: metricFieldName,
+        },
       };
 
       if (metricFunction === 'percentiles') {
@@ -1171,7 +1192,7 @@ export function getEventDistributionData(
       body,
       rest_total_hits_as_int: true,
     })
-      .then((resp) => {
+      .then(resp => {
         // Because of the sampling, results of metricFunctions which use sum or count
         // can be significantly skewed. Taking into account totalHits we calculate a
         // a factor to normalize results for these metricFunctions.
@@ -1179,7 +1200,7 @@ export function getEventDistributionData(
         const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
 
         let normalizeFactor = 1;
-        if (totalHits > (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE)) {
+        if (totalHits > successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE) {
           normalizeFactor = totalHits / (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE);
         }
 
@@ -1187,13 +1208,13 @@ export function getEventDistributionData(
         const data = dataByTime.reduce((d, dataForTime) => {
           const date = +dataForTime.key;
           const entities = _.get(dataForTime, ['entities', 'buckets'], []);
-          entities.forEach((entity) => {
-            let value = (metricFunction === 'count') ? entity.doc_count : entity.metric.value;
+          entities.forEach(entity => {
+            let value = metricFunction === 'count' ? entity.doc_count : entity.metric.value;
 
             if (
-              metricFunction === 'count'
-              || metricFunction === 'cardinality'
-              || metricFunction === 'sum'
+              metricFunction === 'count' ||
+              metricFunction === 'cardinality' ||
+              metricFunction === 'sum'
             ) {
               value = value * normalizeFactor;
             }
@@ -1201,14 +1222,14 @@ export function getEventDistributionData(
             d.push({
               date,
               entity: entity.key,
-              value
+              value,
             });
           });
           return d;
         }, []);
         resolve(data);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -1222,7 +1243,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
-      results: {}
+      results: {},
     };
 
     // Build the criteria to use in the bool filter part of the request.
@@ -1232,20 +1253,20 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
           timestamp: {
             gte: earliestMs,
             lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       },
-      { term: { job_id: jobId } }
+      { term: { job_id: jobId } },
     ];
     const shouldCriteria = [];
 
-    _.each(criteriaFields, (criteria) => {
+    _.each(criteriaFields, criteria => {
       if (criteria.fieldValue.length !== 0) {
         mustCriteria.push({
           term: {
-            [criteria.fieldName]: criteria.fieldValue
-          }
+            [criteria.fieldName]: criteria.fieldValue,
+          },
         });
       } else {
         // Add special handling for blank entity field values, checking for either
@@ -1254,11 +1275,10 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
           bool: {
             must: [
               {
-                term: {
-                }
-              }
-            ]
-          }
+                term: {},
+              },
+            ],
+          },
         };
         emptyFieldCondition.bool.must[0].term[criteria.fieldName] = '';
         shouldCriteria.push(emptyFieldCondition);
@@ -1266,13 +1286,12 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
           bool: {
             must_not: [
               {
-                exists: { field: criteria.fieldName }
-              }
-            ]
-          }
+                exists: { field: criteria.fieldName },
+              },
+            ],
+          },
         });
       }
-
     });
 
     ml.esSearch({
@@ -1281,39 +1300,42 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
       body: {
         query: {
           bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: true
-              }
-            }, {
-              bool: {
-                must: mustCriteria
-              }
-            }]
-          }
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: true,
+                },
+              },
+              {
+                bool: {
+                  must: mustCriteria,
+                },
+              },
+            ],
+          },
         },
         aggs: {
           times: {
             date_histogram: {
               field: 'timestamp',
               interval: interval,
-              min_doc_count: 1
+              min_doc_count: 1,
             },
             aggs: {
               recordScore: {
                 max: {
-                  field: 'record_score'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'record_score',
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
+        _.each(aggregationsByTime, dataForTime => {
           const time = dataForTime.key;
           obj.results[time] = {
             score: _.get(dataForTime, ['recordScore', 'value']),
@@ -1322,7 +1344,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
 
         resolve(obj);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });

@@ -24,7 +24,7 @@ require('plugins/timelion/directives/timelion_grid');
 const app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
 import html from './fullscreen.html';
 
-app.directive('timelionFullscreen', function () {
+app.directive('timelionFullscreen', function() {
   return {
     restrict: 'E',
     scope: {
@@ -34,6 +34,6 @@ app.directive('timelionFullscreen', function () {
       transient: '=',
       onSearch: '=',
     },
-    template: html
+    template: html,
   };
 });

@@ -20,12 +20,12 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { IAction, createAction } from '../../actions';
+import { Action, createAction } from '../../actions';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
-export function createSayHelloAction(overlays: CoreStart['overlays']): IAction<{ name: string }> {
+export function createSayHelloAction(overlays: CoreStart['overlays']): Action<{ name: string }> {
   return createAction<{ name: string }>({
     type: SAY_HELLO_ACTION,
     getDisplayName: ({ name }) => `Hello, ${name}`,

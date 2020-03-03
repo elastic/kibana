@@ -19,7 +19,7 @@ By default, this will also set the password for native realm accounts to the pas
 | Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
 | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
-| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
+| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
@@ -46,17 +46,17 @@ yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc
 
 #### Debugging browser tests
 ```
-yarn test:browser:dev
+yarn test:karma:debug
 ```
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
 
 #### Running server unit tests
-You can run server-side unit tests by running:
+You can run mocha unit tests by running:
 
 ```
-yarn test:server
+yarn test:mocha
 ```
 
 #### Running functional tests

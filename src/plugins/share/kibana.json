@@ -1,6 +1,6 @@
 {
   "id": "share",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true
 }

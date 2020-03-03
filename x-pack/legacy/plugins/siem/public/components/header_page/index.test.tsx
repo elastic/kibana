@@ -5,48 +5,30 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { HeaderPage } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('HeaderPage', () => {
+  const mount = useMountAppended();
+
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <HeaderPage
-          badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-          border
-          subtitle="Test subtitle"
-          subtitle2="Test subtitle 2"
-          title="Test title"
-        >
-          <p>{'Test supplement'}</p>
-        </HeaderPage>
-      </TestProviders>
+      <HeaderPage
+        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
+        border
+        subtitle="Test subtitle"
+        subtitle2="Test subtitle 2"
+        title="Test title"
+      >
+        <p>{'Test supplement'}</p>
+      </HeaderPage>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
-  });
-
-  test('it renders the title', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-title"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the back link when provided', () => {
@@ -193,35 +175,5 @@ describe('HeaderPage', () => {
 
     expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
     expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
-  });
-
-  test('it renders as a draggable when arguments provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage draggableArguments={{ field: 'neat', value: 'cool' }} title="Test title" />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-draggable"]')
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
-  test('it DOES NOT render as a draggable when arguments not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-draggable"]')
-        .first()
-        .exists()
-    ).toBe(false);
   });
 });

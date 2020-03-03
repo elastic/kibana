@@ -1,26 +1,2 @@
 // Discover plugin styles
-@import 'mixins';
-
-// Prefix all styles with "dsc" to avoid conflicts.
-// Examples
-//   dscTable
-//   dscTable__footer
-//   monChart__legend--small
-//   monChart__legend-isLoading
-
-@import 'components/fetch_error/index';
-@import 'components/field_chooser/index';
-@import 'angular/directives/index';
-@import 'angular/doc_table/index';
-
-@import 'hacks';
-
-@import 'discover';
-
-@import 'embeddable/index';
-
-// Doc Viewer
-@import 'components/doc_viewer/index';
-
-// Context styles
-@import 'angular/context/index';
+@import 'np_ready/index';

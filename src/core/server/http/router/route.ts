@@ -17,14 +17,29 @@
  * under the License.
  */
 
-import { ObjectType, Type } from '@kbn/config-schema';
-import { Stream } from 'stream';
+import { RouteValidatorFullConfig } from './validator';
+
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
+}
+
+/**
+ * Set of HTTP methods changing the state of the server.
+ * @public
+ */
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+/**
+ * Set of HTTP methods not changing the state of the server.
+ * @public
+ */
+export type SafeRouteMethod = 'get' | 'options';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
  */
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 /**
  * The set of valid body.output
@@ -110,6 +125,15 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   authRequired?: boolean;
 
   /**
+   * Defines xsrf protection requirements for a route:
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
+   * - false. Disables xsrf protection.
+   *
+   * Set to true by default
+   */
+  xsrfRequired?: Method extends 'get' ? never : boolean;
+
+  /**
    * Additional metadata tag strings to attach to the route.
    */
   tags?: readonly string[];
@@ -124,12 +148,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
  * Route specific configuration.
  * @public
  */
-export interface RouteConfig<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>,
-  Method extends RouteMethod
-> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * The endpoint _within_ the router path to register the route.
    *
@@ -201,25 +220,10 @@ export interface RouteConfig<
    * });
    * ```
    */
-  validate: RouteSchemas<P, Q, B> | false;
+  validate: RouteValidatorFullConfig<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
-}
-
-/**
- * RouteSchemas contains the schemas for validating the different parts of a
- * request.
- * @public
- */
-export interface RouteSchemas<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>
-> {
-  params?: P;
-  query?: Q;
-  body?: B;
 }

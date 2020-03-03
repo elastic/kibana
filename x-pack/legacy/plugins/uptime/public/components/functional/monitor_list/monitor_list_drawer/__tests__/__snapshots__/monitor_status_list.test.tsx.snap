@@ -5,7 +5,7 @@ exports[`MonitorStatusList component renders checks 1`] = `
   <MonitorStatusRow
     locationNames={
       Set {
-        "unnamed-location",
+        "Unnamed-location",
       }
     }
     status="down"
@@ -13,6 +13,9 @@ exports[`MonitorStatusList component renders checks 1`] = `
   <MonitorStatusRow
     locationNames={Set {}}
     status="up"
+  />
+  <EuiSpacer
+    size="s"
   />
   <EuiCallOut
     color="warning"
@@ -27,6 +30,9 @@ exports[`MonitorStatusList component renders checks 1`] = `
       }
     />
   </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
 </Fragment>
 `;
 
@@ -35,7 +41,7 @@ exports[`MonitorStatusList component renders null in place of child status with 
   <MonitorStatusRow
     locationNames={
       Set {
-        "unnamed-location",
+        "Unnamed-location",
       }
     }
     status="down"
@@ -43,6 +49,9 @@ exports[`MonitorStatusList component renders null in place of child status with 
   <MonitorStatusRow
     locationNames={Set {}}
     status="up"
+  />
+  <EuiSpacer
+    size="s"
   />
   <EuiCallOut
     color="warning"
@@ -57,5 +66,8 @@ exports[`MonitorStatusList component renders null in place of child status with 
       }
     />
   </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
 </Fragment>
 `;

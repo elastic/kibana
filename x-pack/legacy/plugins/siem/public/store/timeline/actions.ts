@@ -6,8 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { Sort } from '../../components/timeline/body/sort';
 import {
   DataProvider,
@@ -15,7 +14,8 @@ import {
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { KqlMode, TimelineModel } from './model';
+import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
+import { TimelineNonEcsData } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -27,9 +27,11 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const upsertColumn = actionCreator<{ column: ColumnHeader; id: string; index: number }>(
-  'UPSERT_COLUMN'
-);
+export const upsertColumn = actionCreator<{
+  column: ColumnHeaderOptions;
+  id: string;
+  index: number;
+}>('UPSERT_COLUMN');
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
@@ -49,10 +51,22 @@ export const applyDeltaToColumnWidth = actionCreator<{
 
 export const createTimeline = actionCreator<{
   id: string;
-  columns: ColumnHeader[];
+  dataProviders?: DataProvider[];
+  dateRange?: {
+    start: number;
+    end: number;
+  };
+  filters?: Filter[];
+  columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
+  kqlQuery?: {
+    filterQuery: SerializedFilterQuery | null;
+    filterQueryDraft: KueryFilterQuery | null;
+  };
   show?: boolean;
   sort?: Sort;
+  showCheckboxes?: boolean;
+  showRowRenderers?: boolean;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -97,7 +111,7 @@ export const updateIsLoading = actionCreator<{
 
 export const updateColumns = actionCreator<{
   id: string;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
 }>('UPDATE_COLUMNS');
 
 export const updateDataProviderEnabled = actionCreator<{
@@ -196,5 +210,40 @@ export const setSavedQueryId = actionCreator<{
 
 export const setFilters = actionCreator<{
   id: string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }>('SET_TIMELINE_FILTERS');
+
+export const setSelected = actionCreator<{
+  id: string;
+  eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  isSelected: boolean;
+  isSelectAllChecked: boolean;
+}>('SET_TIMELINE_SELECTED');
+
+export const clearSelected = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_SELECTED');
+
+export const setEventsLoading = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+}>('SET_TIMELINE_EVENTS_LOADING');
+
+export const clearEventsLoading = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_LOADING');
+
+export const setEventsDeleted = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+}>('SET_TIMELINE_EVENTS_DELETED');
+
+export const clearEventsDeleted = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_DELETED');
+
+export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
+  'UPDATE_EVENT_TYPE'
+);

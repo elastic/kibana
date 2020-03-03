@@ -20,7 +20,7 @@ import {
   loggingServiceMock,
 } from 'src/core/server/mocks';
 import { workpads } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
-import { okResponse } from './ok_response';
+import { okResponse } from '../ok_response';
 
 const mockRouteContext = ({
   core: {

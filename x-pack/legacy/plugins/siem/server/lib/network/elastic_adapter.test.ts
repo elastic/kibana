@@ -35,11 +35,8 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -63,12 +60,9 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -105,11 +99,8 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     ].buckets[0].location.top_geo.hits.hits = [];
     mockCallWithRequest.mockResolvedValue(mockNoGeoDataResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -138,12 +129,9 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockNoPaginationResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -163,11 +151,8 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponseIp);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({

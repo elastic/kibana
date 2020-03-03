@@ -42,7 +42,9 @@ export function handleResponse(response, clusters) {
 export function getClustersState(req, esIndexPattern, clusters) {
   checkParam(esIndexPattern, 'esIndexPattern in cluster/getClustersHealth');
 
-  const clusterUuids = clusters.filter(cluster => !cluster.cluster_state).map(cluster => cluster.cluster_uuid);
+  const clusterUuids = clusters
+    .filter(cluster => !cluster.cluster_state)
+    .map(cluster => cluster.cluster_uuid);
 
   // we only need to fetch the cluster state if we don't already have it
   //  newer documents (those from the version 6 schema and later already have the cluster state with cluster stats)
@@ -57,26 +59,24 @@ export function getClustersState(req, esIndexPattern, clusters) {
     filterPath: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.cluster_state',
-      'hits.hits._source.cluster_state'
+      'hits.hits._source.cluster_state',
     ],
     body: {
       query: {
         bool: {
-          filter: [
-            { term: { type: 'cluster_state' } },
-            { terms: { 'cluster_uuid': clusterUuids } }
-          ]
-        }
+          filter: [{ term: { type: 'cluster_state' } }, { terms: { cluster_uuid: clusterUuids } }],
+        },
       },
       collapse: {
-        field: 'cluster_uuid'
+        field: 'cluster_uuid',
       },
-      sort: { 'timestamp': { order: 'desc' } },
-    }
+      sort: { timestamp: { order: 'desc' } },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-  return callWithRequest(req, 'search', params)
-    .then(response => handleResponse(response, clusters));
+  return callWithRequest(req, 'search', params).then(response =>
+    handleResponse(response, clusters)
+  );
 }

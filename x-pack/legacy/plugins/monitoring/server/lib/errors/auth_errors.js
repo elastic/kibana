@@ -13,7 +13,7 @@ const getStatusCode = err => {
 
 export function isAuthError(err) {
   const statusCode = getStatusCode(err);
-  return (statusCode === 401 || statusCode === 403);
+  return statusCode === 401 || statusCode === 403;
 }
 
 export function handleAuthError(err) {
@@ -28,10 +28,12 @@ export function handleAuthError(err) {
    */
   if (statusCode === 401) {
     message = i18n.translate('xpack.monitoring.errors.invalidAuthErrorMessage', {
-      defaultMessage: 'Invalid authentication for monitoring cluster' });
+      defaultMessage: 'Invalid authentication for monitoring cluster',
+    });
   } else {
     message = i18n.translate('xpack.monitoring.errors.insufficientUserErrorMessage', {
-      defaultMessage: 'Insufficient user permissions for monitoring data' });
+      defaultMessage: 'Insufficient user permissions for monitoring data',
+    });
   }
 
   return forbidden(message);

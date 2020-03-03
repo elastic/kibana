@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../lib/helpers';
@@ -19,7 +19,7 @@ import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/kibana');
 
 describe('StatefulOpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -422,7 +422,6 @@ describe('StatefulOpenTimeline', () => {
       ).toEqual({
         '10849df0-7b44-11e9-a608-ab3d811609': (
           <NotePreviews
-            isModal={false}
             notes={
               mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
                 ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(

@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiInMemoryTable,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -39,7 +33,7 @@ function DeleteButton({ onClick, canDeleteCalendar }) {
   );
 }
 
-export const EventsTable = injectI18n(function EventsTable({
+export const EventsTable = ({
   canCreateCalendar,
   canDeleteCalendar,
   eventsList,
@@ -47,69 +41,68 @@ export const EventsTable = injectI18n(function EventsTable({
   showSearchBar,
   showImportModal,
   showNewEventModal,
-  intl
-}) {
+}) => {
   const sorting = {
     sort: {
       field: 'description',
       direction: 'asc',
-    }
+    },
   };
 
   const pagination = {
     initialPageSize: 5,
-    pageSizeOptions: [5, 10]
+    pageSizeOptions: [5, 10],
   };
 
   const columns = [
     {
       field: 'description',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsEdit.eventsTable.descriptionColumnName',
-        defaultMessage: 'Description'
+      name: i18n.translate('xpack.ml.calendarsEdit.eventsTable.descriptionColumnName', {
+        defaultMessage: 'Description',
       }),
       sortable: true,
-      truncateText: true
+      truncateText: true,
+      scope: 'row',
     },
     {
       field: 'start_time',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsEdit.eventsTable.startColumnName',
-        defaultMessage: 'Start'
+      name: i18n.translate('xpack.ml.calendarsEdit.eventsTable.startColumnName', {
+        defaultMessage: 'Start',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: timeMs => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
-      }
+      },
     },
     {
       field: 'end_time',
-      name: intl.formatMessage({
-        id: 'xpack.ml.calendarsEdit.eventsTable.endColumnName',
-        defaultMessage: 'End'
+      name: i18n.translate('xpack.ml.calendarsEdit.eventsTable.endColumnName', {
+        defaultMessage: 'End',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: timeMs => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
-      }
+      },
     },
     {
       field: '',
       name: '',
-      render: (event) => (
+      render: event => (
         <DeleteButton
           data-testid="event_delete"
           canDeleteCalendar={canDeleteCalendar}
-          onClick={() => { onDeleteClick(event.event_id); }}
+          onClick={() => {
+            onDeleteClick(event.event_id);
+          }}
         />
-      )
+      ),
     },
   ];
 
   const search = {
-    toolsRight: [(
+    toolsRight: [
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_new_event"
@@ -122,8 +115,7 @@ export const EventsTable = injectI18n(function EventsTable({
           id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
           defaultMessage="New event"
         />
-      </EuiButton>),
-    (
+      </EuiButton>,
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_import_event"
@@ -136,12 +128,12 @@ export const EventsTable = injectI18n(function EventsTable({
           id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
           defaultMessage="Import events"
         />
-      </EuiButton>
-    )],
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
     },
-    filters: []
+    filters: [],
   };
 
   return (
@@ -157,9 +149,9 @@ export const EventsTable = injectI18n(function EventsTable({
       />
     </Fragment>
   );
-});
+};
 
-EventsTable.WrappedComponent.propTypes = {
+EventsTable.propTypes = {
   canCreateCalendar: PropTypes.bool,
   canDeleteCalendar: PropTypes.bool,
   eventsList: PropTypes.array.isRequired,
@@ -169,8 +161,8 @@ EventsTable.WrappedComponent.propTypes = {
   showSearchBar: PropTypes.bool,
 };
 
-EventsTable.WrappedComponent.defaultProps = {
+EventsTable.defaultProps = {
   showSearchBar: false,
   canCreateCalendar: true,
-  canDeleteCalendar: true
+  canDeleteCalendar: true,
 };

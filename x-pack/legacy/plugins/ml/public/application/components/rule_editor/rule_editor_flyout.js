@@ -9,9 +9,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -30,8 +28,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from '../../privilege/check_privilege';
@@ -47,17 +43,18 @@ import {
   addItemToFilter,
 } from './utils';
 
-import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../../common/constants/detector_rule';
+import {
+  ACTION,
+  CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
+} from '../../../../common/constants/detector_rule';
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { metadata } from 'ui/metadata';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-// metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
-
-export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Component {
+class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
@@ -75,7 +72,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       isConditionsEnabled: false,
       isScopeEnabled: false,
       filterListIds: [],
-      isFlyoutVisible: false
+      isFlyoutVisible: false,
     };
 
     this.partitioningFieldNames = [];
@@ -94,22 +91,26 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
     }
   }
 
-  showFlyout = (anomaly) => {
+  showFlyout = anomaly => {
     let ruleIndex = -1;
-    const { intl } = this.props;
     const job = mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
-      toastNotifications.addDanger(
-        intl.formatMessage({
-          id: 'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
-          defaultMessage: 'Unable to configure rules as an error occurred obtaining details for job ID {jobId}'
-        }, { jobId: anomaly.jobId })
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
+          {
+            defaultMessage:
+              'Unable to configure rules as an error occurred obtaining details for job ID {jobId}',
+            values: { jobId: anomaly.jobId },
+          }
+        )
       );
       this.setState({
         job,
-        isFlyoutVisible: false
+        isFlyoutVisible: false,
       });
 
       return;
@@ -127,7 +128,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
     let isConditionsEnabled = false;
     if (ruleIndex === 0) {
       // Configuring the first rule for a detector.
-      isConditionsEnabled = (this.partitioningFieldNames.length === 0);
+      isConditionsEnabled = this.partitioningFieldNames.length === 0;
     }
 
     this.setState({
@@ -136,47 +137,52 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       ruleIndex,
       isConditionsEnabled,
       isScopeEnabled: false,
-      isFlyoutVisible: true
+      isFlyoutVisible: true,
     });
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.
-      ml.filters.filters()
-        .then((filters) => {
+      ml.filters
+        .filters()
+        .then(filters => {
           const filterListIds = filters.map(filter => filter.filter_id);
           this.setState({
-            filterListIds
+            filterListIds,
           });
         })
-        .catch((resp) => {
+        .catch(resp => {
           console.log('Error loading list of filters:', resp);
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
-              defaultMessage: 'Error loading the filter lists used in the rule scope'
-            })
+          const { toasts } = this.props.kibana.services.notifications;
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
+              {
+                defaultMessage: 'Error loading the filter lists used in the rule scope',
+              }
+            )
           );
         });
     }
-  }
+  };
 
   closeFlyout = () => {
     this.setState({ isFlyoutVisible: false });
-  }
+  };
 
-  setEditRuleIndex = (ruleIndex) => {
+  setEditRuleIndex = ruleIndex => {
     const detectorIndex = this.state.anomaly.detectorIndex;
     const detector = this.state.job.analysis_config.detectors[detectorIndex];
     const rules = detector.custom_rules;
-    const rule = (rules === undefined || ruleIndex >= rules.length) ?
-      getNewRuleDefaults() : rules[ruleIndex];
+    const rule =
+      rules === undefined || ruleIndex >= rules.length ? getNewRuleDefaults() : rules[ruleIndex];
 
-    const isConditionsEnabled = (this.partitioningFieldNames.length === 0) ||
+    const isConditionsEnabled =
+      this.partitioningFieldNames.length === 0 ||
       (rule.conditions !== undefined && rule.conditions.length > 0);
-    const isScopeEnabled = (rule.scope !== undefined) && (Object.keys(rule.scope).length > 0);
+    const isScopeEnabled = rule.scope !== undefined && Object.keys(rule.scope).length > 0;
     if (isScopeEnabled === true) {
       // Add 'enabled:true' to mark them as selected in the UI.
-      Object.keys(rule.scope).forEach((field) => {
+      Object.keys(rule.scope).forEach(field => {
         rule.scope[field].enabled = true;
       });
     }
@@ -185,47 +191,47 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       ruleIndex,
       rule,
       isConditionsEnabled,
-      isScopeEnabled
+      isScopeEnabled,
     });
-  }
+  };
 
-  onSkipResultChange = (e) => {
+  onSkipResultChange = e => {
     const checked = e.target.checked;
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const actions = [...prevState.rule.actions];
       const idx = actions.indexOf(ACTION.SKIP_RESULT);
-      if ((idx === -1) && checked) {
+      if (idx === -1 && checked) {
         actions.push(ACTION.SKIP_RESULT);
-      } else if ((idx > -1) && !checked) {
+      } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
 
       return {
-        rule: { ...prevState.rule, actions }
+        rule: { ...prevState.rule, actions },
       };
     });
-  }
+  };
 
-  onSkipModelUpdateChange = (e) => {
+  onSkipModelUpdateChange = e => {
     const checked = e.target.checked;
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const actions = [...prevState.rule.actions];
       const idx = actions.indexOf(ACTION.SKIP_MODEL_UPDATE);
-      if ((idx === -1) && checked) {
+      if (idx === -1 && checked) {
         actions.push(ACTION.SKIP_MODEL_UPDATE);
-      } else if ((idx > -1) && !checked) {
+      } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
 
       return {
-        rule: { ...prevState.rule, actions }
+        rule: { ...prevState.rule, actions },
       };
     });
-  }
+  };
 
-  onConditionsEnabledChange = (e) => {
+  onConditionsEnabledChange = e => {
     const isConditionsEnabled = e.target.checked;
-    this.setState((prevState) => {
+    this.setState(prevState => {
       let conditions;
       if (isConditionsEnabled === false) {
         // Clear any conditions that have been added.
@@ -237,55 +243,55 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
 
       return {
         rule: { ...prevState.rule, conditions },
-        isConditionsEnabled
+        isConditionsEnabled,
       };
     });
-  }
+  };
 
   addCondition = () => {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const conditions = [...prevState.rule.conditions];
       conditions.push(getNewConditionDefaults());
 
       return {
-        rule: { ...prevState.rule, conditions }
+        rule: { ...prevState.rule, conditions },
       };
     });
-  }
+  };
 
   updateCondition = (index, appliesTo, operator, value) => {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const conditions = [...prevState.rule.conditions];
       if (index < conditions.length) {
         conditions[index] = {
           applies_to: appliesTo,
           operator,
-          value
+          value,
         };
       }
 
       return {
-        rule: { ...prevState.rule, conditions }
+        rule: { ...prevState.rule, conditions },
       };
     });
-  }
+  };
 
-  deleteCondition = (index) => {
-    this.setState((prevState) => {
+  deleteCondition = index => {
+    this.setState(prevState => {
       const conditions = [...prevState.rule.conditions];
       if (index < conditions.length) {
         conditions.splice(index, 1);
       }
 
       return {
-        rule: { ...prevState.rule, conditions }
+        rule: { ...prevState.rule, conditions },
       };
     });
-  }
+  };
 
-  onScopeEnabledChange = (e) => {
+  onScopeEnabledChange = e => {
     const isScopeEnabled = e.target.checked;
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const rule = { ...prevState.rule };
       if (isScopeEnabled === false) {
         // Clear scope property.
@@ -294,13 +300,13 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
 
       return {
         rule,
-        isScopeEnabled
+        isScopeEnabled,
       };
     });
-  }
+  };
 
   updateScope = (fieldName, filterId, filterType, enabled) => {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       let scope = { ...prevState.rule.scope };
       if (scope === undefined) {
         scope = {};
@@ -313,144 +319,160 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       };
 
       return {
-        rule: { ...prevState.rule, scope }
+        rule: { ...prevState.rule, scope },
       };
     });
-  }
+  };
 
   saveEdit = () => {
-    const {
-      rule,
-      ruleIndex
-    } = this.state;
+    const { rule, ruleIndex } = this.state;
 
     this.updateRuleAtIndex(ruleIndex, rule);
-  }
+  };
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
-    const { intl } = this.props;
-    const {
-      job,
-      anomaly,
-    } = this.state;
+    const { toasts } = this.props.kibana.services.notifications;
+    const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
     saveJobRule(job, detectorIndex, ruleIndex, editedRule)
-      .then((resp) => {
+      .then(resp => {
         if (resp.success) {
-          toastNotifications.add(
-            {
-              title: intl.formatMessage({
-                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageTitle',
-                defaultMessage: 'Changes to {jobId} detector rules saved'
-              }, { jobId }),
-              color: 'success',
-              iconType: 'check',
-              text: intl.formatMessage({
-                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageDescription',
-                defaultMessage: 'Note that changes will take effect for new results only.'
-              })
-            }
-          );
+          toasts.add({
+            title: i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageTitle',
+              {
+                defaultMessage: 'Changes to {jobId} detector rules saved',
+                values: { jobId },
+              }
+            ),
+            color: 'success',
+            iconType: 'check',
+            text: i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageDescription',
+              {
+                defaultMessage: 'Note that changes will take effect for new results only.',
+              }
+            ),
+          });
           this.closeFlyout();
         } else {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
-              defaultMessage: 'Error saving changes to {jobId} detector rules'
-            }, { jobId })
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
+              {
+                defaultMessage: 'Error saving changes to {jobId} detector rules',
+                values: { jobId },
+              }
+            )
           );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
-        toastNotifications.addDanger(
-          intl.formatMessage({
-            id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
-            defaultMessage: 'Error saving changes to {jobId} detector rules'
-          }, { jobId })
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
+            {
+              defaultMessage: 'Error saving changes to {jobId} detector rules',
+              values: { jobId },
+            }
+          )
         );
       });
-  }
+  };
 
-  deleteRuleAtIndex = (index) => {
-    const { intl } = this.props;
-    const {
-      job,
-      anomaly
-    } = this.state;
+  deleteRuleAtIndex = index => {
+    const { toasts } = this.props.kibana.services.notifications;
+    const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
     deleteJobRule(job, detectorIndex, index)
-      .then((resp) => {
+      .then(resp => {
         if (resp.success) {
-          toastNotifications.addSuccess(
-            intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.ruleDeletedFromJobDetectorNotificationMessage',
-              defaultMessage: 'Rule deleted from {jobId} detector'
-            }, { jobId })
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.ruleDeletedFromJobDetectorNotificationMessage',
+              {
+                defaultMessage: 'Rule deleted from {jobId} detector',
+                values: { jobId },
+              }
+            )
           );
           this.closeFlyout();
         } else {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
-              defaultMessage: 'Error deleting rule from {jobId} detector'
-            }, { jobId })
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+              {
+                defaultMessage: 'Error deleting rule from {jobId} detector',
+                values: { jobId },
+              }
+            )
           );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
-        let errorMessage = intl.formatMessage({
-          id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
-          defaultMessage: 'Error deleting rule from {jobId} detector'
-        }, { jobId });
+        let errorMessage = i18n.translate(
+          'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+          {
+            defaultMessage: 'Error deleting rule from {jobId} detector',
+            values: { jobId },
+          }
+        );
         if (error.message) {
           errorMessage += ` : ${error.message}`;
         }
-        toastNotifications.addDanger(errorMessage);
+        toasts.addDanger(errorMessage);
       });
-  }
+  };
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
-    const { intl } = this.props;
+    const { toasts } = this.props.kibana.services.notifications;
     addItemToFilter(item, filterId)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
-          toastNotifications.add(
-            {
-              title: intl.formatMessage({
-                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageTitle',
-                defaultMessage: 'Added {item} to {filterId}'
-              }, { item, filterId }),
-              color: 'success',
-              iconType: 'check',
-              text: intl.formatMessage({
-                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageDescription',
-                defaultMessage: 'Note that changes will take effect for new results only.'
-              })
-            }
-          );
+          toasts.add({
+            title: i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageTitle',
+              {
+                defaultMessage: 'Added {item} to {filterId}',
+                values: { item, filterId },
+              }
+            ),
+            color: 'success',
+            iconType: 'check',
+            text: i18n.translate(
+              'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageDescription',
+              {
+                defaultMessage: 'Note that changes will take effect for new results only.',
+              }
+            ),
+          });
           this.closeFlyout();
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(`Error adding ${item} to filter ${filterId}:`, error);
-        toastNotifications.addDanger(
-          intl.formatMessage({
-            id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
-            defaultMessage: 'An error occurred adding {item} to filter {filterId}'
-          }, { item, filterId })
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
+            {
+              defaultMessage: 'An error occurred adding {item} to filter {filterId}',
+              values: { item, filterId },
+            }
+          )
         );
       });
-  }
+  };
 
   render() {
-    const { intl } = this.props;
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
+    const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
     const {
       isFlyoutVisible,
       job,
@@ -459,7 +481,8 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       rule,
       filterListIds,
       isConditionsEnabled,
-      isScopeEnabled } = this.state;
+      isScopeEnabled,
+    } = this.state;
 
     if (isFlyoutVisible === false) {
       return null;
@@ -479,7 +502,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
               <h1 id="flyoutTitle">
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
-                  defaultMessage="Edit Rules"
+                  defaultMessage="Edit rules"
                 />
               </h1>
             </EuiTitle>
@@ -499,11 +522,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                >
+                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
                     defaultMessage="Close"
@@ -518,14 +537,19 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
       const detectorIndex = anomaly.detectorIndex;
       const detector = job.analysis_config.detectors[detectorIndex];
       const rules = detector.custom_rules;
-      const isCreate = (rules === undefined || ruleIndex >= rules.length);
+      const isCreate = rules === undefined || ruleIndex >= rules.length;
 
-      const hasPartitioningFields = (this.partitioningFieldNames && this.partitioningFieldNames.length > 0);
-      const conditionSupported = (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1);
-      const conditionsText = intl.formatMessage({
-        id: 'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
-        defaultMessage: 'Add numeric conditions for when the rule applies. Multiple conditions are combined using AND.'
-      });
+      const hasPartitioningFields =
+        this.partitioningFieldNames && this.partitioningFieldNames.length > 0;
+      const conditionSupported =
+        CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1;
+      const conditionsText = i18n.translate(
+        'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
+        {
+          defaultMessage:
+            'Add numeric conditions for when the rule applies. Multiple conditions are combined using AND.',
+        }
+      );
 
       flyout = (
         <EuiFlyout
@@ -536,15 +560,15 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="m">
               <h1 id="flyoutTitle">
-                {(isCreate === true) ? (
+                {isCreate === true ? (
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-                    defaultMessage="Create Rule"
+                    defaultMessage="Create rule"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
-                    defaultMessage="Edit Rule"
+                    defaultMessage="Edit rule"
                   />
                 )}
               </h1>
@@ -552,11 +576,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
-            <DetectorDescriptionList
-              job={job}
-              detector={detector}
-              anomaly={anomaly}
-            />
+            <DetectorDescriptionList job={job} detector={detector} anomaly={anomaly} />
             <EuiSpacer size="m" />
             <EuiText>
               <p>
@@ -574,7 +594,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
                           defaultMessage="Learn more"
                         />
                       </EuiLink>
-                    )
+                    ),
                   }}
                 />
               </p>
@@ -607,27 +627,27 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
               </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {(conditionSupported === true) ?
-              (
-                <EuiCheckbox
-                  id="enable_conditions_checkbox"
-                  className="scope-enable-checkbox"
-                  label={conditionsText}
-                  checked={isConditionsEnabled}
-                  onChange={this.onConditionsEnabledChange}
-                  disabled={!conditionSupported || !hasPartitioningFields}
-                />
-              ) : (
-                <EuiCallOut
-                  title={<FormattedMessage
+            {conditionSupported === true ? (
+              <EuiCheckbox
+                id="enable_conditions_checkbox"
+                className="scope-enable-checkbox"
+                label={conditionsText}
+                checked={isConditionsEnabled}
+                onChange={this.onConditionsEnabledChange}
+                disabled={!conditionSupported || !hasPartitioningFields}
+              />
+            ) : (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsNotSupportedTitle"
                     defaultMessage="Conditions are not supported for detectors using the {functionName} function"
                     values={{ functionName: anomaly.source.function }}
-                  />}
-                  iconType="iInCircle"
-                />
-              )
-            }
+                  />
+                }
+                iconType="iInCircle"
+              />
+            )}
             <EuiSpacer size="s" />
             <ConditionsSection
               isEnabled={isConditionsEnabled}
@@ -649,10 +669,12 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
             />
 
             <EuiCallOut
-              title={<FormattedMessage
-                id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
-                defaultMessage="Rerun job"
-              />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+                  defaultMessage="Rerun job"
+                />
+              }
               color="warning"
               iconType="help"
             >
@@ -671,17 +693,12 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
                 />
               </p>
             </EuiCallOut>
-
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                >
+                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
                     defaultMessage="Close"
@@ -689,11 +706,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={this.saveEdit}
-                  isDisabled={!isValidRule(rule)}
-                  fill
-                >
+                <EuiButton onClick={this.saveEdit} isDisabled={!isValidRule(rule)} fill>
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
                     defaultMessage="Save"
@@ -704,14 +717,10 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           </EuiFlyoutFooter>
         </EuiFlyout>
       );
-
     }
 
-    return (
-      <React.Fragment>
-        {flyout}
-      </React.Fragment>
-    );
-
+    return <React.Fragment>{flyout}</React.Fragment>;
   }
-});
+}
+
+export const RuleEditorFlyout = withKibana(RuleEditorFlyoutUI);

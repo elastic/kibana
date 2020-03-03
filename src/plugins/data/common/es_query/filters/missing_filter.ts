@@ -27,3 +27,7 @@ export type MissingFilter = Filter & {
 };
 
 export const isMissingFilter = (filter: any): filter is MissingFilter => filter && filter.missing;
+
+export const getMissingFilterField = (filter: MissingFilter) => {
+  return filter.missing && filter.missing.field;
+};

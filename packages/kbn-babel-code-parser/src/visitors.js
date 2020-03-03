@@ -21,29 +21,29 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on require + require.resolve
       CallExpression: ({ node }) => {
         // AST check for require expressions
-        const isRequire = (node) => {
+        const isRequire = node => {
           return matches({
             callee: {
               type: 'Identifier',
-              name: 'require'
-            }
+              name: 'require',
+            },
           })(node);
         };
 
         // AST check for require.resolve expressions
-        const isRequireResolve = (node) => {
+        const isRequireResolve = node => {
           return matches({
             callee: {
               type: 'MemberExpression',
               object: {
                 type: 'Identifier',
-                name: 'require'
+                name: 'require',
               },
               property: {
                 type: 'Identifier',
-                name: 'resolve'
-              }
-            }
+                name: 'resolve',
+              },
+            },
           })(node);
         };
 
@@ -66,12 +66,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on import
       ImportDeclaration: ({ node }) => {
         // AST check for supported import expressions
-        const isImport = (node) => {
+        const isImport = node => {
           return matches({
             type: 'ImportDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -85,12 +85,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export from
       ExportNamedDeclaration: ({ node }) => {
         // AST check for supported export from expressions
-        const isExportFrom = (node) => {
+        const isExportFrom = node => {
           return matches({
             type: 'ExportNamedDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -104,12 +104,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export * from
       ExportAllDeclaration: ({ node }) => {
         // AST check for supported export * from expressions
-        const isExportAllFrom = (node) => {
+        const isExportAllFrom = node => {
           return matches({
             type: 'ExportAllDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -118,7 +118,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           const exportAllFromSource = node.source;
           dependenciesAcc.push(exportAllFromSource.value);
         }
-      }
+      },
     };
   })();
 }

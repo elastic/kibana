@@ -3,17 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getSpecId, CustomSeriesColorsMap, DataSeriesColorsValues } from '@elastic/charts';
-
-export function getCustomColor(specId: string, color: string): CustomSeriesColorsMap {
-  const lineDataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(specId),
-  };
-  return new Map([[lineDataSeriesColorValues, color]]);
-}
-
 export function getYRange(chartData: any[]) {
   if (chartData.length === 0) {
     return { min: 0, max: 0 };

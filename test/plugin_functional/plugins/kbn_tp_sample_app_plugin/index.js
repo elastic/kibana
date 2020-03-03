@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
         title: 'Test Plugin App',
         description: 'This is a sample plugin for the functional tests.',
         main: 'plugins/kbn_tp_sample_app_plugin/app',
-      }
-    }
+      },
+    },
   });
 }

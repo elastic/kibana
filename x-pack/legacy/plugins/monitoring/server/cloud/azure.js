@@ -14,8 +14,7 @@ import { CLOUD_METADATA_SERVICES } from '../../common/constants';
  * {@code AzureCloudService} will check and load the service metadata for an Azure VM if it is available.
  */
 class AzureCloudService extends CloudService {
-
-  constructor(options = { }) {
+  constructor(options = {}) {
     super('azure', options);
   }
 
@@ -25,16 +24,18 @@ class AzureCloudService extends CloudService {
       uri: CLOUD_METADATA_SERVICES.AZURE_URL,
       headers: {
         // Azure requires this header
-        'Metadata': 'true'
+        Metadata: 'true',
       },
-      json: true
+      json: true,
     };
 
-    return promisify(request)(req)
-    // Note: there is no fallback option for Azure
-      .then(response => {
-        return this._parseResponse(response.body, (body) => this._parseBody(body));
-      });
+    return (
+      promisify(request)(req)
+        // Note: there is no fallback option for Azure
+        .then(response => {
+          return this._parseResponse(response.body, body => this._parseBody(body));
+        })
+    );
   }
 
   /**
@@ -72,7 +73,7 @@ class AzureCloudService extends CloudService {
     const region = get(compute, 'location');
 
     // remove keys that we already have; explicitly undefined so we don't send it when empty
-    const metadata = compute ? omit(compute, [ 'vmId', 'vmSize', 'location' ]) : undefined;
+    const metadata = compute ? omit(compute, ['vmId', 'vmSize', 'location']) : undefined;
 
     // we don't actually use network, but we check for its existence to see if this is a response from Azure
     const network = get(body, 'network');
@@ -87,7 +88,6 @@ class AzureCloudService extends CloudService {
 
     return null;
   }
-
 }
 
 /**

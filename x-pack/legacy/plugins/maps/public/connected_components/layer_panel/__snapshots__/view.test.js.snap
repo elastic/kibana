@@ -97,9 +97,14 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <LayerErrors />
         <LayerSettings />
-        <SourceSettings />
+        <div>
+          mockSourceSettings
+        </div>
         <EuiPanel>
-          <JoinEditor />
+          <JoinEditor
+            layerDisplayName="layer 1"
+            leftJoinFields={Array []}
+          />
         </EuiPanel>
         <EuiSpacer
           size="s"

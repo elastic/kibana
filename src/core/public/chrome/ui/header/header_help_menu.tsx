@@ -36,14 +36,10 @@ import {
 } from '@elastic/eui';
 
 import { ExclusiveUnion } from '@elastic/eui';
+import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import {
-  ELASTIC_SUPPORT_LINK,
-  GITHUB_CREATE_ISSUE_LINK,
-  KIBANA_ASK_ELASTIC_LINK,
-  KIBANA_FEEDBACK_LINK,
-} from '../../constants';
+import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -110,16 +106,17 @@ export type ChromeHelpExtensionMenuLink = ExclusiveUnion<
 
 interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Rx.Observable<string>;
   intl: InjectedIntl;
   kibanaVersion: string;
   useDefaultContent?: boolean;
   kibanaDocLink: string;
-  isCloudEnabled: boolean;
 }
 
 interface State {
   isOpen: boolean;
   helpExtension?: ChromeHelpExtension;
+  helpSupportUrl: string;
 }
 
 class HeaderHelpMenuUI extends Component<Props, State> {
@@ -131,16 +128,19 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     this.state = {
       isOpen: false,
       helpExtension: undefined,
+      helpSupportUrl: '',
     };
   }
 
   public componentDidMount() {
-    this.subscription = this.props.helpExtension$.subscribe({
-      next: helpExtension => {
-        this.setState({
-          helpExtension,
-        });
-      },
+    this.subscription = combineLatest(
+      this.props.helpExtension$,
+      this.props.helpSupportUrl$
+    ).subscribe(([helpExtension, helpSupportUrl]) => {
+      this.setState({
+        helpExtension,
+        helpSupportUrl,
+      });
     });
   }
 
@@ -183,7 +183,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
   public render() {
     const { intl, kibanaVersion, useDefaultContent, kibanaDocLink } = this.props;
-    const { helpExtension } = this.state;
+    const { helpExtension, helpSupportUrl } = this.state;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
@@ -196,12 +196,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty
-          href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_ASK_ELASTIC_LINK}
-          target="_blank"
-          size="xs"
-          flush="left"
-        >
+        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
             defaultMessage="Ask Elastic"

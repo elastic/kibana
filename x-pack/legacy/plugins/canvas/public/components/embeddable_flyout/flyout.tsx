@@ -8,9 +8,9 @@ import React from 'react';
 
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import {
-  SavedObjectFinder,
+  SavedObjectFinderUi,
   SavedObjectMetaData,
-} from '../../../../../../../src/plugins/kibana_react/public/saved_objects'; // eslint-disable-line
+} from '../../../../../../../src/plugins/saved_objects/public/';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { ComponentStrings } from '../../../i18n';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -64,7 +64,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <SavedObjectFinder
+          <SavedObjectFinderUi
             onChoose={this.onAddPanel}
             savedObjectMetaData={availableSavedObjects}
             showFilter={true}

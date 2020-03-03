@@ -7,15 +7,15 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
-import { MockPluginContextWrapper } from '../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
 
 describe('Home component', () => {
   it('should render services', () => {
     expect(
       shallow(
-        <MockPluginContextWrapper>
+        <MockApmPluginContextWrapper>
           <Home tab="services" />
-        </MockPluginContextWrapper>
+        </MockApmPluginContextWrapper>
       )
     ).toMatchSnapshot();
   });
@@ -23,9 +23,9 @@ describe('Home component', () => {
   it('should render traces', () => {
     expect(
       shallow(
-        <MockPluginContextWrapper>
+        <MockApmPluginContextWrapper>
           <Home tab="traces" />
-        </MockPluginContextWrapper>
+        </MockApmPluginContextWrapper>
       )
     ).toMatchSnapshot();
   });

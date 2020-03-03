@@ -59,6 +59,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
         "maxWidth": "400px",
       }
     }
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
@@ -93,9 +94,6 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value="test value"
@@ -160,6 +158,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
         "maxWidth": "400px",
       }
     }
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
@@ -194,9 +193,6 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value=""

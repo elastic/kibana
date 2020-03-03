@@ -7,57 +7,88 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 import {
+  MachineLearningAnomaliesTableProvider,
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
+  MachineLearningCommonProvider,
+  MachineLearningCustomUrlsProvider,
   MachineLearningDataFrameAnalyticsProvider,
+  MachineLearningDataFrameAnalyticsCreationProvider,
+  MachineLearningDataFrameAnalyticsTableProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
+  MachineLearningJobSelectionProvider,
   MachineLearningJobSourceSelectionProvider,
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
   MachineLearningJobWizardAdvancedProvider,
+  MachineLearningJobWizardCategorizationProvider,
   MachineLearningJobWizardCommonProvider,
   MachineLearningJobWizardMultiMetricProvider,
   MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
+  MachineLearningSecurityCommonProvider,
+  MachineLearningSecurityUIProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
 } from './machine_learning';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
+  const common = MachineLearningCommonProvider(context);
+
+  const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
-  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
+  const customUrls = MachineLearningCustomUrlsProvider(context);
+  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
+  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
+    context,
+    common
+  );
+  const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
+  const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
-  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
+  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
+  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
 
   return {
+    anomaliesTable,
     anomalyExplorer,
     api,
+    common,
+    customUrls,
     dataFrameAnalytics,
+    dataFrameAnalyticsCreation,
+    dataFrameAnalyticsTable,
     dataVisualizer,
     dataVisualizerIndexBased,
     jobManagement,
+    jobSelection,
     jobSourceSelection,
     jobTable,
     jobTypeSelection,
     jobWizardAdvanced,
+    jobWizardCategorization,
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
     navigation,
+    securityCommon,
+    securityUI,
     settings,
     singleMetricViewer,
   };

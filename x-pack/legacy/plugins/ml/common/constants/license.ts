@@ -6,5 +6,7 @@
 
 export enum LICENSE_TYPE {
   BASIC,
-  FULL, // platinum or trial
+  FULL, // >= platinum
 }
+
+export const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];

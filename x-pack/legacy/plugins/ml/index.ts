@@ -6,19 +6,12 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { plugin } from './server/new_platform';
-import {
-  MlInitializerContext,
-  MlCoreSetup,
-  MlHttpServiceSetup,
-} from './server/new_platform/plugin';
+import { Server } from 'src/legacy/server/kbn_server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+// @ts-ignore: could not find declaration file for module
+import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
-
-interface MlServer extends Server {
-  addAppLinksToSampleDataset: () => {};
-}
 
 export const ml = (kibana: any) => {
   return new kibana.Plugin({
@@ -38,10 +31,10 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/application/app',
+        main: 'plugins/ml/legacy',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
@@ -57,40 +50,8 @@ export const ml = (kibana: any) => {
       },
     },
 
-    async init(server: MlServer) {
-      const kbnServer = (server as unknown) as KbnServer;
-
-      const initializerContext = ({
-        legacyConfig: server.config(),
-        logger: {
-          get(...contextParts: string[]) {
-            return kbnServer.newPlatform.coreContext.logger.get('plugins', 'ml', ...contextParts);
-          },
-        },
-      } as unknown) as MlInitializerContext;
-
-      const mlHttpService: MlHttpServiceSetup = {
-        ...kbnServer.newPlatform.setup.core.http,
-        route: server.route.bind(server),
-      };
-
-      const core: MlCoreSetup = {
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        injectUiAppVars: server.injectUiAppVars,
-        http: mlHttpService,
-        savedObjects: server.savedObjects,
-      };
-
-      const plugins = {
-        elasticsearch: server.plugins.elasticsearch,
-        security: server.plugins.security,
-        xpackMain: server.plugins.xpack_main,
-        spaces: server.plugins.spaces,
-        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection,
-        ml: this,
-      };
-
-      plugin(initializerContext).setup(core, plugins);
+    async init(server: Server) {
+      mirrorPluginStatus(server.plugins.xpack_main, this);
     },
   });
 };

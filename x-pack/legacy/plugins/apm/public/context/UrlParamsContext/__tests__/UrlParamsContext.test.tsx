@@ -11,8 +11,8 @@ import { Location, History } from 'history';
 import { MemoryRouter, Router } from 'react-router-dom';
 import moment from 'moment-timezone';
 import { IUrlParams } from '../types';
-import { tick } from '../../../utils/testHelpers';
 import { getParsedDate } from '../helpers';
+import { wait } from '@testing-library/react';
 
 function mountParams(location: Location) {
   return mount(
@@ -143,13 +143,13 @@ describe('UrlParamsContext', () => {
       </Router>
     );
 
-    await tick();
+    await wait();
 
     expect(calls.length).toBe(1);
 
     wrapper.find('button').simulate('click');
 
-    await tick();
+    await wait();
 
     expect(calls.length).toBe(2);
 
@@ -194,11 +194,11 @@ describe('UrlParamsContext', () => {
       </Router>
     );
 
-    await tick();
+    await wait();
 
     wrapper.find('button').simulate('click');
 
-    await tick();
+    await wait();
 
     const params = getDataFromOutput(wrapper);
     expect(params.start).toEqual('2000-06-14T00:00:00.000Z');

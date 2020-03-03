@@ -136,10 +136,6 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -165,10 +161,6 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -296,10 +288,6 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -325,10 +313,6 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -456,10 +440,6 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -484,10 +464,6 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [

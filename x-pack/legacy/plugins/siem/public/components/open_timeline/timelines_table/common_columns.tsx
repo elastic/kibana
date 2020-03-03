@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
@@ -25,11 +27,9 @@ export const getCommonColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
 }: {
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
 }) => [
   {
@@ -43,9 +43,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: (
-                    <NotePreviews notes={notes} isModal={!showExtendedColumnsAndActions} />
-                  ),
+                  [savedObjectId]: <NotePreviews notes={notes} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}

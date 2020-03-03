@@ -5,44 +5,28 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiPanel,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiTitle,
-  EuiPagination
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React, { useState, useEffect } from 'react';
-import { sum } from 'lodash';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IBucket } from '../../../../../../../../plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
-import { TransactionTabs } from './TransactionTabs';
-import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
+import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
-import { units, px } from '../../../../style/variables';
-
-const PaginationContainer = styled.div`
-  margin-left: ${px(units.quarter)};
-  display: flex;
-  align-items: center;
-
-  > span:first-of-type {
-    font-weight: 600;
-  }
-
-  > span:last-of-type {
-    margin-right: ${px(units.half)};
-  }
-`;
+import { TransactionTabs } from './TransactionTabs';
+import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   urlParams: IUrlParams;
@@ -103,7 +87,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'baseLine' }}>
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
@@ -112,16 +96,12 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
             </h5>
           </EuiTitle>
           {traceSamples && (
-            <PaginationContainer>
-              <span>{sampleActivePage + 1}</span>
-              <span>/{traceSamples.length}</span>
-              <EuiPagination
-                pageCount={traceSamples.length}
-                activePage={sampleActivePage}
-                onPageClick={goToSample}
-                compressed
-              />
-            </PaginationContainer>
+            <EuiPagination
+              pageCount={traceSamples.length}
+              activePage={sampleActivePage}
+              onPageClick={goToSample}
+              compressed
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -140,8 +120,8 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
-        totalDuration={waterfall.traceRootDuration}
+        errorCount={waterfall.errorsCount}
+        totalDuration={waterfall.rootTransaction?.transaction.duration.us}
         transaction={entryTransaction}
       />
       <EuiSpacer size="s" />

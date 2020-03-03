@@ -135,28 +135,24 @@ describe('copySavedObjectsToSpaces', () => {
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "excludeExportDetails": true,
-                        "exportSizeLimit": 1000,
-                        "includeReferencesDeep": true,
-                        "namespace": "sourceSpace",
-                        "objects": Array [
-                          Object {
-                            "id": "my-dashboard",
-                            "type": "dashboard",
-                          },
-                        ],
-                        "savedObjectsClient": null,
-                        "types": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          Object {
+            "excludeExportDetails": true,
+            "exportSizeLimit": 1000,
+            "includeReferencesDeep": true,
+            "namespace": "sourceSpace",
+            "objects": Array [
+              Object {
+                "id": "my-dashboard",
+                "type": "dashboard",
+              },
+            ],
+            "savedObjectsClient": null,
+          },
+        ],
+      ]
+    `);
 
     expect((savedObjectsService.importExport.importSavedObjects as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
@@ -176,6 +172,7 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,
@@ -228,6 +225,7 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,

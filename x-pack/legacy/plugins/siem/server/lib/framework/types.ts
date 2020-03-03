@@ -6,9 +6,9 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { RequestAuth } from 'hapi';
-import { Legacy } from 'kibana';
 
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
@@ -16,16 +16,15 @@ import {
   SortField,
   SourceConfiguration,
   TimerangeInput,
+  Maybe,
+  HistogramType,
 } from '../../graphql/types';
-import { RequestFacade } from '../../types';
 
 export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  version: string;
-  exposeStaticDir(urlPath: string, dir: string): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
@@ -39,37 +38,16 @@ export interface FrameworkAdapter {
   ): Promise<DatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
     req: FrameworkRequest,
-    method: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    req: FrameworkRequest,
     method: 'indices.getMapping',
     options?: IndicesGetMappingParams // eslint-disable-line
   ): Promise<MappingResponse>;
-  callWithRequest(
-    req: FrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get', // eslint-disable-line
-    options?: object
-  ): Promise<DatabaseGetIndicesResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
-  getSavedObjectsService(): Legacy.SavedObjectsService;
 }
 
-export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {
-  [internalFrameworkRequest]: InternalRequest;
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
-  auth: InternalRequest['auth'];
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface WrappableRequest<Payload = any, Params = any, Query = any> {
-  payload: Payload;
-  params: Params;
-  query: Query;
-  auth: RequestAuth;
+export interface FrameworkRequest extends Pick<KibanaRequest, 'body'> {
+  [internalFrameworkRequest]: KibanaRequest;
+  context: RequestHandlerContext;
+  user: AuthenticatedUser | null;
 }
 
 export interface DatabaseResponse {
@@ -132,27 +110,16 @@ export interface FrameworkIndexPatternsService {
   }): Promise<FrameworkIndexFieldDescriptor[]>;
 }
 
-interface Alias {
-  settings: {
-    index: {
-      uuid: string;
-    };
-  };
-}
-
-export interface DatabaseGetIndicesResponse {
-  [indexName: string]: {
-    aliases: {
-      [aliasName: string]: Alias;
-    };
-  };
-}
-
 export interface RequestBasicOptions {
   sourceConfiguration: SourceConfiguration;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
+}
+
+export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
+  stackByField: Maybe<string>;
+  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

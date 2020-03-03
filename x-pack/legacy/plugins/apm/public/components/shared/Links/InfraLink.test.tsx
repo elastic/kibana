@@ -8,28 +8,18 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
-import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
-
-const coreMock = ({
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`
-    }
-  }
-} as unknown) as LegacyCoreStart;
-
-jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 test('InfraLink produces the correct URL', async () => {
   const href = await getRenderedHref(
-    () => <InfraLink path="/some/path" query={{ time: 1554687198 }} />,
+    () => (
+      <InfraLink app="metrics" path="/some/path" query={{ time: 1554687198 }} />
+    ),
     {
       search: '?rangeFrom=now-5h&rangeTo=now-2h'
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/infra#/some/path?time=1554687198"`
+    `"/basepath/app/metrics/some/path?time=1554687198"`
   );
 });

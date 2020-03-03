@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { removeFilterFromQueryString, getQueryPattern, escapeRegExp } from '../utils';
 
@@ -16,7 +14,6 @@ describe('ML - KqlFilterBar utils', () => {
   const speciaCharFieldValue = '<>:;[})';
 
   describe('removeFilterFromQueryString', () => {
-
     it('removes selected fieldName/fieldValue from query string with one value', () => {
       const currentQueryString = 'http.response.status_code : "200"';
       const expectedOutput = '';
@@ -45,28 +42,28 @@ describe('ML - KqlFilterBar utils', () => {
       expect(result).to.be(expectedOutput);
     });
 
-    it('removes \'and\' from end of the query to ensure kuery syntax is valid', () => {
+    it("removes 'and' from end of the query to ensure kuery syntax is valid", () => {
       const currentQueryString = 'http.response.status_code : "200" and';
       const expectedOutput = '';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
 
-    it('removes \'or\' from end of the query to ensure kuery syntax is valid', () => {
+    it("removes 'or' from end of the query to ensure kuery syntax is valid", () => {
       const currentQueryString = 'http.response.status_code : "200" or';
       const expectedOutput = '';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
 
-    it('removes \'and\' from start of the query to ensure kuery syntax is valid', () => {
+    it("removes 'and' from start of the query to ensure kuery syntax is valid", () => {
       const currentQueryString = ' and http.response.status_code : "200"';
       const expectedOutput = '';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
 
-    it('removes \'or\' from start of the query to ensure kuery syntax is valid', () => {
+    it("removes 'or' from start of the query to ensure kuery syntax is valid", () => {
       const currentQueryString = ' or http.response.status_code : "200" ';
       const expectedOutput = '';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
@@ -76,7 +73,8 @@ describe('ML - KqlFilterBar utils', () => {
     it('removes selected fieldName/fieldValue correctly from  AND query string when it is the middle value', () => {
       const currentQueryString = `http.response.status_code : "400" and http.response.status_code : "200"
         and http.response.status_code : "300"`;
-      const expectedOutput = 'http.response.status_code : "400" and http.response.status_code : "300"';
+      const expectedOutput =
+        'http.response.status_code : "400" and http.response.status_code : "300"';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
@@ -84,15 +82,14 @@ describe('ML - KqlFilterBar utils', () => {
     it('removes selected fieldName/fieldValue correctly from OR query string when it is the middle value', () => {
       const currentQueryString = `http.response.status_code : "400" or http.response.status_code : "200"
         or http.response.status_code : "300"`;
-      const expectedOutput = 'http.response.status_code : "400" or http.response.status_code : "300"';
+      const expectedOutput =
+        'http.response.status_code : "400" or http.response.status_code : "300"';
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
-
   });
 
   describe('getQueryPattern', () => {
-
     it('creates a regular expression pattern for given fieldName/fieldValue', () => {
       // The source property returns a String containing the source text of the regexp object
       // and it doesn't contain the two forward slashes on both sides and any flags.
@@ -108,11 +105,9 @@ describe('ML - KqlFilterBar utils', () => {
       const result = getQueryPattern(speciaCharFieldName, speciaCharFieldValue).source;
       expect(result).to.be(expectedOutput);
     });
-
   });
 
   describe('escapeRegExp', () => {
-
     it('escapes regex special characters for given fieldName/fieldValue', () => {
       // The source property returns a String containing the source text of the regexp object
       // and it doesn't contain the two forward slashes on both sides and any flags.
@@ -124,7 +119,5 @@ describe('ML - KqlFilterBar utils', () => {
       expect(resultFieldName).to.be(expectedFieldName);
       expect(resultFieldValue).to.be(expectedFieldValue);
     });
-
   });
-
 });

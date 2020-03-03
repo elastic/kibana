@@ -9,7 +9,7 @@ import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerRoutes } from './server/routes/register_routes';
 import { ccrDataEnricher } from './cross_cluster_replication_data';
-import { addIndexManagementDataEnricher } from '../index_management/server/index_management_data';
+
 export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
@@ -22,10 +22,8 @@ export function crossClusterReplication(kibana) {
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          ccrUiEnabled: (
-            config.get('xpack.ccr.ui.enabled')
-              && config.get('xpack.remote_clusters.ui.enabled')
-          ),
+          ccrUiEnabled:
+            config.get('xpack.ccr.ui.enabled') && config.get('xpack.remote_clusters.ui.enabled'),
         };
       },
     },
@@ -34,7 +32,7 @@ export function crossClusterReplication(kibana) {
       return Joi.object({
         // display menu item
         ui: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true),
         }).default(),
 
         // enable plugin
@@ -52,9 +50,11 @@ export function crossClusterReplication(kibana) {
       registerLicenseChecker(server);
       registerRoutes(server);
       if (
-        server.config().get('xpack.ccr.ui.enabled')
+        server.config().get('xpack.ccr.ui.enabled') &&
+        server.newPlatform.setup.plugins.indexManagement &&
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher
       ) {
-        addIndexManagementDataEnricher(ccrDataEnricher);
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher.add(ccrDataEnricher);
       }
     },
   });

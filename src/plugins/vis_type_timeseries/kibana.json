@@ -1,0 +1,7 @@
+{
+  "id": "metrics",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "optionalPlugins": ["usageCollection"]
+}

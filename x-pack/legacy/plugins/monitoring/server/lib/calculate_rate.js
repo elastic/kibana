@@ -19,23 +19,26 @@ import moment from 'moment';
  * 4. From that subtract the earliest timestamp from the time picker
  * This gives you the denominator in millis. Divide it by 1000 to convert to seconds
  */
-export function calculateRate(
-  {
-    hitTimestamp = null,
-    earliestHitTimestamp = null,
-    latestTotal = null,
-    earliestTotal = null,
-    timeWindowMin,
-    timeWindowMax
-  } = {}
-) {
+export function calculateRate({
+  hitTimestamp = null,
+  earliestHitTimestamp = null,
+  latestTotal = null,
+  earliestTotal = null,
+  timeWindowMin,
+  timeWindowMax,
+} = {}) {
   const nullResult = {
     rate: null,
-    isEstimate: false
+    isEstimate: false,
   };
 
   // check if any params used for calculations are null
-  if (hitTimestamp === null || earliestHitTimestamp === null || latestTotal === null || earliestTotal === null) {
+  if (
+    hitTimestamp === null ||
+    earliestHitTimestamp === null ||
+    latestTotal === null ||
+    earliestTotal === null
+  ) {
     return nullResult;
   }
 

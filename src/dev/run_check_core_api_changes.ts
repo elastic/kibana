@@ -35,6 +35,7 @@ import getopts from 'getopts';
 
 const apiExtractorConfig = (folder: string): ExtractorConfig => {
   const config: IConfigFile = {
+    newlineKind: 'lf',
     compiler: {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
@@ -82,7 +83,7 @@ const runBuildTypes = async () => {
 const runApiDocumenter = async (folder: string) => {
   await execa(
     'api-documenter',
-    ['markdown', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
+    ['generate', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
     {
       preferLocal: true,
     }

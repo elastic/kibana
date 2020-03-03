@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
 
   describe('beats cluster', () => {
@@ -37,9 +37,8 @@ export default function ({ getService, getPageObjects }) {
           duckbeat: 1,
           sheepbeat: 1,
           winlogbeat: 1,
-        }
+        },
       });
     });
-
   });
 }

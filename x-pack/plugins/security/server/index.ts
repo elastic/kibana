@@ -4,25 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from '../../../../src/core/server';
 import { ConfigSchema } from './config';
-import { Plugin } from './plugin';
+import { Plugin, SecurityPluginSetup, PluginSetupDependencies } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
-// functions or removal of exports should be considered as a breaking change. Ideally we should
-// reduce number of such exports to zero and provide everything we want to expose via Setup/Start
-// run-time contracts.
-export { wrapError } from './errors';
+// functions or removal of exports should be considered as a breaking change.
 export {
-  canRedirectRequest,
+  Authentication,
   AuthenticationResult,
   DeauthenticationResult,
-  OIDCAuthenticationFlow,
   CreateAPIKeyResult,
+  InvalidateAPIKeyParams,
+  InvalidateAPIKeyResult,
 } from './authentication';
+export { SecurityPluginSetup };
+export { AuthenticatedUser } from '../common/model';
 
-export { PluginSetupContract } from './plugin';
+export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
+  schema: ConfigSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('sessionTimeout', 'session.idleTimeout'),
+    unused('authorization.legacyFallback.enabled'),
+    (settings, fromPath, log) => {
+      const hasProvider = (provider: string) =>
+        settings?.xpack?.security?.authc?.providers?.includes(provider) ?? false;
 
-export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+      if (hasProvider('basic') && hasProvider('token')) {
+        log(
+          'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.'
+        );
+      }
+      return settings;
+    },
+  ],
+};
+export const plugin: PluginInitializer<
+  RecursiveReadonly<SecurityPluginSetup>,
+  void,
+  PluginSetupDependencies
+> = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);

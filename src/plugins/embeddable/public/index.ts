@@ -17,20 +17,23 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export {
+  Adapters,
   ADD_PANEL_ACTION_ID,
+  AddPanelAction,
   APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  Adapters,
-  AddPanelAction,
-  CONTEXT_MENU_TRIGGER,
+  applyFilterTrigger,
   Container,
   ContainerInput,
   ContainerOutput,
+  CONTEXT_MENU_TRIGGER,
+  contextMenuTrigger,
   EDIT_PANEL_ACTION_ID,
   EditPanelAction,
   Embeddable,
@@ -38,23 +41,32 @@ export {
   EmbeddableChildPanelProps,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
+  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePanel,
+  EmbeddableRoot,
+  EmbeddableVisTriggerContext,
   ErrorEmbeddable,
   GetEmbeddableFactories,
   GetEmbeddableFactory,
   IContainer,
   IEmbeddable,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
   OutputSpec,
+  PANEL_BADGE_TRIGGER,
+  panelBadgeTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
-  SavedObjectMetaData,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
   ViewMode,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
+  withEmbeddableSubscription,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

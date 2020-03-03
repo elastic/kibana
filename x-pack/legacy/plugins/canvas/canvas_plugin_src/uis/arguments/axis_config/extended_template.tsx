@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ExpressionAST } from '../../../../types';
-import { ArgumentStrings } from '../../../../i18n';
+import { ExpressionAstExpression } from '../../../../types';
+import { ArgumentStrings } from '../../../../i18n/ui';
 
 const { AxisConfig: strings } = ArgumentStrings;
 
 const { set } = immutable;
 
-const defaultExpression: ExpressionAST = {
+const defaultExpression: ExpressionAstExpression = {
   type: 'expression',
   chain: [
     {
@@ -28,8 +28,8 @@ const defaultExpression: ExpressionAST = {
 };
 
 export interface Props {
-  onValueChange: (newValue: ExpressionAST) => void;
-  argValue: boolean | ExpressionAST;
+  onValueChange: (newValue: ExpressionAstExpression) => void;
+  argValue: boolean | ExpressionAstExpression;
   typeInstance: {
     name: 'xaxis' | 'yaxis';
   };
@@ -79,13 +79,19 @@ export class ExtendedTemplate extends PureComponent<Props> {
     }
 
     const positions = {
-      xaxis: [strings.getPositionBottom(), strings.getPositionTop()],
-      yaxis: [strings.getPositionLeft(), strings.getPositionRight()],
+      xaxis: [
+        { value: 'bottom', text: strings.getPositionBottom() },
+        { value: 'top', text: strings.getPositionTop() },
+      ],
+      yaxis: [
+        { value: 'left', text: strings.getPositionLeft() },
+        { value: 'right', text: strings.getPositionRight() },
+      ],
     };
     const argName = this.props.typeInstance.name;
-    const position = this.getArgValue('position', positions[argName][0]);
+    const position = this.getArgValue('position', positions[argName][0].value);
 
-    const options = positions[argName].map(val => ({ value: val, text: val }));
+    const options = positions[argName];
 
     return (
       <Fragment>

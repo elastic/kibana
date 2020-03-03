@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
-import { timefilter } from 'ui/timefilter';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiPage,
-  EuiPageContent,
-  EuiOverlayMask,
-} from '@elastic/eui';
-
-import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiOverlayMask } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
 
@@ -28,9 +18,10 @@ import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 
-
-export const NewCalendar = injectI18n(class NewCalendar extends Component {
+class NewCalendarUI extends Component {
   static propTypes = {
     calendarId: PropTypes.string,
     canCreateCalendar: PropTypes.bool.isRequired,
@@ -56,12 +47,11 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       events: [],
       saving: false,
       selectedCalendar: undefined,
+      isGlobalCalendar: false,
     };
   }
 
   componentDidMount() {
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
     this.formSetup();
   }
 
@@ -69,30 +59,35 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     try {
       const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
 
-      const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
-      const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
+      const jobIdOptions = jobIds.map(jobId => ({ label: jobId }));
+      const groupIdOptions = groupIds.map(groupId => ({ label: groupId }));
 
       const selectedJobOptions = [];
       const selectedGroupOptions = [];
       let eventsList = [];
       let selectedCalendar;
       let formCalendarId = '';
+      let isGlobalCalendar = false;
 
       // Editing existing calendar.
       if (this.props.calendarId !== undefined) {
-        selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
+        selectedCalendar = calendars.find(cal => cal.calendar_id === this.props.calendarId);
 
         if (selectedCalendar) {
           formCalendarId = selectedCalendar.calendar_id;
           eventsList = selectedCalendar.events;
 
-          selectedCalendar.job_ids.forEach(id => {
-            if (jobIds.find((jobId) => jobId === id)) {
-              selectedJobOptions.push({ label: id });
-            } else if (groupIds.find((groupId) => groupId === id)) {
-              selectedGroupOptions.push({ label: id });
-            }
-          });
+          if (selectedCalendar.job_ids.includes(GLOBAL_CALENDAR)) {
+            isGlobalCalendar = true;
+          } else {
+            selectedCalendar.job_ids.forEach(id => {
+              if (jobIds.find(jobId => jobId === id)) {
+                selectedJobOptions.push({ label: id });
+              } else if (groupIds.find(groupId => groupId === id)) {
+                selectedGroupOptions.push({ label: id });
+              }
+            });
+          }
         }
       }
 
@@ -107,15 +102,16 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
         loading: false,
         selectedJobOptions,
         selectedGroupOptions,
-        selectedCalendar
+        selectedCalendar,
+        isGlobalCalendar,
       });
     } catch (error) {
       console.log(error);
       this.setState({ loading: false });
-      toastNotifications.addDanger(
-        this.props.intl.formatMessage({
-          id: 'xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage',
-          defaultMessage: 'An error occurred loading calendar form data. Try refreshing the page.'
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage', {
+          defaultMessage: 'An error occurred loading calendar form data. Try refreshing the page.',
         })
       );
     }
@@ -131,21 +127,18 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     }
 
     return false;
-  }
+  };
 
   onCreate = async () => {
     const { formCalendarId } = this.state;
-    const { intl } = this.props;
 
     if (this.isDuplicateId()) {
-      toastNotifications.addDanger(
-        intl.formatMessage(
-          {
-            id: 'xpack.ml.calendarsEdit.canNotCreateCalendarWithExistingIdErrorMessag',
-            defaultMessage: 'Cannot create calendar with id [{formCalendarId}] as it already exists.'
-          },
-          { formCalendarId }
-        )
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.calendarsEdit.canNotCreateCalendarWithExistingIdErrorMessag', {
+          defaultMessage: 'Cannot create calendar with id [{formCalendarId}] as it already exists.',
+          values: { formCalendarId },
+        })
       );
     } else {
       const calendar = this.setUpCalendarForApi();
@@ -153,22 +146,20 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
 
       try {
         await ml.addCalendar(calendar);
-        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+        window.location = '#/settings/calendars_list';
       } catch (error) {
         console.log('Error saving calendar', error);
         this.setState({ saving: false });
-        toastNotifications.addDanger(
-          intl.formatMessage(
-            {
-              id: 'xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage',
-              defaultMessage: 'An error occurred creating calendar {calendarId}'
-            },
-            { calendarId: calendar.calendarId }
-          )
+        const { toasts } = this.props.kibana.services.notifications;
+        toasts.addDanger(
+          i18n.translate('xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage', {
+            defaultMessage: 'An error occurred creating calendar {calendarId}',
+            values: { calendarId: calendar.calendarId },
+          })
         );
       }
     }
-  }
+  };
 
   onEdit = async () => {
     const calendar = this.setUpCalendarForApi();
@@ -176,21 +167,20 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
 
     try {
       await ml.updateCalendar(calendar);
-      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+      window.location = '#/settings/calendars_list';
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
-      toastNotifications.addDanger(
-        this.props.intl.formatMessage(
-          {
-            id: 'xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage',
-            defaultMessage: 'An error occurred saving calendar {calendarId}. Try refreshing the page.'
-          },
-          { calendarId: calendar.calendarId }
-        )
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage', {
+          defaultMessage:
+            'An error occurred saving calendar {calendarId}. Try refreshing the page.',
+          values: { calendarId: calendar.calendarId },
+        })
       );
     }
-  }
+  };
 
   setUpCalendarForApi = () => {
     const {
@@ -199,16 +189,21 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       events,
       selectedGroupOptions,
       selectedJobOptions,
+      isGlobalCalendar,
     } = this.state;
 
-    const jobIds = selectedJobOptions.map((option) => option.label);
-    const groupIds = selectedGroupOptions.map((option) => option.label);
+    const allIds = isGlobalCalendar
+      ? [GLOBAL_CALENDAR]
+      : [
+          ...selectedJobOptions.map(option => option.label),
+          ...selectedGroupOptions.map(option => option.label),
+        ];
 
     // Reduce events to fields expected by api
-    const eventsToSave = events.map((event) => ({
+    const eventsToSave = events.map(event => ({
       description: event.description,
       start_time: event.start_time,
-      end_time: event.end_time
+      end_time: event.end_time,
     }));
 
     // set up calendar
@@ -216,13 +211,13 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       calendarId: formCalendarId,
       description,
       events: eventsToSave,
-      job_ids: [...jobIds, ...groupIds]
+      job_ids: allIds,
     };
 
     return calendar;
-  }
+  };
 
-  onCreateGroupOption = (newGroup) => {
+  onCreateGroupOption = newGroup => {
     const newOption = {
       label: newGroup,
     };
@@ -232,28 +227,34 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     }));
   };
 
-  onJobSelection = (selectedJobOptions) => {
+  onGlobalCalendarChange = ({ currentTarget }) => {
+    this.setState({
+      isGlobalCalendar: currentTarget.checked,
+    });
+  };
+
+  onJobSelection = selectedJobOptions => {
     this.setState({
       selectedJobOptions,
     });
   };
 
-  onGroupSelection = (selectedGroupOptions) => {
+  onGroupSelection = selectedGroupOptions => {
     this.setState({
       selectedGroupOptions,
     });
   };
 
-  onCalendarIdChange = (e) => {
+  onCalendarIdChange = e => {
     const isValid = validateCalendarId(e.target.value);
 
     this.setState({
       formCalendarId: e.target.value,
-      isNewCalendarIdValid: isValid
+      isNewCalendarIdValid: isValid,
     });
   };
 
-  onDescriptionChange = (e) => {
+  onDescriptionChange = e => {
     this.setState({
       description: e.target.value,
     });
@@ -263,41 +264,41 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     this.setState(prevState => ({
       isImportModalVisible: !prevState.isImportModalVisible,
     }));
-  }
+  };
 
   closeImportModal = () => {
     this.setState({
       isImportModalVisible: false,
     });
-  }
+  };
 
-  onEventDelete = (eventId) => {
+  onEventDelete = eventId => {
     this.setState(prevState => ({
-      events: prevState.events.filter(event => event.event_id !== eventId)
+      events: prevState.events.filter(event => event.event_id !== eventId),
     }));
-  }
+  };
 
   closeNewEventModal = () => {
     this.setState({ isNewEventModalVisible: false });
-  }
+  };
 
   showNewEventModal = () => {
     this.setState({ isNewEventModalVisible: true });
-  }
+  };
 
-  addEvent = (event) => {
+  addEvent = event => {
     this.setState(prevState => ({
       events: [...prevState.events, event],
-      isNewEventModalVisible: false
+      isNewEventModalVisible: false,
     }));
-  }
+  };
 
-  addImportedEvents = (events) => {
+  addImportedEvents = events => {
     this.setState(prevState => ({
       events: [...prevState.events, ...events],
-      isImportModalVisible: false
+      isImportModalVisible: false,
     }));
-  }
+  };
 
   render() {
     const {
@@ -312,7 +313,8 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       saving,
       selectedCalendar,
       selectedJobOptions,
-      selectedGroupOptions
+      selectedGroupOptions,
+      isGlobalCalendar,
     } = this.state;
 
     let modal = '';
@@ -320,10 +322,7 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     if (isNewEventModalVisible) {
       modal = (
         <EuiOverlayMask>
-          <NewEventModal
-            addEvent={this.addEvent}
-            closeModal={this.closeNewEventModal}
-          />
+          <NewEventModal addEvent={this.addEvent} closeModal={this.closeNewEventModal} />
         </EuiOverlayMask>
       );
     } else if (isImportModalVisible) {
@@ -341,39 +340,47 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       <Fragment>
         <NavigationMenu tabId="settings" />
         <EuiPage className="mlCalendarEditForm">
-          <EuiPageContent
-            className="mlCalendarEditForm__content"
-            verticalPosition="center"
-            horizontalPosition="center"
-          >
-            <CalendarForm
-              calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
-              canCreateCalendar={this.props.canCreateCalendar}
-              canDeleteCalendar={this.props.canDeleteCalendar}
-              description={selectedCalendar ? selectedCalendar.description : description}
-              eventsList={events}
-              groupIds={groupIdOptions}
-              isEdit={selectedCalendar !== undefined}
-              isNewCalendarIdValid={(selectedCalendar || isNewCalendarIdValid === null) ? true : isNewCalendarIdValid}
-              jobIds={jobIdOptions}
-              onCalendarIdChange={this.onCalendarIdChange}
-              onCreate={this.onCreate}
-              onDescriptionChange={this.onDescriptionChange}
-              onEdit={this.onEdit}
-              onEventDelete={this.onEventDelete}
-              onGroupSelection={this.onGroupSelection}
-              showImportModal={this.showImportModal}
-              onJobSelection={this.onJobSelection}
-              saving={saving}
-              selectedGroupOptions={selectedGroupOptions}
-              selectedJobOptions={selectedJobOptions}
-              onCreateGroupOption={this.onCreateGroupOption}
-              showNewEventModal={this.showNewEventModal}
-            />
-          </EuiPageContent>
-          {modal}
+          <EuiPageBody>
+            <EuiPageContent
+              className="mlCalendarEditForm__content"
+              verticalPosition="center"
+              horizontalPosition="center"
+            >
+              <CalendarForm
+                calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+                canCreateCalendar={this.props.canCreateCalendar}
+                canDeleteCalendar={this.props.canDeleteCalendar}
+                description={selectedCalendar ? selectedCalendar.description : description}
+                eventsList={events}
+                groupIds={groupIdOptions}
+                isEdit={selectedCalendar !== undefined}
+                isNewCalendarIdValid={
+                  selectedCalendar || isNewCalendarIdValid === null ? true : isNewCalendarIdValid
+                }
+                jobIds={jobIdOptions}
+                onCalendarIdChange={this.onCalendarIdChange}
+                onCreate={this.onCreate}
+                onDescriptionChange={this.onDescriptionChange}
+                onEdit={this.onEdit}
+                onEventDelete={this.onEventDelete}
+                onGroupSelection={this.onGroupSelection}
+                showImportModal={this.showImportModal}
+                onJobSelection={this.onJobSelection}
+                saving={saving}
+                selectedGroupOptions={selectedGroupOptions}
+                selectedJobOptions={selectedJobOptions}
+                onCreateGroupOption={this.onCreateGroupOption}
+                showNewEventModal={this.showNewEventModal}
+                isGlobalCalendar={isGlobalCalendar}
+                onGlobalCalendarChange={this.onGlobalCalendarChange}
+              />
+            </EuiPageContent>
+            {modal}
+          </EuiPageBody>
         </EuiPage>
       </Fragment>
     );
   }
-});
+}
+
+export const NewCalendar = withKibana(NewCalendarUI);

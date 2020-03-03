@@ -59,6 +59,7 @@ import {
 
 export { ObjectType, TypeOf, Type };
 export { ByteSizeValue } from './byte_size_value';
+export { SchemaTypeError, ValidationError } from './errors';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);

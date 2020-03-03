@@ -16,13 +16,12 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 
 export class EMSFileSource extends AbstractVectorSource {
-
   static type = EMS_FILE;
-  static title =  i18n.translate('xpack.maps.source.emsFileTitle', {
-    defaultMessage: 'EMS Boundaries'
+  static title = i18n.translate('xpack.maps.source.emsFileTitle', {
+    defaultMessage: 'EMS Boundaries',
   });
   static description = i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service'
+    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   });
   static icon = 'emsApp';
 
@@ -30,29 +29,31 @@ export class EMSFileSource extends AbstractVectorSource {
     return {
       type: EMSFileSource.type,
       id,
-      tooltipProperties
+      tooltipProperties,
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = (sourceConfig) => {
+    const onSourceConfigChange = sourceConfig => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>;
+    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   constructor(descriptor, inspectorAdapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
-    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey => this.createField({ fieldName: propertyKey }));
+    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey =>
+      this.createField({ fieldName: propertyKey })
+    );
   }
 
   createField({ fieldName }) {
     return new EMSFileField({
       fieldName,
       source: this,
-      origin: FIELD_ORIGIN.SOURCE
+      origin: FIELD_ORIGIN.SOURCE,
     });
   }
 
@@ -70,14 +71,16 @@ export class EMSFileSource extends AbstractVectorSource {
   async getEMSFileLayer() {
     const emsClient = getEMSClient();
     const emsFileLayers = await emsClient.getFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer => fileLayer.getId() === this._descriptor.id));
+    const emsFileLayer = emsFileLayers.find(fileLayer => fileLayer.getId() === this._descriptor.id);
     if (!emsFileLayer) {
-      throw new Error(i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
-        defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
-        values: {
-          id: this._descriptor.id
-        }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
+          defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
+          values: {
+            id: this._descriptor.id,
+          },
+        })
+      );
     }
     return emsFileLayer;
   }
@@ -87,21 +90,19 @@ export class EMSFileSource extends AbstractVectorSource {
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
-      fetchUrl: emsFileLayer.getDefaultFormatUrl()
+      fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });
 
     const emsIdField = emsFileLayer._config.fields.find(field => {
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature, index) => {
-      feature.id = emsIdField
-        ? feature.properties[emsIdField.id]
-        : index;
+      feature.id = emsIdField ? feature.properties[emsIdField.id] : index;
     });
 
     return {
       data: featureCollection,
-      meta: {}
+      meta: {},
     };
   }
 
@@ -110,22 +111,22 @@ export class EMSFileSource extends AbstractVectorSource {
     try {
       const emsFileLayer = await this.getEMSFileLayer();
       emsLink = emsFileLayer.getEMSHotLink();
-    } catch(error) {
+    } catch (error) {
       // ignore error if EMS layer id could not be found
     }
 
     return [
       {
         label: getDataSourceLabel(),
-        value: EMSFileSource.title
+        value: EMSFileSource.title,
       },
       {
         label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
           defaultMessage: `Layer`,
         }),
         value: this._descriptor.id,
-        link: emsLink
-      }
+        link: emsLink,
+      },
     ];
   }
 
@@ -142,7 +143,6 @@ export class EMSFileSource extends AbstractVectorSource {
     const emsFileLayer = await this.getEMSFileLayer();
     return emsFileLayer.getAttributions();
   }
-
 
   async getLeftJoinFields() {
     const emsFileLayer = await this.getEMSFileLayer();
@@ -166,5 +166,4 @@ export class EMSFileSource extends AbstractVectorSource {
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPES.POLYGON];
   }
-
 }

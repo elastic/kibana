@@ -18,21 +18,45 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
-import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { initLegacyModule } from './shim/legacy_module';
-import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
-  createFilterAction,
-  GLOBAL_APPLY_FILTER_ACTION,
-} from './filter/action/apply_filter_action';
-import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+  DataPublicPluginSetup,
+} from '../../../../plugins/data/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
+
+import {
+  setIndexPatterns,
+  setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
+  setOverlays,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+import { setSearchServiceShim } from './services';
+import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
+import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/embeddable/public/lib/triggers';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
+
+import { SearchSetup, SearchStart, SearchService } from './search/search_service';
+
+export interface DataPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+  expressions: ExpressionsSetup;
+  uiActions: UiActionsSetup;
+}
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -41,7 +65,7 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
+  search: SearchSetup;
 }
 
 /**
@@ -50,10 +74,7 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  indexPatterns: IndexPatternsStart;
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
+  search: SearchStart;
 }
 
 /**
@@ -68,62 +89,47 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
+export class DataPlugin
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
 
-  private setupApi!: DataSetup;
-  private storage!: IStorageWrapper;
+  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
+    setInjectedMetadata(core.injectedMetadata);
 
-  public setup(core: CoreSetup): DataSetup {
-    this.storage = new Storage(window.localStorage);
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
 
-    this.setupApi = {
-      indexPatterns: this.indexPatterns.setup(),
+    uiActions.registerAction(
+      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+    uiActions.registerAction(
+      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+
+    return {
+      search: this.search.setup(core),
     };
-
-    return this.setupApi;
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
-    const { uiSettings, http, notifications, savedObjects } = core;
+    const search = this.search.start(core);
+    setSearchServiceShim(search);
 
-    const indexPatternsService = this.indexPatterns.start({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
-      notifications,
-      fieldFormats: data.fieldFormats,
-    });
+    setUiSettings(core.uiSettings);
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setSearchService(data.search);
+    setOverlays(core.overlays);
 
-    initLegacyModule(indexPatternsService.indexPatterns);
-
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-    });
-
-    uiActions.registerAction(
-      createFilterAction(
-        core.overlays,
-        data.query.filterManager,
-        data.query.timefilter.timefilter,
-        indexPatternsService
-      )
-    );
-
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
+    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
+    uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
 
     return {
-      ...this.setupApi!,
-      indexPatterns: indexPatternsService,
-      ui: {
-        SearchBar,
-      },
+      search,
     };
   }
 
-  public stop() {
-    this.indexPatterns.stop();
-  }
+  public stop() {}
 }

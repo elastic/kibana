@@ -25,21 +25,24 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
         buttonContent={ButtonContent}
         onToggle={setAdditionalExpanded}
         initialIsOpen={additionalExpanded}
+        data-test-subj="mlJobWizardToggleAdditionalSettingsSection"
       >
-        <EuiSpacer />
+        <section data-test-subj="mlJobWizardAdditionalSettingsSection">
+          <EuiSpacer />
 
-        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
-          <EuiFlexItem>
-            <CustomUrlsSelection />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+            <EuiFlexItem>
+              <CustomUrlsSelection />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
-          <EuiFlexItem>
-            <CalendarsSelection />
-          </EuiFlexItem>
-          <EuiFlexItem />
-        </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+            <EuiFlexItem>
+              <CalendarsSelection />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </section>
       </EuiAccordion>
     </Fragment>
   );

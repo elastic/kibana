@@ -16,10 +16,9 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
@@ -49,6 +48,9 @@ export interface CustomUrlListProps {
  * with buttons for testing and deleting each custom URL.
  */
 export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCustomUrls }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -106,7 +108,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
         .catch(resp => {
           // eslint-disable-next-line no-console
           console.error('Error obtaining URL for test:', resp);
-          toastNotifications.addDanger(
+
+          const { toasts } = notifications;
+          toasts.addDanger(
             i18n.translate(
               'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
               {
@@ -144,7 +148,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
       : [];
 
     return (
-      <EuiFlexGroup key={`url_${index}`}>
+      <EuiFlexGroup key={`url_${index}`} data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={
@@ -160,6 +164,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               value={label}
               isInvalid={isInvalidLabel}
               onChange={e => onLabelChange(e, index)}
+              data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -266,5 +271,5 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
     );
   });
 
-  return <>{customUrlRows}</>;
+  return <div data-test-subj="mlJobEditCustomUrlsList">{customUrlRows}</div>;
 };

@@ -5,66 +5,10 @@
  */
 
 import { CoreSetup, PluginsSetup } from './shim';
-import { routes } from './routes';
 import { functions } from '../canvas_plugin_src/functions/server';
-import { registerCanvasUsageCollector } from './usage';
-import { loadSampleData } from './sample_data';
 
 export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    routes(core);
-
-    const { serverFunctions } = plugins.interpreter.register({ serverFunctions: functions });
-
-    core.injectUiAppVars('canvas', async () => {
-      const config = core.getServerConfig();
-      const basePath = config.get('server.basePath');
-      const reportingBrowserType = (() => {
-        const configKey = 'xpack.reporting.capture.browser.type';
-        if (!config.has(configKey)) {
-          return null;
-        }
-        return config.get(configKey);
-      })();
-
-      return {
-        ...plugins.kibana.injectedUiAppVars,
-        kbnIndex: config.get('kibana.index'),
-        serverFunctions: serverFunctions.toArray(),
-        basePath,
-        reportingBrowserType,
-      };
-    });
-
-    plugins.features.registerFeature({
-      id: 'canvas',
-      name: 'Canvas',
-      icon: 'canvasApp',
-      navLinkId: 'canvas',
-      app: ['canvas', 'kibana'],
-      catalogue: ['canvas'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['canvas-workpad', 'canvas-element'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show'],
-        },
-        read: {
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
-
-    registerCanvasUsageCollector(plugins.usageCollection, core);
-    loadSampleData(
-      plugins.sampleData.addSavedObjectsToSampleDataset,
-      plugins.sampleData.addAppLinksToSampleDataset
-    );
+    plugins.interpreter.register({ serverFunctions: functions });
   }
 }

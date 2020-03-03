@@ -124,7 +124,7 @@ describe('Session Timeout', () => {
     });
 
     test(`starts and does not initialize on an anonymous path`, async () => {
-      http.anonymousPaths.register(window.location.pathname);
+      http.anonymousPaths.isAnonymous.mockReturnValue(true);
       await sessionTimeout.start();
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).toBeUndefined();

@@ -23,7 +23,6 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -41,8 +40,16 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
+// TODO This is an integration test and thus requires a running platform. When moving to the new platform,
+// this test has to be migrated to the newly created integration test environment.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { npStart } from 'ui/new_platform';
+import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -56,20 +63,40 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
   let visRegComplete = false;
 
+  setInjectedVars({
+    emsTileLayerId: {},
+    enableExternalUrls: true,
+    esShardTimeout: 10000,
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
       vegaVisualizationDependencies = {
-        es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
-        uiSettings: $injector.get('config'),
+        core: {
+          uiSettings: npStart.core.uiSettings,
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {},
+              },
+            },
+            __LEGACY: {
+              esClient: npStart.plugins.data.search.__LEGACY.esClient,
+            },
+          },
+        },
       };
 
-      if(!visRegComplete) {
+      if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(createVegaTypeDefinition(vegaVisualizationDependencies));
+        visualizationsSetup.types.createBaseVisualization(
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
       }
-
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
@@ -77,19 +104,19 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function () {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, { type: 'vega' });
+      vis = new visualizationsStart.Vis(indexPattern, { type: 'vega' });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -112,7 +139,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph (may fail in dev env)', async function () {
+    it('should show vega graph (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);

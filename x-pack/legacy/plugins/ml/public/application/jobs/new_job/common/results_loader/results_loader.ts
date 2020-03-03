@@ -12,8 +12,8 @@ import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
 import { getScoresByRecord } from './searches';
-import { JOB_TYPE } from '../job_creator/util/constants';
 import { ChartLoader } from '../chart_loader';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 
 export interface Results {

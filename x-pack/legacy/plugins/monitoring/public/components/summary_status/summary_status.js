@@ -13,17 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const wrapChild = ({ label, value, ...props }, index) => (
-  <EuiFlexItem
-    key={`summary-status-item-${index}`}
-    grow={false}
-    {...props}
-  >
-    <EuiStat
-      title={value}
-      titleSize="xs"
-      textAlign="left"
-      description={label ? `${label}` : ''}
-    />
+  <EuiFlexItem key={`summary-status-item-${index}`} grow={false} {...props}>
+    <EuiStat title={value} titleSize="xs" textAlign="left" description={label ? `${label}` : ''} />
   </EuiFlexItem>
 );
 
@@ -39,11 +30,11 @@ const DefaultIconComponent = ({ status }) => (
             label={i18n.translate('xpack.monitoring.summaryStatus.statusIconLabel', {
               defaultMessage: 'Status: {status}',
               values: {
-                status
-              }
+                status,
+              },
             })}
           />
-        )
+        ),
       }}
     />
   </Fragment>
@@ -55,18 +46,15 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   }
 
   return (
-    <EuiFlexItem
-      key={`summary-status-item-status`}
-      grow={false}
-    >
+    <EuiFlexItem key={`summary-status-item-status`} grow={false}>
       <EuiStat
-        title={(
+        title={
           <Fragment>
             <IconComponent status={status} isOnline={isOnline} />
-              &nbsp;
+            &nbsp;
             {capitalize(status)}
           </Fragment>
-        )}
+        }
         titleSize="xs"
         textAlign="left"
         description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
@@ -77,7 +65,13 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   );
 };
 
-export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
+export function SummaryStatus({
+  metrics,
+  status,
+  isOnline,
+  IconComponent = DefaultIconComponent,
+  ...props
+}) {
   return (
     <div {...props} className="monSummaryStatusNoWrap">
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -89,5 +83,5 @@ export function SummaryStatus({ metrics, status, isOnline, IconComponent = Defau
 }
 
 SummaryStatus.propTypes = {
-  metrics: PropTypes.array.isRequired
+  metrics: PropTypes.array.isRequired,
 };

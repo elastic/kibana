@@ -9,31 +9,35 @@ describe('repository_serialization', () => {
   describe('deserializePolicy()', () => {
     it('should deserialize a new slm policy', () => {
       expect(
-        deserializePolicy('my-backups-snapshots', {
-          version: 1,
-          modified_date: '2019-07-09T22:11:55.761Z',
-          modified_date_millis: 1562710315761,
-          policy: {
-            name: '<daily-snap-{now/d}>',
-            schedule: '0 30 1 * * ?',
-            repository: 'my-backups',
-            config: {
-              indices: ['kibana-*'],
-              ignore_unavailable: false,
-              include_global_state: false,
-              metadata: {
-                foo: 'bar',
+        deserializePolicy(
+          'my-backups-snapshots',
+          {
+            version: 1,
+            modified_date: '2019-07-09T22:11:55.761Z',
+            modified_date_millis: 1562710315761,
+            policy: {
+              name: '<daily-snap-{now/d}>',
+              schedule: '0 30 1 * * ?',
+              repository: 'my-backups',
+              config: {
+                indices: ['kibana-*'],
+                ignore_unavailable: false,
+                include_global_state: false,
+                metadata: {
+                  foo: 'bar',
+                },
+              },
+              retention: {
+                expire_after: '14d',
+                max_count: 30,
+                min_count: 4,
               },
             },
-            retention: {
-              expire_after: '14d',
-              max_count: 30,
-              min_count: 4,
-            },
+            next_execution: '2019-07-11T01:30:00.000Z',
+            next_execution_millis: 1562722200000,
           },
-          next_execution: '2019-07-11T01:30:00.000Z',
-          next_execution_millis: 1562722200000,
-        })
+          ['my-backups-snapshots']
+        )
       ).toEqual({
         name: 'my-backups-snapshots',
         version: 1,
@@ -58,41 +62,46 @@ describe('repository_serialization', () => {
         },
         nextExecution: '2019-07-11T01:30:00.000Z',
         nextExecutionMillis: 1562722200000,
+        isManagedPolicy: true,
       });
     });
 
     it('should deserialize a slm policy with success and failure info', () => {
       expect(
-        deserializePolicy('my-backups-snapshots', {
-          version: 1,
-          modified_date: '2019-07-09T22:11:55.761Z',
-          modified_date_millis: 1562710315761,
-          policy: {
-            name: '<daily-snap-{now/d}>',
-            schedule: '0 30 1 * * ?',
-            repository: 'my-backups',
-            config: {
-              indices: ['kibana-*'],
-              ignore_unavailable: false,
-              include_global_state: false,
+        deserializePolicy(
+          'my-backups-snapshots',
+          {
+            version: 1,
+            modified_date: '2019-07-09T22:11:55.761Z',
+            modified_date_millis: 1562710315761,
+            policy: {
+              name: '<daily-snap-{now/d}>',
+              schedule: '0 30 1 * * ?',
+              repository: 'my-backups',
+              config: {
+                indices: ['kibana-*'],
+                ignore_unavailable: false,
+                include_global_state: false,
+              },
             },
-          },
-          next_execution: '2019-07-11T01:30:00.000Z',
-          next_execution_millis: 1562722200000,
-          last_success: {
-            snapshot_name: 'daily-snap-2019.07.10-ya_cajvksbcidtlbnnxt9q',
-            time_string: '2019-07-10T01:30:02.548Z',
-            time: 1562722202548,
-          },
-          last_failure: {
-            snapshot_name: 'daily-snap-2019.07.10-cvi4m0uts5knejcrgq4qxq',
-            time_string: '2019-07-10T01:30:02.443Z',
-            time: 1562722202443,
-            details: `{"type":"concurrent_snapshot_execution_exception",
+            next_execution: '2019-07-11T01:30:00.000Z',
+            next_execution_millis: 1562722200000,
+            last_success: {
+              snapshot_name: 'daily-snap-2019.07.10-ya_cajvksbcidtlbnnxt9q',
+              time_string: '2019-07-10T01:30:02.548Z',
+              time: 1562722202548,
+            },
+            last_failure: {
+              snapshot_name: 'daily-snap-2019.07.10-cvi4m0uts5knejcrgq4qxq',
+              time_string: '2019-07-10T01:30:02.443Z',
+              time: 1562722202443,
+              details: `{"type":"concurrent_snapshot_execution_exception",
             "reason":"[my-backups:daily-snap-2019.07.10-cvi4m0uts5knejcrgq4qxq] a snapshot is already running",
             "stack_trace":"Some stack trace"}`,
+            },
           },
-        })
+          ['my-backups-snapshots']
+        )
       ).toEqual({
         name: 'my-backups-snapshots',
         version: 1,
@@ -120,6 +129,7 @@ describe('repository_serialization', () => {
           time: 1562722202548,
           timeString: '2019-07-10T01:30:02.548Z',
         },
+        isManagedPolicy: true,
       });
     });
   });
@@ -146,6 +156,7 @@ describe('repository_serialization', () => {
             maxCount: 30,
             minCount: 4,
           },
+          isManagedPolicy: true,
         })
       ).toEqual({
         name: 'my-backups-snapshots',

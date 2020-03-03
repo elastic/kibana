@@ -16,9 +16,19 @@ const initialState = {
 
 const success = action => `${action}_SUCCESS`;
 
-const parseAutoFollowPattern = (autoFollowPattern) => {
+const setActiveForIds = (ids, byId, active) => {
+  const shallowCopyByIds = { ...byId };
+  ids.forEach(id => {
+    shallowCopyByIds[id].active = active;
+  });
+  return shallowCopyByIds;
+};
+
+const parseAutoFollowPattern = autoFollowPattern => {
   // Extract prefix and suffix from follow index pattern
-  const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(autoFollowPattern.followIndexPattern);
+  const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(
+    autoFollowPattern.followIndexPattern
+  );
 
   return { ...autoFollowPattern, followIndexPatternPrefix, followIndexPatternSuffix };
 };
@@ -26,10 +36,16 @@ const parseAutoFollowPattern = (autoFollowPattern) => {
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.patterns.map(parseAutoFollowPattern), 'name') };
+      return {
+        ...state,
+        byId: arrayToObject(action.payload.patterns.map(parseAutoFollowPattern), 'name'),
+      };
     }
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) } };
+      return {
+        ...state,
+        byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) },
+      };
     }
     case t.AUTO_FOLLOW_PATTERN_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };
@@ -42,6 +58,14 @@ export const reducer = (state = initialState, action) => {
       const { itemsDeleted } = action.payload;
       itemsDeleted.forEach(id => delete byId[id]);
       return { ...state, byId };
+    }
+    case success(t.AUTO_FOLLOW_PATTERN_PAUSE): {
+      const { itemsPaused } = action.payload;
+      return { ...state, byId: setActiveForIds(itemsPaused, state.byId, false) };
+    }
+    case success(t.AUTO_FOLLOW_PATTERN_RESUME): {
+      const { itemsResumed } = action.payload;
+      return { ...state, byId: setActiveForIds(itemsResumed, state.byId, true) };
     }
     default:
       return state;

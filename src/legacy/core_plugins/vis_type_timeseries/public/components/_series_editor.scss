@@ -1,10 +1,8 @@
-@import 'node_modules/@elastic/eui/src/components/panel/mixins';
-
 .tvbSeriesEditor__container {
   padding: $euiSize;
 }
 
-@include euiPanel('tvbSeriesEditor');
+@include euiPanel('.tvbSeriesEditor');
 
 .tvbSeriesEditor {
   margin-bottom: $euiSize;

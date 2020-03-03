@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export default function ($elem, fn, frequency) {
-
+export default function($elem, fn, frequency) {
   frequency = frequency || 500;
   let currentHeight = $elem.height();
   let currentWidth = $elem.width();
@@ -26,7 +25,7 @@ export default function ($elem, fn, frequency) {
   let timeout;
 
   function checkLoop() {
-    timeout = setTimeout(function () {
+    timeout = setTimeout(function() {
       if (currentHeight !== $elem.height() || currentWidth !== $elem.width()) {
         currentHeight = $elem.height();
         currentWidth = $elem.width();
@@ -39,9 +38,7 @@ export default function ($elem, fn, frequency) {
 
   checkLoop();
 
-  return function () {
+  return function() {
     clearTimeout(timeout);
   };
-
-
 }

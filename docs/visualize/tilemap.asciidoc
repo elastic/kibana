@@ -1,105 +1,142 @@
-[[tilemap]]
-== Coordinate Maps
+[[visualize-maps]]
+== Maps
 
-A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
+To tell a story and answer questions about your geographical data, you can create several types of interactive maps with Visualize.
 
-Kibana’s out-of-the-box settings do not show a coordinate map in the New Visualization menu. Use <<maps>> instead, which offers more functionality and is easier to use.
-If you want to create new coordinate map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
+Visualize supports the following maps:
 
-Kibana uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service]
-to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
-in `kibana.yml`.
+* *Coordinate* &mdash; Display latitude and longitude coordinates that are associated to the specified bucket aggregation.
 
-[float]
-[[tilemap-configuration]]
-=== Configuration
+* *Region* &mdash; Display colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
 
-[float]
-==== Data
+* *Heat* &mdash; Display graphical representations of data where the individual values are represented by colors.
+
+NOTE: The maps in Visualize have been replaced with <<maps>>, which offers more functionality.
 
 [float]
-===== Metrics
+[[coordinate-map]]
+=== Coordinate map
 
-The default _metrics_ aggregation for a coordinate map is the *Count* aggregation. You can select any of the following
-aggregations as the metrics aggregation:
+Use a coordinate map when your data set includes latitude and longitude values. For example, use a coordinate map to see the varying popularity of destination airports using the sample flight data.
 
-*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
-the elements in the selected index pattern.
-*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
-field. Select a field from the drop-down.
-*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
-field. Select a field from the drop-down.
-*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
-numeric field. Select a field from the drop-down.
-*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
-numeric field. Select a field from the drop-down.
-*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
-the number of unique values in a field. Select a field from the drop-down.
-
-Enter a string in the *Custom Label* field to change the display label.
+[role="screenshot"]
+image::images/visualize_coordinate_map_example.png[]
 
 [float]
-===== Buckets
+[[build-coordinate-map]]
+==== Build a coordinate map
 
-Coordinate maps use the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
-drop-down.
+Configure the `kibana.yml` settings and add the aggregations.
 
-- The _Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
-The _Precision_ slider determines the granularity of the results displayed on the map. See the documentation
-for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid]
-aggregation for details on the area specified by each precision level.
+. Configure the following `kibana.yml` settings:
 
-NOTE: Higher precisions increase memory usage for the browser displaying Kibana as well as for the underlying
-Elasticsearch cluster.
+* Set `xpack.maps.showMapVisualizationTypes` to `true`.
 
-- The _place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])_ box is checked by default. When this box is checked, the markers are
-placed in the center of all the documents in that bucket. When unchecked, the markers are placed in the center
-of the geohash grid cell. Leaving this checked generally results in a more accurate visualization.
+* To use a tile service provider for coordinate maps other than https://www.elastic.co/elastic-maps-service[Elastic Maps Service], configure the <<tilemap-settings,tilemap settings>>.
 
+. To display your data on the coordinate map, use the following aggregations:
 
-Enter a string in the *Custom Label* field to change the display label.
+* <<visualize-metric-aggregations,Metric>>
 
-[float]
-==== Options
+* <<visualize-bucket-aggregations,Geohash bucket aggregation>>
 
-*Map type*:: Select one of the following options from the drop-down.
-*_Scaled Circle Markers_*:: Scale the size of the markers based on the metric aggregation's value.
-*_Shaded Circle Markers_*:: Displays the markers with different shades based on the metric aggregation's value.
-*_Shaded Geohash Grid_*:: Displays the rectangular cells of the geohash grid instead of circular markers, with different
-shades based on the metric aggregation's value.
-*_Heatmap_*:: A heat map applies blurring to the circle markers and applies shading based on the amount of overlap.
-Heatmaps have the following options:
+. Specify the geohash bucket aggregation options:
 
-* *Cluster size*: Adjust the size of the heatmap clustering.
-* *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.
+* *Precision* slider &mdash; Determines the granularity of the results displayed on the map. To show the *Precision* slider, deselect *Change precision on map zoom*. For information on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
++
+NOTE: Higher precisions increase memory usage for the browser that displays {kib} and the underlying
+{es} cluster.
 
-*Desaturate map tiles*:: Desaturate the map's color in order to make the markers stand out more clearly.
-*WMS compliant map server*:: Check this box to enable the use of a third-party mapping service that complies with the Web
-Map Service (WMS) standard. Specify the following elements:
-
-* *WMS url*: The URL for the WMS map service.
-* *WMS layers*: A comma-separated list of the layers to use in this visualization. Each map server provides its own list of
-layers.
-* *WMS version*: The WMS version used by this map service.
-* *WMS format*: The image format used by this map service. The two most common formats are `image/png` and `image/jpeg`.
-* *WMS attribution*: An optional, user-defined string that identifies the map source. Maps display the attribution string
-in the lower right corner.
-* *WMS styles*: A comma-separated list of the styles to use in this visualization. Each map server provides its own styling
-options.
-
-After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard
-changes* button to keep your visualization in its current state.
+* *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])* &mdash; When you selected, the markers are
+placed in the center of all documents in the bucket, and a more accurate visualization is created. When deselected, the markers are placed in the center
+of the geohash grid cell.
++
+NOTE: When you have multiple values in the geo_point, the coordinate map is unable to accurately calculate the geo_centroid.
 
 [float]
-[[navigate-map]]
-=== Navigating the Map
+[[navigate-coordinate-map]]
+==== Navigate the coordinate map
 
-Once your tilemap visualization is ready, you can explore the map in several ways:
+To navigate the coordinate map, use the navigation options.
 
-* Click and hold anywhere on the map and move the cursor to move the map center. Hold Shift and drag a bounding box
-across the map to zoom in on the selection.
-* Click the *Zoom In/Out* image:images/viz-zoom.png[] buttons to change the zoom level manually.
-* Click the *Fit Data Bounds* image:images/viz-fit-bounds.png[] button to automatically crop the map boundaries to the
-geohash buckets that have at least one result.
-* Click the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[] button, then drag a bounding box across the
-map, to create a filter for the box coordinates.
+* To move the map center, click and hold anywhere on the map and move the cursor.
+
+* To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
+
+* To automatically crop the map boundaries to the
+geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
+
+[float]
+[[region-map]]
+=== Region map
+
+Use region maps when you want to show statistical data on a geographic area, such as a county, country, province, or state. For example, use a region map if you want to see the average sales for each country with the sample eCommerce order data.
+
+[role="screenshot"]
+image::images/visualize_region_map_example.png[]
+
+[float]
+[[build-region-maps]]
+==== Build a region map
+
+Configure the `kibana.yml` settings and add the aggregations.
+
+. In `kibana.yml`, set `xpack.maps.showMapVisualizationTypes` to `true`.
+
+. To display your data on the region map, use the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Terms bucket aggregation>>
+
+[float]
+[[navigate-region-map]]
+==== Navigate the region map
+
+To navigate the region map, use the navigation options.
+
+* To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
+
+* To automatically crop the map boundaries, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
+
+[float]
+[[heat-map]]
+=== Heat map
+
+Use heat maps when your data set includes categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
+
+[role="screenshot"]
+image::images/visualize_heat_map_example.png[]
+
+[float]
+[[build-heat-map]]
+==== Build a heat map
+
+To display your data on the heat map, use the supported aggregations.
+
+Heat maps support the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Bucket>>
+
+[float]
+[[navigate-heatmap]]
+==== Change the color ranges
+
+When only one color displays on the heat map, you might need to change the color ranges.
+
+To specify the number of color ranges:
+
+. Click *Options*.
+
+. Enter the *Number of colors* to display.
+
+To specify custom ranges:
+
+. Click *Options*.
+
+. Select *Use custom ranges*.
+
+. Enter the ranges to display.

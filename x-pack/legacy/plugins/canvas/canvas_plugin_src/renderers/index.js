@@ -7,7 +7,7 @@
 import { advancedFilter } from './advanced_filter';
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
-import { embeddable } from './embeddable';
+import { embeddable } from './embeddable/embeddable';
 import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';

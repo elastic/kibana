@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // Create a mock for the privilege check used within the table to
 // enable/disable the 'New Filter' button.
 jest.mock('../../../privilege/check_privilege', () => ({
-  checkPermission: () => true
+  checkPermission: () => true,
 }));
 jest.mock('../../../services/ml_api_service', () => 'ml');
 
@@ -18,7 +17,6 @@ import React from 'react';
 import { FilterListsTable } from './table';
 
 describe('Filter Lists Table', () => {
-
   const setSelectedFilterLists = jest.fn(() => {});
   const refreshFilterLists = jest.fn(() => {});
 
@@ -26,7 +24,7 @@ describe('Filter Lists Table', () => {
     setSelectedFilterLists,
     refreshFilterLists,
     canCreateFilter: true,
-    canDeleteFilter: true
+    canDeleteFilter: true,
   };
 
   const testFilterLists = [
@@ -47,15 +45,12 @@ describe('Filter Lists Table', () => {
   test('renders with filter lists supplied', () => {
     const props = {
       ...requiredProps,
-      filterLists: testFilterLists
+      filterLists: testFilterLists,
     };
 
-    const component = shallowWithIntl(
-      <FilterListsTable {...props} />
-    );
+    const component = shallowWithIntl(<FilterListsTable {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders with filter lists and selection supplied', () => {
@@ -65,12 +60,8 @@ describe('Filter Lists Table', () => {
       selectedFilterLists: [testFilterLists[0]],
     };
 
-    const component = shallowWithIntl(
-      <FilterListsTable {...props} />
-    );
+    const component = shallowWithIntl(<FilterListsTable {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
-
 });

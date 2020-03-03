@@ -5,14 +5,10 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { WrapperPage } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('WrapperPage', () => {
   test('it renders', () => {
@@ -24,7 +20,7 @@ describe('WrapperPage', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
   });
 
   describe('restrict width', () => {
@@ -37,7 +33,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is number', () => {
@@ -49,7 +45,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is string', () => {
@@ -61,7 +57,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
   });
 });

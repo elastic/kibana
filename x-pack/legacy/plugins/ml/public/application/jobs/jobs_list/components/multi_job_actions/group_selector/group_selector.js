@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { checkPermission } from '../../../../../privilege/check_privilege';
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -26,16 +22,18 @@ import {
 import { cloneDeep } from 'lodash';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { checkPermission } from '../../../../../privilege/check_privilege';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
 import { mlMessageBarService } from '../../../../../components/messagebar';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map(j => j.id);
   const groupCounts = {};
-  jobs.forEach((j) => {
-    j.groups.forEach((g) => {
+  jobs.forEach(j => {
+    j.groups.forEach(g => {
       if (groupCounts[g] === undefined) {
         groupCounts[g] = 0;
       }
@@ -46,7 +44,7 @@ function createSelectedGroups(jobs, groups) {
   const selectedGroups = groups.reduce((p, c) => {
     if (c.jobIds.some(j => jobIds.includes(j))) {
       p[c.id] = {
-        partial: (groupCounts[c.id] !== jobIds.length),
+        partial: groupCounts[c.id] !== jobIds.length,
       };
     }
     return p;
@@ -55,7 +53,7 @@ function createSelectedGroups(jobs, groups) {
   return selectedGroups;
 }
 
-export const GroupSelector = injectI18n(class GroupSelector extends Component {
+export class GroupSelector extends Component {
   static propTypes = {
     jobs: PropTypes.array.isRequired,
     allJobIds: PropTypes.array.isRequired,
@@ -89,8 +87,9 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
     if (this.state.isPopoverOpen) {
       this.closePopover();
     } else {
-      ml.jobs.groups()
-        .then((groups) => {
+      ml.jobs
+        .groups()
+        .then(groups => {
           const selectedGroups = createSelectedGroups(this.props.jobs, groups);
 
           this.setState({
@@ -100,20 +99,20 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
             groups,
           });
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error);
         });
     }
-  }
+  };
 
   closePopover = () => {
     this.setState({
       edited: false,
       isPopoverOpen: false,
     });
-  }
+  };
 
-  selectGroup = (group) => {
+  selectGroup = group => {
     const newSelectedGroups = cloneDeep(this.state.selectedGroups);
 
     if (newSelectedGroups[group.id] === undefined) {
@@ -130,7 +129,7 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
       selectedGroups: newSelectedGroups,
       edited: true,
     });
-  }
+  };
 
   applyChanges = () => {
     const { selectedGroups } = this.state;
@@ -144,7 +143,7 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
     for (const gId in selectedGroups) {
       if (selectedGroups.hasOwnProperty(gId)) {
         const group = selectedGroups[gId];
-        newJobs.forEach((j) => {
+        newJobs.forEach(j => {
           if (group.partial === false || (group.partial === true && j.oldGroups.includes(gId))) {
             j.newGroups.push(gId);
           }
@@ -153,8 +152,9 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
     }
 
     const tempJobs = newJobs.map(j => ({ job_id: j.id, groups: j.newGroups }));
-    ml.jobs.updateGroups(tempJobs)
-    	.then((resp) => {
+    ml.jobs
+      .updateGroups(tempJobs)
+      .then(resp => {
         let success = true;
         for (const jobId in resp) {
           // check success of each job update
@@ -174,13 +174,13 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
           console.error(resp);
         }
       })
-      .catch((error) => {
+      .catch(error => {
         mlMessageBarService.notify.error(error);
         console.error(error);
       });
-  }
+  };
 
-  addNewGroup = (id) => {
+  addNewGroup = id => {
     const newGroup = {
       id,
       calendarIds: [],
@@ -195,29 +195,28 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
     this.setState({
       groups,
     });
-  }
+  };
 
   render() {
-    const { intl } = this.props;
-    const {
-      groups,
-      selectedGroups,
-      edited,
-    } = this.state;
+    const { groups, selectedGroups, edited } = this.state;
     const button = (
       <EuiToolTip
         position="bottom"
-        content={<FormattedMessage
-          id="xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonTooltip"
-          defaultMessage="Edit job groups"
-        />}
+        content={
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonTooltip"
+            defaultMessage="Edit job groups"
+          />
+        }
       >
         <EuiButtonIcon
           iconType="indexEdit"
-          aria-label={intl.formatMessage({
-            id: 'xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonAriaLabel',
-            defaultMessage: 'Edit job groups'
-          })}
+          aria-label={i18n.translate(
+            'xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonAriaLabel',
+            {
+              defaultMessage: 'Edit job groups',
+            }
+          )}
           onClick={() => this.togglePopover()}
           disabled={this.canUpdateJob === false}
         />
@@ -248,22 +247,15 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
           />
 
           <EuiHorizontalRule margin="xs" />
-          <EuiSpacer size="s"/>
+          <EuiSpacer size="s" />
 
-          <NewGroupInput
-            addNewGroup={this.addNewGroup}
-            allJobIds={this.props.allJobIds}
-          />
+          <NewGroupInput addNewGroup={this.addNewGroup} allJobIds={this.props.allJobIds} />
 
           <EuiHorizontalRule margin="m" />
           <div>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={this.applyChanges}
-                  isDisabled={(edited === false)}
-                >
+                <EuiButton size="s" onClick={this.applyChanges} isDisabled={edited === false}>
                   <FormattedMessage
                     id="xpack.ml.jobsList.multiJobActions.groupSelector.applyButtonLabel"
                     defaultMessage="Apply"
@@ -276,4 +268,4 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
       </EuiPopover>
     );
   }
-});
+}

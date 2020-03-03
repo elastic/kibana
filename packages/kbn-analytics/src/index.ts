@@ -20,3 +20,4 @@
 export { ReportHTTP, Reporter, ReporterConfig } from './reporter';
 export { UiStatsMetricType, METRIC_TYPE } from './metrics';
 export { Report, ReportManager } from './report';
+export { Storage } from './storage';

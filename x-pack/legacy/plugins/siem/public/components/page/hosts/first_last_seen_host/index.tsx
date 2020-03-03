@@ -5,10 +5,8 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
-
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
-import { pure } from 'recompose';
 
 import { useFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -19,7 +17,7 @@ export enum FirstLastSeenHostType {
   LAST_SEEN = 'last-seen',
 }
 
-export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHostType }>(
+export const FirstLastSeenHost = React.memo<{ hostname: string; type: FirstLastSeenHostType }>(
   ({ hostname, type }) => {
     return (
       <ApolloConsumer>

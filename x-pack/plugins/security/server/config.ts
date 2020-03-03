@@ -34,15 +34,14 @@ export const ConfigSchema = schema.object(
       schema.maybe(schema.string({ minLength: 32 })),
       schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
     ),
-    sessionTimeout: schema.maybe(schema.oneOf([schema.number(), schema.literal(null)])), // DEPRECATED
     session: schema.object({
-      idleTimeout: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
-      lifespan: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+      idleTimeout: schema.nullable(schema.duration()),
+      lifespan: schema.nullable(schema.duration()),
     }),
     secureCookies: schema.boolean({ defaultValue: false }),
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-      oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
+      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
       saml: providerOptionsSchema(
         'saml',
         schema.object({
@@ -50,6 +49,11 @@ export const ConfigSchema = schema.object(
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
         })
       ),
+      http: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+        schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      }),
     }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
@@ -87,23 +91,11 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         secureCookies = true;
       }
 
-      // "sessionTimeout" is deprecated and replaced with "session.idleTimeout"
-      // however, NP does not yet have a mechanism to automatically rename deprecated keys
-      // for the time being, we'll do it manually:
-      const sess = config.session;
-      const session = {
-        idleTimeout: (sess && sess.idleTimeout) || config.sessionTimeout || null,
-        lifespan: (sess && sess.lifespan) || null,
-      };
-
-      const val = {
+      return {
         ...config,
         encryptionKey,
         secureCookies,
-        session,
       };
-      delete val.sessionTimeout; // DEPRECATED
-      return val;
     })
   );
 }

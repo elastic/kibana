@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { aggTypeFilters } from 'ui/agg_types/filter';
-
-export function initAggTypeFilter() {
+export function initAggTypeFilter(aggTypeFilters) {
   /**
    * If rollup index pattern, check its capabilities
    * and limit available aggregations based on that.
    */
-  aggTypeFilters.addFilter(
-    (aggType, indexPattern) => {
-      if(indexPattern.type !== 'rollup') {
-        return true;
-      }
-      const aggName = aggType.name;
-      const aggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-
-      // Return doc_count (which is collected by default for rollup date histogram, histogram, and terms)
-      // and the rest of the defined metrics from capabilities.
-      return aggName === 'count' || Object.keys(aggs).includes(aggName);
+  aggTypeFilters.addFilter((aggType, indexPattern) => {
+    if (indexPattern.type !== 'rollup') {
+      return true;
     }
-  );
+    const aggName = aggType.name;
+    const aggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
+
+    // Return doc_count (which is collected by default for rollup date histogram, histogram, and terms)
+    // and the rest of the defined metrics from capabilities.
+    return aggName === 'count' || Object.keys(aggs).includes(aggName);
+  });
 }

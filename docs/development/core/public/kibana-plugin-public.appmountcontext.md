@@ -4,7 +4,11 @@
 
 ## AppMountContext interface
 
-The context object received when applications are mounted to the DOM.
+> Warning: This API is now obsolete.
+> 
+> 
+
+The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->.
 
 <b>Signature:</b>
 
@@ -16,5 +20,5 @@ export interface AppMountContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-public.appmountcontext.core.md) | <code>{</code><br/><code>        application: Pick&lt;ApplicationStart, 'capabilities' &#124; 'navigateToApp'&gt;;</code><br/><code>        chrome: ChromeStart;</code><br/><code>        docLinks: DocLinksStart;</code><br/><code>        http: HttpStart;</code><br/><code>        i18n: I18nStart;</code><br/><code>        notifications: NotificationsStart;</code><br/><code>        overlays: OverlayStart;</code><br/><code>        uiSettings: IUiSettingsClient;</code><br/><code>        injectedMetadata: {</code><br/><code>            getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>        };</code><br/><code>    }</code> | Core service APIs available to mounted applications. |
+|  [core](./kibana-plugin-public.appmountcontext.core.md) | <code>{</code><br/><code>        application: Pick&lt;ApplicationStart, 'capabilities' &#124; 'navigateToApp'&gt;;</code><br/><code>        chrome: ChromeStart;</code><br/><code>        docLinks: DocLinksStart;</code><br/><code>        http: HttpStart;</code><br/><code>        i18n: I18nStart;</code><br/><code>        notifications: NotificationsStart;</code><br/><code>        overlays: OverlayStart;</code><br/><code>        savedObjects: SavedObjectsStart;</code><br/><code>        uiSettings: IUiSettingsClient;</code><br/><code>        injectedMetadata: {</code><br/><code>            getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>        };</code><br/><code>    }</code> | Core service APIs available to mounted applications. |
 

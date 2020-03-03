@@ -66,6 +66,8 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
+const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
+
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
@@ -230,6 +232,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
                   <EuiButtonEmpty
                     onClick={createAnalyticsForm.actions.openModal}
                     isDisabled={disabled}
+                    data-test-subj="mlAnalyticsCreateFirstButton"
                   >
                     {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
                       defaultMessage: 'Create your first data frame analytics job',
@@ -326,8 +329,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setSortDirection(direction);
   };
 
-  const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
-
   return (
     <Fragment>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -352,23 +353,28 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <MlInMemoryTable
-        allowNeutralSort={false}
-        className="mlAnalyticsTable"
-        columns={columns}
-        error={searchError}
-        hasActions={false}
-        isExpandable={true}
-        isSelectable={false}
-        items={filterActive ? filteredAnalytics : analytics}
-        itemId={DataFrameAnalyticsListColumn.id}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onTableChange={onTableChange}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
-        data-test-subj="mlDataFramesTableAnalytics"
-      />
+      <div data-test-subj="mlAnalyticsTableContainer">
+        <MlInMemoryTable
+          allowNeutralSort={false}
+          className="mlAnalyticsTable"
+          columns={columns}
+          error={searchError}
+          hasActions={false}
+          isExpandable={true}
+          isSelectable={false}
+          items={filterActive ? filteredAnalytics : analytics}
+          itemId={DataFrameAnalyticsListColumn.id}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+          data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
+          rowProps={item => ({
+            'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
+          })}
+        />
+      </div>
     </Fragment>
   );
 };

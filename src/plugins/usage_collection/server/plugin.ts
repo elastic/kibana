@@ -18,22 +18,23 @@
  */
 
 import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
-import { PluginInitializerContext, Logger } from '../../../../src/core/server';
+import { CoreStart, ISavedObjectsRepository } from 'kibana/server';
+import { ConfigType } from './config';
+import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
+import { setupRoutes } from './routes';
 
 export type UsageCollectionSetup = CollectorSet;
-
-export class Plugin {
+export class UsageCollectionPlugin {
   logger: Logger;
+  private savedObjects?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(): Promise<UsageCollectionSetup> {
+  public async setup(core: CoreSetup) {
     const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
+      .create<ConfigType>()
       .pipe(first())
       .toPromise();
 
@@ -42,11 +43,15 @@ export class Plugin {
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
+    const router = core.http.createRouter();
+    setupRoutes(router, () => this.savedObjects);
+
     return collectorSet;
   }
 
-  public start() {
+  public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
+    this.savedObjects = savedObjects.createInternalRepository();
   }
 
   public stop() {

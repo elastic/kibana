@@ -19,7 +19,7 @@ const classificationsAndTooltipsReducer = (classifications, tooltips) => {
       {
         tooltip: tooltips[current],
         classification: classifications[current],
-      }
+      },
     ];
   }, []);
 };
@@ -27,21 +27,26 @@ const classificationsAndTooltipsReducer = (classifications, tooltips) => {
 export function MonitoringElasticsearchShardsProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_UNASSIGNED_SHARDS         = `clusterView-Unassigned > shardIcon`;
+  const SUBJ_UNASSIGNED_SHARDS = `clusterView-Unassigned > shardIcon`;
   const SUBJ_ASSIGNED_CONTAINER_PREFIX = 'clusterView-Assigned-';
-  const SUBJ_SHOW_SYSTEM_INDICES       = 'shardShowSystemIndices';
-  const getAssignedShardsSelector      = parent => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
+  const SUBJ_SHOW_SYSTEM_INDICES = 'shardShowSystemIndices';
+  const getAssignedShardsSelector = parent => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
 
-  return new class ElasticsearchShards {
-
+  return new (class ElasticsearchShards {
     async getUnassignedIndexAllocation() {
       const hasUnassigned = await testSubjects.exists(SUBJ_UNASSIGNED_SHARDS);
       if (!hasUnassigned) {
         return null;
       }
 
-      const classifications = await testSubjects.getAttributeAll(SUBJ_UNASSIGNED_SHARDS, 'data-shard-classification');
-      const tooltips = await testSubjects.getAttributeAll(SUBJ_UNASSIGNED_SHARDS, 'data-shard-tooltip');
+      const classifications = await testSubjects.getAttributeAll(
+        SUBJ_UNASSIGNED_SHARDS,
+        'data-shard-classification'
+      );
+      const tooltips = await testSubjects.getAttributeAll(
+        SUBJ_UNASSIGNED_SHARDS,
+        'data-shard-tooltip'
+      );
 
       return classificationsAndTooltipsReducer(classifications, tooltips);
     }
@@ -54,12 +59,20 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
       }
 
       const assignedShardsSelector = getAssignedShardsSelector(assignedParentSelector);
-      const classifications = await testSubjects.getAttributeAll(assignedShardsSelector, 'data-shard-classification');
-      const tooltips = await testSubjects.getAttributeAll(assignedShardsSelector, 'data-shard-tooltip');
+      const classifications = await testSubjects.getAttributeAll(
+        assignedShardsSelector,
+        'data-shard-classification'
+      );
+      const tooltips = await testSubjects.getAttributeAll(
+        assignedShardsSelector,
+        'data-shard-tooltip'
+      );
 
       return {
-        visibleText: generateVisibleTextString(await testSubjects.getVisibleText(assignedParentSelector)),
-        shards: classificationsAndTooltipsReducer(classifications, tooltips)
+        visibleText: generateVisibleTextString(
+          await testSubjects.getVisibleText(assignedParentSelector)
+        ),
+        shards: classificationsAndTooltipsReducer(classifications, tooltips),
       };
     }
 
@@ -80,15 +93,22 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
       }
 
       const assignedShardsSelector = getAssignedShardsSelector(assignedParentSelector);
-      const classifications = await testSubjects.getAttributeAll(assignedShardsSelector, 'data-shard-classification');
-      const tooltips = await testSubjects.getAttributeAll(assignedShardsSelector, 'data-shard-tooltip');
+      const classifications = await testSubjects.getAttributeAll(
+        assignedShardsSelector,
+        'data-shard-classification'
+      );
+      const tooltips = await testSubjects.getAttributeAll(
+        assignedShardsSelector,
+        'data-shard-tooltip'
+      );
 
       return {
-        visibleText: generateVisibleTextString(await testSubjects.getVisibleText(assignedParentSelector)),
+        visibleText: generateVisibleTextString(
+          await testSubjects.getVisibleText(assignedParentSelector)
+        ),
         shards: classificationsAndTooltipsReducer(classifications, tooltips),
         status: await testSubjects.getAttribute(assignedParentSelector, 'data-status'),
       };
     }
-
-  };
+  })();
 }

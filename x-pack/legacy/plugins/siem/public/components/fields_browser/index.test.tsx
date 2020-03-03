@@ -5,14 +5,40 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
+import { ActionCreator } from 'typescript-fsa';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
+
+// Suppress warnings about "react-beautiful-dnd" until we migrate to @testing-library/react
+/* eslint-disable no-console */
+const originalError = console.error;
+const originalWarn = console.warn;
+beforeAll(() => {
+  console.warn = jest.fn();
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+  console.warn = originalWarn;
+});
+
+const removeColumnMock = (jest.fn() as unknown) as ActionCreator<{
+  id: string;
+  columnId: string;
+}>;
+
+const upsertColumnMock = (jest.fn() as unknown) as ActionCreator<{
+  column: ColumnHeaderOptions;
+  id: string;
+  index: number;
+}>;
 
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
@@ -28,6 +54,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={removeColumnMock}
+          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
@@ -52,6 +80,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={removeColumnMock}
+            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -70,6 +100,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={removeColumnMock}
+            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -98,6 +130,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={removeColumnMock}
+            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -129,6 +163,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={removeColumnMock}
+            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -167,6 +203,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={removeColumnMock}
+          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
@@ -193,6 +231,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={removeColumnMock}
+          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
@@ -219,6 +259,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={removeColumnMock}
+          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );

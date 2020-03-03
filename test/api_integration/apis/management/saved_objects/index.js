@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('saved_objects', () => {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./relationships'));

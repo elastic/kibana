@@ -13,57 +13,78 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
@@ -101,15 +122,22 @@ describe('config schema', () => {
           authc: { providers: ['oidc'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+          ],
+        }
+      `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
@@ -126,16 +154,23 @@ describe('config schema', () => {
           authc: { providers: ['oidc', 'basic'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                    "basic",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+            "basic",
+          ],
+        }
+      `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
@@ -164,18 +199,25 @@ describe('config schema', () => {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "providers": Array [
-                                    "saml",
-                                  ],
-                                  "saml": Object {
-                                    "maxRedirectURLSize": ByteSizeValue {
-                                      "valueInBytes": 2048,
-                                    },
-                                    "realm": "realm-1",
-                                  },
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {
+            "maxRedirectURLSize": ByteSizeValue {
+              "valueInBytes": 2048,
+            },
+            "realm": "realm-1",
+          },
+        }
+      `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {
@@ -254,19 +296,22 @@ describe('config schema', () => {
 });
 
 describe('createConfig$()', () => {
+  const mockAndCreateConfig = async (isTLSEnabled: boolean, value = {}, context?: any) => {
+    const contextMock = coreMock.createPluginInitializerContext(
+      // we must use validate to avoid errors in `createConfig$`
+      ConfigSchema.validate(value, context)
+    );
+    return await createConfig$(contextMock, isTLSEnabled)
+      .pipe(first())
+      .toPromise()
+      .then(config => ({ contextMock, config }));
+  };
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const contextMock = coreMock.createPluginInitializerContext({});
-    const config = await createConfig$(contextMock, true)
-      .pipe(first())
-      .toPromise();
-    expect(config).toEqual({
-      encryptionKey: 'ab'.repeat(16),
-      secureCookies: true,
-      session: { idleTimeout: null, lifespan: null },
-    });
+    const { contextMock, config } = await mockAndCreateConfig(true, {}, { dist: true });
+    expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -278,14 +323,7 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: false,
-    });
-
-    const config = await createConfig$(contextMock, false)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(false, {});
     expect(config.secureCookies).toEqual(false);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
@@ -298,14 +336,7 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: true,
-    });
-
-    const config = await createConfig$(contextMock, false)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(false, { secureCookies: true });
     expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
@@ -318,14 +349,7 @@ describe('createConfig$()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: false,
-    });
-
-    const config = await createConfig$(contextMock, true)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(true, {});
     expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);

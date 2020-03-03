@@ -5,9 +5,10 @@
  */
 
 import { CoreStart } from 'kibana/public';
+import { ConfigSchema } from './plugin';
 
-export function toggleAppLinkInNav(core: CoreStart, { apmUiEnabled = false }) {
-  if (apmUiEnabled === false) {
+export function toggleAppLinkInNav(core: CoreStart, { ui }: ConfigSchema) {
+  if (ui.enabled === false) {
     core.chrome.navLinks.update('apm', { hidden: true });
   }
 }

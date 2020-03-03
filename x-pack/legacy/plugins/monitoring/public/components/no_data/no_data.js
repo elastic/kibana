@@ -19,7 +19,8 @@ import {
   EuiText,
   EuiTitle,
   EuiTextColor,
-  EuiButtonEmpty
+  EuiButtonEmpty,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -43,7 +44,7 @@ function NoDataMessage(props) {
 
 export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [useInternalCollection, setUseInternalCollection] = useState(props.isOnCloud);
+  const [useInternalCollection, setUseInternalCollection] = useState(props.isCloudEnabled);
 
   async function startSetup() {
     setIsLoading(true);
@@ -54,6 +55,14 @@ export function NoData(props) {
   if (useInternalCollection) {
     return (
       <EuiPage>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.no_data.internal_collection.heading"
+              defaultMessage="No monitoring data found."
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           <EuiPageContent
             verticalPosition="center"
@@ -64,10 +73,13 @@ export function NoData(props) {
             <EuiSpacer size="m" />
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
-            { !props.isOnCloud ? (
+            {!props.isCloudEnabled ? (
               <Fragment>
                 <EuiHorizontalRule size="half" />
-                <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
+                <EuiButtonEmpty
+                  isDisabled={props.isCollectionEnabledUpdated}
+                  onClick={() => setUseInternalCollection(false)}
+                >
                   <EuiTextColor color="default">
                     <FormattedMessage
                       id="xpack.monitoring.noData.setupMetricbeatInstead"
@@ -76,7 +88,7 @@ export function NoData(props) {
                   </EuiTextColor>
                 </EuiButtonEmpty>
               </Fragment>
-            ) : null }
+            ) : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
@@ -85,6 +97,14 @@ export function NoData(props) {
 
   return (
     <EuiPage>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage
+            id="xpack.monitoring.no_data.heading"
+            defaultMessage="No monitoring data found."
+          />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"
@@ -112,11 +132,7 @@ export function NoData(props) {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceAround"
-            gutterSize="s"
-          >
+          <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}
@@ -133,7 +149,10 @@ export function NoData(props) {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule size="half" />
-          <EuiButtonEmpty onClick={() => setUseInternalCollection(true)} data-test-subj="useInternalCollection">
+          <EuiButtonEmpty
+            onClick={() => setUseInternalCollection(true)}
+            data-test-subj="useInternalCollection"
+          >
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
@@ -151,5 +170,5 @@ NoData.propTypes = {
   changePath: PropTypes.func,
   isLoading: PropTypes.bool.isRequired,
   reason: PropTypes.object,
-  checkMessage: PropTypes.string
+  checkMessage: PropTypes.string,
 };

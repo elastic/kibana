@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -26,15 +26,16 @@ import {
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl, cronUrl } from '../../../services';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../legacy_imports';
+import { getLogisticalDetailsUrl, getCronUrl } from '../../../services';
 import { StepError } from './components';
 
-const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
+
+const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-export class StepLogisticsUi extends Component {
+export class StepLogistics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -145,7 +146,7 @@ export class StepLogisticsUi extends Component {
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={
               <p>
-                <EuiLink href={cronUrl} target="_blank">
+                <EuiLink href={getCronUrl()} target="_blank">
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
@@ -257,7 +258,7 @@ export class StepLogisticsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={logisticalDetailsUrl}
+              href={getLogisticalDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateLogisticsDocsButton"
@@ -521,5 +522,3 @@ export class StepLogisticsUi extends Component {
     return <StepError />;
   };
 }
-
-export const StepLogistics = injectI18n(StepLogisticsUi);

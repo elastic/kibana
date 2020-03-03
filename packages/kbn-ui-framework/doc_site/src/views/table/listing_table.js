@@ -19,16 +19,9 @@
 
 import React, { Component } from 'react';
 
-import {
-  KuiButton,
-  KuiButtonIcon,
-  KuiPager,
-  KuiListingTable,
-} from '../../../../components';
+import { KuiButton, KuiButtonIcon, KuiPager, KuiListingTable } from '../../../../components';
 
-import {
-  RIGHT_ALIGNMENT
-} from '../../../../src/services';
+import { RIGHT_ALIGNMENT } from '../../../../src/services';
 
 export class ListingTable extends Component {
   constructor(props) {
@@ -41,51 +34,59 @@ export class ListingTable extends Component {
       {
         id: '1',
         cells: [
-          <a className="kuiLink" href="#">Alligator</a>,
-          <div className="kuiIcon kuiIcon--success fa-check"/>,
+          <a className="kuiLink" href="#">
+            Alligator
+          </a>,
+          <div className="kuiIcon kuiIcon--success fa-check" />,
           'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
           {
             content: '1',
-            align: RIGHT_ALIGNMENT
+            align: RIGHT_ALIGNMENT,
           },
-        ]
+        ],
       },
       {
         id: '2',
         cells: [
-          <a className="kuiLink" href="#">Boomerang</a>,
-          <div className="kuiIcon kuiIcon--success fa-check"/>,
+          <a className="kuiLink" href="#">
+            Boomerang
+          </a>,
+          <div className="kuiIcon kuiIcon--success fa-check" />,
           'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
           {
             content: '10',
-            align: RIGHT_ALIGNMENT
+            align: RIGHT_ALIGNMENT,
           },
-        ]
+        ],
       },
       {
         id: '3',
         cells: [
-          <a className="kuiLink" href="#">Celebration</a>,
-          <div className="kuiIcon kuiIcon--warning fa-bolt"/>,
+          <a className="kuiLink" href="#">
+            Celebration
+          </a>,
+          <div className="kuiIcon kuiIcon--warning fa-bolt" />,
           'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
           {
             content: '100',
-            align: RIGHT_ALIGNMENT
+            align: RIGHT_ALIGNMENT,
           },
-        ]
+        ],
       },
       {
         id: '4',
         cells: [
-          <a className="kuiLink" href="#">Dog</a>,
-          <div className="kuiIcon kuiIcon--error fa-warning"/>,
+          <a className="kuiLink" href="#">
+            Dog
+          </a>,
+          <div className="kuiIcon kuiIcon--error fa-warning" />,
           'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
           {
             content: '1000',
-            align: RIGHT_ALIGNMENT
+            align: RIGHT_ALIGNMENT,
           },
-        ]
-      }
+        ],
+      },
     ];
 
     this.header = [
@@ -98,7 +99,7 @@ export class ListingTable extends Component {
         isSorted: true,
         isSortAscending: true,
         align: RIGHT_ALIGNMENT,
-      }
+      },
     ];
   }
 
@@ -118,11 +119,7 @@ export class ListingTable extends Component {
 
   renderToolBarActions() {
     return [
-      <KuiButton
-        key="add"
-        buttonType="primary"
-        aria-label="Add"
-      >
+      <KuiButton key="add" buttonType="primary" aria-label="Add">
         Add
       </KuiButton>,
       <KuiButton
@@ -136,11 +133,11 @@ export class ListingTable extends Component {
         aria-label="Menu"
         buttonType="basic"
         icon={<KuiButtonIcon type="menu" />}
-      />
+      />,
     ];
   }
 
-  onItemSelectionChanged = (selectedRowIds) => {
+  onItemSelectionChanged = selectedRowIds => {
     this.setState({ selectedRowIds });
   };
 

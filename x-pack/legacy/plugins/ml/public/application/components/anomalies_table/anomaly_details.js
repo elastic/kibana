@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for displaying details of an anomaly in the expanded row section
  * of the anomalies table.
@@ -25,7 +24,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
@@ -42,15 +41,8 @@ import { MAX_CHARS } from './anomalies_table_constants';
 
 const TIME_FIELD_NAME = 'timestamp';
 
-
 function getFilterEntity(entityName, entityValue, filter) {
-  return (
-    <EntityCell
-      entityName={entityName}
-      entityValue={entityValue}
-      filter={filter}
-    />
-  );
+  return <EntityCell entityName={entityName} entityValue={entityValue} filter={filter} />;
 }
 
 function getDetailsItems(anomaly, examples, filter) {
@@ -70,13 +62,17 @@ function getDetailsItems(anomaly, examples, filter) {
       singleCauseByFieldValue = sourceCauses[0].by_field_value;
     }
   } else {
-    causes = sourceCauses.map((cause) => {
+    causes = sourceCauses.map(cause => {
       const simplified = _.pick(cause, 'typical', 'actual', 'probability');
       // Get the 'entity field name/value' to display in the cause -
       // For by and over, use by_field_name/value (over_field_name/value are in the top level fields)
       // For just an 'over' field - the over_field_name/value appear in both top level and cause.
-      simplified.entityName = _.has(cause, 'by_field_name') ? cause.by_field_name : cause.over_field_name;
-      simplified.entityValue = _.has(cause, 'by_field_value') ? cause.by_field_value : cause.over_field_value;
+      simplified.entityName = _.has(cause, 'by_field_name')
+        ? cause.by_field_name
+        : cause.over_field_name;
+      simplified.entityValue = _.has(cause, 'by_field_value')
+        ? cause.by_field_value
+        : cause.over_field_value;
       return simplified;
     });
   }
@@ -85,14 +81,18 @@ function getDetailsItems(anomaly, examples, filter) {
   if (source.partition_field_value !== undefined) {
     items.push({
       title: source.partition_field_name,
-      description: getFilterEntity(source.partition_field_name, source.partition_field_value, filter)
+      description: getFilterEntity(
+        source.partition_field_name,
+        source.partition_field_value,
+        filter
+      ),
     });
   }
 
   if (source.by_field_value !== undefined) {
     items.push({
       title: source.by_field_name,
-      description: getFilterEntity(source.by_field_name, source.by_field_value, filter)
+      description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
     });
   }
 
@@ -100,41 +100,41 @@ function getDetailsItems(anomaly, examples, filter) {
     // Display byField of single cause.
     items.push({
       title: singleCauseByFieldName,
-      description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter)
+      description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter),
     });
   }
 
   if (source.over_field_value !== undefined) {
     items.push({
       title: source.over_field_name,
-      description: getFilterEntity(source.over_field_name, source.over_field_value, filter)
+      description: getFilterEntity(source.over_field_name, source.over_field_value, filter),
     });
   }
 
   const anomalyTime = source[TIME_FIELD_NAME];
   let timeDesc = `${formatHumanReadableDateTimeSeconds(anomalyTime)}`;
   if (source.bucket_span !== undefined) {
-    const anomalyEndTime = anomalyTime + (source.bucket_span * 1000);
+    const anomalyEndTime = anomalyTime + source.bucket_span * 1000;
     timeDesc = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyTimeRangeLabel', {
       defaultMessage: '{anomalyTime} to {anomalyEndTime}',
       values: {
         anomalyTime: formatHumanReadableDateTimeSeconds(anomalyTime),
         anomalyEndTime: formatHumanReadableDateTimeSeconds(anomalyEndTime),
-      }
+      },
     });
   }
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.timeTitle', {
       defaultMessage: 'time',
     }),
-    description: timeDesc
+    description: timeDesc,
   });
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
       defaultMessage: 'function',
     }),
-    description: (source.function !== 'metric') ? source.function : source.function_description
+    description: source.function !== 'metric' ? source.function : source.function_description,
   });
 
   if (source.field_name !== undefined) {
@@ -142,7 +142,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.fieldNameTitle', {
         defaultMessage: 'fieldName',
       }),
-      description: source.field_name
+      description: source.field_name,
     });
   }
 
@@ -152,7 +152,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'actual',
       }),
-      description: formatValue(anomaly.actual, source.function, undefined, source)
+      description: formatValue(anomaly.actual, source.function, undefined, source),
     });
   }
 
@@ -161,7 +161,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'typical',
       }),
-      description: formatValue(anomaly.typical, source.function, undefined, source)
+      description: formatValue(anomaly.typical, source.function, undefined, source),
     });
   }
 
@@ -169,16 +169,18 @@ function getDetailsItems(anomaly, examples, filter) {
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.jobIdTitle', {
       defaultMessage: 'job ID',
     }),
-    description: anomaly.jobId
+    description: anomaly.jobId,
   });
 
-  if (source.multi_bucket_impact !== undefined &&
-    source.multi_bucket_impact >= MULTI_BUCKET_IMPACT.LOW) {
+  if (
+    source.multi_bucket_impact !== undefined &&
+    source.multi_bucket_impact >= MULTI_BUCKET_IMPACT.LOW
+  ) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle', {
         defaultMessage: 'multi-bucket impact',
       }),
-      description: getMultiBucketImpactLabel(source.multi_bucket_impact)
+      description: getMultiBucketImpactLabel(source.multi_bucket_impact),
     });
   }
 
@@ -186,29 +188,36 @@ function getDetailsItems(anomaly, examples, filter) {
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle', {
       defaultMessage: 'probability',
     }),
-    description: source.probability
+    description: source.probability,
   });
 
   // If there was only one cause, the actual, typical and by_field
   // will already have been added for display.
   if (causes.length > 1) {
     causes.forEach((cause, index) => {
-      const title = (index === 0) ? i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.causeValuesTitle', {
-        defaultMessage: '{causeEntityName} values',
-        values: {
-          causeEntityName: cause.entityName,
+      const title =
+        index === 0
+          ? i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.causeValuesTitle', {
+              defaultMessage: '{causeEntityName} values',
+              values: {
+                causeEntityName: cause.entityName,
+              },
+            })
+          : '';
+      const description = i18n.translate(
+        'xpack.ml.anomaliesTable.anomalyDetails.causeValuesDescription',
+        {
+          defaultMessage:
+            '{causeEntityValue} (actual {actualValue}, ' +
+            'typical {typicalValue}, probability {probabilityValue})',
+          values: {
+            causeEntityValue: cause.entityValue,
+            actualValue: formatValue(cause.actual, source.function),
+            typicalValue: formatValue(cause.typical, source.function),
+            probabilityValue: cause.probability,
+          },
         }
-      }) : '';
-      const description = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.causeValuesDescription', {
-        defaultMessage: '{causeEntityValue} (actual {actualValue}, ' +
-          'typical {typicalValue}, probability {probabilityValue})',
-        values: {
-          causeEntityValue: cause.entityValue,
-          actualValue: formatValue(cause.actual, source.function),
-          typicalValue: formatValue(cause.typical, source.function),
-          probabilityValue: cause.probability,
-        }
-      });
+      );
       items.push({ title, description });
     });
   }
@@ -220,12 +229,12 @@ function getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay)
   const items = [];
 
   for (let i = 0; i < numToDisplay; i++) {
-    Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
+    Object.keys(anomalyInfluencers[i]).forEach(influencerFieldName => {
       const value = anomalyInfluencers[i][influencerFieldName];
 
       items.push({
         title: influencerFieldName,
-        description: getFilterEntity(influencerFieldName, value, influencerFilter)
+        description: getFilterEntity(influencerFieldName, value, influencerFilter),
       });
     });
   }
@@ -242,43 +251,40 @@ export class AnomalyDetails extends Component {
     filter: PropTypes.func,
     influencersLimit: PropTypes.number,
     influencerFilter: PropTypes.func,
-    tabIndex: PropTypes.number.isRequired
+    tabIndex: PropTypes.number.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      showAllInfluencers: false
+      showAllInfluencers: false,
     };
 
     if (this.props.examples !== undefined && this.props.examples.length > 0) {
-      this.tabs = [{
-        id: 'Details',
-        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detailsTitle', {
-          defaultMessage: 'Details',
-        }),
-        content: (
-          <Fragment>
-            <div className="ml-anomalies-table-details">
-              {this.renderDescription()}
-              <EuiSpacer size="m" />
-              {this.renderDetails()}
-              {this.renderInfluencers()}
-            </div>
-          </Fragment>
-        )
-      },
-      {
-        id: 'Category examples',
-        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
-          defaultMessage: 'Category examples',
-        }),
-        content: (
-          <Fragment>
-            {this.renderCategoryExamples()}
-          </Fragment>
-        ),
-      }
+      this.tabs = [
+        {
+          id: 'Details',
+          name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detailsTitle', {
+            defaultMessage: 'Details',
+          }),
+          content: (
+            <Fragment>
+              <div className="ml-anomalies-table-details">
+                {this.renderDescription()}
+                <EuiSpacer size="m" />
+                {this.renderDetails()}
+                {this.renderInfluencers()}
+              </div>
+            </Fragment>
+          ),
+        },
+        {
+          id: 'Category examples',
+          name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
+            defaultMessage: 'Category examples',
+          }),
+          content: <Fragment>{this.renderCategoryExamples()}</Fragment>,
+        },
       ];
     }
   }
@@ -297,84 +303,89 @@ export class AnomalyDetails extends Component {
         gutterSize="m"
         className="mlAnomalyCategoryExamples"
       >
-        {(definition !== undefined && definition.terms) &&
-        <Fragment>
-          <EuiFlexItem key={`example-terms`}>
-            <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
-                {
-                  i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
-                    defaultMessage: 'Terms'
-                  })
-                }
-              </h4>&nbsp;
-              <EuiIconTip
-                aria-label={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel', {
-                  defaultMessage: 'Description'
-                })}
-                type="questionInCircle"
-                color="subdued"
-                size="s"
-                content={<FormattedMessage
-                  id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
-                  defaultMessage="A space separated list of the common tokens that are matched in values of the category
+        {definition !== undefined && definition.terms && (
+          <Fragment>
+            <EuiFlexItem key={`example-terms`}>
+              <EuiText size="xs">
+                <h4 className="mlAnomalyCategoryExamples__header">
+                  {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
+                    defaultMessage: 'Terms',
+                  })}
+                </h4>
+                &nbsp;
+                <EuiIconTip
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel',
+                    {
+                      defaultMessage: 'Description',
+                    }
+                  )}
+                  type="questionInCircle"
+                  color="subdued"
+                  size="s"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                      defaultMessage="A space separated list of the common tokens that are matched in values of the category
                     (may have been truncated to a max character limit of {maxChars})"
-                  values={{ maxChars: MAX_CHARS }}
-                />}
-              />
-            </EuiText>
-            <EuiText size="xs">
-              {definition.terms}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiSpacer size="xs" />
-        </Fragment> }
-        {(definition !== undefined && definition.regex) &&
+                      values={{ maxChars: MAX_CHARS }}
+                    />
+                  }
+                />
+              </EuiText>
+              <EuiText size="xs">{definition.terms}</EuiText>
+            </EuiFlexItem>
+            <EuiSpacer size="xs" />
+          </Fragment>
+        )}
+        {definition !== undefined && definition.regex && (
           <Fragment>
             <EuiFlexItem key={`example-regex`}>
               <EuiText size="xs">
                 <h4 className="mlAnomalyCategoryExamples__header">
-                  {
-                    i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
-                      defaultMessage: 'Regex'
-                    })
-                  }
-                </h4>&nbsp;
-                <EuiIconTip
-                  aria-label={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel', {
-                    defaultMessage: 'Description'
+                  {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
+                    defaultMessage: 'Regex',
                   })}
+                </h4>
+                &nbsp;
+                <EuiIconTip
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel',
+                    {
+                      defaultMessage: 'Description',
+                    }
+                  )}
                   type="questionInCircle"
                   color="subdued"
                   size="s"
-                  content={<FormattedMessage
-                    id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
-                    defaultMessage="The regular expression that is used to search for values that match the category
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                      defaultMessage="The regular expression that is used to search for values that match the category
                       (may have been truncated to a max character limit of {maxChars})"
-                    values={{ maxChars: MAX_CHARS }}
-                  />}
+                      values={{ maxChars: MAX_CHARS }}
+                    />
+                  }
                 />
               </EuiText>
-              <EuiText size="xs">
-                {definition.regex}
-              </EuiText>
+              <EuiText size="xs">{definition.regex}</EuiText>
             </EuiFlexItem>
             <EuiSpacer size="xs" />
-          </Fragment>}
+          </Fragment>
+        )}
 
         {examples.map((example, i) => {
           return (
             <EuiFlexItem key={`example${i}`}>
-              {(i === 0 && definition !== undefined) &&
+              {i === 0 && definition !== undefined && (
                 <EuiText size="s">
                   <h4>
-                    {
-                      i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.examplesTitle', {
-                        defaultMessage: 'Examples'
-                      })
-                    }
+                    {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.examplesTitle', {
+                      defaultMessage: 'Examples',
+                    })}
                   </h4>
-                </EuiText>}
+                </EuiText>
+              )}
               <span className="mlAnomalyCategoryExamples__item">{example}</span>
             </EuiFlexItem>
           );
@@ -387,47 +398,59 @@ export class AnomalyDetails extends Component {
     const anomaly = this.props.anomaly;
     const source = anomaly.source;
 
-    let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
-      defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
-      values: {
-        anomalySeverity: getSeverity(anomaly.severity).label,
-        anomalyDetector: anomaly.detector,
+    let anomalyDescription = i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel',
+      {
+        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
+        values: {
+          anomalySeverity: getSeverity(anomaly.severity).label,
+          anomalyDetector: anomaly.detector,
+        },
       }
-    });
+    );
     if (anomaly.entityName !== undefined) {
       anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.foundForLabel', {
         defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
         values: {
           anomalyEntityName: anomaly.entityName,
           anomalyEntityValue: anomaly.entityValue,
-        }
+        },
       });
     }
 
-    if ((source.partition_field_name !== undefined) &&
-        (source.partition_field_name !== anomaly.entityName)) {
-      anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detectedInLabel', {
-        defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
-        values: {
-          sourcePartitionFieldName: source.partition_field_name,
-          sourcePartitionFieldValue: source.partition_field_value,
+    if (
+      source.partition_field_name !== undefined &&
+      source.partition_field_name !== anomaly.entityName
+    ) {
+      anomalyDescription += i18n.translate(
+        'xpack.ml.anomaliesTable.anomalyDetails.detectedInLabel',
+        {
+          defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
+          values: {
+            sourcePartitionFieldName: source.partition_field_name,
+            sourcePartitionFieldValue: source.partition_field_value,
+          },
         }
-      });
+      );
     }
 
     // Check for a correlatedByFieldValue in the source which will be present for multivariate analyses
     // where the record is anomalous due to relationship with another 'by' field value.
     let mvDescription = undefined;
     if (source.correlated_by_field_value !== undefined) {
-      mvDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription', {
-        defaultMessage: 'multivariate correlations found in {sourceByFieldName}; ' +
-          '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
-        values: {
-          sourceByFieldName: source.by_field_name,
-          sourceByFieldValue: source.by_field_value,
-          sourceCorrelatedByFieldValue: source.correlated_by_field_value,
+      mvDescription = i18n.translate(
+        'xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription',
+        {
+          defaultMessage:
+            'multivariate correlations found in {sourceByFieldName}; ' +
+            '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
+          values: {
+            sourceByFieldName: source.by_field_name,
+            sourceByFieldValue: source.by_field_value,
+            sourceCorrelatedByFieldValue: source.correlated_by_field_value,
+          },
         }
-      });
+      );
     }
 
     return (
@@ -441,11 +464,7 @@ export class AnomalyDetails extends Component {
           </h4>
           {anomalyDescription}
         </EuiText>
-        {(mvDescription !== undefined) &&
-          <EuiText size="xs">
-            {mvDescription}
-          </EuiText>
-        }
+        {mvDescription !== undefined && <EuiText size="xs">{mvDescription}</EuiText>}
       </React.Fragment>
     );
   }
@@ -471,9 +490,9 @@ export class AnomalyDetails extends Component {
               />
             </h4>
           )}
-          {isInterimResult === true &&
+          {isInterimResult === true && (
             <React.Fragment>
-              <EuiIcon type="alert"/>
+              <EuiIcon type="alert" />
               <span className="interim-result">
                 <FormattedMessage
                   id="xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel"
@@ -481,7 +500,7 @@ export class AnomalyDetails extends Component {
                 />
               </span>
             </React.Fragment>
-          }
+          )}
         </EuiText>
         <EuiDescriptionList
           type="column"
@@ -498,8 +517,10 @@ export class AnomalyDetails extends Component {
     let othersCount = 0;
     let numToDisplay = 0;
     if (anomalyInfluencers !== undefined) {
-      numToDisplay = (this.state.showAllInfluencers === true) ?
-        anomalyInfluencers.length : Math.min(this.props.influencersLimit, anomalyInfluencers.length);
+      numToDisplay =
+        this.state.showAllInfluencers === true
+          ? anomalyInfluencers.length
+          : Math.min(this.props.influencersLimit, anomalyInfluencers.length);
       othersCount = Math.max(anomalyInfluencers.length - numToDisplay, 0);
 
       if (othersCount === 1) {
@@ -508,7 +529,11 @@ export class AnomalyDetails extends Component {
         othersCount = 0;
       }
 
-      listItems = getInfluencersItems(anomalyInfluencers, this.props.influencerFilter, numToDisplay);
+      listItems = getInfluencersItems(
+        anomalyInfluencers,
+        this.props.influencerFilter,
+        numToDisplay
+      );
     }
 
     if (listItems.length > 0) {
@@ -528,27 +553,23 @@ export class AnomalyDetails extends Component {
             listItems={listItems}
             className="anomaly-description-list"
           />
-          {othersCount > 0 &&
-            <EuiLink
-              onClick={() => this.toggleAllInfluencers()}
-            >
+          {othersCount > 0 && (
+            <EuiLink onClick={() => this.toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionListMoreLinkText"
                 defaultMessage="and {othersCount} more"
                 values={{ othersCount }}
               />
             </EuiLink>
-          }
-          {numToDisplay > (this.props.influencersLimit + 1) &&
-            <EuiLink
-              onClick={() => this.toggleAllInfluencers()}
-            >
+          )}
+          {numToDisplay > this.props.influencersLimit + 1 && (
+            <EuiLink onClick={() => this.toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionShowLessLinkText"
                 defaultMessage="show less"
               />
             </EuiLink>
-          }
+          )}
         </React.Fragment>
       );
     }

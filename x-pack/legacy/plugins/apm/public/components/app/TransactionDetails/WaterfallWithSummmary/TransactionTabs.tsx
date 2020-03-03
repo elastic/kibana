@@ -8,7 +8,7 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
@@ -77,7 +77,6 @@ export function TransactionTabs({
 
       {currentTab.key === timelineTab.key ? (
         <WaterfallContainer
-          transaction={transaction}
           location={location}
           urlParams={urlParams}
           waterfall={waterfall}

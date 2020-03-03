@@ -9,8 +9,8 @@ export function setCollectionDisabled(req) {
   const params = {
     body: {
       transient: { 'xpack.monitoring.elasticsearch.collection.enabled': null }, // clears the disabling method used in testing environment
-      persistent: { 'xpack.monitoring.elasticsearch.collection.enabled': false }
-    }
+      persistent: { 'xpack.monitoring.elasticsearch.collection.enabled': false },
+    },
   };
 
   // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-cluster-putsettings

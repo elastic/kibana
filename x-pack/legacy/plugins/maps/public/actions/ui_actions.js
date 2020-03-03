@@ -18,7 +18,7 @@ export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
 export function updateFlyout(display) {
   return {
     type: UPDATE_FLYOUT,
-    display
+    display,
   };
 }
 export function closeSetView() {
@@ -34,46 +34,46 @@ export function openSetView() {
 export function setIsLayerTOCOpen(isLayerTOCOpen) {
   return {
     type: SET_IS_LAYER_TOC_OPEN,
-    isLayerTOCOpen
+    isLayerTOCOpen,
   };
 }
 export function exitFullScreen() {
   return {
     type: SET_FULL_SCREEN,
-    isFullScreen: false
+    isFullScreen: false,
   };
 }
 export function enableFullScreen() {
   return {
     type: SET_FULL_SCREEN,
-    isFullScreen: true
+    isFullScreen: true,
   };
 }
 export function setReadOnly(isReadOnly) {
   return {
     type: SET_READ_ONLY,
-    isReadOnly
+    isReadOnly,
   };
 }
 
 export function setOpenTOCDetails(layerIds) {
   return {
     type: SET_OPEN_TOC_DETAILS,
-    layerIds
+    layerIds,
   };
 }
 
 export function showTOCDetails(layerId) {
   return {
     type: SHOW_TOC_DETAILS,
-    layerId
+    layerId,
   };
 }
 
 export function hideTOCDetails(layerId) {
   return {
     type: HIDE_TOC_DETAILS,
-    layerId
+    layerId,
   };
 }
 

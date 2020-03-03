@@ -17,7 +17,7 @@ import {
   fontSize,
   fontSizes
 } from '../../../../style/variables';
-import Legend from '../Legend';
+import { Legend } from '../Legend';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asAbsoluteDateTime } from '../../../../utils/formatters';
 

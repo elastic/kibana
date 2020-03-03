@@ -29,13 +29,16 @@ import { trim, startCase } from 'lodash';
 export function parsePathToBreadcrumbs(path) {
   return trim(path, '/')
     .split('/')
-    .reduce((acc, id, i, parts) => [
-      ...acc,
-      {
-        id,
-        display: startCase(id),
-        href: i === 0 ? `#/${id}` : `${acc[i - 1].href}/${id}`,
-        current: i === (parts.length - 1)
-      }
-    ], []);
+    .reduce(
+      (acc, id, i, parts) => [
+        ...acc,
+        {
+          id,
+          display: startCase(id),
+          href: i === 0 ? `#/${id}` : `${acc[i - 1].href}/${id}`,
+          current: i === parts.length - 1,
+        },
+      ],
+      []
+    );
 }

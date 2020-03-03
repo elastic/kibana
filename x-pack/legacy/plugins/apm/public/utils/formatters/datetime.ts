@@ -57,34 +57,37 @@ function getDateFormat(dateUnit: DateUnit) {
   }
 }
 
-function getFormatsAccordingToDateDifference(
-  momentStart: moment.Moment,
-  momentEnd: moment.Moment
-) {
-  const getDateDifference = (unitOfTime: DateUnit | TimeUnit) =>
-    momentEnd.diff(momentStart, unitOfTime);
+export const getDateDifference = (
+  start: moment.Moment,
+  end: moment.Moment,
+  unitOfTime: DateUnit | TimeUnit
+) => end.diff(start, unitOfTime);
 
-  if (getDateDifference('years') >= 5) {
+function getFormatsAccordingToDateDifference(
+  start: moment.Moment,
+  end: moment.Moment
+) {
+  if (getDateDifference(start, end, 'years') >= 5) {
     return { dateFormat: getDateFormat('years') };
   }
 
-  if (getDateDifference('months') >= 5) {
+  if (getDateDifference(start, end, 'months') >= 5) {
     return { dateFormat: getDateFormat('months') };
   }
 
   const dateFormatWithDays = getDateFormat('days');
-  if (getDateDifference('days') > 1) {
+  if (getDateDifference(start, end, 'days') > 1) {
     return { dateFormat: dateFormatWithDays };
   }
 
-  if (getDateDifference('hours') >= 5) {
+  if (getDateDifference(start, end, 'hours') >= 5) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('minutes')
     };
   }
 
-  if (getDateDifference('minutes') >= 5) {
+  if (getDateDifference(start, end, 'minutes') >= 5) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('seconds')

@@ -39,6 +39,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .send({
           name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
@@ -50,7 +53,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
 
@@ -65,12 +68,35 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
     });
 
     it('should return unsuccessfully when passed invalid create parameters', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A pagerduty action',
+          actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
+          secrets: {},
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should return unsuccessfully when default pagerduty url is not whitelisted', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
@@ -85,7 +111,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
           });
         });
     });
@@ -121,6 +147,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result).to.eql({
         status: 'ok',
+        actionId: simulatedActionId,
         data: {
           dedup_key: `action:${simulatedActionId}`,
           message: 'Event processed',
@@ -140,9 +167,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: unexpected status 418/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: unexpected status 418/);
     });
 
     it('should handle a 429 pagerduty error', async () => {
@@ -158,7 +183,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.equal('error');
       expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 429, retry later/
+        /error posting pagerduty event: http status 429, retry later/
       );
       expect(result.retry).to.equal(true);
     });
@@ -175,9 +200,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 502, retry later/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: http status 502/);
       expect(result.retry).to.equal(true);
     });
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { registryMock } from './plugin.test.mocks';
+import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin } from './plugin';
 import { coreMock } from '../../../core/server/mocks';
 import { CoreSetup } from '../../../core/server';
@@ -26,26 +26,41 @@ type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
-    registryMock.setup.mockClear();
-    registryMock.start.mockClear();
+    registryForTutorialsMock.setup.mockClear();
+    registryForTutorialsMock.start.mockClear();
+    registryForSampleDataMock.setup.mockClear();
+    registryForSampleDataMock.start.mockClear();
   });
 
   describe('setup', () => {
     const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
+    const initContext = coreMock.createPluginInitializerContext();
 
-    test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin().setup(mockCoreSetup);
+    test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
     });
+
+    test('wires up sample data provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      expect(setup).toHaveProperty('sampleData');
+      expect(setup.sampleData).toHaveProperty('registerSampleDataset');
+      expect(setup.sampleData).toHaveProperty('getSampleDatasets');
+      expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
+      expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
+      expect(setup.sampleData).toHaveProperty('replacePanelInSampleDatasetDashboard');
+    });
   });
 
   describe('start', () => {
+    const initContext = coreMock.createPluginInitializerContext();
     test('is defined', () => {
-      const start = new HomeServerPlugin().start();
+      const start = new HomeServerPlugin(initContext).start();
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
+      expect(start).toHaveProperty('sampleData');
     });
   });
 });

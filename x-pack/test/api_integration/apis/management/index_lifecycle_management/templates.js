@@ -10,22 +10,17 @@ import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
   const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
-  const {
-    loadTemplates,
-    getTemplate,
-    addPolicyToTemplate,
-  } = registerTemplatesHelpers({ supertest });
+  const { loadTemplates, getTemplate, addPolicyToTemplate } = registerTemplatesHelpers({
+    supertest,
+  });
 
-  const {
-    createPolicy,
-    cleanUp: cleanUpPolicies,
-  } = registerPoliciesHelpers({ supertest });
+  const { createPolicy, cleanUp: cleanUpPolicies } = registerPoliciesHelpers({ supertest });
 
   describe('templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
@@ -84,7 +79,11 @@ export default function ({ getService }) {
 
         // Fetch the template and verify that the policy has been attached
         const { body } = await getTemplate(templateName);
-        const { settings: { index: { lifecycle } } } = body;
+        const {
+          settings: {
+            index: { lifecycle },
+          },
+        } = body;
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });

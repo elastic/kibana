@@ -29,9 +29,7 @@ import { GeohashGridMarkers } from './markers/geohash_grid';
 import { MapTypes } from './map_types';
 
 export class GeohashLayer extends KibanaMapLayer {
-
   constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap) {
-
     super();
 
     this._featureCollection = featureCollection;
@@ -52,50 +50,70 @@ export class GeohashLayer extends KibanaMapLayer {
       valueFormatter: this._geohashOptions.valueFormatter,
       tooltipFormatter: this._geohashOptions.tooltipFormatter,
       label: this._geohashOptions.label,
-      colorRamp: this._geohashOptions.colorRamp
+      colorRamp: this._geohashOptions.colorRamp,
     };
     switch (this._geohashOptions.mapType) {
       case MapTypes.ScaledCircleMarkers:
-        this._geohashMarkers = new ScaledCirclesMarkers(this._featureCollection,
-          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ScaledCirclesMarkers(
+          this._featureCollection,
+          this._featureCollectionMetaData,
+          markerOptions,
+          this._zoom,
+          this._kibanaMap
+        );
         break;
       case MapTypes.ShadedCircleMarkers:
-        this._geohashMarkers = new ShadedCirclesMarkers(this._featureCollection,
-          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ShadedCirclesMarkers(
+          this._featureCollection,
+          this._featureCollectionMetaData,
+          markerOptions,
+          this._zoom,
+          this._kibanaMap
+        );
         break;
       case MapTypes.ShadedGeohashGrid:
-        this._geohashMarkers = new GeohashGridMarkers(this._featureCollection,
-          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new GeohashGridMarkers(
+          this._featureCollection,
+          this._featureCollectionMetaData,
+          markerOptions,
+          this._zoom,
+          this._kibanaMap
+        );
         break;
       case MapTypes.Heatmap:
-
         let radius = 15;
         if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {
           const minGridLength = min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
-          radius = (minGridLength / metersPerPixel) / 2;
+          radius = minGridLength / metersPerPixel / 2;
         }
         radius = radius * parseFloat(this._geohashOptions.heatmap.heatClusterSize);
-        this._geohashMarkers = new HeatmapMarkers(this._featureCollection, {
-          radius: radius,
-          blur: radius,
-          maxZoom: this._kibanaMap.getZoomLevel(),
-          minOpacity: 0.1,
-          tooltipFormatter: this._geohashOptions.tooltipFormatter
-        }, this._zoom, this._featureCollectionMetaData.max);
+        this._geohashMarkers = new HeatmapMarkers(
+          this._featureCollection,
+          {
+            radius: radius,
+            blur: radius,
+            maxZoom: this._kibanaMap.getZoomLevel(),
+            minOpacity: 0.1,
+            tooltipFormatter: this._geohashOptions.tooltipFormatter,
+          },
+          this._zoom,
+          this._featureCollectionMetaData.max
+        );
         break;
       default:
-        throw new Error(i18n.translate('tileMap.geohashLayer.mapTitle', {
-          defaultMessage: '{mapType} mapType not recognized',
-          values: {
-            mapType: this._geohashOptions.mapType,
-          },
-        }));
-
+        throw new Error(
+          i18n.translate('tileMap.geohashLayer.mapTitle', {
+            defaultMessage: '{mapType} mapType not recognized',
+            values: {
+              mapType: this._geohashOptions.mapType,
+            },
+          })
+        );
     }
 
-    this._geohashMarkers.on('showTooltip', (event) => this.emit('showTooltip', event));
-    this._geohashMarkers.on('hideTooltip', (event) => this.emit('hideTooltip', event));
+    this._geohashMarkers.on('showTooltip', event => this.emit('showTooltip', event));
+    this._geohashMarkers.on('hideTooltip', event => this.emit('hideTooltip', event));
     this._leafletLayer = this._geohashMarkers.getLeafletLayer();
   }
 
@@ -135,7 +153,6 @@ export class GeohashLayer extends KibanaMapLayer {
   }
 
   isReusable(options) {
-
     if (isEqual(this._geohashOptions, options)) {
       return true;
     }
@@ -145,13 +162,13 @@ export class GeohashLayer extends KibanaMapLayer {
       return false;
     } else if (this._geohashOptions.mapType !== options.mapType) {
       return false;
-    } else if (this._geohashOptions.mapType === 'Heatmap' && !isEqual(this._geohashOptions.heatmap, options)) {
+    } else if (
+      this._geohashOptions.mapType === 'Heatmap' &&
+      !isEqual(this._geohashOptions.heatmap, options)
+    ) {
       return false;
     } else {
       return true;
     }
   }
 }
-
-
-

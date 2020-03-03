@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
 import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ES_SEARCH_STRATEGY } from '../../../common/search';
@@ -28,7 +29,9 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
     search: async (request, options) => {
+      const config = await context.config$.pipe(first()).toPromise();
       const params = {
+        timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
         ignoreUnavailable: true, // Don't fail if the index/indices don't exist
         restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
         ...request.params,

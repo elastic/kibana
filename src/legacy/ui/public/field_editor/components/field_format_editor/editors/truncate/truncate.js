@@ -19,22 +19,13 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
-import {
-  sample
-} from './sample';
+import { sample } from './sample';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -47,27 +38,37 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams } = this.props;
+    const { formatParams, onError } = this.props;
     const { error, samples } = this.state;
 
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.truncate.lengthLabel" defaultMessage="Field length"/>}
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.truncate.lengthLabel"
+              defaultMessage="Field length"
+            />
+          }
           isInvalid={!!error}
           error={error}
         >
           <EuiFieldNumber
             defaultValue={formatParams.fieldLength}
-            onChange={(e) => {
-              this.onChange({ fieldLength: e.target.value ? Number(e.target.value) : null });
+            min={1}
+            onChange={e => {
+              if (e.target.checkValidity()) {
+                this.onChange({
+                  fieldLength: e.target.value ? Number(e.target.value) : null,
+                });
+              } else {
+                onError(e.target.validationMessage);
+              }
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
-        <FormatEditorSamples
-          samples={samples}
-        />
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

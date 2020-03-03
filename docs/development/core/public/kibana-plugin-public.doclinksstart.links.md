@@ -79,7 +79,10 @@ readonly links: {
             readonly introduction: string;
         };
         readonly kibana: string;
-        readonly siem: string;
+        readonly siem: {
+            readonly guide: string;
+            readonly gettingStarted: string;
+        };
         readonly query: {
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
@@ -88,5 +91,6 @@ readonly links: {
         readonly date: {
             readonly dateMath: string;
         };
+        readonly management: Record<string, string>;
     };
 ```

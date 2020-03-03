@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -19,6 +18,7 @@ import {
   NetworkTopTablesSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -54,7 +54,7 @@ export interface NetworkTopNFlowComponentReduxProps {
   sort: NetworkTopTablesSortField;
 }
 
-type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
+type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps & WithKibanaProps;
 
 class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   NetworkTopNFlowProps,
@@ -68,6 +68,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       endDate,
       flowTarget,
       filterQuery,
+      kibana,
       id = `${ID}-${flowTarget}`,
       ip,
       isInspected,
@@ -78,7 +79,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetNetworkTopNFlowQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
@@ -154,5 +155,6 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkTopNFlowQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps)
+  connect(makeMapStateToProps),
+  withKibana
 )(NetworkTopNFlowComponentQuery);

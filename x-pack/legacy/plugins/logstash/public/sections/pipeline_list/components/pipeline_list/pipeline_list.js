@@ -17,7 +17,7 @@ import 'plugins/logstash/services/monitoring';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('pipelineList', function ($injector) {
+app.directive('pipelineList', function($injector) {
   const pipelinesService = $injector.get('pipelinesService');
   const licenseService = $injector.get('logstashLicenseService');
   const clusterService = $injector.get('xpackLogstashClusterService');

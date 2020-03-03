@@ -1,10 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
-<Component>
-  <AuditdGenericFileDetails
-    browserFields={Object {}}
+<Details>
+  <AuditdGenericFileLine
+    args={null}
     contextId="contextid-123"
+    fileIcon="document"
+    filePath="/proc/15990/attr/current"
+    hostName="zeek-london"
+    id="28"
+    primary="unset"
+    processExecutable="/lib/systemd/systemd-journald"
+    processName="systemd-journal"
+    processPid={27244}
+    processTitle="/lib/systemd/systemd-journald"
+    result="success"
+    secondary="root"
+    session="unset"
+    text="generic-text-123"
+    userName="root"
+    workingDirectory="/"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NetflowRenderer
     data={
       Object {
         "_id": "28",
@@ -137,9 +157,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         "zeek": null,
       }
     }
-    fileIcon="document"
-    text="generic-text-123"
     timelineId="test"
   />
-</Component>
+</Details>
 `;

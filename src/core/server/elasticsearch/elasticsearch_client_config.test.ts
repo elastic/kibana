@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { mockReadFileSync } from './elasticsearch_client_config.test.mocks';
-
 import { duration } from 'moment';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import {
@@ -66,8 +64,6 @@ Object {
 });
 
 test('parses fully specified config', () => {
-  mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-
   const elasticsearchConfig: ElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
     customHeaders: { xsrf: 'something' },
@@ -87,9 +83,9 @@ test('parses fully specified config', () => {
     sniffInterval: 11223344,
     ssl: {
       verificationMode: 'certificate',
-      certificateAuthorities: ['ca-path-1', 'ca-path-2'],
-      certificate: 'certificate-path',
-      key: 'key-path',
+      certificateAuthorities: ['content-of-ca-path-1', 'content-of-ca-path-2'],
+      certificate: 'content-of-certificate-path',
+      key: 'content-of-key-path',
       keyPassphrase: 'key-pass',
       alwaysPresentCertificate: true,
     },
@@ -497,6 +493,7 @@ Object {
   "sniffOnConnectionFault": true,
   "sniffOnStart": true,
   "ssl": Object {
+    "ca": undefined,
     "rejectUnauthorized": false,
   },
 }
@@ -541,6 +538,7 @@ Object {
   "sniffOnConnectionFault": true,
   "sniffOnStart": true,
   "ssl": Object {
+    "ca": undefined,
     "checkServerIdentity": [Function],
     "rejectUnauthorized": true,
   },
@@ -581,6 +579,7 @@ Object {
   "sniffOnConnectionFault": true,
   "sniffOnStart": true,
   "ssl": Object {
+    "ca": undefined,
     "rejectUnauthorized": true,
   },
 }
@@ -606,8 +605,6 @@ Object {
   });
 
   test('#ignoreCertAndKey = true', () => {
-    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-
     expect(
       parseElasticsearchClientConfig(
         {
@@ -620,9 +617,9 @@ Object {
           requestHeadersWhitelist: [],
           ssl: {
             verificationMode: 'certificate',
-            certificateAuthorities: ['ca-path'],
-            certificate: 'certificate-path',
-            key: 'key-path',
+            certificateAuthorities: ['content-of-ca-path'],
+            certificate: 'content-of-certificate-path',
+            key: 'content-of-key-path',
             keyPassphrase: 'key-pass',
             alwaysPresentCertificate: true,
           },

@@ -31,7 +31,7 @@ describe('UiNavLink', () => {
         url: '/app/kibana#/discover',
         euiIconType: 'discoverApp',
         hidden: true,
-        disabled: true
+        disabled: true,
       };
 
       const link = new UiNavLink(spec);
@@ -45,10 +45,12 @@ describe('UiNavLink', () => {
         euiIconType: spec.euiIconType,
         hidden: spec.hidden,
         disabled: spec.disabled,
+        category: undefined,
 
         // defaults
         linkToLastSubUrl: true,
-        tooltip: ''
+        disableSubUrlTracking: undefined,
+        tooltip: '',
       });
     });
 
@@ -69,7 +71,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        linkToLastSubUrl: false
+        linkToLastSubUrl: false,
       };
       const link = new UiNavLink(spec);
 

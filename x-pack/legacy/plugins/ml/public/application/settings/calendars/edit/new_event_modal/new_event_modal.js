@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React, {
-  Component,
-  Fragment
-} from 'react';
+import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 import {
   EuiButton,
@@ -31,11 +27,12 @@ import moment from 'moment';
 import { TIME_FORMAT } from '../events_table';
 import { generateTempId } from '../utils';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const VALID_DATE_STRING_LENGTH = 19;
 
-export const NewEventModal = injectI18n(class NewEventModal extends Component {
+export class NewEventModal extends Component {
   static propTypes = {
     closeModal: PropTypes.func.isRequired,
     addEvent: PropTypes.func.isRequired,
@@ -45,18 +42,20 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
     super(props);
 
     const startDate = moment().startOf('day');
-    const endDate = moment().startOf('day').add(1, 'days');
+    const endDate = moment()
+      .startOf('day')
+      .add(1, 'days');
 
     this.state = {
       startDate,
       endDate,
       description: '',
       startDateString: startDate.format(TIME_FORMAT),
-      endDateString: endDate.format(TIME_FORMAT)
+      endDateString: endDate.format(TIME_FORMAT),
     };
   }
 
-  onDescriptionChange = (e) => {
+  onDescriptionChange = e => {
     this.setState({
       description: e.target.value,
     });
@@ -71,13 +70,13 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
       description,
       start_time: startDate.valueOf(),
       end_time: endDate.valueOf(),
-      event_id: tempId
+      event_id: tempId,
     };
 
     this.props.addEvent(event);
-  }
+  };
 
-  handleChangeStart = (date) => {
+  handleChangeStart = date => {
     let start = null;
     let end = this.state.endDate;
 
@@ -93,11 +92,11 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
       startDate: start,
       endDate: end,
       startDateString: start.format(TIME_FORMAT),
-      endDateString: end.format(TIME_FORMAT)
+      endDateString: end.format(TIME_FORMAT),
     });
-  }
+  };
 
-  handleChangeEnd = (date) => {
+  handleChangeEnd = date => {
     let start = this.state.startDate;
     let end = null;
 
@@ -113,11 +112,11 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
       startDate: start,
       endDate: end,
       startDateString: start.format(TIME_FORMAT),
-      endDateString: end.format(TIME_FORMAT)
+      endDateString: end.format(TIME_FORMAT),
     });
-  }
+  };
 
-  handleTimeStartChange = (event) => {
+  handleTimeStartChange = event => {
     const dateString = event.target.value;
     let isValidDate = false;
 
@@ -132,12 +131,12 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
     if (isValidDate) {
       this.setState({
         startDateString: dateString,
-        startDate: moment(dateString)
+        startDate: moment(dateString),
       });
     }
-  }
+  };
 
-  handleTimeEndChange = (event) => {
+  handleTimeEndChange = event => {
     const dateString = event.target.value;
     let isValidDate = false;
 
@@ -152,30 +151,25 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
     if (isValidDate) {
       this.setState({
         endDateString: dateString,
-        endDate: moment(dateString)
+        endDate: moment(dateString),
       });
     }
-  }
+  };
 
   renderRangedDatePicker = () => {
-    const {
-      startDate,
-      endDate,
-      startDateString,
-      endDateString,
-    } = this.state;
-
-    const { intl } = this.props;
+    const { startDate, endDate, startDateString, endDateString } = this.state;
 
     const timeInputs = (
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label={<FormattedMessage
-                id="xpack.ml.calendarsEdit.newEventModal.fromLabel"
-                defaultMessage="From:"
-              />}
+              label={
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.newEventModal.fromLabel"
+                  defaultMessage="From:"
+                />
+              }
               helpText={TIME_FORMAT}
             >
               <EuiFieldText
@@ -188,10 +182,12 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label={<FormattedMessage
-                id="xpack.ml.calendarsEdit.newEventModal.toLabel"
-                defaultMessage="To:"
-              />}
+              label={
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.newEventModal.toLabel"
+                  defaultMessage="To:"
+                />
+              }
               helpText={TIME_FORMAT}
             >
               <EuiFieldText
@@ -224,10 +220,12 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
                 startDate={startDate}
                 endDate={endDate}
                 isInvalid={startDate > endDate}
-                aria-label={intl.formatMessage({
-                  id: 'xpack.ml.calendarsEdit.newEventModal.startDateAriaLabel',
-                  defaultMessage: 'Start date'
-                })}
+                aria-label={i18n.translate(
+                  'xpack.ml.calendarsEdit.newEventModal.startDateAriaLabel',
+                  {
+                    defaultMessage: 'Start date',
+                  }
+                )}
                 timeFormat={TIME_FORMAT}
                 dateFormat={TIME_FORMAT}
               />
@@ -241,10 +239,10 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
                 startDate={startDate}
                 endDate={endDate}
                 isInvalid={startDate > endDate}
-                aria-label={intl.formatMessage({
-                  id: 'xpack.ml.calendarsEdit.newEventModal.endDateAriaLabel',
-                  defaultMessage: 'End date'
-                })}
+                aria-label={i18n.translate(
+                  'xpack.ml.calendarsEdit.newEventModal.endDateAriaLabel',
+                  { defaultMessage: 'End date' }
+                )}
                 timeFormat={TIME_FORMAT}
                 dateFormat={TIME_FORMAT}
               />
@@ -253,7 +251,7 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
         </EuiFormRow>
       </Fragment>
     );
-  }
+  };
 
   render() {
     const { closeModal } = this.props;
@@ -261,13 +259,9 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal
-          onClose={closeModal}
-          initialFocus="[name=eventDescription]"
-          maxWidth={false}
-        >
+        <EuiModal onClose={closeModal} initialFocus="[name=eventDescription]" maxWidth={false}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle >
+            <EuiModalHeaderTitle>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
                 defaultMessage="Create new event"
@@ -278,10 +272,12 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
           <EuiModalBody>
             <EuiForm>
               <EuiFormRow
-                label={<FormattedMessage
-                  id="xpack.ml.calendarsEdit.newEventModal.descriptionLabel"
-                  defaultMessage="Description"
-                />}
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.newEventModal.descriptionLabel"
+                    defaultMessage="Description"
+                  />
+                }
                 fullWidth
               >
                 <EuiFieldText
@@ -295,24 +291,17 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
               <EuiSpacer size="m" />
 
               {this.renderRangedDatePicker()}
-
             </EuiForm>
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={closeModal}
-            >
+            <EuiButtonEmpty onClick={closeModal}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
-            <EuiButton
-              onClick={this.handleAddEvent}
-              fill
-              disabled={!description}
-            >
+            <EuiButton onClick={this.handleAddEvent} fill disabled={!description}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.addButtonLabel"
                 defaultMessage="Add"
@@ -323,4 +312,4 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
       </Fragment>
     );
   }
-});
+}

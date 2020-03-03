@@ -76,7 +76,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
         <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
       )}
           
-      {isInitialized === true && analytics.length === 0 && (
+      {errorMessage === undefined && isInitialized === true && analytics.length === 0 && (
         <EuiEmptyPrompt
           iconType="createAdvancedJob"
           title={

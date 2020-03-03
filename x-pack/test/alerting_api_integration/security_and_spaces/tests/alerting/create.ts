@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,11 +31,32 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle create alert request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData());
+            .send(
+              getTestAlertData({
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -56,13 +77,23 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 id: response.body.id,
                 name: 'abc',
                 tags: ['foo'],
-                actions: [],
+                actions: [
+                  {
+                    id: createdAction.id,
+                    actionTypeId: createdAction.actionTypeId,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
                 enabled: true,
                 alertTypeId: 'test.noop',
+                consumer: 'bar',
                 params: {},
                 createdBy: user.username,
-                interval: '1m',
+                schedule: { interval: '1m' },
                 scheduledTaskId: response.body.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
                 throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
@@ -70,12 +101,22 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: response.body.id,
                 spaceId: space.id,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: response.body.id,
               });
               break;
             default:
@@ -172,12 +213,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['name', 'alertTypeId', 'interval', 'params', 'actions'],
-                },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -222,12 +258,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle create alert request appropriately when interval is wrong syntax', async () => {
+        it('should handle create alert request appropriately when interval schedule is wrong syntax', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ interval: '10x' })));
+            .send(getTestAlertData(getTestAlertData({ schedule: { interval: '10x' } })));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -244,14 +280,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]',
-                validation: {
-                  source: 'payload',
-                  keys: ['interval', 'interval', 'interval', 'interval'],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
+                statusCode: 400,
               });
               break;
             default:
@@ -259,12 +290,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle create alert request appropriately when interval is 0', async () => {
+        it('should handle create alert request appropriately when interval schedule is 0', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ interval: '0s' })));
+            .send(getTestAlertData(getTestAlertData({ schedule: { interval: '0s' } })));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -281,14 +312,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]',
-                validation: {
-                  source: 'payload',
-                  keys: ['interval', 'interval', 'interval', 'interval'],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 0s',
+                statusCode: 400,
               });
               break;
             default:

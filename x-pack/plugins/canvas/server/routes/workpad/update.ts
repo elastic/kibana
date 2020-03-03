@@ -6,8 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { KibanaResponseFactory } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -15,15 +14,10 @@ import {
   API_ROUTE_WORKPAD_STRUCTURES,
   API_ROUTE_WORKPAD_ASSETS,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
-import { okResponse } from './ok_response';
+import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
-
-export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
-  '@timestamp': string;
-  '@created': string;
-};
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 
@@ -69,6 +63,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         }),
         body: WorkpadSchema,
       },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
@@ -88,6 +88,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
           id: schema.string(),
         }),
         body: WorkpadSchema,
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     catchErrorHandler(async (context, request, response) => {
@@ -115,6 +121,12 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         // Because we don't know what keys the assets will have, we have to allow
         // unknowns and then validate in the handler
         body: schema.object({}, { allowUnknowns: true }),
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     async (context, request, response) => {

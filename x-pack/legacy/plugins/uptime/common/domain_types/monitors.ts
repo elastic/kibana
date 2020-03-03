@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HistogramDataPoint } from '../graphql/types';
-
 export interface UMGqlRange {
   dateRangeStart: string;
   dateRangeEnd: string;
-}
-
-export interface HistogramResult {
-  histogram: HistogramDataPoint[];
-  interval: number;
 }

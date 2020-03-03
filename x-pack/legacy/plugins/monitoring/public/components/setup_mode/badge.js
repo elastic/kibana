@@ -5,28 +5,33 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiTextColor,
-  EuiIcon,
-  EuiBadge
-} from '@elastic/eui';
+import { EuiTextColor, EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
-const clickToMonitorWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.clickToMonitorWithMetricbeat', {
-  defaultMessage: 'Monitor with Metricbeat'
-});
+const clickToMonitorWithMetricbeat = i18n.translate(
+  'xpack.monitoring.setupMode.clickToMonitorWithMetricbeat',
+  {
+    defaultMessage: 'Monitor with Metricbeat',
+  }
+);
 
-const clickToDisableInternalCollection = i18n.translate('xpack.monitoring.setupMode.clickToDisableInternalCollection', {
-  defaultMessage: 'Disable self monitoring'
-});
+const clickToDisableInternalCollection = i18n.translate(
+  'xpack.monitoring.setupMode.clickToDisableInternalCollection',
+  {
+    defaultMessage: 'Disable self monitoring',
+  }
+);
 
-const monitoredWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
-  defaultMessage: 'Monitored with Metricbeat'
-});
+const monitoredWithMetricbeat = i18n.translate(
+  'xpack.monitoring.setupMode.usingMetricbeatCollection',
+  {
+    defaultMessage: 'Monitored with Metricbeat',
+  }
+);
 
 const unknown = i18n.translate('xpack.monitoring.setupMode.unknown', {
-  defaultMessage: 'N/A'
+  defaultMessage: 'N/A',
 });
 
 export function SetupModeBadge({ setupMode, productName, status, instance, clusterUuid }) {
@@ -38,7 +43,8 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
 
   // Migrating from partially to fully for Elasticsearch involves changing a cluster
   // setting which impacts all nodes in the cluster so the action text needs to reflect that
-  const allPartiallyMigrated = setupModeData.totalUniquePartiallyMigratedCount === setupModeData.totalUniqueInstanceCount;
+  const allPartiallyMigrated =
+    setupModeData.totalUniquePartiallyMigratedCount === setupModeData.totalUniqueInstanceCount;
 
   if (status.isPartiallyMigrated && productName === ELASTICSEARCH_SYSTEM_ID) {
     if (allPartiallyMigrated) {
@@ -46,15 +52,14 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       if (setupModeMeta.liveClusterUuid === clusterUuid) {
         customAction = setupMode.shortcutToFinishMigration;
       }
-    }
-    else {
+    } else {
       return (
         <Fragment>
-          <EuiIcon type="flag"/>
+          <EuiIcon type="flag" />
           &nbsp;
           <EuiTextColor color="warning" size="xs">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
-              defaultMessage: 'Some nodes use only self monitoring'
+              defaultMessage: 'Some nodes use only self monitoring',
             })}
           </EuiTextColor>
         </Fragment>
@@ -67,7 +72,6 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     badgeProps.onClick = customAction ? customAction : () => setupMode.openFlyout(instance);
   }
 
-
   let statusText = null;
   if (status.isInternalCollector) {
     if (badgeProps.onClick) {
@@ -78,8 +82,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
         {customText || clickToMonitorWithMetricbeat}
       </EuiBadge>
     );
-  }
-  else if (status.isPartiallyMigrated) {
+  } else if (status.isPartiallyMigrated) {
     if (badgeProps.onClick) {
       badgeProps.onClickAriaLabel = customText || clickToDisableInternalCollection;
     }
@@ -88,8 +91,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
         {customText || clickToDisableInternalCollection}
       </EuiBadge>
     );
-  }
-  else if (status.isFullyMigrated) {
+  } else if (status.isFullyMigrated) {
     if (badgeProps.onClick) {
       badgeProps.onClickAriaLabel = customText || monitoredWithMetricbeat;
     }
@@ -98,8 +100,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
         {customText || monitoredWithMetricbeat}
       </EuiBadge>
     );
-  }
-  else if (status.isNetNewUser) {
+  } else if (status.isNetNewUser) {
     if (badgeProps.onClick) {
       badgeProps.onClickAriaLabel = customText || clickToMonitorWithMetricbeat;
     }
@@ -108,8 +109,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
         {customText || clickToMonitorWithMetricbeat}
       </EuiBadge>
     );
-  }
-  else {
+  } else {
     if (badgeProps.onClick) {
       badgeProps.onClickAriaLabel = customText || unknown;
     }

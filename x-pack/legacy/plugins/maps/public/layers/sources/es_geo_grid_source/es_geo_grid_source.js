@@ -10,44 +10,41 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { convertToGeoJson } from './convert_to_geojson';
+import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { vectorStyles } from '../../styles/vector/vector_style_defaults';
+import {
+  getDefaultDynamicProperties,
+  VECTOR_STYLES,
+} from '../../styles/vector/vector_style_defaults';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../../common/constants';
+import {
+  AGG_TYPE,
+  DEFAULT_MAX_BUCKETS_LIMIT,
+  SOURCE_DATA_ID_ORIGIN,
+  ES_GEO_GRID,
+  COUNT_PROP_NAME,
+  COLOR_MAP_TYPE,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
+import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
 
-const aggSchemas = new Schemas([
-  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
-  {
-    group: 'buckets',
-    name: 'segment',
-    title: 'Geo Grid',
-    aggFilter: 'geotile_grid',
-    min: 1,
-    max: 1
-  }
-]);
-
 export class ESGeoGridSource extends AbstractESAggSource {
-
   static type = ES_GEO_GRID;
   static title = i18n.translate('xpack.maps.source.esGridTitle', {
-    defaultMessage: 'Grid aggregation'
+    defaultMessage: 'Grid aggregation',
   });
   static description = i18n.translate('xpack.maps.source.esGridDescription', {
-    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell'
+    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   });
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
@@ -57,12 +54,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
       indexPatternId: indexPatternId,
       geoField: geoField,
       requestType: requestType,
-      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE
+      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = (sourceConfig) => {
+    const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -73,7 +70,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       onPreviewSource(source);
     };
 
-    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -84,7 +81,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -101,30 +97,31 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESGeoGridSource.title
+        value: ESGeoGridSource.title,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
-          defaultMessage: 'Index pattern'
+          defaultMessage: 'Index pattern',
         }),
-        value: indexPatternTitle },
+        value: indexPatternTitle,
+      },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
-          defaultMessage: 'Geospatial field'
+          defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField
+        value: this._descriptor.geoField,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
-          defaultMessage: 'Show as'
+          defaultMessage: 'Show as',
         }),
-        value: this._descriptor.requestType
+        value: this._descriptor.requestType,
       },
     ];
   }
 
   getFieldNames() {
-    return this.getMetricFields().map((esAggMetricField => esAggMetricField.getName()));
+    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
   }
 
   isGeoGridPrecisionAware() {
@@ -157,38 +154,182 @@ export class ESGeoGridSource extends AbstractESAggSource {
       return 4;
     }
 
-    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
-      defaultMessage: `Grid resolution param not recognized: {resolution}`,
-      values: {
-        resolution: this._descriptor.resolution
-      }
-    }));
+    throw new Error(
+      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+        defaultMessage: `Grid resolution param not recognized: {resolution}`,
+        values: {
+          resolution: this._descriptor.resolution,
+        },
+      })
+    );
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this.getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
-    searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(
-      layerName,
-      searchSource,
-      registerCancelCallback,
-      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-        defaultMessage: 'Elasticsearch geo grid aggregation request'
-      }));
+  async _compositeAggRequest({
+    searchSource,
+    indexPattern,
+    precision,
+    layerName,
+    registerCancelCallback,
+    bucketsPerGrid,
+    isRequestStillActive,
+  }) {
+    const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
+    const aggs = {
+      compositeSplit: {
+        composite: {
+          size: gridsPerRequest,
+          sources: [
+            {
+              gridSplit: {
+                geotile_grid: {
+                  field: this._descriptor.geoField,
+                  precision,
+                },
+              },
+            },
+          ],
+        },
+        aggs: {
+          gridCentroid: {
+            geo_centroid: {
+              field: this._descriptor.geoField,
+            },
+          },
+          ...this.getValueAggsDsl(indexPattern),
+        },
+      },
+    };
 
-    const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
-    const { featureCollection } = convertToGeoJson({
-      table: tabifiedResp,
-      renderAs: this._descriptor.requestType,
+    const features = [];
+    let requestCount = 0;
+    let afterKey = null;
+    while (true) {
+      if (!isRequestStillActive()) {
+        // Stop paging through results if request is obsolete
+        throw new DataRequestAbortError();
+      }
+
+      requestCount++;
+
+      // circuit breaker to ensure reasonable number of requests
+      if (requestCount > 5) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esGrid.compositePaginationErrorMessage', {
+            defaultMessage: `{layerName} is causing too many requests. Reduce "Grid resolution" and/or reduce the number of top term "Metrics".`,
+            values: { layerName },
+          })
+        );
+      }
+
+      if (afterKey) {
+        aggs.compositeSplit.composite.after = afterKey;
+      }
+      searchSource.setField('aggs', aggs);
+      const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
+      const esResponse = await this._runEsQuery({
+        requestId,
+        requestName: `${layerName} (${requestCount})`,
+        searchSource,
+        registerCancelCallback,
+        requestDescription: i18n.translate(
+          'xpack.maps.source.esGrid.compositeInspectorDescription',
+          {
+            defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
+            values: { requestId },
+          }
+        ),
+      });
+
+      features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
+
+      afterKey = esResponse.aggregations.compositeSplit.after_key;
+      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+        // Finished because request did not get full resultset back
+        break;
+      }
+    }
+
+    return features;
+  }
+
+  // Do not use composite aggregation when there are no terms sub-aggregations
+  // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
+  async _nonCompositeAggRequest({
+    searchSource,
+    indexPattern,
+    precision,
+    layerName,
+    registerCancelCallback,
+  }) {
+    searchSource.setField('aggs', {
+      gridSplit: {
+        geotile_grid: {
+          field: this._descriptor.geoField,
+          precision,
+        },
+        aggs: {
+          gridCentroid: {
+            geo_centroid: {
+              field: this._descriptor.geoField,
+            },
+          },
+          ...this.getValueAggsDsl(indexPattern),
+        },
+      },
     });
 
-    return {
-      data: featureCollection,
-      meta: {
-        areResultsTrimmed: false
+    const esResponse = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+        defaultMessage: 'Elasticsearch geo grid aggregation request',
+      }),
+    });
+
+    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
+  }
+
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
+
+    let bucketsPerGrid = 1;
+    this.getMetricFields().forEach(metricField => {
+      if (metricField.getAggType() === AGG_TYPE.TERMS) {
+        // each terms aggregation increases the overall number of buckets per grid
+        bucketsPerGrid++;
       }
+    });
+
+    const features =
+      bucketsPerGrid === 1
+        ? await this._nonCompositeAggRequest({
+            searchSource,
+            indexPattern,
+            precision: searchFilters.geogridPrecision,
+            layerName,
+            registerCancelCallback,
+          })
+        : await this._compositeAggRequest({
+            searchSource,
+            indexPattern,
+            precision: searchFilters.geogridPrecision,
+            layerName,
+            registerCancelCallback,
+            bucketsPerGrid,
+            isRequestStillActive,
+          });
+
+    return {
+      data: {
+        type: 'FeatureCollection',
+        features: features,
+      },
+      meta: {
+        areResultsTrimmed: false,
+      },
     };
   }
 
@@ -196,60 +337,66 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  _makeAggConfigs(precision) {
-    const metricAggConfigs = this.createMetricAggConfigs();
-    return [
-      ...metricAggConfigs,
-      {
-        id: 'grid',
-        enabled: true,
-        type: 'geotile_grid',
-        schema: 'segment',
-        params: {
-          field: this._descriptor.geoField,
-          useGeocentroid: true,
-          precision: precision,
-        }
-      },
-    ];
+  _createHeatmapLayerDescriptor(options) {
+    return HeatmapLayer.createDescriptor({
+      sourceDescriptor: this._descriptor,
+      ...options,
+    });
   }
 
-  _createDefaultLayerDescriptor(options) {
-    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
-      return HeatmapLayer.createDescriptor({
-        sourceDescriptor: this._descriptor,
-        ...options
-      });
-    }
-
+  _createVectorLayerDescriptor(options) {
     const descriptor = VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
-      ...options
+      ...options,
     });
+
+    const defaultDynamicProperties = getDefaultDynamicProperties();
+
     descriptor.style = VectorStyle.createDescriptor({
-      [vectorStyles.FILL_COLOR]: {
+      [VECTOR_STYLES.FILL_COLOR]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues'
-        }
+          color: COLOR_GRADIENTS[0].value,
+          type: COLOR_MAP_TYPE.ORDINAL,
+        },
       },
-      [vectorStyles.ICON_SIZE]: {
+      [VECTOR_STYLES.LINE_COLOR]: {
+        type: StaticStyleProperty.type,
+        options: {
+          color: '#FFF',
+        },
+      },
+      [VECTOR_STYLES.LINE_WIDTH]: {
+        type: StaticStyleProperty.type,
+        options: {
+          size: 0,
+        },
+      },
+      [VECTOR_STYLES.ICON_SIZE]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN
+            origin: SOURCE_DATA_ID_ORIGIN,
           },
-          minSize: 4,
-          maxSize: 32,
-        }
-      }
+        },
+      },
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
     });
     return descriptor;
   }
@@ -257,17 +404,17 @@ export class ESGeoGridSource extends AbstractESAggSource {
   createDefaultLayer(options) {
     if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
       return new HeatmapLayer({
-        layerDescriptor: this._createDefaultLayerDescriptor(options),
-        source: this
+        layerDescriptor: this._createHeatmapLayerDescriptor(options),
+        source: this,
       });
     }
 
-    const layerDescriptor = this._createDefaultLayerDescriptor(options);
+    const layerDescriptor = this._createVectorLayerDescriptor(options);
     const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
-      layerDescriptor: layerDescriptor,
+      layerDescriptor,
       source: this,
-      style
+      style,
     });
   }
 

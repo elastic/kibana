@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
-
 import { getInitialState, getJobConfigFromFormState } from './state';
 
 describe('useCreateAnalyticsForm', () => {
@@ -17,15 +15,15 @@ describe('useCreateAnalyticsForm', () => {
 
     const jobConfig = getJobConfigFromFormState(state.form);
 
-    expect(idx(jobConfig, _ => _.dest.index)).toBe('the-destination-index');
-    expect(idx(jobConfig, _ => _.source.index)).toBe('the-source-index');
-    expect(idx(jobConfig, _ => _.analyzed_fields.excludes)).toStrictEqual([]);
-    expect(typeof idx(jobConfig, _ => _.analyzed_fields.includes)).toBe('undefined');
+    expect(jobConfig?.dest?.index).toBe('the-destination-index');
+    expect(jobConfig?.source?.index).toBe('the-source-index');
+    expect(jobConfig?.analyzed_fields?.excludes).toStrictEqual([]);
+    expect(typeof jobConfig?.analyzed_fields?.includes).toBe('undefined');
 
     // test the conversion of comma-separated Kibana index patterns to ES array based index patterns
     state.form.sourceIndex = 'the-source-index-1,the-source-index-2';
     const jobConfigSourceIndexArray = getJobConfigFromFormState(state.form);
-    expect(idx(jobConfigSourceIndexArray, _ => _.source.index)).toStrictEqual([
+    expect(jobConfigSourceIndexArray?.source?.index).toStrictEqual([
       'the-source-index-1',
       'the-source-index-2',
     ]);

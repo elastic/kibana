@@ -20,7 +20,7 @@ import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
-import { JOB_TYPE } from '../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 interface Props {
   jobCreator: JobCreatorType;
@@ -41,13 +41,15 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
-  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
-
-  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<(s: number) => number>(
+  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
     s => s + 1,
     0
   );
+  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
+
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
+    (s: number, action: any) => number
+  >(s => s + 1, 0);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
@@ -75,6 +77,16 @@ export const Wizard: FC<Props> = ({
   const [stringifiedConfigs, setStringifiedConfigs] = useState(
     stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig)
   );
+
+  useEffect(() => {
+    const subscription = jobValidator.validationResult$.subscribe(() => {
+      setJobValidatorUpdate(jobValidatorUpdated);
+    });
+
+    return () => {
+      return subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     jobValidator.validate(() => {

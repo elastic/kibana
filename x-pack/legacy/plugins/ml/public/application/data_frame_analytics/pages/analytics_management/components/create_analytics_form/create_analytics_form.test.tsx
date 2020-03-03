@@ -10,21 +10,16 @@ import { mountHook } from '../../../../../../../../../../test_utils/enzyme_helpe
 
 import { CreateAnalyticsForm } from './create_analytics_form';
 
-import { KibanaContext } from '../../../../../contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+import { MlContext } from '../../../../../contexts/ml';
+import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
 import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
-
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS: [],
-}));
 
 const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
     ({ children }) => (
-      <KibanaContext.Provider value={kibanaContextValueMock}>{children}</KibanaContext.Provider>
+      <MlContext.Provider value={kibanaContextValueMock}>{children}</MlContext.Provider>
     )
   );
 
@@ -34,18 +29,31 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        docLinks: () => ({
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        }),
+      },
+    };
+  },
+}));
+
 describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();
     const props = getLastHookValue();
     const wrapper = mount(
-      <KibanaContext.Provider value={kibanaContextValueMock}>
+      <MlContext.Provider value={kibanaContextValueMock}>
         <CreateAnalyticsForm {...props} />
-      </KibanaContext.Provider>
+      </MlContext.Provider>
     );
 
     const euiFormRows = wrapper.find('EuiFormRow');
-    expect(euiFormRows.length).toBe(7);
+    expect(euiFormRows.length).toBe(9);
 
     const row1 = euiFormRows.at(0);
     expect(row1.find('label').text()).toBe('Job type');
@@ -56,6 +64,6 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     expect(options.at(2).props().value).toBe('regression');
 
     const row2 = euiFormRows.at(1);
-    expect(row2.find('p').text()).toBe('Enable advanced editor');
+    expect(row2.find('EuiSwitch').text()).toBe('Enable advanced editor');
   });
 });

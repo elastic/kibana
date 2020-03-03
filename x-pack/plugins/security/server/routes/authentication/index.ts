@@ -6,11 +6,36 @@
 
 import { defineSessionRoutes } from './session';
 import { defineSAMLRoutes } from './saml';
+import { defineBasicRoutes } from './basic';
+import { defineCommonRoutes } from './common';
+import { defineOIDCRoutes } from './oidc';
 import { RouteDefinitionParams } from '..';
+
+export function createCustomResourceResponse(body: string, contentType: string, cspHeader: string) {
+  return {
+    body,
+    headers: {
+      'content-type': contentType,
+      'cache-control': 'private, no-cache, no-store',
+      'content-security-policy': cspHeader,
+    },
+    statusCode: 200,
+  };
+}
 
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineSessionRoutes(params);
-  if (params.config.authc.providers.includes('saml')) {
+  defineCommonRoutes(params);
+
+  if (params.authc.isProviderEnabled('basic') || params.authc.isProviderEnabled('token')) {
+    defineBasicRoutes(params);
+  }
+
+  if (params.authc.isProviderEnabled('saml')) {
     defineSAMLRoutes(params);
+  }
+
+  if (params.authc.isProviderEnabled('oidc')) {
+    defineOIDCRoutes(params);
   }
 }

@@ -15,7 +15,7 @@ export const RefreshAnalyticsListButton: FC = () => {
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   return (
     <EuiButtonEmpty
-      data-test-subj="mlRefreshAnalyticsListButton"
+      data-test-subj="mlAnalyticsRefreshListButton"
       onClick={refresh}
       isLoading={isLoading}
     >

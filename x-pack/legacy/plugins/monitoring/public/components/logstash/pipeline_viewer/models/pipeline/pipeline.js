@@ -9,7 +9,8 @@ import { QueueVertex } from '../graph/queue_vertex';
 import { isVertexPipelineStage } from './utils';
 
 function getInputStatements(pipelineGraph) {
-  return pipelineGraph.getVertices()
+  return pipelineGraph
+    .getVertices()
     .filter(v => v.pipelineStage === 'input')
     .map(makeStatement);
 }
@@ -27,7 +28,6 @@ function isVertexChildOfQueue(vertex) {
 }
 
 function getFilterStatements(pipelineGraph) {
-
   // If the graph has a Queue vertex, then the first filter vertex whose parent is the Queue vertex
   // is where we want to start. If there is no Queue vertex then there are necessarily no input-stage vertices
   // either, so the first filter vertex that has no parents (orphan vertex) is where we want to start.
@@ -52,14 +52,16 @@ function getFilterStatements(pipelineGraph) {
 }
 
 function getQueue(pipelineGraph) {
-  return pipelineGraph.hasQueueVertex
-    ? makeStatement(pipelineGraph.queueVertex)
-    : null;
+  return pipelineGraph.hasQueueVertex ? makeStatement(pipelineGraph.queueVertex) : null;
 }
 
 function getOutputStatements(pipelineGraph) {
-  return pipelineGraph.getVertices()
-    .filter(v => (v.pipelineStage === 'output') && !v.incomingVertices.some(p => p.pipelineStage === 'output'))
+  return pipelineGraph
+    .getVertices()
+    .filter(
+      v =>
+        v.pipelineStage === 'output' && !v.incomingVertices.some(p => p.pipelineStage === 'output')
+    )
     .map(v => makeStatement(v, 'output'));
 }
 

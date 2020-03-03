@@ -1,0 +1,36 @@
+{
+  "description": "This rule detects network events that may indicate the use of RPC traffic\nfrom the Internet. RPC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "RPC (Remote Procedure Call) from the Internet",
+  "query": "network.transport: tcp and destination.port: 135 and (\n    network.direction: inbound or (\n        not source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 73,
+  "rule_id": "143cb236-0956-4f42-a706-814bcaa0cf5a",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

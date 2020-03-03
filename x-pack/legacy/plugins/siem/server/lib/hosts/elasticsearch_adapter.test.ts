@@ -159,12 +159,9 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostsResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 
@@ -182,12 +179,9 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostOverviewResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 
@@ -205,12 +199,9 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostLastFirstSeenResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 

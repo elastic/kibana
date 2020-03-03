@@ -28,3 +28,7 @@ export function isFilterable(field: IFieldType): boolean {
     Boolean(field.searchable && filterableTypes.includes(field.type))
   );
 }
+
+export function isNestedField(field: IFieldType): boolean {
+  return !!field.subType?.nested;
+}

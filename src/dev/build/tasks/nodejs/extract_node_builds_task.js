@@ -42,7 +42,7 @@ export const ExtractNodeBuildsTask = {
 
         // all other downloads are tarballs
         return untar(downloadPath, extractDir, { strip: 1 });
-      }),
+      })
     );
   },
   async copyWindows(source, destination) {

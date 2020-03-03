@@ -4,19 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { CalendarsListHeader } from './header';
 
-describe('CalendarListsHeader', () => {
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
+  },
+}));
 
+describe('CalendarListsHeader', () => {
   const refreshCalendars = jest.fn(() => {});
 
   const requiredProps = {
     totalCount: 3,
     refreshCalendars,
+    kibana: {
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        },
+      },
+    },
   };
 
   test('renders header', () => {
@@ -24,12 +36,8 @@ describe('CalendarListsHeader', () => {
       ...requiredProps,
     };
 
-    const component = shallowWithIntl(
-      <CalendarsListHeader {...props} />
-    );
+    const component = shallowWithIntl(<CalendarsListHeader {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
-
 });

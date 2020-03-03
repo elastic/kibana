@@ -7,20 +7,20 @@
 export const metricSet = [
   {
     keys: ['kibana_os_load_1m', 'kibana_os_load_5m', 'kibana_os_load_15m'],
-    name: 'kibana_os_load'
+    name: 'kibana_os_load',
   },
   'kibana_average_concurrent_connections',
   'kibana_process_delay',
   {
     keys: ['kibana_memory_heap_size_limit', 'kibana_memory_size'],
-    name: 'kibana_memory'
+    name: 'kibana_memory',
   },
   {
     keys: ['kibana_max_response_times', 'kibana_average_response_times'],
-    name: 'kibana_response_times'
+    name: 'kibana_response_times',
   },
   {
     keys: ['kibana_requests_total', 'kibana_requests_disconnects'],
-    name: 'kibana_requests'
-  }
+    name: 'kibana_requests',
+  },
 ];

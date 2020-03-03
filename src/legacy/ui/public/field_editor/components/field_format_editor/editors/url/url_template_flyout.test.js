@@ -24,18 +24,12 @@ import { UrlTemplateFlyout } from './url_template_flyout';
 
 describe('UrlTemplateFlyout', () => {
   it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
-      <UrlTemplateFlyout
-        isVisible={true}
-      />
-    );
+    const component = shallowWithI18nProvider(<UrlTemplateFlyout isVisible={true} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should not render if not visible', async () => {
-    const component = shallowWithI18nProvider(
-      <UrlTemplateFlyout />
-    );
+    const component = shallowWithI18nProvider(<UrlTemplateFlyout />);
     expect(component).toMatchSnapshot();
   });
 });

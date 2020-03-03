@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { parseInterval } from 'ui/utils/parse_interval';
-import { GTE_INTERVAL_RE } from '../../common/interval_regexp';
+import { GTE_INTERVAL_RE } from '../../../../../plugins/vis_type_timeseries/common/interval_regexp';
 import { i18n } from '@kbn/i18n';
+import { parseInterval } from '../../../../../plugins/data/public';
 
 export function validateInterval(bounds, panel, maxBuckets) {
   const { interval } = panel;
@@ -35,11 +35,14 @@ export function validateInterval(bounds, panel, maxBuckets) {
     const buckets = Math.floor(span / duration.asMilliseconds());
     if (buckets > maxBuckets) {
       throw new Error(
-        i18n.translate('visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage', {
-          defaultMessage:
-            'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
-          values: { buckets, maxBuckets },
-        })
+        i18n.translate(
+          'visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage',
+          {
+            defaultMessage:
+              'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
+            values: { buckets, maxBuckets },
+          }
+        )
       );
     }
   }

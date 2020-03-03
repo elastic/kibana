@@ -10,10 +10,16 @@ import React from 'react';
 import { FilterLists } from './filter_lists';
 
 jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true,
+}));
+
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: node => {
+    return node;
+  },
 }));
 
 // Mock the call for loading the list of filters.
@@ -42,7 +48,7 @@ const props = {
 
 describe('Filter Lists', () => {
   test('renders a list of filters', () => {
-    const wrapper = shallowWithIntl(<FilterLists.WrappedComponent {...props} />);
+    const wrapper = shallowWithIntl(<FilterLists {...props} />);
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
     // has resolved.

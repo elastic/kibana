@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import instanceFixture from './fixtures/instance';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/singlecluster-yellow-platinum';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z'
+      max: '2017-08-29T17:26:08.000Z',
     };
 
     before('load archive', () => {
@@ -28,7 +28,9 @@ export default function ({ getService }) {
 
     it('should summarize single kibana instance with metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana/de3b8f2a-7bb9-4931-9bf3-997ba7824cf9')
+        .post(
+          '/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana/de3b8f2a-7bb9-4931-9bf3-997ba7824cf9'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);

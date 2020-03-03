@@ -54,6 +54,14 @@ The protocol for accessing Kibana, typically `http` or `https`.
 `xpack.reporting.kibanaServer.hostname`::
 The hostname for accessing {kib}, if different from the `server.host` value.
 
+[NOTE]
+============
+Reporting authenticates requests on the Kibana page only when the hostname matches the
+`xpack.reporting.kibanaServer.hostname` setting. Therefore Reporting would fail if the
+set value redirects to another server. For that reason, `"0"` is an invalid setting
+because, in the Reporting browser, it becomes an automatic redirect to `"0.0.0.0"`.
+============
+
 
 [float]
 [[reporting-job-queue-settings]]

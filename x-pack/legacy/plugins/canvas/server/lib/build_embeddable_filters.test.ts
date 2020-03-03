@@ -23,10 +23,10 @@ const timeFilter: Filter = {
 };
 
 describe('buildEmbeddableFilters', () => {
-  it('converts non time Canvas Filters to ES Filters ', () => {
+  it('converts all Canvas Filters to ES Filters ', () => {
     const filters = buildEmbeddableFilters([timeFilter, columnFilter, columnFilter]);
 
-    expect(filters.filters).toHaveLength(2);
+    expect(filters.filters).toHaveLength(3);
   });
 
   it('converts time filter to time range', () => {

@@ -112,5 +112,6 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
     }
   }
   responsive={false}
+  tableLayout="fixed"
 />
 `;

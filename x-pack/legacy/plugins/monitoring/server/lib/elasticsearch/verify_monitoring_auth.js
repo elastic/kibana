@@ -44,12 +44,12 @@ async function verifyHasPrivileges(req) {
     body: {
       index: [
         {
-          names: [ INDEX_PATTERN ], // uses wildcard
-          privileges: [ 'read' ]
-        }
-      ]
+          names: [INDEX_PATTERN], // uses wildcard
+          privileges: ['read'],
+        },
+      ],
     },
-    ignoreUnavailable: true // we allow 404 incase the user shutdown security in-between the check and now
+    ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
   });
 
   // we assume true because, if the response 404ed, then it will not exist but we should try to continue

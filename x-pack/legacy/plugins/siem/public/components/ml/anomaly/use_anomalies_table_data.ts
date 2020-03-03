@@ -14,12 +14,8 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import {
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_TIMEZONE_BROWSER,
-  DEFAULT_KBN_VERSION,
-} from '../../../../common/constants';
+import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
+import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -67,9 +63,8 @@ export const useAnomaliesTableData = ({
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
-  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const timeZone = useTimeZone();
+  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 
@@ -95,11 +90,10 @@ export const useAnomaliesTableData = ({
               earliestMs,
               latestMs,
               influencers: influencersInput,
-              dateFormatTz: timezone,
+              dateFormatTz: timeZone,
               maxRecords: 500,
               maxExamples: 10,
             },
-            kbnVersion,
             abortCtrl.signal
           );
           if (isSubscribed) {

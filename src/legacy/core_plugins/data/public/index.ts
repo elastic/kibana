@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,23 +27,62 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export { DataSetup, DataStart };
-
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-} from './index_patterns';
-export { SearchBar, SearchBarProps } from './search';
+export { DataSetup, DataStart } from './plugin';
 export {
   SavedQueryAttributes,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '../../../../plugins/data/public';
+export {
+  // agg_types
+  AggParam, // only the type is used externally, only in vis editor
+  AggParamOption, // only the type is used externally
+  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  IpRangeKey, // only used in field formatter deserialization, which will live in data
+  ISchemas,
+  OptionedParamEditorProps, // only type is used externally
+  OptionedValueProp, // only type is used externally
+} from './search/types';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
+export {
+  // agg_types TODO need to group these under a namespace or prefix
+  AggConfigs,
+  AggParamType,
+  AggTypeFilters, // TODO convert to interface
+  aggTypeFilters,
+  AggTypeFieldFilters, // TODO convert to interface
+  AggGroupNames,
+  aggGroupNamesMap,
+  BUCKET_TYPES,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  setBounds,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  METRIC_TYPES,
+  OptionedParamType,
+  parentPipelineType,
+  propFilter,
+  Schema,
+  Schemas,
+  siblingPipelineType,
+  termsAggFilter,
+  // search_source
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';

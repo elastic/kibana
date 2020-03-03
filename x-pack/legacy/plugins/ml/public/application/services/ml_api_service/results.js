@@ -6,11 +6,9 @@
 
 // Service for obtaining data for the ML Results dashboards.
 
-import chrome from 'ui/chrome';
-
 import { http, http$ } from '../http_service';
 
-const basePath = chrome.addBasePath('/api/ml');
+import { basePath } from './index';
 
 export const results = {
   getAnomaliesTableData(
@@ -24,8 +22,9 @@ export const results = {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery) {
-    return http$(`${basePath}/results/anomalies_table_data`, {
+    influencersFilterQuery
+  ) {
+    return http$(`${basePath()}/results/anomalies_table_data`, {
       method: 'POST',
       body: {
         jobIds,
@@ -38,50 +37,53 @@ export const results = {
         dateFormatTz,
         maxRecords,
         maxExamples,
-        influencersFilterQuery
-      }
+        influencersFilterQuery,
+      },
     });
   },
 
-  getMaxAnomalyScore(
-    jobIds,
-    earliestMs,
-    latestMs
-  ) {
-
+  getMaxAnomalyScore(jobIds, earliestMs, latestMs) {
     return http({
-      url: `${basePath}/results/max_anomaly_score`,
+      url: `${basePath()}/results/max_anomaly_score`,
       method: 'POST',
       data: {
         jobIds,
         earliestMs,
-        latestMs
-      }
+        latestMs,
+      },
     });
   },
 
   getCategoryDefinition(jobId, categoryId) {
     return http({
-      url: `${basePath}/results/category_definition`,
+      url: `${basePath()}/results/category_definition`,
       method: 'POST',
-      data: { jobId, categoryId }
+      data: { jobId, categoryId },
     });
   },
 
-  getCategoryExamples(
-    jobId,
-    categoryIds,
-    maxExamples
-  ) {
-
+  getCategoryExamples(jobId, categoryIds, maxExamples) {
     return http({
-      url: `${basePath}/results/category_examples`,
+      url: `${basePath()}/results/category_examples`,
       method: 'POST',
       data: {
         jobId,
         categoryIds,
-        maxExamples
-      }
+        maxExamples,
+      },
     });
-  }
+  },
+
+  fetchPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs) {
+    return http$(`${basePath()}/results/partition_fields_values`, {
+      method: 'POST',
+      body: {
+        jobId,
+        searchTerm,
+        criteriaFields,
+        earliestMs,
+        latestMs,
+      },
+    });
+  },
 };

@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
@@ -56,9 +55,10 @@ export interface LoaderProps {
   overlay?: boolean;
   overlayBackground?: string;
   size?: EuiLoadingSpinnerSize;
+  children?: React.ReactChild;
 }
 
-export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
+export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
   <Aside overlay={overlay} overlayBackground={overlayBackground}>
     <FlexGroup overlay={{ overlay }}>
       <EuiFlexItem grow={false}>

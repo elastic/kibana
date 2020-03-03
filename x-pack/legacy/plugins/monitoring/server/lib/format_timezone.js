@@ -5,7 +5,6 @@
  */
 import moment from 'moment';
 
-
 /**
  * This function is designed to offset a UTC timestamp based on the provided timezone
  * For example, EST is UTC-4h so this function will subtract (4 * 60 * 60 * 1000)ms
@@ -20,6 +19,6 @@ export const formatUTCTimestampForTimezone = (utcTimestamp, timezone) => {
     return utcTimestamp;
   }
   const offsetInMinutes = moment.tz(timezone).utcOffset();
-  const offsetTimestamp = utcTimestamp + (offsetInMinutes * 1 * 60 * 1000);
+  const offsetTimestamp = utcTimestamp + offsetInMinutes * 1 * 60 * 1000;
   return offsetTimestamp;
 };

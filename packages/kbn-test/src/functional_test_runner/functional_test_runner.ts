@@ -18,10 +18,12 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Suite, Test } from './fake_mocha_types';
 
+import { Suite, Test } from './fake_mocha_types';
 import {
-  createLifecycle,
+  Lifecycle,
+  LifecyclePhase,
+  FailureMetadata,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -31,7 +33,8 @@ import {
 } from './lib';
 
 export class FunctionalTestRunner {
-  public readonly lifecycle = createLifecycle();
+  public readonly lifecycle = new Lifecycle();
+  public readonly failureMetadata = new FailureMetadata(this.lifecycle);
   private closed = false;
 
   constructor(
@@ -39,13 +42,12 @@ export class FunctionalTestRunner {
     private readonly configFile: string,
     private readonly configOverrides: any
   ) {
-    this.lifecycle.on('phaseStart', name => {
-      log.verbose('starting %j lifecycle phase', name);
-    });
-
-    this.lifecycle.on('phaseEnd', name => {
-      log.verbose('ending %j lifecycle phase', name);
-    });
+    for (const [key, value] of Object.entries(this.lifecycle)) {
+      if (value instanceof LifecyclePhase) {
+        value.before$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+        value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+      }
+    }
   }
 
   async run() {
@@ -58,8 +60,16 @@ export class FunctionalTestRunner {
 
       await providers.loadAll();
 
+      const customTestRunner = config.get('testRunner');
+      if (customTestRunner) {
+        this.log.warning(
+          'custom test runner defined, ignoring all mocha/suite/filtering related options'
+        );
+        return (await providers.invokeProviderFn(customTestRunner)) || 0;
+      }
+
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-      await this.lifecycle.trigger('beforeTests');
+      await this.lifecycle.beforeTests.trigger();
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
@@ -68,6 +78,10 @@ export class FunctionalTestRunner {
 
   async getTestStats() {
     return await this._run(async (config, coreProviders) => {
+      if (config.get('testRunner')) {
+        throw new Error('Unable to get test stats for config that uses a custom test runner');
+      }
+
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
@@ -106,14 +120,18 @@ export class FunctionalTestRunner {
       const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
       this.log.info('Config loaded');
 
-      if (config.get('testFiles').length === 0) {
-        throw new Error('No test files defined.');
+      if (
+        (!config.get('testFiles') || config.get('testFiles').length === 0) &&
+        !config.get('testRunner')
+      ) {
+        throw new Error('No tests defined.');
       }
 
       // base level services that functional_test_runner exposes
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
+        failureMetadata: () => this.failureMetadata,
         config: () => config,
       });
 
@@ -140,6 +158,6 @@ export class FunctionalTestRunner {
     if (this.closed) return;
 
     this.closed = true;
-    await this.lifecycle.trigger('cleanup');
+    await this.lifecycle.cleanup.trigger();
   }
 }

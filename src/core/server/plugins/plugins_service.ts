@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -196,6 +197,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+            if (configDescriptor.deprecations) {
+              this.coreContext.configService.addDeprecationProvider(
+                plugin.configPath,
+                configDescriptor.deprecations
+              );
+            }
             await this.coreContext.configService.setSchema(
               plugin.configPath,
               configDescriptor.schema
@@ -208,7 +215,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           }
 
           if (plugin.includesUiPlugin) {
-            this.uiPluginInternalInfo.set(plugin.name, { entryPointPath: `${plugin.path}/public` });
+            this.uiPluginInternalInfo.set(plugin.name, {
+              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+            });
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });

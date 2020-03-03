@@ -7,11 +7,10 @@
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { idx } from '@kbn/elastic-idx';
 
 import { SimpleSavedObject } from 'src/core/public';
 import { ml } from '../../../../../services/ml_api_service';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 
 import {
   useRefreshAnalyticsList,
@@ -44,7 +43,7 @@ export function getErrorMessage(error: any) {
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
@@ -131,7 +130,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.make();
+      const newIndexPattern = await mlContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',
@@ -162,8 +161,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
       // check if there's a default index pattern, if not,
       // set the newly created one as the default index pattern.
-      if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
-        await kibanaContext.kibanaConfig.set('defaultIndex', id);
+      if (!mlContext.kibanaConfig.get('defaultIndex')) {
+        await mlContext.kibanaConfig.set('defaultIndex', id);
       }
 
       addRequestMessage({
@@ -227,11 +226,11 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     try {
       // Set the index pattern titles which the user can choose as the source.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
+      const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
-        const title = idx(obj, _ => _.attributes.title);
+        const title = obj?.attributes?.title;
         if (title !== undefined) {
-          const id = idx(obj, _ => _.id) || '';
+          const id = obj?.id || '';
           indexPatternsMap[title] = { label: title, value: id };
         }
       });

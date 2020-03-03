@@ -3,45 +3,50 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
-import numeral from '@elastic/numeral';
-import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 
-export const getBarchartConfigs = ({
-  from,
-  to,
-  scaleType,
-  onBrushEnd,
-  yTickFormatter,
-  showLegend,
-}: {
+import { UpdateDateRange, ChartSeriesData } from '../charts/common';
+import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
+import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { histogramDateTimeFormatter } from '../utils';
+
+interface GetBarchartConfigsProps {
+  chartHeight?: number;
   from: number;
+  legendPosition?: Position;
   to: number;
-  scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
-}) => ({
+}
+
+export const DEFAULT_CHART_HEIGHT = 174;
+export const DEFAULT_Y_TICK_FORMATTER = (value: string | number): string => value.toLocaleString();
+
+export const getBarchartConfigs = ({
+  chartHeight,
+  from,
+  legendPosition,
+  to,
+  onBrushEnd,
+  yTickFormatter,
+  showLegend,
+}: GetBarchartConfigsProps): BarchartConfigs => ({
   series: {
-    xScaleType: scaleType || ScaleType.Time,
+    xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter: scaleType === ScaleType.Time ? niceTimeFormatter([from, to]) : undefined,
-    yTickFormatter:
-      yTickFormatter != null
-        ? yTickFormatter
-        : (value: string | number): string => value.toLocaleString(),
+    xTickFormatter: histogramDateTimeFormatter([from, to]),
+    yTickFormatter: yTickFormatter != null ? yTickFormatter : DEFAULT_Y_TICK_FORMATTER,
     tickSize: 8,
   },
   settings: {
-    legendPosition: Position.Bottom,
+    legendPosition: legendPosition ?? Position.Right,
     onBrushEnd,
-    showLegend: showLegend || true,
+    showLegend: showLegend ?? true,
     theme: {
       scales: {
         barsPadding: 0.08,
@@ -60,34 +65,30 @@ export const getBarchartConfigs = ({
       },
     },
   },
-  customHeight: 324,
+  customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
 });
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixHistogramDataTypes[]
+  MatrixOverTimeHistogramData[]
 ]): ChartSeriesData => ({
   key,
   value,
 });
 
 export const getCustomChartData = (
-  data: MatrixHistogramDataTypes[],
+  data: MatrixOverTimeHistogramData[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
+  if (!data) return [];
   const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
 
   if (mapping)
     return map((item: ChartSeriesData) => {
-      const customColor = get(`${item.key}.color`, mapping);
-      item.color = customColor;
-      return item;
+      const mapItem = get(item.key, mapping);
+      return { ...item, color: mapItem?.color };
     }, formattedChartData);
   else return formattedChartData;
-};
-
-export const bytesFormatter = (value: number) => {
-  return numeral(value).format('0,0.[0]b');
 };

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for quick addition of a partitioning field value
  * to a filter list used in the scope part of a rule.
@@ -13,21 +12,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiLink,
-} from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function AddToFilterListLink({
-  fieldValue,
-  filterId,
-  addItemToFilterList,
-}) {
-
+export function AddToFilterListLink({ fieldValue, filterId, addItemToFilterList }) {
   return (
-    <EuiLink
-      onClick={() => addItemToFilterList(fieldValue, filterId, true)}
-    >
+    <EuiLink onClick={() => addItemToFilterList(fieldValue, filterId, true)}>
       <FormattedMessage
         id="xpack.ml.ruleEditor.addValueToFilterListLinkText"
         defaultMessage="Add {fieldValue} to {filterId}"

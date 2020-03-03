@@ -69,6 +69,6 @@ export function createSplitStream(splitChunk) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

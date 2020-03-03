@@ -4,39 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiCheckbox,
-  EuiFieldText,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiFieldText, EuiCallOut } from '@elastic/eui';
 
 import { has } from 'lodash';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { ml } from '../../../../services/ml_api_service';
-import { SelectSeverity } from '../../../../components/controls/select_severity/select_severity';
+import { SelectSeverity } from './select_severity';
 import { mlCreateWatchService } from './create_watch_service';
 const STATUS = mlCreateWatchService.STATUS;
 
-export const CreateWatch = injectI18n(class CreateWatch extends Component {
+export class CreateWatch extends Component {
   static propTypes = {
     jobId: PropTypes.string.isRequired,
-    bucketSpan: PropTypes.string.isRequired
+    bucketSpan: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -55,7 +48,6 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
       status: null,
       watchAlreadyExists: false,
     };
-
   }
 
   componentDidMount() {
@@ -74,13 +66,14 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
     }
 
     // load elasticsearch settings to see if email has been configured
-    ml.getNotificationSettings().then((resp) => {
+    ml.getNotificationSettings().then(resp => {
       if (has(resp, 'defaults.xpack.notification.email')) {
         this.setState({ emailEnabled: true });
       }
     });
 
-    mlCreateWatchService.loadWatch(this.state.jobId)
+    mlCreateWatchService
+      .loadWatch(this.state.jobId)
       .then(() => {
         this.setState({ watchAlreadyExists: true });
       })
@@ -89,48 +82,34 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
       });
   }
 
-  onThresholdChange = (threshold) => {
+  onThresholdChange = threshold => {
     this.setState({ threshold }, () => {
       this.config.threshold = threshold;
     });
-  }
+  };
 
-  onIntervalChange = (e) => {
+  onIntervalChange = e => {
     const interval = e.target.value;
     this.setState({ interval }, () => {
       this.config.interval = interval;
     });
-  }
+  };
 
-  onIncludeEmailChanged = (e) => {
+  onIncludeEmailChanged = e => {
     const includeEmail = e.target.checked;
     this.setState({ includeEmail }, () => {
       this.config.includeEmail = includeEmail;
     });
-  }
+  };
 
-  onEmailChange = (e) => {
+  onEmailChange = e => {
     const email = e.target.value;
     this.setState({ email }, () => {
       this.config.email = email;
     });
-  }
+  };
 
   render() {
-    const { intl } = this.props;
-    const mlSelectSeverityService = {
-      state: {
-        set: (name, threshold) => {
-          this.onThresholdChange(threshold);
-          return {
-            changed: () => {}
-          };
-        },
-        get: () => {
-          return this.config.threshold;
-        },
-      }
-    };
     const { status } = this.state;
 
     if (status === null || status === STATUS.SAVING || status === STATUS.SAVE_FAILED) {
@@ -139,10 +118,7 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
           <div className="form-group form-group-flex">
             <div className="sub-form-group">
               <div>
-                <label
-                  htmlFor="selectInterval"
-                  className="euiFormLabel"
-                >
+                <label htmlFor="selectInterval" className="euiFormLabel">
                   <FormattedMessage
                     id="xpack.ml.newJob.simple.createWatchView.timeRangeLabel"
                     defaultMessage="Time range"
@@ -152,22 +128,21 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
               <FormattedMessage
                 id="xpack.ml.newJob.simple.createWatchView.nowLabel"
                 defaultMessage="Now - {selectInterval}"
-                values={{ selectInterval: (
-                  <EuiFieldText
-                    id="selectInterval"
-                    value={this.state.interval}
-                    onChange={this.onIntervalChange}
-                  />
-                ) }}
+                values={{
+                  selectInterval: (
+                    <EuiFieldText
+                      id="selectInterval"
+                      value={this.state.interval}
+                      onChange={this.onIntervalChange}
+                    />
+                  ),
+                }}
               />
             </div>
 
             <div className="sub-form-group">
               <div>
-                <label
-                  htmlFor="selectSeverity"
-                  className="euiFormLabel"
-                >
+                <label htmlFor="selectSeverity" className="euiFormLabel">
                   <FormattedMessage
                     id="xpack.ml.newJob.simple.createWatchView.severityThresholdLabel"
                     defaultMessage="Severity threshold"
@@ -175,57 +150,58 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
                 </label>
               </div>
               <div className="dropdown-group">
-                <SelectSeverity
-                  id="selectSeverity"
-                  mlSelectSeverityService={mlSelectSeverityService}
-                />
+                <SelectSeverity onChange={this.onThresholdChange} />
               </div>
             </div>
           </div>
-          {
-            this.state.emailEnabled &&
-
+          {this.state.emailEnabled && (
             <div className="form-group">
               <EuiCheckbox
                 id="includeEmail"
-                label={<FormattedMessage
-                  id="xpack.ml.newJob.simple.createWatchView.sendEmailLabel"
-                  defaultMessage="Send email"
-                />}
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.createWatchView.sendEmailLabel"
+                    defaultMessage="Send email"
+                  />
+                }
                 checked={this.state.includeEmail}
                 onChange={this.onIncludeEmailChanged}
               />
-              {
-                this.state.includeEmail &&
+              {this.state.includeEmail && (
                 <div className="email-section">
                   <EuiFieldText
                     value={this.state.email}
                     onChange={this.onEmailChange}
-                    placeholder={intl.formatMessage({
-                      id: 'xpack.ml.newJob.simple.createWatchView.emailAddressPlaceholder',
-                      defaultMessage: 'email address'
-                    })}
-                    aria-label={intl.formatMessage({
-                      id: 'xpack.ml.newJob.simple.createWatchView.watchEmailAddressAriaLabel',
-                      defaultMessage: 'Watch email address'
-                    })}
+                    placeholder={i18n.translate(
+                      'xpack.ml.newJob.simple.createWatchView.emailAddressPlaceholder',
+                      {
+                        defaultMessage: 'email address',
+                      }
+                    )}
+                    aria-label={i18n.translate(
+                      'xpack.ml.newJob.simple.createWatchView.watchEmailAddressAriaLabel',
+                      {
+                        defaultMessage: 'Watch email address',
+                      }
+                    )}
                   />
                 </div>
-              }
+              )}
             </div>
-          }
-          {
-            this.state.watchAlreadyExists &&
+          )}
+          {this.state.watchAlreadyExists && (
             <EuiCallOut
-              title={<FormattedMessage
-                id="xpack.ml.newJob.simple.createWatchView.watchAlreadyExistsWarningMessage"
-                defaultMessage="Warning, watch ml-{jobId} already exists, clicking apply will overwrite the original."
-                values={{
-                  jobId: this.state.jobId
-                }}
-              />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.newJob.simple.createWatchView.watchAlreadyExistsWarningMessage"
+                  defaultMessage="Warning, watch ml-{jobId} already exists, clicking apply will overwrite the original."
+                  values={{
+                    jobId: this.state.jobId,
+                  }}
+                />
+              }
             />
-          }
+          )}
         </div>
       );
     } else if (status === STATUS.SAVED) {
@@ -238,7 +214,7 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
         </div>
       );
     } else {
-      return (<div />);
+      return <div />;
     }
   }
-});
+}

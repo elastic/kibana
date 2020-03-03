@@ -4,28 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AddItemPopover } from './add_item_popover';
 
 function prepareTest(addItemsFn) {
-
   const props = {
     addItems: addItemsFn,
-    canCreateFilter: true
+    canCreateFilter: true,
   };
 
-  const wrapper = shallowWithIntl(
-    <AddItemPopover {...props} />
-  );
+  const wrapper = shallowWithIntl(<AddItemPopover {...props} />);
 
   return wrapper;
 }
 
 describe('AddItemPopover', () => {
-
   test('renders the popover', () => {
     const addItems = jest.fn(() => {});
     const wrapper = prepareTest(addItems);
@@ -61,5 +56,4 @@ describe('AddItemPopover', () => {
     expect(addItems).toHaveBeenCalledWith(['google.com', 'elastic.co']);
     expect(wrapper).toMatchSnapshot();
   });
-
 });

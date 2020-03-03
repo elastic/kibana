@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { inputsModel } from '../../store';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
 interface OwnProps {
   deleteQuery?: ({ id }: { id: string }) => void;
+  headerChildren?: React.ReactNode;
   id: string;
+  legendPosition?: Position;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  setQuery: SetQuery;
   inspect?: inputsModel.InspectQuery;
 }
 

@@ -17,11 +17,11 @@ export const routeDefinitionParamsMock = {
   create: () => ({
     router: httpServiceMock.createRouter(),
     basePath: httpServiceMock.createBasePath(),
+    csp: httpServiceMock.createSetupContract().csp,
     logger: loggingServiceMock.create().get(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     config: { ...ConfigSchema.validate({}), encryptionKey: 'some-enc-key' },
     authc: authenticationMock.create(),
     authz: authorizationMock.create(),
-    getLegacyAPI: jest.fn(),
   }),
 };

@@ -18,16 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
+
+import { Schemas } from './legacy_imports';
 import { Status } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 
 // @ts-ignore
-import { TagCloudVisualization } from './components/tag_cloud_visualization';
+import { createTagCloudVisualization } from './components/tag_cloud_visualization';
+import { TagCloudVisDependencies } from './plugin';
 
-export const tagcloudVisDefinition = {
+export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) => ({
   name: 'tagcloud',
   title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
   icon: 'visTagCloud',
@@ -44,7 +45,7 @@ export const tagcloudVisDefinition = {
     },
   },
   requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
-  visualization: TagCloudVisualization,
+  visualization: createTagCloudVisualization(deps),
   editorConfig: {
     collections: {
       scales: [
@@ -121,4 +122,4 @@ export const tagcloudVisDefinition = {
     ]),
   },
   useCustomNoDataScreen: true,
-};
+});

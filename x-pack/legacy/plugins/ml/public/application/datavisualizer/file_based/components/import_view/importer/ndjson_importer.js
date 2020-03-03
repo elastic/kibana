@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { Importer } from './importer';
 
 export class NdjsonImporter extends Importer {
@@ -12,7 +11,7 @@ export class NdjsonImporter extends Importer {
     super(settings);
   }
 
-  async read(json) {
+  read(json) {
     try {
       const splitJson = json.split(/}\s*\n/);
 

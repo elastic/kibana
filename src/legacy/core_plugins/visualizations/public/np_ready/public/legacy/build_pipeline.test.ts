@@ -26,16 +26,11 @@ import {
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
-import { Vis, VisState } from '..';
-import { AggConfig } from '../../../legacy_imports';
+import { Vis } from '..';
+import { IAggConfig } from '../../../legacy_imports';
 import { searchSourceMock } from '../../../legacy_mocks';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/agg_types/buckets/date_histogram', () => ({
-  setBounds: () => {},
-  dateHistogramBucketAgg: () => {},
-  isDateHistogramBucketAggConfig: () => true,
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -83,7 +78,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipelineVisFunction', () => {
-    let visStateDef: VisState;
+    let visStateDef: ReturnType<Vis['getCurrentState']>;
     let schemaConfig: SchemaConfig;
     let schemasDef: Schemas;
     let uiState: any;
@@ -94,7 +89,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         // @ts-ignore
         type: 'type',
         params: {},
-      };
+      } as ReturnType<Vis['getCurrentState']>;
 
       schemaConfig = {
         accessor: 0,
@@ -349,7 +344,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
   describe('buildPipeline', () => {
     it('calls toExpression on vis_type if it exists', async () => {
-      const vis: Vis = {
+      const vis = ({
         getCurrentState: () => {},
         getUiState: () => null,
         isHierarchical: () => false,
@@ -360,14 +355,14 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         type: {
           toExpression: () => 'testing custom expressions',
         },
-      };
+      } as unknown) as Vis;
       const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
       expect(expression).toMatchSnapshot();
     });
   });
 
   describe('buildVislibDimensions', () => {
-    let aggs: AggConfig[];
+    let aggs: IAggConfig[];
     let visState: any;
     let vis: Vis;
     let params: any;
@@ -385,7 +380,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             name: 'metric',
           },
           params: {},
-        } as AggConfig,
+        } as IAggConfig,
       ];
 
       params = {
@@ -453,7 +448,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       it('with two numeric metrics, mixed normal and percent mode should have corresponding formatters', async () => {
         const aggConfig = aggs[0];
-        aggs = [{ ...aggConfig } as AggConfig, { ...aggConfig, id: '5' } as AggConfig];
+        aggs = [{ ...aggConfig } as IAggConfig, { ...aggConfig, id: '5' } as IAggConfig];
 
         visState = {
           params: {

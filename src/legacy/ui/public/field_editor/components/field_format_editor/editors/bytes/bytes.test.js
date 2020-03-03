@@ -24,7 +24,7 @@ import { BytesFormatEditor } from './bytes';
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input) => input * 2),
+  getConverterFor: jest.fn().mockImplementation(() => input => input * 2),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]b' };
   }),

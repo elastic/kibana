@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export function UsageAPIProvider({ getService }) {
   const supertest = getService('supertest');
   const supertestNoAuth = getService('supertestWithoutAuth');

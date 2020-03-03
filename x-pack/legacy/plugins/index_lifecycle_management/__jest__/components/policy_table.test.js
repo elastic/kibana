@@ -6,17 +6,24 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { fetchedPolicies } from '../../public/store/actions';
-import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { PolicyTable } from '../../public/sections/policy_table';
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies } from '../../public/np_ready/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
+import { PolicyTable } from '../../public/np_ready/application/sections/policy_table';
+import { init as initHttp } from '../../public/np_ready/application/services/http';
+import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
+
+initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initUiMetric(() => () => {});
+
+jest.mock('ui/new_platform');
+
 let server = null;
 
 let store = null;
@@ -24,9 +31,11 @@ const policies = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').valueOf(),
+    modified_date: moment()
+      .subtract(i, 'days')
+      .valueOf(),
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
-    name: `testy${i}`
+    name: `testy${i}`,
   });
 }
 jest.mock('');
@@ -45,12 +54,11 @@ const namesText = rendered => {
   return names(rendered).map(button => button.text());
 };
 
-const testSort = (headerName) => {
+const testSort = headerName => {
   const rendered = mountWithIntl(component);
-  const nameHeader = findTestSubject(
-    rendered,
-    `policyTableHeaderCell-${headerName}`
-  ).find('button');
+  const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
+    'button'
+  );
   nameHeader.simulate('click');
   rendered.update();
   snapshot(namesText(rendered));
@@ -58,12 +66,9 @@ const testSort = (headerName) => {
   rendered.update();
   snapshot(namesText(rendered));
 };
-const openContextMenu = (buttonIndex) => {
+const openContextMenu = buttonIndex => {
   const rendered = mountWithIntl(component);
-  const actionsButton = findTestSubject(
-    rendered,
-    'policyActionsContextMenuButton'
-  );
+  const actionsButton = findTestSubject(rendered, 'policyActionsContextMenuButton');
   actionsButton.at(buttonIndex).simulate('click');
   rendered.update();
   return rendered;
@@ -82,7 +87,7 @@ describe('policy table', () => {
     server.respondWith('/api/index_lifecycle_management/policies', [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(policies)
+      JSON.stringify(policies),
     ]);
   });
   test('should show spinner when policies are loading', () => {
@@ -94,7 +99,6 @@ describe('policy table', () => {
     );
     const rendered = mountWithIntl(component);
     expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
-
   });
   test('should show empty state when there are not any policies', () => {
     store.dispatch(fetchedPolicies([]));

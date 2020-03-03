@@ -6,8 +6,6 @@
 
 import { Plugin, CoreStart } from 'src/core/public';
 // @ts-ignore
-import { initResources } from './util/indexing_service';
-// @ts-ignore
 import { JsonUploadAndParse } from './components/json_upload_and_parse';
 // @ts-ignore
 import { initServicesAndConstants } from './kibana_services';

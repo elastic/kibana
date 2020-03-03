@@ -90,7 +90,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -116,7 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -411,7 +410,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -448,7 +446,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

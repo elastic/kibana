@@ -153,5 +153,79 @@ export default function emailTest({ getService }: FtrProviderContext) {
           });
         });
     });
+
+    it('should respond with a 400 Bad Request when creating an email action with non-whitelisted server', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          actionTypeId: '.email',
+          config: {
+            service: 'gmail', // not whitelisted in the config for this test
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'changeme',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the whitelistedHosts configuration",
+          });
+        });
+
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          actionTypeId: '.email',
+          config: {
+            host: 'stmp.gmail.com', // not whitelisted in the config for this test
+            port: 666,
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'changeme',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              "error validating action type config: [host] value 'stmp.gmail.com' is not in the whitelistedHosts configuration",
+          });
+        });
+    });
+
+    it('should handle creating an email action with a whitelisted server', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          actionTypeId: '.email',
+          config: {
+            host: 'some.non.existent.com', // whitelisted in the config for this test
+            port: 666,
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'changeme',
+          },
+        })
+        .expect(200);
+      expect(typeof createdAction.id).to.be('string');
+    });
   });
 }

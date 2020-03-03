@@ -16,13 +16,13 @@ import {
   setMapInitError,
 } from '../../../actions/map_actions';
 import {
-  getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
   getScrollZoom,
   isInteractiveDisabled,
   isTooltipControlDisabled,
+  isViewControlHidden,
 } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
@@ -32,19 +32,20 @@ function mapStateToProps(state = {}) {
     layerList: getLayerList(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    tooltipState: getTooltipState(state),
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state)
+    disableTooltipControl: isTooltipControlDisabled(state),
+    disableTooltipControl: isTooltipControlDisabled(state),
+    hideViewControl: isViewControlHidden(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    extentChanged: (e) => {
+    extentChanged: e => {
       dispatch(mapExtentChanged(e));
     },
-    onMapReady: (e) => {
+    onMapReady: e => {
       dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());
@@ -67,5 +68,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(MBMapContainer);
+const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
+  forwardRef: true,
+})(MBMapContainer);
 export { connectedMBMapContainer as MBMapContainer };

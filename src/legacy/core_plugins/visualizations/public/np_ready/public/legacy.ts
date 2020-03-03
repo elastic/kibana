@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
+
+import { PluginInitializerContext } from '../../../../../../core/public';
 
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core);
-export const start = pluginInstance.start(npStart.core);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

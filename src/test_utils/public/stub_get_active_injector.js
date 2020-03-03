@@ -38,9 +38,11 @@ import sinon from 'sinon';
  * but BEFORE you first execute code, that uses chrome.dangerouslyGetActiveInjector.
  */
 export function setupInjectorStub() {
-  beforeEach(ngMock.inject(($injector) => {
-    sinon.stub(chrome, 'dangerouslyGetActiveInjector').returns(Promise.resolve($injector));
-  }));
+  beforeEach(
+    ngMock.inject($injector => {
+      sinon.stub(chrome, 'dangerouslyGetActiveInjector').returns(Promise.resolve($injector));
+    })
+  );
 }
 
 /**

@@ -9,7 +9,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
     fields={
       Array [
         Object {
-          "color": "#00B3A4",
+          "color": "#54B399",
           "description": "success",
           "icon": "check",
           "key": "authSuccess",
@@ -17,7 +17,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
           "value": null,
         },
         Object {
-          "color": "#920000",
+          "color": "#E7664C",
           "description": "fail",
           "icon": "cross",
           "key": "authFailure",
@@ -37,7 +37,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
     fields={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
@@ -45,7 +45,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
           "value": null,
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",
@@ -69,7 +69,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     fields={
       Array [
         Object {
-          "color": "#3185FC",
+          "color": "#6092C0",
           "icon": "storage",
           "key": "hosts",
           "value": null,
@@ -87,7 +87,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     fields={
       Array [
         Object {
-          "color": "#00B3A4",
+          "color": "#54B399",
           "description": "success",
           "icon": "check",
           "key": "authSuccess",
@@ -95,7 +95,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
           "value": null,
         },
         Object {
-          "color": "#920000",
+          "color": "#E7664C",
           "description": "fail",
           "icon": "cross",
           "key": "authFailure",
@@ -115,7 +115,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     fields={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
@@ -123,7 +123,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
           "value": null,
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",

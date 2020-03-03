@@ -36,7 +36,7 @@ export async function startChecks(checkers, updateModel) {
       return updateModel({
         reason,
         isLoading: false,
-        checkMessage: null
+        checkMessage: null,
       });
     } else if (currentChecker.hasNext()) {
       return runCheck(currentChecker.getNext());
@@ -46,7 +46,7 @@ export async function startChecks(checkers, updateModel) {
     updateModel({
       reason: null,
       isLoading: false,
-      checkMessage: null
+      checkMessage: null,
     });
   };
 

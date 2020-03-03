@@ -16,9 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createMemoryHistory } from 'history';
+
+// Only import types from '.' to avoid triggering default Jest mocks.
+import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
+// Import values from their individual modules instead.
+import { ScopedHistory } from './application';
+
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -26,7 +32,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
@@ -40,12 +46,17 @@ export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { scopedHistoryMock } from './application/scoped_history.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreSetup> & { notifications: MockedKeys<NotificationsSetup> } = {
+  const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), {}])
+    ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
@@ -58,7 +69,7 @@ function createCoreSetupMock({ basePath = '' } = {}) {
 }
 
 function createCoreStartMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreStart> & { notifications: MockedKeys<NotificationsSetup> } = {
+  const mock = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -67,14 +78,16 @@ function createCoreStartMock({ basePath = '' } = {}) {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    savedObjects: savedObjectsMock.createStartContract(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
+    fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
   return mock;
 }
+
 function pluginInitializerContextMock() {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
@@ -132,10 +145,27 @@ function createStorageMock() {
   return storageMock;
 }
 
+function createAppMountParametersMock(appBasePath = '') {
+  // Assemble an in-memory history mock using the provided basePath
+  const rawHistory = createMemoryHistory();
+  rawHistory.push(appBasePath);
+  const history = new ScopedHistory(rawHistory, appBasePath);
+
+  const params: jest.Mocked<AppMountParameters> = {
+    appBasePath,
+    element: document.createElement('div'),
+    history,
+    onAppLeave: jest.fn(),
+  };
+
+  return params;
+}
+
 export const coreMock = {
   createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createStorage: createStorageMock,
+  createAppMountParamters: createAppMountParametersMock,
 };

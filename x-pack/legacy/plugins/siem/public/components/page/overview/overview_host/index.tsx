@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
-import { HeaderSection } from '../../../header_section';
-import { manageQuery } from '../../../page/manage_query';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
+import { ESQuery } from '../../../../../common/typed_json';
 import {
   ID as OverviewHostQueryId,
   OverviewHostQuery,
 } from '../../../../containers/overview/overview_host';
-import { inputsModel } from '../../../../store/inputs';
-import { OverviewHostStats } from '../overview_host_stats';
+import { HeaderSection } from '../../../header_section';
+import { useUiSetting$ } from '../../../../lib/kibana';
 import { getHostsUrl } from '../../../link_to';
+import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
+import { manageQuery } from '../../../page/manage_query';
+import { inputsModel } from '../../../../store/inputs';
+import { InspectButtonContainer } from '../../../inspect';
 
 export interface OwnProps {
   startDate: number;
   endDate: number;
+  filterQuery?: ESQuery | string;
   setQuery: ({
     id,
     inspect,
@@ -36,46 +42,83 @@ export interface OwnProps {
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
-type OverviewHostProps = OwnProps;
-export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQuery }) => {
-  const [isHover, setIsHover] = useState(false);
+export type OverviewHostProps = OwnProps;
+
+const OverviewHostComponent: React.FC<OverviewHostProps> = ({
+  endDate,
+  filterQuery,
+  startDate,
+  setQuery,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
   return (
     <EuiFlexItem>
-      <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderSection
-          border
-          id={OverviewHostQueryId}
-          showInspect={isHover}
-          subtitle={
-            <FormattedMessage
-              id="xpack.siem.overview.hostsSubtitle"
-              defaultMessage="Showing: Last 24 hours"
-            />
-          }
-          title={
-            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
-          }
-        >
-          <EuiButton href={getHostsUrl()}>
-            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
-          </EuiButton>
-        </HeaderSection>
+      <InspectButtonContainer>
+        <EuiPanel>
+          <OverviewHostQuery
+            data-test-subj="overview-host-query"
+            endDate={endDate}
+            filterQuery={filterQuery}
+            sourceId="default"
+            startDate={startDate}
+          >
+            {({ overviewHost, loading, id, inspect, refetch }) => {
+              const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
+                (total, stat) => total + stat.count,
+                0
+              );
+              const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
 
-        <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
-          {({ overviewHost, loading, id, inspect, refetch }) => (
-            <OverviewHostStatsManage
-              loading={loading}
-              data={overviewHost}
-              setQuery={setQuery}
-              id={id}
-              inspect={inspect}
-              refetch={refetch}
-            />
-          )}
-        </OverviewHostQuery>
-      </EuiPanel>
+              return (
+                <>
+                  <HeaderSection
+                    id={OverviewHostQueryId}
+                    subtitle={
+                      !isEmpty(overviewHost) ? (
+                        <FormattedMessage
+                          defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
+                          id="xpack.siem.overview.overviewHost.hostsSubtitle"
+                          values={{
+                            formattedHostEventsCount,
+                            hostEventsCount,
+                          }}
+                        />
+                      ) : (
+                        <>{''}</>
+                      )
+                    }
+                    title={
+                      <FormattedMessage
+                        id="xpack.siem.overview.hostsTitle"
+                        defaultMessage="Host events"
+                      />
+                    }
+                  >
+                    <EuiButton href={getHostsUrl()}>
+                      <FormattedMessage
+                        id="xpack.siem.overview.hostsAction"
+                        defaultMessage="View hosts"
+                      />
+                    </EuiButton>
+                  </HeaderSection>
+
+                  <OverviewHostStatsManage
+                    loading={loading}
+                    data={overviewHost}
+                    setQuery={setQuery}
+                    id={id}
+                    inspect={inspect}
+                    refetch={refetch}
+                  />
+                </>
+              );
+            }}
+          </OverviewHostQuery>
+        </EuiPanel>
+      </InspectButtonContainer>
     </EuiFlexItem>
   );
-});
+};
 
-OverviewHost.displayName = 'OverviewHost';
+export const OverviewHost = React.memo(OverviewHostComponent);

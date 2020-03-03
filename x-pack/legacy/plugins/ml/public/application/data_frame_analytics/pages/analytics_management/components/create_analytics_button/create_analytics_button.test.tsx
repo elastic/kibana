@@ -10,21 +10,16 @@ import { mountHook } from '../../../../../../../../../../test_utils/enzyme_helpe
 
 import { CreateAnalyticsButton } from './create_analytics_button';
 
-import { KibanaContext } from '../../../../../contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+import { MlContext } from '../../../../../contexts/ml';
+import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
 import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
-
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS: [],
-}));
 
 const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
     ({ children }) => (
-      <KibanaContext.Provider value={kibanaContextValueMock}>{children}</KibanaContext.Provider>
+      <MlContext.Provider value={kibanaContextValueMock}>{children}</MlContext.Provider>
     )
   );
 
@@ -33,6 +28,8 @@ jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, memo: (x: any) => x };
 });
+
+jest.mock('../../../../../../../shared_imports');
 
 describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
   test('Minimal initialization', () => {

@@ -31,34 +31,25 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
-import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
-  IDataPluginServices,
-  IIndexPattern,
-  PersistedLog,
-  SuggestionsComponent,
-  toUser,
-  fromUser,
-  matchPairs,
-  getQueryLog,
-  Query,
-} from '../..';
+import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
+
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  intl: InjectedIntl;
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
@@ -71,7 +62,7 @@ interface Props {
 interface State {
   isSuggestionsVisible: boolean;
   index: number | null;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: QuerySuggestion[];
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -90,8 +81,6 @@ const KEY_CODES = {
   END: 35,
 };
 
-const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
-
 export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
@@ -106,6 +95,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
+  private abortController: AbortController | undefined;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
@@ -137,15 +127,14 @@ export class QueryStringInputUI extends Component<Props, State> {
       return;
     }
 
-    const uiSettings = this.services.uiSettings;
     const language = this.props.query.language;
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
+    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
 
     if (
-      !autocompleteProvider ||
+      !hasQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
@@ -153,22 +142,32 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     const indexPatterns = this.state.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({
-      config: uiSettings,
-      indexPatterns,
-    });
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
 
-    const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query: queryString,
-      selectionStart,
-      selectionEnd,
-    });
-    return [...suggestions, ...recentSearchSuggestions];
+    try {
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
+      const suggestions =
+        (await this.services.data.autocomplete.getQuerySuggestions({
+          language,
+          indexPatterns,
+          query: queryString,
+          selectionStart,
+          selectionEnd,
+          signal: this.abortController.signal,
+        })) || [];
+
+      return [...suggestions, ...recentSearchSuggestions];
+    } catch (e) {
+      // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
+      // Ignore aborted requests
+      if (e.message === 'The user aborted a request.') return;
+      throw e;
+    }
   };
 
   private getRecentSearchSuggestions = (query: string) => {
@@ -184,7 +183,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
-      return { type: recentSearchType, text, start, end };
+      return { type: QuerySuggestionTypes.RecentSearch, text, start, end };
     });
   };
 
@@ -310,7 +309,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: AutocompleteSuggestion) => {
+  private selectSuggestion = (suggestion: QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -334,13 +333,13 @@ export class QueryStringInputUI extends Component<Props, State> {
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
 
-    if (type === recentSearchType) {
+    if (type === QuerySuggestionTypes.RecentSearch) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }
   };
 
-  private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
+  private handleNestedFieldSyntaxNotification = (suggestion: QuerySuggestion) => {
     if (
       'field' in suggestion &&
       suggestion.field.subType &&
@@ -357,8 +356,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: this.props.intl.formatMessage({
-            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+          title: i18n.translate('data.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
             defaultMessage: 'KQL nested query syntax',
           }),
           text: toMountPoint(
@@ -442,7 +440,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: AutocompleteSuggestion) => {
+  private onClickSuggestion = (suggestion: QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -585,4 +583,4 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryStringInput = injectI18n(withKibana(QueryStringInputUI));
+export const QueryStringInput = withKibana(QueryStringInputUI);

@@ -25,11 +25,9 @@ import template from 'plugins/status_page/status_page.html';
 
 npStart.core.chrome.navLinks.enableForcedAppSwitcherNavigation();
 
-chrome
-  .setRootTemplate(template)
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
+chrome.setRootTemplate(template).setRootController('ui', function($scope, buildNum, buildSha) {
+  $scope.$$postDigest(() => {
+    renderStatusPage(buildNum, buildSha.substr(0, 8));
+    $scope.$on('$destroy', destroyStatusPage);
   });
+});

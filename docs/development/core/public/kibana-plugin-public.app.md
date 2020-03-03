@@ -9,13 +9,14 @@ Extension of [common app properties](./kibana-plugin-public.appbase.md) with the
 <b>Signature:</b>
 
 ```typescript
-export interface App extends AppBase 
+export interface App<HistoryLocationState = unknown> extends AppBase 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [appRoute](./kibana-plugin-public.app.approute.md) | <code>string</code> | Override the application's routing path from <code>/app/${id}</code>. Must be unique across registered applications. Should not include the base path from HTTP. |
 |  [chromeless](./kibana-plugin-public.app.chromeless.md) | <code>boolean</code> | Hide the UI chrome when the application is mounted. Defaults to <code>false</code>. Takes precedence over chrome service visibility settings. |
-|  [mount](./kibana-plugin-public.app.mount.md) | <code>(context: AppMountContext, params: AppMountParameters) =&gt; AppUnmount &#124; Promise&lt;AppUnmount&gt;</code> | A mount function called when the user navigates to this app's route. |
+|  [mount](./kibana-plugin-public.app.mount.md) | <code>AppMount&lt;HistoryLocationState&gt; &#124; AppMountDeprecated&lt;HistoryLocationState&gt;</code> | A mount function called when the user navigates to this app's route. May have signature of [AppMount](./kibana-plugin-public.appmount.md) or [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md)<!-- -->. |
 

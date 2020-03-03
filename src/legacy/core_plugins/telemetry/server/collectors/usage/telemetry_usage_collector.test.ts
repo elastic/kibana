@@ -75,7 +75,7 @@ describe('telemetry_usage_collector', () => {
     // empty
     writeFileSync(tempFiles.empty, '');
     // 1 byte too big
-    writeFileSync(tempFiles.too_big, new Buffer(MAX_FILE_SIZE + 1));
+    writeFileSync(tempFiles.too_big, Buffer.alloc(MAX_FILE_SIZE + 1));
     // write-only file
     writeFileSync(tempFiles.unreadable, 'valid: true', { mode: 0o222 });
     // valid
@@ -136,7 +136,7 @@ describe('telemetry_usage_collector', () => {
       const collectorOptions = createTelemetryUsageCollector(usageCollector, server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
-      expect(await collectorOptions.fetch()).toEqual(expectedObject);
+      expect(await collectorOptions.fetch({} as any)).toEqual(expectedObject); // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
     });
   });
 });

@@ -22,15 +22,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-const ICON_TYPES = [
-  'create',
-  'delete',
-  'previous',
-  'next',
-  'loading',
-  'settings',
-  'menu',
-];
+const ICON_TYPES = ['create', 'delete', 'previous', 'next', 'loading', 'settings', 'menu'];
 
 const KuiButtonIcon = props => {
   const typeToClassNameMap = {
@@ -50,9 +42,7 @@ const KuiButtonIcon = props => {
   // Purely decorative icons should be hidden from screen readers. Button icons are purely
   // decorate since assisted users will want to click on the button itself, not the icon within.
   // (https://www.w3.org/WAI/GL/wiki/Using_aria-hidden%3Dtrue_on_an_icon_font_that_AT_should_ignore)
-  return (
-    <span aria-hidden="true" className={iconClasses} />
-  );
+  return <span aria-hidden="true" className={iconClasses} />;
 };
 
 KuiButtonIcon.propTypes = {
@@ -60,7 +50,4 @@ KuiButtonIcon.propTypes = {
   className: PropTypes.string,
 };
 
-export {
-  ICON_TYPES,
-  KuiButtonIcon,
-};
+export { ICON_TYPES, KuiButtonIcon };

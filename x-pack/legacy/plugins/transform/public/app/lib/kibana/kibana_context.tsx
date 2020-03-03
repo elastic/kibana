@@ -6,31 +6,25 @@
 
 import React, { createContext, useContext, FC } from 'react';
 
+import { IUiSettingsClient } from 'kibana/public';
+
+import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import {
-  IndexPattern as IndexPatternType,
-  IndexPatterns as IndexPatternsType,
-} from 'ui/index_patterns';
-
-import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-import { KibanaConfig } from '../../../../../../../../src/legacy/server/kbn_server';
-
-// set() method is missing in original d.ts
-interface KibanaConfigTypeFix extends KibanaConfig {
-  set(key: string, value: any): void;
-}
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../../src/plugins/data/public';
 
 interface UninitializedKibanaContextValue {
-  initialized: boolean;
+  initialized: false;
 }
 
 export interface InitializedKibanaContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPatternType;
-  currentSavedSearch: SavedSearch;
-  indexPatterns: IndexPatternsType;
-  initialized: boolean;
-  kbnBaseUrl: string;
-  kibanaConfig: KibanaConfigTypeFix;
+  indexPatterns: IndexPatternsContract;
+  initialized: true;
+  kibanaConfig: IUiSettingsClient;
+  currentIndexPattern: IndexPattern;
+  currentSavedSearch?: SavedSearch;
 }
 
 export type KibanaContextValue = UninitializedKibanaContextValue | InitializedKibanaContextValue;

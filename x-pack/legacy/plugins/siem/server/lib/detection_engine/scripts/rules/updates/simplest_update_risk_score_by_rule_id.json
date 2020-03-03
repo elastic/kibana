@@ -1,0 +1,9 @@
+{
+  "rule_id": "query-rule-id",
+  "name": "Some new name",
+  "description": "Changing the name and changing the risk score",
+  "risk_score": 98,
+  "severity": "high",
+  "type": "query",
+  "query": "user.name: root or user.name: admin"
+}

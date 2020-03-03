@@ -7,11 +7,18 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { BrowserLineChart } from './BrowserLineChart';
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
 describe('BrowserLineChart', () => {
   describe('render', () => {
     it('renders', () => {
-      expect(() => shallow(<BrowserLineChart />)).not.toThrowError();
+      expect(() =>
+        shallow(
+          <MockApmPluginContextWrapper>
+            <BrowserLineChart />
+          </MockApmPluginContextWrapper>
+        )
+      ).not.toThrowError();
     });
   });
 });

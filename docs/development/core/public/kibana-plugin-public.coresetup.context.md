@@ -4,6 +4,10 @@
 
 ## CoreSetup.context property
 
+> Warning: This API is now obsolete.
+> 
+> 
+
 [ContextSetup](./kibana-plugin-public.contextsetup.md)
 
 <b>Signature:</b>

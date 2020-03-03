@@ -16,7 +16,7 @@ exports[`MonitorStatusRow component renders status row when status is down 1`] =
     />
   </EuiHealth>
   <EuiSpacer
-    size="s"
+    size="xs"
   />
 </Fragment>
 `;
@@ -37,7 +37,7 @@ exports[`MonitorStatusRow component renders status row when status is up 1`] = `
     />
   </EuiHealth>
   <EuiSpacer
-    size="s"
+    size="xs"
   />
 </Fragment>
 `;

@@ -1,11 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UtilityBarAction it renders 1`] = `
-<Component>
-  <UtilityBarAction
-    iconType="alert"
-  >
-    Test action
-  </UtilityBarAction>
-</Component>
+<UtilityBarAction
+  iconType="alert"
+>
+  Test action
+</UtilityBarAction>
 `;

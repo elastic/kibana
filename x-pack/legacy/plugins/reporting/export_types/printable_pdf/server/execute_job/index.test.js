@@ -6,6 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
+import { createMockReportingCore } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -14,40 +15,29 @@ import { LevelLogger } from '../../../../server/lib';
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
 const cancellationToken = {
-  on: jest.fn()
+  on: jest.fn(),
 };
 
 let config;
 let mockServer;
-beforeEach(() => {
+let mockReporting;
+
+beforeEach(async () => {
+  mockReporting = await createMockReportingCore();
+
   config = {
     'xpack.reporting.encryptionKey': 'testencryptionkey',
     'server.basePath': '/sbp',
     'server.host': 'localhost',
-    'server.port': 5601
+    'server.port': 5601,
   };
   mockServer = {
-    expose: () => { },
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
     },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn()
-          };
-        })
-      }
-    },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
-
-  mockServer.config().get.mockImplementation((key) => {
+  mockServer.config().get.mockImplementation(key => {
     return config[key];
   });
 
@@ -56,35 +46,25 @@ beforeEach(() => {
 
 afterEach(() => generatePdfObservableFactory.mockReset());
 
-const encryptHeaders = async (headers) => {
+const getMockLogger = () => new LevelLogger();
+const mockElasticsearch = {
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
+};
+
+const encryptHeaders = async headers => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };
 
-test(`passes browserTimezone to generatePdf`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-
-  const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
-
-  const executeJob = executeJobFactory(mockServer);
-  const browserTimezone = 'UTC';
-  await executeJob('pdfJobId', { objects: [], browserTimezone, headers: encryptedHeaders }, cancellationToken);
-
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(generatePdfObservable).toBeCalledWith(
-    expect.any(LevelLogger),
-    undefined,
-    [],
-    browserTimezone,
-    expect.anything(),
-    undefined,
-    undefined
-  );
-});
-
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -92,7 +72,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await executeJob(
     'pdfJobId',
-    { objects: [], timeRange: {}, headers: encryptedHeaders },
+    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -104,9 +84,18 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob('pdfJobId', { objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  const { content } = await executeJob(
+    'pdfJobId',
+    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
+    cancellationToken
+  );
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
 });

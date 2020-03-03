@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MLJobEditor, EDITOR_MODE } from './ml_job_editor';
+export { MLJobEditor, ML_EDITOR_MODE } from './ml_job_editor';

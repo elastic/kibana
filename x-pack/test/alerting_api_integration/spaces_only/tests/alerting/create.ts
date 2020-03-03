@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,10 +27,31 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     }
 
     it('should handle create alert request appropriately', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(
+          getTestAlertData({
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
@@ -38,18 +59,32 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         id: response.body.id,
         name: 'abc',
         tags: ['foo'],
-        actions: [],
+        actions: [
+          {
+            id: createdAction.id,
+            actionTypeId: createdAction.actionTypeId,
+            group: 'default',
+            params: {},
+          },
+        ],
         enabled: true,
         alertTypeId: 'test.noop',
+        consumer: 'bar',
         params: {},
         createdBy: null,
-        interval: '1m',
+        schedule: { interval: '1m' },
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: response.body.createdAt,
+        updatedAt: response.body.updatedAt,
       });
+      expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+
       expect(typeof response.body.scheduledTaskId).to.be('string');
       const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
       expect(taskRecord.type).to.eql('task');
@@ -57,6 +92,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: Spaces.space1.id,
+      });
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: response.body.id,
       });
     });
 

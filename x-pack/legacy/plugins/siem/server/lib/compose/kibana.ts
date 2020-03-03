@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EnvironmentMode } from 'src/core/server';
-import { ServerFacade } from '../../types';
-import { Anomalies } from '../anomalies';
-import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
+import { CoreSetup, SetupPlugins } from '../../plugin';
+
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
-import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
@@ -28,24 +25,27 @@ import { Overview } from '../overview';
 import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
-import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
+import { AppBackendLibs, AppDomainLibs } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
+import { ElasticsearchMatrixHistogramAdapter, MatrixHistogram } from '../matrix_histogram';
 
-export function compose(server: ServerFacade, mode: EnvironmentMode): AppBackendLibs {
-  const configuration = new KibanaConfigurationAdapter<Configuration>(server);
-  const framework = new KibanaBackendFrameworkAdapter(server, mode);
-  const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
+export function compose(
+  core: CoreSetup,
+  plugins: SetupPlugins,
+  isProductionMode: boolean
+): AppBackendLibs {
+  const framework = new KibanaBackendFrameworkAdapter(core, plugins, isProductionMode);
+  const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
-  const timeline = new Timeline({ savedObjects: framework.getSavedObjectsService() });
-  const note = new Note({ savedObjects: framework.getSavedObjectsService() });
-  const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
+  const timeline = new Timeline();
+  const note = new Note();
+  const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
-    anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
@@ -54,13 +54,13 @@ export function compose(server: ServerFacade, mode: EnvironmentMode): AppBackend
     tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
+    matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {
-    configuration,
     framework,
     sourceStatus,
     sources,

@@ -4,36 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { AnomaliesQueryTabBodyProps } from './types';
-import { manageQuery } from '../../../components/page/manage_query';
-import { AnomaliesOverTimeHistogram } from '../../../components/anomalies_over_time';
-import { AnomaliesOverTimeQuery } from '../anomalies_over_time';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-
-const AnomaliesOverTimeManage = manageQuery(AnomaliesOverTimeHistogram);
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { histogramConfigs } from './histogram_configs';
+const ID = 'anomaliesOverTimeQuery';
 
 export const AnomaliesQueryTabBody = ({
+  deleteQuery,
   endDate,
+  setQuery,
   skip,
   startDate,
   type,
   narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
-  setQuery,
-  hideHistogramIfEmpty,
-  updateDateRange = () => {},
   AnomaliesTableComponent,
   flowTarget,
   ip,
 }: AnomaliesQueryTabBodyProps) => {
-  const [siemJobsLoading, siemJobs] = useSiemJobs(true);
-  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+
+  const [, siemJobs] = useSiemJobs(true);
+  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
     filterQuery,
@@ -46,37 +50,16 @@ export const AnomaliesQueryTabBody = ({
 
   return (
     <>
-      <AnomaliesOverTimeQuery
+      <MatrixHistogramContainer
         endDate={endDate}
         filterQuery={mergedFilterQuery}
+        id={ID}
+        setQuery={setQuery}
         sourceId="default"
         startDate={startDate}
         type={type}
-      >
-        {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => {
-          if (hideHistogramIfEmpty && !anomaliesOverTime.length) {
-            return <div />;
-          }
-
-          return (
-            <>
-              <AnomaliesOverTimeManage
-                data={anomaliesOverTime!}
-                endDate={endDate}
-                id={id}
-                inspect={inspect}
-                loading={siemJobsLoading || loading}
-                refetch={refetch}
-                setQuery={setQuery}
-                startDate={startDate}
-                totalCount={totalCount}
-                updateDateRange={updateDateRange}
-              />
-              <EuiSpacer />
-            </>
-          );
-        }}
-      </AnomaliesOverTimeQuery>
+        {...histogramConfigs}
+      />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}

@@ -6,7 +6,7 @@
 
 import { initRoutes } from './init_routes';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     name: 'oidcProvider',
     id: 'oidcProvider',

@@ -9,7 +9,7 @@ Route specific configuration.
 <b>Signature:</b>
 
 ```typescript
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> 
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> 
 ```
 
 ## Properties
@@ -18,5 +18,5 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 |  --- | --- | --- |
 |  [options](./kibana-plugin-server.routeconfig.options.md) | <code>RouteConfigOptions&lt;Method&gt;</code> | Additional route options [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md)<!-- -->. |
 |  [path](./kibana-plugin-server.routeconfig.path.md) | <code>string</code> | The endpoint \_within\_ the router path to register the route. |
-|  [validate](./kibana-plugin-server.routeconfig.validate.md) | <code>RouteSchemas&lt;P, Q, B&gt; &#124; false</code> | A schema created with <code>@kbn/config-schema</code> that every request will be validated against. |
+|  [validate](./kibana-plugin-server.routeconfig.validate.md) | <code>RouteValidatorFullConfig&lt;P, Q, B&gt; &#124; false</code> | A schema created with <code>@kbn/config-schema</code> that every request will be validated against. |
 

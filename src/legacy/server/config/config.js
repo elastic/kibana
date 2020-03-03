@@ -21,9 +21,9 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { getConfig } from '../path';
-import { pkg, unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
-
+import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
@@ -47,7 +47,7 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, (child) => {
+      return _.each(extension._inner.children, child => {
         this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }
@@ -109,9 +109,10 @@ export class Config {
       version: _.get(pkg, 'version'),
       branch: _.get(pkg, 'branch'),
       buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      buildSha: IS_KIBANA_DISTRIBUTABLE
+        ? pkg.build.sha
+        : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       dist: IS_KIBANA_DISTRIBUTABLE,
-      defaultConfigPath: getConfig(),
     };
 
     if (!context.dev && !context.prod) {
@@ -122,7 +123,7 @@ export class Config {
 
     const results = Joi.validate(newVals, this.getSchema(), {
       context,
-      abortEarly: false
+      abortEarly: false,
     });
 
     if (results.error) {
@@ -173,7 +174,7 @@ export class Config {
           // true if there's a match
           if (child.schema._type === 'object') {
             if (has(key, child.schema, path.concat([child.key]))) return true;
-          // if the child matches, return true
+            // if the child matches, return true
           } else if (path.concat([child.key]).join('.') === key) {
             return true;
           }
@@ -192,21 +193,25 @@ export class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let schema = Joi.object().keys({}).default();
+        let schema = Joi.object()
+          .keys({})
+          .default();
 
         for (const key of Object.keys(children)) {
           const child = children[key];
           const childSchema = _.isPlainObject(child) ? convertToSchema(child) : child;
 
           if (!childSchema || !childSchema.isJoi) {
-            throw new TypeError('Unable to convert configuration definition value to Joi schema: ' + childSchema);
+            throw new TypeError(
+              'Unable to convert configuration definition value to Joi schema: ' + childSchema
+            );
           }
 
           schema = schema.keys({ [key]: childSchema });
         }
 
         return schema;
-      }(this[schemaExts]));
+      })(this[schemaExts]);
     }
 
     return this[schema];

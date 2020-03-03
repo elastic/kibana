@@ -14,9 +14,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 
-import React, {
-  Component, Fragment
-} from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiBadge,
@@ -29,36 +27,40 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui/lib/services';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
-import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
-import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
+import {
+  getLatestDataOrBucketTimestamp,
+  isTimeSeriesViewJob,
+} from '../../../../../common/util/job_utils';
 
-import { annotation$, annotationsRefresh$ } from '../../../services/annotations_service';
-
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import {
+  annotation$,
+  annotationsRefresh$,
+  annotationsRefreshed,
+} from '../../../services/annotations_service';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
-const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
+export class AnnotationsTable extends Component {
   static propTypes = {
     annotations: PropTypes.array,
     jobs: PropTypes.array,
     isSingleMetricViewerLinkVisible: PropTypes.bool,
-    isNumberBadgeVisible: PropTypes.bool
+    isNumberBadgeVisible: PropTypes.bool,
   };
 
   constructor(props) {
@@ -66,9 +68,12 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
-      // Need to do a detailed check here because the angular wrapper could pass on something like `[undefined]`.
-      jobId: (Array.isArray(this.props.jobs) && this.props.jobs.length > 0 && this.props.jobs[0] !== undefined)
-        ? this.props.jobs[0].job_id : undefined,
+      jobId:
+        Array.isArray(this.props.jobs) &&
+        this.props.jobs.length > 0 &&
+        this.props.jobs[0] !== undefined
+          ? this.props.jobs[0].job_id
+          : undefined,
     };
   }
 
@@ -77,32 +82,36 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     const dataCounts = job.data_counts;
 
     this.setState({
-      isLoading: true
+      isLoading: true,
     });
 
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      ml.annotations.getAnnotations({
-        jobIds: [job.job_id],
-        earliestMs: null,
-        latestMs: null,
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).toPromise().then((resp) => {
-        this.setState((prevState, props) => ({
-          annotations: resp.annotations[props.jobs[0].job_id] || [],
-          errorMessage: undefined,
-          isLoading: false,
-          jobId: props.jobs[0].job_id
-        }));
-      }).catch((resp) => {
-        console.log('Error loading list of annotations for jobs list:', resp);
-        this.setState({
-          annotations: [],
-          errorMessage: 'Error loading the list of annotations for this job',
-          isLoading: false,
-          jobId: undefined
+      ml.annotations
+        .getAnnotations({
+          jobIds: [job.job_id],
+          earliestMs: null,
+          latestMs: null,
+          maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        })
+        .toPromise()
+        .then(resp => {
+          this.setState((prevState, props) => ({
+            annotations: resp.annotations[props.jobs[0].job_id] || [],
+            errorMessage: undefined,
+            isLoading: false,
+            jobId: props.jobs[0].job_id,
+          }));
+        })
+        .catch(resp => {
+          console.log('Error loading list of annotations for jobs list:', resp);
+          this.setState({
+            annotations: [],
+            errorMessage: 'Error loading the list of annotations for this job',
+            isLoading: false,
+            jobId: undefined,
+          });
         });
-      });
     }
   }
 
@@ -123,23 +132,27 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
   componentDidMount() {
     if (
       this.props.annotations === undefined &&
-      Array.isArray(this.props.jobs) && this.props.jobs.length > 0
+      Array.isArray(this.props.jobs) &&
+      this.props.jobs.length > 0
     ) {
-      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => this.getAnnotations());
-      annotationsRefresh$.next(true);
+      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() =>
+        this.getAnnotations()
+      );
+      annotationsRefreshed();
     }
   }
 
   previousJobId = undefined;
   componentDidUpdate() {
     if (
-      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
+      Array.isArray(this.props.jobs) &&
+      this.props.jobs.length > 0 &&
       this.previousJobId !== this.props.jobs[0].job_id &&
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
-      annotationsRefresh$.next(true);
+      annotationsRefreshed();
       this.previousJobId = this.props.jobs[0].job_id;
     }
   }
@@ -155,41 +168,44 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     // Set the total time range from the start to the end of the annotation.
     const job = this.getJob(annotation.job_id);
     const dataCounts = job.data_counts;
-    const resultLatest = getLatestDataOrBucketTimestamp(dataCounts.latest_record_timestamp, dataCounts.latest_bucket_timestamp);
+    const resultLatest = getLatestDataOrBucketTimestamp(
+      dataCounts.latest_record_timestamp,
+      dataCounts.latest_bucket_timestamp
+    );
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(resultLatest).toISOString();
 
     const globalSettings = {
       ml: {
-        jobIds: [job.job_id]
+        jobIds: [job.job_id],
       },
       refreshInterval: {
         display: 'Off',
         pause: false,
-        value: 0
+        value: 0,
       },
       time: {
         from,
         to,
-        mode: 'absolute'
-      }
+        mode: 'absolute',
+      },
     };
 
     const appState = {
       query: {
         query_string: {
           analyze_wildcard: true,
-          query: '*'
-        }
-      }
+          query: '*',
+        },
+      },
     };
 
     if (annotation.timestamp !== undefined && annotation.end_timestamp !== undefined) {
       appState.mlTimeSeriesExplorer = {
         zoom: {
           from: new Date(annotation.timestamp).toISOString(),
-          to: new Date(annotation.end_timestamp).toISOString()
-        }
+          to: new Date(annotation.end_timestamp).toISOString(),
+        },
       };
 
       if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
@@ -206,10 +222,10 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
 
     const url = `?_g=${_g}&_a=${_a}`;
     addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
-    window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
-  }
+    window.open(`#/timeseriesexplorer${url}`, '_self');
+  };
 
-  onMouseOverRow = (record) => {
+  onMouseOverRow = record => {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
@@ -224,7 +240,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     }
 
     this.mouseOverRecord = record;
-  }
+  };
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
@@ -234,29 +250,21 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
   };
 
   render() {
-    const {
-      isSingleMetricViewerLinkVisible = true,
-      isNumberBadgeVisible = false,
-      intl
-    } = this.props;
+    const { isSingleMetricViewerLinkVisible = true, isNumberBadgeVisible = false } = this.props;
 
     if (this.props.annotations === undefined) {
       if (this.state.isLoading === true) {
         return (
           <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}><EuiLoadingSpinner size="l"/></EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       }
 
       if (this.state.errorMessage !== undefined) {
-        return (
-          <EuiCallOut
-            title={this.state.errorMessage}
-            color="danger"
-            iconType="cross"
-          />
-        );
+        return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
       }
     }
 
@@ -265,14 +273,16 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     if (annotations.length === 0) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
-            defaultMessage="No annotations created for this job"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
+              defaultMessage="No annotations created for this job"
+            />
+          }
           iconType="iInCircle"
           role="alert"
         >
-          {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
+          {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) && (
             <p>
               <FormattedMessage
                 id="xpack.ml.annotationsTable.howToCreateAnnotationDescription"
@@ -285,31 +295,32 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
                         defaultMessage="Single Metric Viewer"
                       />
                     </EuiLink>
-                  )
+                  ),
                 }}
               />
             </p>
-          }
+          )}
         </EuiCallOut>
       );
     }
 
-    function renderDate(date) { return formatDate(date, TIME_FORMAT); }
+    function renderDate(date) {
+      return formatDate(date, TIME_FORMAT);
+    }
 
     const columns = [
       {
         field: 'annotation',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.annotationColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.annotationColumnName', {
           defaultMessage: 'Annotation',
         }),
         sortable: true,
         width: '50%',
+        scope: 'row',
       },
       {
         field: 'timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.fromColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.fromColumnName', {
           defaultMessage: 'From',
         }),
         dataType: 'date',
@@ -318,8 +329,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       },
       {
         field: 'end_timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.toColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.toColumnName', {
           defaultMessage: 'To',
         }),
         dataType: 'date',
@@ -328,8 +338,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       },
       {
         field: 'modified_time',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.lastModifiedDateColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.lastModifiedDateColumnName', {
           defaultMessage: 'Last modified date',
         }),
         dataType: 'date',
@@ -338,8 +347,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       },
       {
         field: 'modified_username',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.lastModifiedByColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.lastModifiedByColumnName', {
           defaultMessage: 'Last modified by',
         }),
         sortable: true,
@@ -350,8 +358,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.jobIdColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.jobIdColumnName', {
           defaultMessage: 'job ID',
         }),
         sortable: true,
@@ -361,26 +368,21 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.labelColumnName',
+        name: i18n.translate('xpack.ml.annotationsTable.labelColumnName', {
           defaultMessage: 'Label',
         }),
         sortable: true,
         width: '60px',
-        render: (key) => {
-          return (
-            <EuiBadge color="default">
-              {key}
-            </EuiBadge>
-          );
-        }
+        render: key => {
+          return <EuiBadge color="default">{key}</EuiBadge>;
+        },
       });
     }
 
     const actions = [];
 
     actions.push({
-      render: (annotation) => {
+      render: annotation => {
         const editAnnotationsTooltipText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
@@ -394,10 +396,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           />
         );
         return (
-          <EuiToolTip
-            position="bottom"
-            content={editAnnotationsTooltipText}
-          >
+          <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
             <EuiButtonIcon
               onClick={() => annotation$.next(annotation)}
               iconType="pencil"
@@ -405,12 +404,12 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             />
           </EuiToolTip>
         );
-      }
+      },
     });
 
     if (isSingleMetricViewerLinkVisible) {
       actions.push({
-        render: (annotation) => {
+        render: annotation => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
           const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
             <FormattedMessage
@@ -436,10 +435,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           );
 
           return (
-            <EuiToolTip
-              position="bottom"
-              content={openInSingleMetricViewerTooltipText}
-            >
+            <EuiToolTip position="bottom" content={openInSingleMetricViewerTooltipText}>
               <EuiButtonIcon
                 onClick={() => this.openSingleMetricView(annotation)}
                 disabled={!isDrillDownAvailable}
@@ -448,24 +444,23 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
               />
             </EuiToolTip>
           );
-        }
+        },
       });
     }
 
     columns.push({
       align: RIGHT_ALIGNMENT,
       width: '60px',
-      name: intl.formatMessage({
-        id: 'xpack.ml.annotationsTable.actionsColumnName',
+      name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions
+      actions,
     });
 
-    const getRowProps = (item) => {
+    const getRowProps = item => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
-        onMouseLeave: () => this.onMouseLeaveRow()
+        onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
 
@@ -477,18 +472,17 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           items={annotations}
           columns={columns}
           pagination={{
-            pageSizeOptions: [5, 10, 25]
+            pageSizeOptions: [5, 10, 25],
           }}
           sorting={{
             sort: {
-              field: 'timestamp', direction: 'asc'
-            }
+              field: 'timestamp',
+              direction: 'asc',
+            },
           }}
           rowProps={getRowProps}
         />
       </Fragment>
     );
   }
-});
-
-export { AnnotationsTable };
+}

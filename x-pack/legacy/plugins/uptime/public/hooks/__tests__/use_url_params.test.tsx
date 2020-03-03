@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
-import { RouteComponentProps } from 'react-router-dom';
 import { UptimeRefreshContext } from '../../contexts';
+import { mountWithRouter } from '../../lib';
+import { createMemoryHistory } from 'history';
 
 interface MockUrlParamsComponentProps {
   hook: UptimeUrlParamsHook;
   updateParams?: { [key: string]: any };
 }
-
-let mockRouter: RouteComponentProps;
 
 const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
@@ -42,57 +40,37 @@ const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponen
 describe('useUrlParams', () => {
   let dateMathSpy: any;
   const MOCK_DATE_VALUE = 20;
+
   beforeEach(() => {
-    mockRouter = {
-      // @ts-ignore other properties aren't needed for this test
-      history: {
-        push: jest.fn(),
-      },
-      location: {
-        pathname: '',
-        search: '?g=""',
-        state: {},
-        hash: '',
-      },
-      match: {
-        params: '',
-        isExact: true,
-        path: '/',
-        url: 'http://elastic.co',
-      },
-    };
     dateMathSpy = jest.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
   it('accepts router props, updates URL params, and returns the current params', () => {
-    const component = mountWithIntl(
-      <UptimeRefreshContext.Provider
-        value={{ lastRefresh: 123, history: mockRouter.history, location: mockRouter.location }}
-      >
+    const history = createMemoryHistory();
+    jest.spyOn(history, 'push');
+
+    const component = mountWithRouter(
+      <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
         <UseUrlParamsTestComponent hook={useUrlParams} />
-      </UptimeRefreshContext.Provider>
+      </UptimeRefreshContext.Provider>,
+      history
     );
 
     const setUrlParamsButton = component.find('#setUrlParams');
     setUrlParamsButton.simulate('click');
-
-    expect(mockRouter.history.push).toHaveBeenCalledWith({
-      pathname: '',
-      search: 'g=%22%22&dateRangeStart=now-12d&dateRangeEnd=now',
+    expect(history.push).toHaveBeenCalledWith({
+      pathname: '/',
+      search: 'dateRangeStart=now-12d&dateRangeEnd=now',
     });
   });
 
   it('gets the expected values using the context', () => {
-    const component = mountWithIntl(
+    const component = mountWithRouter(
       <UptimeRefreshContext.Provider
         value={{
           lastRefresh: 123,
-          history: mockRouter.history,
-          location: {
-            ...mockRouter.location,
-            search: 'g=%22%22&dateRangeStart=now-19d&dateRangeEnd=now-1m',
-          },
+          refreshApp: jest.fn(),
         }}
       >
         <UseUrlParamsTestComponent hook={useUrlParams} />
@@ -106,17 +84,22 @@ describe('useUrlParams', () => {
   });
 
   it('deletes keys that do not have truthy values', () => {
-    mockRouter.location.search = 'g=%22%22&dateRangeStart=now-12&dateRangeEnd=now&pagination=foo';
-    const component = mountWithIntl(
+    const history = createMemoryHistory({
+      initialEntries: ['/?g=%22%22&dateRangeStart=now-12&dateRangeEnd=now&pagination=foo'],
+    });
+    history.location.key = 'test';
+
+    jest.spyOn(history, 'push');
+    const component = mountWithRouter(
       <UptimeRefreshContext.Provider
         value={{
           lastRefresh: 123,
-          history: mockRouter.history,
-          location: mockRouter.location,
+          refreshApp: jest.fn(),
         }}
       >
         <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
-      </UptimeRefreshContext.Provider>
+      </UptimeRefreshContext.Provider>,
+      history
     );
 
     const getUrlParamsButton = component.find('#getUrlParams');
@@ -126,11 +109,11 @@ describe('useUrlParams', () => {
 
     expect(component).toMatchSnapshot();
 
-    const setUrlParmsButton = component.find('#setUrlParams');
-    setUrlParmsButton.simulate('click');
+    const setUrlParamsButton = component.find('#setUrlParams');
+    setUrlParamsButton.simulate('click');
 
-    expect(mockRouter.history.push).toHaveBeenCalledWith({
-      pathname: '',
+    expect(history.push).toHaveBeenCalledWith({
+      pathname: '/',
       search: 'g=%22%22&dateRangeStart=now-12&dateRangeEnd=now',
     });
   });

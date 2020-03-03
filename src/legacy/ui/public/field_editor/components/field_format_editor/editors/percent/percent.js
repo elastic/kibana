@@ -27,7 +27,7 @@ export class PercentFormatEditor extends NumberFormatEditor {
 
     this.state = {
       ...this.state,
-      sampleInputs: [0.10, 0.99999, 1, 100, 1000],
+      sampleInputs: [0.1, 0.99999, 1, 100, 1000],
     };
   }
 }

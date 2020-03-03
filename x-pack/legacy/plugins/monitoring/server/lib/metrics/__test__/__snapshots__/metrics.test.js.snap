@@ -3020,8 +3020,7 @@ Object {
   },
   "logstash_cluster_pipeline_throughput": LogstashPipelineThroughputMetric {
     "app": "logstash",
-    "calculation": [Function],
-    "derivative": false,
+    "derivative": true,
     "description": "Number of events emitted per second by the Logstash pipeline at the outputs stage.",
     "field": "logstash_stats.pipelines.events.out",
     "format": "0,0.[00]",
@@ -3296,8 +3295,7 @@ Object {
   },
   "logstash_node_pipeline_throughput": LogstashPipelineThroughputMetric {
     "app": "logstash",
-    "calculation": [Function],
-    "derivative": false,
+    "derivative": true,
     "description": "Number of events emitted per second by the Logstash pipeline at the outputs stage.",
     "field": "logstash_stats.pipelines.events.out",
     "format": "0,0.[00]",

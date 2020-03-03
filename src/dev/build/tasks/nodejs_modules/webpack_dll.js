@@ -28,28 +28,40 @@ function checkDllEntryAccess(entry, baseDir = '') {
   return isFileAccessible(resolvedPath);
 }
 
-export async function getDllEntries(manifestPath, whiteListedModules, baseDir = '') {
-  const manifest = JSON.parse(await read(manifestPath));
+export async function getDllEntries(manifestPaths, whiteListedModules, baseDir = '') {
+  // Read and parse all manifests
+  const manifests = await Promise.all(
+    manifestPaths.map(async manifestPath => JSON.parse(await read(manifestPath)))
+  );
 
-  if (!manifest || !manifest.content) {
-    // It should fails because if we don't have the manifest file
-    // or it is malformed something wrong is happening and we
-    // should stop
-    throw new Error(`The following dll manifest doesn't exists: ${manifestPath}`);
-  }
+  // Process and group modules from all manifests
+  const manifestsModules = manifests.flatMap((manifest, idx) => {
+    if (!manifest || !manifest.content) {
+      // It should fails because if we don't have the manifest file
+      // or it is malformed something wrong is happening and we
+      // should stop
+      throw new Error(`The following dll manifest doesn't exists: ${manifestPaths[idx]}`);
+    }
 
-  const modules = Object.keys(manifest.content);
-  if (!modules.length) {
-    // It should fails because if we don't have any
-    // module inside the client vendors dll something
-    // wrong is happening and we should stop too
-    throw new Error(`The following dll manifest is reporting an empty dll: ${manifestPath}`);
-  }
+    const modules = Object.keys(manifest.content);
+    if (!modules.length) {
+      // It should fails because if we don't have any
+      // module inside the client vendors dll something
+      // wrong is happening and we should stop too
+      throw new Error(
+        `The following dll manifest is reporting an empty dll: ${manifestPaths[idx]}`
+      );
+    }
+
+    return modules;
+  });
 
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
-  return modules.filter(entry => {
-    const isWhiteListed = whiteListedModules.some(nonEntry => normalizePosixPath(entry).includes(`node_modules/${nonEntry}`));
+  return manifestsModules.filter(entry => {
+    const isWhiteListed = whiteListedModules.some(nonEntry =>
+      normalizePosixPath(entry).includes(`node_modules/${nonEntry}`)
+    );
     const isNodeModule = entry.includes('node_modules');
 
     // NOTE: when using dynamic imports on webpack the entry paths could be created
@@ -100,24 +112,20 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
     `!${normalizedModuleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
   ]);
 
-  await deleteAll(filesToDelete.filter(path => {
-    const relativePath = relative(moduleDir, path);
-    return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
-  }));
+  await deleteAll(
+    filesToDelete.filter(path => {
+      const relativePath = relative(moduleDir, path);
+      return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
+    })
+  );
 
   // Mark this module as cleaned
   modulePkg.cleaned = true;
 
   // Rewrite modified package.json
-  await write(
-    modulePkgPath,
-    JSON.stringify(modulePkg, null, 2)
-  );
+  await write(modulePkgPath, JSON.stringify(modulePkg, null, 2));
 }
 
 export async function writeEmptyFileForDllEntry(entryPath) {
-  await write(
-    entryPath,
-    ''
-  );
+  await write(entryPath, '');
 }

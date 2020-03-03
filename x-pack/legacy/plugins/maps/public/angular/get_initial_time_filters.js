@@ -7,11 +7,7 @@ import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export function getInitialTimeFilters({
-  mapStateJSON,
-  globalState = {},
-}) {
-
+export function getInitialTimeFilters({ mapStateJSON, globalState = {} }) {
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
     if (mapState.timeFilters) {

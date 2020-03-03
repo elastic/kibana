@@ -8,11 +8,12 @@ import React from 'react';
 
 import { Bar, BarProps } from './styles';
 
-export interface UtilityBarProps extends BarProps {
+interface UtilityBarProps extends BarProps {
   children: React.ReactNode;
 }
 
 export const UtilityBar = React.memo<UtilityBarProps>(({ border, children }) => (
   <Bar border={border}>{children}</Bar>
 ));
+
 UtilityBar.displayName = 'UtilityBar';

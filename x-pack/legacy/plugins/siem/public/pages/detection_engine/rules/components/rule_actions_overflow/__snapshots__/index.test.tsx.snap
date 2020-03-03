@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="leftCenter"
+    button={
+      <EuiToolTip
+        content="All actions"
+        delay="regular"
+        position="top"
+      >
+        <ForwardRef(Styled(EuiButtonIcon))
+          aria-label="All actions"
+          iconType="boxesHorizontal"
+          isDisabled={false}
+          onClick={[Function]}
+        />
+      </EuiToolTip>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="ruleActionsOverflow"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={
+        Array [
+          <EuiContextMenuItem
+            disabled={false}
+            icon="exportAction"
+            onClick={[Function]}
+          >
+            Duplicate rule…
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            disabled={false}
+            icon="indexEdit"
+            onClick={[Function]}
+          >
+            Export rule
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            disabled={false}
+            icon="trash"
+            onClick={[Function]}
+          >
+            Delete rule…
+          </EuiContextMenuItem>,
+        ]
+      }
+    />
+  </EuiPopover>
+  <RuleDownloader
+    filename="rules_export.ndjson"
+    onExportComplete={[Function]}
+    ruleIds={Array []}
+  />
+</Fragment>
+`;

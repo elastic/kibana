@@ -30,7 +30,6 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
   let iconChar = '';
 
   switch (type) {
-
     // icon class names
     case ML_JOB_FIELD_TYPES.BOOLEAN:
       iconClass.push('kuiIcon', 'fa-adjust');
@@ -64,7 +63,7 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
     ariaLabel,
     className: iconClass.join(' '),
     iconChar,
-    needsAria
+    needsAria,
   };
 
   if (tooltipEnabled === true) {
@@ -76,7 +75,7 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
         position="left"
         content={i18n.translate('xpack.ml.fieldTypeIcon.fieldTypeTooltip', {
           defaultMessage: '{type} type',
-          values: { type }
+          values: { type },
         })}
       >
         <FieldTypeIconContainer {...containerProps} />
@@ -89,19 +88,12 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
 
 FieldTypeIcon.propTypes = {
   tooltipEnabled: PropTypes.bool,
-  type: PropTypes.string
+  type: PropTypes.string,
 };
 
 // If the tooltip is used, it will apply its events to its first inner child.
 // To pass on its properties we apply `rest` to the outer `span` element.
-function FieldTypeIconContainer({
-  ariaLabel,
-  className,
-  iconChar,
-  needsAria,
-  ...rest
-}) {
-
+function FieldTypeIconContainer({ ariaLabel, className, iconChar, needsAria, ...rest }) {
   const wrapperProps = { className };
   if (needsAria && ariaLabel) {
     wrapperProps['aria-label'] = ariaLabel;
@@ -109,7 +101,7 @@ function FieldTypeIconContainer({
 
   return (
     <span className="field-type-icon-container" {...rest}>
-      {(iconChar === '') ? (
+      {iconChar === '' ? (
         <span {...wrapperProps} />
       ) : (
         <span {...wrapperProps}>

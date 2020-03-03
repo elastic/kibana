@@ -7,13 +7,14 @@
 import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '../../../../../../plugins/apm/common/processor_event';
 
 interface PathParams {
   processorEvent?: ProcessorEvent;
   serviceName?: string;
   errorGroupId?: string;
   serviceNodeName?: string;
+  traceId?: string;
 }
 
 export function getParsedDate(rawDate?: string, opts = {}) {
@@ -67,7 +68,6 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
 export function getPathParams(pathname: string = ''): PathParams {
   const paths = getPathAsArray(pathname);
   const pageName = paths[0];
-
   // TODO: use react router's real match params instead of guessing the path order
 
   switch (pageName) {
@@ -115,6 +115,16 @@ export function getPathParams(pathname: string = ''): PathParams {
       return {
         processorEvent: ProcessorEvent.transaction
       };
+    case 'link-to':
+      const link = paths[1];
+      switch (link) {
+        case 'trace':
+          return {
+            traceId: paths[2]
+          };
+        default:
+          return {};
+      }
     default:
       return {};
   }
