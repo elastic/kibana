@@ -18,8 +18,7 @@
  */
 
 import { SavedObjectsManagement } from './management';
-import { SavedObjectsType } from '../types';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsType, SavedObjectTypeRegistry } from '../../../../core/server';
 
 describe('SavedObjectsManagement', () => {
   let registry: SavedObjectTypeRegistry;

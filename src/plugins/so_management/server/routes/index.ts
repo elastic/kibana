@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export { SavedObjectsManagement } from './management';
+import { HttpServiceSetup } from 'src/core/server';
+import { SavedObjectsManagement } from '../services';
+import { registerFindRoute } from './find';
+import { registerScrollForCountRoute } from './scroll_count';
+import { registerScrollForExportRoute } from './scroll_export';
+import { registerRelationshipsRoute } from './relationships';
+
+interface RegisterRouteOptions {
+  http: HttpServiceSetup;
+  managementServicePromise: Promise<SavedObjectsManagement>;
+}
+
+export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
+  const router = http.createRouter();
+  registerFindRoute(router, managementServicePromise);
+  registerScrollForCountRoute(router);
+  registerScrollForExportRoute(router);
+  registerRelationshipsRoute(router, managementServicePromise);
+}

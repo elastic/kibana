@@ -24,7 +24,6 @@ import { promisify } from 'util';
 import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
-import { managementApi } from './server/routes/api/management';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
@@ -310,7 +309,6 @@ export default function(kibana) {
       // routes
       importApi(server);
       exportApi(server);
-      managementApi(server);
       registerCspCollector(usageCollection, server);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
