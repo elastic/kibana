@@ -8,7 +8,6 @@ import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { CoreStart } from '../../../../../src/core/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 
@@ -16,9 +15,6 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: CoreStart;
-  plugins: {
-    usageCollection: UsageCollectionSetup;
-  };
   services: {
     httpService: HttpService;
     uiMetricService: UiMetricService;

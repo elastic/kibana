@@ -38,6 +38,7 @@ export class SnapshotRestoreUIPlugin {
     const { management, usageCollection } = plugins;
 
     // Initialize services
+    this.uiMetricService.setup(usageCollection);
     textService.init(i18n);
     httpService.setup(http);
 
@@ -61,9 +62,6 @@ export class SnapshotRestoreUIPlugin {
         const appDependencies: AppDependencies = {
           core,
           config,
-          plugins: {
-            usageCollection,
-          },
           services: {
             httpService,
             uiMetricService: this.uiMetricService,
