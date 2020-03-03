@@ -34,9 +34,14 @@ const regexes = {
 describe('Ingesting Coverage to Cluster', () => {
   const chunks = [];
 
-  function onData (x) {
-    chunks.push(x + '');
-  }
+  const env = {
+    BUILD_ID: 407,
+    CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
+    STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
+    TIME_STAMP: '2020-03-02T21:11:47Z',
+    ES_HOST: 'https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243',
+    NODE_ENV: 'integration_test',
+  };
 
   beforeAll(done => {
     const coverageSummaryPath = resolve(MOCKS_DIR, 'jest-combined/coverage-summary-NO-total.json');
@@ -46,33 +51,22 @@ describe('Ingesting Coverage to Cluster', () => {
       '--path',
       coverageSummaryPath,
     ];
-    const create = spawn(process.execPath, args, {
-      cwd: ROOT_DIR,
-      env: {
-        BUILD_ID: 407,
-        CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
-        STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
-        TIME_STAMP: '2020-03-02T21:11:47Z',
-        ES_HOST: 'https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243',
-        NODE_ENV: 'integration_test',
-      },
-    });
 
-    create.stdout.on('data', onData);
+    const create = spawn(process.execPath, args, { cwd: ROOT_DIR, env });
+
+    create.stdout.on('data', x => chunks.push(x + ''));
     create.on('close', done);
   });
 
-  it('should result in every posted item having a static site url that meets certain requirements, tested via regex', function() {
+  it('should result in every posted item having a static site url that meets certain requirements, tested via regex', () => {
+    const includesSiteUrlPredicate = x => x.includes('staticSiteUrl');
+    const expectAllRegexesToPass = urlLine =>
+      Object.entries(regexes).forEach(reList => expect(reList[1].test(urlLine)).to.be(true));
+
     chunks
-      .filter(x => x.includes('staticSiteUrl'))
-      .map(x => x.split('\n')
-        .reduce(getUrlLine)
-      )
-      .forEach(urlLine => Object.entries(regexes)
-        .forEach(reList =>
-          expect(reList[1].test(urlLine)).to.be(true)
-        )
-      );
+      .filter(includesSiteUrlPredicate)
+      .map(x => x.split('\n').reduce(getUrlLine))
+      .forEach(expectAllRegexesToPass);
   });
 });
 
