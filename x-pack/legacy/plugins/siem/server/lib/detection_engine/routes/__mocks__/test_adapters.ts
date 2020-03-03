@@ -25,11 +25,11 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
 
   switch (method) {
     case 'ok':
-      return calls.map(([call]) => ({ status: 200, body: call?.body }));
+      return calls.map(([call]) => ({ status: 200, body: call.body }));
     case 'custom':
       return calls.map(([call]) => ({
-        status: call?.statusCode,
-        body: JSON.parse(call?.body),
+        status: call.statusCode,
+        body: JSON.parse(call.body),
       }));
     default:
       throw new Error(`Encountered unexpected call to response.${method}`);
