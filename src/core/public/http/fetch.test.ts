@@ -21,6 +21,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { first } from 'rxjs/operators';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
@@ -30,14 +31,88 @@ function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
 }
 
+const BASE_PATH = 'http://localhost/myBase';
+
 describe('Fetch', () => {
   const fetchInstance = new Fetch({
-    basePath: new BasePath('http://localhost/myBase'),
+    basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
   });
   afterEach(() => {
     fetchMock.restore();
     fetchInstance.removeAllInterceptors();
+  });
+
+  describe('getRequestCount$', () => {
+    const getCurrentRequestCount = () =>
+      fetchInstance
+        .getRequestCount$()
+        .pipe(first())
+        .toPromise();
+
+    it('should increase and decrease when request succeeds', async () => {
+      let resolveRequest: any;
+      const response = new Promise<any>(resolve => (resolveRequest = resolve));
+      fetchMock.get('*', response);
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      resolveRequest(200);
+      await fetchResponse;
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should increase and decrease when request fails', async () => {
+      let resolveRequest: any;
+      const response = new Promise<any>(resolve => (resolveRequest = resolve));
+      fetchMock.get('*', response);
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      resolveRequest(500);
+      await expect(fetchResponse).rejects.toThrow();
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should change for multiple requests', async () => {
+      let resolveSuccessfulRequest: any;
+      const successfulResponse = new Promise<any>(resolve => (resolveSuccessfulRequest = resolve));
+      let resolveFailedRequest: any;
+      const failedResponse = new Promise<any>(resolve => (resolveFailedRequest = resolve));
+
+      fetchMock.get(`${BASE_PATH}/success`, successfulResponse);
+      fetchMock.get(`${BASE_PATH}/fail`, failedResponse);
+
+      const requestCounts: number[] = [];
+      const subscription = fetchInstance
+        .getRequestCount$()
+        .subscribe(count => requestCounts.push(count));
+
+      const success1 = fetchInstance.fetch('/success');
+      const success2 = fetchInstance.fetch('/success');
+      const failure1 = fetchInstance.fetch('/fail');
+      const failure2 = fetchInstance.fetch('/fail');
+      const success3 = fetchInstance.fetch('/success');
+      const failure3 = fetchInstance.fetch('/fail');
+
+      resolveSuccessfulRequest(200);
+      resolveFailedRequest(400);
+
+      const swallowError = (p: Promise<any>) => p.catch(() => {});
+      await Promise.all([
+        success1,
+        success2,
+        success3,
+        swallowError(failure1),
+        swallowError(failure2),
+        swallowError(failure3),
+      ]);
+
+      expect(requestCounts).toEqual([0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0]);
+      subscription.unsubscribe();
+    });
   });
 
   describe('http requests', () => {
