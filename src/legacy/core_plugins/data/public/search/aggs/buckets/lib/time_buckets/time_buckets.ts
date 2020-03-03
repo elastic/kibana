@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { npStart } from 'ui/new_platform';
+import { fieldFormats, parseInterval } from '../../../../../../../../../plugins/data/public';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
   EsInterval,
 } from './calc_es_interval';
-import { fieldFormats, parseInterval } from '../../../../plugins/data/public';
 
 interface Bounds {
   min: Date | number | null;
