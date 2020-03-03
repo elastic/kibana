@@ -10,7 +10,7 @@ class TextService {
   public i18n: any;
   private repositoryTypeNames: { [key: string]: string } = {};
 
-  public init(i18n: any): void {
+  public setup(i18n: any): void {
     this.i18n = i18n;
     this.repositoryTypeNames = {
       [REPOSITORY_TYPES.fs]: i18n.translate(

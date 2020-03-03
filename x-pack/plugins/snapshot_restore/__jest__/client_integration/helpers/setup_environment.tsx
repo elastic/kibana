@@ -44,7 +44,7 @@ export const setupEnvironment = () => {
   // @ts-ignore
   httpService.setup(mockHttpClient);
   breadcrumbService.setup(() => undefined);
-  textService.init(i18n);
+  textService.setup(i18n);
   documentationLinksService.setup({} as any);
   docTitleService.setup(() => undefined);
 

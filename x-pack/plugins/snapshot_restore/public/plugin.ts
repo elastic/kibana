@@ -39,7 +39,7 @@ export class SnapshotRestoreUIPlugin {
 
     // Initialize services
     this.uiMetricService.setup(usageCollection);
-    textService.init(i18n);
+    textService.setup(i18n);
     httpService.setup(http);
 
     management.sections.getSection('elasticsearch')!.registerApp({
