@@ -38,7 +38,7 @@ export const accountManagementApp = Object.freeze({
         return renderAccountManagementPage(coreStart.i18n, element, {
           authc,
           notifications: coreStart.notifications,
-          apiClient: new UserAPIClient(coreStart.http),
+          userAPIClient: new UserAPIClient(coreStart.http),
         });
       },
     });

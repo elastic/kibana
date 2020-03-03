@@ -19,4 +19,5 @@ export interface RouteConfigOptions<Method extends RouteMethod>
 |  [authRequired](./kibana-plugin-server.routeconfigoptions.authrequired.md) | <code>boolean</code> | A flag shows that authentication for a route: <code>enabled</code> when true <code>disabled</code> when false<!-- -->Enabled by default. |
 |  [body](./kibana-plugin-server.routeconfigoptions.body.md) | <code>Method extends 'get' &#124; 'options' ? undefined : RouteConfigOptionsBody</code> | Additional body options [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md)<!-- -->. |
 |  [tags](./kibana-plugin-server.routeconfigoptions.tags.md) | <code>readonly string[]</code> | Additional metadata tag strings to attach to the route. |
+|  [xsrfRequired](./kibana-plugin-server.routeconfigoptions.xsrfrequired.md) | <code>Method extends 'get' ? never : boolean</code> | Defines xsrf protection requirements for a route: - true. Requires an incoming POST/PUT/DELETE request to contain <code>kbn-xsrf</code> header. - false. Disables xsrf protection.<!-- -->Set to true by default |
 

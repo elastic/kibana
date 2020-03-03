@@ -65,7 +65,7 @@ describe('accountManagementApp', () => {
     const mockRenderApp = jest.requireMock('./account_management_page').renderAccountManagementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
-      apiClient: expect.any(UserAPIClient),
+      userAPIClient: expect.any(UserAPIClient),
       authc: authcMock,
       notifications: coreStartMock.notifications,
     });

@@ -81,6 +81,19 @@ describe('core deprecations', () => {
     });
   });
 
+  describe('xsrfDeprecation', () => {
+    it('logs a warning if server.xsrf.whitelist is set', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { xsrf: { whitelist: ['/path'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+        ]
+      `);
+    });
+  });
+
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
       const { messages } = applyCoreDeprecations({
