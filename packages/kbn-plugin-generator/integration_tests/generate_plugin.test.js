@@ -102,6 +102,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
             'start',
             '--optimize.enabled=false',
             '--logging.json=false',
+            '--logging.verbose=true',
             '--migrations.skip=true',
           ],
           cwd: generatedPath,
