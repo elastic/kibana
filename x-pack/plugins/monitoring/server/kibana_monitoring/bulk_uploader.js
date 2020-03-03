@@ -10,6 +10,7 @@ import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
 import { hasMonitoringCluster } from '../es_client/instantiate_client';
+import { parseElasticsearchConfig } from '../es_client/parse_elasticsearch_config';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -51,12 +52,8 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    const directConfig = config.elasticsearch;
-    // TODO: NP
-    // The config reuses the default ES one so it has the default
-    // default values which means it will _always_ be defined
-    // We can't properly detect if this is configured or not
-    if (false && hasMonitoringCluster(directConfig)) {
+    const directConfig = parseElasticsearchConfig(config, 'elasticsearch');
+    if (hasMonitoringCluster(directConfig)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
       this._cluster = elasticsearch.createClient('monitoring-direct', directConfig);

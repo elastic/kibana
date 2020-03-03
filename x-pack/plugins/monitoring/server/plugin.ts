@@ -28,6 +28,7 @@ import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
+import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 import { registerMonitoringCollection } from './telemetry_collection';
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -85,9 +86,10 @@ export class Plugin {
 
     // Monitoring creates and maintains a connection to a potentially
     // separate ES cluster - create this first
+    const elasticsearchConfig = parseElasticsearchConfig(config);
     const cluster = (this.cluster = await instantiateClient({
       log: this.log,
-      elasticsearchConfig: config.ui.elasticsearch,
+      elasticsearchConfig,
       elasticsearchPlugin: {
         createCluster: core.elasticsearch.createClient,
       },
