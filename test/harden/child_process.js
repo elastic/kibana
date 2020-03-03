@@ -23,7 +23,7 @@ const cp = require('child_process');
 const path = require('path');
 const test = require('tape');
 
-Object.prototype.POLLUTED = 'yes'; // eslint-disable-line no-extend-native
+Object.prototype.POLLUTED = 'polluted!'; // eslint-disable-line no-extend-native
 
 const notSet = [null, undefined];
 
@@ -32,7 +32,7 @@ test.onFinish(() => {
 });
 
 test('test setup ok', t => {
-  t.equal({}.POLLUTED, 'yes');
+  t.equal({}.POLLUTED, 'polluted!');
   t.end();
 });
 
