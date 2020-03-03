@@ -28,7 +28,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
-import './index.scss';
+import './action_wizard.scss';
 
 // TODO: this interface is temporary for just moving forward with the component
 // and it will be imported from the ../ui_actions when implemented properly
@@ -134,7 +134,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps<ActionFactoryBa
   const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(null);
   return (
     <div
-      className="uiActions__SelectedActionFactory"
+      className="uiaActionWizard__selectedActionFactoryContainer"
       data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
     >
       <header>
@@ -192,7 +192,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     <EuiFlexGroup wrap={true}>
       {actionFactories.map(actionFactory => (
         <EuiFlexItem
-          className="uiActions__ActionFactory"
+          className="uiaActionWizard__actionFactoryItem"
           grow={false}
           key={actionFactory.type}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
