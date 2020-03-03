@@ -9,7 +9,7 @@ kibanaPipeline(timeoutMinutes: 180) {
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       parallel([
-        'kibana-intake-agent': 'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
         // 'x-pack-intake-agent': {
         //   withEnv([
         //     'NODE_ENV=test' // Needed for jest tests only
