@@ -256,9 +256,6 @@ export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
-    headers: {
-      'Content-Type': 'multipart/form-data; boundary=???',
-    },
     body: { file: hapiStream },
   });
 
@@ -266,9 +263,6 @@ export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStre
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
-    headers: {
-      'Content-Type': 'multipart/form-data; boundary=???',
-    },
     body: { file: hapiStream },
     query: { overwrite: true },
   });
