@@ -22,17 +22,13 @@ import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
+import { CI_PARALLEL_PROCESS_TAG_PREFIX } from '@kbn/test';
 import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';
 import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
-
-const CLUSTER_NAME_PARTS = [
-  process.env.JOB ? `job-${process.env.JOB}-` : '',
-  process.env.CI_WORKER_NUMBER ? `worker-${process.env.CI_WORKER_NUMBER}-` : '',
-].filter(Boolean);
 
 export function createLegacyEsTestCluster(options = {}) {
   const {
@@ -49,7 +45,7 @@ export function createLegacyEsTestCluster(options = {}) {
     ssl,
   } = options;
 
-  const clusterName = [...CLUSTER_NAME_PARTS, customClusterName].join('-');
+  const clusterName = `${CI_PARALLEL_PROCESS_TAG_PREFIX}${customClusterName}`;
 
   const esArgs = [
     `cluster.name=${clusterName}`,

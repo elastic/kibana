@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { CI_PARALLEL_PROCESS_TAG } from './ci_parallel_process_tag';
+const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
+const num = process.env.CI_PARALLEL_PROCESS_NUMBER
+  ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
+  : '';
 
-export function makeJunitReportPath(rootDirectory: string, reportName: string) {
-  return resolve(
-    rootDirectory,
-    'target/junit',
-    process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_TAG}${reportName}.xml`
-  );
-}
+export const CI_PARALLEL_PROCESS_TAG = `${job}${num}`;
+export const CI_PARALLEL_PROCESS_TAG_PREFIX = CI_PARALLEL_PROCESS_TAG
+  ? `${CI_PARALLEL_PROCESS_TAG}-`
+  : '';

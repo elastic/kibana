@@ -58,3 +58,5 @@ export {
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { makeJunitReportPath } from './junit_report_path';
+
+export * from './ci_parallel_process_tag';
