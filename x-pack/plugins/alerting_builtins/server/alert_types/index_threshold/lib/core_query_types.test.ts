@@ -50,7 +50,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.index = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[index]: value is [] but it must have a minimum length of [1]."`
+        `"[index]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -67,7 +67,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.timeField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeField]: value is [] but it must have a minimum length of [1]."`
+        `"[timeField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -91,7 +91,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.aggField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggField]: value is [] but it must have a minimum length of [1]."`
+        `"[aggField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -103,7 +103,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.groupField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[groupField]: value is [] but it must have a minimum length of [1]."`
+        `"[groupField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
