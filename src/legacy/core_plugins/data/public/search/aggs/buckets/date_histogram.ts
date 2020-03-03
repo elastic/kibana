@@ -30,7 +30,7 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES, TimefilterContract } from '../../../../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES, TimeRange } from '../../../../../../../plugins/data/public';
 import {
   getFieldFormats,
   getQueryService,
@@ -41,27 +41,22 @@ import {
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
-const getInterval = (agg: IBucketAggConfig): string => _.get(agg, ['params', 'interval']);
-
-const setAggTimeRangeBounds = (
+const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
-  opts: {
-    timefilter: TimefilterContract;
-    force?: boolean;
-  }
+  customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
-  const { force, timefilter } = opts;
-  if (agg.buckets._alreadySet && !force) return;
-  agg.buckets._alreadySet = true;
+  const { timefilter } = getQueryService().timefilter;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-  agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+
+  const buckets = customBuckets || agg.buckets;
+  buckets.setBounds(agg.fieldIsTimeField() && bounds);
+  buckets.setInterval(agg.params.interval);
 };
 
 // TODO: Need to incorporate these properly into TimeBuckets
 interface ITimeBuckets {
-  _alreadySet?: boolean;
   setBounds: Function;
-  getScaledDateFormatter: Function;
+  getScaledDateFormat: TimeBuckets['getScaledDateFormat'];
   setInterval: Function;
   getInterval: Function;
 }
@@ -100,8 +95,6 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
   },
   createFilter: createFilterDateHistogram,
   decorateAggConfig() {
-    const fieldFormats = getFieldFormats();
-    const { timefilter } = getQueryService().timefilter;
     const uiSettings = getUiSettings();
     let buckets: any;
 
@@ -111,9 +104,8 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         get() {
           if (buckets) return buckets;
 
-          buckets = new TimeBuckets({ fieldFormats, uiSettings });
-          buckets.setInterval(getInterval(this));
-          setAggTimeRangeBounds(this, { timefilter });
+          buckets = new TimeBuckets({ uiSettings });
+          updateTimeBuckets(this, buckets);
 
           return buckets;
         },
@@ -121,7 +113,18 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     };
   },
   getFormat(agg) {
-    return agg.buckets.getScaledDateFormatter();
+    const DateFieldFormat = getFieldFormats().getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+
+    if (!DateFieldFormat) {
+      throw new Error('Unable to retrieve Date Field Format');
+    }
+
+    return new DateFieldFormat(
+      {
+        pattern: agg.buckets.getScaledDateFormat(),
+      },
+      (key: string) => getUiSettings().get(key)
+    );
   },
   params: [
     {
@@ -132,16 +135,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         return agg.getIndexPattern().timeFieldName;
       },
       onChange(agg: IBucketDateHistogramAggConfig) {
-        const { timefilter } = getQueryService().timefilter;
-
         if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
           delete agg.params.interval;
         }
-
-        setAggTimeRangeBounds(agg, {
-          force: true,
-          timefilter,
-        });
       },
     },
     {
@@ -179,20 +175,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       },
       default: 'auto',
       options: intervalOptions,
-      modifyAggConfigOnSearchRequestStart(agg: IBucketDateHistogramAggConfig) {
-        const { timefilter } = getQueryService().timefilter;
-        setAggTimeRangeBounds(agg, {
-          force: true,
-          timefilter,
-        });
-      },
       write(agg, output, aggs) {
-        const { timefilter } = getQueryService().timefilter;
-        setAggTimeRangeBounds(agg, {
-          force: true,
-          timefilter,
-        });
-        agg.buckets.setInterval(getInterval(agg));
+        updateTimeBuckets(agg);
+
         const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
