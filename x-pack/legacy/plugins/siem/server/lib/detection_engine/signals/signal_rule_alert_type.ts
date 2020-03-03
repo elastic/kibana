@@ -232,7 +232,7 @@ export const signalRulesAlertType = ({
                 true
               );
             logger.info(
-              `Found ${signalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${newSignalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 
