@@ -10,6 +10,7 @@ import { euiStyled } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { CategoryExampleMessage } from './category_example_message';
+import { CategoryExampleMessagesEmptyIndicator } from './category_example_messages_empty_indicator';
 import { CategoryExampleMessagesFailureIndicator } from './category_example_messages_failure_indicator';
 import { CategoryExampleMessagesLoadingIndicator } from './category_example_messages_loading_indicator';
 
@@ -43,6 +44,8 @@ export const CategoryDetailsRow: React.FunctionComponent<{
         <CategoryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
       ) : hasFailedLoadingLogEntryCategoryExamples ? (
         <CategoryExampleMessagesFailureIndicator onRetry={getLogEntryCategoryExamples} />
+      ) : logEntryCategoryExamples.length === 0 ? (
+        <CategoryExampleMessagesEmptyIndicator onReload={getLogEntryCategoryExamples} />
       ) : (
         logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
           <CategoryExampleMessage
