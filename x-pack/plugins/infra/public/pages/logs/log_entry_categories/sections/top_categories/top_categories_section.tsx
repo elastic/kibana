@@ -70,6 +70,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
         loadingChildren={<LoadingOverlayContent />}
       >
         <TopCategoriesTable
+          categorizationJobId={jobId}
           sourceId={sourceId}
           timeRange={timeRange}
           topCategories={topCategories}

@@ -100,6 +100,19 @@ export const createTopLogEntryCategoriesQuery = (
                   field: 'record_score',
                 },
               },
+              terms_dataset: {
+                terms: {
+                  field: 'partition_field_value',
+                  size: 1000,
+                },
+                aggs: {
+                  maximum_record_score: {
+                    max: {
+                      field: 'record_score',
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -130,6 +143,15 @@ export const logEntryCategoryBucketRT = rt.type({
   doc_count: rt.number,
   filter_record: rt.type({
     maximum_record_score: metricAggregationRT,
+    terms_dataset: rt.type({
+      buckets: rt.array(
+        rt.type({
+          key: rt.string,
+          doc_count: rt.number,
+          maximum_record_score: metricAggregationRT,
+        })
+      ),
+    }),
   }),
   filter_model_plot: rt.type({
     sum_actual: metricAggregationRT,

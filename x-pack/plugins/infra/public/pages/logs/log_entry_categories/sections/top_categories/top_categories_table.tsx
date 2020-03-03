@@ -13,23 +13,27 @@ import { useSet } from 'react-use';
 import { euiStyled } from '../../../../../../../observability/public';
 import {
   LogEntryCategory,
+  LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
 } from '../../../../../../common/http_api/log_analysis';
 import { TimeRange } from '../../../../../../common/http_api/shared';
-import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
+import { RowExpansionButton } from '../../../../../components/basic_table';
+import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
+import { CategoryDetailsRow } from './category_details_row';
 import { RegularExpressionRepresentation } from './category_expression';
+import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
-import { RowExpansionButton } from '../../../../../components/basic_table';
-import { CategoryDetailsRow } from './category_details_row';
 
 export const TopCategoriesTable = euiStyled(
   ({
+    categorizationJobId,
     className,
     sourceId,
     timeRange,
     topCategories,
   }: {
+    categorizationJobId: string;
     className?: string;
     sourceId: string;
     timeRange: TimeRange;
@@ -40,8 +44,15 @@ export const TopCategoriesTable = euiStyled(
     );
 
     const columns = useMemo(
-      () => createColumns(timeRange, expandedCategories, expandCategory, collapseCategory),
-      [collapseCategory, expandCategory, expandedCategories, timeRange]
+      () =>
+        createColumns(
+          timeRange,
+          categorizationJobId,
+          expandedCategories,
+          expandCategory,
+          collapseCategory
+        ),
+      [categorizationJobId, collapseCategory, expandCategory, expandedCategories, timeRange]
     );
 
     const expandedRowContentsById = useMemo(
@@ -80,6 +91,7 @@ export const TopCategoriesTable = euiStyled(
 
 const createColumns = (
   timeRange: TimeRange,
+  categorizationJobId: string,
   expandedCategories: Set<number>,
   expandCategory: (categoryId: number) => void,
   collapseCategory: (categoryId: number) => void
@@ -126,7 +138,7 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.datasetColumnTitle', {
       defaultMessage: 'Datasets',
     }),
-    render: (datasets: string[]) => <DatasetsList datasets={datasets} />,
+    render: (datasets: LogEntryCategoryDataset[]) => <DatasetsList datasets={datasets} />,
     width: '200px',
   },
   {
@@ -135,11 +147,27 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.maximumAnomalyScoreColumnTitle', {
       defaultMessage: 'Maximum anomaly score',
     }),
-    render: (maximumAnomalyScore: number) => (
-      <AnomalySeverityIndicator anomalyScore={maximumAnomalyScore} />
+    render: (_maximumAnomalyScore: number, item) => (
+      <AnomalySeverityIndicatorList datasets={item.datasets} />
     ),
     width: '160px',
   },
+  {
+    actions: [
+      {
+        render: category => (
+          <DatasetActionsList
+            categorizationJobId={categorizationJobId}
+            categoryId={category.categoryId}
+            datasets={category.datasets}
+            timeRange={timeRange}
+          />
+        ),
+      },
+    ],
+    width: '40px',
+  },
+
   {
     align: 'right',
     isExpander: true,

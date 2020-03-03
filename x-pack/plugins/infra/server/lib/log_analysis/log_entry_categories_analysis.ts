@@ -6,17 +6,18 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import {
+  compareDatasetsByMaximumAnomalyScore,
   getJobId,
-  logEntryCategoriesJobTypes,
   jobCustomSettingsRT,
+  logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import {
-  NoLogAnalysisResultsIndexError,
-  NoLogAnalysisMlJobError,
   InsufficientLogAnalysisMlJobConfigurationError,
+  NoLogAnalysisMlJobError,
+  NoLogAnalysisResultsIndexError,
   UnknownCategoryError,
 } from './errors';
 import {
@@ -24,6 +25,10 @@ import {
   logEntryCategoriesResponseRT,
   LogEntryCategoryHit,
 } from './queries/log_entry_categories';
+import {
+  createLogEntryCategoryExamplesQuery,
+  logEntryCategoryExamplesResponseRT,
+} from './queries/log_entry_category_examples';
 import {
   createLogEntryCategoryHistogramsQuery,
   logEntryCategoryHistogramsResponseRT,
@@ -34,15 +39,11 @@ import {
   LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
-import { mlJobsResponseRT, createMlJobsQuery } from './queries/ml_jobs';
+import { createMlJobsQuery, mlJobsResponseRT } from './queries/ml_jobs';
 import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
-import {
-  createLogEntryCategoryExamplesQuery,
-  logEntryCategoryExamplesResponseRT,
-} from './queries/log_entry_category_examples';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -296,14 +297,30 @@ export class LogEntryCategoriesAnalysis {
     }
 
     const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
-      topCategoryBucket => ({
-        categoryId: parseCategoryId(topCategoryBucket.key),
-        logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
-        datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets.map(
-          datasetBucket => datasetBucket.key
-        ),
-        maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
-      })
+      topCategoryBucket => {
+        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
+          Record<string, number>
+        >(
+          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+            ...accumulatedMaximumAnomalyScores,
+            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+          }),
+          {}
+        );
+
+        return {
+          categoryId: parseCategoryId(topCategoryBucket.key),
+          logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
+          datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
+            .map(datasetBucket => ({
+              name: datasetBucket.key,
+              maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
+            }))
+            .sort(compareDatasetsByMaximumAnomalyScore)
+            .reverse(),
+          maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
+        };
+      }
     );
 
     return {

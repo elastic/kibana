@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryCategoryDataset } from '../../../../../../common/http_api/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
 
-export const DatasetsList: React.FunctionComponent<{
+export const AnomalySeverityIndicatorList: React.FunctionComponent<{
   datasets: LogEntryCategoryDataset[];
 }> = ({ datasets }) => (
   <ul>
@@ -18,19 +18,9 @@ export const DatasetsList: React.FunctionComponent<{
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
       return (
         <li key={datasetLabel}>
-          <DatasetLabel>{datasetLabel}</DatasetLabel>
+          <AnomalySeverityIndicator anomalyScore={dataset.maximumAnomalyScore} />
         </li>
       );
     })}
   </ul>
 );
-
-/*
- * These aim at aligning the list with the EuiHealth list in the neighboring
- * column.
- */
-const DatasetLabel = euiStyled.div`
-  display: inline-block;
-  margin-bottom: 2.5px;
-  margin-top: 1px;
-`;
