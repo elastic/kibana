@@ -116,8 +116,12 @@ def withGcsArtifactUpload(workerName, closure) {
       catchErrors {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
-          uploadGcsArtifact(uploadPrefix, '../kibana-oss/' + pattern)
-          uploadGcsArtifact(uploadPrefix, '../kibana-xpack/' + pattern)
+          dir('../kibana-oss') {
+            uploadGcsArtifact(uploadPrefix, pattern)
+          }
+          dir('../kibana-x-pack') {
+            uploadGcsArtifact(uploadPrefix, pattern)
+          }
         }
       }
     }

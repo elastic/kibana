@@ -154,7 +154,7 @@ def parallelProcesses(Map params) {
         parallelExtra: config.parallelExtra,
       ])
     } finally {
-      config.postWork()
+      config.post()
     }
   }
 }
