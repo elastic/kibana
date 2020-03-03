@@ -19,7 +19,6 @@
 
 import moment from 'moment-timezone';
 import { merge, Subscription } from 'rxjs';
-import { get } from 'lodash';
 
 import { tap } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
