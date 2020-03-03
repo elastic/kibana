@@ -32,7 +32,6 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
         statusCode: err.statusCode,
       };
     } else if (err instanceof TypeError) {
-      // TODO should we really count an error as a bad request?
       // allows us to throw type errors instead of booms in some conditions
       // where we don't want to mingle Boom with the rest of the code
       return {
