@@ -159,6 +159,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
+          required: true,
         },
         {
           dimensionId: 'y',
@@ -168,6 +169,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           accessors: layer.accessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
+          required: true,
         },
         {
           dimensionId: 'breakdown',

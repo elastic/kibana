@@ -255,6 +255,7 @@ export function getIndexPatternDatasource({
               storage={storage}
               savedObjectsClient={core.savedObjects.client}
               http={core.http}
+              data={data}
               uniqueLabel={columnLabelMap[props.columnId]}
               {...props}
             />

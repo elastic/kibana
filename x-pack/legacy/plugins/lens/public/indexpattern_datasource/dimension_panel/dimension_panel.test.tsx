@@ -17,12 +17,12 @@ import {
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
-  IndexPatternDimensionPanel,
-  IndexPatternDimensionPanelComponent,
-  IndexPatternDimensionPanelProps,
+  IndexPatternDimensionEditor,
+  IndexPatternDimensionEditorComponent,
+  IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { DropHandler, DragContextState } from '../../drag_drop';
-import { createMockedDragDropContext } from '../mocks';
+// import { DropHandler, DragContextState } from '../../drag_drop';
+// import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -79,11 +79,11 @@ const expectedIndexPatterns = {
   },
 };
 
-describe('IndexPatternDimensionPanel', () => {
+describe('IndexPatternDimensionEditorPanel', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
   let state: IndexPatternPrivateState;
   let setState: jest.Mock;
-  let defaultProps: IndexPatternDimensionPanelProps;
+  let defaultProps: IndexPatternDimensionEditorProps;
   let dragDropContext: DragContextState;
 
   function openPopover() {
@@ -170,7 +170,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should display a configure button if dimension has no column yet', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
     expect(
       wrapper
         .find('[data-test-subj="indexPattern-configure-dimension"]')
@@ -183,14 +183,14 @@ describe('IndexPatternDimensionPanel', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
     wrapper = shallow(
-      <IndexPatternDimensionPanelComponent {...defaultProps} filterOperations={filterOperations} />
+      <IndexPatternDimensionEditorComponent {...defaultProps} filterOperations={filterOperations} />
     );
 
     expect(filterOperations).toBeCalled();
   });
 
   it('should show field select combo box on click', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -201,7 +201,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should not show any choices if the filter returns false', () => {
     wrapper = mount(
-      <IndexPatternDimensionPanel
+      <IndexPatternDimensionEditor
         {...defaultProps}
         columnId={'col2'}
         filterOperations={() => false}
@@ -219,7 +219,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should list all field names and document as a whole in prioritized order', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -253,7 +253,7 @@ describe('IndexPatternDimensionPanel', () => {
         },
       },
     };
-    wrapper = mount(<IndexPatternDimensionPanel {...props} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...props} />);
 
     openPopover();
 
@@ -267,7 +267,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
     wrapper = mount(
-      <IndexPatternDimensionPanel
+      <IndexPatternDimensionEditor
         {...defaultProps}
         state={{
           ...state,
@@ -311,7 +311,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should indicate operations which are incompatible for the field of the current column', () => {
     wrapper = mount(
-      <IndexPatternDimensionPanel
+      <IndexPatternDimensionEditor
         {...defaultProps}
         state={{
           ...state,
@@ -377,7 +377,7 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
 
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={initialState} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} state={initialState} />);
 
     openPopover();
 
@@ -410,7 +410,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should switch operations when selecting a field that requires another operation', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -443,7 +443,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should keep the field when switching to another operation compatible for this field', () => {
     wrapper = mount(
-      <IndexPatternDimensionPanel
+      <IndexPatternDimensionEditor
         {...defaultProps}
         state={{
           ...state,
@@ -495,7 +495,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should not set the state if selecting the currently active operation', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -509,7 +509,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should update label on label input changes', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -538,7 +538,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   describe('transient invalid state', () => {
     it('should not set the state if selecting an operation incompatible with the current field', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -552,7 +552,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should show error message in invalid state', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -566,7 +566,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should leave error state if a compatible operation is selected', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -582,7 +582,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should leave error state if the popover gets closed', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -600,7 +600,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should indicate fields compatible with selected operation', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -624,7 +624,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should select compatible operation if field not compatible with selected operation', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
 
       openPopover();
 
@@ -679,7 +679,7 @@ describe('IndexPatternDimensionPanel', () => {
         },
       };
       wrapper = mount(
-        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+        <IndexPatternDimensionEditor {...defaultProps} state={initialState} columnId="col2" />
       );
 
       openPopover();
@@ -713,7 +713,7 @@ describe('IndexPatternDimensionPanel', () => {
         },
       };
       wrapper = mount(
-        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+        <IndexPatternDimensionEditor {...defaultProps} state={initialState} columnId="col2" />
       );
 
       openPopover();
@@ -738,7 +738,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('should set datasource state if compatible field is selected for operation', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+      wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
       openPopover();
 
@@ -776,7 +776,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should support selecting the operation before the field', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
 
     openPopover();
 
@@ -822,7 +822,7 @@ describe('IndexPatternDimensionPanel', () => {
     };
 
     wrapper = mount(
-      <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId={'col2'} />
+      <IndexPatternDimensionEditor {...defaultProps} state={initialState} columnId={'col2'} />
     );
 
     openPopover();
@@ -849,7 +849,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should select operation directly if only document is possible', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
 
     openPopover();
 
@@ -874,7 +874,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
 
     openPopover();
 
@@ -918,7 +918,7 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
     wrapper = mount(
-      <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId={'col2'} />
+      <IndexPatternDimensionEditor {...defaultProps} state={initialState} columnId={'col2'} />
     );
 
     openPopover();
@@ -937,7 +937,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should show all operations that are not filtered out', () => {
     wrapper = mount(
-      <IndexPatternDimensionPanel
+      <IndexPatternDimensionEditor
         {...defaultProps}
         filterOperations={op => !op.isBucketed && op.dataType === 'number'}
       />
@@ -962,7 +962,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should add a column on selection of a field', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} columnId={'col2'} />);
 
     openPopover();
 
@@ -1014,7 +1014,7 @@ describe('IndexPatternDimensionPanel', () => {
         },
       },
     };
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={initialState} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} state={initialState} />);
 
     openPopover();
 
@@ -1036,31 +1036,8 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should clear the dimension with the clear button', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
-
-    const clearButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-remove"]'
-    );
-
-    act(() => {
-      clearButton.simulate('click');
-    });
-
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columns: {},
-          columnOrder: [],
-        },
-      },
-    });
-  });
-
   it('should clear the dimension when removing the selection in field combobox', () => {
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} />);
 
     openPopover();
 
@@ -1104,7 +1081,7 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
 
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} state={stateWithNumberCol} />);
 
     openPopover();
 
@@ -1157,7 +1134,7 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
 
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} state={stateWithNumberCol} />);
 
     openPopover();
 
@@ -1207,7 +1184,7 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
 
-    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+    wrapper = mount(<IndexPatternDimensionEditor {...defaultProps} state={stateWithNumberCol} />);
 
     openPopover();
 
@@ -1288,7 +1265,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is not droppable if no drag is happening', () => {
       wrapper = mount(
-        <IndexPatternDimensionPanel {...defaultProps} state={dragDropState()} layerId="myLayer" />
+        <IndexPatternDimensionEditor {...defaultProps} state={dragDropState()} layerId="myLayer" />
       );
 
       expect(
@@ -1301,7 +1278,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is not droppable if the dragged item has no field', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1322,7 +1299,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is not droppable if field is not supported by filterOperations', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1347,7 +1324,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is droppable if the field is supported by filterOperations', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1372,7 +1349,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is notdroppable if the field belongs to another index pattern', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1402,7 +1379,7 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1450,7 +1427,7 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1498,12 +1475,12 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanelComponent
+        <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          dragDropContext={{
-            ...dragDropContext,
-            dragging,
-          }}
+          // dragDropContext={{
+          //   ...dragDropContext,
+          //   dragging,
+          // }}
           state={testState}
           filterOperations={op => op.dataType === 'number'}
           layerId="myLayer"

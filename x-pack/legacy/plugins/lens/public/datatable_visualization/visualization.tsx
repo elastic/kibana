@@ -128,12 +128,12 @@ export const datatableVisualization: Visualization<
     ];
   },
 
-  getLayerOptions(props) {
+  getLayerOptions({ state }) {
     return {
       dimensions: [
         {
-          layerId: props.state.layers[0].layerId,
-          accessors: props.state.layers[0].columns,
+          layerId: state.layers[0].layerId,
+          accessors: state.layers[0].columns,
           dimensionId: 'columns',
           dimensionLabel: i18n.translate('xpack.lens.datatable.columns', {
             defaultMessage: 'Columns',

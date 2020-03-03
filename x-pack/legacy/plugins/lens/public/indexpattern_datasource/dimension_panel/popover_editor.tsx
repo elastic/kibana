@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -16,7 +15,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
-  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
@@ -252,6 +250,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   layerId: props.layerId,
                   suggestedPriority: props.suggestedPriority,
                   op: operation as OperationType,
+                  previousColumn: selectedColumn,
                 });
               }
 
@@ -359,6 +358,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   }}
                 />
               )}
+
+              {selectedColumn && selectedColumn.dataType === 'number' ? (
+                <FormatSelector
+                  selectedColumn={selectedColumn}
+                  onChange={newFormat => {
+                    setState(
+                      updateColumnParam({
+                        state,
+                        layerId,
+                        currentColumn: selectedColumn,
+                        paramName: 'format',
+                        value: newFormat,
+                      })
+                    );
+                  }}
+                />
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

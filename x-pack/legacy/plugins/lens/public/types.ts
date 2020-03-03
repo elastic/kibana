@@ -283,6 +283,8 @@ interface VisualizationDimensionConfig {
   // from the panel, and this lets the visualization hint that it doesn't want
   // users to have that level of control
   hideGrouping?: boolean;
+
+  required?: boolean;
 }
 
 export interface VisualizationLayerConfigResult<T = unknown> {

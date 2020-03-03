@@ -6,11 +6,7 @@
 
 import React from 'react';
 import { createMockDatasource } from '../editor_frame_service/mocks';
-import {
-  DatatableVisualizationState,
-  datatableVisualization,
-  DataTableLayer,
-} from './visualization';
+import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { mount } from 'enzyme';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
 import { generateId } from '../id_generator';
@@ -217,26 +213,16 @@ describe('Datatable Visualization', () => {
   describe('DataTableLayer', () => {
     it('allows all kinds of operations', () => {
       const setState = jest.fn();
-      const datasource = createMockDatasource();
-      const layer = { layerId: 'a', columns: ['b', 'c'] };
       const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
 
-      mount(
-        <DataTableLayer
-          layerId="layer1"
-          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={frame}
-          layer={layer}
-          setState={setState}
-          state={{ layers: [layer] }}
-        />
-      );
-
-      expect(datasource.publicAPIMock.renderDimensionPanel).toHaveBeenCalled();
-
-      const filterOperations =
-        datasource.publicAPIMock.renderDimensionPanel.mock.calls[0][1].filterOperations;
+      const filterOperations = datatableVisualization.getLayerOptions({
+        layerId: 'first',
+        state: {
+          layers: [{ layerId: 'first', columns: [] }],
+        },
+        setState,
+        frame,
+      }).dimensions[0].filterOperations;
 
       const baseOperation: Operation = {
         dataType: 'string',

@@ -15,7 +15,7 @@ import {
   DatasourceDimensionDropHandlerProps,
 } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
+// import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor, PopoverTrigger } from './popover_editor';
@@ -154,6 +154,7 @@ export function onDrop(
         layerId,
         suggestedPriority: props.suggestedPriority,
         field: droppedItem.field,
+        previousColumn: selectedColumn,
       });
 
   trackUiEvent('drop_onto_dimension');

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiText,
   EuiButton,
   EuiForm,
   EuiFormRow,
@@ -238,6 +239,9 @@ function LayerPanel(
     openId: null,
   });
 
+  const { dimensions } = activeVisualization.getLayerOptions(layerVisualizationConfigProps);
+  const isEmptyLayer = !dimensions.some(d => d.accessors.length > 0);
+
   function wrapInPopover(id: string, trigger: React.ReactElement, panel: React.ReactElement) {
     return (
       <EuiPopover
@@ -280,142 +284,55 @@ function LayerPanel(
 
         <EuiSpacer size="s" />
 
-        {activeVisualization
-          .getLayerOptions(layerVisualizationConfigProps)
-          .dimensions.map((dimension, index) => {
-            const newId = generateId();
-            return (
-              <EuiFormRow
-                className="lnsConfigPanel__axis"
-                label={dimension.dimensionLabel}
-                key={index}
-              >
-                <>
-                  {dimension.accessors.map(accessor => (
-                    <DragDrop
-                      key={accessor}
-                      className="lnsIndexPatternDimensionPanel"
-                      data-test-subj="indexPattern-dropTarget"
-                      droppable={
-                        dragDropContext.dragging &&
-                        layerDatasource.canHandleDrop({
-                          ...layerDatasourceDropProps,
+        {dimensions.map((dimension, index) => {
+          const newId = generateId();
+          const isMissing = !isEmptyLayer && dimension.required && dimension.accessors.length === 0;
+          return (
+            <EuiFormRow
+              className="lnsConfigPanel__axis"
+              label={dimension.dimensionLabel}
+              key={index}
+              isInvalid={isMissing}
+              error={
+                isMissing
+                  ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
+                      defaultMessage: 'Required dimension',
+                    })
+                  : []
+              }
+            >
+              <>
+                {dimension.accessors.map(accessor => (
+                  <DragDrop
+                    key={accessor}
+                    className="lnsIndexPatternDimensionPanel"
+                    data-test-subj="indexPattern-dropTarget"
+                    droppable={
+                      dragDropContext.dragging &&
+                      layerDatasource.canHandleDrop({
+                        ...layerDatasourceDropProps,
+                        columnId: accessor,
+                        filterOperations: dimension.filterOperations,
+                      })
+                    }
+                    onDrop={droppedItem => {
+                      layerDatasource.onDrop({
+                        ...layerDatasourceDropProps,
+                        droppedItem,
+                        columnId: accessor,
+                        filterOperations: dimension.filterOperations,
+                      });
+                    }}
+                  >
+                    {wrapInPopover(
+                      accessor,
+                      <NativeRenderer
+                        render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                        nativeProps={{
+                          ...layerDatasourceConfigProps,
                           columnId: accessor,
                           filterOperations: dimension.filterOperations,
-                        })
-                      }
-                      onDrop={droppedItem => {
-                        layerDatasource.onDrop({
-                          ...layerDatasourceDropProps,
-                          droppedItem,
-                          columnId: accessor,
-                          filterOperations: dimension.filterOperations,
-                        });
-                      }}
-                    >
-                      {wrapInPopover(
-                        accessor,
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            columnId: accessor,
-                            filterOperations: dimension.filterOperations,
-                            togglePopover: () => {
-                              if (popoverState.isOpen) {
-                                setPopoverState({
-                                  isOpen: false,
-                                  openId: null,
-                                });
-                              } else {
-                                setPopoverState({
-                                  isOpen: true,
-                                  openId: accessor,
-                                });
-                              }
-                            },
-                          }}
-                        />,
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: accessor,
-                            filterOperations: dimension.filterOperations,
-                          }}
-                        />
-                      )}
-
-                      <EuiButtonIcon
-                        data-test-subj="indexPattern-dimensionPopover-remove"
-                        iconType="cross"
-                        iconSize="s"
-                        size="s"
-                        color="danger"
-                        aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                          defaultMessage: 'Remove configuration',
-                        })}
-                        title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                          defaultMessage: 'Remove configuration',
-                        })}
-                        onClick={() => {
-                          trackUiEvent('indexpattern_dimension_removed');
-                          props.updateVisualization(
-                            props.activeVisualization.removeDimension({
-                              layerId,
-                              dimensionId: dimension.dimensionId,
-                              columnId: accessor,
-                              prevState: props.visualizationState,
-                            })
-                          );
-                        }}
-                      />
-                    </DragDrop>
-                  ))}
-                  {dimension.supportsMoreColumns ? (
-                    <DragDrop
-                      className="lnsIndexPatternDimensionPanel"
-                      data-test-subj="indexPattern-dropTarget"
-                      droppable={
-                        dragDropContext.dragging &&
-                        layerDatasource.canHandleDrop({
-                          ...layerDatasourceDropProps,
-                          columnId: newId,
-                          filterOperations: dimension.filterOperations,
-                        })
-                      }
-                      onDrop={droppedItem => {
-                        const dropSuccess = layerDatasource.onDrop({
-                          ...layerDatasourceDropProps,
-                          droppedItem,
-                          columnId: newId,
-                          filterOperations: dimension.filterOperations,
-                        });
-                        if (dropSuccess) {
-                          props.updateVisualization(
-                            activeVisualization.setDimension({
-                              layerId,
-                              dimensionId: dimension.dimensionId,
-                              columnId: newId,
-                              prevState: props.visualizationState,
-                            })
-                          );
-                        }
-                      }}
-                    >
-                      {wrapInPopover(
-                        dimension.dimensionLabel,
-                        <EuiButtonEmpty
-                          iconType="plusInCircleFilled"
-                          data-test-subj="indexPattern-configure-dimension"
-                          aria-label={i18n.translate('xpack.lens.configure.addConfig', {
-                            defaultMessage: 'Add a configuration',
-                          })}
-                          title={i18n.translate('xpack.lens.configure.addConfig', {
-                            defaultMessage: 'Add a configuration',
-                          })}
-                          onClick={() => {
+                          togglePopover: () => {
                             if (popoverState.isOpen) {
                               setPopoverState({
                                 isOpen: false,
@@ -424,45 +341,139 @@ function LayerPanel(
                             } else {
                               setPopoverState({
                                 isOpen: true,
-                                openId: dimension.dimensionLabel,
+                                openId: accessor,
                               });
                             }
-                          }}
-                          size="xs"
-                        >
-                          <FormattedMessage
-                            id="xpack.lens.configure.emptyConfig"
-                            defaultMessage="Drop a field here"
-                          />
-                        </EuiButtonEmpty>,
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: newId,
-                            filterOperations: dimension.filterOperations,
+                          },
+                        }}
+                      />,
+                      <NativeRenderer
+                        render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                        nativeProps={{
+                          ...layerDatasourceConfigProps,
+                          core: props.core,
+                          columnId: accessor,
+                          filterOperations: dimension.filterOperations,
+                        }}
+                      />
+                    )}
 
-                            setState: (newState: unknown) => {
-                              props.updateVisualization(
-                                activeVisualization.setDimension({
-                                  layerId,
-                                  dimensionId: dimension.dimensionId,
-                                  columnId: newId,
-                                  prevState: props.visualizationState,
-                                })
-                              );
-                              props.updateDatasource(datasourceId, newState);
-                            },
-                          }}
+                    <EuiButtonIcon
+                      data-test-subj="indexPattern-dimensionPopover-remove"
+                      iconType="cross"
+                      iconSize="s"
+                      size="s"
+                      color="danger"
+                      aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                        defaultMessage: 'Remove configuration',
+                      })}
+                      title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                        defaultMessage: 'Remove configuration',
+                      })}
+                      onClick={() => {
+                        trackUiEvent('indexpattern_dimension_removed');
+                        props.updateVisualization(
+                          props.activeVisualization.removeDimension({
+                            layerId,
+                            dimensionId: dimension.dimensionId,
+                            columnId: accessor,
+                            prevState: props.visualizationState,
+                          })
+                        );
+                      }}
+                    />
+                  </DragDrop>
+                ))}
+                {dimension.supportsMoreColumns ? (
+                  <DragDrop
+                    className="lnsIndexPatternDimensionPanel"
+                    data-test-subj="indexPattern-dropTarget"
+                    droppable={
+                      dragDropContext.dragging &&
+                      layerDatasource.canHandleDrop({
+                        ...layerDatasourceDropProps,
+                        columnId: newId,
+                        filterOperations: dimension.filterOperations,
+                      })
+                    }
+                    onDrop={droppedItem => {
+                      const dropSuccess = layerDatasource.onDrop({
+                        ...layerDatasourceDropProps,
+                        droppedItem,
+                        columnId: newId,
+                        filterOperations: dimension.filterOperations,
+                      });
+                      if (dropSuccess) {
+                        props.updateVisualization(
+                          activeVisualization.setDimension({
+                            layerId,
+                            dimensionId: dimension.dimensionId,
+                            columnId: newId,
+                            prevState: props.visualizationState,
+                          })
+                        );
+                      }
+                    }}
+                  >
+                    {wrapInPopover(
+                      dimension.dimensionLabel,
+                      <EuiButtonEmpty
+                        iconType="plusInCircleFilled"
+                        data-test-subj="indexPattern-configure-dimension"
+                        aria-label={i18n.translate('xpack.lens.configure.addConfig', {
+                          defaultMessage: 'Add a configuration',
+                        })}
+                        title={i18n.translate('xpack.lens.configure.addConfig', {
+                          defaultMessage: 'Add a configuration',
+                        })}
+                        onClick={() => {
+                          if (popoverState.isOpen) {
+                            setPopoverState({
+                              isOpen: false,
+                              openId: null,
+                            });
+                          } else {
+                            setPopoverState({
+                              isOpen: true,
+                              openId: dimension.dimensionLabel,
+                            });
+                          }
+                        }}
+                        size="xs"
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.configure.emptyConfig"
+                          defaultMessage="Drop a field here"
                         />
-                      )}
-                    </DragDrop>
-                  ) : null}
-                </>
-              </EuiFormRow>
-            );
-          })}
+                      </EuiButtonEmpty>,
+                      <NativeRenderer
+                        render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                        nativeProps={{
+                          ...layerDatasourceConfigProps,
+                          core: props.core,
+                          columnId: newId,
+                          filterOperations: dimension.filterOperations,
+
+                          setState: (newState: unknown) => {
+                            props.updateVisualization(
+                              activeVisualization.setDimension({
+                                layerId,
+                                dimensionId: dimension.dimensionId,
+                                columnId: newId,
+                                prevState: props.visualizationState,
+                              })
+                            );
+                            props.updateDatasource(datasourceId, newState);
+                          },
+                        }}
+                      />
+                    )}
+                  </DragDrop>
+                ) : null}
+              </>
+            </EuiFormRow>
+          );
+        })}
 
         <EuiSpacer size="s" />
 

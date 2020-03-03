@@ -72,6 +72,12 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#setDimension', () => {
+  });
+
+  describe('#removeDimension', () => {
+  });
+
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
       const datasource: DatasourcePublicAPI = {

@@ -238,6 +238,8 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           index
         ) => {
           if (
+            !xAccessor ||
+            !accessors.length ||
             !data.tables[layerId] ||
             data.tables[layerId].rows.length === 0 ||
             data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
