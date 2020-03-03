@@ -145,7 +145,11 @@ export const StepCreateForm: FC<Props> = React.memo(
           setStarted(true);
           setLoading(false);
         } else {
-          throw new Error();
+          const errorMessage =
+            typeof resp === 'object' && resp !== null && resp[transformId]?.success === false
+              ? resp[transformId].error
+              : resp;
+          throw new Error(errorMessage);
         }
       } catch (e) {
         toastNotifications.addDanger({
