@@ -93,18 +93,19 @@ describe('role', () => {
 
   describe('getExtendedRoleDeprecationNotice', () => {
     test('advises not to use the deprecated role', () => {
-      const testRole = {};
+      const testRole = { name: 'test-role' };
       expect(getExtendedRoleDeprecationNotice(testRole)).toMatchInlineSnapshot(
-        `"This role is deprecated and should no longer be assigned. "`
+        `"The test-role role is deprecated. "`
       );
     });
 
     test('includes the deprecation reason when provided', () => {
       const testRole = {
+        name: 'test-role',
         metadata: { _deprecated_reason: "We just don't like this role anymore" },
       };
       expect(getExtendedRoleDeprecationNotice(testRole)).toMatchInlineSnapshot(
-        `"This role is deprecated and should no longer be assigned. We just don't like this role anymore"`
+        `"The test-role role is deprecated. We just don't like this role anymore"`
       );
     });
   });
