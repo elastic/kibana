@@ -35,7 +35,7 @@ export const MyState {
   foo: string;
 }
 export interface UrlGeneratorStateMapping {
-  [MY_GENERATOR]: MyState;
+  [MY_GENERATOR]: UrlGeneratorState<MyState>;
 }
 ```
 
@@ -56,8 +56,8 @@ Second release:
     bar: string;
   }
   export interface UrlGeneratorStateMapping {
-    [MY_LEGACY_GENERATOR_V1]: MyLegacyState;
-    [MY_GENERATOR]: MyState;
+    [MY_LEGACY_GENERATOR_V1]: UrlGeneratorState<MyLegacyState, typeof MY_GENERATOR, MyState>;
+    [MY_GENERATOR]: UrlGeneratorState<MyState>;
   }
 ```
 

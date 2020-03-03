@@ -19,23 +19,40 @@
 
 import { TimeRange, Filter, Query } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
+import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
-export interface DashboardAppLinkGeneratorState {
-  State: {
-    dashboardId?: string;
-    timeRange?: TimeRange;
-    filters?: Filter[];
-    query?: Query;
-    // If not given, will use the uiSettings configuration
-    useHash?: boolean;
-  };
-}
+export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
+  /**
+   * If given, the dashboard saved object with this id will be loaded. If not given,
+   * a new, unsaved dashboard will be loaded up.
+   */
+  dashboardId?: string;
+  /**
+   * Optionally set the time range in the time picker.
+   */
+  timeRange?: TimeRange;
+  /**
+   * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
+   * saved dashboard has filters saved with it, this will _replace_ those filters.  This will set
+   * app filters, not global filters.
+   */
+  filters?: Filter[];
+  /**
+   * Optionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the
+   * saved dashboard has a query saved with it, this will _replace_ that query.
+   */
+  query?: Query;
+  /**
+   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
+   * whether to hash the data in the url to avoid url length issues.
+   */
+  useHash?: boolean;
+}>;
 
 export const createDirectAccessDashboardLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
