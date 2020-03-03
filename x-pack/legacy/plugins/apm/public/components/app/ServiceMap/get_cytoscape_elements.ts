@@ -105,7 +105,8 @@ export function getCytoscapeElements(
             `/services/${node['service.name']}/service-map`,
             search
           ),
-          agentName: node['agent.name'] || node['agent.name'],
+          agentName: node['agent.name'],
+          frameworkName: node['service.framework.name'],
           type: 'service'
         };
       }
