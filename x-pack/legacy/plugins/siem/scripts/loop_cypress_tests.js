@@ -10,7 +10,13 @@ const process = require('process');
 const spawn = require('child_process').spawn;
 /* eslint-disable no-process-exit */
 const MUST_RUN_FROM_DIR = 'kibana';
-const OUTPUT_FILE = `target/loop-cypress-tests.txt`;
+const OUTPUT_DIR = 'target';
+const OUTPUT_FILE = `${OUTPUT_DIR}/loop-cypress-tests.txt`;
+const createOutputDir = () => {
+  fs.mkdir(OUTPUT_DIR, { recursive: true }, err => {
+    if (err) throw err;
+  });
+};
 const showUsage = () => {
   const scriptName = process.argv[1].slice(process.argv[1].lastIndexOf('/') + 1);
   console.log(`\nUsage: ${scriptName} <times-to-run>`, `\nExample: ${scriptName} 5`);
@@ -73,4 +79,5 @@ exitIfIncorrectWorkingDir();
 exitIfTimesToRunIsInvalid(timesToRun);
 console.log(`\nCypress tests will be run ${timesToRun} times`);
 console.log(`\nTest output will be appended to '${OUTPUT_FILE}'`);
+createOutputDir();
 runNTimes(timesToRun);
