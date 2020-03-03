@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'src/core/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
 import { CombinedJob } from '../../../../../legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
-import { callWithRequestType } from '../../../../../legacy/plugins/ml/common/types/kibana';
 // @ts-ignore
 import { validateJobObject } from './validate_job_object';
 
@@ -27,12 +27,12 @@ const BUCKET_SPAN_COMPARE_FACTOR = 25;
 const MIN_TIME_SPAN_MS = 7200000;
 const MIN_TIME_SPAN_READABLE = '2 hours';
 
-export async function isValidTimeField(callWithRequest: callWithRequestType, job: CombinedJob) {
+export async function isValidTimeField(callAsCurrentUser: APICaller, job: CombinedJob) {
   const index = job.datafeed_config.indices.join(',');
   const timeField = job.data_description.time_field;
 
   // check if time_field is of type 'date' or 'date_nanos'
-  const fieldCaps = await callWithRequest('fieldCaps', {
+  const fieldCaps = await callAsCurrentUser('fieldCaps', {
     index,
     fields: [timeField],
   });
@@ -45,7 +45,7 @@ export async function isValidTimeField(callWithRequest: callWithRequestType, job
 }
 
 export async function validateTimeRange(
-  callWithRequest: callWithRequestType,
+  callAsCurrentUser: APICaller,
   job: CombinedJob,
   timeRange: TimeRange | undefined
 ) {
@@ -54,13 +54,13 @@ export async function validateTimeRange(
   validateJobObject(job);
 
   // check if time_field is a date type
-  if (!(await isValidTimeField(callWithRequest, job))) {
+  if (!(await isValidTimeField(callAsCurrentUser, job))) {
     messages.push({
       id: 'time_field_invalid',
       timeField: job.data_description.time_field,
     });
     // if the time field is invalid, skip all other checks
-    return Promise.resolve(messages);
+    return messages;
   }
 
   // if there is no duration, do not run the estimate test
@@ -69,7 +69,7 @@ export async function validateTimeRange(
     typeof timeRange.start === 'undefined' ||
     typeof timeRange.end === 'undefined'
   ) {
-    return Promise.resolve(messages);
+    return messages;
   }
 
   // check if time range is after the Unix epoch start
