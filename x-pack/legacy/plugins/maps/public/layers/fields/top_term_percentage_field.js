@@ -6,6 +6,7 @@
 
 import { AbstractField } from './field';
 import { TooltipProperty } from '../tooltips/tooltip_property';
+import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 
 export class TopTermPercentageField extends AbstractField {
   constructor(topTermAggField) {
@@ -14,10 +15,11 @@ export class TopTermPercentageField extends AbstractField {
   }
 
   getName() {
-    return `${this._topTermAggField.getName()}_percentage`;
+    return `${this._topTermAggField.getName()}${TOP_TERM_PERCENTAGE_SUFFIX}`;
   }
 
   getRootName() {
+    // top term percentage is a derived value so it has no root field
     return '';
   }
 

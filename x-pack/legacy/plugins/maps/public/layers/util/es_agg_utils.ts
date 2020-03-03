@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/public';
+import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 
 export function getField(indexPattern: IndexPattern, fieldName: string) {
   const field = indexPattern.fields.getByName(fieldName);
@@ -43,6 +44,12 @@ export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = 
       properties[key] = bucket[key].value;
     } else if (_.has(bucket[key], 'buckets')) {
       properties[key] = _.get(bucket[key], 'buckets[0].key');
+      const topBucketCount = bucket[key].buckets[0].doc_count;
+      const totalCount = bucket.doc_count;
+      if (totalCount && topBucketCount) {
+        properties[`${key}${TOP_TERM_PERCENTAGE_SUFFIX}`] =
+          _.round(topBucketCount / totalCount, 4) * 100;
+      }
     } else {
       properties[key] = bucket[key];
     }

@@ -127,6 +127,8 @@ export const AGG_TYPE = {
   UNIQUE_COUNT: 'cardinality',
 };
 
+export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });
