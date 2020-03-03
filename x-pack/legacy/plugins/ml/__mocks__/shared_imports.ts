@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function paginate({ size, index }, data) {
-  const start = index * size;
-  return data.slice(start, start + size);
-}
+export function XJsonMode() {}
