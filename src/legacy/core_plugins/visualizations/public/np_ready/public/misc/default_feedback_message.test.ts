@@ -17,5 +17,10 @@
  * under the License.
  */
 
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';
+import { defaultFeedbackMessage } from './default_feedback_message';
+
+test('default feedback message with link', () => {
+  expect(defaultFeedbackMessage).toMatchInlineSnapshot(
+    `"Have feedback? Please create an issue in <a href=\\"https://github.com/elastic/kibana/issues/new/choose\\" rel=\\"noopener noreferrer\\" target=\\"_blank\\">GitHub</a>."`
+  );
+});
