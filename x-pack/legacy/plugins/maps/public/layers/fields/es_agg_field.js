@@ -5,9 +5,10 @@
  */
 
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
+import { getField, addFieldToDSL } from '../util/es_agg_utils';
 
 export class ESAggMetricField extends AbstractField {
   static type = 'ES_AGG';
@@ -20,13 +21,17 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getName() {
-    return this._source.formatMetricKey(this.getAggType(), this.getESDocFieldName());
+    return this._source.getAggKey(this.getAggType(), this.getRootName());
+  }
+
+  getRootName() {
+    return this._getESDocFieldName();
   }
 
   async getLabel() {
     return this._label
-      ? await this._label
-      : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
+      ? this._label
+      : this._source.getAggLabel(this.getAggType(), this.getRootName());
   }
 
   getAggType() {
@@ -34,22 +39,21 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return this.getAggType() === COUNT_AGG_TYPE ? true : !!this._esDocField;
+    return this.getAggType() === AGG_TYPE.COUNT ? true : !!this._esDocField;
   }
 
   async getDataType() {
-    // aggregations only provide numerical data
-    return 'number';
+    return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
-  getESDocFieldName() {
+  _getESDocFieldName() {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
   getRequestDescription() {
-    return this.getAggType() !== COUNT_AGG_TYPE
-      ? `${this.getAggType()} ${this.getESDocFieldName()}`
-      : COUNT_AGG_TYPE;
+    return this.getAggType() !== AGG_TYPE.COUNT
+      ? `${this.getAggType()} ${this.getRootName()}`
+      : AGG_TYPE.COUNT;
   }
 
   async createTooltipProperty(value) {
@@ -63,18 +67,13 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-  makeMetricAggConfig() {
-    const metricAggConfig = {
-      id: this.getName(),
-      enabled: true,
-      type: this.getAggType(),
-      schema: 'metric',
-      params: {},
+  getValueAggDsl(indexPattern) {
+    const field = getField(indexPattern, this.getRootName());
+    const aggType = this.getAggType();
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
+    return {
+      [aggType]: addFieldToDSL(aggBody, field),
     };
-    if (this.getAggType() !== COUNT_AGG_TYPE) {
-      metricAggConfig.params = { field: this.getESDocFieldName() };
-    }
-    return metricAggConfig;
   }
 
   supportsFieldMeta() {
@@ -82,7 +81,16 @@ export class ESAggMetricField extends AbstractField {
     return !isMetricCountable(this.getAggType());
   }
 
+  canValueBeFormatted() {
+    // Do not use field formatters for counting metrics
+    return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
+  }
+
   async getOrdinalFieldMetaRequest(config) {
     return this._esDocField.getOrdinalFieldMetaRequest(config);
+  }
+
+  async getCategoricalFieldMetaRequest() {
+    return this._esDocField.getCategoricalFieldMetaRequest();
   }
 }

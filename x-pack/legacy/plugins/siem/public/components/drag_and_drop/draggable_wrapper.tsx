@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { createContext, useContext, useEffect } from 'react';
 import {
   Draggable,
@@ -14,6 +13,7 @@ import {
 } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
@@ -122,7 +122,7 @@ const DraggableWrapperComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
-      isEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+      deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
       prevProps.render !== nextProps.render &&
       prevProps.truncate === nextProps.truncate
     );

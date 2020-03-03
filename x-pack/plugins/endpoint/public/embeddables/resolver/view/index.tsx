@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useLayoutEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { Panel } from './panel';
@@ -14,6 +15,8 @@ import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, NamedColors } from './defs';
+import { ResolverAction } from '../types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -34,16 +37,37 @@ const StyledGraphControls = styled(GraphControls)`
 `;
 
 export const Resolver = styled(
-  React.memo(function Resolver({ className }: { className?: string }) {
+  React.memo(function Resolver({
+    className,
+    selectedEvent,
+  }: {
+    className?: string;
+    selectedEvent?: LegacyEndpointEvent;
+  }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments
     );
 
+    const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const { projectionMatrix, ref, onMouseDown } = useCamera();
+    const isLoading = useSelector(selectors.isLoading);
 
+    useLayoutEffect(() => {
+      dispatch({
+        type: 'userChangedSelectedEvent',
+        payload: { selectedEvent },
+      });
+    }, [dispatch, selectedEvent]);
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
-        <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
+
+        {isLoading ? (
+          <div className="loading-container">
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : (
+          <>
+            <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
           {edgeLineSegments.map(([startPosition, endPosition], index) => (
             <EdgeLine
               key={index}
@@ -64,6 +88,8 @@ export const Resolver = styled(
         <StyledPanel />
         <StyledGraphControls />
         <SymbolDefinitions />
+          </>
+        )}
       </div>
     );
   })
@@ -74,6 +100,12 @@ export const Resolver = styled(
   &,
   .resolver-graph {
     display: flex;
+    flex-grow: 1;
+  }
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-grow: 1;
   }
   /**

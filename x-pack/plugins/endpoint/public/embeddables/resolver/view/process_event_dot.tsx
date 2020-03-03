@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -68,7 +69,7 @@ export const ProcessEventDot = styled(
       /**
        * An event which contains details about the process node.
        */
-      event: ProcessEvent;
+      event: LegacyEndpointEvent;
       /**
        * projectionMatrix which can be used to convert `position` to screen coordinates.
        */
@@ -178,6 +179,7 @@ export const ProcessEventDot = styled(
             {labelText}
           </text>
         </svg>
+
       );
     }
   )
