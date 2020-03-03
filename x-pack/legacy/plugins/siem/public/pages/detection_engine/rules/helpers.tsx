@@ -13,7 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { AlertAction } from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from '../../shared_imports';
+import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import {
   AboutStepRule,
   DefineStepRule,

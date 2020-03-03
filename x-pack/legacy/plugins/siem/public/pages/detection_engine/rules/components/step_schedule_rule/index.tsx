@@ -11,7 +11,7 @@ import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { schema } from './schema';
