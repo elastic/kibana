@@ -39,7 +39,7 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 
 export const hasMLJobSelector = createSelector(mlSelector, ml => ml.mlJob?.count > 0);
 
-export const isMLJobCreating = createSelector(mlSelector, ml => ml.loading);
+export const isMLJobCreatingSelector = createSelector(mlSelector, ml => ml.loading);
 
 export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies);
 

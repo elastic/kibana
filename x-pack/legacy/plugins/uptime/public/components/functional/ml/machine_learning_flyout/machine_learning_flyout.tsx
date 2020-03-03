@@ -35,6 +35,7 @@ interface Props {
 export function MachineLearningFlyoutView({
   isCreatingJob,
   onClickCreate,
+  onClickDelete,
   onClose,
   hasMLJob,
 }: Props) {
@@ -90,6 +91,18 @@ export function MachineLearningFlyoutView({
                 disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
               >
                 {labels.CREATE_NEW_JOB}
+              </EuiButton>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow>
+              <EuiButton
+                onClick={() => onClickDelete()}
+                fill
+                disabled={isCreatingJob || !hasMLJob || isLoadingMLJob}
+                color="danger"
+              >
+                {labels.DELETE_JOB}
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>

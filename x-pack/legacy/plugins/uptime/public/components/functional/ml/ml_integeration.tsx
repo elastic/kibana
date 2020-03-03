@@ -57,7 +57,7 @@ export const MLIntegrationComponent = () => {
       <EuiPopover id="popover" button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      <MachineLearningFlyout isOpen={isMlFlyoutOpen} onClose={closeFlyout} />
+      {isMlFlyoutOpen && <MachineLearningFlyout isOpen={isMlFlyoutOpen} onClose={closeFlyout} />}
     </>
   );
 };

@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, useContext, useEffect, useState } from 'react';
-import { Dispatch } from 'redux';
-import { connect, useSelector } from 'react-redux';
-import { AppState } from '../../../state';
+import React, { Component, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyoutView } from '../../functional';
-import { hasMLJobSelector, isMLJobCreating, mlSelector } from '../../../state/selectors';
-import { createMLJobAction, getMLJobAction } from '../../../state/actions';
+import { hasMLJobSelector, isMLJobCreatingSelector, mlSelector } from '../../../state/selectors';
+import { createMLJobAction, deleteMLJobAction, getMLJobAction } from '../../../state/actions';
 import { MLJobLink } from '../../functional/ml/ml_job_link';
 import * as labels from './translations';
 import { ML_JOB_ID } from '../../../../common/constants';
-import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  useKibana,
+  KibanaReactNotifications,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   isOpen: boolean;
@@ -26,49 +27,63 @@ interface Props {
   mlError: any;
 }
 
-export const MLFlyoutContainer: Component<Props> = ({
-  isOpen,
-  onClose,
-  loadMLJob,
-  hasMLJob,
-  createMLJob,
-  isJobCreating,
-  mlError,
-}) => {
+const showMLJobNotification = (
+  notifications: KibanaReactNotifications,
+  success: boolean,
+  message = ''
+) => {
+  if (success) {
+    notifications.toasts.success({
+      title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+      body: (
+        <p>
+          {labels.JOB_CREATED_SUCCESS_MESSAGE}
+          <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
+        </p>
+      ),
+      toastLifeTimeMs: 5000,
+    });
+  } else {
+    notifications.toasts.warning({
+      title: <p>{labels.JOB_CREATION_FAILED}</p>,
+      body: message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
+      toastLifeTimeMs: 5000,
+    });
+  }
+};
+
+export const MachineLearningFlyout: Component<Props> = ({ isOpen, onClose }) => {
   const { notifications } = useKibana();
   const { errors } = useSelector(mlSelector);
-  useEffect(() => {
-    loadMLJob(ML_JOB_ID);
-  }, [loadMLJob]);
+
+  const dispatch = useDispatch();
+  const hasMLJob = useSelector(hasMLJobSelector);
+  const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+
+  const createMLJob = () => dispatch(createMLJobAction.get());
+
+  const deleteMLJob = () => dispatch(deleteMLJobAction.get());
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
-  useEffect(() => {
-    if (hasMLJob && isCreatingJob) {
-      notifications.toasts.success({
-        title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
-        body: toMountPoint(
-          <p>
-            {labels.JOB_CREATED_SUCCESS_MESSAGE}
-            <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
-          </p>
-        ),
-      });
-      setIsCreatingJob(false);
-    }
-    // onClose();
-  }, [hasMLJob, notifications, onClose, isCreatingJob]);
 
   useEffect(() => {
-    if (isCreatingJob && !hasMLJob) {
-      const err = errors?.pop();
-      notifications.toasts.warning({
-        title: <p>{labels.JOB_CREATION_FAILED}</p>,
-        body: err?.body?.message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
-        toastLifeTimeMs: 5000,
-      });
+    const loadMLJob = (jobId: string) => dispatch(getMLJobAction.get({ jobId }));
+
+    loadMLJob(ML_JOB_ID);
+  }, [dispatch, isOpen]);
+
+  useEffect(() => {
+    if (isCreatingJob && !isMLJobCreating) {
+      if (hasMLJob) {
+        showMLJobNotification(notifications, true);
+      } else {
+        const err = errors?.pop();
+        showMLJobNotification(notifications, false, err?.body?.message);
+      }
       setIsCreatingJob(false);
+      onClose();
     }
-  }, [hasMLJob, notifications, isCreatingJob, errors]);
+  }, [hasMLJob, notifications, onClose, isCreatingJob, errors, isMLJobCreating]);
 
   if (!isOpen) {
     return null;
@@ -77,30 +92,15 @@ export const MLFlyoutContainer: Component<Props> = ({
   const createAnomalyJob = () => {
     setIsCreatingJob(true);
     createMLJob();
-    onClose();
   };
 
   return (
     <MachineLearningFlyoutView
-      isCreatingJob={isJobCreating}
+      isCreatingJob={isMLJobCreating}
       onClickCreate={createAnomalyJob}
+      onClickDelete={deleteMLJob}
       onClose={onClose}
       hasMLJob={hasMLJob}
     />
   );
 };
-
-const mapStateToProps = (state: AppState) => ({
-  hasMLJob: hasMLJobSelector(state),
-  isMLJobCreating: isMLJobCreating(state),
-});
-
-const mapDispatchToProps = (dispatch: Dispatch<any>): any => ({
-  loadMLJob: (jobId: string) => dispatch(getMLJobAction.get({ jobId })),
-  createMLJob: () => dispatch(createMLJobAction.get()),
-});
-
-export const MachineLearningFlyout = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MLFlyoutContainer);

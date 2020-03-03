@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchGet, fetchPost } from './utils';
+import { fetchDelete, fetchGet, fetchPost } from './utils';
 import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
 
 export const fetchMLJob = async () => {
@@ -33,7 +33,25 @@ export const createMLJob = async () => {
     indexPatternName: INDEX_NAMES.HEARTBEAT,
   };
 
-  return fetchPost(url, data);
+  const response = await fetchPost(url, data);
+  if (response?.jobs?.[0]?.id === ML_JOB_ID && response?.jobs?.[0]?.success === true) {
+    return {
+      count: 1,
+    };
+  } else {
+    return null;
+  }
+};
+
+export const deleteMLJob = async () => {
+  const url = `/api/ml/jobs/delete_jobs`;
+
+  const data = { jobIds: [ML_JOB_ID] };
+
+  const response = await fetchPost(url, data);
+  if (response?.[ML_JOB_ID]?.deleted) {
+    return null;
+  }
 };
 
 export const getIndexDateRange = async () => {

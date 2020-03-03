@@ -5,7 +5,12 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { getMLJobAction, createMLJobAction, anomalyRecordsAction } from '../actions';
+import {
+  getMLJobAction,
+  createMLJobAction,
+  anomalyRecordsAction,
+  deleteMLJobAction,
+} from '../actions';
 import { IReducerState } from './types';
 import { handleAsyncAction } from './utils';
 
@@ -16,6 +21,7 @@ export interface MLJobState extends IReducerState {
 
 const initialState: MLJobState = {
   mlJob: null,
+  newMlJob: null,
   anomalies: null,
   loading: false,
   errors: [],
@@ -23,8 +29,9 @@ const initialState: MLJobState = {
 
 export const mlJobsReducer = handleActions<MLJobState>(
   {
-    ...handleAsyncAction('mlJob', createMLJobAction),
     ...handleAsyncAction('mlJob', getMLJobAction),
+    ...handleAsyncAction('mlJob', createMLJobAction),
+    ...handleAsyncAction('mlJob', deleteMLJobAction),
     ...handleAsyncAction('anomalies', anomalyRecordsAction),
   },
   initialState

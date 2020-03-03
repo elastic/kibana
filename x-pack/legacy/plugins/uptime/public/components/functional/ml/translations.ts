@@ -48,6 +48,13 @@ export const CREATE_NEW_JOB = i18n.translate(
   }
 );
 
+export const DELETE_JOB = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.deleteJobButtonLabel',
+  {
+    defaultMessage: 'Delete Job',
+  }
+);
+
 export const CREAT_ML_JOB_DESC = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription',
   {

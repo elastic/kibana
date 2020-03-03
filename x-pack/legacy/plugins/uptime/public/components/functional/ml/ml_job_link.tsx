@@ -24,7 +24,7 @@ export const MLJobLink: React.FC = ({ fill, children }: Props) => {
     time: { from: 'now-24h', to: 'now' },
   };
 
-  const path = '/timeseriesexplorer';
+  const path = '/explorer';
 
   const href = url.format({
     pathname: basePath + '/app/ml',

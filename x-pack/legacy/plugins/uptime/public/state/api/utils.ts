@@ -24,3 +24,7 @@ export const fetchPost = (apiUrl: string, data: any) => {
     body: JSON.stringify(data),
   });
 };
+
+export const fetchDelete = (apiUrl: string) => {
+  return KIBANA_HTTP.http.delete(apiUrl);
+};

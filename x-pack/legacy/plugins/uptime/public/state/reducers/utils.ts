@@ -17,7 +17,7 @@ export const handleAsyncAction = (storeKey: string, asyncAction: AsyncAction) =>
     [String(asyncAction.success)]: (state, action: Action<any>) => ({
       ...state,
       loading: false,
-      [storeKey]: { ...action.payload },
+      [storeKey]: action.payload === null ? action.payload : { ...action.payload },
     }),
 
     [String(asyncAction.fail)]: (state, action: Action<any>) => ({
