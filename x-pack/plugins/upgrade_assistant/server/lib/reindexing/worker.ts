@@ -11,6 +11,8 @@ import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { BatchQueues } from './batch_queues';
+import { BatchQueue } from './batch_queue';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
@@ -42,6 +44,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
+    private batchQueue: BatchQueue,
     private clusterClient: IClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup
@@ -132,6 +135,10 @@ export class ReindexWorker {
     } catch (e) {
       this.log.debug(`Could not fetch reindex operations from Elasticsearch`);
       this.inProgressOps = [];
+    }
+
+    if (this.batchQueue.size()) {
+      const nextItem = this.batchQueue.readNextItem();
     }
 
     // If there are operations in progress and we're not already updating operations, kick off the update loop
