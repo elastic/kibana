@@ -100,7 +100,7 @@ export class MlServerPlugin {
       mlLicense: this.mlLicense,
     };
 
-    annotationRoutes(routeInit, plugins.security);
+    annotationRoutes(routeInit, plugins?.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
     dataFrameAnalyticsRoutes(routeInit);

@@ -36,7 +36,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
  */
 export function annotationRoutes(
   { router, mlLicense }: RouteInitialization,
-  securityPlugin: SecurityPluginSetup
+  securityPlugin?: SecurityPluginSetup
 ) {
   /**
    * @apiGroup Annotations
@@ -101,7 +101,10 @@ export function annotationRoutes(
         }
 
         const { indexAnnotation } = annotationServiceProvider(context);
-        const user = securityPlugin.authc.getCurrentUser(request) || {};
+
+        const currentUser =
+          securityPlugin !== undefined && securityPlugin.authc.getCurrentUser(request);
+        const user = currentUser ? currentUser : {};
         // @ts-ignore username doesn't exist on {}
         const resp = await indexAnnotation(request.body, user.username || ANNOTATION_USER_UNKNOWN);
 
