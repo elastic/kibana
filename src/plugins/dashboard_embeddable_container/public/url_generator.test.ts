@@ -18,49 +18,91 @@
  */
 
 import { createDirectAccessDashboardLinkGenerator } from './url_generator';
+import { hashedItemStore } from '../../kibana_utils/public';
+// eslint-disable-next-line
+import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 
 const APP_BASE_PATH: string = 'xyz/app/kibana';
 
-test('creates a link to a saved dashboard', async () => {
-  const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
-  );
-  const url = await generator.createUrl!({});
-  expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard?_a=()&_g=()"`);
-});
-
-test('creates a link with global time range set up', async () => {
-  const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
-  );
-  const url = await generator.createUrl!({
-    timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+describe('dashboard url generator', () => {
+  beforeEach(() => {
+    // @ts-ignore
+    hashedItemStore.storage = mockStorage;
   });
-  expect(url).toMatchInlineSnapshot(
-    `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
-  );
-});
 
-test('creates a link with filters, time range and query to a saved object', async () => {
-  const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
-  );
-  const url = await generator.createUrl!({
-    timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
-    dashboardId: '123',
-    filters: [
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
+  test('creates a link to a saved dashboard', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({});
+    expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard?_a=()&_g=()"`);
+  });
+
+  test('creates a link with global time range set up', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
+    );
+  });
+
+  test('creates a link with filters, time range and query to a saved object', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      dashboardId: '123',
+      filters: [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'hi' },
         },
-        query: { query: 'hi' },
-      },
-    ],
-    query: { query: 'bye', language: 'kuery' },
+      ],
+      query: { query: 'bye', language: 'kuery' },
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(time:(from:now-15m,mode:relative,to:now))"`
+    );
   });
-  expect(url).toMatchInlineSnapshot(
-    `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(time:(from:now-15m,mode:relative,to:now))"`
-  );
+
+  test('if no useHash setting is given, uses the one was start services', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: true })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+    });
+    expect(url.indexOf('relative')).toBe(-1);
+  });
+
+  test('can override a false useHash ui setting', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      useHash: true,
+    });
+    expect(url.indexOf('relative')).toBe(-1);
+  });
+
+  test('can override a true useHash ui setting', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: true })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      useHash: false,
+    });
+    expect(url.indexOf('relative')).toBeGreaterThan(1);
+  });
 });

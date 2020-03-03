@@ -60,7 +60,7 @@ export const createDirectAccessDashboardLinkGenerator = (
   id: DASHBOARD_APP_URL_GENERATOR,
   createUrl: async state => {
     const startServices = await getStartServices();
-    const useHash = state.useHash || startServices.useHashedUrl;
+    const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
