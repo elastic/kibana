@@ -129,15 +129,20 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   ).toMatchSnapshot('foo bundle');
 
   expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/1.plugin.js'), 'utf8')
+  ).toMatchSnapshot('1 async bundle');
+
+  expect(
     Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
   ).toMatchSnapshot('bar bundle');
 
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(3);
+  expect(foo.cache.getModuleCount()).toBe(4);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
@@ -148,8 +153,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
-    // code + styles + style/css-loader runtime
-    14
+    // code + styles + style/css-loader runtimes
+    15
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
@@ -159,6 +164,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
