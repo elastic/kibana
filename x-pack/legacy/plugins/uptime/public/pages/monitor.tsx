@@ -5,18 +5,44 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
+import { Ping } from '../../common/graphql/types';
+import { AppState } from '../state';
+import { selectSelectedMonitor } from '../state/selectors';
+import { getSelectedMonitor } from '../state/actions';
+import { PageHeader } from './page_header';
 
-export const MonitorPage = () => {
+interface StateProps {
+  selectedMonitor: Ping | null;
+}
+
+interface DispatchProps {
+  dispatchGetMonitorStatus: (monitorId: string) => void;
+}
+
+type Props = StateProps & DispatchProps;
+
+export const MonitorPageComponent: React.FC<Props> = ({
+  selectedMonitor,
+  dispatchGetMonitorStatus,
+}: Props) => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
+
+  useEffect(() => {
+    if (monitorId) {
+      dispatchGetMonitorStatus(monitorId);
+    }
+  }, [dispatchGetMonitorStatus, monitorId]);
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors } = useContext(UptimeThemeContext);
@@ -39,8 +65,11 @@ export const MonitorPage = () => {
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
+  const nameOrId = selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id || '';
+  const breadcrumbs: ChromeBreadcrumb[] = [{ text: nameOrId }];
   return (
     <>
+      <PageHeader headingText={nameOrId} breadcrumbs={breadcrumbs} datePicker={true} />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
@@ -65,3 +94,21 @@ export const MonitorPage = () => {
     </>
   );
 };
+
+const mapStateToProps: MapStateToPropsParam<StateProps, {}, AppState> = state => ({
+  selectedMonitor: selectSelectedMonitor(state),
+});
+
+const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispatch, own) => {
+  return {
+    dispatchGetMonitorStatus: (monitorId: string) => {
+      dispatch(
+        getSelectedMonitor({
+          monitorId,
+        })
+      );
+    },
+  };
+};
+
+export const MonitorPage = connect(mapStateToProps, mapDispatchToProps)(MonitorPageComponent);
