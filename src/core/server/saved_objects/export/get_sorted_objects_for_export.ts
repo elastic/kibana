@@ -130,7 +130,7 @@ async function fetchObjectsToExport({
  *
  * @public
  */
-export async function getSortedObjectsForExport({
+export async function exportSavedObjectsToStream({
   types,
   objects,
   search,

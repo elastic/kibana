@@ -113,11 +113,11 @@ export interface SavedObjectsImportOptions {
   objectLimit: number;
   /** if true, will override existing object if present */
   overwrite: boolean;
-  /** client to use to perform the import operation */
+  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
   /** the list of allowed types to import */
   supportedTypes: string[];
-  /** if specified, will import in given namespace */
+  /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
 }
 

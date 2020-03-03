@@ -33,7 +33,7 @@ import { validateReferences } from './validate_references';
  *
  * @public
  */
-export async function resolveImportErrors({
+export async function resolveSavedObjectsImportErrors({
   readStream,
   objectLimit,
   retries,

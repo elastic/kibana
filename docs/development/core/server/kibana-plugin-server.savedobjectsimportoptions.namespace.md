@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportOptions.namespace property
 
-if specified, will import in given namespace
+if specified, will import in given namespace, else will import as global object
 
 <b>Signature:</b>
 

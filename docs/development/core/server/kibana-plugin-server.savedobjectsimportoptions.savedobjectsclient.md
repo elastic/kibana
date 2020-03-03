@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportOptions.savedObjectsClient property
 
-client to use to perform the import operation
+[client](./kibana-plugin-server.savedobjectsclientcontract.md) to use to perform the import operation
 
 <b>Signature:</b>
 

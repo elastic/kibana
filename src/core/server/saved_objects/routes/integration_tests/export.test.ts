@@ -30,7 +30,7 @@ import { registerExportRoute } from '../export';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
-const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
+const getSortedObjectsForExport = exportMock.exportSavedObjectsToStream as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
   maxImportPayloadBytes: 10485760,
