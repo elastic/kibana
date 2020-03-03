@@ -43,7 +43,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // await del(TMP_DIR);
+  await del(TMP_DIR);
 });
 
 it('builds expected bundles, saves bundle counts to metadata', async () => {
