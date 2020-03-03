@@ -30,7 +30,7 @@ import {
   getUseField,
   UseField,
   useForm,
-} from '../../../../shared_imports';
+} from '../../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
 import { stepAboutDefaultValue } from './default_value';
