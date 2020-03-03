@@ -15,15 +15,24 @@ import { plugin } from './';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
+type PluginsSetupExtended = typeof npSetup.plugins & {
+  // adds plugins which aren't in the PluginsSetup interface, but do exist
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+};
+
+type PluginsStartExtended = typeof npStart.plugins & {
+  // adds plugins which aren't in the PluginsSetup interface, but do exist
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+};
+
+const setupDependencies = npSetup.plugins as PluginsSetupExtended;
+const startDependencies = npStart.plugins as PluginsStartExtended;
+
 pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
-  triggers_actions_ui: ((npSetup.plugins as unknown) as {
-    triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
-  }).triggers_actions_ui,
+  triggers_actions_ui: setupDependencies.triggers_actions_ui,
 });
 pluginInstance.start(npStart.core, {
   ...npStart.plugins,
-  triggers_actions_ui: ((npStart.plugins as unknown) as {
-    triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
-  }).triggers_actions_ui,
+  triggers_actions_ui: startDependencies.triggers_actions_ui,
 });

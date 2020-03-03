@@ -60,6 +60,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
+      await nameInput.click();
+      await nameInput.click();
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
