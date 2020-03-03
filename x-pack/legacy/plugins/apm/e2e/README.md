@@ -7,7 +7,7 @@
 ```shell
 $ git clone https://github.com/elastic/apm-integration-testing.git
 $ cd apm-integration-testing
-./scripts/compose.py start master --no-kibana --no-xpack-secure
+./scripts/compose.py start master --no-kibana --elasticsearch-port 9201 --apm-server-port 8201
 ```
 
 2. Download [static data file](https://storage.googleapis.com/apm-ui-e2e-static-data/events.json)
@@ -21,18 +21,17 @@ $ curl https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --outpu
 
 ```shell
 $ cd x-pack/legacy/plugins/apm/e2e/cypress/ingest-data
-$ node replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
+$ node replay.js --server-url http://localhost:8201 --secret-token abcd --events ./events.json
 ```
->This process will take a few minutes to ingest all data
+
+> This process will take a few minutes to ingest all data
 
 4. Start Kibana
 
 ```shell
 $ yarn kbn bootstrap
-$ yarn start --no-base-path --csp.strict=false
+$ yarn start --no-base-path --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
 ```
-
-> Content Security Policy (CSP) Settings: Your Kibana instance must have the `csp.strict: false`.
 
 ## How to run the tests
 
@@ -52,7 +51,7 @@ yarn cypress run
 
 ## Reproducing CI builds
 
->This process is very slow compared to the local development described above. Consider that the CI must install and configure the build tools and create a Docker image for the project to run tests in a consistent manner.
+> This process is very slow compared to the local development described above. Consider that the CI must install and configure the build tools and create a Docker image for the project to run tests in a consistent manner.
 
 The Jenkins CI uses a shell script to prepare Kibana:
 
@@ -60,7 +59,7 @@ The Jenkins CI uses a shell script to prepare Kibana:
 # Prepare and run Kibana locally
 $ x-pack/legacy/plugins/apm/e2e/ci/prepare-kibana.sh
 # Build Docker image for Kibana
-$ docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) x-pack/legacy/plugins/apm/e2e/ci 
+$ docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) x-pack/legacy/plugins/apm/e2e/ci
 # Run Docker image
 $ docker run --rm -t --user "$(id -u):$(id -g)" \
     -v `pwd`:/app --network="host" \
