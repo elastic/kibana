@@ -15,10 +15,14 @@ export interface LegacyServices {
   route: Legacy.Server['route'];
 }
 
+export { SiemClient };
+
+export interface SiemRequestContext {
+  getSiemClient: () => SiemClient;
+}
+
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    siem: {
-      getSiemClient: () => SiemClient;
-    };
+    siem: SiemRequestContext;
   }
 }
