@@ -22,7 +22,7 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
     if (
       (action.type === 'userChangedUrl' &&
         isOnManagementPage(state) &&
-        hasSelectedHost(state) !== undefined) ||
+        hasSelectedHost(state) !== true) ||
       action.type === 'userPaginatedManagementList'
     ) {
       const managementPageIndex = pageIndex(state);
@@ -41,15 +41,13 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
         payload: response,
       });
     }
-    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== undefined) {
+    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
       const { selected_host: selectedHost } = uiQueryParams(state);
-      if (selectedHost !== undefined) {
-        const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
-        dispatch({
-          type: 'serverReturnedManagementDetails',
-          payload: response,
-        });
-      }
+      const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+      dispatch({
+        type: 'serverReturnedManagementDetails',
+        payload: response,
+      });
     }
   };
 };
