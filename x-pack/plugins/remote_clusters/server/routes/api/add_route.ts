@@ -11,15 +11,47 @@ import { RequestHandler } from 'src/core/server';
 
 import { serializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { RouteDependencies } from '../../types';
 
 const bodyValidation = schema.object({
   name: schema.string(),
-  seeds: schema.arrayOf(schema.string()),
   skipUnavailable: schema.boolean(),
+  mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
+  // The following validation only applies to "sniff" mode
+  seeds: schema.conditional(
+    schema.siblingRef('mode'),
+    SNIFF_MODE,
+    schema.arrayOf(schema.string()),
+    schema.never()
+  ),
+  nodeConnections: schema.conditional(
+    schema.siblingRef('mode'),
+    SNIFF_MODE,
+    schema.maybe(schema.number()),
+    schema.never()
+  ),
+  // The following validation only applies to "proxy" mode
+  proxyAddress: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.string(),
+    schema.never()
+  ),
+  proxySocketConnections: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.maybe(schema.number()),
+    schema.never()
+  ),
+  serverName: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.maybe(schema.string()),
+    schema.never()
+  ),
 });
 
 type RouteBody = TypeOf<typeof bodyValidation>;
@@ -33,7 +65,7 @@ export const register = (deps: RouteDependencies): void => {
     try {
       const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
-      const { name, seeds, skipUnavailable } = request.body;
+      const { name } = request.body;
 
       // Check if cluster already exists.
       const existingCluster = await doesClusterExist(callAsCurrentUser, name);
@@ -50,7 +82,7 @@ export const register = (deps: RouteDependencies): void => {
         });
       }
 
-      const addClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
+      const addClusterPayload = serializeCluster(request.body);
       const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: addClusterPayload,
       });

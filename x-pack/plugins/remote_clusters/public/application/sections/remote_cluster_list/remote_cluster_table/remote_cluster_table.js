@@ -129,7 +129,7 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Seeds',
         }),
         truncateText: true,
-        render: seeds => seeds.join(', '),
+        render: seeds => (seeds ? seeds.join(', ') : ''), // TODO Determine better way to support proxy mode
       },
       {
         field: 'isConnected',

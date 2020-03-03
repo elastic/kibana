@@ -177,7 +177,8 @@ export class DetailPanel extends Component {
               </EuiDescriptionListTitle>
 
               <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-                {seeds.map(seed => (
+                {/* TODO: Fix to support proxy mode */}
+                {(seeds || []).map(seed => (
                   <EuiText key={seed}>{seed}</EuiText>
                 ))}
               </EuiDescriptionListDescription>

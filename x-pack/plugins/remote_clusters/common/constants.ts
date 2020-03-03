@@ -21,3 +21,6 @@ export const PLUGIN = {
 };
 
 export const API_BASE_PATH = '/api/remote_clusters';
+
+export const SNIFF_MODE = 'sniff';
+export const PROXY_MODE = 'proxy';

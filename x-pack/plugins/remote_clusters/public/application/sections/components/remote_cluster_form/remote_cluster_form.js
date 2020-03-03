@@ -15,6 +15,7 @@ import {
   EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,10 +40,17 @@ import { RequestFlyout } from './request_flyout';
 
 import { validateName, validateSeeds, validateSeed } from './validators';
 
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
+
 const defaultFields = {
   name: '',
   seeds: [],
   skipUnavailable: false,
+  mode: SNIFF_MODE,
+  nodeConnections: 3,
+  proxyAddress: '',
+  proxySocketConnections: 18,
+  serverName: '',
 };
 
 const ERROR_TITLE_ID = 'removeClustersErrorTitle';
@@ -88,10 +96,10 @@ export class RemoteClusterForm extends Component {
   };
 
   getFieldsErrors(fields, seedInput = '') {
-    const { name, seeds } = fields;
+    const { name, seeds, mode } = fields;
     return {
       name: validateName(name),
-      seeds: validateSeeds(seeds, seedInput),
+      seeds: mode === SNIFF_MODE ? validateSeeds(seeds, seedInput) : null,
     };
   }
 
@@ -110,13 +118,38 @@ export class RemoteClusterForm extends Component {
 
   getAllFields() {
     const {
-      fields: { name, seeds, skipUnavailable },
+      fields: {
+        name,
+        mode,
+        seeds,
+        nodeConnections,
+        proxyAddress,
+        proxySocketConnections,
+        serverName,
+        skipUnavailable,
+      },
     } = this.state;
+
+    let modeSettings;
+
+    if (mode === PROXY_MODE) {
+      modeSettings = {
+        proxyAddress,
+        proxySocketConnections,
+        serverName,
+      };
+    } else {
+      modeSettings = {
+        seeds,
+        nodeConnections,
+      };
+    }
 
     return {
       name,
-      seeds,
       skipUnavailable,
+      mode,
+      ...modeSettings,
     };
   }
 
@@ -215,10 +248,10 @@ export class RemoteClusterForm extends Component {
     return hasErrors;
   };
 
-  renderSeeds() {
+  renderSniffModeSettings() {
     const {
       areErrorsVisible,
-      fields: { seeds },
+      fields: { seeds, nodeConnections },
       fieldsErrors: { seeds: errorsSeeds },
       localSeedErrors,
     } = this.state;
@@ -231,26 +264,7 @@ export class RemoteClusterForm extends Component {
     const formattedSeeds = seeds.map(seed => ({ label: seed }));
 
     return (
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
-                defaultMessage="Seed nodes for cluster discovery"
-              />
-            </h2>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-            defaultMessage="A list of remote cluster nodes to query for the cluster state.
-              Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
-          />
-        }
-        fullWidth
-      >
+      <>
         <EuiFormRow
           data-test-subj="remoteClusterFormSeedNodesFormRow"
           label={
@@ -261,7 +275,7 @@ export class RemoteClusterForm extends Component {
           }
           helpText={
             <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
+              id="xpack.remoteClusters.remoteClusterForm.fieldSeedsHelpText"
               defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
               values={{
                 transportPort: (
@@ -296,6 +310,152 @@ export class RemoteClusterForm extends Component {
             data-test-subj="remoteClusterFormSeedsInput"
           />
         </EuiFormRow>
+
+        <EuiFormRow
+          data-test-subj="remoteClusterFormNodeConnectionsFormRow"
+          label={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldNodeConnectionsLabel"
+              defaultMessage="Node connections"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldNodeConnectionsHelpText"
+              defaultMessage="The number of gateway nodes to connect to."
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldNumber
+            value={nodeConnections}
+            onChange={e => this.onFieldsChange({ nodeConnections: e.target.value })}
+            fullWidth
+          />
+        </EuiFormRow>
+      </>
+    );
+  }
+
+  renderProxyModeSettings() {
+    const {
+      fields: { proxyAddress, proxySocketConnections, serverName },
+    } = this.state;
+
+    return (
+      <>
+        <EuiFormRow
+          data-test-subj="remoteClusterFormProxyAddressFormRow"
+          label={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressLabel"
+              defaultMessage="Proxy address"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
+              defaultMessage="The address used for all remote connections."
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldText
+            value={proxyAddress}
+            onChange={e => this.onFieldsChange({ proxyAddress: e.target.value })}
+            fullWidth
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+          label={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+              defaultMessage="Socket connections"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+              defaultMessage="The number of socket connections to open per remote cluster."
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldNumber
+            value={proxySocketConnections}
+            onChange={e => this.onFieldsChange({ proxySocketConnections: e.target.value })}
+            fullWidth
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          data-test-subj="remoteClusterFormServerNameFormRow"
+          label={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
+              defaultMessage="Server name"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+              defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldText
+            value={serverName}
+            onChange={e => this.onFieldsChange({ serverName: e.target.value })}
+            fullWidth
+          />
+        </EuiFormRow>
+      </>
+    );
+  }
+
+  renderMode() {
+    const {
+      fields: { mode },
+    } = this.state;
+
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
+                defaultMessage="Connection mode settings"
+              />
+            </h2>
+          </EuiTitle>
+        }
+        description={
+          <>
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
+              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster. There are two potential modes: sniff mode and proxy mode."
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                  defaultMessage="Use proxy mode"
+                />
+              }
+              checked={mode === PROXY_MODE}
+              onChange={e =>
+                this.onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
+              }
+            />
+          </>
+        }
+        fullWidth
+      >
+        {mode === PROXY_MODE ? this.renderProxyModeSettings() : this.renderSniffModeSettings()}
       </EuiDescribedFormGroup>
     );
   }
@@ -662,7 +822,7 @@ export class RemoteClusterForm extends Component {
             </EuiFormRow>
           </EuiDescribedFormGroup>
 
-          {this.renderSeeds()}
+          {this.renderMode()}
 
           {this.renderSkipUnavailable()}
         </EuiForm>
