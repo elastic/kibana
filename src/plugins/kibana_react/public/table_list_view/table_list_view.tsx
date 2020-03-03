@@ -372,7 +372,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   getVisualizationVisibleItems() {
-    return this.state.items.filter(item => item.visible);
+    // stage.beta is to allow Lens visualizations to show until we do a migration on them as well
+    return this.state.items.filter(item => item.visible || item.stage === 'beta');
   }
 
   getItemsToRender() {
