@@ -109,7 +109,9 @@ export const configSchema = schema.object({
         defaultValue: false,
       }),
       sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-      hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })]),
+      hosts: schema.maybe(
+        schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])
+      ),
       preserveHost: schema.boolean({ defaultValue: true }),
       username: schema.maybe(
         schema.conditional(
