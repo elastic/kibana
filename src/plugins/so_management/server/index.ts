@@ -17,28 +17,8 @@
  * under the License.
  */
 
-import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { PluginInitializerContext } from 'src/core/server';
+import { SavedObjectsManagementPlugin } from './plugin';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
-  Pick<SavedObjectTypeRegistry, 'registerType'>> => {
-  const mock = {
-    registerType: jest.fn(),
-    getType: jest.fn(),
-    getAllTypes: jest.fn(),
-    isNamespaceAgnostic: jest.fn(),
-    isHidden: jest.fn(),
-    getIndex: jest.fn(),
-    isImportableAndExportable: jest.fn(),
-  };
-
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.isHidden.mockReturnValue(false);
-  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
-  mock.isImportableAndExportable.mockReturnValue(true);
-
-  return mock;
-};
-
-export const typeRegistryMock = {
-  create: createRegistryMock,
-};
+export const plugin = (context: PluginInitializerContext) =>
+  new SavedObjectsManagementPlugin(context);

@@ -17,28 +17,23 @@
  * under the License.
  */
 
-import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsFindOptions } from 'src/core/server';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
-  Pick<SavedObjectTypeRegistry, 'registerType'>> => {
-  const mock = {
-    registerType: jest.fn(),
-    getType: jest.fn(),
-    getAllTypes: jest.fn(),
-    isNamespaceAgnostic: jest.fn(),
-    isHidden: jest.fn(),
-    getIndex: jest.fn(),
-    isImportableAndExportable: jest.fn(),
-  };
+export const findAll = async (
+  client: SavedObjectsClientContract,
+  findOptions: SavedObjectsFindOptions,
+  page = 1,
+  allObjects: SavedObject[] = []
+): Promise<SavedObject[]> => {
+  const objects = await client.find({
+    ...findOptions,
+    page,
+  });
 
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.isHidden.mockReturnValue(false);
-  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
-  mock.isImportableAndExportable.mockReturnValue(true);
+  allObjects.push(...objects.saved_objects);
+  if (allObjects.length < objects.total) {
+    return findAll(client, findOptions, page + 1, allObjects);
+  }
 
-  return mock;
-};
-
-export const typeRegistryMock = {
-  create: createRegistryMock,
+  return allObjects;
 };

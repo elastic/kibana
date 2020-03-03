@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { SavedObjectsManagement, SavedObjectsManagementDefinition } from './management';
+export { injectMetaAttributes } from './inject_meta_attributes';
+export { findAll } from './find_all';
+export { findRelationships } from './find_relationships';

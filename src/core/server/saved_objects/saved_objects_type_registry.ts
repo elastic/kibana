@@ -27,7 +27,12 @@ import { SavedObjectsType } from './types';
  */
 export type ISavedObjectTypeRegistry = Pick<
   SavedObjectTypeRegistry,
-  'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'
+  | 'getType'
+  | 'getAllTypes'
+  | 'getIndex'
+  | 'isNamespaceAgnostic'
+  | 'isHidden'
+  | 'isImportableAndExportable'
 >;
 
 /**

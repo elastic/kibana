@@ -17,13 +17,22 @@
  * under the License.
  */
 
-import { registerFind } from './saved_objects/find';
-import { registerRelationships } from './saved_objects/relationships';
-import { registerScrollForExportRoute, registerScrollForCountRoute } from './saved_objects/scroll';
+import { HttpServiceSetup } from 'src/core/server';
+import { SavedObjectsManagement } from '../services';
+import { registerFindRoute } from './find';
+import { registerScrollForCountRoute } from './scroll_count';
+import { registerScrollForExportRoute } from './scroll_export';
+import { registerRelationshipsRoute } from './relationships';
 
-export function managementApi(server) {
-  registerRelationships(server);
-  registerFind(server);
-  registerScrollForExportRoute(server);
-  registerScrollForCountRoute(server);
+interface RegisterRouteOptions {
+  http: HttpServiceSetup;
+  managementServicePromise: Promise<SavedObjectsManagement>;
+}
+
+export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
+  const router = http.createRouter();
+  registerFindRoute(router, managementServicePromise);
+  registerScrollForCountRoute(router);
+  registerScrollForExportRoute(router);
+  registerRelationshipsRoute(router, managementServicePromise);
 }
