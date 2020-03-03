@@ -37,7 +37,7 @@ test('creates a link with global time range set up', async () => {
     timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
   });
   expect(url).toMatchInlineSnapshot(
-    `"xyz/app/kibana#/dashboard?_a=()&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
+    `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
   );
 });
 
@@ -61,6 +61,6 @@ test('creates a link with filters, time range and query to a saved object', asyn
     query: { query: 'bye', language: 'kuery' },
   });
   expect(url).toMatchInlineSnapshot(
-    `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(timeRange:(from:now-15m,mode:relative,to:now))"`
+    `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(time:(from:now-15m,mode:relative,to:now))"`
   );
 });

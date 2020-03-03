@@ -60,7 +60,7 @@ export const createDirectAccessDashboardLinkGenerator = (
     return setStateToKbnUrl(
       GLOBAL_STATE_STORAGE_KEY,
       {
-        timeRange: state.timeRange,
+        time: state.timeRange,
       },
       { useHash },
       appStateUrl
