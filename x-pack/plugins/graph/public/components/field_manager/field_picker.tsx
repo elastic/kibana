@@ -9,7 +9,7 @@ import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
-import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;

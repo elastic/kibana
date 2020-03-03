@@ -10,7 +10,7 @@ import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform');
 

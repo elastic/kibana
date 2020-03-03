@@ -30,7 +30,7 @@ import {
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;

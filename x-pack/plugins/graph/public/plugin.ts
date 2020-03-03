@@ -6,8 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { Plugin } from 'src/core/public';
+import { AppMountParameters, Plugin } from 'src/core/public';
 import { PluginInitializerContext } from 'kibana/public';
+
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { initAngularBootstrap } from '../../../../src/plugins/kibana_legacy/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
 import { toggleNavLink } from './services/toggle_nav_link';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
@@ -15,19 +21,32 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { ConfigSchema } from '../config';
 
+// import './index.scss';
+
 export interface GraphPluginSetupDependencies {
+  graph: GraphSetup;
   licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
-export class GraphPlugin implements Plugin<{ config: Readonly<ConfigSchema> }, void> {
+export interface GraphPluginStartDependencies {
+  navigation: NavigationStart;
+  data: DataPublicPluginStart;
+}
+
+export class GraphPlugin
+  implements Plugin<{ config: Readonly<ConfigSchema> }, void, {}, GraphPluginStartDependencies> {
   private licensing: LicensingPluginSetup | null = null;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  setup(core: CoreSetup, { licensing, home }: GraphPluginSetupDependencies) {
+  setup(
+    core: CoreSetup<GraphPluginStartDependencies>,
+    { licensing, home }: GraphPluginSetupDependencies
+  ) {
     this.licensing = licensing;
 
     if (home) {
@@ -44,6 +63,44 @@ export class GraphPlugin implements Plugin<{ config: Readonly<ConfigSchema> }, v
       });
     }
 
+    const config = this.initializerContext.config.get();
+
+    initAngularBootstrap();
+    core.application.register({
+      id: 'graph',
+      title: 'Graph',
+      order: 9000,
+      appRoute: '/app/graph',
+      icon: 'plugins/graph/icon.png',
+      euiIconType: 'graphApp',
+      category: DEFAULT_APP_CATEGORIES.analyze,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const { renderApp } = await import('./application');
+        return renderApp({
+          ...params,
+          pluginInitializerContext: this.initializerContext,
+          licensing,
+          core: coreStart,
+          navigation: pluginsStart.navigation,
+          npData: pluginsStart.data,
+          savedObjectsClient: coreStart.savedObjects.client,
+          addBasePath: core.http.basePath.prepend,
+          getBasePath: core.http.basePath.get,
+          canEditDrillDownUrls: config.canEditDrillDownUrls,
+          graphSavePolicy: config.savePolicy,
+          storage: new Storage(window.localStorage),
+          capabilities: coreStart.application.capabilities.graph,
+          coreStart,
+          chrome: coreStart.chrome,
+          config: coreStart.uiSettings,
+          toastNotifications: coreStart.notifications.toasts,
+          indexPatterns: pluginsStart.data!.indexPatterns,
+          overlays: coreStart.overlays,
+        });
+      },
+    });
+
     return {
       /**
        * The configuration is temporarily exposed to allow the legacy graph plugin to consume
@@ -51,7 +108,7 @@ export class GraphPlugin implements Plugin<{ config: Readonly<ConfigSchema> }, v
        * detail.
        * @deprecated
        */
-      config: this.initializerContext.config.get(),
+      config,
     };
   }
 

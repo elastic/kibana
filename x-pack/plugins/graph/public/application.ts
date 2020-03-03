@@ -9,34 +9,33 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-
+import 'angular-ui-ace';
+import 'angular-sanitize';
 // type imports
 import {
   AppMountContext,
   ChromeStart,
-  LegacyCoreStart,
+  CoreStart,
+  PluginInitializerContext,
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
-import { configureAppAngularModule } from './legacy_imports';
-// @ts-ignore
-import { initGraphApp } from './app';
 import {
-  Plugin as DataPlugin,
-  IndexPatternsContract,
-} from '../../../../../src/plugins/data/public';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
-import { checkLicense } from '../../../../plugins/graph/common/check_license';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
-import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import {
+  addAppRedirectMessageToUrl,
+  configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../../../../src/plugins/kibana_legacy/public';
-import { addAppRedirectMessageToUrl } from '../../../../../src/plugins/kibana_legacy/public';
+} from '../../../../src/plugins/kibana_legacy/public';
+import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+// @ts-ignore
+import { initGraphApp } from './app';
+import { LicensingPluginSetup } from '../../licensing/public';
+import { checkLicense } from '../common/check_license';
+import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -45,6 +44,8 @@ import { addAppRedirectMessageToUrl } from '../../../../../src/plugins/kibana_le
  * itself changes
  */
 export interface GraphDependencies {
+  pluginInitializerContext: PluginInitializerContext;
+  core: CoreStart;
   element: HTMLElement;
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
@@ -67,7 +68,11 @@ export interface GraphDependencies {
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
   const graphAngularModule = createLocalAngularModule(deps.navigation);
-  configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart, true);
+  configureAppAngularModule(
+    graphAngularModule,
+    { core: deps.core, env: deps.pluginInitializerContext.env },
+    true
+  );
 
   const licenseSubscription = deps.licensing.license$.subscribe(license => {
     const info = checkLicense(license);

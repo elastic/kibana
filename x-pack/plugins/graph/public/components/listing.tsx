@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 import { CoreStart, ApplicationStart } from 'kibana/public';
-import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
+import { TableListView } from '../../../../../src/plugins/kibana_react/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 export interface ListingProps {

@@ -14,13 +14,13 @@ type XpackNpSetupDeps = typeof npSetup.plugins & {
   graph: GraphSetup;
 };
 
-(async () => {
-  const instance = new GraphPlugin();
-  instance.setup(npSetup.core, {
-    ...(npSetup.plugins as XpackNpSetupDeps),
-  });
-  instance.start(npStart.core, {
-    npData: npStart.plugins.data,
-    navigation: npStart.plugins.navigation,
-  });
-})();
+// (async () => {
+//   const instance = new GraphPlugin();
+//   instance.setup(npSetup.core, {
+//     ...(npSetup.plugins as XpackNpSetupDeps),
+//   });
+//   instance.start(npStart.core, {
+//     npData: npStart.plugins.data,
+//     navigation: npStart.plugins.navigation,
+//   });
+// })();

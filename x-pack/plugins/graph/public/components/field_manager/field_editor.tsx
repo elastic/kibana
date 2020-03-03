@@ -30,7 +30,7 @@ import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
-import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';

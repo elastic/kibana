@@ -6,7 +6,7 @@
 
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
-import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface WorkspaceNode {
   x: number;

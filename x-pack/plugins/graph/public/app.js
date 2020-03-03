@@ -6,13 +6,12 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import 'ace';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { showSaveModal } from '../../../../src/plugins/saved_objects/public';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -107,7 +106,7 @@ export function initGraphApp(angularModule, deps) {
       .when('/home', {
         template: listingTemplate,
         badge: getReadonlyBadge,
-        controller($location, $scope) {
+        controller: function($location, $scope) {
           $scope.listingLimit = config.get('savedObjects:listingLimit');
           $scope.create = () => {
             $location.url(getNewPath());
@@ -132,20 +131,14 @@ export function initGraphApp(angularModule, deps) {
         template: appTemplate,
         badge: getReadonlyBadge,
         resolve: {
-          savedWorkspace: function($rootScope, $route, $location) {
+          savedWorkspace: function($route) {
             return $route.current.params.id
-              ? savedWorkspaceLoader.get($route.current.params.id).catch(function(e) {
-                  toastNotifications.addError(e, {
-                    title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
-                      defaultMessage: "Couldn't load graph with ID",
-                    }),
-                  });
-                  $rootScope.$eval(() => {
-                    $location.path('/home');
-                    $location.replace();
-                  });
-                  // return promise that never returns to prevent the controller from loading
-                  return new Promise();
+              ? savedWorkspaceLoader.get($route.current.params.id).catch(function() {
+                  toastNotifications.addDanger(
+                    i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
+                      defaultMessage: 'Missing workspace',
+                    })
+                  );
                 })
               : savedWorkspaceLoader.get();
           },

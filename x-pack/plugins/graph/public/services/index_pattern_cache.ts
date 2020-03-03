@@ -5,7 +5,7 @@
  */
 
 import { IndexPatternProvider } from '../types';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export function createCachedIndexPatternProvider(
   indexPatternGetter: (id: string) => Promise<IndexPattern>

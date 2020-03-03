@@ -18,7 +18,7 @@ import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
 import { GraphTitle } from './graph_title';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export interface GraphAppProps extends SearchBarProps {
   coreStart: CoreStart;

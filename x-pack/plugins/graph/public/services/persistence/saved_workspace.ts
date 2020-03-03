@@ -9,7 +9,7 @@ import {
   SavedObject,
   createSavedObjectClass,
   SavedObjectKibanaServices,
-} from '../../../../../../../src/plugins/saved_objects/public';
+} from '../../../../../../src/plugins/saved_objects/public';
 
 export interface SavedWorkspace extends SavedObject {
   wsState?: string;

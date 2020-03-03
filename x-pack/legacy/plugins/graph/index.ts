@@ -20,14 +20,14 @@ export const graph: LegacyPluginInitializer = kibana => {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      app: {
-        title: 'Graph',
-        order: 9000,
-        icon: 'plugins/graph/icon.png',
-        euiIconType: 'graphApp',
-        main: 'plugins/graph/index',
-        category: DEFAULT_APP_CATEGORIES.analyze,
-      },
+      // app: {
+      //   title: 'Graph',
+      //   order: 9000,
+      //   icon: 'plugins/graph/icon.png',
+      //   euiIconType: 'graphApp',
+      //   main: 'plugins/graph/index',
+      //   category: DEFAULT_APP_CATEGORIES.analyze,
+      // },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       migrations,

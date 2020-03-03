@@ -27,7 +27,7 @@ import {
 import {
   IndexPattern,
   indexPatterns as indexPatternsUtils,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,

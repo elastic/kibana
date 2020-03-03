@@ -6,10 +6,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { takeEvery, select } from 'redux-saga/effects';
+import { KibanaParsedUrl } from '../../../../../src/legacy/ui/public/url/kibana_parsed_url';
 import { GraphState, GraphStoreDependencies } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';

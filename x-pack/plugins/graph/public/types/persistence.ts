@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from '../../../../../../src/plugins/saved_objects/public';
+import { SavedObject } from '../../../../../src/plugins/saved_objects/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 

@@ -7,10 +7,7 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectSaveModal,
-  OnSaveProps,
-} from '../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectSaveModal, OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 
 import { GraphSavePolicy } from '../types/config';
 
@@ -49,7 +46,6 @@ export function SaveModal({
       objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
         defaultMessage: 'graph',
       })}
-      showDescription={false}
       options={
         <>
           <EuiFormRow

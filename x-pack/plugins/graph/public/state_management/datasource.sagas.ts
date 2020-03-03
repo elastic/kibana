@@ -17,7 +17,7 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

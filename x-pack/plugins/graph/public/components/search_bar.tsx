@@ -18,14 +18,14 @@ import {
   IndexpatternDatasource,
 } from '../state_management';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   IndexPattern,
   QueryStringInput,
   IDataPluginServices,
   Query,
   esKuery,
-} from '../../../../../../src/plugins/data/public';
+} from '../../../../../src/plugins/data/public';
 
 export interface OuterSearchBarProps {
   isLoading: boolean;
