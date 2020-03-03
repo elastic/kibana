@@ -51,7 +51,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should not allow to enroll an agent with a invalid enrollment', async () => {
-      const { body: apiResponse } = await supertest
+      await supertest
         .post(`/api/ingest_manager/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', 'ApiKey NOTAVALIDKEY')
@@ -63,8 +63,6 @@ export default function(providerContext: FtrProviderContext) {
           },
         })
         .expect(401);
-
-      expect(apiResponse.message).to.match(/Invalid Enrollment API Key/);
     });
 
     it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
