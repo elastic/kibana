@@ -24,7 +24,7 @@ interface UserActionItemProps {
   userName: string;
 }
 
-const UserAction = styled(EuiFlexGroup)`
+const UserActionItemContainer = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     & {
       background-image: linear-gradient(
@@ -72,7 +72,7 @@ export const UserActionItem = ({
   onEdit,
   userName,
 }: UserActionItemProps) => (
-  <UserAction gutterSize={'none'}>
+  <UserActionItemContainer gutterSize={'none'}>
     <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
       <UserActionAvatar name={fullName ?? userName} />
     </EuiFlexItem>
@@ -93,5 +93,5 @@ export const UserActionItem = ({
         </EuiPanel>
       )}
     </EuiFlexItem>
-  </UserAction>
+  </UserActionItemContainer>
 );
