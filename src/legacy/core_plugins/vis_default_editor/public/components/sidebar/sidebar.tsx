@@ -51,7 +51,7 @@ function DefaultEditorSideBar({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
-  const metricSchemas = getSchemasByGroup(vis.type.schemas.all, AggGroupNames.Metrics).map(
+  const metricSchemas = getSchemasByGroup(vis.type.schemas.all || [], AggGroupNames.Metrics).map(
     s => s.name
   );
   const metricAggs = useMemo(

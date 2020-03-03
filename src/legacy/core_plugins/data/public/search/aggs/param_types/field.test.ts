@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
@@ -109,10 +108,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterFieldTypes: (aggConfig: IMetricAggConfig) =>
-          get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
-            ? '*'
-            : KBN_FIELD_TYPES.NUMBER,
+        filterFieldTypes: '*',
       });
       const fields = aggParam.getAvailableFields(agg);
 

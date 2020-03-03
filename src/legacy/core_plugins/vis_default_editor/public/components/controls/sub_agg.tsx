@@ -62,6 +62,7 @@ function SubAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={agg.params.customMetric}
+        allowedAggs={aggParam.allowedAggs}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}

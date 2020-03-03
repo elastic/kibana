@@ -59,6 +59,7 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   setValidity: (isValid: boolean) => void;
   setTouched: (isTouched: boolean) => void;
   schemas: Schema[];
+  allowedAggs?: string[];
 }
 
 function DefaultEditorAggParams({
@@ -78,12 +79,12 @@ function DefaultEditorAggParams({
   setTouched,
   setValidity,
   schemas,
+  allowedAggs,
 }: DefaultEditorAggParamsProps) {
-  const groupedAggTypeOptions = useMemo(() => getAggTypeOptions(agg, indexPattern, groupName), [
-    agg,
-    indexPattern,
-    groupName,
-  ]);
+  const groupedAggTypeOptions = useMemo(
+    () => getAggTypeOptions(agg, indexPattern, groupName, allowedAggs || []),
+    [agg, indexPattern, groupName, allowedAggs]
+  );
   const { title } = getSchemaByName(schemas, agg.schema);
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {

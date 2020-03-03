@@ -29,6 +29,10 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
   constructor(config: Record<string, any>) {
     super(config);
 
+    if (config.allowedAggs) {
+      this.allowedAggs = config.allowedAggs;
+    }
+
     if (!config.write) {
       this.write = (aggConfig: TAggConfig, output: Record<string, any>) => {
         if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {

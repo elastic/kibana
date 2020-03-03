@@ -65,6 +65,7 @@ function OrderAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={value as IAggConfig}
+        allowedAggs={aggParam.allowedAggs}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}

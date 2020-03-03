@@ -26,7 +26,6 @@ import {
 } from '../../visualizations/public/';
 import { PanelsContainer, Panel } from '../../../../plugins/kibana_react/public';
 
-import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';

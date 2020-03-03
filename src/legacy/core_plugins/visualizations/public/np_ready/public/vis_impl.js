@@ -69,15 +69,12 @@ class VisImpl extends EventEmitter {
     // but whatever). Also if a schema.name is already set then don't
     // set anything.
     const newConfigs = [...configStates];
-    _(schemas)
-      .filter(schema => {
-        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
-      })
-      .each(schema => {
-        if (!configStates.find(agg => agg.schema && agg.schema === schema.name)) {
-          const defaults = schema.defaults.slice(0, schema.max);
-          defaults.forEach(d => newConfigs.push(d));
-        }
+    schemas
+      .filter(schema => Array.isArray(schema.defaults) && schema.defaults.length > 0)
+      .filter(schema => !configStates.find(agg => agg.schema && agg.schema === schema.name))
+      .forEach(schema => {
+        const defaults = schema.defaults.slice(0, schema.max);
+        defaults.forEach(d => newConfigs.push(d));
       });
     return newConfigs;
   }
@@ -104,7 +101,7 @@ class VisImpl extends EventEmitter {
 
     if (state.aggs || !this.aggs) {
       let configStates = state.aggs ? state.aggs.aggs || state.aggs : [];
-      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all);
+      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all || []);
       this.aggs = createAggConfigs(this.indexPattern, configStates);
     }
   }

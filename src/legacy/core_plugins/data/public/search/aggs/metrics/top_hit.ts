@@ -63,10 +63,7 @@ export const topHitMetricAgg = new MetricAggType({
       name: 'field',
       type: 'field',
       onlyAggregatable: false,
-      filterFieldTypes: (aggConfig: IMetricAggConfig) =>
-        _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
-          ? '*'
-          : KBN_FIELD_TYPES.NUMBER,
+      filterFieldTypes: '*',
       write(agg, output) {
         const field = agg.getParam('field');
         output.params = {};
@@ -133,7 +130,7 @@ export const topHitMetricAgg = new MetricAggType({
             defaultMessage: 'Concatenate',
           }),
           isCompatible(aggConfig: IMetricAggConfig) {
-            return _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false);
+            return _.get(aggConfig.params, 'field.filterFieldTypes', '*') === '*';
           },
           disabled: true,
           value: 'concat',

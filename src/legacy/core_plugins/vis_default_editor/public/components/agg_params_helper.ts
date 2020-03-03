@@ -33,6 +33,7 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
+  propFilter,
 } from '../legacy_imports';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
@@ -82,9 +83,15 @@ function getAggParamsToRender({
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(
-        agg
-      );
+      let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);
+      // should be refactored in the future to provide a more general way
+      // for visualization to override some agg config settings
+      if (agg.type.name === 'top_hits') {
+        const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
+        if (!allowStrings) {
+          availableFields = availableFields.filter(field => field.type === 'number');
+        }
+      }
       fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
 
@@ -126,12 +133,19 @@ function getAggParamsToRender({
   return params;
 }
 
+const filterByName = propFilter('name');
+
 function getAggTypeOptions(
   agg: IAggConfig,
   indexPattern: IndexPattern,
-  groupName: string
+  groupName: string,
+  allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {
-  const aggTypeOptions = aggTypeFilters.filter((aggTypes as any)[groupName], indexPattern, agg);
+  const aggTypeOptions = aggTypeFilters
+    .filter((aggTypes as any)[groupName], indexPattern, agg)
+    .filter(aggType => {
+      return filterByName([aggType], allowedAggs).length !== 0;
+    });
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
 
