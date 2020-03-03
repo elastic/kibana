@@ -30,5 +30,13 @@ describe('SiemClientFactory', () => {
 
       expect(mockClient).toHaveBeenCalledWith('default', expect.anything());
     });
+
+    it('cannot call create without calling setup first', () => {
+      const factory = new SiemClientFactory();
+      const mockRequest = httpServerMock.createKibanaRequest();
+      expect(() => factory.create(mockRequest)).toThrow(
+        'Cannot create SiemClient as config is not present. Did you forget to call setup()?'
+      );
+    });
   });
 });

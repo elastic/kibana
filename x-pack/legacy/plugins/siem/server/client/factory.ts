@@ -15,8 +15,8 @@ interface SetupDependencies {
 }
 
 export class SiemClientFactory {
-  private getSpaceId!: SetupDependencies['getSpaceId'];
-  private config!: SetupDependencies['config'];
+  private getSpaceId?: SetupDependencies['getSpaceId'];
+  private config?: SetupDependencies['config'];
 
   public setup({ getSpaceId, config }: SetupDependencies) {
     this.getSpaceId = getSpaceId;
@@ -24,6 +24,12 @@ export class SiemClientFactory {
   }
 
   public create(request: KibanaRequest): SiemClient {
+    if (this.config == null) {
+      throw new Error(
+        'Cannot create SiemClient as config is not present. Did you forget to call setup()?'
+      );
+    }
+
     const spaceId = this.getSpaceId?.(request) ?? 'default';
     return new SiemClient(spaceId, this.config);
   }
