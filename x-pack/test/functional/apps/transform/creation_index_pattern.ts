@@ -57,6 +57,28 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'category.keyword': {
+                terms: {
+                  field: 'category.keyword',
+                },
+              },
+              order_date: {
+                date_histogram: {
+                  field: 'order_date',
+                  calendar_interval: '1m',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.avg': {
+                avg: {
+                  field: 'products.base_price',
+                },
+              },
+            },
+          },
           pivotPreview: {
             column: 0,
             values: [`Men's Accessories`],
@@ -67,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            columns: 6,
+            columns: 45,
             rows: 5,
           },
         },
@@ -150,6 +172,13 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced pivot editor switch', async () => {
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+        });
+
+        it('displays the advanced configuration', async () => {
+          await transform.wizard.enabledAdvancedPivotEditor();
+          await transform.wizard.assertAdvancedPivotEditorContent(
+            testData.expected.pivotAdvancedEditorValue
+          );
         });
 
         it('loads the pivot preview', async () => {
