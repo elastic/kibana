@@ -280,6 +280,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     .slice(0, pageSize);
   const hilight = localState.nameFilter.toLowerCase();
 
+  const filterByTypeLabel = i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
+    defaultMessage: 'Filter by type',
+  });
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -366,18 +370,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     }));
                   }}
                 >
-                  <FormattedMessage
-                    id="xpack.lens.indexPatterns.toggleFiltersPopover"
-                    defaultMessage="Filter by type"
-                  />
+                  {filterByTypeLabel}
                 </EuiFacetButton>
               }
             >
-              <EuiPopoverTitle>
-                {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
-                  defaultMessage: 'Filter by type',
-                })}
-              </EuiPopoverTitle>
+              <EuiPopoverTitle>{filterByTypeLabel}</EuiPopoverTitle>
               <FixedEuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
@@ -511,8 +508,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         <li>
                           {i18n.translate('xpack.lens.indexPatterns.noFields.fieldFilterBullet', {
                             defaultMessage:
-                              'Using Filter by type {arrow} to show fields without data',
-                            values: { arrow: '↑' },
+                              'Using {filterByTypeLabel} {arrow} to show fields without data',
+                            values: { filterByTypeLabel, arrow: '↑' },
                           })}
                         </li>
                       </ul>
