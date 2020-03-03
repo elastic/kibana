@@ -6,7 +6,6 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { createFilterSchema, updateFilterSchema } from './schemas/filters_schema';
@@ -44,7 +43,7 @@ function deleteFilter(context: RequestHandlerContext, filterId: string) {
   return mgr.deleteFilter(filterId);
 }
 
-export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
@@ -60,7 +59,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
       path: '/api/ml/filters',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getAllFilters(context);
 
@@ -90,7 +89,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
         params: schema.object({ filterId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getFilter(context, request.params.filterId);
         return response.ok({
@@ -119,7 +118,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
         body: schema.object(createFilterSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const body = request.body;
         const resp = await newFilter(context, body);
@@ -151,7 +150,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
         body: schema.object(updateFilterSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { filterId } = request.params;
         const body = request.body;
@@ -182,7 +181,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
         params: schema.object({ filterId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { filterId } = request.params;
         const resp = await deleteFilter(context, filterId);
@@ -212,7 +211,7 @@ export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitializ
       path: '/api/ml/filters/_stats',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getAllFilterStats(context);
 
