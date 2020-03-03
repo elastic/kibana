@@ -106,7 +106,6 @@ export const AlertEdit = ({
       return newAlert;
     } catch (errorRes) {
       setServerError(errorRes);
-      return undefined;
     }
   }
 

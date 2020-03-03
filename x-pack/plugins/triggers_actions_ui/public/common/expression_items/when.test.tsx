@@ -27,7 +27,7 @@ describe('when expression', () => {
           },
           Object {
             "text": "average()",
-            "value": "average",
+            "value": "avg",
           },
           Object {
             "text": "sum()",
@@ -96,10 +96,10 @@ describe('when expression', () => {
   it('renders when popover title', () => {
     const onChangeSelectedAggType = jest.fn();
     const wrapper = shallow(
-      <WhenExpression aggType={'average'} onChangeSelectedAggType={onChangeSelectedAggType} />
+      <WhenExpression aggType={'avg'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
     wrapper.simulate('click');
-    expect(wrapper.find('[value="average"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[value="avg"]').length > 0).toBeTruthy();
     expect(wrapper.contains(<EuiPopoverTitle>when</EuiPopoverTitle>)).toBeTruthy();
   });
 });

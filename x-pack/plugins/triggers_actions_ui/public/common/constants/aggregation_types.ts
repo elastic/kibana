@@ -8,7 +8,7 @@ import { AggregationType } from '../types';
 
 export enum AGGREGATION_TYPES {
   COUNT = 'count',
-  AVERAGE = 'average',
+  AVERAGE = 'avg',
   SUM = 'sum',
   MIN = 'min',
   MAX = 'max',
@@ -21,7 +21,7 @@ export const builtInAggregationTypes: { [key: string]: AggregationType } = {
     value: AGGREGATION_TYPES.COUNT,
     validNormalizedTypes: [],
   },
-  average: {
+  avg: {
     text: 'average()',
     fieldRequired: true,
     validNormalizedTypes: ['number'],

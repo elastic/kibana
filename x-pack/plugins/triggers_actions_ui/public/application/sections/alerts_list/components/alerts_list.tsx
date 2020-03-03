@@ -227,8 +227,8 @@ export const AlertsList: React.FunctionComponent = () => {
               render: (item: AlertTableItem) => {
                 return (
                   <EuiLink
+                    data-test-subj="alertsTableCell-editLink"
                     color="primary"
-                    data-test-subj={`alertEditLink-${item.id}`}
                     onClick={() => editItem(item)}
                   >
                     <FormattedMessage
