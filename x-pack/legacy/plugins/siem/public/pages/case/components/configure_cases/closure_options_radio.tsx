@@ -28,14 +28,13 @@ const radios = [
 ];
 
 const ClosureOptionsRadioComponent: React.FC = () => {
-  const [selectedClosure, selectClosure] = useState(defaultRadio);
-  const onChange = useCallback(option => selectClosure(option), [selectedClosure]);
+  const [selectedClosure, setSelectedClosure] = useState(defaultRadio);
 
   return (
     <EuiRadioGroup
       options={radios}
       idSelected={selectedClosure}
-      onChange={onChange}
+      onChange={setSelectedClosure}
       name="closure_options"
     />
   );

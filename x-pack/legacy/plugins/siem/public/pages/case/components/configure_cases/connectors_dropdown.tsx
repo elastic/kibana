@@ -40,15 +40,14 @@ const connectors: Array<EuiSuperSelectOption<string>> = [
 ];
 
 const ConnectorsDropdownComponent: React.FC = () => {
-  const [selectedConnector, selectConnector] = useState(connectors[0].value);
-  const onChange = useCallback(connector => selectConnector(connector), [selectedConnector]);
+  const [selectedConnector, setSelectedConnector] = useState(connectors[0].value);
 
   return (
     <EuiSuperSelect
       options={connectors}
       valueOfSelected={selectedConnector}
       fullWidth
-      onChange={onChange}
+      onChange={setSelectedConnector}
     />
   );
 };

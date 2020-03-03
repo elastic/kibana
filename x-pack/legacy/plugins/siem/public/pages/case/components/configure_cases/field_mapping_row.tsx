@@ -49,8 +49,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyFie
     [thirdPartyFields]
   );
 
-  const [selectedThirdParty, selectThirdParty] = useState(thirdPartyOptions[0].value);
-  const onThirdPartyChange = useCallback(option => selectThirdParty(option), [selectedThirdParty]);
+  const [selectedThirdParty, setSelectedThirdParty] = useState(thirdPartyOptions[0].value);
 
   return (
     <EuiFlexGroup alignItems="center">
@@ -68,7 +67,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyFie
         <EuiSuperSelect
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
-          onChange={onThirdPartyChange}
+          onChange={setSelectedThirdParty}
         />
       </EuiFlexItem>
       <EuiFlexItem>
