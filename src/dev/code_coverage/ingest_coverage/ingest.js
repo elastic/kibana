@@ -21,49 +21,65 @@ const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { green } from './utils'
+import { fromNullable } from './either';
+import { always } from './utils'
+
 const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
-
 export const ingest = log => async body => {
-  const  index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
+  const index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
 
-  try {
-    await client.index({ index, body });
+  if (process.env.NODE_ENV === 'integration_test') {
+    log.debug('### Just Logging, not actually sending')
+    logSuccess(log, index, body);
+  } else {
+    try {
+      await client.index({ index, body });
+      logSuccess(log, index, body);
+    } catch (e) {
+      throw createFailError(errMsg(index, body, e));
+    }
+  }
 
-    log.verbose(`
+}
+function logSuccess(log, index, body) {
+  log.verbose(`
 ### Sent:
 ### ES HOST (redacted): ${redacted}
 ### Index: ${green(index)}
 ${pretty(body)}
 `);
 
-    const {staticSiteUrl} = body;
-    log.debug(`
+  const {staticSiteUrl} = body;
+
+  log.debug(`
 ### Sent:
 ### Index: ${green(index)}
 ### staticSiteUrl: ${staticSiteUrl}
 `);
+}
+function errMsg(index, body, e) {
+  const orig = fromNullable(e.body).fold(always(''), () => `### Orig Err:\n${pretty(e.body.error)}`);
 
-  } catch (e) {
-    const red = color('red');
-    const err = `
+  const red = color('red');
+
+  return `
 ### ES HOST (redacted): \n\t${red(redacted)}
 ### INDEX: \n\t${red(index)}
 ### Partial orig err stack: \n\t${partial(e.stack)}
 ### Item BODY:\n${pretty(body)}
-### Orig Err:\n${pretty(e.body.error)}
+${orig}
 
 ### Troubleshooting Hint:
 ${red('Perhaps the coverage data was not merged properly?\n')}
 `;
 
-    throw createFailError(err);
-  }
 }
+
 function partial(x) {
   return x
     .split('\n')

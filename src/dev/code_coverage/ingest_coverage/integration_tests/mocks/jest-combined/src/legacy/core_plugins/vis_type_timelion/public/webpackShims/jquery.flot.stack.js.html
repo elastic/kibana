@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/legacy/core_plugins/vis_type_timelion/public/webpackShims/jquery.flot.stack.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../../../index.html">All files</a> / <a href="index.html">src/legacy/core_plugins/vis_type_timelion/public/webpackShims</a> jquery.flot.stack.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/87</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/60</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/4</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/85</span>
+      </div>
+    </div>
+    <p class="quiet">
+      Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+    </p>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/* Flot plugin for stacking data sets rather than overlaying them.
+&nbsp;
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Licensed under the MIT license.
+&nbsp;
+The plugin assumes the data is sorted on x (or y if stacking horizontally).
+For line charts, it is assumed that if a line has an undefined gap (from a
+null point), then the line above it should have the same gap - insert zeros
+instead of "null" if you want another behaviour. This also holds for the start
+and end of the chart. Note that stacking a mix of positive and negative values
+in most instances doesn't make sense (so it looks weird).
+&nbsp;
+Two or more series are stacked when their "stack" attribute is set to the same
+key (which can be any number or string or just "true"). To specify the default
+stack, you can set the stack option like this:
+&nbsp;
+	series: {
+		stack: null/false, true, or a key (number/string)
+	}
+&nbsp;
+You can also specify it for a single series, like this:
+&nbsp;
+	$.plot( $("#placeholder"), [{
+		data: [ ... ],
+		stack: true
+	}])
+&nbsp;
+The stacking order is determined by the order of the data series in the array
+(later series end up on top of the previous).
+&nbsp;
+Internally, the plugin modifies the datapoints in each series, adding an
+offset to the y value. For line series, extra data points are inserted through
+interpolation. If there's a second y value, it's also adjusted (e.g for bar
+charts or filled areas).
+&nbsp;
+*/
+&nbsp;
+<span class="cstat-no" title="statement not covered" >(<span class="fstat-no" title="function not covered" >fu</span>nction ($) {</span>
+    var options = <span class="cstat-no" title="statement not covered" >{</span>
+        series: { stack: null } // or number/string
+    };
+    
+    function <span class="fstat-no" title="function not covered" >init(</span>plot) {
+        function <span class="fstat-no" title="function not covered" >findMatchingSeries(</span>s, allseries) {
+            var res = <span class="cstat-no" title="statement not covered" >null;</span>
+<span class="cstat-no" title="statement not covered" >            for (var i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; allseries.length; ++i) {</span>
+<span class="cstat-no" title="statement not covered" >                if (s == allseries[i])</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                
+<span class="cstat-no" title="statement not covered" >                if (allseries[i].stack == s.stack)</span>
+<span class="cstat-no" title="statement not covered" >                    res = allseries[i];</span>
+            }
+            
+<span class="cstat-no" title="statement not covered" >            return res;</span>
+        }
+        
+        function <span class="fstat-no" title="function not covered" >stackData(</span>plot, s, datapoints) {
+<span class="cstat-no" title="statement not covered" >            if (s.stack == null || s.stack === false)</span>
+<span class="cstat-no" title="statement not covered" >                return;</span>
+&nbsp;
+            var other = <span class="cstat-no" title="statement not covered" >findMatchingSeries(s, plot.getData());</span>
+<span class="cstat-no" title="statement not covered" >            if (!other)</span>
+<span class="cstat-no" title="statement not covered" >                return;</span>
+&nbsp;
+            var ps = <span class="cstat-no" title="statement not covered" >datapoints.pointsize,</span>
+                points = <span class="cstat-no" title="statement not covered" >datapoints.points,</span>
+                otherps = <span class="cstat-no" title="statement not covered" >other.datapoints.pointsize,</span>
+                otherpoints = <span class="cstat-no" title="statement not covered" >other.datapoints.points,</span>
+                newpoints = <span class="cstat-no" title="statement not covered" >[],</span>
+                px, py, intery, qx, qy, bottom,
+                withlines = <span class="cstat-no" title="statement not covered" >s.lines.show,</span>
+                horizontal = <span class="cstat-no" title="statement not covered" >s.bars.horizontal,</span>
+                withbottom = <span class="cstat-no" title="statement not covered" >ps &gt; 2 &amp;&amp; (horizontal ? datapoints.format[2].x : datapoints.format[2].y),</span>
+                withsteps = <span class="cstat-no" title="statement not covered" >withlines &amp;&amp; s.lines.steps,</span>
+                fromgap = <span class="cstat-no" title="statement not covered" >true,</span>
+                keyOffset = <span class="cstat-no" title="statement not covered" >horizontal ? 1 : 0,</span>
+                accumulateOffset = <span class="cstat-no" title="statement not covered" >horizontal ? 0 : 1,</span>
+                i = <span class="cstat-no" title="statement not covered" >0,</span> j = <span class="cstat-no" title="statement not covered" >0,</span> l, m;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            while (true) {</span>
+<span class="cstat-no" title="statement not covered" >                if (i &gt;= points.length)</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                l = newpoints.length;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                if (points[i] == null) {</span>
+                    // copy gaps
+<span class="cstat-no" title="statement not covered" >                    for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                        newpoints.push(points[i + m]);</span>
+<span class="cstat-no" title="statement not covered" >                    i += ps;</span>
+                }
+                else <span class="cstat-no" title="statement not covered" >if (j &gt;= otherpoints.length) {</span>
+                    // for lines, we can't use the rest of the points
+<span class="cstat-no" title="statement not covered" >                    if (!withlines) {</span>
+<span class="cstat-no" title="statement not covered" >                        for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                            newpoints.push(points[i + m]);</span>
+                    }
+<span class="cstat-no" title="statement not covered" >                    i += ps;</span>
+                }
+                else <span class="cstat-no" title="statement not covered" >if (otherpoints[j] == null) {</span>
+                    // oops, got a gap
+<span class="cstat-no" title="statement not covered" >                    for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                        newpoints.push(null);</span>
+<span class="cstat-no" title="statement not covered" >                    fromgap = true;</span>
+<span class="cstat-no" title="statement not covered" >                    j += otherps;</span>
+                }
+                else {
+                    // cases where we actually got two points
+<span class="cstat-no" title="statement not covered" >                    px = points[i + keyOffset];</span>
+<span class="cstat-no" title="statement not covered" >                    py = points[i + accumulateOffset];</span>
+<span class="cstat-no" title="statement not covered" >                    qx = otherpoints[j + keyOffset];</span>
+<span class="cstat-no" title="statement not covered" >                    qy = otherpoints[j + accumulateOffset];</span>
+<span class="cstat-no" title="statement not covered" >                    bottom = 0;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                    if (px == qx) {</span>
+<span class="cstat-no" title="statement not covered" >                        for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                            newpoints.push(points[i + m]);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                        newpoints[l + accumulateOffset] += qy;</span>
+<span class="cstat-no" title="statement not covered" >                        bottom = qy;</span>
+                        
+<span class="cstat-no" title="statement not covered" >                        i += ps;</span>
+<span class="cstat-no" title="statement not covered" >                        j += otherps;</span>
+                    }
+                    else <span class="cstat-no" title="statement not covered" >if (px &gt; qx) {</span>
+                        // we got past point below, might need to
+                        // insert interpolated extra point
+<span class="cstat-no" title="statement not covered" >                        if (withlines &amp;&amp; i &gt; 0 &amp;&amp; points[i - ps] != null) {</span>
+<span class="cstat-no" title="statement not covered" >                            intery = py + (points[i - ps + accumulateOffset] - py) * (qx - px) / (points[i - ps + keyOffset] - px);</span>
+<span class="cstat-no" title="statement not covered" >                            newpoints.push(qx);</span>
+<span class="cstat-no" title="statement not covered" >                            newpoints.push(intery + qy);</span>
+<span class="cstat-no" title="statement not covered" >                            for (m = 2; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                                newpoints.push(points[i + m]);</span>
+<span class="cstat-no" title="statement not covered" >                            bottom = qy; </span>
+                        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                        j += otherps;</span>
+                    }
+                    else { // px &lt; qx
+<span class="cstat-no" title="statement not covered" >                        if (fromgap &amp;&amp; withlines) {</span>
+                            // if we come from a gap, we just skip this point
+<span class="cstat-no" title="statement not covered" >                            i += ps;</span>
+<span class="cstat-no" title="statement not covered" >                            continue;</span>
+                        }
+                            
+<span class="cstat-no" title="statement not covered" >                        for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                            newpoints.push(points[i + m]);</span>
+                        
+                        // we might be able to interpolate a point below,
+                        // this can give us a better y
+<span class="cstat-no" title="statement not covered" >                        if (withlines &amp;&amp; j &gt; 0 &amp;&amp; otherpoints[j - otherps] != null)</span>
+<span class="cstat-no" title="statement not covered" >                            bottom = qy + (otherpoints[j - otherps + accumulateOffset] - qy) * (px - qx) / (otherpoints[j - otherps + keyOffset] - qx);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                        newpoints[l + accumulateOffset] += bottom;</span>
+                        
+<span class="cstat-no" title="statement not covered" >                        i += ps;</span>
+                    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                    fromgap = false;</span>
+                    
+<span class="cstat-no" title="statement not covered" >                    if (l != newpoints.length &amp;&amp; withbottom)</span>
+<span class="cstat-no" title="statement not covered" >                        newpoints[l + 2] += bottom;</span>
+                }
+&nbsp;
+                // maintain the line steps invariant
+<span class="cstat-no" title="statement not covered" >                if (withsteps &amp;&amp; l != newpoints.length &amp;&amp; l &gt; 0</span>
+                    &amp;&amp; newpoints[l] != null
+                    &amp;&amp; newpoints[l] != newpoints[l - ps]
+                    &amp;&amp; newpoints[l + 1] != newpoints[l - ps + 1]) {
+<span class="cstat-no" title="statement not covered" >                    for (m = 0; m &lt; ps; ++m)</span>
+<span class="cstat-no" title="statement not covered" >                        newpoints[l + ps + m] = newpoints[l + m];</span>
+<span class="cstat-no" title="statement not covered" >                    newpoints[l + 1] = newpoints[l - ps + 1];</span>
+                }
+            }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            datapoints.points = newpoints;</span>
+        }
+        
+<span class="cstat-no" title="statement not covered" >        plot.hooks.processDatapoints.push(stackData);</span>
+    }
+    
+<span class="cstat-no" title="statement not covered" >    $.plot.plugins.push({</span>
+        init: init,
+        options: options,
+        name: 'stack',
+        version: '1.2'
+    });
+})(jQuery);
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Mon Mar 02 2020 21:48:10 GMT+0000 (Coordinated Universal Time)
+</div>
+</div>
+<script src="../../../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../../../sorter.js"></script>
+<script src="../../../../../../block-navigation.js"></script>
+</body>
+</html>
