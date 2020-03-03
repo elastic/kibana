@@ -5,20 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { AlertExecutorOptions } from '../../../../alerting/server';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
-
-export interface StatusCheckExecutorParams {
-  filters?: string;
-  locations: string[];
-  numTimes: number;
-  timerange: {
-    from: string;
-    to: string;
-  };
-}
+import { StatusCheckExecutorParamsType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 const { DOWN_MONITOR } = ACTION_GROUP_DEFINITIONS;
 
@@ -129,7 +122,16 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     },
   ],
   async executor(options: AlertExecutorOptions) {
-    const params = options.params as StatusCheckExecutorParams;
+    const { params: rawParams } = options;
+    const decoded = StatusCheckExecutorParamsType.decode(rawParams);
+    if (!isRight(decoded)) {
+      ThrowReporter.report(decoded);
+      return {
+        error: 'Alert param types do not conform to required shape.',
+      };
+    }
+
+    const params = decoded.right;
 
     /* This is called `monitorsByLocation` but it's really:
      * monitors by location by status. The query we run to generate this

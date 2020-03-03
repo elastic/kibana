@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TODO: after NP migration is complete we should be able to remove this lint ignore comment
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../../../plugins/triggers_actions_ui/public/types';
 import { initMonitorStatusAlertType } from './monitor_status';
 

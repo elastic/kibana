@@ -12,6 +12,7 @@ describe('monitor status alert type', () => {
 
     beforeEach(() => {
       params = {
+        locations: [],
         numTimes: 5,
         timerange: {
           from: 'now-15m',
@@ -20,31 +21,31 @@ describe('monitor status alert type', () => {
       };
     });
 
-    it('missing timerange', () => {
-      delete params.timerange;
-      expect(validate(params)).toMatchInlineSnapshot(`
+    it(`doesn't throw on empty set`, () => {
+      expect(validate({})).toMatchInlineSnapshot(`
         Object {
-          "errors": Object {
-            "noTimeRange": "No time range specified",
-          },
+          "errors": Object {},
         }
       `);
     });
 
+    it('missing timerange', () => {
+      delete params.timerange;
+      expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }"`
+      );
+    });
+
     it('timerange missing `from` or `to` value', () => {
-      expect(
+      expect(() =>
         validate({
           ...params,
           timerange: {},
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "errors": Object {
-            "noTimeRangeEnd": "Specified time range has no end time",
-            "noTimeRangeStart": "Specified time range has no start time",
-          },
-        }
-      `);
+      ).toThrowErrorMatchingInlineSnapshot(`
+"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/from: string
+Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/to: string"
+`);
     });
 
     it('invalid time range', () => {
@@ -57,56 +58,50 @@ describe('monitor status alert type', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
-          "errors": Object {
-            "invalidTimeRange": "Time range start cannot exceed time range end",
-          },
-        }
-      `);
+            Object {
+              "errors": Object {
+                "invalidTimeRange": "Time range start cannot exceed time range end",
+              },
+            }
+          `);
     });
 
     it('missing numTimes', () => {
       delete params.numTimes;
-      expect(validate(params)).toMatchInlineSnapshot(`
-        Object {
-          "errors": Object {
-            "invalidNumTimes": "Number of alert check down times must be an integer greater than 0",
-          },
-        }
-      `);
+      expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
+      );
     });
 
     it('NaN numTimes', () => {
-      expect(validate({ ...params, numTimes: `this isn't a number` })).toMatchInlineSnapshot(`
-        Object {
-          "errors": Object {
-            "invalidNumTimes": "Number of alert check down times must be an integer greater than 0",
-          },
-        }
-      `);
+      expect(() =>
+        validate({ ...params, numTimes: `this isn't a number` })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value \\"this isn't a number\\" supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
+      );
     });
 
     it('numTimes < 1', () => {
       expect(validate({ ...params, numTimes: 0 })).toMatchInlineSnapshot(`
-        Object {
-          "errors": Object {
-            "invalidNumTimes": "Number of alert check down times must be an integer greater than 0",
-          },
-        }
-      `);
+          Object {
+            "errors": Object {
+              "invalidNumTimes": "Number of alert check down times must be an integer greater than 0",
+            },
+          }
+        `);
     });
   });
 
   describe('initMonitorStatusAlertType', () => {
     expect(initMonitorStatusAlertType({ autocomplete: {} })).toMatchInlineSnapshot(`
-      Object {
-        "alertParamsExpression": [Function],
-        "defaultActionMessage": "Monitor [{{ctx.metadata.name}}] is down",
-        "iconClass": "uptimeApp",
-        "id": "xpack.uptime.alerts.downMonitor",
-        "name": "Uptime Monitor Status",
-        "validate": [Function],
-      }
-    `);
+        Object {
+          "alertParamsExpression": [Function],
+          "defaultActionMessage": "Monitor [{{ctx.metadata.name}}] is down",
+          "iconClass": "uptimeApp",
+          "id": "xpack.uptime.alerts.downMonitor",
+          "name": "Uptime Monitor Status",
+          "validate": [Function],
+        }
+      `);
   });
 });
