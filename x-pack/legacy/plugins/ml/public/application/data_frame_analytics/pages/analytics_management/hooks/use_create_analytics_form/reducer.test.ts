@@ -41,13 +41,19 @@ describe('useCreateAnalyticsForm', () => {
     const initialState = getInitialState();
     expect(initialState.isValid).toBe(false);
 
-    const updatedState = reducer(initialState, {
+    const stateWithEstimatedMml = reducer(initialState, {
+      type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT,
+      value: '182222kb',
+    });
+
+    const updatedState = reducer(stateWithEstimatedMml, {
       type: ACTION.SET_FORM_STATE,
       payload: {
         destinationIndex: 'the-destination-index',
         jobId: 'the-analytics-job-id',
         sourceIndex: 'the-source-index',
         jobType: JOB_TYPES.OUTLIER_DETECTION,
+        modelMemoryLimit: '200mb',
       },
     });
     expect(updatedState.isValid).toBe(true);
