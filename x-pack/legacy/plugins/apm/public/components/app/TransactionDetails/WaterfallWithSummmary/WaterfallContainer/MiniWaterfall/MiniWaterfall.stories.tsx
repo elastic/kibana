@@ -17,10 +17,7 @@ import { MiniWaterfall } from '.';
 const entryTransactionId = '6528d29667c22f62';
 const waterfall = getWaterfall(response, entryTransactionId);
 
-storiesOf(
-  'app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/MiniWaterfall',
-  module
-).add(
+storiesOf('app/TransactionDetails/MiniWaterfall', module).add(
   'example',
   () => {
     return (

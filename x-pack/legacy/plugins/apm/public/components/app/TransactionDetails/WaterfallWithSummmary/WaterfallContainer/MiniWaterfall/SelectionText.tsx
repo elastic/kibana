@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { CSSProperties } from 'react';
-import styled from 'styled-components';
 import { Selection } from './';
-
-const Text = styled(EuiText)`
-  font-size: ${lightTheme.euiFontSizeXS};
-  margin-bottom: ${lightTheme.spacerSizes.s};
-  text-align: right;
-`;
 
 interface SelectionTextProps {
   selection: Selection;
@@ -34,7 +26,7 @@ export function SelectionText({
 
   return (
     <span style={style}>
-      <Text color="subdued">
+      <EuiText color="subdued" size="xs" textAlign="right">
         {i18n.translate(
           'xpack.apm.transactionDetails.miniWaterfall.selectionText',
           {
@@ -51,7 +43,8 @@ export function SelectionText({
             }
           )}
         </EuiLink>
-      </Text>
+      </EuiText>
+      <EuiSpacer size="s" />
     </span>
   );
 }
