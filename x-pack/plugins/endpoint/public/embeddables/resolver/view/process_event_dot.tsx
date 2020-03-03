@@ -119,9 +119,11 @@ export const ProcessEventDot = styled(
             ? 'terminatedProcessCube'
             : 'terminatedTriggerCube';
         }
-      })(event?.data_buffer);
+      })(event?.endgame);
 
       const { cubeSymbol, labelFill, descriptionFill, labelText } = nodeAssets[nodeType];
+
+      console.log('rendering')
 
       return (
         <svg
@@ -130,7 +132,7 @@ export const ProcessEventDot = styled(
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
           role="treeitem"
-          aria-level={event.data_buffer.depth}
+          aria-level={event.endgame.depth}
         >
           <use
             role="presentation"
@@ -163,7 +165,7 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
             style={{ letterSpacing: '-0.02px' }}
           >
-            {event?.data_buffer?.process_name}
+            {event?.endgame?.process_name}
           </text>
           <text
             x={markerPositionOffset(magFactorX) + markerSize(magFactorX)}

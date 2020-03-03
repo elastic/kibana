@@ -298,6 +298,7 @@ export interface LegacyEndpointEvent {
     process_path?: string;
     timestamp_utc?: string;
     serial_event_id?: number;
+    depth?: number;
   };
   agent: {
     id: string;
