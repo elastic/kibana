@@ -26,7 +26,7 @@ timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
       node('linux && immutable') {
-        catchError {
+        catchErrors {
           def VERSION
           def SNAPSHOT_ID
           def DESTINATION

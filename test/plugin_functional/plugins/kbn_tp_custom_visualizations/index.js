@@ -20,7 +20,7 @@
 export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
-      visTypes: ['plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis'],
+      hacks: ['plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis'],
     },
   });
 }
