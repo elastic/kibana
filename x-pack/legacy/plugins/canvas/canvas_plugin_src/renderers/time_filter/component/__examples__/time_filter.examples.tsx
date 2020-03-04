@@ -9,17 +9,9 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { TimeFilter } from '..';
 
-storiesOf('renderers/TimeFilter', module)
-  .add('default', () => (
-    <TimeFilter
-      filter="timefilter from=now-1y to=now-7d column=@timestamp"
-      commit={action('commit')}
-    />
-  ))
-  .add('compact mode', () => (
-    <TimeFilter
-      filter="timefilter from=now-7d to=now column=@timestamp"
-      compact
-      commit={action('commit')}
-    />
-  ));
+storiesOf('renderers/TimeFilter', module).add('default', () => (
+  <TimeFilter
+    filter="timefilter from=now-1y to=now-7d column=@timestamp"
+    commit={action('commit')}
+  />
+));
