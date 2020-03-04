@@ -51,6 +51,6 @@ exports[`MonitorPage shallow renders expected elements for valid props 1`] = `
     }
   }
 >
-  <MonitorPage />
+  <Connect(MonitorPageComponent) />
 </ContextProvider>
 `;

@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { MLJobEditor, EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
 export function AdvancedSettings({
@@ -149,7 +149,7 @@ function IndexSettings({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -175,7 +175,7 @@ function Mappings({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -201,7 +201,7 @@ function IngestPipeline({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}

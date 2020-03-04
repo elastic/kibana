@@ -33,7 +33,7 @@ import {
   getUseField,
   UseField,
   useForm,
-} from '../../../../shared_imports';
+} from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
 
