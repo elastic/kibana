@@ -18,7 +18,6 @@
  */
 
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -26,7 +25,24 @@ import { debounce } from 'lodash';
 // @ts-ignore
 import * as qs from 'querystring-browser';
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiSpacer,
+  EuiPopoverTitle,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+
+import { ConsoleInstruction } from 'src/core/server/pulse/collectors/console';
+import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
+
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -49,8 +65,13 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 export interface EditorProps {
   initialTextValue: string;
+  pulseInstructions: ConsoleInstruction[];
 }
 
+interface InstructionWithEndpoint extends ConsoleInstruction {
+  docLink?: string;
+  takeMeThereHref: string;
+}
 const abs: CSSProperties = {
   position: 'absolute',
   top: '0',
@@ -66,12 +87,16 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, pulseInstructions }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
     elasticsearchUrl,
   } = useServicesContext();
+
+  const [pulseNotificationIsOpen, setPulseNotificationIsOpen] = useState(false);
+  const [pulseNotificationShowBell, setPulseNotificationShowBell] = useState(false);
+  const [pulseInstruction, setPulseInstruction] = useState<InstructionWithEndpoint | undefined>();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
@@ -149,6 +174,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       const saveDelay = 500;
 
       editor.getCoreEditor().on('change', () => {
+        updatePulse();
         if (timer) {
           clearTimeout(timer);
         }
@@ -156,18 +182,59 @@ function EditorUI({ initialTextValue }: EditorProps) {
       });
     }
 
+    window.setInterval(() => {
+      updatePulse();
+    }, 300);
+    let updating = false;
+    function updatePulse() {
+      if (updating) {
+        return;
+      }
+      updating = true;
+      const coreEditor = editor.getCoreEditor();
+      const endpointDescription = getEndpointFromPosition(
+        coreEditor,
+        coreEditor.getCurrentPosition(),
+        editor.parser
+      );
+      if (endpointDescription) {
+        const instruction = pulseInstructions.find(instruction => {
+          return instruction.endpoint_id === endpointDescription.id;
+        });
+        if (instruction) {
+          if (pulseInstruction?.endpoint_id === instruction?.endpoint_id) {
+            return;
+          }
+          if (!pulseNotificationShowBell) {
+            setPulseNotificationShowBell(true);
+          }
+          setPulseInstruction({
+            docLink: endpointDescription.documentation,
+            takeMeThereHref: `http://localhost:5601/app/kibana#${instruction.action?.href}`,
+            ...instruction,
+          });
+        } else {
+          setPulseInstruction(undefined);
+          setPulseNotificationShowBell(false);
+        }
+      }
+      updating = false;
+    }
+
     function saveCurrentState() {
       try {
-        const content = editor.getCoreEditor().getValue();
+        const coreEditor = editor.getCoreEditor();
+        const content = coreEditor.getValue();
         saveCurrentTextObject(content);
       } catch (e) {
         // Ignoring saving error
+        setPulseInstruction(undefined);
+        setPulseNotificationShowBell(false);
       }
     }
 
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
-
     mappings.retrieveAutoCompleteInfo();
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
@@ -178,7 +245,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+  }, [
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    pulseInstructions,
+    pulseInstruction,
+    pulseNotificationShowBell,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -198,6 +273,19 @@ function EditorUI({ initialTextValue }: EditorProps) {
     });
   }, [sendCurrentRequestToES, openDocumentation]);
 
+  const pulseButton = (
+    <EuiButtonIcon
+      size="s"
+      style={{ minHeight: '18px', paddingRight: '2px' }}
+      className="animate-ring conApp__editorActionButton conApp__editorActionButton--success"
+      iconType="bell"
+      aria-label="pulse notification"
+      onClick={() => {
+        setPulseNotificationIsOpen(true);
+      }}
+    />
+  );
+
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
@@ -208,6 +296,58 @@ function EditorUI({ initialTextValue }: EditorProps) {
           gutterSize="none"
           responsive={false}
         >
+          <EuiFlexItem>
+            {pulseNotificationShowBell && !!pulseInstruction && (
+              <EuiPopover
+                id="pulse_popover"
+                button={pulseButton}
+                isOpen={pulseNotificationIsOpen}
+                closePopover={() => {
+                  setPulseNotificationIsOpen(false);
+                }}
+              >
+                <EuiPopoverTitle>Pulse Recommendation</EuiPopoverTitle>
+                <div style={{ width: '300px' }}>
+                  <EuiText size="s">
+                    <p>
+                      {pulseInstruction.description.map((item, key) => {
+                        switch (item.type) {
+                          case 'text':
+                            return item.text;
+                          case 'docLink':
+                            return (
+                              <EuiLink
+                                key={`${key}_item.text`}
+                                href={pulseInstruction.docLink}
+                                target="_blank"
+                              >
+                                {item.text}
+                              </EuiLink>
+                            );
+                        }
+                      })}
+                    </p>
+                  </EuiText>
+                </div>
+                <EuiSpacer />
+                <div style={{ textAlign: 'right' }}>
+                  <EuiButtonEmpty size="s">disable</EuiButtonEmpty>
+                  {!!pulseInstruction.action && (
+                    <EuiButton
+                      size="s"
+                      fill
+                      color="primary"
+                      style={{ marginLeft: '10px' }}
+                      target="_blank"
+                      href={pulseInstruction.takeMeThereHref}
+                    >
+                      Take me there!
+                    </EuiButton>
+                  )}
+                </div>
+              </EuiPopover>
+            )}
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip
               content={i18n.translate('console.sendRequestButtonTooltip', {
