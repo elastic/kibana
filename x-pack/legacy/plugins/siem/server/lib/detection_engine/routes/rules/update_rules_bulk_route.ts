@@ -4,51 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
+  UpdateRuleAlertParamsRest,
 } from '../../rules/types';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-
-import { transformBulkError, getIndex } from '../utils';
+import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
-export const createUpdateRulesBulkRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    options: {
-      tags: ['access:siem'],
+export const updateRulesBulkRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: updateRulesBulkSchema,
+        body: buildRouteValidation<UpdateRuleAlertParamsRest[]>(updateRulesBulkSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: BulkUpdateRulesRequest, headers) {
-      const { actionsClient, alertsClient, savedObjectsClient, spacesClient } = await getClients(
-        request
-      );
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const actionsClient = context.actions.getActionsClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const rules = await Promise.all(
-        request.payload.map(async payloadRule => {
+        request.body.map(async payloadRule => {
           const {
             description,
             enabled,
@@ -77,7 +70,7 @@ export const createUpdateRulesBulkRoute = (
             references,
             version,
           } = payloadRule;
-          const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+          const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -132,25 +125,13 @@ export const createUpdateRulesBulkRoute = (
           }
         })
       );
+
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return headers
-          .response({
-            message: errors,
-            status_code: 500,
-          })
-          .code(500);
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
-        return validated;
+        return response.ok({ body: validated ?? {} });
       }
-    },
-  };
-};
-
-export const updateRulesBulkRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createUpdateRulesBulkRoute(config, getClients));
+    }
+  );
 };
