@@ -10,8 +10,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-killall node &> /dev/null # TODO: REMOVE!!
-sleep 2
+
+# ensure that background tasks (kibana) are killed when the script ends
+# trap "exit" INT TERM ERR
+# trap "kill 0" EXIT
+# killall node &> /dev/null # TODO: REMOVE!!
+# sleep 2
 
 # Ensure Kibana port is available
 if lsof -Pi :$KIBANA_PORT -sTCP:LISTEN -t >/dev/null ; then
@@ -19,11 +23,6 @@ if lsof -Pi :$KIBANA_PORT -sTCP:LISTEN -t >/dev/null ; then
     lsof -Pi :$KIBANA_PORT -sTCP:LISTEN
     exit 1
 fi
-
-# ensure that background tasks (kibana) are killed when the script ends
-# trap "exit" INT TERM ERR
-# trap "kill 0" EXIT
-
 
 # Create tmp folder
 mkdir -p tmp
