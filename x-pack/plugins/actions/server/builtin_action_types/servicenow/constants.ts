@@ -5,3 +5,4 @@
  */
 
 export const ACTION_TYPE_ID = '.servicenow';
+export const SUPPORTED_SOURCE_FIELDS = ['title', 'comments', 'description'];
