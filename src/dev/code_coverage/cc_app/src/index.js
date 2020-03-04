@@ -30,19 +30,11 @@ const rootEl = document.getElementById.bind(document, 'root');
 const { initialData } = window;
 const tryInit = () => tc(() => initialData);
 const tryOneProp = () => tc(() => initialData.testRunnerTypes);
+const noDataLoaded = () => ReactDOM.render(<NoData />, rootEl());
 
 tryInit()
   .chain(tryOneProp)
-  .fold(noDataLoaded, boot)
-
-function noDataLoaded() {
-  console.log('\n### NO DATA');
-
-  ReactDOM.render(
-    <NoData />,
-    rootEl()
-  )
-}
+  .fold(noDataLoaded, boot);
 
 function boot(testRunnerTypes) {
   const {
