@@ -73,7 +73,6 @@ export const FilterView: FC<Props> = ({
       onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
         defaultMessage: 'Filter actions',
       })}
-      style={{ maxWidth: 200 }}
       {...rest}
     >
       <span ref={ref}>
