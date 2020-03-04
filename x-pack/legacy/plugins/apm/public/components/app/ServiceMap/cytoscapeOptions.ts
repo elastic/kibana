@@ -12,19 +12,8 @@ export const animationOptions: cytoscape.AnimationOptions = {
   // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.euiAnimSlightBounce
 };
-
+const lineColor = '#C5CCD7';
 export const nodeHeight = parseInt(theme.avatarSizing.l.size, 10);
-
-const layout = {
-  name: 'dagre',
-  nodeDimensionsIncludeLabels: true,
-  rankDir: 'LR',
-  animate: true,
-  animationEasing: animationOptions.easing,
-  animationDuration: animationOptions.duration,
-  fit: true,
-  padding: nodeHeight
-};
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data('type') === 'service';
@@ -42,12 +31,12 @@ const style: cytoscape.Stylesheet[] = [
       'background-image': (el: cytoscape.NodeSingular) =>
         iconForNode(el) ?? defaultIcon,
       'background-height': (el: cytoscape.NodeSingular) =>
-        isService(el) ? '80%' : '40%',
+        isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
-        isService(el) ? '80%' : '40%',
+        isService(el) ? '60%' : '40%',
       'border-color': (el: cytoscape.NodeSingular) =>
-        el.hasClass('primary')
-          ? theme.euiColorSecondary
+        el.hasClass('primary') || el.selected()
+          ? theme.euiColorPrimary
           : theme.euiColorMediumShade,
       'border-width': 2,
       color: theme.textColors.default,
@@ -55,6 +44,10 @@ const style: cytoscape.Stylesheet[] = [
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
       'font-size': theme.euiFontSizeXS,
+      ghost: 'yes',
+      'ghost-offset-x': 0,
+      'ghost-offset-y': 2,
+      'ghost-opacity': 0.15,
       height: nodeHeight,
       label: 'data(label)',
       'min-zoomed-font-size': theme.euiSizeL,
@@ -75,10 +68,12 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'edge',
     style: {
-      'curve-style': 'bezier',
-      'line-color': theme.euiColorMediumShade,
+      'curve-style': 'taxi',
+      // @ts-ignore
+      'taxi-direction': 'rightward',
+      'line-color': lineColor,
       'overlay-opacity': 0,
-      'target-arrow-color': theme.euiColorMediumShade,
+      'target-arrow-color': lineColor,
       'target-arrow-shape': 'triangle',
       // The DefinitelyTyped definitions don't specify this property since it's
       // fairly new.
@@ -93,10 +88,28 @@ const style: cytoscape.Stylesheet[] = [
     selector: 'edge[bidirectional]',
     style: {
       'source-arrow-shape': 'triangle',
+      'source-arrow-color': lineColor,
       'target-arrow-shape': 'triangle',
       // @ts-ignore
       'source-distance-from-node': theme.paddingSizes.xs,
       'target-distance-from-node': theme.paddingSizes.xs
+    }
+  },
+  // @ts-ignore
+  {
+    selector: '.invisible',
+    style: { visibility: 'hidden' }
+  },
+  {
+    selector: 'edge.nodeHover',
+    style: {
+      width: 4
+    }
+  },
+  {
+    selector: 'node.hover',
+    style: {
+      'border-width': 4
     }
   }
 ];
@@ -104,7 +117,6 @@ const style: cytoscape.Stylesheet[] = [
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,
   boxSelectionEnabled: false,
-  layout,
   maxZoom: 3,
   minZoom: 0.2,
   style

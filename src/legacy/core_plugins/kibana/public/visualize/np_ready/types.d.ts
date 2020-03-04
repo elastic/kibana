@@ -19,9 +19,10 @@
 
 import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { VisState, Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { VisSavedObject, PersistedState } from '../legacy_imports';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { VisSavedObject } from '../legacy_imports';
 
 export type PureVisState = ReturnType<Vis['getCurrentState']>;
 
@@ -58,6 +59,10 @@ export interface EditorRenderProps {
   uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }
 
 export interface SavedVisualizations {

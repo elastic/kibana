@@ -782,7 +782,7 @@ Array [
       <h1
         class="euiTitle euiTitle--medium"
       >
-        https://www.elastic.co
+        TestingHeading
       </h1>
     </div>
     <div
@@ -887,7 +887,7 @@ Array [
 ]
 `;
 
-exports[`PageHeaderComponent renders expected title for valid overview route 1`] = `
+exports[`PageHeader shallow renders with breadcrumbs without the date picker: page_header_no_date_picker 1`] = `
 Array [
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
@@ -898,7 +898,7 @@ Array [
       <h1
         class="euiTitle euiTitle--medium"
       >
-        Overview
+        TestingHeading
       </h1>
     </div>
     <div
@@ -1001,61 +1001,4 @@ Array [
     class="euiSpacer euiSpacer--s"
   />,
 ]
-`;
-
-exports[`PageHeaderComponent shallow renders expected elements for valid props 1`] = `
-<ContextProvider
-  value={
-    Object {
-      "history": Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
-        },
-        "push": [Function],
-        "replace": [Function],
-      },
-      "location": Object {
-        "hash": "",
-        "key": "TestKeyForTesting",
-        "pathname": "/",
-        "search": "",
-        "state": undefined,
-      },
-      "match": Object {
-        "isExact": true,
-        "params": Object {},
-        "path": "/",
-        "url": "/",
-      },
-      "staticContext": undefined,
-    }
-  }
->
-  <PageHeaderComponent
-    setBreadcrumbs={[MockFunction]}
-  />
-</ContextProvider>
 `;

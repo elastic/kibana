@@ -104,6 +104,7 @@ export const npSetup = {
         getProvider: sinon.fake(),
       },
       query: {
+        state$: mockObservable(),
         filterManager: {
           getFetches$: sinon.fake(),
           getFilters: sinon.fake(),
@@ -212,11 +213,17 @@ export const npSetup = {
       config: {
         disableWelcomeScreen: false,
       },
+      tutorials: {
+        setVariable: sinon.fake(),
+      },
     },
     charts: {
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
+      },
+      colors: {
+        seedColors: ['white', 'black'],
       },
     },
     management: {
@@ -376,18 +383,6 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
-    },
-    home: {
-      featureCatalogue: {
-        get: sinon.fake(),
-        register: sinon.fake(),
-      },
-      environment: {
-        get: sinon.fake(),
-      },
-      config: {
-        disableWelcomeScreen: false,
-      },
     },
     navigation: {
       ui: {

@@ -27,15 +27,11 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis } from '..';
-import { IAggConfig } from '../../../legacy_imports';
-import { searchSourceMock } from '../../../legacy_mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { searchSourceMock } from '../../../../../../../plugins/data/public/search/search_source/mocks';
+import { IAggConfig } from '../../../../../data/public';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/agg_types', () => ({
-  setBounds: () => {},
-  dateHistogramBucketAgg: () => {},
-  isDateHistogramBucketAggConfig: () => true,
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {

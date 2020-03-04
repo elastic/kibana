@@ -30,7 +30,7 @@ export function initVisEditorDirective(app, deps) {
         appState: '=',
       },
       link: function($scope, element) {
-        const Editor = $scope.savedObj.vis.type.editor;
+        const Editor = $scope.savedObj.vis.type.editor || deps.DefaultVisualizationEditor;
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
@@ -43,6 +43,7 @@ export function initVisEditorDirective(app, deps) {
             filters: $scope.filters,
             query: $scope.query,
             appState: $scope.appState,
+            linked: !!$scope.savedObj.savedSearchId,
           });
         };
 

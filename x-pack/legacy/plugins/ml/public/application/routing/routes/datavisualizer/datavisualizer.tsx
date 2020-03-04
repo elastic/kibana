@@ -15,7 +15,7 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';
 
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 

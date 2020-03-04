@@ -7,20 +7,21 @@
 import { Store, createStore } from 'redux';
 import { DataAction } from './action';
 import { dataReducer } from './reducer';
-import { DataState, ProcessEvent } from '../../types';
+import { DataState } from '../../types';
+import { LegacyEndpointEvent } from '../../../../../common/types';
 import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 
 describe('resolver graph layout', () => {
-  let processA: ProcessEvent;
-  let processB: ProcessEvent;
-  let processC: ProcessEvent;
-  let processD: ProcessEvent;
-  let processE: ProcessEvent;
-  let processF: ProcessEvent;
-  let processG: ProcessEvent;
-  let processH: ProcessEvent;
-  let processI: ProcessEvent;
+  let processA: LegacyEndpointEvent;
+  let processB: LegacyEndpointEvent;
+  let processC: LegacyEndpointEvent;
+  let processD: LegacyEndpointEvent;
+  let processE: LegacyEndpointEvent;
+  let processF: LegacyEndpointEvent;
+  let processG: LegacyEndpointEvent;
+  let processH: LegacyEndpointEvent;
+  let processI: LegacyEndpointEvent;
   let store: Store<DataState, DataAction>;
 
   beforeEach(() => {
@@ -37,75 +38,75 @@ describe('resolver graph layout', () => {
      *
      */
     processA = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         process_name: '',
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 0,
+        unique_pid: 0,
       },
     });
     processB = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'already_running',
-        node_id: 1,
-        source_id: 0,
+        unique_pid: 1,
+        unique_ppid: 0,
       },
     });
     processC = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 2,
-        source_id: 0,
+        unique_pid: 2,
+        unique_ppid: 0,
       },
     });
     processD = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 3,
-        source_id: 1,
+        unique_pid: 3,
+        unique_ppid: 1,
       },
     });
     processE = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 4,
-        source_id: 1,
+        unique_pid: 4,
+        unique_ppid: 1,
       },
     });
     processF = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 5,
-        source_id: 2,
+        unique_pid: 5,
+        unique_ppid: 2,
       },
     });
     processG = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 6,
-        source_id: 2,
+        unique_pid: 6,
+        unique_ppid: 2,
       },
     });
     processH = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        node_id: 7,
-        source_id: 6,
+        unique_pid: 7,
+        unique_ppid: 6,
       },
     });
     processI = mockProcessEvent({
-      data_buffer: {
+      endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'termination_event',
-        node_id: 8,
-        source_id: 0,
+        unique_pid: 8,
+        unique_ppid: 0,
       },
     });
     store = createStore(dataReducer, undefined);

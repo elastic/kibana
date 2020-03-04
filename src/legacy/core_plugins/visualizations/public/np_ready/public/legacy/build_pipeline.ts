@@ -18,17 +18,11 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-// @ts-ignore
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'src/plugins/data/public';
-import {
-  IAggConfig,
-  setBounds,
-  isDateHistogramBucketAggConfig,
-  createFormat,
-} from '../../../legacy_imports';
-import { Vis, VisParams } from '..';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
+import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
+import { Vis, VisParams } from '../types';
+import { IAggConfig, isDateHistogramBucketAggConfig, setBounds } from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -102,7 +96,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       'max_bucket',
     ].includes(agg.type.name);
 
-    const format = createFormat(
+    const format = fieldFormats.serialize(
       hasSubAgg
         ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
         : agg
