@@ -17,7 +17,11 @@
  * under the License.
  */
 
-const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
+import { IAggConfig } from 'ui/agg_types';
+import { Filter } from '../../../../../../plugins/data/public';
+import { TabbedTable } from '../tabify';
+
+const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowIndex: number) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -41,11 +45,17 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
   ];
 };
 
-const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
+const createFilter = (
+  aggConfigs: IAggConfig[],
+  table: TabbedTable,
+  columnIndex: number,
+  rowIndex: number,
+  cellValue: any
+) => {
   const column = table.columns[columnIndex];
   const aggConfig = aggConfigs[columnIndex];
-  let filter = [];
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
+  let filter: Filter[] = [];
+  const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -54,6 +64,10 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
     filter = aggConfig.createFilter(value, { terms });
   } else {
     filter = aggConfig.createFilter(value);
+  }
+
+  if (!filter) {
+    return;
   }
 
   if (!Array.isArray(filter)) {
