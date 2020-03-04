@@ -119,6 +119,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickLoadSavedSearchButton() {
+      await testSubjects.moveMouseTo('discoverOpenButton');
       await testSubjects.click('discoverOpenButton');
     }
 
