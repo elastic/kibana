@@ -30,6 +30,8 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -40,7 +42,7 @@ export { loggingServiceMock } from './logging/logging_service.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { uuidServiceMock } from './uuid/uuid_service.mock';
+export { metricsServiceMock } from './metrics/metrics_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -153,6 +155,7 @@ function createInternalCoreSetupMock() {
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }

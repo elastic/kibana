@@ -47,8 +47,9 @@ export function addMessages(c: BaseActionContext, p: Params): ActionContext {
   );
 
   const agg = p.aggField ? `${p.aggType}(${p.aggField})` : `${p.aggType}`;
-  const humanFn = `${agg} ${p.comparator} ${p.threshold.join(',')}`;
+  const humanFn = `${agg} ${p.thresholdComparator} ${p.threshold.join(',')}`;
 
+  const window = `${p.timeWindowSize}${p.timeWindowUnit}`;
   const message = i18n.translate(
     'xpack.alertingBuiltins.indexThreshold.alertTypeContextMessageDescription',
     {
@@ -59,7 +60,7 @@ export function addMessages(c: BaseActionContext, p: Params): ActionContext {
         group: c.group,
         value: c.value,
         function: humanFn,
-        window: p.window,
+        window,
         date: c.date,
       },
     }

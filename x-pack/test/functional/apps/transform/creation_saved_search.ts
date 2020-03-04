@@ -63,7 +63,7 @@ export default function({ getService }: FtrProviderContext) {
           },
           sourceIndex: 'farequote',
           sourcePreview: {
-            column: 3,
+            column: 2,
             values: ['ASA'],
           },
         },
