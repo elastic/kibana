@@ -11,10 +11,10 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 
-export const listActionTypesRoute = (router: IRouter, licenseState: LicenseState) => {
+export const listActionTypesRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `/api/action/types`,

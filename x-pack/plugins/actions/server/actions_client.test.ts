@@ -11,7 +11,7 @@ import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
-import { configUtilsMock } from './actions_config.mock';
+import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import {
@@ -30,7 +30,7 @@ const actionTypeRegistryParams = {
   taskRunnerFactory: new TaskRunnerFactory(
     new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
   ),
-  actionsConfigUtils: configUtilsMock,
+  actionsConfigUtils: actionsConfigMock.create(),
 };
 
 let actionsClient: ActionsClient;

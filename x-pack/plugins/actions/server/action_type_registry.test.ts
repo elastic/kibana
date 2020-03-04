@@ -5,21 +5,27 @@
  */
 
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
-import { configUtilsMock } from './actions_config.mock';
+import { actionsConfigMock } from './actions_config.mock';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 const mockTaskManager = taskManagerMock.setup();
-const actionTypeRegistryParams = {
-  taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(
-    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-  ),
-  actionsConfigUtils: configUtilsMock,
-};
+let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+let actionTypeRegistryParams: ActionTypeRegistryOpts;
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockedActionsConfig = actionsConfigMock.create();
+  actionTypeRegistryParams = {
+    taskManager: mockTaskManager,
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+    ),
+    actionsConfigUtils: mockedActionsConfig,
+  };
+});
 
 const executor: ExecutorType = async options => {
   return { status: 'ok', actionId: options.actionId };

@@ -12,7 +12,7 @@ import { getActionType } from './webhook';
 import { ActionType, Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import axios from 'axios';
@@ -164,7 +164,7 @@ describe('config validation', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },
@@ -207,7 +207,7 @@ describe('execute()', () => {
     axiosRequestMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: configUtilsMock,
+      configurationUtilities: actionsConfigMock.create(),
     });
   });
 
