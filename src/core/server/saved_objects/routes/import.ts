@@ -21,7 +21,7 @@ import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { importSavedObjects } from '../import';
+import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -65,7 +65,7 @@ export const registerImportRoute = (
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const result = await importSavedObjects({
+      const result = await importSavedObjectsFromStream({
         supportedTypes,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
