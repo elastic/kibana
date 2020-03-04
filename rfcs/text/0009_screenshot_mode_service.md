@@ -56,7 +56,7 @@ direction is appropriate for improving PDF report generation.
 # Detailed design
 
 The Screenshot Mode Service is a callable API availble in the context of a
-request on the server side, and as a pubic coreSetup API Javascript.
+request on the server side, and as a pubic coreSetup Javascript API.
 
 The data provided by the Screenshot Mode are signals about:
  - whether or not the context of the page load is for a screenshot capture
@@ -65,7 +65,7 @@ The data provided by the Screenshot Mode are signals about:
 
 There are a few ways for the service to obtain the data for its internal state.
 The most typical way would be to have a URL query string variable with the
-raw data and have the service read it when and API client is constructed. The
+raw data and have the service read it when an API client is constructed. The
 service would provide some abstractions around that data to the different
 applications.
 
