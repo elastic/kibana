@@ -45,9 +45,16 @@ export const CommentSchema = schema.object({
   version: schema.maybe(schema.string()),
 });
 
+export const ExecutorAction = schema.oneOf([
+  schema.literal('newIncident'),
+  schema.literal('updateIncident'),
+]);
+
 export const ParamsSchema = schema.object({
+  executorAction: ExecutorAction,
   id: schema.nullable(schema.string()),
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   description: schema.maybe(schema.string()),
-  title: schema.string(),
+  title: schema.maybe(schema.string()),
+  incidentId: schema.maybe(schema.string()),
 });

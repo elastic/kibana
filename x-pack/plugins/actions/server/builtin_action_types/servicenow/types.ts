@@ -15,6 +15,8 @@ import {
   CommentSchema,
 } from './schema';
 
+import { ServiceNow } from '../lib/servicenow';
+
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
 
@@ -30,3 +32,15 @@ export type MapsType = TypeOf<typeof MapsSchema>;
 export type CommentType = TypeOf<typeof CommentSchema>;
 
 export type FinalMapping = Map<string, any>;
+
+export interface ActionHandlerArguments {
+  serviceNow: ServiceNow;
+  params: any;
+  comments: CommentType[];
+  mapping: FinalMapping;
+}
+
+export type UpdateParamsType = Partial<ParamsType>;
+export type UpdateActionHandlerArguments = ActionHandlerArguments & {
+  incidentId: string;
+};

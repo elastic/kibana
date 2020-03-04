@@ -18,12 +18,12 @@ import { ServiceNow } from '../lib/servicenow';
 import * as i18n from './translations';
 
 import { ACTION_TYPE_ID } from './constants';
-import { ConfigType, SecretsType, ParamsType } from './types';
+import { ConfigType, SecretsType, ParamsType, CommentType } from './types';
 
 import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
 
 import { buildMap, mapParams } from './helpers';
-import { Incident } from '../lib/servicenow/types';
+import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
@@ -87,30 +87,46 @@ async function serviceNowExecutor(
   } = execOptions.config as ConfigType;
   const { username, password } = execOptions.secrets as SecretsType;
   const params = execOptions.params as ParamsType;
-  const { comments, ...restParams } = params;
+  const { comments, executorAction, incidentId, ...restParams } = params;
 
   const finalMap = buildMap(mapping);
   const restMapped = mapParams(restParams, finalMap);
-  const paramsAsIncident = restMapped as Incident;
-
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
-  const userId = await serviceNow.getUserID();
-  const { id, number } = await serviceNow.createIncident({
-    ...paramsAsIncident,
-    caller_id: userId,
-  });
 
-  if (comments && Array.isArray(comments) && comments.length > 0) {
-    serviceNow.batchAddComments(
-      id,
-      comments.map(c => c.comment),
-      finalMap.get('comments').target
-    );
-  }
-
-  return {
-    status: 'ok',
-    actionId,
-    data: { id, number },
+  const handlerInput = {
+    serviceNow,
+    params: restMapped,
+    comments: comments as CommentType[],
+    mapping: finalMap,
   };
+
+  let res = {};
+
+  switch (executorAction) {
+    case 'newIncident':
+      res = await handleCreateIncident(handlerInput);
+
+      return {
+        status: 'ok',
+        actionId,
+        data: { ...res },
+      };
+
+    case 'updateIncident':
+      if (!incidentId) {
+        throw new Error('[Action][ServiceNow]: IncidentId is required.');
+      }
+
+      await handleUpdateIncident({ incidentId, ...handlerInput });
+      return {
+        status: 'ok',
+        actionId,
+      };
+    default:
+      return {
+        status: 'ok',
+        actionId,
+        serviceMessage: '[Action][ServiceNow]: Unimplemented executor action.',
+      };
+  }
 }
