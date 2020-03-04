@@ -100,9 +100,12 @@ export const CustomLinkTable = ({
       <EuiFieldSearch
         fullWidth
         onChange={e => setSearchTerm(e.target.value)}
-        placeholder={i18n.translate('xpack.apm.searchInput.filter', {
-          defaultMessage: 'Filter links by Name or URL...'
-        })}
+        placeholder={i18n.translate(
+          'xpack.apm.settings.customizeUI.customLink.searchInput.filter',
+          {
+            defaultMessage: 'Filter links by Name or URL...'
+          }
+        )}
       />
       <EuiSpacer size="s" />
       <ManagedTable

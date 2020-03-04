@@ -60,7 +60,7 @@ export async function saveCustomLink({
         { defaultMessage: 'Link could not be saved!' }
       ),
       text: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.create.failed',
+        'xpack.apm.settings.customizeUI.customLink.create.failed.message',
         {
           defaultMessage:
             'Something went wrong when saving the link. Error: "{errorMessage}"',
