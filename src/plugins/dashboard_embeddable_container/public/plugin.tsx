@@ -32,6 +32,8 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
+import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
+import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
 import {
   DashboardAppLinkGeneratorState,
   DASHBOARD_APP_URL_GENERATOR,
@@ -59,6 +61,13 @@ interface StartDependencies {
 export type Setup = void;
 export type Start = void;
 
+declare module '../../../plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
+    [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+  }
+}
+
 export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -66,7 +75,7 @@ export class DashboardEmbeddableContainerPublicPlugin
   public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
     const startServices = core.getStartServices();
 
     if (share) {
@@ -104,7 +113,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
 
     const factory = new DashboardContainerFactory({
       application,
