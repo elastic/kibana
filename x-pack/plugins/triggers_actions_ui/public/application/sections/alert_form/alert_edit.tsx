@@ -23,36 +23,23 @@ import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
-import { createAlert } from '../../lib/alert_api';
+import { updateAlert } from '../../lib/alert_api';
 
-interface AlertAddProps {
-  consumer: string;
-  alertTypeId?: string;
-  canChangeTrigger?: boolean;
+interface AlertEditProps {
+  initialAlert: Alert;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddProps) => {
-  const initialAlert = ({
-    params: {},
-    consumer,
-    alertTypeId,
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-  } as unknown) as Alert;
-
+export const AlertEdit = ({
+  initialAlert,
+  editFlyoutVisible,
+  setEditFlyoutVisibility,
+}: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const setAlert = (value: any) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
-  };
-
   const {
-    addFlyoutVisible,
-    setAddFlyoutVisibility,
     reloadAlerts,
     http,
     toastNotifications,
@@ -61,20 +48,20 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
-    setAlert(initialAlert);
+    setEditFlyoutVisibility(false);
     setServerError(null);
-  }, [initialAlert, setAddFlyoutVisibility]);
+  }, [setEditFlyoutVisibility]);
 
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
 
-  if (!addFlyoutVisible) {
+  if (!editFlyoutVisible) {
     return null;
   }
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
+
   const errors = {
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
@@ -103,11 +90,11 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await createAlert({ http, alert });
+      const newAlert = await updateAlert({ http, alert, id: alert.id });
       if (toastNotifications) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
-            defaultMessage: "Saved '{alertName}'",
+          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
+            defaultMessage: "Updated '{alertName}'",
             values: {
               alertName: newAlert.name,
             },
@@ -117,7 +104,6 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
       return newAlert;
     } catch (errorRes) {
       setServerError(errorRes);
-      return undefined;
     }
   }
 
@@ -125,23 +111,23 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
     <EuiPortal>
       <EuiFlyout
         onClose={closeFlyout}
-        aria-labelledby="flyoutAlertAddTitle"
+        aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
         ownFocus
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
+          <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create Alert"
-                id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
+                defaultMessage="Edit Alert"
+                id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
               &emsp;
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
+                  'xpack.triggersActionsUI.sections.alertEdit.betaBadgeTooltipContent',
                   {
                     defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
                   }
@@ -156,14 +142,14 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
             dispatch={dispatch}
             errors={errors}
             serverError={serverError}
-            canChangeTrigger={canChangeTrigger}
+            canChangeTrigger={false}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+              <EuiButtonEmpty data-test-subj="cancelSaveEditedAlertButton" onClick={closeFlyout}>
+                {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
                   defaultMessage: 'Cancel',
                 })}
               </EuiButtonEmpty>
@@ -172,7 +158,7 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
               <EuiButton
                 fill
                 color="secondary"
-                data-test-subj="saveAlertButton"
+                data-test-subj="saveEditedAlertButton"
                 type="submit"
                 iconType="check"
                 isDisabled={hasErrors || hasActionErrors}
@@ -190,7 +176,7 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
                 }}
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                  id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
                   defaultMessage="Save"
                 />
               </EuiButton>
