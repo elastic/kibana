@@ -7,6 +7,7 @@
 jest.mock('ui/new_platform');
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { SavedMapInput } from '../../functions/common/saved_map';
+import { SavedLensInput } from '../../functions/common/saved_lens';
 import { EmbeddableTypes } from '../../expression_types';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
@@ -76,7 +77,42 @@ describe('input to expression', () => {
 
   describe('Lens Embeddable', () => {
     it('converts to a savedLens expression', () => {
-      expect('foo').toBe('bar');
+      const input: SavedLensInput = {
+        ...baseSavedMapInput,
+      };
+
+      const expression = embeddableInputToExpression(input, EmbeddableTypes.lens);
+      const ast = fromExpression(expression);
+
+      expect(ast.type).toBe('expression');
+      expect(ast.chain[0].function).toBe('savedLens');
+
+      expect(ast.chain[0].arguments.id).toStrictEqual([input.id]);
+
+      expect(ast.chain[0].arguments).not.toHaveProperty('title');
+      expect(ast.chain[0].arguments).not.toHaveProperty('timerange');
+    });
+
+    it('includes optional input values', () => {
+      const input: SavedLensInput = {
+        ...baseSavedMapInput,
+        title: 'title',
+        timeRange: {
+          from: 'now-1h',
+          to: 'now',
+        },
+      };
+
+      const expression = embeddableInputToExpression(input, EmbeddableTypes.map);
+      const ast = fromExpression(expression);
+
+      expect(ast.chain[0].arguments).toHaveProperty('title', input.title);
+      expect(ast.chain[0].arguments).toHaveProperty('timerange');
+
+      const timerangeExpression = ast.chain[0].arguments.timerange[0] as Ast;
+      expect(timerangeExpression.chain[0].function).toBe('timerange');
+      expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.timeRange?.from);
+      expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
     });
   });
 });
