@@ -144,6 +144,7 @@ exports[`Transform: <PivotPreview /> Minimal initialization 1`] = `
                     "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                   },
                   "management": Object {
+                    "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                     "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                   },
                   "metricbeat": Object {
