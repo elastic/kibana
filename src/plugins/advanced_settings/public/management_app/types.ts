@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Query } from '@elastic/eui';
 import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
 
 export interface FieldSetting {
@@ -55,8 +56,4 @@ export interface FieldState {
   error?: string | null;
 }
 
-export interface IQuery {
-  ast: any; // incomplete
-  text: string;
-  syntax: any; // incomplete
-}
+export type IQuery = Query;

@@ -53,7 +53,7 @@ export class Search extends PureComponent<SearchProps> {
     parseErrorMessage: null,
   };
 
-  onChange = ({ query, error }: { query: IQuery; error: { message: string } }) => {
+  onChange = ({ query, error }: { query: IQuery | null; error: { message: string } | null }) => {
     if (error) {
       this.setState({
         isSearchTextValid: false,
@@ -66,7 +66,7 @@ export class Search extends PureComponent<SearchProps> {
       isSearchTextValid: true,
       parseErrorMessage: null,
     });
-    this.props.onQueryChange({ query });
+    this.props.onQueryChange({ query: query! });
   };
 
   render() {
@@ -82,12 +82,12 @@ export class Search extends PureComponent<SearchProps> {
 
     const filters = [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'category',
         name: i18n.translate('advancedSettings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),
-        multiSelect: 'or',
+        multiSelect: 'or' as const,
         options: this.categories,
       },
     ];

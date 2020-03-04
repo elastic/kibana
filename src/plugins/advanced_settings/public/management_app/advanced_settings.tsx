@@ -19,14 +19,7 @@
 
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
-import {
-  Comparators,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  // @ts-ignore
-  Query,
-} from '@elastic/eui';
+import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
