@@ -60,7 +60,7 @@ function getDateRange(value?: ExpressionValueSearchContext | null) {
     return;
   }
 
-  const dateRange = toAbsoluteDates({ from: value.timeRange.from, to: value.timeRange.to });
+  const dateRange = toAbsoluteDates(value.timeRange);
 
   if (!dateRange) {
     return;

@@ -45,7 +45,7 @@ import {
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
-export const updateTimeBuckets = (
+const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
   timefilter: TimefilterContract,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']

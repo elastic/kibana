@@ -27,8 +27,7 @@ export function getAutoDate(deps: {
       return;
     }
 
-    const { from, to } = ctx.timeRange;
-    return deps.data.search.aggs.calculateAutoTimeExpression({ from, to });
+    return deps.data.search.aggs.calculateAutoTimeExpression(ctx.timeRange);
   }
 
   /**

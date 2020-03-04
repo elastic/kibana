@@ -26,11 +26,7 @@ import {
   TimefilterContract,
 } from '../../../../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
-import {
-  IAggConfig,
-  isDateHistogramBucketAggConfig,
-  updateTimeBuckets,
-} from '../../../../../data/public';
+import { IAggConfig, isDateHistogramBucketAggConfig } from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -93,13 +89,13 @@ const getSchemas = (
     timefilter: TimefilterContract;
   }
 ): Schemas => {
-  const { timeRange } = opts;
+  const { timeRange, timefilter } = opts;
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
-      // TODO: This is only place this is used outside the `data` plugin.
-      // We should find a way to get rid of it so it can stay internal to `data`.
-      updateTimeBuckets(agg, opts.timefilter);
+      const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+      agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+      agg.buckets.setInterval(agg.params.interval);
     }
 
     const hasSubAgg = [
