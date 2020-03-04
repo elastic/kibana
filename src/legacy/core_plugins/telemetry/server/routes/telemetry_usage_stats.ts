@@ -19,16 +19,14 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { CoreSetup } from 'src/core/server';
+import { Legacy } from 'kibana';
 import { telemetryCollectionManager } from '../collection_manager';
 
-export function registerTelemetryUsageStatsRoutes(core: CoreSetup) {
-  const { server } = core.http as any;
-
+export function registerTelemetryUsageStatsRoutes(server: Legacy.Server) {
   server.route({
     method: 'POST',
     path: '/api/telemetry/v2/clusters/_stats',
-    config: {
+    options: {
       validate: {
         payload: Joi.object({
           unencrypted: Joi.bool(),

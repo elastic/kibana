@@ -161,6 +161,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -203,6 +205,7 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -226,6 +229,7 @@ export {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
@@ -244,6 +248,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 

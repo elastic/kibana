@@ -61,7 +61,7 @@ describe('setupAuthentication()', () => {
           lifespan: null,
         },
         cookieName: 'my-sid-cookie',
-        authc: { providers: ['basic'] },
+        authc: { providers: ['basic'], http: { enabled: true } },
       }),
       true
     );

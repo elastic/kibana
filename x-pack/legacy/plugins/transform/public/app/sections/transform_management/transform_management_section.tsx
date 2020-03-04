@@ -7,10 +7,8 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,12 +22,12 @@ import {
 } from '@elastic/eui';
 
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { useDocumentationLinks } from '../../app_dependencies';
 import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { documentationLinksService } from '../../services/documentation';
 
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 import { SearchSelection } from './components/search_selection';
@@ -37,6 +35,8 @@ import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 
 export const TransformManagement: FC = () => {
+  const { esTransform } = useDocumentationLinks();
+
   const [transformsLoading, setTransformsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -82,23 +82,11 @@ export const TransformManagement: FC = () => {
                   id="xpack.transform.transformList.transformTitle"
                   defaultMessage="Transforms"
                 />
-                <span>&nbsp;</span>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.transform.transformList.betaBadgeLabel', {
-                    defaultMessage: `Beta`,
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.transform.transformList.betaBadgeTooltipContent',
-                    {
-                      defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                    }
-                  )}
-                />
               </h1>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={documentationLinksService.getTransformsDocUrl()}
+                href={esTransform}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"
