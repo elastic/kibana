@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ALLOWED_DATA_UNITS } from '../constants/validation';
+
 /**
  * Provides a validator function for maximum allowed input length.
  * @param maxLength Maximum length allowed.
@@ -44,8 +46,8 @@ export function patternValidator(
  * @param validators
  */
 export function composeValidators(
-  ...validators: Array<(value: string) => { [key: string]: any } | null>
-): (value: string) => { [key: string]: any } | null {
+  ...validators: Array<(value: any) => { [key: string]: any } | null>
+): (value: any) => { [key: string]: any } | null {
   return value => {
     const validationResult = validators.reduce((acc, validator) => {
       return {
@@ -54,5 +56,23 @@ export function composeValidators(
       };
     }, {});
     return Object.keys(validationResult).length > 0 ? validationResult : null;
+  };
+}
+
+export function requiredValidator() {
+  return (value: any) => {
+    return value === '' || value === undefined || value === null ? { required: true } : null;
+  };
+}
+
+export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
+  return (value: any) => {
+    if (typeof value !== 'string' || value === '') {
+      return null;
+    }
+    const regexp = new RegExp(`\\d+(${allowedUnits.join('|')})$`, 'i');
+    return regexp.test(value.trim())
+      ? null
+      : { invalidUnits: { allowedUnits: allowedUnits.join(', ') } };
   };
 }

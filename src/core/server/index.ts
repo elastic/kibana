@@ -159,6 +159,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -229,6 +231,9 @@ export {
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
