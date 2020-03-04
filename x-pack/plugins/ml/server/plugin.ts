@@ -100,7 +100,7 @@ export class MlServerPlugin {
       mlLicense: this.mlLicense,
     };
 
-    annotationRoutes(routeInit, plugins?.security);
+    annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
     dataFrameAnalyticsRoutes(routeInit);
@@ -117,7 +117,7 @@ export class MlServerPlugin {
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
     systemRoutes(routeInit, {
-      spacesPlugin: plugins.spaces,
+      spaces: plugins.spaces,
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
