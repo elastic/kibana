@@ -5,41 +5,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSuperSelect, EuiIcon, EuiSuperSelectOption } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 
-import * as i18n from './translations';
+interface Props {
+  connectors: Array<EuiSuperSelectOption<string>>;
+}
 
-const ICON_SIZE = 'm';
-
-const EuiIconExtended = styled(EuiIcon)`
-  margin-right: 13px;
-`;
-
-const connectors: Array<EuiSuperSelectOption<string>> = [
-  {
-    value: 'no-connector',
-    inputDisplay: (
-      <>
-        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
-        <span>{i18n.NO_CONNECTOR}</span>
-      </>
-    ),
-    'data-test-subj': 'no-connector',
-  },
-  {
-    value: 'servicenow-connector',
-    inputDisplay: (
-      <>
-        <EuiIconExtended type="logoWebhook" size={ICON_SIZE} />
-        <span>{'My ServiceNow connector'}</span>
-      </>
-    ),
-    'data-test-subj': 'servicenow-connector',
-  },
-];
-
-const ConnectorsDropdownComponent: React.FC = () => {
+const ConnectorsDropdownComponent: React.FC<Props> = ({ connectors }) => {
   const [selectedConnector, setSelectedConnector] = useState(connectors[0].value);
 
   return (
