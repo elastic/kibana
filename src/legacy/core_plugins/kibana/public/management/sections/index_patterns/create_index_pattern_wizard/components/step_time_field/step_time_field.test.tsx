@@ -29,8 +29,9 @@ jest.mock('./components/header', () => ({ Header: 'Header' }));
 jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
 jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
-jest.mock('./../../lib/extract_time_fields', () => ({
-  extractTimeFields: (fields: IFieldType) => fields,
+jest.mock('./../../lib', () => ({
+  extractTimeFields: require.requireActual('./../../lib').extractTimeFields,
+  ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
 }));
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
@@ -295,24 +296,39 @@ describe('StepTimeField', () => {
 
   it('should call createIndexPattern with undefined time field when no time filter chosen', async () => {
     const createIndexPattern = jest.fn();
+    const fields = [
+      {
+        name: '@timestamp',
+        type: 'date',
+      },
+    ];
+    const indPatternsService = {
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
+        },
+      }),
+    } as any;
 
     const component = shallowWithI18nProvider(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        indexPatternsService={indPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={createIndexPattern}
         indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
+    await (component.instance() as StepTimeField).fetchTimeFields();
+
+    expect((component.state() as any).timeFields).toHaveLength(3);
+
     (component.instance() as StepTimeField).onTimeFieldChanged(({
       target: { value: undefined },
     } as unknown) as React.ChangeEvent<HTMLSelectElement>);
-    component.update();
 
     await (component.instance() as StepTimeField).createIndexPattern();
-    component.update();
 
     expect(createIndexPattern).toHaveBeenCalledWith(undefined, '');
   });
