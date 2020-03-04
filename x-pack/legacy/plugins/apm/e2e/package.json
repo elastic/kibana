@@ -16,9 +16,11 @@
     "cypress": "^3.5.0",
     "cypress-cucumber-preprocessor": "^2.0.1",
     "js-yaml": "^3.13.1",
+    "ora": "^4.0.3",
     "p-limit": "^2.2.1",
     "ts-loader": "^6.1.0",
     "typescript": "3.7.5",
+    "wait-on": "^4.0.1",
     "webpack": "^4.41.5"
   }
 }

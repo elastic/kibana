@@ -17,7 +17,6 @@ export function loginAndWaitForPage(url: string) {
   const username = Cypress.env('elasticsearch_username');
   const password = Cypress.env('elasticsearch_password');
 
-  const hasCredentials = username && password;
   cy.log(`Authenticating via ${username} / ${password}`);
 
   const fullUrl = `${BASE_URL}${url}?rangeFrom=${RANGE_FROM}&rangeTo=${RANGE_TO}`;
