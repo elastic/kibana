@@ -43,7 +43,7 @@ This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
 [role="exclude",id="xpack-dashboard-only-mode"]
 == Dashboard-only mode
 
-Using the `kibana_dashboard_only_user` role is deprecated. 
+Using the `kibana_dashboard_only_user` role is deprecated.
 Use <<kibana-feature-privileges,feature privileges>> instead.
 
 [role="exclude",id="pdf-layout-modes"]
@@ -56,4 +56,12 @@ This page has moved. Please see <<reporting-getting-started>>.
 
 This page has moved. Please see <<reporting-getting-started>>.
 
+[role="exclude",id="add-sample-data"]
+== Add sample data
 
+This page has moved. Please see <<get-data-in>>.
+
+[role="exclude",id="tilemap"]
+== Coordinate map
+
+This page has moved. Please see <<coordinate-map>>.

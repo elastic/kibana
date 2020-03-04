@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface AppMountParameters 
+export interface AppMountParameters<HistoryLocationState = unknown> 
 ```
 
 ## Properties
@@ -17,5 +17,6 @@ export interface AppMountParameters
 |  --- | --- | --- |
 |  [appBasePath](./kibana-plugin-public.appmountparameters.appbasepath.md) | <code>string</code> | The route path for configuring navigation to the application. This string should not include the base path from HTTP. |
 |  [element](./kibana-plugin-public.appmountparameters.element.md) | <code>HTMLElement</code> | The container element to render the application into. |
+|  [history](./kibana-plugin-public.appmountparameters.history.md) | <code>ScopedHistory&lt;HistoryLocationState&gt;</code> | A scoped history instance for your application. Should be used to wire up your applications Router. |
 |  [onAppLeave](./kibana-plugin-public.appmountparameters.onappleave.md) | <code>(handler: AppLeaveHandler) =&gt; void</code> | A function that can be used to register a handler that will be called when the user is leaving the current application, allowing to prompt a confirmation message before actually changing the page.<!-- -->This will be called either when the user goes to another application, or when trying to close the tab or manually changing the url. |
 

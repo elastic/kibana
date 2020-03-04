@@ -305,6 +305,7 @@ export const SnapshotMetricTypeRT = rt.keyof({
   sqsMessagesSent: null,
   sqsMessagesEmpty: null,
   sqsOldestMessage: null,
+  custom: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;

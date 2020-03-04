@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { legacyBackDoorToSettings } from '../../application';
-
 const $ = require('jquery');
 const _ = require('lodash');
 const es = require('../es/es');
@@ -255,7 +253,6 @@ function clear() {
 }
 
 function retrieveSettings(settingsKey, settingsToRetrieve) {
-  const currentSettings = legacyBackDoorToSettings().getAutocomplete();
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -263,16 +260,17 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
-  if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
+  if (settingsToRetrieve[settingsKey] === true) {
     return es.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
-    // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
-    if (currentSettings[settingsKey]) {
+    if (settingsToRetrieve[settingsKey] === false) {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
+      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
+    } else {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
       return settingsPromise.resolve();
     }
-    // If the user doesn't want autocomplete suggestions, then clear any that exist
-    return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
   }
 }
 
@@ -293,9 +291,12 @@ function clearSubscriptions() {
   }
 }
 
-function retrieveAutoCompleteInfo(
-  settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()
-) {
+/**
+ *
+ * @param settings Settings A way to retrieve the current settings
+ * @param settingsToRetrieve any
+ */
+function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
@@ -334,8 +335,8 @@ function retrieveAutoCompleteInfo(
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
-      if (legacyBackDoorToSettings().getPolling()) {
-        retrieveAutoCompleteInfo();
+      if (settings.getPolling()) {
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
     }, POLL_INTERVAL);
   });

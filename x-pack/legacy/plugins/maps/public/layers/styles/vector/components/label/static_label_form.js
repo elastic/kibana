@@ -14,8 +14,10 @@ export function StaticLabelForm({ onStaticStyleChange, staticDynamicSelect, styl
   };
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+      <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+        {staticDynamicSelect}
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFieldText
           placeholder={i18n.translate('xpack.maps.styles.staticLabel.valuePlaceholder', {

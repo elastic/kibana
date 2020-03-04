@@ -92,6 +92,7 @@ export class ValidatedDualRange extends Component {
           fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}
+          focusable={false} // remove when #59039 is fixed
           {...rest}
         />
       </EuiFormRow>
