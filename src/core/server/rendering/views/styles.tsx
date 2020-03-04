@@ -62,7 +62,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             margin: 0;
           }
 
-          .kibanaWelcomeView {
+          .kbnWelcomeView {
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -87,18 +87,18 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                     justify-content: center;
           }
 
-          .kibanaWelcomeTitle {
+          .kbnWelcomeTitle {
             color: #000;
             font-size: 20px;
             font-family: sans-serif;
-            margin-top: 20px;
+            margin: 16px 0;
             animation: fadeIn 1s ease-in-out;
             animation-fill-mode: forwards;
             opacity: 0;
             animation-delay: 1.0s;
           }
 
-          .kibanaWelcomeText {
+          .kbnWelcomeText {
             font-size: 16px;
             font-family: sans-serif;
             color: #98a2b3;
@@ -108,19 +108,19 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             animation-delay: 1.0s;
           }
 
-          .kibanaLoaderWrap {
+          .kbnLoaderWrap {
             height: 128px;
             width: 128px;
             text-align: center;
           }
 
-          .kibanaLogoElastic {
+          .kbnLoader svg {
             width: 128px;
             height: 128px;
             margin-bottom: 16px;
           }
 
-          .kibanaLogoElastic path {
+          .kbnLoader path {
             stroke: white;
             animation-name: scaleElastic;
             animation-fill-mode: forwards;
@@ -132,37 +132,37 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             transform-origin: 50% 50%;
           }
 
-          .kibanaLogoElastic path:nth-of-type(1) {
+          .kbnLoader path:nth-of-type(1) {
             fill: #EE5097;
             animation-delay: 0s;
           }
 
 
-          .kibanaLogoElastic path:nth-of-type(2) {
+          .kbnLoader path:nth-of-type(2) {
             fill: #17A7E0;
             animation-delay: 0.035s;
           }
 
 
-          .kibanaLogoElastic path:nth-of-type(3) {
+          .kbnLoader path:nth-of-type(3) {
             fill: #23BAB1;
             animation-delay: 0.125s;
           }
 
 
-          .kibanaLogoElastic path:nth-of-type(4) {
+          .kbnLoader path:nth-of-type(4) {
             fill: #92C73D;
             animation-delay: 0.155s;
           }
 
 
-          .kibanaLogoElastic path:nth-of-type(5) {
+          .kbnLoader path:nth-of-type(5) {
             fill: #0678A0;
             animation-delay: 0.075s;
           }
 
 
-          .kibanaLogoElastic path:nth-of-type(6) {
+          .kbnLoader path:nth-of-type(6) {
             fill: #FDD009;
             animation-delay: 0.06s;
           };
