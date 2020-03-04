@@ -158,8 +158,23 @@ describe('KibanaRequest', () => {
 
       expect(kibanaRequest.route.options.authRequired).toBe(true);
     });
+
     it('handles required auth: { mode: "optional" }', () => {
       const auth: RouteOptions['auth'] = { mode: 'optional' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+    });
+
+    it('handles required auth: { mode: "try" } as "optional"', () => {
+      const auth: RouteOptions['auth'] = { mode: 'try' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
