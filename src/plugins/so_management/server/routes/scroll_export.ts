@@ -22,7 +22,7 @@ import { IRouter } from 'src/core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForExportRoute = (router: IRouter) => {
-  router.get(
+  router.post(
     {
       path: '/api/kibana/management/saved_objects/scroll/export', // TODO: change
       validate: {
