@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, createContext } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
@@ -34,7 +34,7 @@ import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
-import { TimeRange } from '../../../../../plugins/data/common';
+import { TimeRange } from '../../../../../plugins/data/public';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -48,6 +48,8 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   setAggsState: React.Dispatch<AggsAction>;
   timeRange?: TimeRange;
 }
+
+export const DefaultEditorAggParamsContext = createContext({} as any);
 
 function DefaultEditorAgg({
   agg,
@@ -73,6 +75,7 @@ function DefaultEditorAgg({
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
+  const [, setLocalTimeRange] = useState(timeRange);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
   const aggName = agg.type?.name;
@@ -117,11 +120,12 @@ function DefaultEditorAgg({
     }
   }
 
-  // Passed timeRange value is required to update agg.params.timeRange to the actual data,
-  // so makeLabel could return the relevant interval description.
+  // This useEffect is required to initiate rerender to keep labels up to date (Issue #57822).
   useEffect(() => {
-    agg.params.timeRange = timeRange;
-  }, [agg.params.timeRange, timeRange]);
+    if (aggName === 'date_histogram') {
+      setLocalTimeRange(timeRange);
+    }
+  }, [aggName, timeRange]);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
@@ -297,22 +301,24 @@ function DefaultEditorAgg({
             setStateParamValue={setStateParamValue}
           />
         )}
-        <DefaultEditorAggParams
-          agg={agg}
-          aggError={aggError}
-          aggIndex={aggIndex}
-          aggIsTooLow={aggIsTooLow}
-          disabledParams={disabledParams}
-          formIsTouched={formIsTouched}
-          groupName={groupName}
-          indexPattern={agg.getIndexPattern()}
-          metricAggs={metricAggs}
-          state={state}
-          setAggParamValue={setAggParamValue}
-          onAggTypeChange={onAggTypeChange}
-          setTouched={setTouched}
-          setValidity={setValidity}
-        />
+        <DefaultEditorAggParamsContext.Provider value={timeRange}>
+          <DefaultEditorAggParams
+            agg={agg}
+            aggError={aggError}
+            aggIndex={aggIndex}
+            aggIsTooLow={aggIsTooLow}
+            disabledParams={disabledParams}
+            formIsTouched={formIsTouched}
+            groupName={groupName}
+            indexPattern={agg.getIndexPattern()}
+            metricAggs={metricAggs}
+            state={state}
+            setAggParamValue={setAggParamValue}
+            onAggTypeChange={onAggTypeChange}
+            setTouched={setTouched}
+            setValidity={setValidity}
+          />
+        </DefaultEditorAggParamsContext.Provider>
       </>
     </EuiAccordion>
   );

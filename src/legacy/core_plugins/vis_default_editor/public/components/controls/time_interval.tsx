@@ -18,13 +18,14 @@
  */
 
 import { get, find } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { isValidInterval, AggParamOption } from '../../legacy_imports';
 import { AggParamEditorProps } from '../agg_param_props';
+import { DefaultEditorAggParamsContext } from '../agg';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;
@@ -40,6 +41,7 @@ function TimeIntervalParamEditor({
   setTouched,
   setValidity,
 }: AggParamEditorProps<string>) {
+  const timeRange = useContext(DefaultEditorAggParamsContext);
   const timeBase: string = get(editorConfig, 'interval.timeBase');
   const options = timeBase
     ? []
@@ -117,6 +119,11 @@ function TimeIntervalParamEditor({
   useEffect(() => {
     setValidity(isValid);
   }, [isValid]);
+
+  // To update aggConfigs actual timeRange, value of timeRange is set from context.
+  useEffect(() => {
+    agg.aggConfigs.setTimeRange(timeRange);
+  }, [agg.aggConfigs, timeRange]);
 
   return (
     <EuiFormRow

@@ -41,7 +41,7 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
-import { TimeRange } from '../../../../../plugins/data/common';
+import { TimeRange } from '../../../../../plugins/data/public';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
