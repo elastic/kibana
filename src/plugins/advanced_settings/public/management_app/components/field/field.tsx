@@ -138,8 +138,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   }
 
-  onCodeEditorChange = (_value: string) => {
-    const value = _value as UiSettingsType;
+  onCodeEditorChange = (value: string) => {
     const { defVal, type } = this.props.setting;
 
     let newUnsavedValue;
@@ -281,7 +280,7 @@ export class Field extends PureComponent<FieldProps> {
   };
 
   cancelChangeImage = () => {
-    if (this.changeImageForm.current && this.changeImageForm.current.fileInput) {
+    if (this.changeImageForm.current?.fileInput) {
       this.changeImageForm.current.fileInput.value = '';
       this.changeImageForm.current.handleChange();
     }
