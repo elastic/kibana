@@ -6,6 +6,7 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -73,7 +74,7 @@ function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) 
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization) {
+export function resultsServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup ResultsService
    *
@@ -88,7 +89,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         body: schema.object(anomaliesTableDataSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getAnomaliesTableData(context, request.body);
 
@@ -115,7 +116,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         body: schema.object(categoryDefinitionSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getCategoryDefinition(context, request.body);
 
@@ -142,7 +143,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         body: schema.object(maxAnomalyScoreSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getMaxAnomalyScore(context, request.body);
 
@@ -169,7 +170,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         body: schema.object(categoryExamplesSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getCategoryExamples(context, request.body);
 
@@ -196,7 +197,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         body: schema.object(partitionFieldValuesSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getPartitionFieldsValues(context, request.body);
 
