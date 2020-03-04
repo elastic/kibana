@@ -5,7 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { datasourceService } from '../../services';
+import { appContextService, datasourceService, agentConfigService } from '../../services';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
@@ -70,8 +70,12 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const datasource = await datasourceService.create(soClient, request.body);
+    await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id], {
+      user,
+    });
     return response.ok({
       body: { item: datasource, success: true },
     });

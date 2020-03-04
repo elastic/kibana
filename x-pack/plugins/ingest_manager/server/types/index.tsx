@@ -16,6 +16,8 @@ export {
   AgentAction,
   Datasource,
   NewDatasource,
+  FullAgentConfigDatasource,
+  FullAgentConfig,
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,

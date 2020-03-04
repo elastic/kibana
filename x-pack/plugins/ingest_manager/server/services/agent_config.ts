@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
-import { flatten } from 'lodash';
 import { AuthenticatedUser } from '../../../security/server';
 import { DEFAULT_AGENT_CONFIG, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
-import { NewAgentConfig, AgentConfig, AgentConfigStatus, ListWithKuery } from '../types';
+import {
+  Datasource,
+  NewAgentConfig,
+  AgentConfig,
+  FullAgentConfig,
+  FullAgentConfigDatasource,
+  AgentConfigStatus,
+  ListWithKuery,
+} from '../types';
 import { DeleteAgentConfigsResponse } from '../../common';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
@@ -249,25 +256,38 @@ class AgentConfigService {
     return result;
   }
 
-  private storedDatasourceToAgentStreams(datasources: AgentConfig['datasources'] = []): any[] {
-    return flatten(
-      // @ts-ignore
-      datasources.map((ds: any) => {
-        return ds.streams.map((stream: any) => ({
-          ...stream.input,
-          id: stream.id,
-          type: stream.input.type as any,
-          output: { use_output: stream.output_id },
-          ...(stream.config || {}),
-        }));
-      })
-    );
-  }
+  private storedDatasourceToAgentDatasource = (
+    datasource: Datasource
+  ): FullAgentConfigDatasource => {
+    const { name, namespace, enabled, package: pkg, output_id, inputs } = datasource;
+    return {
+      name,
+      namespace,
+      enabled,
+      package: pkg
+        ? {
+            name: pkg.name,
+            version: pkg.version,
+          }
+        : undefined,
+      use_output: output_id,
+      inputs: inputs
+        .filter(input => input.enabled)
+        .map(input => ({
+          ...input,
+          streams: input.streams.map(stream => ({
+            ...stream,
+            config: undefined,
+            ...(stream.config || {}),
+          })),
+        })),
+    };
+  };
 
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<any | null> {
+  ): Promise<FullAgentConfig | null> {
     let config;
 
     try {
@@ -282,25 +302,26 @@ class AgentConfigService {
       return null;
     }
 
-    const agentConfig = {
+    const agentConfig: FullAgentConfig = {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
         ...[
           await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
-        ].reduce((outputs, { config: outputConfig, ...output }) => {
-          outputs[output.is_default ? 'default' : output.id] = {
-            ...output,
-            type: output.type as any,
+        ].reduce((outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+          outputs[name] = {
+            type,
+            hosts,
+            ca_sha256,
+            api_key,
             ...outputConfig,
           };
           return outputs;
-        }, {} as any),
+        }, {} as FullAgentConfig['outputs']),
       },
-      streams:
-        config.datasources && config.datasources.length
-          ? this.storedDatasourceToAgentStreams(config.datasources)
-          : [],
+      datasources: (config.datasources as Datasource[]).map(ds =>
+        this.storedDatasourceToAgentDatasource(ds)
+      ),
     };
 
     return agentConfig;

@@ -31,3 +31,9 @@ export const DeleteAgentConfigsRequestSchema = {
     agentConfigIds: schema.arrayOf(schema.string()),
   }),
 };
+
+export const GetFullAgentConfigRequestSchema = {
+  params: schema.object({
+    agentConfigId: schema.string(),
+  }),
+};

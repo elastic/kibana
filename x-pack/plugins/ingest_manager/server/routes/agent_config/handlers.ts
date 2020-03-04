@@ -12,6 +12,7 @@ import {
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
+  GetFullAgentConfigRequestSchema,
 } from '../../types';
 import {
   GetAgentConfigsResponse,
@@ -19,6 +20,7 @@ import {
   CreateAgentConfigResponse,
   UpdateAgentConfigResponse,
   DeleteAgentConfigsResponse,
+  GetFullAgentConfigResponse,
 } from '../../../common';
 
 export const getAgentConfigsHandler: RequestHandler<
@@ -137,6 +139,38 @@ export const deleteAgentConfigsHandler: RequestHandler<
     return response.ok({
       body,
     });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getFullAgentConfig: RequestHandler<TypeOf<
+  typeof GetFullAgentConfigRequestSchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+
+  try {
+    const fullAgentConfig = await agentConfigService.getFullConfig(
+      soClient,
+      request.params.agentConfigId
+    );
+    if (fullAgentConfig) {
+      const body: GetFullAgentConfigResponse = {
+        item: fullAgentConfig,
+        success: true,
+      };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent config not found' },
+      });
+    }
   } catch (e) {
     return response.customError({
       statusCode: 500,

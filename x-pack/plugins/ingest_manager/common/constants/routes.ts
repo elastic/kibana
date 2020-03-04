@@ -34,6 +34,7 @@ export const AGENT_CONFIG_API_ROUTES = {
   CREATE_PATTERN: `${AGENT_CONFIG_API_ROOT}`,
   UPDATE_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
   DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
+  FULL_INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/full`,
 };
 
 // Agent API routes
