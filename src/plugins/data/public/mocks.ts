@@ -60,9 +60,7 @@ const createStartContract = (): Start => {
     getSuggestions: jest.fn(),
     search: {
       aggs: {
-        calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
-          return getCalculateAutoTimeExpression(coreStart.uiSettings);
-        }),
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
       },
       search: jest.fn(),
       __LEGACY: {

@@ -44,12 +44,12 @@ const aggTypeConfigMock = () => ({
   params: [aggTypeBaseParamMock()],
 });
 
-export const aggTypesRegistrySetupMock = (): MockedKeys<AggTypesRegistrySetup> => ({
+export const aggTypesRegistrySetupMock = (): AggTypesRegistrySetup => ({
   registerBucket: jest.fn(),
   registerMetric: jest.fn(),
 });
 
-export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> => ({
+export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
   get: jest.fn().mockImplementation(aggTypeConfigMock),
   getBuckets: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
   getMetrics: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
@@ -59,20 +59,16 @@ export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> =
   })),
 });
 
-export const searchSetupMock = (): MockedKeys<SearchSetup> => ({
+export const searchSetupMock = (): SearchSetup => ({
   aggs: {
-    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
-      return getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings);
-    }),
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
     types: aggTypesRegistrySetupMock(),
   },
 });
 
-export const searchStartMock = (): MockedKeys<SearchStart> => ({
+export const searchStartMock = (): SearchStart => ({
   aggs: {
-    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
-      return getCalculateAutoTimeExpression(coreMock.createStart().uiSettings);
-    }),
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
     createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
       return new AggConfigs(indexPattern, configStates, {
         schemas,

@@ -25,9 +25,7 @@ export * from './search_source/mocks';
 
 export const searchSetupMock = {
   aggs: {
-    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
-      return getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings);
-    }),
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
   },
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
