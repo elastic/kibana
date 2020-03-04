@@ -20,8 +20,8 @@ export const initUptimeServer = (
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
   );
 
-  uptimeAlertTypeFactories.forEach(alertType =>
-    plugins.alerting.registerType(alertType(server, libs))
+  uptimeAlertTypeFactories.forEach(alertTypeFactory =>
+    plugins.alerting.registerType(alertTypeFactory(server, libs))
   );
 
   const graphQLSchema = makeExecutableSchema({
