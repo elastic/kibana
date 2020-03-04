@@ -40,15 +40,11 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  * @param signal to cancel request
  */
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+  return KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     body: JSON.stringify(rule),
-    asResponse: true,
     signal,
   });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
@@ -94,18 +90,14 @@ export const fetchRules = async ({
     ...(filters.length ? { filter: filters.join(' AND ') } : {}),
   };
 
-  const response = await KibanaServices.get().http.fetch<FetchRulesResponse>(
+  return KibanaServices.get().http.fetch<FetchRulesResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_find`,
     {
       method: 'GET',
       query,
       signal,
-      asResponse: true,
     }
   );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
@@ -116,15 +108,11 @@ export const fetchRules = async ({
  *
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+  return KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
-    asResponse: true,
     signal,
   });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
