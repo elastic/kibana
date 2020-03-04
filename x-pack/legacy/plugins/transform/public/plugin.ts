@@ -10,7 +10,6 @@ import { ShimCore, ShimPlugins } from './shim';
 import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
-import { uiMetricService } from './app/services/ui_metric';
 
 export class Plugin {
   public start(core: ShimCore, plugins: ShimPlugins): void {
@@ -24,7 +23,7 @@ export class Plugin {
       savedObjects,
       overlays,
     } = core;
-    const { data, management, uiMetric } = plugins;
+    const { data, management } = plugins;
     const { docTitle } = chrome;
 
     // AppCore/AppPlugins to be passed on as React context
@@ -72,7 +71,6 @@ export class Plugin {
 
     // Initialize services
     textService.init();
-    uiMetricService.init(uiMetric.createUiStatsReporter);
     docTitleService.init(docTitle.change);
   }
 }

@@ -35,11 +35,7 @@ export interface AppDependencies {
 
 export type ShimCore = NpCore;
 
-export interface ShimPlugins extends NpPlugins {
-  uiMetric: {
-    createUiStatsReporter: typeof createUiStatsReporter;
-  };
-}
+export type ShimPlugins = NpPlugins;
 
 export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
   return {
@@ -48,9 +44,6 @@ export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
     },
     plugins: {
       ...npStart.plugins,
-      uiMetric: {
-        createUiStatsReporter,
-      },
     },
   };
 }
