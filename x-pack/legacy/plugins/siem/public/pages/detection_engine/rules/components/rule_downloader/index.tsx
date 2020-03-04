@@ -6,8 +6,11 @@
 
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { isFunction } from 'lodash/fp';
-import { exportRules } from '../../../../../containers/detection_engine/rules';
+import { isFunction, isNil } from 'lodash/fp';
+import {
+  exportRules,
+  ExportDocumentsProps,
+} from '../../../../../containers/detection_engine/rules';
 import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
 
@@ -15,10 +18,19 @@ const InvisibleAnchor = styled.a`
   display: none;
 `;
 
+export type ExportSelectedData = ({
+  excludeExportDetails,
+  filename,
+  ids,
+  signal,
+}: ExportDocumentsProps) => Promise<Blob>;
+
 export interface RuleDownloaderProps {
   filename: string;
-  ruleIds?: string[];
+  ids?: string[];
+  exportSelectedData?: ExportSelectedData;
   onExportComplete: (exportCount: number) => void;
+  onExportFailure?: () => void;
 }
 
 /**
@@ -29,9 +41,11 @@ export interface RuleDownloaderProps {
  *
  */
 export const RuleDownloaderComponent = ({
+  exportSelectedData,
   filename,
-  ruleIds,
+  ids,
   onExportComplete,
+  onExportFailure,
 }: RuleDownloaderProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const [, dispatchToaster] = useStateToaster();
@@ -41,13 +55,20 @@ export const RuleDownloaderComponent = ({
     const abortCtrl = new AbortController();
 
     async function exportData() {
-      if (anchorRef && anchorRef.current && ruleIds != null && ruleIds.length > 0) {
+      if (anchorRef && anchorRef.current && ids != null && ids.length > 0) {
+        let exportResponse;
         try {
-          const exportResponse = await exportRules({
-            ruleIds,
-            signal: abortCtrl.signal,
-          });
-
+          if (isNil(exportSelectedData)) {
+            exportResponse = await exportRules({
+              ids,
+              signal: abortCtrl.signal,
+            });
+          } else {
+            exportResponse = await exportSelectedData({
+              ids,
+              signal: abortCtrl.signal,
+            });
+          }
           if (isSubscribed) {
             // this is for supporting IE
             if (isFunction(window.navigator.msSaveOrOpenBlob)) {
@@ -61,11 +82,12 @@ export const RuleDownloaderComponent = ({
               window.URL.revokeObjectURL(objectURL);
             }
 
-            onExportComplete(ruleIds.length);
+            if (typeof onExportComplete === 'function') onExportComplete(ids.length);
           }
         } catch (error) {
           if (isSubscribed) {
             displayErrorToast(i18n.EXPORT_FAILURE, [error.message], dispatchToaster);
+            if (typeof onExportFailure === 'function') onExportFailure();
           }
         }
       }
@@ -77,7 +99,7 @@ export const RuleDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [ruleIds]);
+  }, [ids]);
 
   return <InvisibleAnchor ref={anchorRef} />;
 };

@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiIcon } from '@elastic/eui';
 import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
@@ -32,50 +32,60 @@ export const getActionsColumns = ({
   onOpenTimeline: OnOpenTimeline;
 }) => {
   const openAsDuplicateColumn = {
-    align: 'center',
-    field: 'savedObjectId',
-    name: '',
-    render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
-      <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
-        <EuiButtonIcon
-          aria-label={i18n.OPEN_AS_DUPLICATE}
-          data-test-subj="open-duplicate"
-          isDisabled={savedObjectId == null}
-          iconSize="s"
-          iconType="copy"
-          onClick={() =>
-            onOpenTimeline({
-              duplicate: true,
-              timelineId: `${timelineResult.savedObjectId}`,
-            })
-          }
-          size="s"
-        />
-      </EuiToolTip>
-    ),
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
+    name: i18n.OPEN_AS_DUPLICATE,
+    icon: <EuiIcon type="copy" size="s" />,
+    // onClick: () => {
+    //   onOpenTimeline({
+    //     duplicate: true,
+    //     timelineId: `${timelineResult.savedObjectId}`,
+    //   });
+    // },
+    // render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
+    //   <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
+    //     <EuiButtonIcon
+    //       aria-label={i18n.OPEN_AS_DUPLICATE}
+    //       data-test-subj="open-duplicate"
+    //       isDisabled={savedObjectId == null}
+    //       iconSize="s"
+    //       iconType="copy"
+    //       onClick={() =>
+    //         onOpenTimeline({
+    //           duplicate: true,
+    //           timelineId: `${timelineResult.savedObjectId}`,
+    //         })
+    //       }
+    //       size="s"
+    //     />
+    //   </EuiToolTip>
+    // ),
+    // sortable: false,
+    // width: ACTION_COLUMN_WIDTH,
   };
 
   const deleteTimelineColumn = {
-    align: 'center',
-    field: 'savedObjectId',
-    name: '',
-    render: (savedObjectId: string, { title }: OpenTimelineResult) => (
-      <DeleteTimelineModalButton
-        deleteTimelines={deleteTimelines}
-        savedObjectId={savedObjectId}
-        title={title}
-      />
-    ),
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
+    name: i18n.DELETE,
+    icon: <EuiIcon type="trash" size="s" />,
+    // render: (savedObjectId: string, { title }: OpenTimelineResult) => (
+    //   <DeleteTimelineModalButton
+    //     deleteTimelines={deleteTimelines}
+    //     savedObjectId={savedObjectId}
+    //     title={title}
+    //   />
+    // ),
+    // sortable: false,
+    // width: ACTION_COLUMN_WIDTH,
   };
 
   return [
-    actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
-    actionTimelineToShow.includes('delete') && deleteTimelines != null
-      ? deleteTimelineColumn
-      : null,
-  ].filter(action => action != null);
+    {
+      id: 0,
+      title: '',
+      items: [
+        actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
+        actionTimelineToShow.includes('delete') && deleteTimelines != null
+          ? deleteTimelineColumn
+          : null,
+      ].filter(action => action != null),
+    },
+  ];
 };

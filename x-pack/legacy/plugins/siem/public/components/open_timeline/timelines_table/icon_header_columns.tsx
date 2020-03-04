@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiIcon, EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
@@ -36,10 +36,7 @@ const EditTimelineActions = React.memo<{ actionsColumns: [] }>(({ actionsColumns
       isOpen={isPopoverOpen}
       closePopover={tooglePopover.bind(null, false)}
     >
-      {actionsColumns?.length &&
-        actionsColumns?.map((action, idx) => {
-          return <span key={`editTimelineAction-${idx}`}>{`item ${idx} `}</span>;
-        })}
+      <EuiContextMenu initialPanelId={0} panels={actionsColumns} />
     </EuiPopover>
   );
 });

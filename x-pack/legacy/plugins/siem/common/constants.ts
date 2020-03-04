@@ -72,6 +72,9 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
+export const TIMELINE_URL = '/api/timeline';
+export const TIMELINE_EXPORT_URL = '/api/timeline/_export';
+
 /**
  * Default signals index key for kibana.dev.yml
  */

@@ -260,6 +260,32 @@ export class Timeline {
       ),
     };
   }
+
+  // public async exportTimeline(request: FrameworkRequest, timelineIds: string[]) {
+  //   const savedObjectsClient = request.context.core.savedObjects.client;
+  //   const savedObjects = await savedObjectsClient.bulkGet(
+  //     timelineIds.map(id => ({ id, type: timelineSavedObjectType }))
+  //   );
+  //   const timelinesWithNotesAndPinnedEvents = await Promise.all(
+  //     savedObjects.saved_objects.map(async savedObject => {
+  //       const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+  //       return Promise.all([
+  //         this.note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
+  //         this.pinnedEvent.getAllPinnedEventsByTimelineId(
+  //           request,
+  //           timelineSaveObject.savedObjectId
+  //         ),
+  //         Promise.resolve(timelineSaveObject),
+  //       ]);
+  //     })
+  //   );
+
+  //   return {
+  //     timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
+  //       timelineWithReduxProperties(notes, pinnedEvents, timeline)
+  //     ),
+  //   };
+  // }
 }
 
 export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
@@ -271,15 +297,17 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const timelineWithReduxProperties = (
+export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
   timeline: TimelineSavedObject,
-  userName: string
+  userName?: string
 ): TimelineSavedObject => ({
   ...timeline,
   favorite:
-    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
+    timeline.favorite != null && userName != null
+      ? timeline.favorite.filter(fav => fav.userName === userName)
+      : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)

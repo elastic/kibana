@@ -175,8 +175,8 @@ export interface ImportRulesResponse {
   errors: ImportRulesResponseError[];
 }
 
-export interface ExportRulesProps {
-  ruleIds?: string[];
+export interface ExportDocumentsProps {
+  ids?: string[];
   filename?: string;
   excludeExportDetails?: boolean;
   signal: AbortSignal;

@@ -5,8 +5,9 @@
  */
 
 import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import uuid from 'uuid';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
@@ -19,9 +20,24 @@ import {
   UtilityBarText,
   UtilityBarAction,
 } from '../detection_engine/utility_bar';
+
 import * as i18n from './translations';
-import { BATCH_ACTIONS, REFRESH } from '../../pages/detection_engine/rules/translations';
+import {
+  BATCH_ACTIONS,
+  BATCH_ACTION_EXPORT_SELECTED,
+  REFRESH,
+  EXPORT_FILENAME,
+  SUCCESSFULLY_EXPORTED_RULES,
+} from '../../pages/detection_engine/rules/translations';
 import { useStateToaster } from '../toasters';
+import {
+  RuleDownloader,
+  ExportSelectedData,
+} from '../../pages/detection_engine/rules/components/rule_downloader';
+
+import { TIMELINE_EXPORT_URL } from '../../../common/constants';
+import { throwIfNotOk } from '../../hooks/api/api';
+import { KibanaServices } from '../../lib/kibana';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -49,6 +65,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const [, dispatchToaster] = useStateToaster();
+    const [enableDownloader, setEnableDownloader] = useState(false);
+
     const text = useMemo(
       () => (
         <FormattedMessage
@@ -68,98 +86,155 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [totalSearchResultsCount]
     );
 
+    const exportSelectedTimeline: ExportSelectedData = useCallback(
+      async ({
+        excludeExportDetails = false,
+        filename = `timelines_export.ndjson`,
+        ids = [],
+        signal,
+      }): Promise<Blob> => {
+        const body = ids.length > 0 ? JSON.stringify({ objects: ids }) : undefined;
+        const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
+          method: 'POST',
+          body,
+          query: {
+            exclude_export_details: excludeExportDetails,
+            file_name: filename,
+          },
+          signal,
+          asResponse: true,
+        });
+
+        await throwIfNotOk(response.response);
+        return response.body!;
+      },
+      []
+    );
+
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
         <EuiContextMenuPanel
-          items={
-            /* getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)*/
-            [
-              <EuiContextMenuItem
-                key={'BatchItemKey'}
-                icon="trash"
-                disabled={false}
-                onClick={async () => {
-                  closePopover();
-                }}
-              >
-                {'Delete selected timeline'}
-              </EuiContextMenuItem>,
-            ]
-          }
+          items={[
+            <EuiContextMenuItem
+              key={'ExportItemKey'}
+              icon="exportAction"
+              disabled={selectedItems.length === 0}
+              onClick={async () => {
+                closePopover();
+
+                setEnableDownloader(true);
+              }}
+            >
+              {BATCH_ACTION_EXPORT_SELECTED}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key={'DeleteItemKey'}
+              icon="trash"
+              disabled={selectedItems.length === 0}
+              onClick={async () => {
+                closePopover();
+                if (typeof onDeleteSelected === 'function') onDeleteSelected();
+              }}
+            >
+              {'Delete selected timeline'}
+            </EuiContextMenuItem>,
+          ]}
         />
       ),
-      [selectedItems, /* dispatch, */ dispatchToaster, history]
+      [selectedItems, dispatchToaster, history]
     );
 
     return (
-      <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-        <TitleRow
-          data-test-subj="title-row"
-          onDeleteSelected={onDeleteSelected}
-          onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-          selectedTimelinesCount={selectedItems.length}
-          title={title}
-        >
-          <SearchRow
-            data-test-subj="search-row"
-            onlyFavorites={onlyFavorites}
-            onQueryChange={onQueryChange}
-            onToggleOnlyFavorites={onToggleOnlyFavorites}
-            query={query}
+      <>
+        {enableDownloader && (
+          <RuleDownloader
+            filename={`${EXPORT_FILENAME}.ndjson`}
+            ids={selectedItems
+              ?.filter(item => item.savedObjectId != null)
+              .map(item => item.savedObjectId)}
+            exportSelectedData={exportSelectedTimeline}
+            onExportComplete={exportCount => {
+              setEnableDownloader(false);
+              dispatchToaster({
+                type: 'addToaster',
+                toast: {
+                  id: uuid.v4(),
+                  title: SUCCESSFULLY_EXPORTED_RULES(exportCount),
+                  color: 'success',
+                  iconType: 'check',
+                },
+              });
+            }}
+            onExportFailure={() => {
+              setEnableDownloader(false);
+            }}
+          />
+        )}
+        <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
+          <TitleRow
+            data-test-subj="title-row"
+            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+            // onDeleteSelected={onDeleteSelected}
+            selectedTimelinesCount={selectedItems.length}
+            title={title}
+          >
+            <SearchRow
+              data-test-subj="search-row"
+              onlyFavorites={onlyFavorites}
+              onQueryChange={onQueryChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              query={query}
+              totalSearchResultsCount={totalSearchResultsCount}
+            />
+          </TitleRow>
+
+          <UtilityBar border>
+            <UtilityBarSection>
+              <UtilityBarGroup>
+                <UtilityBarText>{text}</UtilityBarText>
+              </UtilityBarGroup>
+
+              <UtilityBarGroup>
+                <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
+                <UtilityBarAction
+                  iconSide="right"
+                  iconType="arrowDown"
+                  popoverContent={getBatchItemsPopoverContent}
+                >
+                  {BATCH_ACTIONS}
+                </UtilityBarAction>
+                <UtilityBarAction iconSide="right" iconType="refresh" onClick={() => null}>
+                  {REFRESH}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+            </UtilityBarSection>
+          </UtilityBar>
+
+          <TimelinesTable
+            actionTimelineToShow={
+              onDeleteSelected != null && deleteTimelines != null
+                ? ['delete', 'duplicate', 'selectable']
+                : ['duplicate', 'selectable']
+            }
+            data-test-subj="timelines-table"
+            deleteTimelines={deleteTimelines}
+            defaultPageSize={defaultPageSize}
+            loading={isLoading}
+            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+            onOpenTimeline={onOpenTimeline}
+            onSelectionChange={onSelectionChange}
+            onTableChange={onTableChange}
+            onToggleShowNotes={onToggleShowNotes}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            searchResults={searchResults}
+            showExtendedColumns={true}
+            sortDirection={sortDirection}
+            sortField={sortField}
             totalSearchResultsCount={totalSearchResultsCount}
           />
-        </TitleRow>
-
-        <UtilityBar border>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText>{text}</UtilityBarText>
-            </UtilityBarGroup>
-
-            <UtilityBarGroup>
-              <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
-              <UtilityBarAction
-                iconSide="right"
-                iconType="arrowDown"
-                popoverContent={getBatchItemsPopoverContent}
-              >
-                {BATCH_ACTIONS}
-              </UtilityBarAction>
-              <UtilityBarAction
-                iconSide="right"
-                iconType="refresh"
-                onClick={() => null /* dispatch({ type: 'refresh' })*/}
-              >
-                {REFRESH}
-              </UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
-
-        <TimelinesTable
-          actionTimelineToShow={
-            onDeleteSelected != null && deleteTimelines != null
-              ? ['delete', 'duplicate', 'selectable']
-              : ['duplicate', 'selectable']
-          }
-          data-test-subj="timelines-table"
-          deleteTimelines={deleteTimelines}
-          defaultPageSize={defaultPageSize}
-          loading={isLoading}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={onOpenTimeline}
-          onSelectionChange={onSelectionChange}
-          onTableChange={onTableChange}
-          onToggleShowNotes={onToggleShowNotes}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          searchResults={searchResults}
-          showExtendedColumns={true}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          totalSearchResultsCount={totalSearchResultsCount}
-        />
-      </EuiPanel>
+        </EuiPanel>
+      </>
     );
   }
 );

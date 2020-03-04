@@ -11,6 +11,8 @@ import * as runtimeTypes from 'io-ts';
 import { unionWithNullType } from '../framework';
 import { NoteSavedObjectToReturnRuntimeType } from '../note/types';
 import { PinnedEventToReturnSavedObjectRuntimeType } from '../pinned_event/types';
+import { LegacyRequest } from '../../types';
+import { ColumnHeaderResult, Maybe, DataProviderResult, NoteResult } from '../../graphql/types';
 
 /*
  *  ColumnHeader Types
@@ -199,3 +201,31 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
 
 export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+
+export interface ExportTimelineRequest extends Omit<LegacyRequest, 'query'> {
+  payload: { objects: Array<{ timelime_id: string }> | null | undefined };
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
+}
+
+export interface ExportTimelineResults {
+  timeline: Array<Maybe<ExportTimelineResult>>;
+}
+
+export interface ExportTimelineResult {
+  columns?: Maybe<ColumnHeaderResult[]>;
+
+  dataProviders?: Maybe<DataProviderResult[]>;
+
+  description?: Maybe<string>;
+
+  eventNotes?: Maybe<NoteResult[]>;
+
+  globalNotes?: Maybe<NoteResult[]>;
+
+  pinnedEventIds?: Maybe<string[]>;
+
+  title?: Maybe<string>;
+}

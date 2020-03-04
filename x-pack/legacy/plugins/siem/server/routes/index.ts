@@ -29,6 +29,7 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
+import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
 
 export type LegacyInitRoutes = (getClients: GetScopedClients) => void;
 
@@ -55,6 +56,8 @@ export const initRoutes = (
 
   importRulesRoute(route, config, getClients);
   exportRulesRoute(route, config, getClients);
+
+  exportTimelinesRoute(route, config, getClients);
 
   findRulesStatusesRoute(route, getClients);
 
