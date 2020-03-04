@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { template } from 'lodash';
 import { http } from '../../../../services/http_service';
 
 import emailBody from './email.html';
 import emailInfluencersBody from './email_influencers.html';
+import { DEFAULT_WATCH_SEVERITY } from './select_severity';
 import { watch } from './watch.js';
 import { i18n } from '@kbn/i18n';
+import { getBasePath, getApplication } from '../../../../util/dependency_cache';
 
 const compiledEmailBody = template(emailBody);
 const compiledEmailInfluencersBody = template(emailInfluencersBody);
@@ -38,8 +39,9 @@ function randomNumber(min, max) {
 }
 
 function saveWatch(watchModel) {
-  const basePath = chrome.addBasePath('/api/watcher');
-  const url = `${basePath}/watch/${watchModel.id}`;
+  const basePath = getBasePath();
+  const path = basePath.prepend('/api/watcher');
+  const url = `${path}/watch/${watchModel.id}`;
 
   return http({
     url,
@@ -74,7 +76,10 @@ class CreateWatchService {
     this.config.interval = '20m';
     this.config.watcherEditURL = '';
     this.config.includeInfluencers = false;
-    this.config.threshold = { display: 'critical', val: 75 };
+
+    // Current implementation means that default needs to match that of the select severity control.
+    const { display, val } = DEFAULT_WATCH_SEVERITY;
+    this.config.threshold = { display, val };
   }
 
   createNewWatch = function(jobId) {
@@ -90,12 +95,13 @@ class CreateWatchService {
         watch.input.search.request.body.aggs.bucket_results.filter.range.anomaly_score.gte = this.config.threshold.val;
 
         if (this.config.includeEmail && this.config.email !== '') {
+          const { getUrlForApp } = getApplication();
           const emails = this.config.email.split(',');
           emailSection.send_email.email.to = emails;
 
           // create the html by adding the variables to the compiled email body.
           emailSection.send_email.email.body.html = compiledEmailBody({
-            serverAddress: chrome.getAppUrl(),
+            serverAddress: getUrlForApp('ml', { absolute: true }),
             influencersSection:
               this.config.includeInfluencers === true
                 ? compiledEmailInfluencersBody({
@@ -152,15 +158,17 @@ class CreateWatchService {
           upstreamJSON: {
             id,
             type: 'json',
+            isNew: false, // Set to false, as we want to allow watches to be overwritten.
             watch,
           },
         };
 
+        const basePath = getBasePath();
         if (id !== '') {
           saveWatch(watchModel)
             .then(() => {
               this.status.watch = this.STATUS.SAVED;
-              this.config.watcherEditURL = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
+              this.config.watcherEditURL = `${basePath.get()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
               resolve({
                 id,
                 url: this.config.watcherEditURL,
@@ -180,8 +188,9 @@ class CreateWatchService {
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
-    const basePath = chrome.addBasePath('/api/watcher');
-    const url = `${basePath}/watch/${id}`;
+    const basePath = getBasePath();
+    const path = basePath.prepend('/api/watcher');
+    const url = `${path}/watch/${id}`;
     return http({
       url,
       method: 'GET',

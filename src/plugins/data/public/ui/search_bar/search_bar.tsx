@@ -29,32 +29,23 @@ import {
   IDataPluginServices,
   TimeRange,
   Query,
-  esFilters,
+  Filter,
   IIndexPattern,
-  TimeHistoryContract,
   FilterBar,
   SavedQuery,
-  SavedQueryMeta,
-  SaveQueryForm,
-  SavedQueryManagementComponent,
-  SavedQueryAttributes,
 } from '../..';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+import { SavedQueryAttributes, TimeHistoryContract } from '../../query';
+import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm } from '..';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
-  filters?: esFilters.Filter[];
-  // Date picker
-  dateRangeFrom?: string;
-  dateRangeTo?: string;
+  onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  isRefreshPaused?: boolean;
-  refreshInterval?: number;
 }
 
 export interface SearchBarOwnProps {
@@ -69,13 +60,19 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
+  filters?: Filter[];
+  // Date picker
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update

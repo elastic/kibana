@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import React from 'react';
 
 interface Props {
   title: React.ReactNode;
-  error: {
-    data: {
-      error: string;
-      cause?: string[];
-      message?: string;
-    };
-  };
+  error: Error | null;
   actions?: JSX.Element;
 }
 
@@ -25,25 +19,11 @@ export const SectionError: React.FunctionComponent<Props> = ({
   actions,
   ...rest
 }) => {
-  const {
-    error: errorString,
-    cause, // wrapEsError() on the server adds a "cause" array
-    message,
-  } = error.data;
+  const errorMessage = error?.message ?? JSON.stringify(error, null, 2);
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      {cause ? message || errorString : <p>{message || errorString}</p>}
-      {cause && (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <ul>
-            {cause.map((causeMsg, i) => (
-              <li key={i}>{causeMsg}</li>
-            ))}
-          </ul>
-        </Fragment>
-      )}
+      <pre>{errorMessage}</pre>
       {actions ? actions : null}
     </EuiCallOut>
   );

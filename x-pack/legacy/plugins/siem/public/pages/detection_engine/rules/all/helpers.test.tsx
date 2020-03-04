@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bucketRulesResponse, formatRules } from './helpers';
-import { mockRule, mockRuleError, mockRules, mockTableData } from './__mocks__/mock';
+import { bucketRulesResponse, showRulesTable } from './helpers';
+import { mockRule, mockRuleError } from './__mocks__/mock';
 import uuid from 'uuid';
 import { Rule, RuleError } from '../../../../containers/detection_engine/rules';
 
@@ -14,20 +14,6 @@ describe('AllRulesTable Helpers', () => {
   const mockRule2: Readonly<Rule> = mockRule(uuid.v4());
   const mockRuleError1: Readonly<RuleError> = mockRuleError(uuid.v4());
   const mockRuleError2: Readonly<RuleError> = mockRuleError(uuid.v4());
-
-  describe('formatRules', () => {
-    test('formats rules with no selection', () => {
-      const formattedRules = formatRules(mockRules);
-      expect(formattedRules).toEqual(mockTableData);
-    });
-
-    test('formats rules with selection', () => {
-      const mockTableDataWithSelected = [...mockTableData];
-      mockTableDataWithSelected[0].isLoading = true;
-      const formattedRules = formatRules(mockRules, [mockRules[0].id]);
-      expect(formattedRules).toEqual(mockTableDataWithSelected);
-    });
-  });
 
   describe('bucketRulesResponse', () => {
     test('buckets empty response', () => {
@@ -56,6 +42,48 @@ describe('AllRulesTable Helpers', () => {
         rules: [mockRule1, mockRule2],
         errors: [mockRuleError1, mockRuleError2],
       });
+    });
+  });
+
+  describe('showRulesTable', () => {
+    test('returns false when rulesCustomInstalled and rulesInstalled are null', () => {
+      const result = showRulesTable({
+        rulesCustomInstalled: null,
+        rulesInstalled: null,
+      });
+      expect(result).toBeFalsy();
+    });
+
+    test('returns false when rulesCustomInstalled and rulesInstalled are 0', () => {
+      const result = showRulesTable({
+        rulesCustomInstalled: 0,
+        rulesInstalled: 0,
+      });
+      expect(result).toBeFalsy();
+    });
+
+    test('returns false when both rulesCustomInstalled and rulesInstalled checks return false', () => {
+      const result = showRulesTable({
+        rulesCustomInstalled: 0,
+        rulesInstalled: null,
+      });
+      expect(result).toBeFalsy();
+    });
+
+    test('returns true if rulesCustomInstalled is not null or 0', () => {
+      const result = showRulesTable({
+        rulesCustomInstalled: 5,
+        rulesInstalled: null,
+      });
+      expect(result).toBeTruthy();
+    });
+
+    test('returns true if rulesInstalled is not null or 0', () => {
+      const result = showRulesTable({
+        rulesCustomInstalled: null,
+        rulesInstalled: 5,
+      });
+      expect(result).toBeTruthy();
     });
   });
 });

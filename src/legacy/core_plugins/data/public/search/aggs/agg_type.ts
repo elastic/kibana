@@ -19,7 +19,6 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { initParams } from './agg_params';
 
 import { AggConfig } from './agg_config';
@@ -29,9 +28,11 @@ import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import {
   KBN_FIELD_TYPES,
-  fieldFormats,
+  IFieldFormat,
   ISearchSource,
 } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../plugins/data/public/services';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -58,14 +59,14 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => fieldFormats.FieldFormat;
+  getFormat?: (agg: TAggConfig) => IFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
-  const fieldFormatsService = npStart.plugins.data.fieldFormats;
+  const fieldFormatsService = getFieldFormats();
 
   return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
@@ -199,7 +200,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => fieldFormats.FieldFormat;
+  getFormat: (agg: TAggConfig) => IFieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

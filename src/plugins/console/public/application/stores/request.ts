@@ -26,13 +26,13 @@ import { ESRequestResult } from '../hooks/use_send_current_request_to_es/send_re
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: ESRequestResult[] } }
-  | { type: 'requestFail'; payload: { contentType: BaseResponseType; value: string } };
+  | { type: 'requestFail'; payload: ESRequestResult<string> | undefined };
 
 export interface Store {
   requestInFlight: boolean;
   lastResult: {
     data: ESRequestResult[] | null;
-    error?: { contentType: BaseResponseType; value: string };
+    error?: ESRequestResult<string>;
   };
 }
 

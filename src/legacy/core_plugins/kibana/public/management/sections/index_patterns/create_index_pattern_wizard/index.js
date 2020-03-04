@@ -43,10 +43,11 @@ uiRoutes.when('/management/kibana/index_pattern', {
         $http: npStart.core.http,
         savedObjectsClient: npStart.core.savedObjects.client,
         indexPatternCreationType,
-        confirmModalPromise: $injector.get('confirmModalPromise'),
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },
+        openConfirm: npStart.core.overlays.openConfirm,
+        uiSettings: npStart.core.uiSettings,
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;

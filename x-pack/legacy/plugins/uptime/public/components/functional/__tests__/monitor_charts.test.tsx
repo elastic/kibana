@@ -6,10 +6,9 @@
 
 import React from 'react';
 import DateMath from '@elastic/datemath';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorChartsComponent } from '../monitor_charts';
 import { MonitorChart } from '../../../../common/graphql/types';
-import { renderWithRouter } from '../../../lib';
+import { shallowWithRouter } from '../../../lib';
 
 describe('MonitorCharts component', () => {
   let dateMathSpy: any;
@@ -63,18 +62,16 @@ describe('MonitorCharts component', () => {
   };
 
   it('renders the component without errors', () => {
-    const component = shallowWithIntl(
-      renderWithRouter(
-        <MonitorChartsComponent
-          danger="dangerColor"
-          data={{ monitorChartsData: chartResponse.monitorChartsData }}
-          loading={false}
-          mean="mean"
-          range="range"
-          success="success"
-          monitorId="something"
-        />
-      )
+    const component = shallowWithRouter(
+      <MonitorChartsComponent
+        danger="dangerColor"
+        data={{ monitorChartsData: chartResponse.monitorChartsData }}
+        loading={false}
+        mean="mean"
+        range="range"
+        success="success"
+        monitorId="something"
+      />
     );
     expect(component).toMatchSnapshot();
   });

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-
 // inner angular imports
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
@@ -20,14 +18,9 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
+  OverlayStart,
 } from 'kibana/public';
-import {
-  configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-  confirmModalFactory,
-  addAppRedirectMessageToUrl,
-} from './legacy_imports';
+import { configureAppAngularModule } from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
 import {
@@ -39,6 +32,11 @@ import { checkLicense } from '../../../../plugins/graph/common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../src/plugins/kibana_legacy/public';
+import { addAppRedirectMessageToUrl } from '../../../../../src/plugins/kibana_legacy/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -64,6 +62,7 @@ export interface GraphDependencies {
   storage: Storage;
   canEditDrillDownUrls: boolean;
   graphSavePolicy: string;
+  overlays: OverlayStart;
 }
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
@@ -120,22 +119,13 @@ function mountGraphApp(appBasePath: string, element: HTMLElement) {
 function createLocalAngularModule(navigation: NavigationStart) {
   createLocalI18nModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
 
   const graphAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'graphI18n',
     'graphTopNav',
-    'graphConfirmModal',
   ]);
   return graphAngularModule;
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('graphConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
 function createLocalTopNavModule(navigation: NavigationStart) {

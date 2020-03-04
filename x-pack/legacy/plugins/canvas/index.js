@@ -36,7 +36,7 @@ export function canvas(kibana) {
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',
       ],
-      home: ['plugins/canvas/register_feature'],
+      home: ['plugins/canvas/legacy_register_feature'],
       mappings,
       migrations,
       savedObjectsManagement: {

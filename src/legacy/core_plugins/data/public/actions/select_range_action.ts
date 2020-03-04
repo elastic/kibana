@@ -19,22 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  IAction,
+  Action,
   createAction,
   IncompatibleActionError,
 } from '../../../../../plugins/ui_actions/public';
-// @ts-ignore
 import { onBrushEvent } from './filters/brush_event';
-import {
-  esFilters,
-  FilterManager,
-  TimefilterContract,
-  changeTimeFilter,
-  extractTimeFilter,
-  mapAndFlattenFilters,
-} from '../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIndexPatterns } from '../../../../../plugins/data/public/services';
+import { FilterManager, TimefilterContract, esFilters } from '../../../../../plugins/data/public';
 
 export const SELECT_RANGE_ACTION = 'SELECT_RANGE_ACTION';
 
@@ -45,8 +35,7 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: esFilters.Filter[] = (await onBrushEvent(context.data, getIndexPatterns)) || [];
-    return filters.length > 0;
+    return Boolean(await onBrushEvent(context.data));
   } catch {
     return false;
   }
@@ -55,7 +44,7 @@ async function isCompatible(context: ActionContext) {
 export function selectRangeAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): IAction<ActionContext> {
+): Action<ActionContext> {
   return createAction<ActionContext>({
     type: SELECT_RANGE_ACTION,
     id: SELECT_RANGE_ACTION,
@@ -70,18 +59,22 @@ export function selectRangeAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = (await onBrushEvent(data, getIndexPatterns)) || [];
+      const filter = await onBrushEvent(data);
 
-      const selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
+      if (!filter) {
+        return;
+      }
+
+      const selectedFilters = esFilters.mapAndFlattenFilters([filter]);
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);

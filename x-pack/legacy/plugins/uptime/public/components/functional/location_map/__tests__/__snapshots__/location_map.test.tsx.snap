@@ -42,15 +42,15 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
         }
       />
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
+    <EuiHideFor
+      sizes={
+        Array [
+          "xs",
+        ]
+      }
     >
-      <EuiHideFor
-        sizes={
-          Array [
-            "xs",
-          ]
-        }
+      <EuiFlexItem
+        grow={false}
       >
         <styled.div>
           <EmbeddedMap
@@ -69,8 +69,8 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
             }
           />
         </styled.div>
-      </EuiHideFor>
-    </EuiFlexItem>
+      </EuiFlexItem>
+    </EuiHideFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
@@ -127,15 +127,15 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
         }
       />
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
+    <EuiHideFor
+      sizes={
+        Array [
+          "xs",
+        ]
+      }
     >
-      <EuiHideFor
-        sizes={
-          Array [
-            "xs",
-          ]
-        }
+      <EuiFlexItem
+        grow={false}
       >
         <LocationMissingWarning />
         <styled.div>
@@ -155,8 +155,8 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
             }
           />
         </styled.div>
-      </EuiHideFor>
-    </EuiFlexItem>
+      </EuiFlexItem>
+    </EuiHideFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
@@ -186,15 +186,15 @@ exports[`LocationMap component renders named locations that have missing geo dat
         }
       />
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
+    <EuiHideFor
+      sizes={
+        Array [
+          "xs",
+        ]
+      }
     >
-      <EuiHideFor
-        sizes={
-          Array [
-            "xs",
-          ]
-        }
+      <EuiFlexItem
+        grow={false}
       >
         <LocationMissingWarning />
         <styled.div>
@@ -203,8 +203,8 @@ exports[`LocationMap component renders named locations that have missing geo dat
             upPoints={Array []}
           />
         </styled.div>
-      </EuiHideFor>
-    </EuiFlexItem>
+      </EuiFlexItem>
+    </EuiHideFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
@@ -247,15 +247,15 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
         }
       />
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
+    <EuiHideFor
+      sizes={
+        Array [
+          "xs",
+        ]
+      }
     >
-      <EuiHideFor
-        sizes={
-          Array [
-            "xs",
-          ]
-        }
+      <EuiFlexItem
+        grow={false}
       >
         <LocationMissingWarning />
         <styled.div>
@@ -271,8 +271,8 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
             }
           />
         </styled.div>
-      </EuiHideFor>
-    </EuiFlexItem>
+      </EuiFlexItem>
+    </EuiHideFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;

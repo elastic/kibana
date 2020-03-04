@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export { aggTypes } from './agg_types';
+export {
+  AggTypesRegistry,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
+} from './agg_types_registry';
 export { AggType } from './agg_type';
+export { aggTypes } from './agg_types';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
@@ -50,3 +55,6 @@ export { isValidJson, isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
+
+// types
+export { CreateAggConfigParams, IAggConfig, IAggConfigs } from './types';

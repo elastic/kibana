@@ -190,10 +190,10 @@ export interface DiscoveredPlugin {
  */
 export interface InternalPluginInfo {
   /**
-   * Path to the client-side entrypoint file to be used to build the client-side
-   * bundle for a plugin.
+   * Path to the target/public directory of the plugin which should be
+   * served
    */
-  readonly entryPointPath: string;
+  readonly publicTargetDir: string;
 }
 
 /**
@@ -214,7 +214,7 @@ export interface Plugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['index'] as const,
+  kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
   path: ['data'] as const,
 };

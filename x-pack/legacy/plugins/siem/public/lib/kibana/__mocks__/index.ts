@@ -12,8 +12,12 @@ import {
   createWithKibanaMock,
 } from '../../../mock/kibana_react';
 
+export const KibanaServices = { get: jest.fn() };
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const useTimeZone = jest.fn();
+export const useDateFormat = jest.fn();
+export const useBasePath = jest.fn(() => '/test/base/path');
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());

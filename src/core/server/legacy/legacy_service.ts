@@ -262,6 +262,8 @@ export class LegacyService implements CoreService {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
+        getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
@@ -297,6 +299,7 @@ export class LegacyService implements CoreService {
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
+        registerType: setupDeps.core.savedObjects.registerType,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

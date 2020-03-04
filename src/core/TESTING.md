@@ -2,15 +2,33 @@
 
 This document outlines best practices and patterns for testing Kibana Plugins.
 
-- [Strategy](#strategy)
-- [Core Integrations](#core-integrations)
-  - [Core Mocks](#core-mocks)
+- [Testing Kibana Plugins](#testing-kibana-plugins)
+  - [Strategy](#strategy)
+  - [New concerns in the Kibana Platform](#new-concerns-in-the-kibana-platform)
+  - [Core Integrations](#core-integrations)
+    - [Core Mocks](#core-mocks)
+      - [Example](#example)
   - [Strategies for specific Core APIs](#strategies-for-specific-core-apis)
-      - [HTTP Routes](#http-routes)
-      - [SavedObjects](#savedobjects)
-      - [Elasticsearch](#elasticsearch)
-- [Plugin Integrations](#plugin-integrations)
-- [Plugin Contracts](#plugin-contracts)
+    - [HTTP Routes](#http-routes)
+        - [Preconditions](#preconditions)
+      - [Unit testing](#unit-testing)
+          - [Example](#example-1)
+      - [Integration tests](#integration-tests)
+        - [Functional Test Runner](#functional-test-runner)
+          - [Example](#example-2)
+        - [TestUtils](#testutils)
+          - [Example](#example-3)
+    - [Applications](#applications)
+      - [Example](#example-4)
+    - [SavedObjects](#savedobjects)
+      - [Unit Tests](#unit-tests)
+      - [Integration Tests](#integration-tests-1)
+    - [Elasticsearch](#elasticsearch)
+  - [Plugin integrations](#plugin-integrations)
+    - [Preconditions](#preconditions-1)
+    - [Testing dependencies usages](#testing-dependencies-usages)
+    - [Testing components consuming the dependencies](#testing-components-consuming-the-dependencies)
+    - [Testing optional plugin dependencies](#testing-optional-plugin-dependencies)
 
 ## Strategy
 
@@ -435,7 +453,7 @@ describe('Plugin', () => {
     const [coreStartMock, startDepsMock] = await coreSetup.getStartServices();
     const unmountMock = jest.fn();
     renderAppMock.mockReturnValue(unmountMock);
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
 
     new Plugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
     // Grab registered mount function
@@ -460,7 +478,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParams, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
 
-export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
+export const renderApp = ({ element, history }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
   // Hide the chrome while this app is mounted for a full screen experience
   core.chrome.setIsVisible(false);
 
@@ -473,7 +491,7 @@ export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreSt
 
   // Render app
   ReactDOM.render(
-    <AppRoot routerBasePath={appBasePath} core={core} plugins={plugins} />,
+    <AppRoot routerHistory={history} core={core} plugins={plugins} />,
     element
   );
 
@@ -494,12 +512,14 @@ In testing `renderApp` you should be verifying that:
 
 ```typescript
 /** public/application.test.ts */
+import { createMemoryHistory } from 'history';
+import { ScopedHistory } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { renderApp } from './application';
 
 describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify some expected DOM element is rendered into the element
@@ -511,7 +531,7 @@ describe('renderApp', () => {
   });
 
   it('unsubscribes from uiSettings', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
     // Create a fake Subject you can use to monitor observers
     const settings$ = new Subject();
@@ -526,7 +546,7 @@ describe('renderApp', () => {
   });
 
   it('resets chrome visibility', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify stateful Core API was called on mount
@@ -540,18 +560,526 @@ describe('renderApp', () => {
 });
 ```
 
-#### SavedObjects
+### SavedObjects
 
-_How to test SO operations_
+#### Unit Tests
 
-#### Elasticsearch
+To unit test code that uses the Saved Objects client mock the client methods
+and make assertions against the behaviour you would expect to see.
+
+Since the Saved Objects client makes network requests to an external
+Elasticsearch cluster, it's important to include failure scenarios in your
+test cases.
+
+When writing a view with which a user might interact, it's important to ensure
+your code can recover from exceptions and provide a way for the user to
+proceed. This behaviour should be tested as well.
+
+Below is an example of a Jest Unit test suite that mocks the server-side Saved
+Objects client:
+
+```typescript
+// src/plugins/myplugin/server/lib/short_url_lookup.ts
+import crypto from 'crypto';
+import { SavedObjectsClientContract } from 'kibana/server';
+
+export const shortUrlLookup = {
+  generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
+    const id = crypto
+      .createHash('md5')
+      .update(url)
+      .digest('hex');
+
+    return savedObjectsClient
+      .create(
+        'url',
+        {
+          url,
+          accessCount: 0,
+          createDate: new Date().valueOf(),
+          accessDate: new Date().valueOf(),
+        },
+        { id }
+      )
+      .then(doc => doc.id)
+      .catch(err => {
+        if (savedObjectsClient.errors.isConflictError(err)) {
+          return id;
+        } else {
+          throw err;
+        }
+      });
+  },
+};
+
+```
+
+```typescript
+// src/plugins/myplugin/server/lib/short_url_lookup.test.ts
+import { shortUrlLookup } from './short_url_lookup';
+import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+
+describe('shortUrlLookup', () => {
+  const ID = 'bf00ad16941fc51420f91a93428b27a0';
+  const TYPE = 'url';
+  const URL = 'http://elastic.co';
+
+  const mockSavedObjectsClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('generateUrlId', () => {
+    it('provides correct arguments to savedObjectsClient', async () => {
+      const ATTRIBUTES = {
+        url: URL,
+        accessCount: 0,
+        createDate: new Date().valueOf(),
+        accessDate: new Date().valueOf(),
+      };
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: ID,
+        type: TYPE,
+        references: [],
+        attributes: ATTRIBUTES,
+      });
+      await shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient);
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      const [type, attributes, options] = mockSavedObjectsClient.create.mock.calls[0];
+      expect(type).toBe(TYPE);
+      expect(attributes).toStrictEqual(ATTRIBUTES);
+      expect(options).toStrictEqual({ id: ID });
+    });
+
+    it('ignores version conflict and returns id', async () => {
+      mockSavedObjectsClient.create.mockRejectedValueOnce(
+        mockSavedObjectsClient.errors.decorateConflictError(new Error())
+      );
+      const id = await shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient);
+      expect(id).toEqual(ID);
+    });
+
+    it('rejects with passed through savedObjectsClient errors', () => {
+      const error = new Error('oops');
+      mockSavedObjectsClient.create.mockRejectedValueOnce(error);
+      return expect(shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient)).rejects.toBe(error);
+    });
+  });
+});
+```
+
+The following is an example of a public saved object unit test. The biggest
+difference with the server-side test is the slightly different Saved Objects
+client API which returns `SimpleSavedObject` instances which needs to be
+reflected in the mock.
+
+```typescript
+// src/plugins/myplugin/public/saved_query_service.ts
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SimpleSavedObject,
+} from 'src/core/public';
+
+export type SavedQueryAttributes = SavedObjectAttributes & {
+  title: string;
+  description: 'bar';
+  query: {
+    language: 'kuery';
+    query: 'response:200';
+  };
+};
+
+export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientContract) => {
+  const saveQuery = async (
+    attributes: SavedQueryAttributes
+  ): Promise<SimpleSavedObject<SavedQueryAttributes>> => {
+    try {
+      return await savedObjectsClient.create<SavedQueryAttributes>('query', attributes, {
+        id: attributes.title as string,
+      });
+    } catch (err) {
+      throw new Error('Unable to create saved query, please try again.');
+    }
+  };
+
+  return {
+    saveQuery,
+  };
+};
+```
+
+```typescript
+// src/plugins/myplugin/public/saved_query_service.test.ts
+import { createSavedQueryService, SavedQueryAttributes } from './saved_query_service';
+import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+
+describe('saved query service', () => {
+  const savedQueryAttributes: SavedQueryAttributes = {
+    title: 'foo',
+    description: 'bar',
+    query: {
+      language: 'kuery',
+      query: 'response:200',
+    },
+  };
+
+  const mockSavedObjectsClient = savedObjectsServiceMock.createStartContract()
+    .client as jest.Mocked<SavedObjectsClientContract>;
+
+  const savedQueryService = createSavedQueryService(mockSavedObjectsClient);
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('saveQuery', function() {
+    it('should create a saved object for the given attributes', async () => {
+      // The public Saved Objects client returns instances of
+      // SimpleSavedObject, so we create an instance to return from our mock.
+      const mockReturnValue = new SimpleSavedObject(mockSavedObjectsClient, {
+        type: 'query',
+        id: 'foo',
+        attributes: savedQueryAttributes,
+        references: [],
+      });
+      mockSavedObjectsClient.create.mockResolvedValue(mockReturnValue);
+
+      const response = await savedQueryService.saveQuery(savedQueryAttributes);
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
+        id: 'foo',
+      });
+      expect(response).toBe(mockReturnValue);
+    });
+
+    it('should reject with an error when saved objects client errors', async done => {
+      mockSavedObjectsClient.create.mockRejectedValue(new Error('timeout'));
+
+      try {
+        await savedQueryService.saveQuery(savedQueryAttributes);
+      } catch (err) {
+        expect(err).toMatchInlineSnapshot(
+          `[Error: Unable to create saved query, please try again.]`
+        );
+        done();
+      }
+    });
+  });
+});
+```
+
+#### Integration Tests
+To get the highest confidence in how your code behaves when using the Saved
+Objects client, you should write at least a few integration tests which loads
+data into and queries a real Elasticsearch database.
+
+To do that we'll write a Jest integration test using `TestUtils` to start
+Kibana and esArchiver to load fixture data into Elasticsearch.
+
+1. Create the fixtures data you need in Elasticsearch
+2. Create a fixtures archive with `node scripts/es_archiver save <name> [index patterns...]`
+3. Load the fixtures in your test using esArchiver `esArchiver.load('name')`;
+
+_todo: fully worked out example_
+
+### Elasticsearch
 
 _How to test ES clients_
 
-## Plugin Integrations
+## Plugin integrations
 
-_How to test against specific plugin APIs (eg. data plugin)_
+In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `kibana.json`
+manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
+`setup` and `start` phases. One of the upsides with testing is that every usage of the dependencies is explicit,
+and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
+specific logical component for unit testing is way easier than in legacy.
 
-## Plugin Contracts
+The approach to test parts of a plugin's code that is relying on other plugins is quite similar to testing
+code using `core` APIs: it's expected to mock the dependency, and make it return the value the test is expecting.
 
-_How to test your plugin's exposed API_
+Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file  in 
+`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in 
+`src/plugins/data/public/mocks.ts`. When such mocks are present, it's strongly recommended to use them
+when testing against dependencies. Otherwise, one should create it's own mocked implementation of the dependency's
+contract (and should probably ping the plugin's owner to ask them to add proper contract mocks).
+
+### Preconditions
+
+For these examples, we are going to see how we should test the `myPlugin` plugin.
+ 
+This plugin declares the `data` plugin as  a `required` dependency and the `usageCollection` plugin as an `optional` 
+one. It also exposes a `getSpecialSuggestions` API in it's start contract, which relies on the `data` plugin to retrieve
+data.
+
+`MyPlugin` plugin definition:
+
+```typescript
+// src/plugins/myplugin/public/plugin.ts
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { SuggestionsService } from './suggestions';
+
+interface MyPluginSetupDeps {
+  data: DataPublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+interface MyPluginStartDeps {
+  data: DataPublicPluginStart;
+}
+
+export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart, MyPluginSetupDeps, MyPluginStartDeps> {
+  private suggestionsService = new SuggestionsService();
+
+  public setup(core: CoreSetup, { data, usageCollection }: MyPluginSetupDeps) {
+    // setup our internal service
+    this.suggestionsService.setup(data);
+
+    // an example on using an optional dependency that will be tested
+    if (usageCollection) {
+      usageCollection.allowTrackUserAgent(true);
+    }
+
+    return {};
+  }
+
+  public start(core: CoreStart, { data }: MyPluginStartDeps) {
+    const suggestions = this.suggestionsService.start(data);
+    return {
+      getSpecialSuggestions: (query: string) => suggestions.getSuggestions(query),
+    };
+  }
+
+  public stop() {}
+}
+
+export type MyPluginSetup = ReturnType<MyPlugin['setup']>;
+export type MyPluginStart = ReturnType<MyPlugin['start']>;
+```
+
+The underlying `SuggestionsService` implementation:
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.ts
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../data/public';
+
+// stubs for testing purposes
+const suggestDependingOn = (...args: any[]) => [];
+const baseOptions = {} as any;
+export const defaultSuggestions = [
+  {
+    text: 'a default suggestion',
+  },
+] as any[];
+
+export class SuggestionsService {
+  public setup(data: DataPublicPluginSetup) {
+    // register a suggestion provider to the `data` dependency plugin
+    data.autocomplete.addQuerySuggestionProvider('fr', async args => {
+      return suggestDependingOn(args);
+    });
+  }
+
+  public start(data: DataPublicPluginStart) {
+    return {
+      getSuggestions: async (query: string) => {
+        // use the `data` plugin contract to retrieve arbitrary data
+        // note: this logic does not really make any sense and is only here to introduce a behavior to test
+        const baseSuggestions = await data.autocomplete.getQuerySuggestions({
+          ...baseOptions,
+          query,
+        });
+        if (!baseSuggestions || baseSuggestions.length === 0) {
+          return defaultSuggestions;
+        }
+        return baseSuggestions.filter(suggestion => suggestion.type !== 'conjunction');
+      },
+    };
+  }
+}
+```
+
+### Testing dependencies usages
+
+A plugin should test expected usage and calls on it's dependency plugins' API.
+
+Some calls, such as 'registration' APIs exposed from dependency plugins, should be checked,
+to ensure both that they are actually executed, and performed with the correct parameters.
+
+For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly 
+registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls 
+`autocomplete.getQuerySuggestions` with the correct parameters.
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.test.ts
+import {
+  dataPluginMock,
+  Setup as DataPluginSetupMock,
+  Start as DataPluginStartMock,
+} from '../../../data/public/mocks';
+import { SuggestionsService } from './suggestion_service';
+
+describe('SuggestionsService', () => {
+  let service: SuggestionsService;
+  let dataSetup: DataPluginSetupMock;
+  let dataStart: DataPluginStartMock;
+
+  beforeEach(() => {
+    service = new SuggestionsService();
+    dataSetup = dataPluginMock.createSetupContract();
+    dataStart = dataPluginMock.createStartContract();
+  });
+
+  describe('#setup', () => {
+    it('registers the query suggestion provider to the data plugin', () => {
+      service.setup(dataSetup);
+
+      expect(dataSetup.autocomplete.addQuerySuggestionProvider).toHaveBeenCalledTimes(1);
+      expect(dataSetup.autocomplete.addQuerySuggestionProvider).toHaveBeenCalledWith(
+        'fr',
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('#start', () => {
+    describe('#getSuggestions', () => {
+      it('calls getQuerySuggestions with the correct query', async () => {
+        service.setup(dataSetup);
+        const serviceStart = service.start(dataStart);
+
+        await serviceStart.getSuggestions('some query');
+
+        expect(dataStart.autocomplete.getQuerySuggestions).toHaveBeenCalledTimes(1);
+        expect(dataStart.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: 'some query',
+          })
+        );
+      });
+    });
+  });
+});
+```
+
+### Testing components consuming the dependencies
+
+When testing parts of your plugin code that depends on the dependency plugin's data, the best approach
+is to mock the dependency to be able to get the behavior expected for the test.
+
+In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test 
+the service's `getSuggestions` method.
+
+```typescript
+// src/plugins/myplugin/public/suggestions/suggestion_service.ts
+
+describe('#start', () => {
+  describe('#getSuggestions', () => {
+    it('returns the default suggestions when autocomplete returns no results', async () => {
+      dataStart.autocomplete.getQuerySuggestions.mockResolvedValue([]);
+
+      service.setup(dataSetup);
+      const serviceStart = service.start(dataStart);
+
+      const results = await serviceStart.getSuggestions('some query');
+      expect(results).toEqual(defaultSuggestions);
+    });
+
+    it('excludes conjunctions from the autocomplete results', async () => {
+      dataStart.autocomplete.getQuerySuggestions.mockResolvedValue([
+        {
+          type: 'field',
+          text: 'field suggestion',
+        },
+        {
+          type: 'conjunction',
+          text: 'conjunction suggestion',
+        },
+      ]);
+
+      service.setup(dataSetup);
+      const serviceStart = service.start(dataStart);
+
+      const results = await serviceStart.getSuggestions('some query');
+
+      expect(results).toEqual([
+        {
+          type: 'field',
+          text: 'field suggestion',
+        },
+      ]);
+    });
+  });
+});
+```
+
+### Testing optional plugin dependencies
+
+Plugins should test that their behavior remains correct when their optional dependencies are either available or not.
+
+A basic test would be to ensure that the plugin properly initialize without error when the optional
+dependency is missing:
+
+```typescript
+// src/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '../../../core/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { MyPlugin } from './plugin';
+
+describe('Plugin', () => {
+  it('initializes correctly if usageCollection is disabled', () => {
+    const plugin = new MyPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const setupDeps = {
+      data: dataPluginMock.createSetupContract(),
+      // optional usageCollector dependency is not available
+    };
+  
+    const coreStart = coreMock.createStart();
+    const startDeps = {
+      data: dataPluginMock.createStartContract(),
+    };
+  
+    expect(() => {
+      plugin.setup(coreSetup, setupDeps);
+    }).not.toThrow();
+    expect(() => {
+      plugin.start(coreStart, startDeps);
+    }).not.toThrow();
+  });
+});
+```
+
+Then we should test that when optional dependency is properly used when present:
+
+```typescript
+// src/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '../../../core/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+
+import { MyPlugin } from './plugin';
+
+describe('Plugin', () => {
+  // [...]
+
+  it('enables trackUserAgent when usageCollection is available', async () => {
+    const plugin = new MyPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+    const setupDeps = {
+      data: dataPluginMock.createSetupContract(),
+      usageCollection: usageCollectionSetup,
+    };
+
+    plugin.setup(coreSetup, setupDeps);
+
+    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledTimes(1);
+    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledWith(true);
+  });
+});
+```

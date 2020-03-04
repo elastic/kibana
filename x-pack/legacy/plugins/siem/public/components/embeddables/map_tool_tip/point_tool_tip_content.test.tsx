@@ -14,12 +14,6 @@ import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { FlowTarget } from '../../../graphql/types';
 
-jest.mock('../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
-
 describe('PointToolTipContent', () => {
   const mount = useMountAppended();
 

@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
+import rison from 'rison-node';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
 import React from 'react';
@@ -45,8 +46,6 @@ import {
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService, getInspector } from '../kibana_services';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
@@ -55,12 +54,44 @@ import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
+import {
+  SavedObjectSaveModal,
+  showSaveModal,
+} from '../../../../../../src/plugins/saved_objects/public';
+import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
+loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
 
 const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
+
+function getInitialLayersFromUrlParam() {
+  const locationSplit = window.location.href.split('?');
+  if (locationSplit.length <= 1) {
+    return [];
+  }
+  const mapAppParams = new URLSearchParams(locationSplit[1]);
+  if (!mapAppParams.has('initialLayers')) {
+    return [];
+  }
+
+  try {
+    return rison.decode_array(mapAppParams.get('initialLayers'));
+  } catch (e) {
+    toastNotifications.addWarning({
+      title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
+        defaultMessage: `Inital layers not added to map`,
+      }),
+      text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
+        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
+        values: { errorMsg: e.message },
+      }),
+    });
+    return [];
+  }
+}
 
 app.controller(
   'GisMapController',
@@ -329,7 +360,7 @@ app.controller(
         store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
 
-      const layerList = getInitialLayers(savedMap.layerListJSON);
+      const layerList = getInitialLayers(savedMap.layerListJSON, getInitialLayersFromUrlParam());
       initialLayerListConfig = copyPersistentState(layerList);
       store.dispatch(replaceLayerList(layerList));
       store.dispatch(setRefreshConfig($scope.refreshConfig));
@@ -564,9 +595,10 @@ app.controller(
                     title={savedMap.title}
                     showCopyOnSave={savedMap.id ? true : false}
                     objectType={MAP_SAVED_OBJECT_TYPE}
+                    showDescription={false}
                   />
                 );
-                showSaveModal(saveModal);
+                showSaveModal(saveModal, npStart.core.i18n.Context);
               },
             },
           ]

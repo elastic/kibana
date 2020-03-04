@@ -17,40 +17,10 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import fs from 'fs';
-import Path from 'path';
-import { promisify } from 'util';
-import { toArray } from 'rxjs/operators';
 import { Client, CreateDocumentParams } from 'elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
-import { SavedObjectsSchema } from '../../../core/server/saved_objects';
-// @ts-ignore
-import { collectUiExports } from '../../../legacy/ui/ui_exports';
-// @ts-ignore
-import { findPluginSpecs } from '../../../legacy/plugin_discovery';
-
-/**
- * Load the uiExports for a Kibana instance, only load uiExports from xpack if
- * it is enabled in the Kibana server.
- */
-const getUiExports = async (kibanaPluginIds: string[]) => {
-  const xpackEnabled = kibanaPluginIds.includes('xpack_main');
-
-  const { spec$ } = await findPluginSpecs({
-    plugins: {
-      scanDirs: [Path.resolve(__dirname, '../../../legacy/core_plugins')],
-      paths: xpackEnabled ? [Path.resolve(__dirname, '../../../../x-pack')] : [],
-    },
-  });
-
-  const specs = await spec$.pipe(toArray()).toPromise();
-  return collectUiExports(specs);
-};
 
 /**
  * Deletes all indices that start with `.kibana`
@@ -91,59 +61,21 @@ export async function deleteKibanaIndices({
  */
 export async function migrateKibanaIndex({
   client,
-  log,
-  kibanaPluginIds,
+  kbnClient,
 }: {
   client: Client;
-  log: ToolingLog;
-  kibanaPluginIds: string[];
+  kbnClient: KbnClient;
 }) {
-  const uiExports = await getUiExports(kibanaPluginIds);
-  const kibanaVersion = await loadKibanaVersion();
-
-  const config: Record<string, string> = {
-    'xpack.task_manager.index': '.kibana_task_manager',
-  };
-
-  const logger = {
-    trace: log.verbose.bind(log),
-    debug: log.debug.bind(log),
-    info: log.info.bind(log),
-    warn: log.warning.bind(log),
-    error: log.error.bind(log),
-    fatal: log.error.bind(log),
-    log: (entry: any) => log.info(entry.message),
-    get: () => logger,
-  };
-
-  const migratorOptions = {
-    config: { get: (path: string) => config[path] } as any,
-    savedObjectsConfig: {
-      scrollDuration: '5m',
-      batchSize: 100,
-      pollInterval: 100,
-      skip: false,
+  // we allow dynamic mappings on the index, as some interceptors are accessing documents before
+  // the migration is actually performed. The migrator will put the value back to `strict` after migration.
+  await client.indices.putMapping({
+    index: '.kibana',
+    body: {
+      dynamic: true,
     },
-    kibanaConfig: {
-      index: '.kibana',
-    } as any,
-    logger,
-    kibanaVersion,
-    savedObjectSchemas: new SavedObjectsSchema(uiExports.savedObjectSchemas),
-    savedObjectMappings: uiExports.savedObjectMappings,
-    savedObjectMigrations: uiExports.savedObjectMigrations,
-    savedObjectValidations: uiExports.savedObjectValidations,
-    callCluster: (path: string, ...args: any[]) =>
-      (get(client, path) as Function).call(client, ...args),
-  };
+  } as any);
 
-  return await new KibanaMigrator(migratorOptions).runMigrations();
-}
-
-async function loadKibanaVersion() {
-  const readFile = promisify(fs.readFile);
-  const packageJson = await readFile(Path.join(__dirname, '../../../../package.json'));
-  return JSON.parse(packageJson.toString('utf-8')).version;
+  return await kbnClient.savedObjects.migrate();
 }
 
 /**

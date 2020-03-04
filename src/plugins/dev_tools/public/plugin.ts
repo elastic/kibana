@@ -21,6 +21,8 @@ import { App, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
+import './index.scss';
+
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available
@@ -94,8 +96,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
-    kibana_legacy.registerLegacyApp({
+  public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
+    kibanaLegacy.registerLegacyApp({
       id: 'dev_tools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {

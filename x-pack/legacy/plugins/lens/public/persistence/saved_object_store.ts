@@ -6,7 +6,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'src/core/server';
-import { Query, esFilters } from '../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../src/plugins/data/public';
 
 export interface Document {
   id?: string;
@@ -21,7 +21,7 @@ export interface Document {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
-    filters: esFilters.Filter[];
+    filters: Filter[];
   };
 }
 

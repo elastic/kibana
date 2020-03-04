@@ -8,13 +8,16 @@ import { flatten } from 'lodash';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
 import { getAutocompleteService } from '../../../services';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+} from '../../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values
     .filter(value => value.toLowerCase().includes(query.toLowerCase()))
     .map(value => ({
-      type: autocomplete.QuerySuggestionsTypes.Value,
+      type: QuerySuggestionTypes.Value,
       text: `${value} `,
       start,
       end,
@@ -24,7 +27,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = core => {
   return async (
     { indexPatterns, boolFilter, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
-  ): Promise<autocomplete.QuerySuggestion[]> => {
+  ): Promise<QuerySuggestion[]> => {
     const allFields = flatten(
       indexPatterns.map(indexPattern =>
         indexPattern.fields.map(field => ({

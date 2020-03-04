@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SavedObjectSaveModal,
   OnSaveProps,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../../src/plugins/saved_objects/public';
 
 import { GraphSavePolicy } from '../types/config';
 
@@ -49,6 +49,7 @@ export function SaveModal({
       objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
         defaultMessage: 'graph',
       })}
+      showDescription={false}
       options={
         <>
           <EuiFormRow

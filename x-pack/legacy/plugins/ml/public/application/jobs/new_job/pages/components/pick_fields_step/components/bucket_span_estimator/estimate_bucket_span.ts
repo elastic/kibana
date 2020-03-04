@@ -14,7 +14,7 @@ import {
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
 import { ml, BucketSpanEstimatorData } from '../../../../../../../services/ml_api_service';
-import { useKibanaContext } from '../../../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../../../contexts/ml';
 import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 export enum ESTIMATE_STATUS {
@@ -24,7 +24,7 @@ export enum ESTIMATE_STATUS {
 
 export function useEstimateBucketSpan() {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
   const [status, setStatus] = useState(ESTIMATE_STATUS.NOT_RUNNING);
 
@@ -35,10 +35,10 @@ export function useEstimateBucketSpan() {
       end: jobCreator.end,
     },
     fields: jobCreator.fields.map(f => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
-    index: kibanaContext.currentIndexPattern.title,
-    query: kibanaContext.combinedQuery,
+    index: mlContext.currentIndexPattern.title,
+    query: mlContext.combinedQuery,
     splitField: undefined,
-    timeField: kibanaContext.currentIndexPattern.timeFieldName,
+    timeField: mlContext.currentIndexPattern.timeFieldName,
   };
 
   if (

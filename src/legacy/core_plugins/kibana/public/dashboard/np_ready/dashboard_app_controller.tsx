@@ -19,32 +19,31 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
+import { migrateLegacyQuery, subscribeWithScope } from '../legacy_imports';
 import {
-  ConfirmationButtonTypes,
-  migrateLegacyQuery,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-  subscribeWithScope,
-} from '../legacy_imports';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
+  connectToQueryState,
+  esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
   SavedQuery,
-  syncAppFilters,
-  syncQuery,
+  syncQueryStateWithUrl,
 } from '../../../../../../plugins/data/public';
+import {
+  getSavedObjectFinder,
+  SaveResult,
+  showSaveModal,
+} from '../../../../../../plugins/saved_objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -60,7 +59,7 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../../../embeddable_api/public/np_ready/public';
-import { ConfirmModalFn, NavAction, SavedDashboardPanel } from './types';
+import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -75,22 +74,18 @@ import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../plugins/kibana_react/public';
-import {
   IKbnUrlStateStorage,
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
-  confirmModal: ConfirmModalFn;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
@@ -102,19 +97,29 @@ export class DashboardAppController {
   };
 
   constructor({
+    pluginInitializerContext,
     $scope,
     $route,
     $routeParams,
     dashboardConfig,
     localStorage,
     indexPatterns,
-    confirmModal,
     savedQueryService,
-    embeddables,
+    embeddable,
     share,
     dashboardCapabilities,
-    npDataStart: { query: queryService },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
+    data: { query: queryService },
+    core: {
+      notifications,
+      overlays,
+      chrome,
+      injectedMetadata,
+      uiSettings,
+      savedObjects,
+      http,
+      i18n: i18nStart,
+    },
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
@@ -125,12 +130,11 @@ export class DashboardAppController {
     // starts syncing `_g` portion of url with query services
     // note: dashboard_state_manager.ts syncs `_a` portion of url
     const {
-      stop: stopSyncingGlobalStateWithUrl,
+      stop: stopSyncingQueryServiceStateWithUrl,
       hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQuery(queryService, kbnUrlStateStorage);
+    } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
-
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
       chrome.docTitle.change(dash.title);
@@ -139,16 +143,25 @@ export class DashboardAppController {
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kibanaVersion: pluginInitializerContext.env.packageInfo.version,
       kbnUrlStateStorage,
       history,
     });
 
-    const stopSyncingAppFilters = syncAppFilters(filterManager, {
-      set: filters => dashboardStateManager.setFilters(filters),
-      get: () => dashboardStateManager.appState.filters,
-      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
-    });
+    // sync initial app filters from state to filterManager
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    // setup syncing of app filters between appState and filterManager
+    const stopSyncingAppFilters = connectToQueryState(
+      queryService,
+      {
+        set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
+        get: () => ({ filters: dashboardStateManager.appState.filters }),
+        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+      },
+      {
+        filters: esFilters.FilterStateStore.APP_STATE,
+      }
+    );
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -167,11 +180,18 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
-    const getIsEmptyInReadonlyMode = () =>
-      !dashboardStateManager.getPanels().length &&
-      !getShouldShowEditHelp() &&
-      !getShouldShowViewHelp() &&
-      dashboardConfig.getHideWriteControls();
+    const shouldShowUnauthorizedEmptyState = () => {
+      const readonlyMode =
+        !dashboardStateManager.getPanels().length &&
+        !getShouldShowEditHelp() &&
+        !getShouldShowViewHelp() &&
+        dashboardConfig.getHideWriteControls();
+      const userHasNoPermissions =
+        !dashboardStateManager.getPanels().length &&
+        !visualizeCapabilities.save &&
+        !mapsCapabilities.save;
+      return readonlyMode || userHasNoPermissions;
+    };
 
     const addVisualization = () => {
       navActions[TopNavIds.VISUALIZE]();
@@ -184,9 +204,9 @@ export class DashboardAppController {
 
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach(id => {
-        const embeddable = container.getChild(id);
-        if (isErrorEmbeddable(embeddable)) return;
-        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
@@ -237,7 +257,7 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
-      const isEmptyInReadonlyMode = getIsEmptyInReadonlyMode();
+      const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -282,7 +302,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddables.getEmbeddableFactory(
+    const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -294,7 +314,7 @@ export class DashboardAppController {
           dashboardContainer.renderEmpty = () => {
             const shouldShowEditHelp = getShouldShowEditHelp();
             const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
+            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
               <DashboardEmptyScreen
@@ -316,10 +336,10 @@ export class DashboardAppController {
             // appState.save which will cause refreshDashboardContainer to be called.
 
             if (
-              !compareFilters(
+              !esFilters.compareFilters(
                 container.getInput().filters,
                 queryFilter.getFilters(),
-                COMPARE_ALL_OPTIONS
+                esFilters.COMPARE_ALL_OPTIONS
               )
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
@@ -419,7 +439,11 @@ export class DashboardAppController {
 
       // Filters shouldn't  be compared using regular isEqual
       if (
-        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+        !esFilters.compareFilters(
+          containerInput.filters,
+          appStateDashboardInput.filters,
+          esFilters.COMPARE_ALL_OPTIONS
+        )
       ) {
         differences.filters = appStateDashboardInput.filters;
       }
@@ -626,27 +650,31 @@ export class DashboardAppController {
         }
       }
 
-      confirmModal(
-        i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-          defaultMessage: `Once you discard your changes, there's no getting them back.`,
-        }),
-        {
-          onConfirm: revertChangesAndExitEditMode,
-          onCancel: _.noop,
-          confirmButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
-            { defaultMessage: 'Discard changes' }
-          ),
-          cancelButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
-            { defaultMessage: 'Continue editing' }
-          ),
-          defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-          title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-            defaultMessage: 'Discard changes to dashboard?',
+      overlays
+        .openConfirm(
+          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+            defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
-        }
-      );
+          {
+            confirmButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
+            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+              defaultMessage: 'Discard changes to dashboard?',
+            }),
+          }
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            revertChangesAndExitEditMode();
+          }
+        });
     };
 
     /**
@@ -777,7 +805,7 @@ export class DashboardAppController {
           showCopyOnSave={dash.id ? true : false}
         />
       );
-      showSaveModal(dashboardSaveModal);
+      showSaveModal(dashboardSaveModal, i18nStart.Context);
     };
     navActions[TopNavIds.CLONE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
@@ -806,24 +834,20 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
-        );
-
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: embeddables.getEmbeddableFactories,
-          getFactory: embeddables.getEmbeddableFactory,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder,
+          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
         });
       }
     };
 
     navActions[TopNavIds.VISUALIZE] = async () => {
       const type = 'visualization';
-      const factory = embeddables.getEmbeddableFactory(type);
+      const factory = embeddable.getEmbeddableFactory(type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
@@ -891,7 +915,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      stopSyncingGlobalStateWithUrl();
+      stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();

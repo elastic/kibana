@@ -16,13 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Plugin,
-  FieldFormatsStart,
-  FieldFormatsSetup,
-  IndexPatternsContract,
-  fieldFormats,
-} from '.';
+
+import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
+import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -35,28 +31,12 @@ const autocompleteMock: any = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
-  getByFieldType: jest.fn(),
-  getDefaultConfig: jest.fn(),
-  getDefaultInstance: jest.fn() as any,
-  getDefaultInstanceCacheResolver: jest.fn(),
-  getDefaultInstancePlain: jest.fn(),
-  getDefaultType: jest.fn(),
-  getDefaultTypeName: jest.fn(),
-  getInstance: jest.fn() as any,
-  getType: jest.fn(),
-  getTypeNameByEsTypes: jest.fn(),
-  init: jest.fn(),
-  register: jest.fn(),
-  parseDefaultTypeMap: jest.fn(),
-};
-
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   const setupContract = {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
     __LEGACY: {
       esClient: {
@@ -84,7 +64,7 @@ const createStartContract = (): Start => {
         },
       },
     },
-    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
@@ -96,7 +76,14 @@ const createStartContract = (): Start => {
         msearch: jest.fn(),
       },
     },
-    indexPatterns: {} as IndexPatternsContract,
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+    } as unknown) as IndexPatternsContract,
   };
   return startContract;
 };

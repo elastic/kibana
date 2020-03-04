@@ -5,7 +5,7 @@
  */
 import { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { AlertInstance } from '../../../../alerting/server/alert_instance';
+import { AlertInstance } from '../../../../../../plugins/alerting/server';
 import { AlertLicense } from '../../alerts/types';
 
 const RESOLVED_SUBJECT = i18n.translate(

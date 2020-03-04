@@ -116,7 +116,6 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             />
           </Fragment>
         }
-        idAria="readonlyRepositoryUrlDescription"
         fullWidth
       >
         <div>
@@ -130,7 +129,6 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                   />
                 }
                 fullWidth
-                describedByIds={['readonlyRepositoryUrlDescription']}
               >
                 <EuiSelect
                   options={schemeOptions}
@@ -151,7 +149,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                   />
                 }
                 fullWidth
-                describedByIds={['readonlyRepositoryUrlDescription readonlyRepositoryUrlHelp']}
+                describedByIds={['readonlyRepositoryUrlHelp']}
                 isInvalid={Boolean(hasErrors && settingErrors.url)}
                 error={settingErrors.url}
               >

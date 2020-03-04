@@ -100,11 +100,7 @@ export const createLegacyAPI = ({
   } as unknown) as jest.Mocked<SavedObjectsLegacyService>;
 
   const legacyAPI: jest.Mocked<LegacyAPI> = {
-    legacyConfig: {
-      kibanaIndex: '',
-    },
     auditLogger: {} as any,
-    xpackMain: {} as any,
     savedObjects: savedObjectsService,
   };
 

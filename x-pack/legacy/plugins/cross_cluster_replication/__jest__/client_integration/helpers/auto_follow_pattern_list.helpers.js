@@ -33,8 +33,22 @@ export const setup = props => {
     checkBox.simulate('change', { target: { checked: true } });
   };
 
+  const getPatternsActionMenuItem = (index = 0) => {
+    testBed.find('autoFollowPatternActionMenuButton').simulate('click');
+    const contextMenu = testBed.find('autoFollowPatternActionContextMenu');
+    return contextMenu.find('button').at(index);
+  };
+
+  const clickPatternsActionMenuItem = (index = 0) => {
+    getPatternsActionMenuItem(index).simulate('click');
+  };
+
+  const getPatternsActionMenuItemText = (index = 0) => {
+    return getPatternsActionMenuItem(index).text();
+  };
+
   const clickBulkDeleteButton = () => {
-    testBed.find('bulkDeleteButton').simulate('click');
+    clickPatternsActionMenuItem(1);
   };
 
   const clickConfirmModalDeleteAutoFollowPattern = () => {
@@ -78,6 +92,8 @@ export const setup = props => {
       clickConfirmModalDeleteAutoFollowPattern,
       clickRowActionButtonAt,
       clickAutoFollowPatternAt,
+      getPatternsActionMenuItemText,
+      clickPatternsActionMenuItem,
     },
   };
 };

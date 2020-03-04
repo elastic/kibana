@@ -5,25 +5,18 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
-  EuiLoadingSpinner,
   EuiFlexItem,
-  EuiBadge
+  EuiLoadingSpinner
 } from '@elastic/eui';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
-import {
-  asDuration,
-  asPercent,
-  toMicroseconds,
-  tpmUnit
-} from '../../../../utils/formatters';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
+import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
 
 function LoadingSpinner() {
   return (
@@ -36,6 +29,10 @@ function LoadingSpinner() {
     </EuiFlexGroup>
   );
 }
+
+const BadgeRow = styled(EuiFlexItem)`
+  padding-bottom: ${lightTheme.gutterTypes.gutterSmall};
+`;
 
 const ItemRow = styled('tr')`
   line-height: 2;
@@ -50,53 +47,21 @@ const ItemDescription = styled('td')`
   text-align: right;
 `;
 
-const na = i18n.translate('xpack.apm.serviceMap.NotAvailableMetric', {
-  defaultMessage: 'N/A'
-});
-
-interface MetricListProps {
-  serviceName: string;
+interface ServiceMetricListProps extends ServiceNodeMetrics {
+  frameworkName?: string;
+  isLoading: boolean;
 }
 
-export function ServiceMetricList({ serviceName }: MetricListProps) {
-  const {
-    urlParams: { start, end, environment }
-  } = useUrlParams();
-
-  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
-    callApmApi => {
-      if (serviceName && start && end) {
-        return callApmApi({
-          pathname: '/api/apm/service-map/service/{serviceName}',
-          params: {
-            path: {
-              serviceName
-            },
-            query: {
-              start,
-              end,
-              environment
-            }
-          }
-        });
-      }
-    },
-    [serviceName, start, end, environment],
-    {
-      preservePreviousData: false
-    }
-  );
-
-  const {
-    avgTransactionDuration,
-    avgRequestsPerMinute,
-    avgErrorsPerMinute,
-    avgCpuUsage,
-    avgMemoryUsage,
-    numInstances
-  } = data;
-  const isLoading = status === 'loading';
-
+export function ServiceMetricList({
+  avgTransactionDuration,
+  avgRequestsPerMinute,
+  avgErrorsPerMinute,
+  avgCpuUsage,
+  avgMemoryUsage,
+  frameworkName,
+  numInstances,
+  isLoading
+}: ServiceMetricListProps) {
   const listItems = [
     {
       title: i18n.translate(
@@ -106,8 +71,8 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
         }
       ),
       description: isNumber(avgTransactionDuration)
-        ? asDuration(toMicroseconds(avgTransactionDuration, 'milliseconds'))
-        : na
+        ? asDuration(avgTransactionDuration)
+        : null
     },
     {
       title: i18n.translate(
@@ -118,7 +83,7 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
       ),
       description: isNumber(avgRequestsPerMinute)
         ? `${avgRequestsPerMinute.toFixed(2)} ${tpmUnit('request')}`
-        : na
+        : null
     },
     {
       title: i18n.translate(
@@ -127,13 +92,13 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
           defaultMessage: 'Errors per minute (avg.)'
         }
       ),
-      description: avgErrorsPerMinute?.toFixed(2) ?? na
+      description: avgErrorsPerMinute?.toFixed(2)
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
         defaultMessage: 'CPU usage (avg.)'
       }),
-      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : na
+      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null
     },
     {
       title: i18n.translate(
@@ -142,34 +107,43 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
           defaultMessage: 'Memory usage (avg.)'
         }
       ),
-      description: isNumber(avgMemoryUsage) ? asPercent(avgMemoryUsage, 1) : na
+      description: isNumber(avgMemoryUsage)
+        ? asPercent(avgMemoryUsage, 1)
+        : null
     }
   ];
+  const showBadgeRow = frameworkName || numInstances > 1;
+
   return isLoading ? (
     <LoadingSpinner />
   ) : (
     <>
-      {numInstances && numInstances > 1 && (
-        <EuiFlexItem>
-          <div>
-            <EuiBadge iconType="apps" color="hollow">
-              {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
-                values: { numInstances },
-                defaultMessage: '{numInstances} instances'
-              })}
-            </EuiBadge>
-          </div>
-        </EuiFlexItem>
+      {showBadgeRow && (
+        <BadgeRow>
+          <EuiFlexGroup gutterSize="none">
+            {frameworkName && <EuiBadge>{frameworkName}</EuiBadge>}
+            {numInstances > 1 && (
+              <EuiBadge iconType="apps" color="hollow">
+                {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
+                  values: { numInstances },
+                  defaultMessage: '{numInstances} instances'
+                })}
+              </EuiBadge>
+            )}
+          </EuiFlexGroup>
+        </BadgeRow>
       )}
-
       <table>
         <tbody>
-          {listItems.map(({ title, description }) => (
-            <ItemRow key={title}>
-              <ItemTitle>{title}</ItemTitle>
-              <ItemDescription>{description}</ItemDescription>
-            </ItemRow>
-          ))}
+          {listItems.map(
+            ({ title, description }) =>
+              description && (
+                <ItemRow key={title}>
+                  <ItemTitle>{title}</ItemTitle>
+                  <ItemDescription>{description}</ItemDescription>
+                </ItemRow>
+              )
+          )}
         </tbody>
       </table>
     </>

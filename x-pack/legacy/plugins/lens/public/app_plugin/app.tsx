@@ -9,18 +9,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { AppMountContext, NotificationsStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { npStart } from 'ui/new_platform';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectSaveModal } from '../../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  Filter,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
@@ -39,7 +40,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 }
 
@@ -320,8 +321,22 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModal
             onSave={props => {
+              const [pinnedFilters, appFilters] = _.partition(
+                lastKnownDoc.state?.filters,
+                esFilters.isFilterPinned
+              );
+              const lastDocWithoutPinned = pinnedFilters?.length
+                ? {
+                    ...lastKnownDoc,
+                    state: {
+                      ...lastKnownDoc.state,
+                      filters: appFilters,
+                    },
+                  }
+                : lastKnownDoc;
+
               const doc = {
-                ...lastKnownDoc,
+                ...lastDocWithoutPinned,
                 id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
               };
@@ -359,6 +374,7 @@ export function App({
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            showDescription={false}
             confirmButtonLabel={confirmButton}
           />
         )}

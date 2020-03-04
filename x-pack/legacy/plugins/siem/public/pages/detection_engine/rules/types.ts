@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
-import { Rule } from '../../../containers/detection_engine/rules';
+import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from './components/shared_imports';
+import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
@@ -21,24 +20,6 @@ export interface EuiBasicTableOnChange {
     size: number;
   };
   sort?: EuiBasicTableSortTypes;
-}
-
-export interface TableData {
-  id: string;
-  immutable: boolean;
-  rule_id: string;
-  rule: {
-    href: string;
-    name: string;
-  };
-  risk_score: number;
-  severity: string;
-  tags: string[];
-  activate: boolean;
-  isLoading: boolean;
-  sourceRule: Rule;
-  status?: string | null;
-  statusDate?: string | null;
 }
 
 export enum RuleStep {
@@ -93,7 +74,7 @@ export interface ScheduleStepRule extends StepRuleData {
 
 export interface DefineStepRuleJson {
   index: string[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   saved_id?: string;
   query: string;
   language: string;

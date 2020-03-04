@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped Library
-import { Fn } from '@kbn/interpreter/common';
-import { uniq } from 'lodash';
 import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
-import { functions as commonFns } from '../../canvas_plugin_src/functions/common';
-import { functions as serverFns } from '../../canvas_plugin_src/functions/server';
+import { ExpressionFunction } from '../../../../../../src/plugins/expressions';
 
-export const functionSpecs = uniq([...browserFns, ...commonFns, ...serverFns], 'name').map(fn => new Fn(fn()));
+export const functionSpecs = browserFns.map(fn => new ExpressionFunction(fn()));

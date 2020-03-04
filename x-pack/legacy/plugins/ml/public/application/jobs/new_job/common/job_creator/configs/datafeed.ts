@@ -15,12 +15,17 @@ export interface Datafeed {
   chunking_config?: ChunkingConfig;
   frequency?: string;
   indices: IndexPatternTitle[];
+  /**
+   * The datafeed can contain indexes and indices
+   */
+  indexes?: IndexPatternTitle[];
   job_id?: JobId;
   query: object;
   query_delay?: string;
   script_fields?: object;
   scroll_size?: number;
   delayed_data_check_config?: object;
+  indices_options?: IndicesOptions;
 }
 
 export interface ChunkingConfig {
@@ -37,4 +42,11 @@ interface Aggregation {
     aggregations?: { [key: string]: any };
     aggs?: { [key: string]: any };
   };
+}
+
+interface IndicesOptions {
+  expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  ignore_throttled?: boolean;
 }

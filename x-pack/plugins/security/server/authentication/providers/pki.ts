@@ -9,8 +9,9 @@ import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { Tokens } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
@@ -25,19 +26,6 @@ interface ProviderState {
    * The SHA-256 digest of the DER encoded peer leaf certificate. It is a `:` separated hexadecimal string.
    */
   peerCertificateFingerprint256: string;
-}
-
-/**
- * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
- * @param request Request instance to extract authentication scheme for.
- */
-function getRequestAuthenticationScheme(request: KibanaRequest) {
-  const authorization = request.headers.authorization;
-  if (!authorization || typeof authorization !== 'string') {
-    return '';
-  }
-
-  return authorization.split(/\s+/)[0].toLowerCase();
 }
 
 /**
@@ -57,19 +45,13 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getRequestAuthenticationScheme(request);
-    if (authenticationScheme && authenticationScheme !== 'bearer') {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    if (getHTTPAuthenticationScheme(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (authenticationScheme) {
-      // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-      authenticationResult = await this.authenticateWithBearerScheme(request);
-    }
-
-    if (state && authenticationResult.notHandled()) {
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
@@ -120,23 +102,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateWithBearerScheme(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate request using "Bearer" authentication scheme.');
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated using "Bearer" authentication scheme.');
-      return AuthenticationResult.succeeded(user);
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
