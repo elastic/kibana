@@ -19,8 +19,14 @@ import {
 } from './types';
 import { AlertServices, PluginSetupContract } from '../../../../../alerting/server';
 
-interface AggregationResponse {
+interface Aggregation {
   aggregatedIntervals: { buckets: Array<{ aggregatedValue: { value: number } }> };
+}
+
+interface CompositeAggregationsResponse {
+  groupings: {
+    buckets: Aggregation[];
+  };
 }
 
 const FIRED_ACTIONS = {
@@ -30,7 +36,7 @@ const FIRED_ACTIONS = {
   }),
 };
 
-const getCurrentValueFromAggregations = (aggregations: AggregationResponse) => {
+const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
   const { buckets } = aggregations.aggregatedIntervals;
   const { value } = buckets[buckets.length - 1].aggregatedValue;
   return value;
@@ -127,8 +133,9 @@ const getMetric: (
   };
 
   if (groupBy) {
-    const bucketSelector = (response: InfraDatabaseSearchResponse<{}, AggregationResponse>) =>
-      response.aggregations?.groupings?.buckets || [];
+    const bucketSelector = (
+      response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
+    ) => response.aggregations?.groupings?.buckets || [];
     const afterKeyHandler = createAfterKeyHandler(
       'query.aggs.groupings.composite.after',
       response => response.aggregations?.groupings?.after_key
@@ -138,7 +145,7 @@ const getMetric: (
       searchBody,
       bucketSelector,
       afterKeyHandler
-    )) as Array<AggregationResponse & { key: { groupBy: string } }>;
+    )) as Array<Aggregation & { key: { groupBy: string } }>;
     return compositeBuckets.reduce(
       (result, bucket) => ({
         ...result,
