@@ -259,7 +259,6 @@ export const ExpressionDataSourceStrings = {
       i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.indexLabel', {
         defaultMessage: 'Enter an index name or select an index pattern',
       }),
-
     getFieldsTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.fieldsTitle', {
         defaultMessage: 'Fields',
