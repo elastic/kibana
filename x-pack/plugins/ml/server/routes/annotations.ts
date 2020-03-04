@@ -13,6 +13,7 @@ import { SecurityPluginSetup } from '../../../security/server';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 import {
   deleteAnnotationSchema,
@@ -35,7 +36,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
  * Routes for annotations
  */
 export function annotationRoutes(
-  { router, mlLicense }: RouteInitialization,
+  { router, getLicenseCheckResults }: RouteInitialization,
   securityPlugin: SecurityPluginSetup
 ) {
   /**
@@ -60,7 +61,7 @@ export function annotationRoutes(
         body: schema.object(getAnnotationsSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getAnnotations } = annotationServiceProvider(context);
         const resp = await getAnnotations(request.body);
@@ -91,7 +92,7 @@ export function annotationRoutes(
         body: schema.object(indexAnnotationSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
           context.ml!.mlClient.callAsCurrentUser
@@ -130,7 +131,7 @@ export function annotationRoutes(
         params: schema.object(deleteAnnotationSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
           context.ml!.mlClient.callAsCurrentUser
