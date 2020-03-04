@@ -24,7 +24,7 @@ import {
 } from './lifecycle_handlers';
 import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
-import { KibanaRequest, RouteMethod } from './router';
+import { KibanaRequest, RouteMethod, KibanaRouteState } from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
@@ -32,12 +32,14 @@ const forgeRequest = ({
   headers = {},
   path = '/',
   method = 'get',
+  kibanaRouteState,
 }: Partial<{
   headers: Record<string, string>;
   path: string;
   method: RouteMethod;
+  kibanaRouteState: KibanaRouteState;
 }>): KibanaRequest => {
-  return httpServerMock.createKibanaRequest({ headers, path, method });
+  return httpServerMock.createKibanaRequest({ headers, path, method, kibanaRouteState });
 };
 
 describe('xsrf post-auth handler', () => {
@@ -133,6 +135,29 @@ describe('xsrf post-auth handler', () => {
       });
       const handler = createXsrfPostAuthHandler(config);
       const request = forgeRequest({ method: 'post', headers: {}, path: '/some-path' });
+
+      toolkit.next.mockReturnValue('next' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(responseFactory.badRequest).not.toHaveBeenCalled();
+      expect(toolkit.next).toHaveBeenCalledTimes(1);
+      expect(result).toEqual('next');
+    });
+
+    it('accepts requests if xsrf protection on a route is disabled', () => {
+      const config = createConfig({
+        xsrf: { whitelist: [], disableProtection: false },
+      });
+      const handler = createXsrfPostAuthHandler(config);
+      const request = forgeRequest({
+        method: 'post',
+        headers: {},
+        path: '/some-path',
+        kibanaRouteState: {
+          xsrfRequired: false,
+        },
+      });
 
       toolkit.next.mockReturnValue('next' as any);
 
