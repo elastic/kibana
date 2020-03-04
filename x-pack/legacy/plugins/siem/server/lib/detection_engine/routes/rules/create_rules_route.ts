@@ -4,39 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import uuid from 'uuid';
 
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { GetScopedClients } from '../../../../services';
-import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
-import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { createRulesSchema } from '../schemas/create_rules_schema';
+import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
+import { RuleAlertParamsRest } from '../../types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
-
 import { getIndexExists } from '../../index/get_index_exists';
-import { getIndex, transformError } from '../utils';
+import { createRulesSchema } from '../schemas/create_rules_schema';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 
-export const createCreateRulesRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const createRulesRoute = (router: IRouter): void => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: createRulesSchema,
+        body: buildRouteValidation<RuleAlertParamsRest>(createRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RulesRequest, headers) {
+    async (context, request, response) => {
       const {
         description,
         enabled,
@@ -62,39 +55,35 @@ export const createCreateRulesRoute = (
         to,
         type,
         references,
-      } = request.payload;
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const {
-          alertsClient,
-          actionsClient,
-          clusterClient,
-          savedObjectsClient,
-          spacesClient,
-        } = await getClients(request);
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return headers.response().code(404);
+          return siemResponse.error({ statusCode: 404 });
         }
 
-        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+        const finalIndex = outputIndex ?? siemClient.signalsIndex;
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
-          return headers
-            .response({
-              message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-              status_code: 400,
-            })
-            .code(400);
+          return siemResponse.error({
+            statusCode: 400,
+            body: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+          });
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return headers
-              .response({
-                message: `rule_id: "${ruleId}" already exists`,
-                status_code: 409,
-              })
-              .code(409);
+            return siemResponse.error({
+              statusCode: 409,
+              body: `rule_id: "${ruleId}" already exists`,
+            });
           }
         }
         const createdRule = await createRules({
@@ -139,32 +128,17 @@ export const createCreateRulesRoute = (
         });
         const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
         if (errors != null) {
-          return headers
-            .response({
-              message: errors,
-              status_code: 500,
-            })
-            .code(500);
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return validated;
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const createRulesRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createCreateRulesRoute(config, getClients));
+    }
+  );
 };

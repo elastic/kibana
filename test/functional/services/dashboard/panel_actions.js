@@ -21,7 +21,7 @@ const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
-const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-CUSTOMIZE_PANEL_ACTION_ID';
+const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 
