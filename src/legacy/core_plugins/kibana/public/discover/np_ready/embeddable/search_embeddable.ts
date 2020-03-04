@@ -37,7 +37,6 @@ import {
   Embeddable,
 } from '../../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
-import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
@@ -51,6 +50,7 @@ import {
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearch } from '../../../../../../../plugins/discover/public';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];

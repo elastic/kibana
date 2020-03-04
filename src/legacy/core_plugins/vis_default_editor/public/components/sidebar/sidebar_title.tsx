@@ -35,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
