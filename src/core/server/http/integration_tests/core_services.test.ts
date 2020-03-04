@@ -118,7 +118,7 @@ describe('http service', () => {
 
         const router = createRouter('');
         router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: false } },
+          { path: '/is-auth', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
