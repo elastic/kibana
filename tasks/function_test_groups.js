@@ -77,6 +77,8 @@ grunt.registerTask(
         'test/functional/config.js',
         '--test-stats',
       ]);
+
+      grunt.log.always(result.stdout);
       const stats = JSON.parse(result.stderr);
 
       if (stats.excludedTests.length > 0) {
@@ -94,6 +96,7 @@ grunt.registerTask(
 
       done();
     } catch (error) {
+      grunt.log.always(error.stack);
       grunt.fail.fatal(error.stack);
     }
   }
