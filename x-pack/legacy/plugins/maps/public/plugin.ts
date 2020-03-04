@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart } from 'src/core/public';
+import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
@@ -31,23 +31,25 @@ interface MapsPluginSetupDependencies {
   };
 }
 
+export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
+  const { licensing } = plugins;
+  if (licensing) {
+    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
+  }
+};
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup(
-    core: any,
-    { __LEGACY: { uiModules }, np: { licensing, home } }: MapsPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
       .directive('mapListing', function(reactDirective: any) {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    if (licensing) {
-      licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
-    }
+    bindSetupCoreAndPlugins(core, np);
 
-    home.featureCatalogue.register(featureCatalogueEntry);
+    np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: any) {
