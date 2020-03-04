@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { ISearchSource } from '../../../data/public';
 
-export const defaultFeedbackMessage = i18n.translate('common.ui.vis.defaultFeedbackMessage', {
-  defaultMessage: 'Have feedback? Please create an issue in {link}.',
-  values: {
-    link:
-      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
-  },
-});
+export type SortOrder = [string, string];
+export interface SavedSearch {
+  readonly id: string;
+  title: string;
+  searchSource: ISearchSource;
+  description?: string;
+  columns: string[];
+  sort: SortOrder[];
+  destroy: () => void;
+}
+export interface SavedSearchLoader {
+  get: (id: string) => Promise<SavedSearch>;
+  urlFor: (id: string) => string;
+}
