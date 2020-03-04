@@ -6,12 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 
 /**
  * Indices routes.
  */
-export function indicesRoutes({ router, mlLicense }: RouteInitialization) {
+export function indicesRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup Indices
    *
@@ -29,7 +30,7 @@ export function indicesRoutes({ router, mlLicense }: RouteInitialization) {
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           body: { index, fields: requestFields },
