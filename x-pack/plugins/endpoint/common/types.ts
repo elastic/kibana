@@ -369,19 +369,6 @@ export const alertingIndexGetQuerySchema = schema.object(
     ),
     sort: schema.maybe(schema.string()),
     order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-    /*
-    order: schema.maybe(
-      schema.string({
-        validate(value) {
-          if (value !== 'asc' && value !== 'desc') {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_sort_direction', {
-              defaultMessage: 'must be `asc` or `desc`',
-            });
-          }
-        },
-      })
-    ),
-    */
     query: schema.maybe(
       schema.string({
         validate(value) {
