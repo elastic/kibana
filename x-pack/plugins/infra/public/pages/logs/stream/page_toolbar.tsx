@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
 import { Toolbar } from '../../../components/eui';
@@ -52,9 +53,6 @@ export const LogsToolbar = () => {
     startDateExpression,
     endDateExpression,
     updateDateRange,
-    updateTimestamps,
-    liveStreamingInterval,
-    setLiveStreamingInterval,
   } = useContext(LogPositionState.Context);
 
   const handleTimeChange = useCallback(
@@ -121,22 +119,40 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            start={startDateExpression}
-            end={endDateExpression}
-            onTimeChange={handleTimeChange}
-            isPaused={!isStreaming}
-            refreshInterval={liveStreamingInterval}
-            onRefresh={updateTimestamps}
-            onRefreshChange={({ refreshInterval, isPaused }) => {
-              if (isPaused) {
-                stopLiveStreaming();
-              } else {
-                startLiveStreaming();
-              }
-              setLiveStreamingInterval(refreshInterval);
-            }}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiSuperDatePicker
+                start={startDateExpression}
+                end={endDateExpression}
+                onTimeChange={handleTimeChange}
+                showUpdateButton={false}
+                // @ts-ignore: EuiSuperDatePicker doesn't expose the `isDisabled` prop, although it exists.
+                isDisabled={isStreaming}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isStreaming ? (
+                <EuiButtonEmpty
+                  color="primary"
+                  iconType="pause"
+                  iconSide="left"
+                  onClick={stopLiveStreaming}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.logs.stopStreamingButtonLabel"
+                    defaultMessage="Stop streaming"
+                  />
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty iconType="play" iconSide="left" onClick={startLiveStreaming}>
+                  <FormattedMessage
+                    id="xpack.infra.logs.startStreamingButtonLabel"
+                    defaultMessage="Stream live"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>

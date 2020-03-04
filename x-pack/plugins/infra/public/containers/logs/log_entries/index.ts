@@ -18,6 +18,7 @@ import {
 import { fetchLogEntries } from './api/fetch_log_entries';
 
 const DESIRED_BUFFER_PAGES = 2;
+const LIVE_STREAM_INTERVAL = 5000;
 
 enum Action {
   FetchingNewEntries,
@@ -53,7 +54,6 @@ type Dispatch = (action: ActionObj) => void;
 interface LogEntriesProps {
   startTimestamp: number;
   endTimestamp: number;
-  liveStreamingInterval: number;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
@@ -273,7 +273,7 @@ const useFetchEntriesEffect = (
     (async () => {
       if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
         if (startedStreaming) {
-          await new Promise(res => setTimeout(res, props.liveStreamingInterval));
+          await new Promise(res => setTimeout(res, LIVE_STREAM_INTERVAL));
         } else {
           const endTimestamp = Date.now();
           props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });

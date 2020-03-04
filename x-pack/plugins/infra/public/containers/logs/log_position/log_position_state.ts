@@ -28,7 +28,6 @@ export interface LogPositionStateParams {
   initialized: boolean;
   targetPosition: TimeKeyOrNull;
   isStreaming: boolean;
-  liveStreamingInterval: number;
   firstVisiblePosition: TimeKeyOrNull;
   pagesBeforeStart: number;
   pagesAfterEnd: number;
@@ -46,11 +45,9 @@ export interface LogPositionCallbacks {
   jumpToTargetPosition: (pos: TimeKeyOrNull) => void;
   jumpToTargetPositionTime: (time: number) => void;
   reportVisiblePositions: (visPos: VisiblePositions) => void;
-  setLiveStreamingInterval: (interval: number) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
-  updateTimestamps: () => void;
 }
 
 const DEFAULT_DATE_RANGE: DateRange = { startDateExpression: 'now-1d', endDateExpression: 'now' };
@@ -95,7 +92,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [liveStreamingInterval, setLiveStreamingInterval] = useState(10000);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
     endKey: null,
     middleKey: null,
@@ -122,12 +118,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     (newDateRange: Partial<DateRange>) => {
       // Prevent unnecessary re-renders
       if (!('startDateExpression' in newDateRange) && !('endDateExpression' in newDateRange)) {
-        return;
-      }
-      if (
-        newDateRange.startDateExpression === dateRange.startDateExpression &&
-        newDateRange.endDateExpression === dateRange.endDateExpression
-      ) {
         return;
       }
 
@@ -158,8 +148,9 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
           endDateExpression: newDateRange.endDateExpression || previousDateRange.endDateExpression,
         };
       });
+      updateTimestamps();
     },
-    [dateRange, targetPosition]
+    [dateRange, targetPosition, updateTimestamps]
   );
 
   // `lastUpdate` needs to be a dependency for the timestamps.
@@ -192,7 +183,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     ...dateRange,
     startTimestamp,
     endTimestamp,
-    liveStreamingInterval,
   };
 
   const callbacks = {
@@ -203,11 +193,13 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
       [jumpToTargetPosition]
     ),
     reportVisiblePositions,
-    startLiveStreaming: useCallback(() => setIsStreaming(true), [setIsStreaming]),
+    startLiveStreaming: useCallback(() => {
+      setIsStreaming(true);
+      jumpToTargetPosition(null);
+      updateDateRange({ startDateExpression: 'now-1d', endDateExpression: 'now' });
+    }, [setIsStreaming, updateDateRange]),
     stopLiveStreaming: useCallback(() => setIsStreaming(false), [setIsStreaming]),
     updateDateRange,
-    setLiveStreamingInterval,
-    updateTimestamps,
   };
 
   return { ...state, ...callbacks };
