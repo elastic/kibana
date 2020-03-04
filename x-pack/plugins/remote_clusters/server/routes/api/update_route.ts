@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
 import { serializeCluster, deserializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
@@ -17,8 +17,40 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 import { isEsError } from '../../lib/is_es_error';
 
 const bodyValidation = schema.object({
-  seeds: schema.arrayOf(schema.string()),
   skipUnavailable: schema.boolean(),
+  mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
+  // The following validation only applies to "sniff" mode
+  seeds: schema.conditional(
+    schema.siblingRef('mode'),
+    SNIFF_MODE,
+    schema.arrayOf(schema.string()),
+    schema.never()
+  ),
+  nodeConnections: schema.conditional(
+    schema.siblingRef('mode'),
+    SNIFF_MODE,
+    schema.maybe(schema.number()),
+    schema.never()
+  ),
+  // The following validation only applies to "proxy" mode
+  proxyAddress: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.string(),
+    schema.never()
+  ),
+  proxySocketConnections: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.maybe(schema.number()),
+    schema.never()
+  ),
+  serverName: schema.conditional(
+    schema.siblingRef('mode'),
+    PROXY_MODE,
+    schema.maybe(schema.string()),
+    schema.never()
+  ),
 });
 
 const paramsValidation = schema.object({
@@ -39,7 +71,6 @@ export const register = (deps: RouteDependencies): void => {
       const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
       const { name } = request.params;
-      const { seeds, skipUnavailable } = request.body;
 
       // Check if cluster does exist.
       const existingCluster = await doesClusterExist(callAsCurrentUser, name);
@@ -57,7 +88,8 @@ export const register = (deps: RouteDependencies): void => {
       }
 
       // Update cluster as new settings
-      const updateClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
+      const updateClusterPayload = serializeCluster({ ...request.body, name });
+
       const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: updateClusterPayload,
       });

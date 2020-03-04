@@ -329,7 +329,7 @@ export class RemoteClusterForm extends Component {
         >
           <EuiFieldNumber
             value={nodeConnections}
-            onChange={e => this.onFieldsChange({ nodeConnections: e.target.value })}
+            onChange={e => this.onFieldsChange({ nodeConnections: Number(e.target.value) || null })}
             fullWidth
           />
         </EuiFormRow>
@@ -385,7 +385,9 @@ export class RemoteClusterForm extends Component {
         >
           <EuiFieldNumber
             value={proxySocketConnections}
-            onChange={e => this.onFieldsChange({ proxySocketConnections: e.target.value })}
+            onChange={e =>
+              this.onFieldsChange({ proxySocketConnections: Number(e.target.value) || null })
+            }
             fullWidth
           />
         </EuiFormRow>
