@@ -8,6 +8,7 @@ import { SearchResponse } from 'elasticsearch';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
+import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
 import { fromKueryExpression } from '../../../../src/plugins/data/common';
 
 /**
@@ -461,4 +462,54 @@ export const alertingIndexGetQuerySchema = schema.object(
   }
 );
 
-export type AlertingIndexGetQuerySchema = TypeOf<typeof alertingIndexGetQuerySchema>;
+/**
+ * Like TypeOf, but provides a type for creating the value that will match.
+ * schema.number accepts a string, so this allows strings for number
+ * schema.maybe creates an optional type, if such a type is a prop on an schema.object,
+ * the key itself will be optional.
+ */
+type KbnConfigSchemaInputTypeOf<
+  T extends kbnConfigSchemaTypes.Type<unknown>
+> = T extends kbnConfigSchemaTypes.ObjectType
+  ? KbnConfigSchemaInputObjectTypeOf<T>
+  : kbnConfigSchemaTypes.Type<number> extends T
+  ? TypeOf<T> | string
+  : TypeOf<T>;
+
+/**
+ * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
+ * This allows us to avoid passing 'maybeKey: undefined' when constructing such an object.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaInputObjectTypeOf<
+  T extends kbnConfigSchemaTypes.ObjectType
+> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
+  ? {
+      [K in Exclude<
+        keyof P,
+        keyof KbnConfigSchemaNonOptionalProps<P>
+      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
+    } &
+      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
+  : never;
+
+/**
+ * Takes the props of a schema.object type, and returns a version that excludes
+ * optional values. Used by `InputObjectTypeOf`.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+  Props,
+  {
+    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+  }[keyof Props]
+>;
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export type AlertingIndexGetQuerySchema = KbnConfigSchemaInputTypeOf<
+  typeof alertingIndexGetQuerySchema
+>;

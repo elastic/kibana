@@ -9,15 +9,11 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import {
-  AlertListState,
-  AlertingIndexUIQueryParams,
-  AlertsAPIQueryParams,
-  CreateStructuredSelector,
-} from '../../types';
+import { AlertListState, AlertingIndexUIQueryParams, CreateStructuredSelector } from '../../types';
 import { Immutable, AlertingIndexGetQuerySchema } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
+
 /**
  * Returns the Alert Data array from state
  */
@@ -90,6 +86,10 @@ export const apiQueryParams: (
   })
 );
 
+/**
+ * True if the user has selected an alert to see details about.
+ * Populated via the browsers query params.
+ */
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
