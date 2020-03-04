@@ -12,14 +12,13 @@ import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { privilegesProvider } from '../lib/check_privileges';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 
 /**
  * System routes
  */
 export function systemRoutes(
-  { getLicenseCheckResults, router }: RouteInitialization,
+  { router, mlLicense }: RouteInitialization,
   { spacesPlugin, cloud }: SystemRouteDeps
 ) {
   async function getNodeCount(context: RequestHandlerContext) {
@@ -56,7 +55,7 @@ export function systemRoutes(
         body: schema.maybe(schema.any()),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         let upgradeInProgress = false;
         try {
@@ -77,7 +76,7 @@ export function systemRoutes(
           }
         }
 
-        if (getLicenseCheckResults().isSecurityDisabled) {
+        if (mlLicense.isSecurityEnabled() === false) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return response.ok({
@@ -116,7 +115,7 @@ export function systemRoutes(
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
@@ -127,7 +126,7 @@ export function systemRoutes(
 
         const { getPrivileges } = privilegesProvider(
           context.ml!.mlClient.callAsCurrentUser,
-          getLicenseCheckResults(),
+          mlLicense,
           isMlEnabledInSpace,
           ignoreSpaces
         );
@@ -152,11 +151,11 @@ export function systemRoutes(
       path: '/api/ml/ml_node_count',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (getLicenseCheckResults().isSecurityDisabled) {
+        if (mlLicense.isSecurityEnabled() === false) {
           return response.ok({
             body: await getNodeCount(context),
           });
@@ -203,7 +202,7 @@ export function systemRoutes(
       path: '/api/ml/info',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
         const cloudId = cloud && cloud.cloudId;
@@ -231,7 +230,7 @@ export function systemRoutes(
         body: schema.maybe(schema.any()),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         return response.ok({
           body: await context.ml!.mlClient.callAsCurrentUser('search', request.body),

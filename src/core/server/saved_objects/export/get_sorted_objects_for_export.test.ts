@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getSortedObjectsForExport } from './get_sorted_objects_for_export';
+import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
@@ -65,7 +65,7 @@ describe('getSortedObjectsForExport()', () => {
       per_page: 1,
       page: 0,
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -151,7 +151,7 @@ describe('getSortedObjectsForExport()', () => {
       per_page: 1,
       page: 0,
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -210,7 +210,7 @@ describe('getSortedObjectsForExport()', () => {
       per_page: 1,
       page: 0,
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -297,7 +297,7 @@ describe('getSortedObjectsForExport()', () => {
       per_page: 1,
       page: 0,
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -385,7 +385,7 @@ describe('getSortedObjectsForExport()', () => {
       page: 0,
     });
     await expect(
-      getSortedObjectsForExport({
+      exportSavedObjectsToStream({
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
@@ -425,7 +425,7 @@ describe('getSortedObjectsForExport()', () => {
         },
       ],
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern'],
@@ -489,7 +489,7 @@ describe('getSortedObjectsForExport()', () => {
         },
       ],
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
       objects: [
@@ -587,7 +587,7 @@ describe('getSortedObjectsForExport()', () => {
         },
       ],
     });
-    const exportStream = await getSortedObjectsForExport({
+    const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
       objects: [
@@ -681,7 +681,7 @@ describe('getSortedObjectsForExport()', () => {
         },
       ],
     };
-    await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`
     );
   });
@@ -694,7 +694,7 @@ describe('getSortedObjectsForExport()', () => {
       objects: undefined,
     };
 
-    expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Either \`type\` or \`objects\` are required."`
     );
   });
@@ -707,7 +707,7 @@ describe('getSortedObjectsForExport()', () => {
       search: 'foo',
     };
 
-    expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't specify both \\"search\\" and \\"objects\\" properties when exporting"`
     );
   });
