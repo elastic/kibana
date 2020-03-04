@@ -22,15 +22,13 @@ import { instance as registry } from '../../contexts/editor_context/editor_regis
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
-
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: { history, settings, notifications, trackUiMetric },
+    services: { history, settings, notifications, trackUiMetric, pulse },
   } = useServicesContext();
-
   const dispatch = useRequestActionContext();
 
   return useCallback(async () => {
@@ -47,8 +45,7 @@ export const useSendCurrentRequestToES = () => {
       }
 
       // Fire and forget
-      setTimeout(() => track(requests, editor, trackUiMetric), 0);
-
+      setTimeout(() => track(requests, editor, trackUiMetric, pulse), 0);
       const results = await sendRequestToES({ requests });
 
       results.forEach(({ request: { path, method, data } }) => {
@@ -84,5 +81,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric]);
+  }, [dispatch, settings, trackUiMetric, pulse, history, notifications.toasts]);
 };

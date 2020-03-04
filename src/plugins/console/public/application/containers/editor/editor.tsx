@@ -52,6 +52,31 @@ export const Editor = ({ loading }: Props) => {
     []
   );
 
+  const pulseInstructions = [
+    {
+      hash: 'snapshot_hash',
+      endpoint_id: 'snapshot.create',
+      action: {
+        text: 'Take me there!',
+        href: '/management/elasticsearch/snapshot_restore/snapshots',
+      },
+      description: [
+        { type: 'text', text: 'You can now use the ' },
+        { type: 'docLink', text: 'Snapshot and Restore' },
+        { type: 'text', text: ' UI to manage taking snapshots.' },
+      ],
+    },
+    {
+      hash: 'user_hash',
+      endpoint_id: 'security.put_user',
+      description: [
+        { type: 'text', text: 'Would you prefer using the ' },
+        { type: 'docLink', text: 'Create User' },
+        { type: 'text', text: ' Kibana UI to manage and create users?' },
+      ],
+    },
+  ];
+
   if (!currentTextObject) return null;
 
   return (
@@ -63,7 +88,10 @@ export const Editor = ({ loading }: Props) => {
         {loading ? (
           <EditorContentSpinner />
         ) : (
-          <EditorUI initialTextValue={currentTextObject.text} />
+          <EditorUI
+            initialTextValue={currentTextObject.text}
+            pulseInstructions={pulseInstructions}
+          />
         )}
       </Panel>
       <Panel
