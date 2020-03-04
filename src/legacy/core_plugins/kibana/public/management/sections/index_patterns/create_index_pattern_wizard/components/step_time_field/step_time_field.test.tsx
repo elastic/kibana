@@ -21,7 +21,6 @@ import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 import { IFieldType } from '../../../../../../../../../../plugins/data/public';
-import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
 
 import { StepTimeField } from '../step_time_field';
 
@@ -43,7 +42,19 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 const noop = () => {};
-const indexPatternsService = dataPluginMock.createStartContract().indexPatterns;
+const fields = [
+  {
+    name: '@timestamp',
+    type: 'date',
+  },
+];
+const indexPatternsService = {
+  make: () => ({
+    fieldsFetcher: {
+      fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
+    },
+  }),
+} as any;
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
@@ -296,24 +307,11 @@ describe('StepTimeField', () => {
 
   it('should call createIndexPattern with undefined time field when no time filter chosen', async () => {
     const createIndexPattern = jest.fn();
-    const fields = [
-      {
-        name: '@timestamp',
-        type: 'date',
-      },
-    ];
-    const indPatternsService = {
-      make: () => ({
-        fieldsFetcher: {
-          fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
-        },
-      }),
-    } as any;
 
     const component = shallowWithI18nProvider(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indPatternsService}
+        indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={createIndexPattern}
         indexPatternCreationType={mockIndexPatternCreationType}
