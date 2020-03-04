@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { Header } from './header';
-export { Table } from './table';
-export { Relationships } from './relationships';
+import { SavedObjectWithMetadata } from '../types';
+
+// TODO: same as in `src/plugins/so_management/server/lib/find_relationships.ts`, create common folder
+export interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectWithMetadata['meta'];
+}

@@ -18,15 +18,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { SavedObjectWithMetadata } from '../../types';
-
-// TODO: same as in `src/plugins/so_management/server/lib/find_relationships.ts`, create common folder
-interface SavedObjectRelation {
-  id: string;
-  type: string;
-  relationship: 'child' | 'parent';
-  meta: SavedObjectWithMetadata['meta'];
-}
+import { SavedObjectRelation } from '../types';
 
 export async function getRelationships(
   type: string,
