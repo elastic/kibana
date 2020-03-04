@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+export { CasesConfigurationSchema } from '../../../../actions/server/builtin_action_types/servicenow/schema';
 
 export const UserSchema = schema.object({
   full_name: schema.maybe(schema.string()),
@@ -62,8 +63,6 @@ export const SavedObjectsFindOptionsSchema = schema.object({
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
 });
-
-export const CasesConfigurationSchema = schema.object({});
 
 export const NewActionSchema = schema.object({
   name: schema.string(),
