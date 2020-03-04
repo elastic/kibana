@@ -54,6 +54,7 @@ export class Plugin() {
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) with the given priority. |
+|  [getImportExportObjectLimit](./kibana-plugin-server.savedobjectsservicesetup.getimportexportobjectlimit.md) | <code>() =&gt; number</code> | Returns the maximum number of objects allowed for import or export operations. |
 |  [registerType](./kibana-plugin-server.savedobjectsservicesetup.registertype.md) | <code>(type: SavedObjectsType) =&gt; void</code> | Register a [savedObjects type](./kibana-plugin-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-server.savedobjectmigrationmap.md) for more details about these. |
 |  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

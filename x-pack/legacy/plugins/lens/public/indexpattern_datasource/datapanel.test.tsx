@@ -533,34 +533,6 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.get).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
     });
-
-    it('shows all fields if empty state button is clicked', async () => {
-      const props = testProps();
-
-      core.http.get.mockResolvedValue({
-        indexPatternTitle: props.currentIndexPatternId,
-        existingFieldNames: [],
-      });
-
-      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
-
-      inst.update();
-      await waitForPromises();
-
-      expect(inst.find('[data-test-subj="lnsFieldListPanelField"]').length).toEqual(0);
-
-      act(() => {
-        inst
-          .find('[data-test-subj="lnsDataPanelShowAllFields"]')
-          .first()
-          .simulate('click');
-        inst.update();
-      });
-
-      expect(
-        props.setState.mock.calls.map(([fn]) => fn(props.state)).filter(s => s.showEmptyFields)
-      ).toHaveLength(1);
-    });
   });
 
   describe('while showing empty fields', () => {
