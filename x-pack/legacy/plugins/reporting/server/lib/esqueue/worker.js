@@ -250,7 +250,7 @@ export class Worker extends events.EventEmitter {
       Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
         .then(res => {
           // job execution was successful
-          if (res.warnings && res.warnings.length > 0) {
+          if (res && res.warnings && res.warnings.length > 0) {
             this.warn(`Job execution completed with warnings`);
           } else {
             this.info(`Job execution completed successfully`);
