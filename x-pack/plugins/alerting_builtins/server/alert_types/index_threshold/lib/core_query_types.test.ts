@@ -126,7 +126,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.termField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termField]: valuehas length [0] but it must have a minimum length of [1]."`
+        `"[termField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -145,7 +145,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.termSize = 0;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termSize]: Value is [0] but it must be equal to or greater than [1]."`
+        `"[termSize]: Value must be equal to or greater than [1]."`
       );
     });
 
@@ -157,7 +157,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.timeWindowSize = 0;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowSize]: Value is [0] but it must be equal to or greater than [1]."`
+        `"[timeWindowSize]: Value must be equal to or greater than [1]."`
       );
     });
 
