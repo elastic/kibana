@@ -15,6 +15,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
+import { Filter as DataFilter } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;
@@ -31,7 +32,7 @@ export type SavedLensInput = EmbeddableInput & {
     interval: number;
   };
   hideFilterActions: true;
-  filters: Filter[];
+  filters: DataFilter[];
 };
 
 const defaultTimeRange = {

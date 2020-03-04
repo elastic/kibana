@@ -63,12 +63,6 @@ export function embeddableInputToExpression(
         `timerange={timerange from="${lensInput.timeRange.from}" to="${lensInput.timeRange.to}"}`
       );
     }
-
-    if (lensInput.hiddenLayers && lensInput.hiddenLayers.length) {
-      for (const layerId of lensInput.hiddenLayers) {
-        expressionParts.push(`hideLayer="${layerId}"`);
-      }
-    }
   }
 
   return expressionParts.join(' ');
