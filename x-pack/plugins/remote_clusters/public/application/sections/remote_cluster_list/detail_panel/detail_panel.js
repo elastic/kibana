@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { PROXY_MODE } from '../../../../../common/constants';
 import { getRouterLinkProps } from '../../../services';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
@@ -113,6 +114,10 @@ export class DetailPanel extends Component {
     seeds,
     maxConnectionsPerCluster,
     initialConnectTimeout,
+    mode,
+    proxyAddress,
+    proxySocketConnections,
+    connectedSocketsCount,
   }) {
     return (
       <section
@@ -147,42 +152,75 @@ export class DetailPanel extends Component {
               </EuiDescriptionListDescription>
             </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
-                    defaultMessage="Connected nodes"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
+            {mode === PROXY_MODE ? (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.connectedSocketsLabel"
+                      defaultMessage="Connected sockets"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedNodesCount">
-                {connectedNodesCount}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedSocketsCount">
+                  {connectedSocketsCount}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
+                      defaultMessage="Connected nodes"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedNodesCount">
+                  {connectedNodesCount}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />
 
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.seedsLabel"
-                    defaultMessage="Seeds"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
+            {mode === PROXY_MODE ? (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.proxyAddressLabel"
+                      defaultMessage="Proxy address"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-                {/* TODO: Fix to support proxy mode */}
-                {(seeds || []).map(seed => (
-                  <EuiText key={seed}>{seed}</EuiText>
-                ))}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailProxyAddress">
+                  {proxyAddress}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.seedsLabel"
+                      defaultMessage="Seeds"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
+                  {seeds.map(seed => (
+                    <EuiText key={seed}>{seed}</EuiText>
+                  ))}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            )}
 
             <EuiFlexItem>
               <EuiDescriptionListTitle>
@@ -203,20 +241,37 @@ export class DetailPanel extends Component {
           <EuiSpacer size="s" />
 
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
-                    defaultMessage="Maximum number of connections"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
+            {mode === PROXY_MODE ? (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.maxSocketConnectionsLabel"
+                      defaultMessage="Maximum number of socket connections"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxConnections">
-                {maxConnectionsPerCluster}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxSocketConnections">
+                  {proxySocketConnections}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
+                      defaultMessage="Maximum number of connections"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxConnections">
+                  {maxConnectionsPerCluster}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            )}
 
             <EuiFlexItem>
               <EuiDescriptionListTitle>
