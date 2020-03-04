@@ -116,8 +116,8 @@ export const patchRules = async ({
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
       },
-      actions: actions ?? [],
-      throttle: throttle ?? null,
+      actions: actions ?? rule.actions ?? [],
+      throttle: throttle ?? rule.throttle ?? null,
       params: nextParams,
     },
   });

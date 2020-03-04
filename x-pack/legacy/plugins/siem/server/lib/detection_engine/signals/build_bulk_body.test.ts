@@ -60,6 +60,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -149,6 +150,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -236,6 +238,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -316,6 +319,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
