@@ -130,7 +130,7 @@ export const Template: FunctionComponent<Props> = ({
           </div>
         </div>
 
-        <div className="kbnWelcomeView" id="kbn_legacy_browser_error">
+        <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
           {logo}
 
           <h2 className="kbnWelcomeTitle">
