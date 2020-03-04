@@ -5,7 +5,6 @@
  */
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
-
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -105,15 +104,17 @@ export class ReindexWorker {
   private startUpdateOperationLoop = async () => {
     this.updateOperationLoopRunning = true;
 
-    while (this.inProgressOps.length > 0) {
-      this.log.debug(`Updating ${this.inProgressOps.length} reindex operations`);
+    try {
+      while (this.inProgressOps.length > 0) {
+        this.log.debug(`Updating ${this.inProgressOps.length} reindex operations`);
 
-      // Push each operation through the state machine and refresh.
-      await Promise.all(this.inProgressOps.map(this.processNextStep));
-      await this.refresh();
+        // Push each operation through the state machine and refresh.
+        await Promise.all(this.inProgressOps.map(this.processNextStep));
+        await this.refresh();
+      }
+    } finally {
+      this.updateOperationLoopRunning = false;
     }
-
-    this.updateOperationLoopRunning = false;
   };
 
   private pollForOperations = async () => {
@@ -126,14 +127,42 @@ export class ReindexWorker {
     }
   };
 
-  private refresh = async () => {
+  private updateInProgressOps = async () => {
     try {
-      this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+      const inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+      const parallelOps: ReindexSavedObject[] = [];
+      const queueOps: ReindexSavedObject[] = [];
+      for (const inProgressOp of inProgressOps) {
+        if (inProgressOp.attributes.reindexOptions?.queueSettings) {
+          queueOps.push(inProgressOp);
+        } else {
+          parallelOps.push(inProgressOp);
+        }
+      }
+
+      if (queueOps.length) {
+        const [firstInQueueOp] = queueOps.sort(
+          (a, b) =>
+            a.attributes.reindexOptions!.queueSettings!.queuedAt -
+            b.attributes.reindexOptions!.queueSettings!.queuedAt
+        );
+
+        this.log.debug(
+          `Queue detected; current length ${queueOps.length}, current item ReindexOperation(id: ${firstInQueueOp.id}, indexName: ${firstInQueueOp.attributes.indexName})`
+        );
+
+        this.inProgressOps = parallelOps.concat(firstInQueueOp);
+      } else {
+        this.inProgressOps = parallelOps;
+      }
     } catch (e) {
-      this.log.debug(`Could not fetch reindex operations from Elasticsearch`);
+      this.log.debug(`Could not fetch reindex operations from Elasticsearch, ${e.message}`);
       this.inProgressOps = [];
     }
+  };
 
+  private refresh = async () => {
+    await this.updateInProgressOps();
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
       this.startUpdateOperationLoop();
