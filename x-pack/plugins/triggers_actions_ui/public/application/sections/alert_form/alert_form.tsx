@@ -112,10 +112,18 @@ export const AlertForm = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
-  const [alertInterval, setAlertInterval] = useState<number | null>(null);
-  const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>('m');
-  const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
-  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
+  const [alertInterval, setAlertInterval] = useState<number>(
+    alert.schedule.interval ? parseInt(alert.schedule.interval.replace(/^[A-Za-z]+$/, ''), 0) : 1
+  );
+  const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
+    alert.schedule.interval ? alert.schedule.interval.replace(alertInterval.toString(), '') : 'm'
+  );
+  const [alertThrottle, setAlertThrottle] = useState<number | null>(
+    alert.throttle ? parseInt(alert.throttle.replace(/^[A-Za-z]+$/, ''), 0) : null
+  );
+  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
+    alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
+  );
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
@@ -774,12 +782,12 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   compressed
-                  value={alertInterval || 1}
+                  value={alertInterval}
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={e => {
                     const interval = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertInterval(interval);
+                    setAlertInterval(interval ?? 1);
                     setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
                   }}
                 />
@@ -789,7 +797,7 @@ export const AlertForm = ({
                   fullWidth
                   compressed
                   value={alertIntervalUnit}
-                  options={getTimeOptions(alertInterval ?? 1)}
+                  options={getTimeOptions(alertInterval)}
                   onChange={e => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
@@ -824,7 +832,9 @@ export const AlertForm = ({
                   options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={e => {
                     setAlertThrottleUnit(e.target.value);
-                    setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
+                    if (alertThrottle) {
+                      setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
+                    }
                   }}
                 />
               </EuiFlexItem>

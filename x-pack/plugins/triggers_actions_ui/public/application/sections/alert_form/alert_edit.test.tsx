@@ -79,7 +79,7 @@ describe('alert_edit', () => {
         },
       ],
       tags: [],
-      name: 'Serhii',
+      name: 'test alert',
       throttle: null,
       apiKeyOwner: null,
       createdBy: 'elastic',
