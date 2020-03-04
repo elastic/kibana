@@ -13,6 +13,9 @@ export interface IField {
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
+  getSource(): IVectorSource;
+  getOrigin(): FIELD_ORIGIN;
+  isValid(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -66,7 +69,7 @@ export class AbstractField implements IField {
     throw new Error('must implement Field#createTooltipProperty');
   }
 
-  getOrigin(): string {
+  getOrigin(): FIELD_ORIGIN {
     return this._origin;
   }
 

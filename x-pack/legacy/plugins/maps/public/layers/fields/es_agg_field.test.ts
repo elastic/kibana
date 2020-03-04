@@ -5,17 +5,37 @@
  */
 
 import { ESAggField } from './es_agg_field';
-import { AGG_TYPE, FIELD_ORIGIN,  } from '../../../common/constants';
-import { ESGeoGridSource } from '../sources/es_geo_grid_source/es_geo_grid_source';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
+import { IESAggSource } from '../sources/es_agg_source';
+import { IIndexPattern } from 'src/plugins/data/public';
 
-const mockInspectorAdapter = {};
+const mockIndexPattern = {
+  title: 'wildIndex',
+  fields: [
+    {
+      name: 'foo*',
+    },
+  ],
+} as IIndexPattern;
+
+const mockEsAggSource = {
+  getAggKey: (aggType: AGG_TYPE, fieldName: string) => {
+    return 'agg_key';
+  },
+  getAggLabel: (aggType: AGG_TYPE, fieldName: string) => {
+    return 'agg_label';
+  },
+  getIndexPattern: async () => {
+    return mockIndexPattern;
+  },
+} as IESAggSource;
 
 const defaultParams = {
   label: 'my agg field',
-  source: new ESGeoGridSource({ type: ESGeoGridSource.type, indexPatternId: 'my index pattern' }, mockInspectorAdapter),
+  source: mockEsAggSource,
   aggType: AGG_TYPE.COUNT,
-  origin: FIELD_ORIGIN.SOURCE
-}
+  origin: FIELD_ORIGIN.SOURCE,
+};
 
 describe('supportsFieldMeta', () => {
   test('Non-counting aggregations should support field meta', () => {

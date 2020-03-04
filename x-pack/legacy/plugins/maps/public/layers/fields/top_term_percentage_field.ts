@@ -4,55 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractField } from './field';
 import { IESAggField } from './es_agg_field';
+import { IESAggSource } from '../sources/es_agg_source';
+// @ts-ignore
 import { TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
+import { FIELD_ORIGIN } from '../../../common/constants';
 
-export class TopTermPercentageField extends AbstractField implements IESAggField {
+export class TopTermPercentageField implements IESAggField {
+  private _topTermAggField: IESAggField;
+
   constructor(topTermAggField: IESAggField) {
-    super({ source: topTermAggField.getSource(), origin: topTermAggField.getOrigin() });
     this._topTermAggField = topTermAggField;
   }
 
-  getName() {
+  getSource(): IESAggSource {
+    return this._topTermAggField.getSource();
+  }
+
+  getOrigin(): FIELD_ORIGIN {
+    return this._topTermAggField.getOrigin();
+  }
+
+  getName(): string {
     return `${this._topTermAggField.getName()}${TOP_TERM_PERCENTAGE_SUFFIX}`;
   }
 
-  getRootName() {
+  getRootName(): string {
     // top term percentage is a derived value so it has no root field
     return '';
   }
 
-  async getLabel() {
+  async getLabel(): Promise<string> {
     return 'Top term percentage';
   }
 
-  isValid() {
+  isValid(): boolean {
     return this._topTermAggField.isValid();
   }
 
-  async getDataType() {
+  async getDataType(): Promise<string> {
     return 'number';
   }
 
-  async createTooltipProperty(value) {
+  async createTooltipProperty(value: unknown): Promise<unknown> {
     return new TooltipProperty(this.getName(), await this.getLabel(), value);
   }
 
-  getValueAggDsl() {
+  getValueAggDsl(): null {
     return null;
   }
 
-  getBucketCount() {
+  getBucketCount(): number {
     return 0;
   }
 
-  supportsFieldMeta() {
+  supportsFieldMeta(): boolean {
     return false;
   }
 
-  canValueBeFormatted() {
+  canValueBeFormatted(): boolean {
     return false;
   }
 }

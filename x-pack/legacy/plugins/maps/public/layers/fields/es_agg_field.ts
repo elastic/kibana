@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractField, IField } from './field';
-import { AggDescriptor } from  '../../../common/descriptor_types';
+import { IndexPattern } from 'src/plugins/data/public';
+import { IField } from './field';
+import { AggDescriptor } from '../../../common/descriptor_types';
 import { IESAggSource } from '../sources/es_agg_source';
+// @ts-ignore
 import { ESDocField } from './es_doc_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
+// @ts-ignore
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { getField, addFieldToDSL } from '../util/es_agg_utils';
 import { TopTermPercentageField } from './top_term_percentage_field';
-import { IIndexPattern } from 'src/plugins/data/public';
 
 export interface IESAggField extends IField {
-  getValueAggDsl(indexPattern: IIndexPattern): unknown;
+  getValueAggDsl(indexPattern: IndexPattern): unknown | null;
   getBucketCount(): number;
 }
 
-export class ESAggField extends AbstractField implements IESAggField {
+export class ESAggField implements IESAggField {
   static type = 'ES_AGG';
 
+  private _source: IESAggSource;
+  private _origin: FIELD_ORIGIN;
   private _label?: string;
   private _aggType: AGG_TYPE;
   private _esDocField?: unknown;
@@ -32,18 +36,27 @@ export class ESAggField extends AbstractField implements IESAggField {
     source,
     aggType,
     esDocField,
-    origin
+    origin,
   }: {
-    label?: string,
-    source: IESAggSource,
-    aggType: AGG_TYPE,
-    esDocField?: unknown,
-    origin: FIELD_ORIGIN,
+    label?: string;
+    source: IESAggSource;
+    aggType: AGG_TYPE;
+    esDocField?: unknown;
+    origin: FIELD_ORIGIN;
   }) {
-    super({ source, origin });
+    this._source = source;
+    this._origin = origin;
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
+  }
+
+  getSource(): IESAggSource {
+    return this._source;
+  }
+
+  getOrigin(): FIELD_ORIGIN {
+    return this._origin;
   }
 
   getName(): string {
@@ -72,7 +85,9 @@ export class ESAggField extends AbstractField implements IESAggField {
     return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
-  _getESDocFieldName(): unknown {
+  _getESDocFieldName(): string {
+    // TODO remove when esDocField is typed
+    // @ts-ignore
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
@@ -87,7 +102,7 @@ export class ESAggField extends AbstractField implements IESAggField {
     );
   }
 
-  getValueAggDsl(indexPattern: IIndexPattern): unknown {
+  getValueAggDsl(indexPattern: IndexPattern): unknown | null {
     if (this.getAggType() === AGG_TYPE.COUNT) {
       return null;
     }
@@ -116,15 +131,23 @@ export class ESAggField extends AbstractField implements IESAggField {
   }
 
   async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    // TODO remove when esDocField is typed
+    // @ts-ignore
     return this._esDocField.getOrdinalFieldMetaRequest();
   }
 
   async getCategoricalFieldMetaRequest(): Promise<unknown> {
+    // TODO remove when esDocField is typed
+    // @ts-ignore
     return this._esDocField.getCategoricalFieldMetaRequest();
   }
 }
 
-export function esAggFieldsFactory(aggDescriptor: AggDescriptor, source: IESAggSource, origin: FIELD_ORIGIN): IESAggField[] {
+export function esAggFieldsFactory(
+  aggDescriptor: AggDescriptor,
+  source: IESAggSource,
+  origin: FIELD_ORIGIN
+): IESAggField[] {
   const aggField = new ESAggField({
     label: aggDescriptor.label,
     esDocField: aggDescriptor.field
@@ -135,7 +158,7 @@ export function esAggFieldsFactory(aggDescriptor: AggDescriptor, source: IESAggS
     origin,
   });
 
-  const aggFields = [aggField];
+  const aggFields: IESAggField[] = [aggField];
 
   if (aggDescriptor.type === AGG_TYPE.TERMS) {
     aggFields.push(new TopTermPercentageField(aggField));

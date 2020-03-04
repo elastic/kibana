@@ -5,11 +5,13 @@
  */
 
 import { AbstractVectorSource } from './vector_source';
+import { ISource } from './source';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface IESSource extends ISource {
-  getIndexPattern(): Promise<IIndexPattern>;
+  getIndexPattern(): Promise<IndexPattern>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
-  getIndexPattern(): Promise<IIndexPattern>;
+  getIndexPattern(): Promise<IndexPattern>;
 }
