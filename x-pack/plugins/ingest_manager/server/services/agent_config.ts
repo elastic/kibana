@@ -308,8 +308,8 @@ class AgentConfigService {
         // TEMPORARY as we only support a default output
         ...[
           await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
-        ].reduce((outputs, { config: outputConfig, ...output }) => {
-          outputs[output.is_default ? 'default' : output.id] = {
+        ].reduce((outputs, { config: outputConfig, is_default, name, id: outputId, ...output }) => {
+          outputs[name] = {
             ...output,
             type: output.type as any,
             ...outputConfig,
