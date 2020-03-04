@@ -247,22 +247,44 @@ export interface SavedObjectsType {
    */
   migrations?: SavedObjectMigrationMap;
   /**
-   * TODO doc
+   * An optional {@link SavedObjectsTypeManagementDefinition | management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition;
 }
 
 /**
- * TODO doc
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
  *
  * @public
  */
 export interface SavedObjectsTypeManagementDefinition {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
   importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
   defaultSearchField?: string;
+  /**
+   * The icon name to display in the management table.
+   * If not defined, no icon will be displayed.
+   */
   icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
   getTitle?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to the edition page of this object.
+   * If not defined, edition will not be allowed.
+   */
   getEditUrl?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 

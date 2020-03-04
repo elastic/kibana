@@ -277,11 +277,13 @@ export {
 /**
  * Plugin specific context passed to a route handler.
  *
- * Provides the following clients:
+ * Provides the following clients and services:
  *    - {@link IScopedRenderingClient | rendering} - Rendering client
  *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
+ *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
+ *      all the registered types.
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch

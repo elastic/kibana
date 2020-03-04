@@ -88,7 +88,8 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
-   * TODO: doc
+   * Returns the `management.importableAndExportable` property for given type, or
+   * `false` if the type is not registered or does not define a management section.
    */
   public isImportableAndExportable(type: string) {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
