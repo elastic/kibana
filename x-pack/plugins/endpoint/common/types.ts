@@ -340,7 +340,3 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
 
 export type AlertingIndexGetQuerySchema = TypeOf<typeof alertingIndexGetQuerySchema>;
-
-export type a = BetterTypeOf<typeof alertingIndexGetQuerySchema>;
-
-export type BetterTypeOf<RT extends Type<any>> = RT extends Type<infer T> ? T : never;
