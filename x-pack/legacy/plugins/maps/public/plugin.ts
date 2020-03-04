@@ -32,7 +32,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, plugins: any) {
     const {
       __LEGACY: { uiModules },
-      np: { licensing },
+      np,
     } = plugins;
 
     uiModules
@@ -42,8 +42,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       });
 
     bindSetupCoreAndPlugins(core, np);
-
-    np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: any) {}
