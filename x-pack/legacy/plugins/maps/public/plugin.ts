@@ -34,12 +34,13 @@ interface MapsPluginSetupDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
+  const { licensing, inspector } = plugins;
   const { injectedMetadata } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  inspector.registerView(MapView);
 };
 
 /** @internal */
@@ -54,7 +55,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     bindSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
-    np.inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {
