@@ -22,13 +22,14 @@ import {
 
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
+import { useCurrentIndexPattern } from '../../../../lib/kibana';
+
 import {
   euiDataGridStyle,
   euiDataGridToolbarSettings,
   EsFieldName,
   PivotQuery,
 } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { getSourceIndexDevConsoleStatement } from './common';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
@@ -48,13 +49,13 @@ const SourceIndexPreviewTitle: React.FC<SourceIndexPreviewTitle> = ({ indexPatte
 );
 
 interface Props {
-  indexPattern: SearchItems['indexPattern'];
   query: PivotQuery;
 }
 
 const defaultPagination = { pageIndex: 0, pageSize: 5 };
 
-export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, query }) => {
+export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
+  const indexPattern = useCurrentIndexPattern();
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
     if (indexPattern.metaFields.includes(f)) {
