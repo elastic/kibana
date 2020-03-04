@@ -77,6 +77,11 @@ const handleAfterKey = createAfterKeyHandler(
   input => input?.aggregations?.nodes?.after_key
 );
 
+const callClusterFactory = (framework: KibanaFramework, requestContext: RequestHandlerContext) => (
+  opts: any
+) =>
+  framework.callWithRequest<{}, InfraSnapshotAggregationResponse>(requestContext, 'search', opts);
+
 const requestGroupedNodes = async (
   requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions,
@@ -119,7 +124,7 @@ const requestGroupedNodes = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeGroupByBucket
-  >(framework, requestContext, query, bucketSelector, handleAfterKey);
+  >(callClusterFactory(framework, requestContext), query, bucketSelector, handleAfterKey);
 };
 
 const requestNodeMetrics = async (
@@ -170,7 +175,7 @@ const requestNodeMetrics = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeMetricsBucket
-  >(framework, requestContext, query, bucketSelector, handleAfterKey);
+  >(callClusterFactory(framework, requestContext), query, bucketSelector, handleAfterKey);
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
