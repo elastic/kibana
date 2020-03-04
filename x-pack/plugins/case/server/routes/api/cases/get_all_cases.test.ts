@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
 } from '../__fixtures__';
-import { initGetAllCasesApi } from '../get_all_cases';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { initGetAllCasesApi } from './get_all_cases';
 
 describe('GET all cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -25,7 +26,11 @@ describe('GET all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);

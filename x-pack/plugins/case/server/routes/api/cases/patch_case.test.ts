@@ -4,35 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
+  mockCaseComments,
 } from '../__fixtures__';
-import { initUpdateCaseApi } from '../update_case';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { initPatchCaseApi } from './patch_case';
 
-describe('UPDATE case', () => {
+describe('PATCH case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initUpdateCaseApi, 'patch');
+    routeHandler = await createRoute(initPatchCaseApi, 'patch');
   });
-  it(`Updates a case`, async () => {
+  it(`Patch a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'patch',
-      params: {
-        id: 'mock-id-1',
-      },
       body: {
-        case: { state: 'closed' },
+        id: 'mock-id-1',
+        state: 'closed',
         version: 'WzAsMV0=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
@@ -41,53 +45,61 @@ describe('UPDATE case', () => {
   });
   it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'patch',
-      params: {
-        id: 'mock-id-1',
-      },
       body: {
+        id: 'mock-id-1',
         case: { state: 'closed' },
         version: 'badv=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(409);
   });
   it(`Fails with 406 if updated field is unchanged`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'patch',
-      params: {
-        id: 'mock-id-1',
-      },
       body: {
+        id: 'mock-id-1',
         case: { state: 'open' },
         version: 'WzAsMV0=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(406);
   });
   it(`Returns an error if updateCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'patch',
-      params: {
-        id: 'mock-id-does-not-exist',
-      },
       body: {
+        id: 'mock-id-does-not-exist',
         state: 'closed',
+        version: 'WzAsMV0=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);

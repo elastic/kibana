@@ -3,18 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCaseComments,
-} from '../__fixtures__';
-import { initGetCommentApi } from '../get_comment';
-import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
-import { flattenCommentSavedObject } from '../utils';
-import { CommentAttributes } from '../types';
+} from '../../__fixtures__';
+import { flattenCommentSavedObject } from '../../utils';
+import { initGetCommentApi } from './get_comment';
 
 describe('GET comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -23,33 +22,47 @@ describe('GET comment', () => {
   });
   it(`returns the comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{id}',
+      path: '/api/cases/{case_id}/comments',
       method: 'get',
       params: {
+        case_id: 'mock-case-1',
+      },
+      query: {
         id: 'mock-comment-1',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCaseComments));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(
-      flattenCommentSavedObject(
-        mockCaseComments.find(s => s.id === 'mock-comment-1') as SavedObject<CommentAttributes>
-      )
-    );
+    const myPayload = mockCaseComments.find(s => s.id === 'mock-comment-1');
+    expect(myPayload).not.toBeUndefined();
+    if (myPayload != null) {
+      expect(response.payload).toEqual(flattenCommentSavedObject(myPayload));
+    }
   });
   it(`returns an error when getComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{id}',
+      path: '/api/cases/{case_id}/comments',
       method: 'get',
       params: {
+        case_id: 'mock-case-1',
+      },
+      query: {
         id: 'not-real',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCaseComments));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);

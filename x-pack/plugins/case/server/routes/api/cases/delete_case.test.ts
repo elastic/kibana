@@ -4,61 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
   mockCasesErrorTriggerData,
+  mockCaseComments,
 } from '../__fixtures__';
-import { initDeleteCaseApi } from '../delete_case';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { initDeleteCaseApi } from './delete_case';
 
 describe('DELETE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
     routeHandler = await createRoute(initDeleteCaseApi, 'delete');
   });
-  it(`deletes the case. responds with 204`, async () => {
+  it(`deletes the case. responds with 200`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'delete',
-      params: {
-        id: 'mock-id-1',
+      query: {
+        ids: ['mock-id-1'],
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(204);
+    expect(response.status).toEqual(200);
   });
   it(`returns an error when thrown from deleteCase service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'delete',
-      params: {
-        id: 'not-real',
+      query: {
+        ids: ['not-real'],
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
   });
   it(`returns an error when thrown from getAllCaseComments service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'delete',
-      params: {
-        id: 'bad-guy',
+      query: {
+        ids: ['bad-guy'],
       },
     });
 
     const theContext = createRouteContext(
-      createMockSavedObjectsRepository(mockCasesErrorTriggerData)
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCasesErrorTriggerData,
+        caseCommentSavedObject: mockCaseComments,
+      })
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
@@ -66,15 +81,18 @@ describe('DELETE case', () => {
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       method: 'delete',
-      params: {
-        id: 'valid-id',
+      query: {
+        ids: ['valid-id'],
       },
     });
 
     const theContext = createRouteContext(
-      createMockSavedObjectsRepository(mockCasesErrorTriggerData)
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCasesErrorTriggerData,
+        caseCommentSavedObject: mockCasesErrorTriggerData,
+      })
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);

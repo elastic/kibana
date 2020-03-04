@@ -5,43 +5,42 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDeps } from '.';
-import { flattenCaseSavedObject, wrapError } from './utils';
+
+import { CaseResponseRt } from '../../../../common/api';
+import { RouteDeps } from '../types';
+import { flattenCaseSavedObject, wrapError } from '../utils';
 
 export function initGetCaseApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{id}',
+      path: '/api/cases',
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
         query: schema.object({
+          id: schema.string(),
           includeComments: schema.string({ defaultValue: 'true' }),
         }),
       },
     },
     async (context, request, response) => {
-      let theCase;
-      const includeComments = JSON.parse(request.query.includeComments);
       try {
-        theCase = await caseService.getCase({
+        const includeComments = JSON.parse(request.query.includeComments);
+
+        const theCase = await caseService.getCase({
           client: context.core.savedObjects.client,
-          caseId: request.params.id,
+          caseId: request.query.id,
         });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      if (!includeComments) {
-        return response.ok({ body: flattenCaseSavedObject(theCase, []) });
-      }
-      try {
+
+        if (!includeComments) {
+          return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, [])) });
+        }
+
         const theComments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
-          caseId: request.params.id,
+          caseId: request.query.id,
         });
+
         return response.ok({
-          body: { ...flattenCaseSavedObject(theCase, theComments.saved_objects) },
+          body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, theComments.saved_objects)),
         });
       } catch (error) {
         return response.customError(wrapError(error));

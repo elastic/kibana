@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
+import { CaseAttributes } from '../../../../common/api';
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
   mockCasesErrorTriggerData,
+  mockCaseComments,
 } from '../__fixtures__';
-import { initGetCaseApi } from '../get_case';
-import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
 import { flattenCaseSavedObject } from '../utils';
-import { CaseAttributes } from '../types';
+import { initGetCaseApi } from './get_case';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -24,17 +26,19 @@ describe('GET case', () => {
   });
   it(`returns the case with empty case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
-      params: {
-        id: 'mock-id-1',
-      },
+      path: '/api/cases',
       method: 'get',
       query: {
+        id: 'mock-id-1',
         includeComments: false,
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
@@ -49,17 +53,19 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getCase`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
-      params: {
-        id: 'abcdefg',
-      },
+      path: '/api/cases',
       method: 'get',
       query: {
+        id: 'abcdefg',
         includeComments: false,
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
@@ -68,17 +74,20 @@ describe('GET case', () => {
   });
   it(`returns the case with case comments when includeComments is true`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
-      params: {
-        id: 'mock-id-1',
-      },
+      path: '/api/cases',
       method: 'get',
       query: {
+        id: 'mock-id-1',
         includeComments: true,
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
@@ -87,18 +96,18 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
-      params: {
-        id: 'bad-guy',
-      },
+      path: '/api/cases',
       method: 'get',
       query: {
+        id: 'bad-guy',
         includeComments: true,
       },
     });
 
     const theContext = createRouteContext(
-      createMockSavedObjectsRepository(mockCasesErrorTriggerData)
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCasesErrorTriggerData,
+      })
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);

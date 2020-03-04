@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CASE_SAVED_OBJECT = 'case-workflow';
-export const CASE_COMMENT_SAVED_OBJECT = 'case-workflow-comment';
+export { caseSavedObjectType, CASE_SAVED_OBJECT } from './cases';
+export { caseCommentSavedObjectType, CASE_COMMENT_SAVED_OBJECT } from './comments';

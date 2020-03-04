@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { schema } from '@kbn/config-schema';
+import Boom from 'boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
+import { CommentPatchRequestRt, CommentResponseRt, throwErrors } from '../../../../../common/api';
+
+import { RouteDeps } from '../../types';
+import { escapeHatch, wrapError, flattenCommentSavedObject } from '../../utils';
+
+export function initPatchCommentApi({ caseService, router }: RouteDeps) {
+  router.patch(
+    {
+      path: '/api/cases/{case_id}/comment',
+      validate: {
+        params: schema.object({
+          case_id: schema.string(),
+        }),
+        body: escapeHatch,
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const query = pipe(
+          CommentPatchRequestRt.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const myComment = await caseService.getComment({
+          client: context.core.savedObjects.client,
+          commentId: query.id,
+        });
+
+        if (query.version !== myComment.version) {
+          throw Boom.conflict(
+            'This case has been updated. Please refresh before saving additional updates.'
+          );
+        }
+
+        const updatedBy = await caseService.getUser({ request, response });
+        const updatedComment = await caseService.patchComment({
+          client: context.core.savedObjects.client,
+          commentId: query.id,
+          updatedAttributes: {
+            ...query,
+            updated_at: new Date().toISOString(),
+            updated_by: updatedBy,
+          },
+        });
+
+        return response.ok({
+          body: CommentResponseRt.encode(
+            flattenCommentSavedObject({
+              ...updatedComment,
+              attributes: { ...myComment.attributes, ...updatedComment.attributes },
+              references: myComment.references,
+            })
+          ),
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    }
+  );
+}

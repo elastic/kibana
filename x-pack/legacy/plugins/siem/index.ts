@@ -40,7 +40,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions', 'case'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {

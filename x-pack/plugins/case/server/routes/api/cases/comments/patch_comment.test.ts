@@ -3,35 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCaseComments,
-} from '../__fixtures__';
-import { initUpdateCommentApi } from '../update_comment';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+  mockCases,
+} from '../../__fixtures__';
+import { initPatchCommentApi } from './patch_comment';
 
-describe('UPDATE comment', () => {
+describe('PATCH comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initUpdateCommentApi, 'patch');
+    routeHandler = await createRoute(initPatchCommentApi, 'patch');
   });
-  it(`Updates a comment`, async () => {
+  it(`Patch a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comment/{id}',
+      path: '/api/cases/{case_id}/comment',
       method: 'patch',
       params: {
-        id: 'mock-comment-1',
+        case_id: 'mock-id-1',
       },
       body: {
         comment: 'Update my comment',
+        id: 'mock-comment-1',
+        version: 'WzEsMV0=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCaseComments));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
@@ -39,17 +47,24 @@ describe('UPDATE comment', () => {
   });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comment/{id}',
+      path: '/api/cases/{case_id}/comment',
       method: 'patch',
       params: {
-        id: 'mock-comment-does-not-exist',
+        case_id: 'mock-id-1',
       },
       body: {
         comment: 'Update my comment',
+        id: 'mock-comment-does-not-exist',
+        version: 'WzEsMV0=',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCaseComments));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);

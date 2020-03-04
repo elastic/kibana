@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
 } from '../__fixtures__';
-import { initPostCaseApi } from '../post_case';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { initPostCaseApi } from './post_case';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -31,11 +32,15 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.case_id).toEqual('mock-it');
+    expect(response.payload.id).toEqual('mock-it');
     expect(response.payload.created_by.username).toEqual('awesome');
   });
   it(`Returns an error if postNewCase throws`, async () => {
@@ -50,7 +55,11 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
@@ -70,7 +79,11 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(500);

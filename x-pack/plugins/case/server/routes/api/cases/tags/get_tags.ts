@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RouteDeps } from './index';
-import { wrapError } from './utils';
+import { RouteDeps } from '../../types';
+import { wrapError } from '../../utils';
 
 export function initGetTagsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/tags',
+      path: '/api/cases/all/tags',
       validate: {},
     },
     async (context, request, response) => {

@@ -4,37 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { RouteDeps } from '.';
-import { formatAllCases, sortToSnake, wrapError } from './utils';
-import { SavedObjectsFindOptionsSchema } from './schema';
-import { AllCases } from './types';
+import Boom from 'boom';
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
+import { CasesResponseRt, SavedObjectFindOptionsRt, throwErrors } from '../../../../common/api';
+import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
+import { RouteDeps } from '../types';
 
 export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases',
+      path: '/api/cases/_find',
       validate: {
-        query: schema.nullable(SavedObjectsFindOptionsSchema),
+        query: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
-        const args = request.query
+        const query = pipe(
+          SavedObjectFindOptionsRt.decode(request.query),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
+        const args = query
           ? {
               client: context.core.savedObjects.client,
               options: {
-                ...request.query,
-                sortField: sortToSnake(request.query.sortField ?? ''),
+                ...query,
+                sortField: sortToSnake(query.sortField ?? ''),
               },
             }
           : {
               client: context.core.savedObjects.client,
             };
         const cases = await caseService.getAllCases(args);
-        const body: AllCases = formatAllCases(cases);
         return response.ok({
-          body,
+          body: CasesResponseRt.encode(transformCases(cases)),
         });
       } catch (error) {
         return response.customError(wrapError(error));
