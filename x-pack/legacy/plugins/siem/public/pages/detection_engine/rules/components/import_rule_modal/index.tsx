@@ -26,6 +26,7 @@ import {
   displayErrorToast,
   displaySuccessToast,
   useStateToaster,
+  errorToToaster,
 } from '../../../../../components/toasters';
 import * as i18n from './translations';
 
@@ -83,9 +84,9 @@ export const ImportRuleModalComponent = ({
 
         importComplete();
         cleanupAndCloseModal();
-      } catch (e) {
+      } catch (error) {
         cleanupAndCloseModal();
-        displayErrorToast(i18n.IMPORT_FAILED, [e.message], dispatchToaster);
+        errorToToaster({ title: i18n.IMPORT_FAILED, error, dispatchToaster });
       }
     }
   }, [selectedFiles, overwrite]);
