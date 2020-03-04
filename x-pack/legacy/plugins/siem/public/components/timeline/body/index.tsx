@@ -10,6 +10,7 @@ import { VariableSizeList, areEqual } from 'react-window';
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -24,8 +25,9 @@ import {
 } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
-import { ColumnHeader } from './column_headers/column_header';
-import { eventIsPinned, getActionsColumnWidth } from './helpers';
+import { eventIsPinned } from './helpers';
+import { getActionsColumnWidth } from './column_headers/helpers';
+import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -35,7 +37,7 @@ import { StatefulEvent } from './events/stateful_event';
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -59,7 +61,7 @@ export interface BodyProps {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 
@@ -127,7 +129,7 @@ export const Body = React.memo<BodyProps>(
       const measure = useCallback(() => {
         if (ref && ref.current) {
           rowHeights[index] = ref.current.getBoundingClientRect().height;
-          listRef.current && listRef.current.resetAfterIndex(index);
+          if (listRef.current) listRef.current.resetAfterIndex(index);
         }
       }, [ref]);
 

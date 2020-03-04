@@ -7,29 +7,26 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const fs = require('fs');
-const promisify = require('util').promisify;
+const { promisify } = require('util');
 const path = require('path');
 const json5 = require('json5');
 const execa = require('execa');
 
-const copyFile = promisify(fs.copyFile);
-const rename = promisify(fs.rename);
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
 const {
   xpackRoot,
   kibanaRoot,
-  apmRoot,
   tsconfigTpl,
   filesToIgnore
 } = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
-function updateParentTsConfigs() {
+function prepareParentTsConfigs() {
   return Promise.all(
     [
-      path.resolve(xpackRoot, 'apm.tsconfig.json'),
+      path.resolve(xpackRoot, 'tsconfig.json'),
       path.resolve(kibanaRoot, 'tsconfig.json')
     ].map(async filename => {
       const config = json5.parse(await readFile(filename, 'utf-8'));
@@ -50,32 +47,37 @@ function updateParentTsConfigs() {
   );
 }
 
+async function addApmFilesToXpackTsConfig() {
+  const template = json5.parse(await readFile(tsconfigTpl, 'utf-8'));
+  const xpackTsConfig = path.join(xpackRoot, 'tsconfig.json');
+  const config = json5.parse(await readFile(xpackTsConfig, 'utf-8'));
+
+  await writeFile(
+    xpackTsConfig,
+    JSON.stringify({ ...config, ...template }, null, 2),
+    { encoding: 'utf-8' }
+  );
+}
+
 async function setIgnoreChanges() {
   for (const filename of filesToIgnore) {
     await execa('git', ['update-index', '--skip-worktree', filename]);
   }
 }
 
-const optimizeTsConfig = () => {
-  return unoptimizeTsConfig()
-    .then(() =>
-      Promise.all([
-        copyFile(tsconfigTpl, path.resolve(apmRoot, './tsconfig.json')),
-        rename(
-          path.resolve(xpackRoot, 'tsconfig.json'),
-          path.resolve(xpackRoot, 'apm.tsconfig.json')
-        )
-      ])
-    )
-    .then(() => updateParentTsConfigs())
-    .then(() => setIgnoreChanges())
-    .then(() => {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Created an optimized tsconfig.json for APM. To undo these changes, run `./scripts/unoptimize-tsconfig.js`'
-      );
-    });
-};
+async function optimizeTsConfig() {
+  await unoptimizeTsConfig();
+
+  await prepareParentTsConfigs();
+
+  await addApmFilesToXpackTsConfig();
+
+  await setIgnoreChanges();
+  // eslint-disable-next-line no-console
+  console.log(
+    'Created an optimized tsconfig.json for APM. To undo these changes, run `./scripts/unoptimize-tsconfig.js`'
+  );
+}
 
 module.exports = {
   optimizeTsConfig

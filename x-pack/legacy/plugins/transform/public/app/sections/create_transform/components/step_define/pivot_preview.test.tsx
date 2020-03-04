@@ -7,8 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../lib/kibana';
-
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import {
   getPivotQuery,
   PivotAggsConfig,
@@ -16,16 +16,18 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { PivotPreview } from './pivot_preview';
-
-jest.mock('ui/new_platform');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, memo: (x: any) => x };
 });
+
+jest.mock('ui/new_platform');
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {
   test('Minimal initialization', () => {
@@ -44,17 +46,18 @@ describe('Transform: <PivotPreview />', () => {
     const props = {
       aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
+      indexPattern: {
+        title: 'the-index-pattern-title',
+        fields: [] as any[],
+      } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
 
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
+    const Providers = getAppProviders(createPublicShim());
     const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <PivotPreview {...props} />
-        </KibanaContext.Provider>
-      </div>
+      <Providers>
+        <PivotPreview {...props} />
+      </Providers>
     );
 
     expect(wrapper).toMatchSnapshot();

@@ -7,24 +7,24 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../lib/kibana';
-
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
+
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
-
-jest.mock('ui/new_platform');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, memo: (x: any) => x };
 });
+
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
@@ -40,7 +40,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       aggName: 'the-group-by-agg-name',
       dropDownName: 'the-group-by-drop-down-name',
     };
-    const props: StepDefineExposedState = {
+    const formState: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedPivotEditorEnabled: false,
@@ -51,14 +51,8 @@ describe('Transform: <DefinePivotSummary />', () => {
       valid: true,
     };
 
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
     const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <StepDefineSummary {...props} />
-        </KibanaContext.Provider>
-      </div>
+      <StepDefineSummary formState={formState} searchItems={{} as SearchItems} />
     );
 
     expect(wrapper).toMatchSnapshot();

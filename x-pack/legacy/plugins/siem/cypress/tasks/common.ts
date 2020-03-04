@@ -23,23 +23,14 @@ export const drag = (subject: JQuery<HTMLElement>) => {
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(1)
+    .wait(5)
     .trigger('mousemove', {
       button: primaryButton,
       clientX: subjectLocation.left + dndSloppyClickDetectionThreshold,
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(1);
-};
-
-/** "Drops" the subject being dragged on the specified drop target  */
-export const drop = (dropTarget: JQuery<HTMLElement>) => {
-  cy.wrap(dropTarget)
-    .trigger('mousemove', { button: primaryButton, force: true })
-    .wait(1)
-    .trigger('mouseup', { force: true })
-    .wait(1);
+    .wait(5);
 };
 
 /** Drags the subject being dragged on the specified drop target, but does not drop it  */
@@ -47,4 +38,13 @@ export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
   cy.wrap(dropTarget).trigger('mousemove', 'center', {
     button: primaryButton,
   });
+};
+
+/** "Drops" the subject being dragged on the specified drop target  */
+export const drop = (dropTarget: JQuery<HTMLElement>) => {
+  cy.wrap(dropTarget)
+    .trigger('mousemove', { button: primaryButton, force: true })
+    .wait(5)
+    .trigger('mouseup', { force: true })
+    .wait(5);
 };

@@ -23,9 +23,9 @@ import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  getSortedObjectsForExport,
-  importSavedObjects,
-  resolveImportErrors,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
@@ -33,7 +33,7 @@ import { SavedObjectsManagement } from '../../../core/server/saved_objects/manag
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
-  const typeRegistry = kbnServer.newPlatform.__internals.typeRegistry;
+  const typeRegistry = kbnServer.newPlatform.start.core.savedObjects.getTypeRegistry();
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
@@ -95,9 +95,9 @@ export function savedObjectsMixin(kbnServer, server) {
       provider.addClientWrapperFactory(...args),
     importExport: {
       objectLimit: server.config().get('savedObjects.maxImportExportSize'),
-      importSavedObjects,
-      resolveImportErrors,
-      getSortedObjectsForExport,
+      importSavedObjects: importSavedObjectsFromStream,
+      resolveImportErrors: resolveSavedObjectsImportErrors,
+      getSortedObjectsForExport: exportSavedObjectsToStream,
     },
     schema,
   };

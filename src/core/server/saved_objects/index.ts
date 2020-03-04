@@ -26,7 +26,7 @@ export { SavedObjectsManagement } from './management';
 export * from './import';
 
 export {
-  getSortedObjectsForExport,
+  exportSavedObjectsToStream,
   SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
 } from './export';
@@ -64,7 +64,11 @@ export {
   SavedObjectsTypeMappingDefinitions,
 } from './mappings';
 
-export { SavedObjectMigrationMap, SavedObjectMigrationFn } from './migrations';
+export {
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
+} from './migrations';
 
 export { SavedObjectsType } from './types';
 

@@ -21,6 +21,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
+      await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
@@ -53,9 +54,31 @@ export default function({ getService }: FtrProviderContext) {
         transformDescription:
           'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
-          return `dest_${this.transformId}`;
+          return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'category.keyword': {
+                terms: {
+                  field: 'category.keyword',
+                },
+              },
+              order_date: {
+                date_histogram: {
+                  field: 'order_date',
+                  calendar_interval: '1m',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.avg': {
+                avg: {
+                  field: 'products.base_price',
+                },
+              },
+            },
+          },
           pivotPreview: {
             column: 0,
             values: [`Men's Accessories`],
@@ -66,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            columns: 6,
+            columns: 45,
             rows: 5,
           },
         },
@@ -151,6 +174,13 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
         });
 
+        it('displays the advanced configuration', async () => {
+          await transform.wizard.enabledAdvancedPivotEditor();
+          await transform.wizard.assertAdvancedPivotEditorContent(
+            testData.expected.pivotAdvancedEditorValue
+          );
+        });
+
         it('loads the pivot preview', async () => {
           await transform.wizard.assertPivotPreviewLoaded();
         });
@@ -200,14 +230,17 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the create and start button', async () => {
           await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCreateAndStartButtonEnabled(true);
         });
 
         it('displays the create button', async () => {
           await transform.wizard.assertCreateButtonExists();
+          await transform.wizard.assertCreateButtonEnabled(true);
         });
 
         it('displays the copy to clipboard button', async () => {
-          await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
         it('creates the transform', async () => {
