@@ -16,10 +16,7 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { FlyoutCreateDrilldownActionContext } from '../../actions';
-import {
-  ActionFactory,
-  ActionFactoryBaseConfig,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { ActionFactory, ActionFactoryBaseConfig } from '../../../../advanced_ui_actions/public';
 
 export interface DrilldownWizardConfig {
   name: string;

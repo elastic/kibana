@@ -11,7 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { UrlDrilldownActionFactory } from '../../../../../../src/plugins/ui_actions/public/components/action_wizard/test_data';
+import { UrlDrilldownActionFactory } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 import {
   ActionFactoryBaseConfig,
   ActionFactory,

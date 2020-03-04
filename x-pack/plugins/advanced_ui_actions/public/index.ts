@@ -12,3 +12,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { AdvancedUiActionsPublicPlugin as Plugin };
+
+export * from './components';

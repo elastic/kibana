@@ -13,11 +13,11 @@ import {
   ActionWizard,
   ActionFactory,
   ActionFactoryBaseConfig,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../advanced_ui_actions/public';
 
 // TODO: this should be actual input to the component and should not be using test data
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_FACTORIES } from '../../../../../../src/plugins/ui_actions/public/components/action_wizard/test_data';
+import { ACTION_FACTORIES } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
 const noop = () => {};
 
