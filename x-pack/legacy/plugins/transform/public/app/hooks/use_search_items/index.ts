@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
+export { SavedSearchQuery, SearchItems } from './common';
+export { useSearchItems } from './use_search_items';
