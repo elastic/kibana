@@ -5,7 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'src/core/server';
+import {
+  Logger,
+  ElasticsearchServiceSetup,
+  SavedObjectsClient,
+  kibanaResponseFactory,
+} from '../../../../../src/core/server';
 import { ReindexStatus } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
@@ -13,6 +18,16 @@ import { CredentialStore } from '../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { RouteDependencies } from '../types';
 import { LicensingPluginSetup } from '../../../licensing/server';
+import { ReindexError } from '../lib/reindexing/error';
+import {
+  AccessForbidden,
+  IndexNotFound,
+  CannotCreateIndex,
+  ReindexAlreadyInProgress,
+  ReindexTaskCannotBeDeleted,
+  ReindexTaskFailed,
+  MultipleReindexJobsFound,
+} from '../lib/reindexing/error_symbols';
 
 interface CreateReindexWorker {
   logger: Logger;
@@ -32,6 +47,29 @@ export function createReindexWorker({
   const { adminClient } = elasticsearchService;
   return new ReindexWorker(savedObjects, credentialStore, adminClient, logger, licensing);
 }
+
+const mapAnyErrorToKibanaHttpResponse = (e: any) => {
+  if (e instanceof ReindexError) {
+    switch (e.symbol) {
+      case AccessForbidden:
+        return kibanaResponseFactory.forbidden({ body: e.message });
+      case IndexNotFound:
+        return kibanaResponseFactory.notFound({ body: e.message });
+      case CannotCreateIndex:
+      case ReindexTaskCannotBeDeleted:
+        return kibanaResponseFactory.internalError({ body: e.message });
+      case ReindexTaskFailed:
+        // Bad data
+        return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
+      case ReindexAlreadyInProgress:
+      case MultipleReindexJobsFound:
+        return kibanaResponseFactory.badRequest({ body: e.message });
+      default:
+      // nothing matched
+    }
+  }
+  return kibanaResponseFactory.internalError({ body: e });
+};
 
 export function registerReindexIndicesRoutes(
   { credentialStore, router, licensing, log }: RouteDependencies,
@@ -94,7 +132,7 @@ export function registerReindexIndicesRoutes(
 
           return response.ok({ body: reindexOp.attributes });
         } catch (e) {
-          return response.internalError({ body: e });
+          return mapAnyErrorToKibanaHttpResponse(e);
         }
       }
     )
@@ -150,15 +188,7 @@ export function registerReindexIndicesRoutes(
             },
           });
         } catch (e) {
-          if (!e.isBoom) {
-            return response.internalError({ body: e });
-          }
-          return response.customError({
-            body: {
-              message: e.message,
-            },
-            statusCode: e.statusCode,
-          });
+          return mapAnyErrorToKibanaHttpResponse(e);
         }
       }
     )
@@ -201,15 +231,7 @@ export function registerReindexIndicesRoutes(
 
           return response.ok({ body: { acknowledged: true } });
         } catch (e) {
-          if (!e.isBoom) {
-            return response.internalError({ body: e });
-          }
-          return response.customError({
-            body: {
-              message: e.message,
-            },
-            statusCode: e.statusCode,
-          });
+          return mapAnyErrorToKibanaHttpResponse(e);
         }
       }
     )

@@ -21,8 +21,17 @@ export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
   const { logger, callCluster, query: queryParams } = params;
-  const { index, window, interval, timeField, dateStart, dateEnd } = queryParams;
+  const {
+    index,
+    timeWindowSize,
+    timeWindowUnit,
+    interval,
+    timeField,
+    dateStart,
+    dateEnd,
+  } = queryParams;
 
+  const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
 
   // core query
@@ -51,10 +60,10 @@ export async function timeSeriesQuery(
   };
 
   // add the aggregations
-  const { aggType, aggField, groupField, groupLimit } = queryParams;
+  const { aggType, aggField, termField, termSize } = queryParams;
 
   const isCountAgg = aggType === 'count';
-  const isGroupAgg = !!groupField;
+  const isGroupAgg = !!termField;
 
   let aggParent = esQuery.body;
 
@@ -63,8 +72,8 @@ export async function timeSeriesQuery(
     aggParent.aggs = {
       groupAgg: {
         terms: {
-          field: groupField,
-          size: groupLimit || DEFAULT_GROUPS,
+          field: termField,
+          size: termSize || DEFAULT_GROUPS,
         },
       },
     };
@@ -83,11 +92,10 @@ export async function timeSeriesQuery(
   aggParent = aggParent.aggs.dateAgg;
 
   // finally, the metric aggregation, if requested
-  const actualAggType = aggType === 'average' ? 'avg' : aggType;
   if (!isCountAgg) {
     aggParent.aggs = {
       metricAgg: {
-        [actualAggType]: {
+        [aggType]: {
           field: aggField,
         },
       },

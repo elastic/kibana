@@ -10,9 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../lib/kibana';
-
 import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
   applyTransformConfigToDefineState,
@@ -46,6 +45,7 @@ interface DefinePivotStepProps {
   stepDefineState: StepDefineExposedState;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
   setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
+  searchItems: SearchItems;
 }
 
 const StepDefine: FC<DefinePivotStepProps> = ({
@@ -53,6 +53,7 @@ const StepDefine: FC<DefinePivotStepProps> = ({
   stepDefineState,
   setCurrentStep,
   setStepDefineState,
+  searchItems,
 }) => {
   const definePivotRef = useRef(null);
 
@@ -61,31 +62,36 @@ const StepDefine: FC<DefinePivotStepProps> = ({
       <div ref={definePivotRef} />
       {isCurrentStep && (
         <Fragment>
-          <StepDefineForm onChange={setStepDefineState} overrides={{ ...stepDefineState }} />
+          <StepDefineForm
+            onChange={setStepDefineState}
+            overrides={{ ...stepDefineState }}
+            searchItems={searchItems}
+          />
           <WizardNav
             next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
             nextActive={stepDefineState.valid}
           />
         </Fragment>
       )}
-      {!isCurrentStep && <StepDefineSummary {...stepDefineState} />}
+      {!isCurrentStep && (
+        <StepDefineSummary formState={{ ...stepDefineState }} searchItems={searchItems} />
+      )}
     </Fragment>
   );
 };
 
 interface WizardProps {
   cloneConfig?: TransformPivotConfig;
+  searchItems: SearchItems;
 }
 
-export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig }) => {
-  const kibanaContext = useKibanaContext();
-
+export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
   const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(kibanaContext), cloneConfig)
+    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig)
   );
 
   // The DETAILS state
@@ -95,7 +101,11 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig }) => {
 
   const stepDetails =
     currentStep === WIZARD_STEPS.DETAILS ? (
-      <StepDetailsForm onChange={setStepDetailsState} overrides={stepDetailsState} />
+      <StepDetailsForm
+        onChange={setStepDetailsState}
+        overrides={stepDetailsState}
+        searchItems={searchItems}
+      />
     ) : (
       <StepDetailsSummary {...stepDetailsState} />
     );
@@ -122,7 +132,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig }) => {
     }
   }, []);
 
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const { indexPattern } = searchItems;
 
   const transformConfig = getCreateRequestBody(
     indexPattern.title,
@@ -154,6 +164,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig }) => {
           stepDefineState={stepDefineState}
           setCurrentStep={setCurrentStep}
           setStepDefineState={setStepDefineState}
+          searchItems={searchItems}
         />
       ),
     },
