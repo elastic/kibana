@@ -17,14 +17,24 @@
  * under the License.
  */
 
-var hook = require('require-in-the-middle');
-var create = require('object-prototype').create;
+module.exports = [
+  'hasOwnProperty',
+  'isPrototypeOf',
+  'propertyIsEnumerable',
+  'toLocaleString',
+  'toString',
+  'valueOf',
+];
 
-// Ensure `process.env` doesn't inherit from `Object.prototype`. This gives
-// partial protection against similar RCE vulnerabilities as described in
-// CVE-2019-7609
-process.env = Object.assign(create(), process.env);
+module.exports.deprecated = [
+  '__defineGetter__',
+  '__defineSetter__',
+  '__lookupGetter__',
+  '__lookupSetter__',
+];
 
-hook(['child_process'], function(exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
-});
+module.exports.nonSpec = ['eval', 'unwatch', 'watch'];
+
+module.exports.nodejs = module.exports.concat(module.exports.deprecated);
+
+module.exports.all = module.exports.concat(module.exports.deprecated, module.exports.nonSpec);

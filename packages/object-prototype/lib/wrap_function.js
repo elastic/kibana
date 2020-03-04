@@ -17,14 +17,25 @@
  * under the License.
  */
 
-var hook = require('require-in-the-middle');
-var create = require('object-prototype').create;
+module.exports = function(name, fn) {
+  if (isSloppy(fn)) {
+    // Hack to give the function the same name as the original
+    return {
+      [name]: function() {
+        return fn.apply(this, arguments);
+      },
+    }[name];
+  } else {
+    // Hack to give the function the same name as the original
+    return {
+      [name]: function() {
+        'use strict'; // eslint-disable-line strict
+        return fn.apply(this, arguments);
+      },
+    }[name];
+  }
+};
 
-// Ensure `process.env` doesn't inherit from `Object.prototype`. This gives
-// partial protection against similar RCE vulnerabilities as described in
-// CVE-2019-7609
-process.env = Object.assign(create(), process.env);
-
-hook(['child_process'], function(exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
-});
+function isSloppy(fn) {
+  return Object.prototype.hasOwnProperty.call(fn, 'caller');
+}

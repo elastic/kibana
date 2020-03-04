@@ -17,14 +17,26 @@
  * under the License.
  */
 
-var hook = require('require-in-the-middle');
-var create = require('object-prototype').create;
+require('../../src/setup_node_env');
 
-// Ensure `process.env` doesn't inherit from `Object.prototype`. This gives
-// partial protection against similar RCE vulnerabilities as described in
-// CVE-2019-7609
-process.env = Object.assign(create(), process.env);
+const test = require('tape');
+const { ObjectPrototype } = require('object-prototype');
 
-hook(['child_process'], function(exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
+test('process.env prototype', t => {
+  t.equal(Object.prototype.isPrototypeOf(process.env), false);
+  t.equal(ObjectPrototype.isPrototypeOf(process.env), true);
+  t.end();
+});
+
+test('prototype pollution', t => {
+  Object.prototype.foo = 42; // eslint-disable-line no-extend-native
+  t.equal(process.env.foo, undefined);
+  delete Object.prototype.foo;
+  t.end();
+});
+
+test('Object.prototype functions', t => {
+  t.equal(typeof process.env.hasOwnProperty, 'function');
+  t.equal(process.env.hasOwnProperty('HOME'), true);
+  t.end();
 });
