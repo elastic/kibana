@@ -30,6 +30,7 @@ import { mlMessageBarService } from '../../../../components/messagebar';
 import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { collapseLiteralStrings } from '../../../../../../shared_imports';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -225,7 +226,7 @@ export class EditJobFlyoutUI extends Component {
       groups: this.state.jobGroups,
       mml: this.state.jobModelMemoryLimit,
       detectorDescriptions: this.state.jobDetectorDescriptions,
-      datafeedQuery: this.state.datafeedQuery,
+      datafeedQuery: collapseLiteralStrings(this.state.datafeedQuery),
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,

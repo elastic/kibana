@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AccountManagementPage } from './account_management_page';
+export { accountManagementApp } from './account_management_app';
