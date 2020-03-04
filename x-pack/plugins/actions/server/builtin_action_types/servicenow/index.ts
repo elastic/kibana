@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   ActionType,
   ActionTypeExecutorOptions,
@@ -13,7 +13,7 @@ import {
   ExecutorType,
 } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { postServiceNow } from '../lib/post_servicenow';
+import { ServiceNow } from '../lib/servicenow';
 
 import * as i18n from './translations';
 
@@ -21,6 +21,9 @@ import { ACTION_TYPE_ID } from './constants';
 import { ConfigType, SecretsType, ParamsType } from './types';
 
 import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
+
+import { buildMap, mapParams } from './helpers';
+import { Incident } from '../lib/servicenow/types';
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
@@ -78,49 +81,36 @@ async function serviceNowExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ConfigType;
-  const secrets = execOptions.secrets as SecretsType;
+  const {
+    apiUrl,
+    casesConfiguration: { closure, mapping },
+  } = execOptions.config as ConfigType;
+  const { username, password } = execOptions.secrets as SecretsType;
   const params = execOptions.params as ParamsType;
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  let response;
-  try {
-    response = await postServiceNow({ apiUrl: config.apiUrl, data: params, headers, secrets });
-  } catch (err) {
-    const message = i18n.ERROR_POSTING;
-    return {
-      status: 'error',
-      actionId,
-      message,
-      serviceMessage: err.message,
-    };
-  }
-  if (response.status === 200 || response.status === 201 || response.status === 204) {
-    return {
-      status: 'ok',
-      actionId,
-      data: response.data,
-    };
-  }
+  const { comments, ...restParams } = params;
 
-  if (response.status === 429 || response.status >= 500) {
-    const message = i18n.RETRY_POSTING(response.status);
+  const finalMap = buildMap(mapping);
+  const restMapped = mapParams(restParams, finalMap);
+  const paramsAsIncident = restMapped as Incident;
 
-    return {
-      status: 'error',
-      actionId,
-      message,
-      retry: true,
-    };
+  const serviceNow = new ServiceNow({ url: apiUrl, username, password });
+  const userId = await serviceNow.getUserID();
+  const { id, number } = await serviceNow.createIncident({
+    ...paramsAsIncident,
+    caller_id: userId,
+  });
+
+  if (comments && Array.isArray(comments) && comments.length > 0) {
+    serviceNow.batchAddComments(
+      id,
+      comments.map(c => c.comment),
+      finalMap.get('comments').target
+    );
   }
-
-  const message = i18n.UNEXPECTED_STATUS(response.status);
 
   return {
-    status: 'error',
+    status: 'ok',
     actionId,
-    message,
+    data: { id, number },
   };
 }
