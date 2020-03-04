@@ -302,20 +302,22 @@ class AgentConfigService {
       return null;
     }
 
-    const agentConfig = {
+    const agentConfig: FullAgentConfig = {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
         ...[
           await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
-        ].reduce((outputs, { config: outputConfig, is_default, name, id: outputId, ...output }) => {
+        ].reduce((outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
           outputs[name] = {
-            ...output,
-            type: output.type as any,
+            type,
+            hosts,
+            ca_sha256,
+            api_key,
             ...outputConfig,
           };
           return outputs;
-        }, {} as any),
+        }, {} as FullAgentConfig['outputs']),
       },
       datasources: (config.datasources as Datasource[]).map(ds =>
         this.storedDatasourceToAgentDatasource(ds)

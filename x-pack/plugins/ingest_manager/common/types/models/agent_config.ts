@@ -50,7 +50,7 @@ export type FullAgentConfigDatasource = Pick<Datasource, 'name' | 'namespace' | 
 export interface FullAgentConfig {
   id: string;
   outputs: {
-    [key: string]: Omit<Output, 'is_default' | 'config' | 'name' | 'id'> & {
+    [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
       [key: string]: any;
     };
   };
