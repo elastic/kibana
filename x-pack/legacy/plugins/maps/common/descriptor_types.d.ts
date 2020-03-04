@@ -120,29 +120,33 @@ export type VectorLayerDescriptor = LayerDescriptor & {
   style?: unknown;
 };
 
-interface IFieldMetaDescriptor {
+export type FieldMetaDescriptor = {
+  // todo remove
   [key: string]: string | number | unknown;
-}
+};
 
-interface IRangeFieldMetaDescriptor extends IFieldMetaDescriptor {
+export type RangeFieldMetaDescriptor = FieldMetaDescriptor & {
   min: number;
   max: number;
   delta: number;
-}
+};
 
-interface ICategoryFieldMetaDescriptor extends IFieldMetaDescriptor {
+export type CategoryFieldMetaDescriptor = FieldMetaDescriptor & {
   categories: unknown[];
-}
+};
 
-interface IGeometryTypesDescriptor {
+export type GeometryTypesDescriptor = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   isPolygonsOnly: boolean;
-}
+};
 
-interface IStyleMetaDescriptor {
-  geometryTypes?: IGeometryTypesDescriptor;
+export type StyleMetaDescriptor = {
+  geometryTypes?: GeometryTypesDescriptor;
   fieldMeta: {
-    [key: string]: IRangeFieldMetaDescriptor | ICategoryFieldMetaDescriptor | unknown;
+    [key: string]: {
+      RANGE: RangeFieldMetaDescriptor;
+      CATEGORIES: CategoryFieldMetaDescriptor;
+    };
   };
-}
+};

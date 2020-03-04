@@ -7,7 +7,12 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { COLOR_PALETTE_MAX_SIZE, STYLE_TYPE } from '../../../../../common/constants';
+import {
+  COLOR_PALETTE_MAX_SIZE,
+  STYLE_TYPE,
+  SOURCE_META_ID_ORIGIN,
+  FIELD_ORIGIN,
+} from '../../../../../common/constants';
 import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
@@ -17,11 +22,19 @@ import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
+  constructor(
+    options,
+    styleName,
+    field,
+    vectorLayer,
+    // getFieldMeta,
+    getFieldFormatter
+  ) {
     super(options, styleName);
     this._field = field;
-    this._getFieldMeta = getFieldMeta;
+    // this._getFieldMeta = getFieldMeta;
     this._getFieldFormatter = getFieldFormatter;
+    this._layer = vectorLayer;
   }
 
   getValueSuggestions = query => {
@@ -30,9 +43,46 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
-  getFieldMeta() {
-    return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
+  getRangeFieldMeta() {
+    const style = this._layer.getStyle();
+    const styleMeta = style.getStyleMeta();
+    const fieldName = this.getFieldName();
+
+    const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
+
+    let dataRequestId;
+    if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_META_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+      });
+      if (join) {
+        dataRequestId = join.getSourceMetaDataRequestId();
+      }
+    }
+
+    if (!dataRequestId) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const data = styleMetaDataRequest.getData();
+    const rangeFieldMeta = this.pluckOrdinalStyleMetaFromFieldMetaData(data);
+    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
+
+  getCategoryFieldMeta() {
+    throw new Error('todo category field meta');
+  }
+
+  // getFieldMeta() {
+  //   return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
+  // }
 
   getField() {
     return this._field;
@@ -173,11 +223,28 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  pluckStyleMetaFromFeatures(features) {
+  // pluckStyleMetaFromFeatures(features) {
+  // if (this.isOrdinal()) {
+  //   return this._pluckOrdinalStyleMetaFromFeatures(features);
+  // } else if (this.isCategorical()) {
+  //   return this._pluckCategoricalStyleMetaFromFeatures(features);
+  // } else {
+  //   return null;
+  // }
+
+  // }
+
+  pluckCategoricalStyleMetaFromFeatures(features) {
+    if (this.isCategorical()) {
+      return this._pluckCategoricalStyleMetaFromFeatures(features);
+    } else {
+      return null;
+    }
+  }
+
+  pluckOrdinalStyleMetaFromFeatures(features) {
     if (this.isOrdinal()) {
       return this._pluckOrdinalStyleMetaFromFeatures(features);
-    } else if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFeatures(features);
     } else {
       return null;
     }
@@ -220,11 +287,27 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+  // pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+  //   if (this.isOrdinal()) {
+  //     return this._pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData);
+  //   } else if (this.isCategorical()) {
+  //     return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
+  //   } else {
+  //     return null;
+  //   }
+  // }
+
+  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (this.isCategorical()) {
+      return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
+    } else {
+      return null;
+    }
+  }
+
+  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
     if (this.isOrdinal()) {
       return this._pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData);
-    } else if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
     } else {
       return null;
     }
@@ -247,7 +330,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
     const valueAsFloat = parseFloat(value);
     if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getFieldMeta());
+      return scaleValue(valueAsFloat, this.getRangeFieldMeta());
     }
     if (isNaN(valueAsFloat)) {
       return 0;

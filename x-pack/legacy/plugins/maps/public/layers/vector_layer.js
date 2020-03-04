@@ -61,6 +61,10 @@ export class VectorLayer extends AbstractLayer {
     this._style = new VectorStyle(this._descriptor.style, this._source, this);
   }
 
+  getStyle() {
+    return this._style;
+  }
+
   destroy() {
     if (this._source) {
       this._source.destroy();

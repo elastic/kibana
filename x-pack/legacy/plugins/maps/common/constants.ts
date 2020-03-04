@@ -160,6 +160,11 @@ export const COLOR_MAP_TYPE = {
   ORDINAL: 'ORDINAL',
 };
 
+export const FEATURE_STYLE_META_TYPE = {
+  CATEGORIES: 'CATEGORIES',
+  RANGE: 'RANGE',
+};
+
 export const COLOR_PALETTE_MAX_SIZE = 10;
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
