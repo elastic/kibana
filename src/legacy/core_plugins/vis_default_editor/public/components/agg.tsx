@@ -34,6 +34,7 @@ import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { getSchemaByName } from '../schemas';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -256,10 +257,10 @@ function DefaultEditorAgg({
       </div>
     );
   };
-
+  const schemaTitle = getSchemaByName(schemas, agg.schema).title;
   const buttonContent = (
     <>
-      {agg.schema} {showDescription && <span>{aggDescription}</span>}
+      {schemaTitle || agg.schema} {showDescription && <span>{aggDescription}</span>}
     </>
   );
 
@@ -273,7 +274,7 @@ function DefaultEditorAgg({
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
       aria-label={i18n.translate('visDefaultEditor.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',
-        values: { schema: agg.schema },
+        values: { schema: schemaTitle || agg.schema },
       })}
       data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}

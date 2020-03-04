@@ -66,7 +66,11 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     setAggParamValue={[MockFunction]}
     setTouched={[Function]}
     setValidity={[Function]}
-    state={Object {}}
+    state={
+      Object {
+        "params": Object {},
+      }
+    }
   />
 </EuiAccordion>
 `;

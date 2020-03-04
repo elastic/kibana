@@ -70,7 +70,7 @@ describe('DefaultEditorAgg component', () => {
       isLastBucket: false,
       isRemovable: false,
       metricAggs: [],
-      state: {} as VisState,
+      state: { params: {} } as VisState,
       setAggParamValue,
       setStateParamValue,
       onAggTypeChange: () => {},
