@@ -4,34 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface DatasourcePackage {
+  assets: Array<{
+    id: string;
+    type: string;
+  }>;
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+}
+
+export interface DatasourceInputStream {
+  id: string;
+  enabled: boolean;
+  dataset: string;
+  processors?: string[];
+  config?: Record<string, any>;
+}
+
+export interface DatasourceInput {
+  type: string;
+  enabled: boolean;
+  processors?: string[];
+  streams: DatasourceInputStream[];
+}
+
 export interface NewDatasource {
   name: string;
   namespace?: string;
   config_id: string;
   enabled: boolean;
-  package?: {
-    assets: Array<{
-      id: string;
-      type: string;
-    }>;
-    description: string;
-    name: string;
-    title: string;
-    version: string;
-  };
+  package?: DatasourcePackage;
   output_id: string;
-  inputs: Array<{
-    type: string;
-    enabled: boolean;
-    processors?: string[];
-    streams: Array<{
-      id: string;
-      enabled: boolean;
-      dataset: string;
-      processors?: string[];
-      config?: Record<string, any>;
-    }>;
-  }>;
+  inputs: DatasourceInput[];
 }
 
 export type Datasource = NewDatasource & { id: string };

@@ -5,7 +5,13 @@
  */
 
 import { SavedObjectAttributes } from '../../../../../../src/core/public';
-import { Datasource } from './datasource';
+import {
+  Datasource,
+  DatasourcePackage,
+  DatasourceInput,
+  DatasourceInputStream,
+} from './datasource';
+import { Output } from './output';
 
 export enum AgentConfigStatus {
   Active = 'active',
@@ -25,4 +31,28 @@ export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
   datasources: string[] | Datasource[];
   updated_on: string;
   updated_by: string;
+}
+
+export type FullAgentConfigDatasource = Pick<Datasource, 'name' | 'namespace' | 'enabled'> & {
+  package?: Pick<DatasourcePackage, 'name' | 'version'>;
+  use_output: string;
+  inputs: Array<
+    Omit<DatasourceInput, 'streams'> & {
+      streams: Array<
+        Omit<DatasourceInputStream, 'config'> & {
+          [key: string]: any;
+        }
+      >;
+    }
+  >;
+};
+
+export interface FullAgentConfig {
+  id: string;
+  outputs: {
+    [key: string]: Omit<Output, 'is_default' | 'config' | 'name'> & {
+      [key: string]: any;
+    };
+  };
+  datasources: FullAgentConfigDatasource[];
 }

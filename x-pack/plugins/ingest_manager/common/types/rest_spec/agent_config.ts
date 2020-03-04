@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AgentConfig, NewAgentConfig } from '../models';
+import { AgentConfig, NewAgentConfig, FullAgentConfig } from '../models';
 import { ListWithKuery } from './common';
 
 export interface GetAgentConfigsRequest {
@@ -57,3 +57,14 @@ export type DeleteAgentConfigsResponse = Array<{
   id: string;
   success: boolean;
 }>;
+
+export interface GetFullAgentConfigRequest {
+  params: {
+    agentConfigId: string;
+  };
+}
+
+export interface GetFullAgentConfigResponse {
+  item: FullAgentConfig;
+  success: boolean;
+}

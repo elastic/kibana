@@ -11,6 +11,7 @@ import {
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
+  GetFullAgentConfigRequestSchema,
 } from '../../types';
 import {
   getAgentConfigsHandler,
@@ -18,6 +19,7 @@ import {
   createAgentConfigHandler,
   updateAgentConfigHandler,
   deleteAgentConfigsHandler,
+  getFullAgentConfig,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -69,5 +71,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     deleteAgentConfigsHandler
+  );
+
+  // Get one full agent config
+  router.get(
+    {
+      path: AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN,
+      validate: GetFullAgentConfigRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    getFullAgentConfig
   );
 };
