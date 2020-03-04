@@ -415,7 +415,7 @@ describe('Auth', () => {
       .expect(200, { content: 'ok' });
   });
 
-  it('blocks access to a resource if credentials are not recognized', async () => {
+  it('blocks access to a resource if credentials are not provided', async () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 

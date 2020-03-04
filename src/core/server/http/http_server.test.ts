@@ -810,7 +810,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       method: 'get',
       path: '/',
       options: {
-        authRequired: false,
+        authRequired: true,
         xsrfRequired: false,
         tags: [],
       },
@@ -923,7 +923,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       method: 'post',
       path: '/',
       options: {
-        authRequired: false,
+        authRequired: true,
         xsrfRequired: true,
         tags: [],
         body: {

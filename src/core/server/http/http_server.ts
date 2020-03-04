@@ -196,16 +196,18 @@ export class HttpServer {
 
   private getAuthOption(
     authRequired: RouteConfigOptions<any>['authRequired'] = true
-  ): false | { mode: 'required' | 'optional' } {
-    if (this.authRegistered) {
-      if (authRequired === true) {
-        return { mode: 'required' };
-      }
-      if (authRequired === 'optional') {
-        return { mode: 'optional' };
-      }
+  ): undefined | false | { mode: 'required' | 'optional' } {
+    if (this.authRegistered === false) return undefined;
+
+    if (authRequired === true) {
+      return { mode: 'required' };
     }
-    return false;
+    if (authRequired === 'optional') {
+      return { mode: 'optional' };
+    }
+    if (authRequired === false) {
+      return false;
+    }
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {

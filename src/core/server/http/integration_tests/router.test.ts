@@ -106,7 +106,25 @@ describe('Options', () => {
 
         expect(response.header['www-authenticate']).toBe(undefined);
       });
+
+      it('User with invalid credentials cannot access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => res.unauthorized());
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
+      });
     });
+
     describe('true', () => {
       it('Authenticated user has access to a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
@@ -116,7 +134,7 @@ describe('Options', () => {
           return toolkit.authenticated();
         });
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
@@ -149,6 +167,22 @@ describe('Options', () => {
           .expect(401);
 
         expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+      });
+      it('User with invalid credentials cannot access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => res.unauthorized());
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
       });
     });
   });

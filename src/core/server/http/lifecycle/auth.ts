@@ -62,10 +62,10 @@ const authResult = {
     };
   },
   isAuthenticated(result: AuthResult): result is Authenticated {
-    return result && result.type === AuthResultType.authenticated;
+    return Boolean(result?.type === AuthResultType.authenticated);
   },
   isNotHandled(result: AuthResult): result is AuthNotHandled {
-    return result && result.type === AuthResultType.notHandled;
+    return Boolean(result?.type === AuthResultType.notHandled);
   },
 };
 
