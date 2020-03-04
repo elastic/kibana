@@ -266,8 +266,6 @@ export function createFieldChooserDirective($location, config, $route) {
             bucket.display = field.format.convert(bucket.value);
           });
           $scope.increaseFieldCounter(field, 1);
-        } else {
-          delete field.details;
         }
         return field.details;
       };

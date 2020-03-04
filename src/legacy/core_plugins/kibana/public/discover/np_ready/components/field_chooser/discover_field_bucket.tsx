@@ -40,6 +40,18 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
   const emptyTxt = i18n.translate('kbn.discover.fieldChooser.detailViews.emptyStringText', {
     defaultMessage: 'Empty string',
   });
+  const addLabel = i18n.translate(
+    'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter for this value',
+    }
+  );
+  const removeLabel = i18n.translate(
+    'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter out this value',
+    }
+  );
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
@@ -55,7 +67,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 iconSize="s"
                 iconType="magnifyWithPlus"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
-                aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for this value'} }}"
+                aria-label={addLabel}
                 data-test-subj={`plus-${field.name}-${bucket.display}`}
                 style={{
                   minHeight: 'auto',
@@ -68,7 +80,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 iconSize="s"
                 iconType="magnifyWithMinus"
                 onClick={() => onAddFilter(field, bucket.value, '-')}
-                aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out this value'} }}"
+                aria-label={removeLabel}
                 data-test-subj={`minus-${field.name}-${bucket.display}`}
                 style={{
                   minHeight: 'auto',

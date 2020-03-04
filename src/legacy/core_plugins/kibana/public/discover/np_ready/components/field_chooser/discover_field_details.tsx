@@ -40,7 +40,7 @@ export interface Field {
   visualizable: boolean;
   type: string;
   /**
-   * determins if a field is selected and displayed in the doc table
+   * determines if a field is selected and displayed in the doc table
    */
   display: boolean;
 }
@@ -83,36 +83,43 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
       )}
       {!field.details.error && (
         <div style={{ marginTop: '4px' }}>
-          {field.details.buckets.map((bucket: any) => (
-            <DiscoverFieldBucket bucket={bucket} field={field} onAddFilter={onAddFilter} />
+          {field.details.buckets.map((bucket: any, idx: number) => (
+            <DiscoverFieldBucket
+              key={`bucket${idx}`}
+              bucket={bucket}
+              field={field}
+              onAddFilter={onAddFilter}
+            />
           ))}
         </div>
       )}
 
       {field.visualizable && getServices().capabilities.visualize.show && (
-        <EuiLink
-          href={field.details.visualizeUrl}
-          className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
-          data-test-subj="fieldVisualize-{{::field.name}}"
-        >
-          <FormattedMessage
-            id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
-            defaultMessage="Visualize"
-          />
+        <>
+          <EuiLink
+            href={field.details.visualizeUrl}
+            className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
+            data-test-subj="fieldVisualize-{{::field.name}}"
+          >
+            <FormattedMessage
+              id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
+              defaultMessage="Visualize"
+            />
+          </EuiLink>
           {warnings.length > 0 && (
             <EuiToolTip content={warnings.join(' ')}>
               <span>
-                ({' '}
+                (
                 <FormattedMessage
                   id="kbn.discover.fieldChooser.detailViews.warningsText"
-                  defaultMessage="warningsLength, plural, one {# warning} other {# warnings}"
+                  defaultMessage="warningsLength, plural, one {warning} other {warnings}"
                   values={{ warningsLength: warnings.length }}
-                />{' '}
+                />
                 <i aria-hidden="true" className="fa fa-warning" /> )
               </span>
             </EuiToolTip>
           )}
-        </EuiLink>
+        </>
       )}
     </div>
   );
