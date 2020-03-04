@@ -234,7 +234,7 @@ export class Server {
 
         return {
           auth: {
-            isAuthenticated: () => coreSetup.http.auth.isAuthenticated(req),
+            isAuthenticated: coreSetup.http.auth.isAuthenticated(req),
           },
           rendering: {
             render: async (options = {}) =>
