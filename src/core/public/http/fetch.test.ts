@@ -50,40 +50,40 @@ describe('Fetch', () => {
         .pipe(first())
         .toPromise();
 
-    it('should increase and decrease when request succeeds', async () => {
-      let resolveRequest: any;
-      const response = new Promise<any>(resolve => (resolveRequest = resolve));
-      fetchMock.get('*', response);
+    it('should increase and decrease when request receives success response', async () => {
+      fetchMock.get('*', 200);
 
       const fetchResponse = fetchInstance.fetch('/path');
       expect(await getCurrentRequestCount()).toEqual(1);
 
-      resolveRequest(200);
-      await fetchResponse;
+      await expect(fetchResponse).resolves.not.toThrow();
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should increase and decrease when request receives error response', async () => {
+      fetchMock.get('*', 500);
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      await expect(fetchResponse).rejects.toThrow();
       expect(await getCurrentRequestCount()).toEqual(0);
     });
 
     it('should increase and decrease when request fails', async () => {
-      let resolveRequest: any;
-      const response = new Promise<any>(resolve => (resolveRequest = resolve));
-      fetchMock.get('*', response);
+      fetchMock.get('*', Promise.reject('Network!'));
 
       const fetchResponse = fetchInstance.fetch('/path');
       expect(await getCurrentRequestCount()).toEqual(1);
 
-      resolveRequest(500);
       await expect(fetchResponse).rejects.toThrow();
       expect(await getCurrentRequestCount()).toEqual(0);
     });
 
     it('should change for multiple requests', async () => {
-      let resolveSuccessfulRequest: any;
-      const successfulResponse = new Promise<any>(resolve => (resolveSuccessfulRequest = resolve));
-      let resolveFailedRequest: any;
-      const failedResponse = new Promise<any>(resolve => (resolveFailedRequest = resolve));
-
-      fetchMock.get(`${BASE_PATH}/success`, successfulResponse);
-      fetchMock.get(`${BASE_PATH}/fail`, failedResponse);
+      fetchMock.get(`${BASE_PATH}/success`, 200);
+      fetchMock.get(`${BASE_PATH}/fail`, 400);
+      fetchMock.get(`${BASE_PATH}/network-fail`, Promise.reject('Network!'));
 
       const requestCounts: number[] = [];
       const subscription = fetchInstance
@@ -94,11 +94,10 @@ describe('Fetch', () => {
       const success2 = fetchInstance.fetch('/success');
       const failure1 = fetchInstance.fetch('/fail');
       const failure2 = fetchInstance.fetch('/fail');
+      const networkFailure1 = fetchInstance.fetch('/network-fail');
       const success3 = fetchInstance.fetch('/success');
       const failure3 = fetchInstance.fetch('/fail');
-
-      resolveSuccessfulRequest(200);
-      resolveFailedRequest(400);
+      const networkFailure2 = fetchInstance.fetch('/network-fail');
 
       const swallowError = (p: Promise<any>) => p.catch(() => {});
       await Promise.all([
@@ -108,9 +107,11 @@ describe('Fetch', () => {
         swallowError(failure1),
         swallowError(failure2),
         swallowError(failure3),
+        swallowError(networkFailure1),
+        swallowError(networkFailure2),
       ]);
 
-      expect(requestCounts).toEqual([0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0]);
+      expect(requestCounts).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
       subscription.unsubscribe();
     });
   });
