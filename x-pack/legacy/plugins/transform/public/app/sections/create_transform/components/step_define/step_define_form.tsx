@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   // @ts-ignore
@@ -254,11 +255,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
   const [useKQL] = useState(true);
-
-  const addToSearch = (newSearch: string) => {
-    const currentDisplaySearch = searchString === defaultSearch ? emptySearch : searchString;
-    setSearchString(`${currentDisplaySearch} ${newSearch}`.trim());
-  };
 
   const searchHandler = (d: Record<string, any>) => {
     const { filterQuery, queryString } = d;
@@ -568,8 +564,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const disabledQuery = numIndexFields > maxIndexFields;
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
+    <EuiFlexGroup className="transform__stepDefineForm">
+      <EuiFlexItem grow={false} className="transform__stepDefineFormLeftColumn">
         <div data-test-subj="transformStepDefineForm">
           <EuiForm>
             {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
@@ -906,9 +902,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         </div>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
-        <EuiSpacer size="m" />
+      <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
+        <SourceIndexPreview query={pivotQuery} />
+        <EuiHorizontalRule />
         <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>

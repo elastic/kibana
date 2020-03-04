@@ -4,121 +4,90 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
-import { omit } from 'lodash/fp';
-import { deleteRulesRoute } from './delete_rules_route';
-import * as utils from './utils';
-import * as deleteRules from '../../rules/delete_rules';
-
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { createMockServer, clientsServiceMock } from '../__mocks__';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { deleteRulesRoute } from './delete_rules_route';
 
 describe('delete_rules', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    getClients.mockResolvedValue(clients);
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
-    deleteRulesRoute(server.route, getClients);
+    deleteRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequest());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getDeleteRequest(), context);
+
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequestById());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getDeleteRequestById(), context);
+
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      const response = await server.inject(getDeleteRequest(), context);
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: 'rule_id: "rule-1" not found',
+        status_code: 404,
+      });
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
-      deleteRulesRoute(route, getClients);
-      const { statusCode } = await inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(getDeleteRequest(), context);
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('returns 500 when transform fails', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue({});
-      jest.spyOn(utils, 'transform').mockReturnValue(null);
-      const { payload, statusCode } = await server.inject(getDeleteRequest());
-      expect(JSON.parse(payload).message).toBe('Internal error transforming');
-      expect(statusCode).toBe(500);
-    });
-
-    test('catches error if deleteRules throws error', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      clients.savedObjectsClient.delete.mockResolvedValue({});
-      jest.spyOn(deleteRules, 'deleteRules').mockImplementation(async () => {
+    test('catches error if deletion throws error', async () => {
+      clients.alertsClient.delete.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const { payload, statusCode } = await server.inject(getDeleteRequestById());
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(getDeleteRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if given a non-existent id', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      const request: ServerInjectOptions = {
-        method: 'DELETE',
-        url: DETECTION_ENGINE_RULES_URL,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+  describe('request validation', () => {
+    test('rejects a request with no id', async () => {
+      const request = requestMock.create({
+        method: 'delete',
+        path: DETECTION_ENGINE_RULES_URL,
+        query: {},
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" must contain at least one of [id, rule_id]'
+      );
     });
   });
 });
