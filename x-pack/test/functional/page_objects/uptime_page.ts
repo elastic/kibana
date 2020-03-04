@@ -21,6 +21,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
     }
 
+    public async goToUptimeSettingsAndLoadData() {
+      await pageObjects.common.navigateToApp('uptime');
+      await uptimeService.navigateToSettings();
+      const settingsFields = await uptimeService.loadSettingsFields();
+      expect(settingsFields.heartbeatIndices).to.eql('FOO');
+    }
+
     public async goToUptimeOverviewAndLoadData(
       datePickerStartValue: string,
       datePickerEndValue: string,

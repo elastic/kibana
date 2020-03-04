@@ -6,13 +6,14 @@
 
 import React, { useEffect } from 'react';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
 import { UptimeUrlParams } from '../lib/helper';
+import { SETTINGS_ROUTE } from '../../common/constants';
 
 interface PageHeaderProps {
   headingText: string;
@@ -52,6 +53,10 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
     </EuiFlexItem>
   ) : null;
 
+  const settingsLinkText = i18n.translate('xpack.uptime.page_header.settingsLink', {
+    defaultMessage: 'Settings',
+  });
+
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
@@ -59,6 +64,11 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
           <EuiTitle>
             <h1>{headingText}</h1>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton href={`#${SETTINGS_ROUTE}`} data-test-subj="settings-page-link">
+            {settingsLinkText}
+          </EuiButton>
         </EuiFlexItem>
         {datePickerComponent}
       </EuiFlexGroup>

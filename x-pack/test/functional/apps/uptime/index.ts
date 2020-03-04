@@ -19,6 +19,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       after('unload', async () => await esArchiver.unload('uptime/blank'));
 
       loadTestFile(require.resolve('./locations'));
+      loadTestFile(require.resolve('./settings'));
     });
     describe('with real-world data', () => {
       before(async () => {

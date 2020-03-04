@@ -29,6 +29,14 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       const url = await browser.getCurrentUrl();
       return url.indexOf(expected) >= 0;
     },
+    async navigateToSettings() {
+      await testSubjects.existOrFail('settings-page-link');
+      await testSubjects.click('settings-page-link', 5000);
+    },
+    async loadSettingsFields() {
+      const heartbeatIndices = await testSubjects.find('heartbeat-indices-input', 5000);
+      return { heartbeatIndices };
+    },
     async navigateToMonitorWithId(monitorId: string) {
       await testSubjects.click(`monitor-page-link-${monitorId}`, 5000);
     },
