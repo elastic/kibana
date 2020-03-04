@@ -5,6 +5,8 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { Type, TypeOf } from '@kbn/config-schema';
+import { alertingIndexGetQuerySchema } from '../server/routes/schema';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -336,3 +338,9 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+
+export type AlertingIndexGetQuerySchema = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+export type a = BetterTypeOf<typeof alertingIndexGetQuerySchema>;
+
+export type BetterTypeOf<RT extends Type<any>> = RT extends Type<infer T> ? T : never;

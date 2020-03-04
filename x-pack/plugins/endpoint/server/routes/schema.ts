@@ -6,10 +6,13 @@
 import { decode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppConstants } from '../../../../common/types';
+import { esKuery } from '../../../../../src/plugins/data/server';
+import { EndpointAppConstants } from '../../common/types';
 
-export const alertListReqSchema = schema.object(
+/**
+ * Used to validate GET requests against the index of the alerting APIs.
+ */
+export const alertingIndexGetQuerySchema = schema.object(
   {
     page_size: schema.maybe(
       schema.number({

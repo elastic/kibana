@@ -9,7 +9,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { alertListReqSchema } from './list/schemas';
+import { alertingIndexGetQuerySchema } from '../schema';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 
@@ -31,7 +31,7 @@ describe('test alerts route', () => {
 
   it('should fail to validate when `page_size` is not a number', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         page_size: 'abc',
       });
     };
@@ -40,7 +40,7 @@ describe('test alerts route', () => {
 
   it('should validate when `page_size` is a number', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         page_size: 25,
       });
     };
@@ -49,7 +49,7 @@ describe('test alerts route', () => {
 
   it('should validate when `page_size` can be converted to a number', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         page_size: '50',
       });
     };
@@ -58,7 +58,7 @@ describe('test alerts route', () => {
 
   it('should allow either `page_index` or `after`, but not both', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         page_index: 1,
         after: [123, 345],
       });
@@ -68,7 +68,7 @@ describe('test alerts route', () => {
 
   it('should allow either `page_index` or `before`, but not both', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         page_index: 1,
         before: 'abc',
       });
@@ -78,7 +78,7 @@ describe('test alerts route', () => {
 
   it('should allow either `before` or `after`, but not both', async () => {
     const validate = () => {
-      alertListReqSchema.validate({
+      alertingIndexGetQuerySchema.validate({
         before: ['abc', 'def'],
         after: [123, 345],
       });

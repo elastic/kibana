@@ -15,7 +15,7 @@ import {
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
-import { Immutable } from '../../../../../common/types';
+import { Immutable, AlertingIndexGetQuerySchema } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
@@ -82,7 +82,7 @@ export const uiQueryParams: (
  */
 export const apiQueryParams: (
   state: AlertListState
-) => Immutable<AlertsAPIQueryParams> = createSelector(
+) => Immutable<AlertingIndexGetQuerySchema> = createSelector(
   uiQueryParams,
   ({ page_size, page_index }) => ({
     page_size,
