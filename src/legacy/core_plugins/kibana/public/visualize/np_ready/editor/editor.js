@@ -288,7 +288,7 @@ function VisualizeAppController(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     query: searchSource.getOwnField('query') || defaultQuery,
-    filters: (searchSource.getOwnField('filter') || []).filter(f => !esFilters.isFilterPinned(f)),
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState,
     linked: !!savedVis.savedSearchId,
   };
@@ -355,7 +355,7 @@ function VisualizeAppController(
 
     savedQueryService.getSavedQuery(savedQueryId).then(savedQuery => {
       $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
+        $scope.updateSavedQuery(savedQuery);
       });
     });
   };
@@ -466,11 +466,11 @@ function VisualizeAppController(
 
     // update the searchSource when query updates
     $scope.fetch = function() {
-      const { query, linked } = stateContainer.getState();
+      const { query, linked, filters } = stateContainer.getState();
       $scope.query = query;
       $scope.linked = linked;
       savedVis.searchSource.setField('query', query);
-      savedVis.searchSource.setField('filter', $scope.filters);
+      savedVis.searchSource.setField('filter', filters);
       $scope.$broadcast('render');
     };
 
