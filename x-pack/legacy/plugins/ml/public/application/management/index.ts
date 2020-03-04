@@ -35,7 +35,9 @@ const licencingSubscription = plugins.licensing.license$.subscribe(license => {
   if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
     initManagementSection();
     // unsubscribe, we only want to register the plugin once.
-    licencingSubscription.unsubscribe();
+    if (licencingSubscription !== undefined) {
+      licencingSubscription.unsubscribe();
+    }
   }
 });
 
