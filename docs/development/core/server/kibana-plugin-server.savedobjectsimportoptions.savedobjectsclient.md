@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportOptions.savedObjectsClient property
 
+[client](./kibana-plugin-server.savedobjectsclientcontract.md) to use to perform the import operation
+
 <b>Signature:</b>
 
 ```typescript

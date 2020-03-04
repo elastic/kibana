@@ -19,8 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { defaultFeedbackMessage } from './legacy_imports';
-import { Status } from '../../visualizations/public';
+import { Status, defaultFeedbackMessage } from '../../visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';

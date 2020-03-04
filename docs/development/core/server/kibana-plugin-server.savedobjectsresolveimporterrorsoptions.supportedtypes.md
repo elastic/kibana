@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions.supportedTypes property
 
+the list of allowed types to import
+
 <b>Signature:</b>
 
 ```typescript
