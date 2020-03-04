@@ -45,6 +45,7 @@ import {
   EuiSwitch,
   EuiToolTip,
   EuiPageContent,
+  // @ts-ignore
   Query,
 } from '@elastic/eui';
 import {
@@ -57,6 +58,7 @@ import {
 } from 'src/core/public';
 import { IndexPatternsContract } from '../../../data/public';
 import { SavedObjectWithMetadata } from '../types';
+import { ISavedObjectsManagementRegistry } from '../management_registry';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -72,6 +74,7 @@ import { Table, Header, Relationships } from './components';
 
 interface SavedObjectsTableProps {
   allowedTypes: string[];
+  serviceRegistry: ISavedObjectsManagementRegistry;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;

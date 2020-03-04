@@ -17,64 +17,45 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import { createSavedDashboardLoader } from '../dashboard';
 import { TypesService, createSavedVisLoader } from '../../../visualizations/public';
 import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
-/**
- * This registry is used for the editing mode of Saved Searches, Visualizations,
- * Dashboard and Time Lion saved objects.
- */
-interface SavedObjectRegistryEntry {
-  id: string;
-  service: SavedObjectLoader;
-  title: string;
+const registry = npSetup.plugins.savedObjectsManagement?.serviceRegistry;
+
+// TODO: should no longer be needed after migration
+export const savedObjectManagementRegistry = registry!;
+
+if (registry) {
+  const services = {
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
+
+  savedObjectManagementRegistry.register({
+    id: 'savedVisualizations',
+    service: createSavedVisLoader({
+      ...services,
+      ...{ visualizationTypes: new TypesService().start() },
+    }),
+    title: 'visualizations',
+  });
+
+  savedObjectManagementRegistry.register({
+    id: 'savedDashboards',
+    service: createSavedDashboardLoader(services),
+    title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
+      defaultMessage: 'dashboards',
+    }),
+  });
+
+  savedObjectManagementRegistry.register({
+    id: 'savedSearches',
+    service: createSavedSearchesLoader(services),
+    title: 'searches',
+  });
 }
-
-const registry: SavedObjectRegistryEntry[] = [];
-
-export const savedObjectManagementRegistry = {
-  register: (service: SavedObjectRegistryEntry) => {
-    registry.push(service);
-  },
-  all: () => {
-    return registry;
-  },
-  get: (id: string) => {
-    return _.find(registry, { id });
-  },
-};
-
-const services = {
-  savedObjectsClient: npStart.core.savedObjects.client,
-  indexPatterns: npStart.plugins.data.indexPatterns,
-  chrome: npStart.core.chrome,
-  overlays: npStart.core.overlays,
-};
-
-savedObjectManagementRegistry.register({
-  id: 'savedVisualizations',
-  service: createSavedVisLoader({
-    ...services,
-    ...{ visualizationTypes: new TypesService().start() },
-  }),
-  title: 'visualizations',
-});
-
-savedObjectManagementRegistry.register({
-  id: 'savedDashboards',
-  service: createSavedDashboardLoader(services),
-  title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
-    defaultMessage: 'dashboards',
-  }),
-});
-
-savedObjectManagementRegistry.register({
-  id: 'savedSearches',
-  service: createSavedSearchesLoader(services),
-  title: 'searches',
-});

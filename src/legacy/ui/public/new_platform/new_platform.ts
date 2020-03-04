@@ -52,6 +52,7 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { SavedObjectsManagementPluginSetup } from '../../../../plugins/so_management/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -71,6 +72,7 @@ export interface PluginsSetup {
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
   telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {

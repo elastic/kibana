@@ -21,6 +21,8 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { registerManagementSection } from './management';
+import { SavedObjectsManagementPluginSetup } from './types';
+import { SavedObjectsManagementRegistry } from './management_registry';
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -31,14 +33,22 @@ export interface StartDependencies {
 }
 
 export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
+  implements Plugin<SavedObjectsManagementPluginSetup, {}, SetupDependencies, StartDependencies> {
+  private readonly serviceRegistry = new SavedObjectsManagementRegistry();
+
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { management }: SetupDependencies
+  ): SavedObjectsManagementPluginSetup {
     registerManagementSection({
       core,
+      serviceRegistry: this.serviceRegistry,
       sections: management.sections,
     });
 
-    return {};
+    return {
+      serviceRegistry: this.serviceRegistry,
+    };
   }
 
   public start(core: CoreStart) {

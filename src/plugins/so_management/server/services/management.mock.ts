@@ -22,13 +22,18 @@ import { SavedObjectsManagement } from './management';
 type Management = PublicMethodsOf<SavedObjectsManagement>;
 const createManagementMock = () => {
   const mocked: jest.Mocked<Management> = {
-    isImportAndExportable: jest.fn().mockReturnValue(true),
+    getImportableAndExportableTypes: jest.fn(),
+    isImportAndExportable: jest.fn(),
     getDefaultSearchField: jest.fn(),
     getIcon: jest.fn(),
     getTitle: jest.fn(),
     getEditUrl: jest.fn(),
     getInAppUrl: jest.fn(),
   };
+
+  mocked.getImportableAndExportableTypes.mockReturnValue([]);
+  mocked.isImportAndExportable.mockReturnValue(true);
+
   return mocked;
 };
 

@@ -18,6 +18,11 @@
  */
 
 import { SavedObject } from 'src/core/public';
+import { ISavedObjectsManagementRegistry } from './management_registry';
+
+export interface SavedObjectsManagementPluginSetup {
+  serviceRegistry: ISavedObjectsManagementRegistry;
+}
 
 export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
   meta: {

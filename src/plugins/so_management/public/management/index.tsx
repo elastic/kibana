@@ -27,19 +27,21 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { ManagementSetup } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { StartDependencies } from '../plugin';
+import { ISavedObjectsManagementRegistry } from '../management_registry';
 import { SavedObjectsTable } from './saved_objects_table';
 import { getAllowedTypes } from './lib';
 
 interface RegisterOptions {
   core: CoreSetup<StartDependencies>;
   sections: ManagementSetup['sections'];
+  serviceRegistry: ISavedObjectsManagementRegistry;
 }
 
 const title = i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
   defaultMessage: 'Saved Objects XXX',
 });
 
-export const registerManagementSection = ({ core, sections }: RegisterOptions) => {
+export const registerManagementSection = ({ core, sections, serviceRegistry }: RegisterOptions) => {
   const kibanaSection = sections.getSection('kibana');
   if (!kibanaSection) {
     throw new Error('`kibana` management section not found.');
@@ -60,6 +62,7 @@ export const registerManagementSection = ({ core, sections }: RegisterOptions) =
                 <SavedObjectsTablePage
                   coreStart={coreStart}
                   dataStart={data}
+                  serviceRegistry={serviceRegistry}
                   allowedTypes={allowedTypes}
                 />
               </Route>
@@ -80,16 +83,19 @@ const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
   allowedTypes,
+  serviceRegistry,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   allowedTypes: string[];
+  serviceRegistry: ISavedObjectsManagementRegistry;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
   return (
     <SavedObjectsTable
       allowedTypes={allowedTypes}
+      serviceRegistry={serviceRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       http={coreStart.http}

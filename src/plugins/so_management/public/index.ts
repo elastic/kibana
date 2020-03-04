@@ -20,6 +20,9 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { SavedObjectsManagementPlugin } from './plugin';
 
+export { SavedObjectsManagementPluginSetup } from './types';
+export { ISavedObjectsManagementRegistry } from './management_registry';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();
 }
