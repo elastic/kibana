@@ -43,11 +43,18 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
     }
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
       const { selected_host: selectedHost } = uiQueryParams(state);
-      const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
-      dispatch({
-        type: 'serverReturnedManagementDetails',
-        payload: response,
-      });
+      try {
+        const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+        dispatch({
+          type: 'serverReturnedManagementDetails',
+          payload: response,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnManagementDetails',
+          payload: error,
+        });
+      }
     }
   };
 };

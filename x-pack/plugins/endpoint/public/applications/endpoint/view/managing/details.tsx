@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo, memo, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useManagementListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
-import { uiQueryParams, detailsData } from './../../store/managing/selectors';
+import { uiQueryParams, detailsData, detailsError } from './../../store/managing/selectors';
 
 const HostDetails = memo(() => {
   const details = useManagementListSelector(detailsData);
@@ -104,13 +106,35 @@ const HostDetails = memo(() => {
 
 export const ManagementDetails = () => {
   const history = useHistory();
+  const { notifications } = useKibana();
   const queryParams = useManagementListSelector(uiQueryParams);
   const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
   const details = useManagementListSelector(detailsData);
+  const error = useManagementListSelector(detailsError);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
   }, [history, queryParamsWithoutSelectedHost]);
+
+  useEffect(() => {
+    if (error !== undefined) {
+      notifications.toasts.danger({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.managementDetails.errorTitle"
+            defaultMessage="Could not find host"
+          />
+        ),
+        body: (
+          <FormattedMessage
+            id="xpack.endpoint.managementDetails.errorTitle"
+            defaultMessage="Please exit the flyout and select an available host."
+          />
+        ),
+        toastLifeTimeMs: 10000,
+      });
+    }
+  }, [error, notifications.toasts]);
 
   return (
     <EuiFlyout onClose={handleFlyoutClose} data-test-subj="managementDetailsFlyout">

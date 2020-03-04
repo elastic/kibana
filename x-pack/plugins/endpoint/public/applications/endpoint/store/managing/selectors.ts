@@ -18,6 +18,8 @@ export const totalHits = (state: ManagementListState) => state.total;
 
 export const isLoading = (state: ManagementListState) => state.loading;
 
+export const detailsError = (state: ManagementListState) => state.detailsError;
+
 export const detailsData = (state: ManagementListState) => {
   return state.details;
 };
@@ -35,7 +37,6 @@ export const uiQueryParams: (
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
-      // do pagination later?
       const keys: Array<keyof ManagingIndexUIQueryParams> = ['selected_host'];
 
       for (const key of keys) {

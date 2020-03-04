@@ -15,6 +15,7 @@ const initialState = (): ManagementListState => {
     pageIndex: 0,
     total: 0,
     loading: false,
+    detailsError: undefined,
     details: undefined,
     location: undefined,
   };
@@ -44,6 +45,11 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
       ...state,
       details: action.payload,
     };
+  } else if (action.type === 'serverFailedToReturnManagementDetails') {
+    return {
+      ...state,
+      detailsError: action.payload,
+    };
   } else if (action.type === 'userExitedManagementList') {
     return initialState();
   } else if (action.type === 'userPaginatedManagementList') {
@@ -56,6 +62,7 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+      detailsError: undefined,
     };
   }
 
