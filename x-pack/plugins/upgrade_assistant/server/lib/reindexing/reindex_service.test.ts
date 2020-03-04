@@ -215,7 +215,7 @@ describe('reindexService', () => {
 
       await service.createReindexOperation('myIndex');
 
-      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex');
+      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex', undefined);
     });
 
     it('fails if index does not exist', async () => {

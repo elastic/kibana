@@ -166,7 +166,7 @@ describe('reindex API', () => {
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex');
+      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -261,6 +261,9 @@ describe('reindex API', () => {
   });
 
   describe('POST /api/upgrade_assistant/reindex/batch', () => {
+    const queueSettingsArg = {
+      queueSettings: { queuedAt: expect.any(Number) },
+    };
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
@@ -283,16 +286,28 @@ describe('reindex API', () => {
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(1, 'theIndex1');
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(2, 'theIndex2');
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(3, 'theIndex3');
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
+        1,
+        'theIndex1',
+        queueSettingsArg
+      );
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
+        2,
+        'theIndex2',
+        queueSettingsArg
+      );
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
+        3,
+        'theIndex3',
+        queueSettingsArg
+      );
 
       // It returned the right results
       expect(resp.status).toEqual(200);
       const data = resp.payload;
       expect(data).toEqual({
         errors: [],
-        started: [
+        enqueued: [
           { indexName: 'theIndex1' },
           { indexName: 'theIndex2' },
           { indexName: 'theIndex3' },
@@ -323,8 +338,16 @@ describe('reindex API', () => {
 
       // It called create correctly
       expect(mockReindexService.createReindexOperation).toHaveBeenCalledTimes(2);
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(1, 'theIndex1');
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(2, 'theIndex3');
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
+        1,
+        'theIndex1',
+        queueSettingsArg
+      );
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
+        2,
+        'theIndex3',
+        queueSettingsArg
+      );
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -337,7 +360,7 @@ describe('reindex API', () => {
           },
           { indexName: 'theIndex3', message: 'oops!' },
         ],
-        started: [{ indexName: 'theIndex1' }],
+        enqueued: [{ indexName: 'theIndex1' }],
       });
     });
   });
