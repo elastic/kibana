@@ -54,5 +54,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { calculateObjectHash } from './legacy/calculate_object_hash'; // move to utils
-export { createSavedVisLoader } from './saved_visualizations/saved_visualizations'; // is already exposed on contract
 export { defaultFeedbackMessage } from './misc/default_feedback_message'; // move to utils?
