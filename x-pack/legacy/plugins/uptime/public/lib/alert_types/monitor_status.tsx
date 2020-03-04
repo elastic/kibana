@@ -14,9 +14,9 @@ import {
   // TODO: this typing issue should be resolved after NP migration
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/triggers_actions_ui/public/types';
-import { AlertMonitorStatus } from '../../components/connected';
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
+import { AlertMonitorStatus } from '../../components/connected/alerts';
 
 /**
  * Check if params have properties.

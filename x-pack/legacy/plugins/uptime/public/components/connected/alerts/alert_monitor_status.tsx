@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import { selectIndexPattern } from '../../../state/selectors';
-import { AlertMonitorStatusComponent } from '../../functional';
+import { AlertMonitorStatusComponent } from '../../functional/alerts';
 
 const mapStateToProps = (state: AppState) => ({
   filters: state.ui.esKuery,
