@@ -27,7 +27,6 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
-import { parse } from 'url';
 
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -143,7 +142,7 @@ export class DashboardAppController {
 
     // url param rules should only apply when embedded (e.g. url?embed=true)
     const shouldForceDisplay = (param: string): boolean =>
-      chrome.isEmbedded && param in parse(location.hash.slice(1), true).query;
+      chrome.isEmbedded && Boolean($routeParams[param]);
 
     const forceShowTopNavMenu = shouldForceDisplay('show-top-nav-menu');
     const forceShowQueryInput = shouldForceDisplay('show-query-input');
