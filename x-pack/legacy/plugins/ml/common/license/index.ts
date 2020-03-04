@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initSampleDataSets } from './sample_data_sets';
+export { MlLicense, LicenseStatus, MINIMUM_FULL_LICENSE, MINIMUM_LICENSE } from './ml_license';

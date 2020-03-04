@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { checkLicense } from './check_license';
+export {
+  checkBasicLicense,
+  checkFullLicense,
+  hasLicenseExpired,
+  isFullLicense,
+  setLicenseCache,
+} from './check_license';
