@@ -61,3 +61,19 @@ export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
 }
+
+export interface Connector {
+  id: string;
+  name: string;
+}
+
+export interface FetchConnectorsResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Connector[];
+}
+
+export interface FetchConnectorsProps {
+  signal: AbortSignal;
+}
