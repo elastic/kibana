@@ -16,3 +16,20 @@ export enum SortFieldCase {
   state = 'state',
   updatedAt = 'updated_at',
 }
+
+export type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};
+
+export type CaseRequestHandler = (
+  service: CaseServiceSetup,
+  context: RequestHandlerContext,
+  request: KibanaRequest,
+  response: KibanaResponseFactory
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+
+export interface UpdateCaseConfiguration {
+  name: string;
+  actionTypeId: string;
+  config: ConfigType;
+}
