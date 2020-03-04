@@ -51,7 +51,7 @@ export class Plugin {
       const uiEnabled = config.get('xpack.monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient({
+        const client = await instantiateClient({
           log: core.log,
           events: core.events,
           elasticsearchConfig,
@@ -59,6 +59,8 @@ export class Plugin {
         }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
+          server: core._hapi,
+          client,
           log: core.log,
           xpackMainPlugin: plugins.xpack_main,
           expose: core.expose,
