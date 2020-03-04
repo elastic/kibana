@@ -161,7 +161,7 @@ export function esAggFieldsFactory(
 
   const aggFields: IESAggField[] = [aggField];
 
-  if (aggDescriptor.type === AGG_TYPE.TERMS) {
+  if (aggDescriptor.field && aggDescriptor.type === AGG_TYPE.TERMS) {
     aggFields.push(new TopTermPercentageField(aggField));
   }
 

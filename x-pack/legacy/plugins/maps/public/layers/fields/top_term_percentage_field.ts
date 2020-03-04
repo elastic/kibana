@@ -36,7 +36,8 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
-    return 'Top term percentage';
+    const baseLabel = await this._topTermAggField.getLabel();
+    return `${baseLabel}%`;
   }
 
   isValid(): boolean {
