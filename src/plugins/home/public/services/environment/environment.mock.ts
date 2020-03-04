@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  EnvironmentService,
-  EnvironmentServiceSetup,
-  EnvironmentServiceStart,
-} from './environment';
+import { EnvironmentService, EnvironmentServiceSetup } from './environment';
 
 const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {
   const setup = {
@@ -30,25 +26,20 @@ const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {
   return setup;
 };
 
-const createStartMock = (): jest.Mocked<EnvironmentServiceStart> => {
-  const start = {
-    get: jest.fn(),
-  };
-  return start;
-};
-
 const createMock = (): jest.Mocked<PublicMethodsOf<EnvironmentService>> => {
   const service = {
     setup: jest.fn(),
-    start: jest.fn(),
+    getEnvironment: jest.fn(() => ({
+      cloud: false,
+      apmUi: false,
+      ml: false,
+    })),
   };
   service.setup.mockImplementation(createSetupMock);
-  service.start.mockImplementation(createStartMock);
   return service;
 };
 
 export const environmentServiceMock = {
   createSetup: createSetupMock,
-  createStart: createStartMock,
   create: createMock,
 };
