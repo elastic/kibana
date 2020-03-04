@@ -26,7 +26,7 @@ export { SavedObjectsManagement } from './management';
 export * from './import';
 
 export {
-  getSortedObjectsForExport,
+  exportSavedObjectsToStream,
   SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
 } from './export';
