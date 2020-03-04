@@ -300,6 +300,7 @@ export class LegacyService implements CoreService {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
+        getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

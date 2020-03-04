@@ -175,7 +175,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
             setValue={setValueAxisTitle}
           />
 
-          <LabelOptions axis={axis} axesName="valueAxes" index={index} {...props} />
+          <LabelOptions axesName="valueAxes" {...props} />
         </>
       ) : (
         <EuiSpacer size="xs" />
@@ -204,7 +204,6 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         <>
           <EuiSpacer size="m" />
           <CustomExtentsOptions
-            axis={axis}
             setValueAxisScale={setValueAxisScale}
             setValueAxis={setValueAxis}
             {...props}
