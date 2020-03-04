@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  checkBasicLicense,
-  checkFullLicense,
-  hasLicenseExpired,
-  isFullLicense,
-  setLicenseCache,
-} from './check_license';
+import { httpServerMock } from '../../../../../../../../../src/core/server/mocks';
+
+export const responseMock = {
+  create: httpServerMock.createResponseFactory,
+};

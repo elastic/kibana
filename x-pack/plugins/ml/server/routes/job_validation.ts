@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { RequestHandlerContext } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -24,7 +25,10 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, version: string) {
+export function jobValidationRoutes(
+  { getLicenseCheckResults, router }: RouteInitialization,
+  version: string
+) {
   function calculateModelMemoryLimit(
     context: RequestHandlerContext,
     payload: CalculateModelMemoryLimitPayload
@@ -66,13 +70,13 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         body: estimateBucketSpanSchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          mlLicense.isSecurityEnabled() === false
+          getLicenseCheckResults().isSecurityDisabled
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
@@ -113,7 +117,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         body: modelMemoryLimitSchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await calculateModelMemoryLimit(context, request.body);
 
@@ -140,7 +144,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         body: schema.object(validateCardinalitySchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await validateCardinality(
           context.ml!.mlClient.callAsCurrentUser,
@@ -170,7 +174,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         body: validateJobSchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         // version corresponds to the version used in documentation links.
         const resp = await validateJob(
@@ -178,7 +182,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
           request.body,
           version,
           context.core.elasticsearch.adminClient.callAsInternalUser,
-          mlLicense.isSecurityEnabled() === false
+          getLicenseCheckResults().isSecurityDisabled
         );
 
         return response.ok({

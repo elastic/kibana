@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MlLicense, LicenseStatus, MINIMUM_FULL_LICENSE, MINIMUM_LICENSE } from './ml_license';
+export { checkLicense } from './check_license';
