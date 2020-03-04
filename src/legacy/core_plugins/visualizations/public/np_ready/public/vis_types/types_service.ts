@@ -67,15 +67,32 @@ export class TypesService {
       this.types[visDefinition.name] = visDefinition;
     };
     return {
+      /**
+       * registers a visualization type
+       * @param {VisType} config - visualization type definition
+       */
       createBaseVisualization: (config: any) => {
         const vis = new BaseVisType(config);
         registerVisualization(() => vis);
       },
+      /**
+       * registers a visualization which uses react for rendering
+       * @param {VisType} config - visualization type definition
+       */
       createReactVisualization: (config: any) => {
         const vis = new ReactVisType(config);
         registerVisualization(() => vis);
       },
+      /**
+       * registers a visualization alias
+       * alias is a visualization type without implementation, it just redirects somewhere in kibana
+       * @param {VisTypeAlias} config - visualization alias definition
+       */
       registerAlias: visTypeAliasRegistry.add,
+      /**
+       * allows to hide specific visualization types from create visualization dialog
+       * @param {string[]} typeNames - list of type ids to hide
+       */
       hideTypes: (typeNames: string[]) => {
         typeNames.forEach((name: string) => {
           if (this.types[name]) {
@@ -90,12 +107,22 @@ export class TypesService {
 
   public start() {
     return {
+      /**
+       * returns specific visualization or undefined if not found
+       * @param {string} visualization - id of visualization to return
+       */
       get: (visualization: string) => {
         return this.types[visualization];
       },
+      /**
+       * returns all registered visualization types
+       */
       all: () => {
         return [...Object.values(this.types)];
       },
+      /**
+       * returns all registered aliases
+       */
       getAliases: visTypeAliasRegistry.get,
     };
   }
