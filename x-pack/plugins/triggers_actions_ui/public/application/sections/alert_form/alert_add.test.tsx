@@ -69,8 +69,6 @@ describe('alert_add', () => {
     wrapper = mountWithIntl(
       <AlertsContextProvider
         value={{
-          addFlyoutVisible: true,
-          setAddFlyoutVisibility: state => {},
           reloadAlerts: () => {
             return new Promise<void>(() => {});
           },
@@ -81,7 +79,11 @@ describe('alert_add', () => {
           uiSettings: deps.uiSettings,
         }}
       >
-        <AlertAdd consumer={'alerting'} />
+        <AlertAdd
+          consumer={'alerting'}
+          addFlyoutVisible={true}
+          setAddFlyoutVisibility={state => {}}
+        />
       </AlertsContextProvider>
     );
     // Wait for active space to resolve before requesting the component to update
