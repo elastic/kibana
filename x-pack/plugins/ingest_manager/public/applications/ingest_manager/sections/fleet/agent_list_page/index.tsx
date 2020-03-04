@@ -28,7 +28,7 @@ import { WithHeaderLayout } from '../../../layouts';
 import { Agent } from '../../../types';
 import { usePagination, useCore, useGetAgentConfigs, useGetAgents } from '../../../hooks';
 import { ConnectedLink } from '../components';
-import { SearchBar } from '../components/search_bar';
+import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 
