@@ -28,8 +28,8 @@ const PARAMS = {
   COLUMNS: 'visEditorSplitBy__false',
 };
 
-function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
-  const idSelected = `visEditorSplitBy__${agg.params.row}`;
+function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggControlProps) {
+  const idSelected = `visEditorSplitBy__${editorStateParams.row}`;
   const options = [
     {
       id: PARAMS.ROWS,
@@ -45,8 +45,8 @@ function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
     },
   ];
   const onChange = useCallback(
-    optionId => setAggParamValue(agg.id, PARAMS.NAME, optionId === PARAMS.ROWS),
-    [setAggParamValue]
+    optionId => setStateParamValue(PARAMS.NAME, optionId === PARAMS.ROWS),
+    [setStateParamValue]
   );
 
   return (

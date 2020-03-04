@@ -236,11 +236,11 @@ export class AggConfigs {
   }
 
   byName(name: string) {
-    return this.aggs.filter(agg => agg.type && agg.type.name === name);
+    return this.aggs.filter(agg => agg.type?.name === name);
   }
 
   byType(type: string) {
-    return this.aggs.filter(agg => agg.type && agg.type.type === type);
+    return this.aggs.filter(agg => agg.type?.type === type);
   }
 
   byTypeName(type: string) {
@@ -248,7 +248,7 @@ export class AggConfigs {
   }
 
   bySchemaName(schema: string) {
-    return this.aggs.filter(agg => agg.schema && agg.schema === schema);
+    return this.aggs.filter(agg => agg.schema === schema);
   }
 
   getRequestAggs(): AggConfig[] {

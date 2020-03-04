@@ -108,7 +108,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterFieldTypes: '*',
+        filterFieldTypes: () => KBN_FIELD_TYPES.NUMBER,
       });
       const fields = aggParam.getAvailableFields(agg);
 
