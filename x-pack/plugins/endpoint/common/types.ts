@@ -8,7 +8,7 @@ import { SearchResponse } from 'elasticsearch';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-import { esKuery } from '../../../../src/plugins/data/public';
+import { fromKueryExpression } from '../../../../src/plugins/data/common';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -385,7 +385,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.string({
         validate(value) {
           try {
-            esKuery.fromKueryExpression(value);
+            fromKueryExpression(value);
           } catch (err) {
             return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
               defaultMessage: 'must be valid KQL',
