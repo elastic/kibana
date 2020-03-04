@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { Action, UiActionsStart, ActionType } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -213,9 +213,9 @@ const renderInEditModeAndOpenContextMenu = async (
 };
 
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
-  const action = {
+  const action: Action = {
     id: 'FOO',
-    type: 'FOO',
+    type: 'FOO' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
@@ -245,9 +245,9 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 });
 
 test('HelloWorldContainer hides disabled badges', async () => {
-  const action = {
+  const action: Action = {
     id: 'BAR',
-    type: 'BAR',
+    type: 'BAR' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,

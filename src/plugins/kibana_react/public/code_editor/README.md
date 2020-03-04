@@ -8,6 +8,9 @@ This editor component allows easy access to:
 * Function signature widget 
 * [Hover widget](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-hover-provider-example)
 
-[_TODO: Examples of each_](https://github.com/elastic/kibana/issues/43812)
-
 The Monaco editor doesn't automatically resize the editor area on window or container resize so this component includes a [resize detector](https://github.com/maslianok/react-resize-detector) to cause the Monaco editor to re-layout and adjust its size when the window or container size changes
+
+## Storybook Examples
+To run the CodeEditor storybook, from the root kibana directory, run `yarn storybook codeeditor`
+
+All stories for the component live in `code_editor.examples.tsx`

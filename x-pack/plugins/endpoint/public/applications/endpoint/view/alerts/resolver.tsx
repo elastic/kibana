@@ -18,6 +18,7 @@ export const AlertDetailResolver = styled(
     ({ className, selectedEvent }: { className?: string; selectedEvent?: LegacyEndpointEvent }) => {
       const context = useKibana<EndpointPluginServices>();
       const { store } = storeFactory(context);
+
       return (
         <div className={className} data-test-subj="alertResolver" data-testid="alertResolver">
           <Provider store={store}>

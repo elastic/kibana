@@ -60,7 +60,7 @@ export class Plugin {
     const elasticsearchConfig = parseElasticsearchConfig(config);
 
     // Create the dedicated client
-    await instantiateClient({
+    const client = await instantiateClient({
       log,
       events,
       elasticsearchConfig,
@@ -77,6 +77,8 @@ export class Plugin {
       if (uiEnabled) {
         await initMonitoringXpackInfo({
           config,
+          server: hapiServer,
+          client,
           log,
           xpackMainPlugin: plugins.xpack_main,
           expose,
