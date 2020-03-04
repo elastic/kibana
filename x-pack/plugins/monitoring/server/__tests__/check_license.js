@@ -8,8 +8,8 @@ import { BehaviorSubject } from 'rxjs';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 
-import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { XPackInfo } from '../../../../legacy/plugins/xpack_main/server/lib/xpack_info';
+import { licensingMock } from '../../../licensing/server/mocks';
 
 const createLicense = (type = 'basic') => {
   return licensingMock.createLicense({

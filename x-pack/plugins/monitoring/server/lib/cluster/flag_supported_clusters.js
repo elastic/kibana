@@ -6,7 +6,7 @@
 
 import { get, set, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
-import { LOGGING_TAG, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
 async function findSupportedBasicLicenseCluster(
   req,
