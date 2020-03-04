@@ -38,6 +38,15 @@ interface LogTextStreamLoadingItemViewProps {
   onStreamStart?: () => void;
 }
 
+const TIMESTAMP_FORMAT = {
+  hour12: false,
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+};
+
 export class LogTextStreamLoadingItemView extends React.PureComponent<
   LogTextStreamLoadingItemViewProps,
   {}
@@ -98,7 +107,7 @@ const ProgressMessage: React.FC<{ timestamp?: number }> = ({ timestamp }) => {
           <FormattedMessage
             id="xpack.infra.logs.showingEntriesUntilTimestamp"
             defaultMessage="Showing entries until {timestamp}"
-            values={{ timestamp: <FormattedTime value={timestamp} /> }}
+            values={{ timestamp: <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} /> }}
           />
         ) : (
           <FormattedMessage
