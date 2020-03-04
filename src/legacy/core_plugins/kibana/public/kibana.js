@@ -42,7 +42,6 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
-import './home';
 import './discover/legacy';
 import './visualize/legacy';
 import './dashboard/legacy';
