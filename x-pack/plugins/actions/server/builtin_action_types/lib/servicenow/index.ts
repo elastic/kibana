@@ -6,8 +6,7 @@
 
 import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 
-import { Instance, Incident, IncidentResponse } from './types';
-import { CommentType } from '../../servicenow/types';
+import { Instance, Incident, IncidentResponse, UpdateIncident } from './types';
 
 const API_VERSION = 'v1';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -57,6 +56,14 @@ class ServiceNow {
     return res;
   }
 
+  private _patch({ url, data }: { url: string; data: any }): Promise<AxiosResponse> {
+    return this._request({
+      url,
+      method: 'patch',
+      data,
+    });
+  }
+
   async getUserID(): Promise<string> {
     const res = await this._request({ url: `${this.userUrl}${this.instance.username}` });
     return res.data.result[0].sys_id;
@@ -72,6 +79,13 @@ class ServiceNow {
     return { number: res.data.result.number, id: res.data.result.sys_id };
   }
 
+  async updateIncident(incidentId: string, incident: UpdateIncident): Promise<void> {
+    await this._patch({
+      url: `${this.incidentUrl}/${incidentId}`,
+      data: { ...incident },
+    });
+  }
+
   async batchAddComments(incidentId: string, comments: string[], field: string): Promise<void> {
     for (const comment of comments) {
       await this.addComment(incidentId, comment, field);
@@ -79,9 +93,8 @@ class ServiceNow {
   }
 
   async addComment(incidentId: string, comment: string, field: string): Promise<void> {
-    await this._request({
+    await this._patch({
       url: `${this.incidentUrl}/${incidentId}`,
-      method: 'patch',
       data: { [field]: comment },
     });
   }
