@@ -3,5 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FileUploadPlugin } from './plugin';
 
-export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
+export * from './plugin';
+
+export const plugin = () => new FileUploadPlugin();
