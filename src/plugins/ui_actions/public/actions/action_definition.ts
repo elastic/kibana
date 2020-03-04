@@ -20,9 +20,7 @@
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 import { ActionType, ActionContextMapping } from '../types';
 
-export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
-
-export interface Action<Context = {}, T = ActionType> {
+export interface ActionDefinition<T extends ActionType> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -32,7 +30,7 @@ export interface Action<Context = {}, T = ActionType> {
   /**
    * A unique identifier for this action instance.
    */
-  id: string;
+  id?: string;
 
   /**
    * The action type is what determines the context shape.
@@ -42,33 +40,33 @@ export interface Action<Context = {}, T = ActionType> {
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: Context): string | undefined;
+  getIconType?(context: ActionContextMapping[T]): string;
 
   /**
    * Returns a title to be displayed to the user.
    * @param context
    */
-  getDisplayName(context: Context): string;
+  getDisplayName?(context: ActionContextMapping[T]): string;
 
   /**
    * `UiComponent` to render when displaying this action as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  MenuItem?: UiComponent<{ context: Context }>;
+  MenuItem?: UiComponent<{ context: ActionContextMapping[T] }>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: Context): Promise<boolean>;
+  isCompatible?(context: ActionContextMapping[T]): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  getHref?(context: Context): string | undefined;
+  getHref?(context: ActionContextMapping[T]): string | undefined;
 
   /**
    * Executes the action.
    */
-  execute(context: Context): Promise<void>;
+  execute(context: ActionContextMapping[T]): Promise<void>;
 }

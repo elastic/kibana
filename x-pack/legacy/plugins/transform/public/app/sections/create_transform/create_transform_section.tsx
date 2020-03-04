@@ -22,9 +22,9 @@ import {
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 
 import { useDocumentationLinks } from '../../app_dependencies';
+import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
-import { KibanaProvider, RenderOnlyWithInitializedKibanaContext } from '../../lib/kibana';
 
 import { Wizard } from './components/wizard';
 
@@ -38,43 +38,41 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
+  const { searchItems } = useSearchItems(match.params.savedObjectId);
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <KibanaProvider savedObjectId={match.params.savedObjectId}>
-        <EuiPageContent data-test-subj="transformPageCreateTransform">
-          <EuiTitle size="l">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={true}>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.transform.transformsWizard.createTransformTitle"
-                    defaultMessage="Create transform"
-                  />
-                </h1>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  href={esTransform}
-                  target="_blank"
-                  iconType="help"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.transform.transformsWizard.transformDocsLinkText"
-                    defaultMessage="Transform docs"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-          <EuiPageContentBody>
-            <EuiSpacer size="l" />
-            <RenderOnlyWithInitializedKibanaContext>
-              <Wizard />
-            </RenderOnlyWithInitializedKibanaContext>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </KibanaProvider>
+      <EuiPageContent data-test-subj="transformPageCreateTransform">
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1>
+                <FormattedMessage
+                  id="xpack.transform.transformsWizard.createTransformTitle"
+                  defaultMessage="Create transform"
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={esTransform}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.transform.transformsWizard.transformDocsLinkText"
+                  defaultMessage="Transform docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiPageContentBody>
+          <EuiSpacer size="l" />
+          {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        </EuiPageContentBody>
+      </EuiPageContent>
     </PrivilegesWrapper>
   );
 };
