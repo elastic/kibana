@@ -80,13 +80,9 @@ describe('data generator', () => {
     expect(events[events.length - 1].event.category).toEqual('malware');
   });
 
-  it('creates tree of process children', () => {
-    const timestamp = new Date().getTime();
-    const root = generator.generateEvent({ timestamp });
-    const generations = 2;
-    const events = generator.generateDescendantsTree(root, generations);
-    const tree: Record<string, Node> = {};
+  function buildResolverTree(events: Event[]): Node {
     // First pass we gather up all the events by entity_id
+    const tree: Record<string, Node> = {};
     events.forEach(event => {
       if (event.process.entity_id in tree) {
         tree[event.process.entity_id].events.push(event);
@@ -104,8 +100,13 @@ describe('data generator', () => {
         tree[value.parent_entity_id].children.push(value);
       }
     }
+    // The root node must be first in the array or this fails
+    return tree[events[0].process.entity_id];
+  }
+
+  function countResolverEvents(rootNode: Node, generations: number): number {
     // Start at the root, traverse N levels of the tree and check that we found all nodes
-    let nodes = [tree[root.process.entity_id]];
+    let nodes = [rootNode];
     let visitedEvents = 0;
     for (let i = 0; i < generations + 1; i++) {
       let nextNodes: Node[] = [];
@@ -115,6 +116,25 @@ describe('data generator', () => {
       });
       nodes = nextNodes;
     }
+    return visitedEvents;
+  }
+
+  it('creates tree of process children', () => {
+    const timestamp = new Date().getTime();
+    const root = generator.generateEvent({ timestamp });
+    const generations = 2;
+    const events = generator.generateDescendantsTree(root, generations);
+    const rootNode = buildResolverTree(events);
+    const visitedEvents = countResolverEvents(rootNode, generations);
+    expect(visitedEvents).toEqual(events.length);
+  });
+
+  it('creates full resolver tree', () => {
+    const alertAncestors = 3;
+    const generations = 2;
+    const events = generator.generateFullResolverTree(alertAncestors, generations);
+    const rootNode = buildResolverTree(events);
+    const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);
   });
 });
