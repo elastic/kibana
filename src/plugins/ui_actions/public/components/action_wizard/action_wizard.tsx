@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiKeyPadMenuItem,
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
@@ -189,30 +190,18 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   }
 
   return (
-    <EuiFlexGroup wrap={true}>
+    <EuiFlexGroup wrap>
       {actionFactories.map(actionFactory => (
-        <EuiFlexItem
+        <EuiKeyPadMenuItem
           className="uiaActionWizard__actionFactoryItem"
           grow={false}
           key={actionFactory.type}
+          label={actionFactory.displayName}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+          onClick={() => onActionFactorySelected(actionFactory)}
         >
-          <EuiPanel
-            onClick={() => onActionFactorySelected(actionFactory)}
-            className="eui-textCenter"
-            paddingSize="s"
-          >
-            {actionFactory.iconType && (
-              <>
-                <EuiIcon type={actionFactory.iconType} size="m" />
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <EuiText size="xs">
-              <h4>{actionFactory.displayName}</h4>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexItem>
+          {actionFactory.iconType && <EuiIcon type={actionFactory.iconType} size="m" />}
+        </EuiKeyPadMenuItem>
       ))}
     </EuiFlexGroup>
   );
