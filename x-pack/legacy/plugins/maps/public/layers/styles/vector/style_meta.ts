@@ -6,7 +6,6 @@
 
 import {
   StyleMetaValues,
-  GeometryTypes,
   RangeFieldMeta,
   CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
@@ -15,16 +14,6 @@ export class StyleMeta {
   private readonly _descriptor: StyleMetaValues;
   constructor(styleMetaDescriptor: StyleMetaValues) {
     this._descriptor = styleMetaDescriptor;
-  }
-
-  _getGeometryTypes(): GeometryTypes {
-    return this._descriptor.geometryTypes
-      ? this._descriptor.geometryTypes
-      : {
-          isPointsOnly: false,
-          isLinesOnly: false,
-          isPolygonsOnly: false,
-        };
   }
 
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
@@ -40,14 +29,14 @@ export class StyleMeta {
   }
 
   isPointsOnly(): boolean {
-    return this._getGeometryTypes().isPointsOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isPointsOnly : false;
   }
 
   isLinesOnly(): boolean {
-    return this._getGeometryTypes().isLinesOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isLinesOnly : false;
   }
 
   isPolygonsOnly(): boolean {
-    return this._getGeometryTypes().isPolygonsOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isPolygonsOnly : false;
   }
 }
