@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const RENDER_AS = {
-  HEATMAP: 'heatmap',
-  POINT: 'point',
-  GRID: 'grid',
-};
+export function XJsonMode() {}

@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function MLJobEditor(props: any): any;
-export const EDITOR_MODE: any;
+import { httpServerMock } from '../../../../../../../../../src/core/server/mocks';
+
+export const requestMock = {
+  create: httpServerMock.createKibanaRequest,
+};

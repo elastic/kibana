@@ -9,6 +9,7 @@ import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../../../legacy/plugins/ml/common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { getModuleIdParamSchema, setupModuleBodySchema } from './schemas/modules';
 import { RouteInitialization } from '../types';
 
@@ -64,7 +65,7 @@ function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: strin
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
+export function dataRecognizer({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataRecognizer
    *
@@ -83,7 +84,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { indexPatternTitle } = request.params;
         const results = await recognize(context, indexPatternTitle);
@@ -113,7 +114,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         let { moduleId } = request.params;
         if (moduleId === '') {
@@ -149,7 +150,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         body: setupModuleBodySchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { moduleId } = request.params;
 
@@ -206,7 +207,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { moduleId } = request.params;
         const result = await dataRecognizerJobsExist(context, moduleId);
