@@ -47,7 +47,7 @@ export class TypeRegistry<T extends BaseObjectType> {
     if (!this.has(id)) {
       throw new Error(
         i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {
-          defaultMessage: 'Action type "{id}" is not registered.',
+          defaultMessage: 'Object type "{id}" is not registered.',
           values: {
             id,
           },
