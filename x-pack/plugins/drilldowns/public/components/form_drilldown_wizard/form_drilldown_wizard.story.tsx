@@ -4,31 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import * as React from 'react';
-import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import { FormCreateDrilldown } from '.';
+import { FormDrilldownWizard } from '.';
 
 const DemoEditName: React.FC = () => {
   const [name, setName] = React.useState('');
 
-  return <FormCreateDrilldown name={name} onNameChange={setName} />;
+  return (
+    <>
+      <FormDrilldownWizard initialName={name} onNameChange={setName} /> <div>name: {name}</div>
+    </>
+  );
 };
 
-storiesOf('components/FormCreateDrilldown', module)
+storiesOf('components/FormDrilldownWizard', module)
   .add('default', () => {
-    return <FormCreateDrilldown />;
+    return <FormDrilldownWizard />;
   })
   .add('[name=foobar]', () => {
-    return <FormCreateDrilldown name={'foobar'} />;
+    return <FormDrilldownWizard initialName={'foobar'} />;
   })
-  .add('can edit name', () => <DemoEditName />)
-  .add('open in flyout', () => {
-    return (
-      <EuiFlyout>
-        <FormCreateDrilldown />
-      </EuiFlyout>
-    );
-  });
+  .add('can edit name', () => <DemoEditName />);

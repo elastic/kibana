@@ -9,16 +9,43 @@
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import { FlyoutEditDrilldown } from '.';
+import { FlyoutDrilldownWizard } from '.';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { UrlDrilldownActionFactory } from '../../../../../../src/plugins/ui_actions/public/components/action_wizard/test_data';
+import {
+  ActionFactoryBaseConfig,
+  ActionFactory,
+} from '../../../../../../src/plugins/ui_actions/public/';
 
-storiesOf('components/FlyoutCreateDrilldown', module)
+storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
-    return <FlyoutEditDrilldown context={{} as any} />;
+    return <FlyoutDrilldownWizard context={{} as any} />;
   })
-  .add('open in flyout', () => {
+  .add('open in flyout - create', () => {
     return (
       <EuiFlyout onClose={() => {}}>
-        <FlyoutEditDrilldown context={{} as any} onClose={() => {}} />
+        <FlyoutDrilldownWizard context={{} as any} onClose={() => {}} />
+      </EuiFlyout>
+    );
+  })
+  .add('open in flyout - edit', () => {
+    return (
+      <EuiFlyout onClose={() => {}}>
+        <FlyoutDrilldownWizard
+          context={{} as any}
+          onClose={() => {}}
+          initialDrilldownWizardConfig={{
+            name: 'My fancy drilldown',
+            actionConfig: {
+              actionFactory: (UrlDrilldownActionFactory as unknown) as ActionFactory,
+              config: {
+                url: 'https://elastic.co',
+                openInNewTab: true,
+              } as ActionFactoryBaseConfig,
+            },
+          }}
+          mode={'edit'}
+        />
       </EuiFlyout>
     );
   });

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './form_edit_drilldown';
+export * from './form_drilldown_wizard';

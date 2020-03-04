@@ -70,6 +70,14 @@ export interface ActionFactoryWizardProps<
 
 export interface ActionWizardProps {
   /**
+   * Initial action factory & config. To be used in editing flow
+   */
+  initialActionConfig?: {
+    actionFactory: ActionFactory | null;
+    config: ActionFactoryBaseConfig | null;
+  };
+
+  /**
    * List of available action factories
    */
   actionFactories: ActionFactory[];
@@ -82,9 +90,15 @@ export interface ActionWizardProps {
    */
   onChange: (actionFactory: ActionFactory | null, config: ActionFactoryBaseConfig | null) => void;
 }
-export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onChange }) => {
+export const ActionWizard: React.FC<ActionWizardProps> = ({
+  actionFactories,
+  onChange,
+  initialActionConfig = null,
+}) => {
   // eslint-disable-next-line prefer-const
-  let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory | null>(null);
+  let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory | null>(
+    initialActionConfig?.actionFactory ?? null
+  );
 
   // auto pick action factory if there is only 1 available
   if (!selectedActionFactory && actionFactories.length === 1) {
@@ -100,6 +114,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({ actionFactories, onC
           setSelectedActionFactory(null);
           onChange(null, null);
         }}
+        initialConfig={initialActionConfig?.config}
         onConfigChange={newConfig => {
           onChange(selectedActionFactory, newConfig);
         }}
@@ -123,6 +138,7 @@ interface SelectedActionFactoryProps<
   Context = unknown
 > {
   actionFactory: ActionFactory<Config, Context>;
+  initialConfig?: Config | null;
   onConfigChange: (config: Config | null) => void;
   showDeselect: boolean;
   onDeselect: () => void;
@@ -133,8 +149,9 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   onDeselect,
   showDeselect,
   onConfigChange,
+  initialConfig = null,
 }) => {
-  const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(null);
+  const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(initialConfig);
   return (
     <div
       className="uiaActionWizard__selectedActionFactoryContainer"

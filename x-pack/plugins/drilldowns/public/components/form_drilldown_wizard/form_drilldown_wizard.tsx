@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import './index.scss';
+import './form_drilldown_wizard.scss';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { txtNameOfDrilldown, txtUntitledDrilldown, txtDrilldownAction } from './i18n';
@@ -21,7 +21,7 @@ import { ACTION_FACTORIES } from '../../../../../../src/plugins/ui_actions/publi
 
 const noop = () => {};
 
-export interface FormCreateDrilldownProps {
+export interface FormDrilldownWizardProps {
   /**
    * Initial name - to be used during editing flow
    */
@@ -48,7 +48,7 @@ export interface FormCreateDrilldownProps {
   ) => void;
 }
 
-export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
+export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   initialName = '',
   initialActionConfig = { actionFactory: null, config: null },
   onNameChange = noop,
@@ -56,7 +56,7 @@ export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
 }) => {
   const [name, setName] = useState(initialName);
   const nameFragment = (
-    <EuiFormRow label={txtNameOfDrilldown} className="drdFormCreateDrilldown__formRow">
+    <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">
       <EuiFieldText
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
@@ -76,7 +76,7 @@ export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
     <EuiFormRow
       label={txtDrilldownAction}
       fullWidth={true}
-      className="drdFormCreateDrilldown__formRow"
+      className="drdFormDrilldownWizard__formRow"
     >
       <ActionWizard
         actionFactories={ACTION_FACTORIES}

@@ -5,46 +5,84 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormCreateDrilldown } from '../form_edit_drilldown';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { FlyoutFrame } from '../flyout_frame';
-import { txtCreateDrilldown } from './i18n';
-import { FlyoutCreateDrilldownAction } from '../../actions';
+import {
+  txtCreateDrilldownButtonLabel,
+  txtCreateDrilldownTitle,
+  txtDeleteDrilldownButtonLabel,
+  txtEditDrilldownButtonLabel,
+  txtEditDrilldownTitle,
+} from './i18n';
+import { FlyoutCreateDrilldownActionContext } from '../../actions';
 import {
   ActionFactory,
   ActionFactoryBaseConfig,
 } from '../../../../../../src/plugins/ui_actions/public';
 
-export interface FlyoutEditDrilldownProps {
-  context: FlyoutCreateDrilldownAction;
-  onClose?: () => void;
+export interface DrilldownWizardConfig {
+  name: string;
+  actionConfig: {
+    actionFactory: ActionFactory;
+    config: ActionFactoryBaseConfig;
+  };
 }
 
-export const FlyoutEditDrilldown: React.FC<FlyoutEditDrilldownProps> = ({
+/**
+ * Represent current wizard's form state in invalid or incomplete shape
+ */
+export interface PartialDrilldownWizardConfig {
+  name: string;
+  actionConfig: {
+    actionFactory: ActionFactory | null;
+    config: ActionFactoryBaseConfig | null;
+  };
+}
+
+export interface FlyoutDrilldownWizardProps {
+  context: FlyoutCreateDrilldownActionContext;
+  onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
+  onDelete?: () => void;
+  onClose?: () => void;
+
+  mode?: 'create' | 'edit';
+  initialDrilldownWizardConfig?: DrilldownWizardConfig;
+}
+
+export const FlyoutDrilldownWizard: React.FC<FlyoutDrilldownWizardProps> = ({
   context,
   onClose,
+  onSubmit = () => {},
+  initialDrilldownWizardConfig,
+  mode = 'create',
+  onDelete = () => {},
 }) => {
-  const [state, setState] = useState<{
-    name: string;
-    action: {
-      actionFactory: ActionFactory | null;
-      config: ActionFactoryBaseConfig | null;
-    };
-  }>({
-    name: '',
-    action: {
-      actionFactory: null,
-      config: null,
-    },
-  });
+  const [wizardConfig, setWizardConfig] = useState<
+    DrilldownWizardConfig | PartialDrilldownWizardConfig
+  >(
+    () =>
+      initialDrilldownWizardConfig ?? {
+        name: '',
+        actionConfig: {
+          actionFactory: null,
+          config: null,
+        },
+      }
+  );
 
-  const isFormValid = () => {
-    if (!state.name) {
+  const isFormValid = (
+    currentWizardConfig: PartialDrilldownWizardConfig | DrilldownWizardConfig
+  ): currentWizardConfig is DrilldownWizardConfig => {
+    if (!currentWizardConfig.name) {
       // name is required
       return false;
     }
 
-    if (!state.action.actionFactory || !state.action.config) {
+    if (
+      !currentWizardConfig.actionConfig.actionFactory ||
+      !currentWizardConfig.actionConfig.config
+    ) {
       // action factory has to be selected and config has to be present
       return false;
     }
@@ -53,31 +91,52 @@ export const FlyoutEditDrilldown: React.FC<FlyoutEditDrilldownProps> = ({
   };
 
   const footer = (
-    <EuiButton onClick={() => {}} fill isDisabled={!isFormValid()}>
-      {txtCreateDrilldown}
+    <EuiButton
+      onClick={() => {
+        if (isFormValid(wizardConfig)) {
+          onSubmit(wizardConfig);
+        }
+      }}
+      fill
+      isDisabled={!isFormValid(wizardConfig)}
+    >
+      {mode === 'edit' ? txtEditDrilldownButtonLabel : txtCreateDrilldownButtonLabel}
     </EuiButton>
   );
 
   return (
-    <FlyoutFrame title={txtCreateDrilldown} footer={footer} onClose={onClose}>
-      <FormCreateDrilldown
-        initialName={state.name}
+    <FlyoutFrame
+      title={mode === 'edit' ? txtEditDrilldownTitle : txtCreateDrilldownTitle}
+      footer={footer}
+      onClose={onClose}
+    >
+      <FormDrilldownWizard
+        initialName={wizardConfig.name}
         onNameChange={newName => {
-          setState({
-            ...state,
+          setWizardConfig({
+            ...wizardConfig,
             name: newName,
           });
         }}
+        initialActionConfig={wizardConfig.actionConfig}
         onActionConfigChange={(actionFactory, config) => {
-          setState({
-            ...state,
-            action: {
+          setWizardConfig({
+            ...wizardConfig,
+            actionConfig: {
               actionFactory,
               config,
             },
           });
         }}
       />
+      {mode === 'edit' && (
+        <>
+          <EuiSpacer size={'xl'} />
+          <EuiButton onClick={onDelete} color={'danger'}>
+            {txtDeleteDrilldownButtonLabel}
+          </EuiButton>
+        </>
+      )}
     </FlyoutFrame>
   );
 };
