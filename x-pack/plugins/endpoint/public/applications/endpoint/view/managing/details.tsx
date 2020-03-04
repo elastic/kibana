@@ -127,7 +127,7 @@ export const ManagementDetails = () => {
         ),
         body: (
           <FormattedMessage
-            id="xpack.endpoint.managementDetails.errorTitle"
+            id="xpack.endpoint.managementDetails.errorBody"
             defaultMessage="Please exit the flyout and select an available host."
           />
         ),
