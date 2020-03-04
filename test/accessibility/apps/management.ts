@@ -59,5 +59,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSettings();
       await a11y.testAppSnapshot();
     });
+
+    // index patterns page
+    it('Navigate back to logstash index page', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+      await a11y.testAppSnapshot();
+    });
   });
 }
