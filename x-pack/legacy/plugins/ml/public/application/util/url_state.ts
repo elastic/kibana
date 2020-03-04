@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'querystring';
+import { parse } from 'querystring';
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
@@ -33,7 +33,7 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString = parse(search);
+  const parsedQueryString = parse(search.substring(1));
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
@@ -64,7 +64,7 @@ export const useUrlState = (accessor: string): UrlState => {
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
       const urlState = getUrlState(search);
-      const parsedQueryString = parse(search);
+      const parsedQueryString = parse(search.substring(1));
 
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
@@ -97,7 +97,7 @@ export const useUrlState = (accessor: string): UrlState => {
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({
-            search: stringify(parsedQueryString),
+            search: url.makeUrlFromQuery(parsedQueryString),
           });
         }
       } catch (error) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'querystring';
+import { parse, stringify } from 'querystring';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFilterName } from '../../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
 import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
@@ -18,7 +18,9 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return url.makeUrlFromQuery(encodedQuery);
+  return stringify(encodedQuery, undefined, undefined, {
+    encodeURIComponent: (c: unknown) => c
+  });
 }
 
 export type APMQueryParams = {
