@@ -632,6 +632,7 @@ export const AlertForm = ({
       {AlertParamsExpressionComponent ? (
         <AlertParamsExpressionComponent
           alertParams={alert.params}
+          alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}

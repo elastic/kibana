@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
+import { TimeSeriesResult } from '../types';
+export { TimeSeriesResult } from '../types';
 
 const WATCHER_API_ROOT = '/api/watcher';
 
@@ -60,20 +62,35 @@ export const loadIndexPatterns = async () => {
   return savedObjects;
 };
 
+const TimeSeriesQueryRoute = '/api/alerting_builtins/index_threshold/_time_series_query';
+
+interface GetThresholdAlertVisualizationDataParams {
+  model: any;
+  visualizeOptions: any;
+  http: HttpSetup;
+}
+
 export async function getThresholdAlertVisualizationData({
   model,
   visualizeOptions,
   http,
-}: {
-  model: any;
-  visualizeOptions: any;
-  http: HttpSetup;
-}): Promise<Record<string, any>> {
-  const { visualizeData } = await http.post(`${WATCHER_API_ROOT}/watch/visualize`, {
-    body: JSON.stringify({
-      watch: model,
-      options: visualizeOptions,
-    }),
+}: GetThresholdAlertVisualizationDataParams): Promise<TimeSeriesResult> {
+  const timeSeriesQueryParams = {
+    index: model.index,
+    timeField: model.timeField,
+    aggType: model.aggType,
+    aggField: model.aggField,
+    groupBy: model.groupBy,
+    termField: model.termField,
+    termSize: model.termSize,
+    timeWindowSize: model.timeWindowSize,
+    timeWindowUnit: model.timeWindowUnit,
+    dateStart: new Date(visualizeOptions.rangeFrom).toISOString(),
+    dateEnd: new Date(visualizeOptions.rangeTo).toISOString(),
+    interval: visualizeOptions.interval,
+  };
+
+  return await http.post<TimeSeriesResult>(TimeSeriesQueryRoute, {
+    body: JSON.stringify(timeSeriesQueryParams),
   });
-  return visualizeData;
 }

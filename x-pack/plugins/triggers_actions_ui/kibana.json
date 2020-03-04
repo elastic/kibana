@@ -3,5 +3,5 @@
     "version": "kibana",
     "server": false,
     "ui": true,
-    "requiredPlugins": ["management", "charts", "data"]
+    "requiredPlugins": ["management", "charts", "data", "alerting", "alertingBuiltins"]
   }
