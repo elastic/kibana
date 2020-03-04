@@ -39,14 +39,14 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                   opacity: 0;
               }
               40% {
-                  transform: scale3d(1.1, 1.1, 2);
+                  transform: scale3d(1, 1, 2);
                   opacity: 1;
               }
               50%{
-                  transform: scale3d(1.05, 1.05, 2);
+                  transform: scale3d(.95, .95, 2);
               }
               70% {
-                  transform: scale3d(0.98, 0.98, -2.5);
+                  transform: scale3d(0.90, 0.90, -2.5);
               }
               100% {
                   transform: scale3d(1, 1, 2);
@@ -99,7 +99,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .kibanaWelcomeText {
-            font-size: 14px;
+            font-size: 16px;
             font-family: sans-serif;
             color: #98a2b3;
             animation: fadeIn 1s ease-in-out;
@@ -111,19 +111,16 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           .kibanaLoaderWrap {
             height: 128px;
             width: 128px;
-            position: relative;
+            text-align: center;
           }
 
-          .kibanaWelcomeLogoCircle {
-            margin: 10px;
-            width: 120px;
-            height: 120px;
-            padding: 20px;
-            transform: scale(1);
-            animation: pulse 1s infinite;
+          .kibanaLogoElastic {
+            width: 128px;
+            height: 128px;
+            margin-bottom: 16px;
           }
 
-          .kibanaWelcomeLogoCircle path {
+          .kibanaLogoElastic path {
             stroke: white;
             animation-name: scaleElastic;
             animation-fill-mode: forwards;
@@ -134,38 +131,38 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             animation-iteration-count: infinite;
             transform-origin: 50% 50%;
           }
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(1) {
+
+          .kibanaLogoElastic path:nth-of-type(1) {
             fill: #EE5097;
             animation-delay: 0s;
           }
 
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(2) {
+
+          .kibanaLogoElastic path:nth-of-type(2) {
             fill: #17A7E0;
             animation-delay: 0.035s;
           }
 
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(3) {
+
+          .kibanaLogoElastic path:nth-of-type(3) {
             fill: #23BAB1;
             animation-delay: 0.125s;
           }
 
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(4) {
+
+          .kibanaLogoElastic path:nth-of-type(4) {
             fill: #92C73D;
             animation-delay: 0.155s;
           }
 
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(5) {
+
+          .kibanaLogoElastic path:nth-of-type(5) {
             fill: #0678A0;
             animation-delay: 0.075s;
           }
 
-          
-          .kibanaWelcomeLogoCircle path:nth-of-type(6) {
+
+          .kibanaLogoElastic path:nth-of-type(6) {
             fill: #FDD009;
             animation-delay: 0.06s;
           };

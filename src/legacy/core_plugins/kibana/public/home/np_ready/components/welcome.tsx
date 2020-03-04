@@ -141,7 +141,10 @@ export class Welcome extends React.Component<Props> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana" />
+                  <FormattedMessage
+                    id="kbn.home.welcomeTitle"
+                    defaultMessage="Welcome to Elastic Kibana"
+                  />
                 </h1>
               </EuiTitle>
               <EuiText size="s" color="subdued" className="homWelcome__subtitle">
