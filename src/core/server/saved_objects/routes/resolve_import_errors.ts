@@ -21,7 +21,7 @@ import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { resolveImportErrors } from '../import';
+import { resolveSavedObjectsImportErrors } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -75,7 +75,7 @@ export const registerResolveImportErrorsRoute = (
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
-      const result = await resolveImportErrors({
+      const result = await resolveSavedObjectsImportErrors({
         supportedTypes,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
