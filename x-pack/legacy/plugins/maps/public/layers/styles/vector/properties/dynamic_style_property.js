@@ -57,7 +57,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return rangeFieldMetaFromLocalFeatures;
     }
