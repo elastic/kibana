@@ -230,7 +230,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
 
       return DeauthenticationResult.redirectTo(
-        `${this.options.basePath.serverBasePath}/logged_out`
+        `${this.options.basePath.serverBasePath}/security/logged_out`
       );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
@@ -392,7 +392,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         'Login initiated by Identity Provider is for a different user than currently authenticated.'
       );
       return AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/overwritten_session`,
+        `${this.options.basePath.serverBasePath}/security/overwritten_session`,
         { state: newState }
       );
     }

@@ -14,6 +14,9 @@ describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -27,6 +30,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -40,6 +44,9 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -53,6 +60,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -66,6 +74,9 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -79,6 +90,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -216,19 +228,7 @@ describe('config schema', () => {
       );
 
       expect(() =>
-        ConfigSchema.validate({ authProviders: ['oidc'] })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
-      );
-
-      expect(() =>
         ConfigSchema.validate({ authc: { providers: ['oidc'], oidc: {} } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
-      );
-
-      expect(() =>
-        ConfigSchema.validate({ authProviders: ['oidc'], authc: { oidc: {} } })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
       );
@@ -256,40 +256,11 @@ describe('config schema', () => {
           ],
         }
       `);
-
-      expect(
-        ConfigSchema.validate({
-          authProviders: ['oidc'],
-          authc: { oidc: { realm: 'realm-1' } },
-        }).authc
-      ).toMatchInlineSnapshot(`
-        Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "schemes": Array [
-              "apikey",
-            ],
-          },
-          "oidc": Object {
-            "realm": "realm-1",
-          },
-          "providers": Array [
-            "oidc",
-          ],
-        }
-      `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['oidc', 'basic'] } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
-      );
-
-      expect(() =>
-        ConfigSchema.validate({ authProviders: ['oidc', 'basic'] })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
       );
@@ -318,39 +289,11 @@ describe('config schema', () => {
           ],
         }
       `);
-
-      expect(
-        ConfigSchema.validate({
-          authProviders: ['oidc', 'basic'],
-          authc: { oidc: { realm: 'realm-1' } },
-        }).authc
-      ).toMatchInlineSnapshot(`
-        Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "schemes": Array [
-              "apikey",
-            ],
-          },
-          "oidc": Object {
-            "realm": "realm-1",
-          },
-          "providers": Array [
-            "oidc",
-            "basic",
-          ],
-        }
-      `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], oidc: { realm: 'realm-1' } } })
-      ).toThrowErrorMatchingInlineSnapshot(`"[authc.oidc]: a value wasn't expected to be present"`);
-
-      expect(() =>
-        ConfigSchema.validate({ authProviders: ['basic'], authc: { oidc: { realm: 'realm-1' } } })
       ).toThrowErrorMatchingInlineSnapshot(`"[authc.oidc]: a value wasn't expected to be present"`);
     });
   });
@@ -378,48 +321,7 @@ describe('config schema', () => {
         }
       `);
 
-      expect(ConfigSchema.validate({ authProviders: ['saml'] }).authc).toMatchInlineSnapshot(`
-        Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "schemes": Array [
-              "apikey",
-            ],
-          },
-          "providers": Array [
-            "saml",
-          ],
-          "saml": Object {
-            "maxRedirectURLSize": ByteSizeValue {
-              "valueInBytes": 2048,
-            },
-          },
-        }
-      `);
-
       expect(ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc)
-        .toMatchInlineSnapshot(`
-        Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "schemes": Array [
-              "apikey",
-            ],
-          },
-          "providers": Array [
-            "saml",
-          ],
-          "saml": Object {
-            "maxRedirectURLSize": ByteSizeValue {
-              "valueInBytes": 2048,
-            },
-          },
-        }
-      `);
-
-      expect(ConfigSchema.validate({ authProviders: ['saml'], authc: { saml: {} } }).authc)
         .toMatchInlineSnapshot(`
         Object {
           "http": Object {
@@ -464,41 +366,11 @@ describe('config schema', () => {
           },
         }
       `);
-
-      expect(
-        ConfigSchema.validate({
-          authProviders: ['saml'],
-          authc: { saml: { realm: 'realm-1' } },
-        }).authc
-      ).toMatchInlineSnapshot(`
-        Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "schemes": Array [
-              "apikey",
-            ],
-          },
-          "providers": Array [
-            "saml",
-          ],
-          "saml": Object {
-            "maxRedirectURLSize": ByteSizeValue {
-              "valueInBytes": 2048,
-            },
-            "realm": "realm-1",
-          },
-        }
-      `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], saml: { realm: 'realm-1' } } })
-      ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
-
-      expect(() =>
-        ConfigSchema.validate({ authProviders: ['basic'], authc: { saml: { realm: 'realm-1' } } })
       ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
     });
 
