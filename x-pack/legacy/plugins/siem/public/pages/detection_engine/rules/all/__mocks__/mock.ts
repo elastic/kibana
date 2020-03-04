@@ -5,6 +5,7 @@
  */
 
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
+import { AboutStepRule } from '../../types';
 
 export const mockRule = (id: string): Rule => ({
   created_at: '2020-01-10T21:11:45.839Z',
@@ -39,6 +40,39 @@ export const mockRule = (id: string): Rule => ({
   threat: [],
   version: 1,
 });
+
+export const mockAboutStepRule: AboutStepRule = {
+  isNew: false,
+  name: 'Query with rule-id',
+  description: '24/7',
+  documentation: '# test documentation',
+  severity: 'low',
+  riskScore: 1,
+  references: ['www.test.co'],
+  falsePositives: ['test'],
+  tags: ['tag1', 'tag2'],
+  timeline: {
+    id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+    title: 'Titled timeline',
+  },
+  threat: [
+    {
+      framework: 'mockFramework',
+      tactic: {
+        id: '1234',
+        name: 'tactic1',
+        reference: 'reference1',
+      },
+      technique: [
+        {
+          id: '456',
+          name: 'technique1',
+          reference: 'technique reference',
+        },
+      ],
+    },
+  ],
+};
 
 export const mockRuleError = (id: string): RuleError => ({
   rule_id: id,
