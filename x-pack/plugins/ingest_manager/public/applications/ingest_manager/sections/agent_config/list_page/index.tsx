@@ -27,14 +27,14 @@ import styled from 'styled-components';
 import { AgentConfig } from '../../../types';
 import {
   AGENT_CONFIG_DETAILS_PATH,
-  FLEET_PATH,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  FLEET_AGENTS_PATH,
+  // AGENT_CONFIG_SAVED_OBJECT_TYPE,
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetAgentConfigs, usePagination, useLink, useConfig } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
-import { SearchBar } from '../components/search_bar';
+// import { SearchBar } from '../components/search_bar';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -129,7 +129,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
                 return (
                   <DangerEuiContextMenuItem
                     icon="trash"
-                    disabled={config.id === DEFAULT_AGENT_CONFIG_ID}
+                    disabled={Boolean(config.is_default)}
                     onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
                   >
                     <FormattedMessage
@@ -172,7 +172,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
   // Base path for config details
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-  const FLEET_URI = useLink(FLEET_PATH);
+  const FLEET_URI = useLink(FLEET_AGENTS_PATH);
 
   // Some configs retrieved, set up table props
   const columns = useMemo(() => {
@@ -351,17 +351,17 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={4}>
-          <SearchBar
-            value={search}
-            onChange={newSearch => {
-              setPagination({
-                ...pagination,
-                currentPage: 1,
-              });
-              setSearch(newSearch);
-            }}
-            fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
-          />
+          {/* <SearchBar*/}
+          {/*  value={search}*/}
+          {/*  onChange={newSearch => {*/}
+          {/*    setPagination({*/}
+          {/*      ...pagination,*/}
+          {/*      currentPage: 1,*/}
+          {/*    });*/}
+          {/*    setSearch(newSearch);*/}
+          {/*  }}*/}
+          {/*  fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}*/}
+          {/* />*/}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
