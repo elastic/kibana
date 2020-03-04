@@ -9,6 +9,7 @@ import { render, cleanup, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import {
   ActionFactory,
+  ActionFactoryBaseConfig,
   ActionWizard,
   TEST_SUBJ_ACTION_FACTORY_ITEM,
   TEST_SUBJ_SELECTED_ACTION_FACTORY,
@@ -28,7 +29,11 @@ test('Pick and configure action', () => {
 
   const screen = render(
     <ActionWizard
-      actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]}
+      actionFactories={
+        ([dashboardDrilldownActionFactory, urlDrilldownActionFactory] as unknown) as Array<
+          ActionFactory<ActionFactoryBaseConfig>
+        >
+      }
       onChange={wizardChangeFn}
     />
   );

@@ -22,7 +22,7 @@ import './action_wizard.scss';
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ActionFactoryBaseConfig = {};
 export interface ActionFactory<Config extends ActionFactoryBaseConfig> {
-  type: string;
+  type: string; // TODO: type should be tied to Action and ActionByType
   displayName: string;
   iconType?: string;
   wizard: React.FC<ActionFactoryWizardProps<Config>>;
