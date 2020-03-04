@@ -33,6 +33,7 @@ import {
   toggleFilterPinned,
   toggleFilterDisabled,
 } from '../../../common';
+import { getNotifications } from '../../services';
 
 interface Props {
   id: string;
@@ -75,7 +76,18 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    let valueLabel;
+    try {
+      valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    } catch (e) {
+      getNotifications().toasts.addError(e, {
+        title: this.props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelError',
+          defaultMessage: 'Failed to render filter',
+        }),
+      });
+      return null;
+    }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${

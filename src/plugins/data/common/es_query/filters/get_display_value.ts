@@ -27,7 +27,11 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   let format = get(indexPattern, ['fields', 'byName', key, 'format']);
   if (!format && (indexPattern.fields as any).getByName) {
     // TODO: Why is indexPatterns sometimes a map and sometimes an array?
-    format = ((indexPattern.fields as any).getByName(key) as IFieldType).format;
+    const field: IFieldType = (indexPattern.fields as any).getByName(key);
+    if (!field) {
+      throw new Error(`Field ${key} not found`);
+    }
+    format = field?.format;
   }
   return format;
 }
