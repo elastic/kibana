@@ -47,7 +47,7 @@ describe('AllRulesTable Columns', () => {
             setTimeout(() => {
               results.push('duplicateRulesAction');
               resolve();
-            }, 1000)
+            }, 500)
           )
       );
 
