@@ -9,9 +9,8 @@ import { useEffect, useReducer } from 'react';
 import { Case } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 import { getTypedPayload } from './utils';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { useStateToaster } from '../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
 
 interface CaseState {

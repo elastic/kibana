@@ -5,8 +5,7 @@
  */
 
 import { useReducer } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import { Case } from './types';

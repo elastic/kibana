@@ -6,8 +6,7 @@
 
 import { useEffect, useReducer } from 'react';
 import chrome from 'ui/chrome';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import { throwIfNotOk } from '../../hooks/api/api';

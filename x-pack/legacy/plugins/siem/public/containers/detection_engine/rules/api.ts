@@ -124,17 +124,10 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  * @throws An error if response is not OK
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const response = await KibanaServices.get().http.fetch<Rule[]>(
-    `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
+    method: 'PATCH',
+    body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+  });
 };
 
 /**

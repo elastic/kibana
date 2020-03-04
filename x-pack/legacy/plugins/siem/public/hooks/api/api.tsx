@@ -6,8 +6,9 @@
 
 import * as i18n from '../translations';
 import { StartServices } from '../../plugin';
-import { parseJsonFromBody, ToasterErrors } from '../../components/ml/api/throw_if_not_ok';
+import { parseJsonFromBody } from '../../components/ml/api/throw_if_not_ok';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
+import { ToasterError } from '../../components/toasters';
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API
@@ -28,21 +29,21 @@ export const getIndexPatterns = async (
 
 export const throwIfNotOk = async (response?: Response): Promise<void> => {
   if (!response) {
-    throw new ToasterErrors([i18n.NETWORK_ERROR]);
+    throw new ToasterError([i18n.NETWORK_ERROR]);
   }
 
   if (!response.ok) {
     const body = await parseJsonFromBody(response);
     if (body != null && body.message) {
       if (body.statusCode != null) {
-        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
+        throw new ToasterError([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
       } else if (body.status_code != null) {
-        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.status_code}`]);
+        throw new ToasterError([body.message, `${i18n.STATUS_CODE} ${body.status_code}`]);
       } else {
-        throw new ToasterErrors([body.message]);
+        throw new ToasterError([body.message]);
       }
     } else {
-      throw new ToasterErrors([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
+      throw new ToasterError([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
     }
   }
 };

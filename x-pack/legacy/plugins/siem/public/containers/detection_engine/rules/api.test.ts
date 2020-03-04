@@ -5,6 +5,7 @@
  */
 
 import { KibanaServices } from '../../../lib/kibana';
+import { ToasterError } from '../../../components/toasters';
 import {
   addRule,
   fetchRules,
@@ -20,7 +21,6 @@ import {
   getPrePackagedRulesStatus,
 } from './api';
 import { ruleMock, rulesMock } from './mock';
-import { ToasterErrors } from '../../../components/ml/api/throw_if_not_ok';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -103,7 +103,7 @@ describe('Detections Rules API', () => {
       try {
         await addRule({ rule: ruleMock, signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -292,7 +292,7 @@ describe('Detections Rules API', () => {
       try {
         await fetchRules({ signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -334,7 +334,7 @@ describe('Detections Rules API', () => {
       try {
         await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -386,7 +386,7 @@ describe('Detections Rules API', () => {
       try {
         await enableRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'], enabled: true });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -427,7 +427,7 @@ describe('Detections Rules API', () => {
       try {
         await deleteRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'] });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -467,7 +467,7 @@ describe('Detections Rules API', () => {
       try {
         await duplicateRules({ rules: rulesMock.data });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -506,7 +506,7 @@ describe('Detections Rules API', () => {
       try {
         await createPrepackagedRules({ signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -591,7 +591,7 @@ describe('Detections Rules API', () => {
       try {
         await importRules({ fileToImport, signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -712,7 +712,7 @@ describe('Detections Rules API', () => {
           signal: abortCtrl.signal,
         });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -768,7 +768,7 @@ describe('Detections Rules API', () => {
       try {
         await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -807,7 +807,7 @@ describe('Detections Rules API', () => {
       try {
         await fetchTags({ signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });
@@ -852,7 +852,7 @@ describe('Detections Rules API', () => {
       try {
         await getPrePackagedRulesStatus({ signal: abortCtrl.signal });
       } catch (exp) {
-        expect(exp).toBeInstanceOf(ToasterErrors);
+        expect(exp).toBeInstanceOf(ToasterError);
         expect(exp.message).toEqual('super mega error, it is not that bad');
       }
     });

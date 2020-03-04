@@ -5,16 +5,17 @@
  */
 
 import fetchMock from 'fetch-mock';
+
+import { ToasterError } from '../../toasters';
+import { SetupMlResponse } from '../../ml_popover/types';
+import { isMlStartJobError } from './errors';
 import {
-  isMlStartJobError,
   MessageBody,
   parseJsonFromBody,
   throwIfErrorAttached,
   throwIfErrorAttachedToSetup,
-  ToasterErrors,
   tryParseResponse,
 } from './throw_if_not_ok';
-import { SetupMlResponse } from '../../ml_popover/types';
 
 describe('throw_if_not_ok', () => {
   afterEach(() => {
@@ -119,7 +120,7 @@ describe('throw_if_not_ok', () => {
         },
       };
       expect(() => throwIfErrorAttached(json, ['some-id'])).toThrow(
-        new ToasterErrors(['some message'])
+        new ToasterError(['some message'])
       );
     });
 

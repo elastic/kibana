@@ -17,8 +17,7 @@ import {
 } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
 import { getTypedPayload } from './utils';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { getCases } from './api';
 
