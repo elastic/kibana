@@ -17,25 +17,6 @@
  * under the License.
  */
 
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+import { AccessLinksExplorerPlugin } from './plugin';
 
-export { SharePluginSetup, SharePluginStart } from './plugin';
-export {
-  ShareContext,
-  ShareMenuProvider,
-  ShareMenuItem,
-  ShowShareMenuOptions,
-  ShareContextMenuPanelItem,
-} from './types';
-
-export {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorsDefinition,
-  UrlGeneratorContract,
-  UrlGeneratorsService,
-} from './url_generators';
-
-import { SharePlugin } from './plugin';
-
-export const plugin = () => new SharePlugin();
+export const plugin = () => new AccessLinksExplorerPlugin();

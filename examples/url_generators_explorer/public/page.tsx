@@ -17,25 +17,35 @@
  * under the License.
  */
 
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+import React from 'react';
 
-export { SharePluginSetup, SharePluginStart } from './plugin';
-export {
-  ShareContext,
-  ShareMenuProvider,
-  ShareMenuItem,
-  ShowShareMenuOptions,
-  ShareContextMenuPanelItem,
-} from './types';
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
 
-export {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorsDefinition,
-  UrlGeneratorContract,
-  UrlGeneratorsService,
-} from './url_generators';
+interface PageProps {
+  title: string;
+  children: React.ReactNode;
+}
 
-import { SharePlugin } from './plugin';
-
-export const plugin = () => new SharePlugin();
+export function Page({ title, children }: PageProps) {
+  return (
+    <EuiPageBody data-test-subj="searchTestPage">
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody>{children}</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+}
