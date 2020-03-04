@@ -11,7 +11,7 @@ import { SavedLensInput } from '../../functions/common/saved_lens';
 import { EmbeddableTypes } from '../../expression_types';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
-const baseSavedMapInput = {
+const baseEmbeddableInput = {
   id: 'embeddableId',
   filters: [],
   isLayerTOCOpen: false,
@@ -26,7 +26,7 @@ describe('input to expression', () => {
   describe('Map Embeddable', () => {
     it('converts to a savedMap expression', () => {
       const input: SavedMapInput = {
-        ...baseSavedMapInput,
+        ...baseEmbeddableInput,
       };
 
       const expression = embeddableInputToExpression(input, EmbeddableTypes.map);
@@ -44,7 +44,7 @@ describe('input to expression', () => {
 
     it('includes optional input values', () => {
       const input: SavedMapInput = {
-        ...baseSavedMapInput,
+        ...baseEmbeddableInput,
         mapCenter: {
           lat: 1,
           lon: 2,
@@ -78,7 +78,7 @@ describe('input to expression', () => {
   describe('Lens Embeddable', () => {
     it('converts to a savedLens expression', () => {
       const input: SavedLensInput = {
-        ...baseSavedMapInput,
+        ...baseEmbeddableInput,
       };
 
       const expression = embeddableInputToExpression(input, EmbeddableTypes.lens);
@@ -95,7 +95,7 @@ describe('input to expression', () => {
 
     it('includes optional input values', () => {
       const input: SavedLensInput = {
-        ...baseSavedMapInput,
+        ...baseEmbeddableInput,
         title: 'title',
         timeRange: {
           from: 'now-1h',
