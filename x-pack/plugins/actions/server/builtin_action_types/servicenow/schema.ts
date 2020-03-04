@@ -6,28 +6,28 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const MapsSchema = schema.object({
+  source: schema.string(),
+  target: schema.string(),
+  onEditAndUpdate: schema.oneOf([
+    schema.literal('nothing'),
+    schema.literal('overwrite'),
+    schema.literal('append'),
+  ]),
+});
+
+export const CasesConfigurationSchema = schema.object({
+  closure: schema.oneOf([
+    schema.literal('manual'),
+    schema.literal('new_incident'),
+    schema.literal('closed_incident'),
+  ]),
+  mapping: schema.arrayOf(MapsSchema),
+});
+
 export const ConfigSchemaProps = {
   apiUrl: schema.string(),
-  casesConfiguration: schema.maybe(
-    schema.object({
-      closure: schema.oneOf([
-        schema.literal('manual'),
-        schema.literal('new_incident'),
-        schema.literal('closed_incident'),
-      ]),
-      mapping: schema.recordOf(
-        schema.string(),
-        schema.object({
-          thirdPartyField: schema.string(),
-          onEditAndUpdate: schema.oneOf([
-            schema.literal('nothing'),
-            schema.literal('overwrite'),
-            schema.literal('append'),
-          ]),
-        })
-      ),
-    })
-  ),
+  casesConfiguration: CasesConfigurationSchema,
 };
 
 export const ConfigSchema = schema.object(ConfigSchemaProps);
