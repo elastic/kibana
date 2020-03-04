@@ -37,8 +37,7 @@ const editUpdateOptions = [
 ];
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyFields }) => {
-  const [selectedEditUpdate, selectEditUpdate] = useState(editUpdateOptions[0].value);
-  const onEditUpdateChange = useCallback(option => selectEditUpdate(option), [selectedEditUpdate]);
+  const [selectedEditUpdate, setSelectedEditUpdate] = useState(editUpdateOptions[0].value);
 
   const thirdPartyOptions = useMemo(
     () =>
@@ -74,7 +73,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyFie
         <EuiSuperSelect
           options={editUpdateOptions}
           valueOfSelected={selectedEditUpdate}
-          onChange={onEditUpdateChange}
+          onChange={setSelectedEditUpdate}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
