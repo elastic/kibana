@@ -141,7 +141,7 @@ const getMetric: (
       response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
     ) => response.aggregations?.groupings?.buckets || [];
     const afterKeyHandler = createAfterKeyHandler(
-      'query.aggs.groupings.composite.after',
+      'aggs.groupings.composite.after',
       response => response.aggregations?.groupings?.after_key
     );
     const compositeBuckets = (await getAllCompositeData(
@@ -239,6 +239,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
         if (shouldAlertFire) {
           alertInstance.scheduleActions(FIRED_ACTIONS.id, {
+            group,
             value: alertResults.map(result => result[group].currentValue),
           });
         }
