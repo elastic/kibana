@@ -13,7 +13,6 @@ import { mockRule } from './__mocks__/mock';
 import { getActions } from './columns';
 
 jest.mock('./actions', () => ({
-  __esModule: true, // this property makes it work
   duplicateRulesAction: jest.fn(),
   deleteRulesAction: jest.fn(),
 }));
@@ -32,42 +31,44 @@ describe('AllRulesTable Columns', () => {
     beforeEach(() => {
       results = [];
 
-      reFetchRules.mockReturnValue(
-        new Promise(resolve => {
-          results.push('reFetchRules');
-          resolve();
-        })
+      reFetchRules.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            results.push('reFetchRules');
+            resolve();
+          })
       );
     });
 
     test('duplicate rule onClick should call refetch after the rule is duplicated', async () => {
-      (duplicateRulesAction as jest.Mock).mockReturnValue(
-        new Promise(resolve =>
-          setTimeout(() => {
-            results.push('duplicateRulesAction');
-            resolve();
-          }, 500)
-        )
+      (duplicateRulesAction as jest.Mock).mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(() => {
+              results.push('duplicateRulesAction');
+              resolve();
+            }, 1000)
+          )
       );
 
       actions = getActions(dispatch, dispatchToaster, history, reFetchRules);
       await actions[1].onClick(rule);
-      expect(results).toEqual(['reFetchRules', 'duplicateRulesAction']);
+      expect(results).toEqual(['duplicateRulesAction', 'reFetchRules']);
     });
 
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
-      (deleteRulesAction as jest.Mock).mockReturnValue(
-        new Promise(resolve =>
-          setTimeout(() => {
-            results.push('deleteRulesAction');
-            resolve();
-          }, 500)
-        )
+      (deleteRulesAction as jest.Mock).mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(() => {
+              resolve(results.push('deleteRulesAction'));
+            }, 500)
+          )
       );
 
       actions = getActions(dispatch, dispatchToaster, history, reFetchRules);
       await actions[3].onClick(rule);
-      expect(results).toEqual(['reFetchRules', 'deleteRulesAction']);
+      expect(results).toEqual(['deleteRulesAction', 'reFetchRules']);
     });
   });
 });
