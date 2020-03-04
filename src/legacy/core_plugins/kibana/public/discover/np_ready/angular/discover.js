@@ -45,7 +45,6 @@ import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   angular,
-  buildVislibDimensions,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -818,13 +817,28 @@ function discoverController(
     if ($scope.opts.timefield) {
       const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
       $scope.searchSource.rawResponse = resp;
-      Promise.resolve(
-        buildVislibDimensions($scope.vis, {
-          timeRange: $scope.timeRange,
-          searchSource: $scope.searchSource,
-        })
-      ).then(resp => {
-        $scope.histogramData = discoverResponseHandler(tabifiedData, resp);
+      const metric = $scope.vis.aggs.aggs[1];
+      const agg = $scope.vis.aggs.aggs[0];
+      agg.params.timeRange = $scope.timeRange;
+      agg.buckets.setBounds(agg);
+      const { esUnit, esValue } = agg.buckets.getInterval();
+      $scope.histogramData = discoverResponseHandler(tabifiedData, {
+        x: {
+          accessor: 1,
+          label: agg.makeLabel(),
+          params: {
+            date: true,
+            interval: moment.duration(esValue, esUnit),
+            intervalESValue: esValue,
+            intervalESUnit: esUnit,
+            format: agg.buckets.getScaledDateFormat(),
+            bounds: agg.buckets.getBounds(),
+          },
+        },
+        y: {
+          accessor: 0,
+          label: metric.makeLabel(),
+        },
       });
     }
 
