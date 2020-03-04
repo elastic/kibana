@@ -80,6 +80,7 @@ export {
   siblingPipelineType,
   termsAggFilter,
   toAbsoluteDates,
+  updateTimeBuckets,
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,

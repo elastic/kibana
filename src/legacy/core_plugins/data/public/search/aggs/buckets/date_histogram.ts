@@ -30,7 +30,11 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import {
+  fieldFormats,
+  KBN_FIELD_TYPES,
+  TimefilterContract,
+} from '../../../../../../../plugins/data/public';
 import {
   getFieldFormats,
   getQueryService,
@@ -41,13 +45,12 @@ import {
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
-const updateTimeBuckets = (
+export const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
+  timefilter: TimefilterContract,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
-  const { timefilter } = getQueryService().timefilter;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-
   const buckets = customBuckets || agg.buckets;
   buckets.setBounds(agg.fieldIsTimeField() && bounds);
   buckets.setInterval(agg.params.interval);
@@ -104,8 +107,9 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         get() {
           if (buckets) return buckets;
 
+          const { timefilter } = getQueryService().timefilter;
           buckets = new TimeBuckets({ uiSettings });
-          updateTimeBuckets(this, buckets);
+          updateTimeBuckets(this, timefilter, buckets);
 
           return buckets;
         },
@@ -176,7 +180,8 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       default: 'auto',
       options: intervalOptions,
       write(agg, output, aggs) {
-        updateTimeBuckets(agg);
+        const { timefilter } = getQueryService().timefilter;
+        updateTimeBuckets(agg, timefilter);
 
         const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);

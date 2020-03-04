@@ -26,7 +26,11 @@ import {
   TimefilterContract,
 } from '../../../../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
-import { IAggConfig, isDateHistogramBucketAggConfig } from '../../../../../data/public';
+import {
+  IAggConfig,
+  isDateHistogramBucketAggConfig,
+  updateTimeBuckets,
+} from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -86,12 +90,16 @@ const getSchemas = (
   vis: Vis,
   opts: {
     timeRange?: any;
+    timefilter: TimefilterContract;
   }
 ): Schemas => {
   const { timeRange } = opts;
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
+      // TODO: This is only place this is used outside the `data` plugin.
+      // We should find a way to get rid of it so it can stay internal to `data`.
+      updateTimeBuckets(agg, opts.timefilter);
     }
 
     const hasSubAgg = [
@@ -445,6 +453,7 @@ export const buildVislibDimensions = async (
 ) => {
   const schemas = getSchemas(vis, {
     timeRange: params.timeRange,
+    timefilter: params.timefilter,
   });
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
@@ -463,12 +472,8 @@ export const buildVislibDimensions = async (
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
       dimensions.x.params.intervalESValue = esValue;
       dimensions.x.params.intervalESUnit = esUnit;
-      const bounds = xAgg.params.timeRange
-        ? params.timefilter.calculateBounds(xAgg.params.timeRange)
-        : null;
-      dimensions.x.params.bounds = xAgg.fieldIsTimeField() && bounds;
-      xAgg.buckets.setBounds(bounds);
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
+      dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
@@ -524,6 +529,7 @@ export const buildPipeline = async (
 
   const schemas = getSchemas(vis, {
     timeRange: params.timeRange,
+    timefilter: params.timefilter,
   });
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState, {
