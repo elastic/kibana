@@ -46,7 +46,9 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: Filter[] = (await createFiltersFromEvent(context.data)) || [];
+    const filters: Filter[] =
+      (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
+      [];
     return filters.length > 0;
   } catch {
     return false;
@@ -71,7 +73,8 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: Filter[] = (await createFiltersFromEvent(data)) || [];
+      const filters: Filter[] =
+        (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
 
       let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
 
