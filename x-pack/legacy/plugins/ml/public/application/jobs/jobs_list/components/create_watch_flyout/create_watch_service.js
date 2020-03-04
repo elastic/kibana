@@ -39,8 +39,7 @@ function randomNumber(min, max) {
 }
 
 function saveWatch(watchModel) {
-  const basePath = getBasePath();
-  const path = basePath.prepend('/api/watcher');
+  const path = '/api/watcher';
   const url = `${path}/watch/${watchModel.id}`;
 
   return http({
@@ -188,8 +187,7 @@ class CreateWatchService {
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
-    const basePath = getBasePath();
-    const path = basePath.prepend('/api/watcher');
+    const path = '/api/watcher';
     const url = `${path}/watch/${id}`;
     return http({
       url,
