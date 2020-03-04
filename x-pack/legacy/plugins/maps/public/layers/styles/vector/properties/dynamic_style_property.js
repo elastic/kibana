@@ -188,7 +188,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return _.get(this.getOptions(), 'fieldMetaOptions', {});
   }
 
-  _pluckOrdinalStyleMetaFromFeatures(features) {
+  pluckOrdinalStyleMetaFromFeatures(features) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const name = this.getField().getName();
     let min = Infinity;
     let max = -Infinity;
@@ -210,7 +214,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
         };
   }
 
-  _pluckCategoricalStyleMetaFromFeatures(features) {
+  pluckCategoricalStyleMetaFromFeatures(features) {
+    if (!this.isCategorical()) {
+      return null;
+    }
+
     const fieldName = this.getField().getName();
     const counts = new Map();
     for (let i = 0; i < features.length; i++) {
@@ -240,34 +248,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  // pluckStyleMetaFromFeatures(features) {
-  // if (this.isOrdinal()) {
-  //   return this._pluckOrdinalStyleMetaFromFeatures(features);
-  // } else if (this.isCategorical()) {
-  //   return this._pluckCategoricalStyleMetaFromFeatures(features);
-  // } else {
-  //   return null;
-  // }
-
-  // }
-
-  pluckCategoricalStyleMetaFromFeatures(features) {
-    if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFeatures(features);
-    } else {
+  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isOrdinal()) {
       return null;
     }
-  }
 
-  pluckOrdinalStyleMetaFromFeatures(features) {
-    if (this.isOrdinal()) {
-      return this._pluckOrdinalStyleMetaFromFeatures(features);
-    } else {
-      return null;
-    }
-  }
-
-  _pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
     const stats = fieldMetaData[this._field.getRootName()];
     if (!stats) {
       return null;
@@ -287,7 +272,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isCategorical()) {
+      return null;
+    }
+
     const rootFieldName = this._field.getRootName();
     if (!fieldMetaData[rootFieldName] || !fieldMetaData[rootFieldName].buckets) {
       return null;
@@ -302,32 +291,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return {
       categories: ordered,
     };
-  }
-
-  // pluckStyleMetaFromFieldMetaData(fieldMetaData) {
-  //   if (this.isOrdinal()) {
-  //     return this._pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData);
-  //   } else if (this.isCategorical()) {
-  //     return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
-  //   } else {
-  //     return null;
-  //   }
-  // }
-
-  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
-    if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
-    } else {
-      return null;
-    }
-  }
-
-  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
-    if (this.isOrdinal()) {
-      return this._pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData);
-    } else {
-      return null;
-    }
   }
 
   formatField(value) {

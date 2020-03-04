@@ -601,7 +601,6 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._layer,
-        // this._getFieldMeta,
         this._getFieldFormatter,
         isSymbolizedAsIcon
       );
@@ -622,7 +621,6 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._layer,
-        // this._getFieldMeta,
         this._getFieldFormatter
       );
     } else {
@@ -655,7 +653,6 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.LABEL_TEXT,
         field,
         this._layer,
-        // this._getFieldMeta,
         this._getFieldFormatter
       );
     } else {
@@ -675,7 +672,6 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.ICON,
         field,
         this._layer,
-        // this._getFieldMeta,
         this._getFieldFormatter
       );
     } else {
