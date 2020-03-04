@@ -12,7 +12,7 @@ import { MapListing } from './components/map_listing';
 import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapView } from '../../../../plugins/maps/public/inspector/views/map_view';
-import { setLicenseId, setInspector } from './kibana_services';
+import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -54,11 +54,12 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     bindSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
+    np.inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {
-    const { inspector } = np.plugins;
+    const { inspector, file_upload } = plugins.np;
     setInspector(inspector);
-    inspector.registerView(MapView);
+    setFileUpload(file_upload);
   }
 }

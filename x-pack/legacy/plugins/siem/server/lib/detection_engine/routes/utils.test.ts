@@ -13,13 +13,13 @@ import {
   transformBulkError,
   BulkError,
   createSuccessObject,
-  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
   convertToSnakeCase,
+  SiemResponseFactory,
 } from './utils';
-import { createMockConfig } from './__mocks__';
+import { responseMock } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -298,24 +298,6 @@ describe('utils', () => {
     });
   });
 
-  describe('getIndex', () => {
-    let mockConfig = createMockConfig();
-
-    beforeEach(() => {
-      mockConfig = () => ({
-        get: jest.fn(() => 'mockSignalsIndex'),
-        has: jest.fn(),
-      });
-    });
-
-    it('appends the space id to the configured index', () => {
-      const getSpaceId = jest.fn(() => 'myspace');
-      const index = getIndex(getSpaceId, mockConfig);
-
-      expect(index).toEqual('mockSignalsIndex-myspace');
-    });
-  });
-
   describe('convertToSnakeCase', () => {
     it('converts camelCase to snakeCase', () => {
       const values = { myTestCamelCaseKey: 'something' };
@@ -338,6 +320,33 @@ describe('utils', () => {
       expect(
         convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
       ).toEqual(null);
+    });
+  });
+
+  describe('SiemResponseFactory', () => {
+    it('builds a custom response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      expect(response.custom).toHaveBeenCalled();
+    });
+
+    it('generates a status_code key on the response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
+
+      expect(statusCode).toEqual(400);
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
+        expect.objectContaining({
+          message: 'Bad Request',
+          status_code: 400,
+        })
+      );
     });
   });
 });
