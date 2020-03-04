@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 
 import * as i18n from './translations';
 
 interface ThirdPartyField {
   value: string;
-  label: string;
+  inputDisplay: JSX.Element;
 }
 interface RowProps {
   siemField: string;
-  thirdPartyFields: ThirdPartyField[];
+  thirdPartyOptions: ThirdPartyField[];
 }
 
 const editUpdateOptions = [
@@ -36,18 +36,8 @@ const editUpdateOptions = [
   },
 ];
 
-const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyFields }) => {
+const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyOptions }) => {
   const [selectedEditUpdate, setSelectedEditUpdate] = useState(editUpdateOptions[0].value);
-
-  const thirdPartyOptions = useMemo(
-    () =>
-      thirdPartyFields.map(field => ({
-        value: field.value,
-        inputDisplay: <span>{field.label}</span>,
-      })),
-    [thirdPartyFields]
-  );
-
   const [selectedThirdParty, setSelectedThirdParty] = useState(thirdPartyOptions[0].value);
 
   return (

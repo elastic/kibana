@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EuiSuperSelect, EuiIcon, EuiSuperSelectOption } from '@elastic/eui';
 import styled from 'styled-components';
 

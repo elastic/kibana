@@ -19,19 +19,19 @@ const FieldRowWrapper = styled.div`
 const supportedThirdPartyFields = [
   {
     value: 'short_description',
-    label: 'Short Description',
+    inputDisplay: <span>{'Short Description'}</span>,
   },
   {
     value: 'comment',
-    label: 'Comment',
+    inputDisplay: <span>{'Comment'}</span>,
   },
   {
     value: 'tags',
-    label: 'Tags',
+    inputDisplay: <span>{'Tags'}</span>,
   },
   {
     value: 'description',
-    label: 'Description',
+    inputDisplay: <span>{'Description'}</span>,
   },
 ];
 
@@ -55,10 +55,10 @@ const FieldMappingComponent: React.FC = () => (
       </EuiFlexGroup>
     </EuiFormRow>
     <FieldRowWrapper>
-      <FieldMappingRow siemField="Name" thirdPartyFields={supportedThirdPartyFields} />
-      <FieldMappingRow siemField="Tags" thirdPartyFields={supportedThirdPartyFields} />
-      <FieldMappingRow siemField="Description" thirdPartyFields={supportedThirdPartyFields} />
-      <FieldMappingRow siemField="Comment" thirdPartyFields={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Name" thirdPartyOptions={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Tags" thirdPartyOptions={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Description" thirdPartyOptions={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Comment" thirdPartyOptions={supportedThirdPartyFields} />
     </FieldRowWrapper>
   </EuiDescribedFormGroup>
 );
