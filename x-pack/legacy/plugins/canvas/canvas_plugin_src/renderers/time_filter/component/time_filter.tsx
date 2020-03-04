@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { AdvancedSettings } from '../../../../../public/lib/kibana_advanced_settings';
-import { UnitStrings } from '../../../../../i18n/units';
+import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
+import { UnitStrings } from '../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;
 
@@ -24,7 +24,7 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   { start: 'now-1y', end: 'now', label: strings.getLast1YearLabel() },
 ];
 
-const customQuickRanges = AdvancedSettings.get('timepicker:quickRanges').map(
+const customQuickRanges = (AdvancedSettings.get('timepicker:quickRanges') || []).map(
   ({ from, to, display }: { from: string; to: string; display: string }) => ({
     start: from,
     end: to,
