@@ -18,16 +18,16 @@ exports[`LoginPage disabled form states renders as expected when a connection to
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
@@ -98,16 +98,16 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
@@ -178,16 +178,16 @@ exports[`LoginPage disabled form states renders as expected when loginAssistance
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
@@ -260,16 +260,16 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
@@ -340,16 +340,16 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
@@ -420,16 +420,16 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
