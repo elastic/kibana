@@ -10,11 +10,11 @@ import { EuiRadioGroup } from '@elastic/eui';
 import * as i18n from './translations';
 
 const ID_PREFIX = 'closure_options';
-const defaultRadio = `${ID_PREFIX}_manual`;
+const DEFAULT_RADIO = `${ID_PREFIX}_manual`;
 
 const radios = [
   {
-    id: defaultRadio,
+    id: DEFAULT_RADIO,
     label: i18n.CASE_CLOSURE_OPTIONS_MANUAL,
   },
   {
@@ -28,7 +28,7 @@ const radios = [
 ];
 
 const ClosureOptionsRadioComponent: React.FC = () => {
-  const [selectedClosure, setSelectedClosure] = useState(defaultRadio);
+  const [selectedClosure, setSelectedClosure] = useState(DEFAULT_RADIO);
 
   return (
     <EuiRadioGroup
