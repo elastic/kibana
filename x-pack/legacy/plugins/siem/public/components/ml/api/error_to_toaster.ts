@@ -14,6 +14,13 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
   dispatchToaster: React.Dispatch<ActionToaster>;
 };
 
+export interface KibanaApiError {
+  body: {
+    message: string;
+    status_code: number;
+  };
+}
+
 export const errorToToaster = ({
   id = uuid.v4(),
   title,
@@ -29,6 +36,18 @@ export const errorToToaster = ({
       color,
       iconType,
       errors: error.messages,
+    };
+    dispatchToaster({
+      type: 'addToaster',
+      toast,
+    });
+  } else if (isApiError(error)) {
+    const toast: AppToast = {
+      id,
+      title,
+      color,
+      iconType,
+      errors: [error.body.message],
     };
     dispatchToaster({
       type: 'addToaster',
@@ -65,3 +84,6 @@ export const isAnError = (error: unknown): error is Error => isError(error);
 
 export const isToasterError = (error: unknown): error is ToasterErrorsType =>
   error instanceof ToasterErrors;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isApiError = (error: any): error is KibanaApiError => error?.body?.message;
