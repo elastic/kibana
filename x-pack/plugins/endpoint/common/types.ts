@@ -502,11 +502,11 @@ type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> =
 /**
  * Query params to pass to the alert API when fetching new data.
  */
-// TODO rename to Input....
-// the type you use when calling the api.
 export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
   typeof alertingIndexGetQuerySchema
 >;
 
-// The type resulting from validating input. used in the handler
+/**
+ * Result of the validated query params when handling alert index requests.
+ */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;

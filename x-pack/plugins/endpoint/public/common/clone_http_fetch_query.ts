@@ -14,7 +14,7 @@ export function cloneHttpFetchQuery(query: Immutable<HttpFetchQuery>): HttpFetch
     if (Array.isArray(value)) {
       clone[key] = [...value];
     } else {
-      // Array.isArray is not removing ImmutableArray from the union. TODO
+      // Array.isArray is not removing ImmutableArray from the union.
       clone[key] = value as string | number | boolean;
     }
   }
