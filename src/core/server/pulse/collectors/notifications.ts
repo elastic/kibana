@@ -18,13 +18,14 @@
  */
 
 import { PulseCollector, CollectorSetupContext } from '../types';
+import { PulseInstruction } from '../channel';
 
 export interface Payload {
   records: NotificationInstruction[];
   deploymentId: string;
 }
 
-export interface NotificationInstruction {
+export interface NotificationInstruction extends PulseInstruction {
   hash: string;
   title: string;
   status: 'new' | 'seen';

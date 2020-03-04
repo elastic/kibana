@@ -37,6 +37,8 @@ import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
 import moment from 'moment';
+// eslint-disable-next-line
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext, shouldUpdateHash, getLastItemHash } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
@@ -45,9 +47,15 @@ import { NewsLoadingPrompt } from './loading_news';
 
 interface Props {
   notificationsChannel: PulseChannel<NotificationInstruction>;
+  errorsChannel: PulseChannel<ErrorInstruction>;
+  errorsInstructionsToShow: ErrorInstruction[];
 }
 
-export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
+export const NewsfeedFlyout = ({
+  notificationsChannel,
+  errorsChannel,
+  errorsInstructionsToShow,
+}: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
@@ -62,6 +70,23 @@ export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
             ...feedItem,
             publishOn: feedItem.publishOn.format('x'),
             expireOn: feedItem.expireOn.format('x'),
+            status: 'seen',
+            seenOn: moment().format('x'),
+          };
+        })
+      );
+    }
+  }
+
+  if (errorsInstructionsToShow && errorsInstructionsToShow.length > 0) {
+    const hasNewErrorInstructionsToShow = errorsInstructionsToShow.filter(
+      instruction => instruction.status === 'new' && !instruction.seenOn!
+    );
+    if (hasNewErrorInstructionsToShow.length > 0) {
+      errorsChannel.sendPulse(
+        hasNewErrorInstructionsToShow.map(item => {
+          return {
+            ...item,
             status: 'seen',
             seenOn: moment().format('x'),
           };
@@ -110,6 +135,24 @@ export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
         ) : (
           <NewsEmptyPrompt />
         )}
+        {errorsInstructionsToShow &&
+          errorsInstructionsToShow.length > 0 &&
+          errorsInstructionsToShow.map((item: ErrorInstruction, index: number) => {
+            return (
+              <EuiHeaderAlert
+                key={index}
+                title={item.hash}
+                text={`The error ${item.hash} has benn fixed in version ${item.fixedVersion}.`}
+                action={
+                  <EuiLink target="_blank" href="#">
+                    {item.fixedVersion}
+                  </EuiLink>
+                }
+                date={moment(item.timestamp).format('DD MMMM YYYY HH:MM:SS')}
+                badge={<EuiBadge color="hollow">{item.fixedVersion}</EuiBadge>}
+              />
+            );
+          })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

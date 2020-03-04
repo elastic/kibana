@@ -27,6 +27,8 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
+// eslint-disable-next-line
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import { FetchResult, NewsfeedPluginInjectedConfig } from '../types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
@@ -38,6 +40,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private notificationsChannel?: PulseChannel<NotificationInstruction>;
+  private errorsChannel?: PulseChannel<ErrorInstruction>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -45,6 +48,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   public setup(core: CoreSetup): Setup {
     this.notificationsChannel = core.pulse.getChannel('notifications');
+    this.errorsChannel = core.pulse.getChannel('errors');
     return {};
   }
 
@@ -85,7 +89,11 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
     ReactDOM.render(
       <I18nProvider>
-        <NewsfeedNavButton apiFetchResult={api$} notificationsChannel={this.notificationsChannel} />
+        <NewsfeedNavButton
+          apiFetchResult={api$}
+          notificationsChannel={this.notificationsChannel}
+          errorsChannel={this.errorsChannel!}
+        />
       </I18nProvider>,
       targetDomElement
     );

@@ -23,12 +23,25 @@
 // by the service
 import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
+import { PulseInstruction } from '../channel';
 
-export type ErrorInstruction = Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id'>;
+export interface ErrorInstruction extends PulseInstruction {
+  channel_id?: string;
+  deployment_id?: string;
+  message: string;
+  hash: string;
+  status: 'new' | 'seen';
+  currentKibanaVersion: string;
+  timestamp: Date;
+  fixedVersion?: string;
+  seenOn?: Date;
+}
 
 export interface Payload {
   deploymentId: string;
-  records: ErrorInstruction[];
+  records: Array<
+    Omit<PulseErrorPayloadRecord, 'channel_id' | 'deployment_id' | 'fixedVersion' | 'seenOn'>
+  >;
 }
 export interface PulseErrorPayloadRecord {
   channel_id: string;
@@ -39,6 +52,7 @@ export interface PulseErrorPayloadRecord {
   message: string;
   status?: 'new' | 'seen';
   timestamp?: Date;
+  seenOn?: Date;
 }
 
 export class Collector extends PulseCollector<Payload> {
@@ -65,15 +79,6 @@ export class Collector extends PulseCollector<Payload> {
             type: 'keyword',
           },
           hash: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
-          },
-          id: {
             type: 'text',
             fields: {
               keyword: {
@@ -120,7 +125,6 @@ export class Collector extends PulseCollector<Payload> {
                 channel_id: 'errors',
                 deployment_id: '123',
                 status: record.status || 'new',
-                id: record.hash,
                 timestamp: record.timestamp || moment(),
               });
             }
@@ -134,7 +138,6 @@ export class Collector extends PulseCollector<Payload> {
     if (this.elasticsearch) {
       const results = await this.elasticsearch.search(this.channelName, {
         bool: {
-          should: [{ match: { status: 'new' } }],
           filter: {
             range: {
               timestamp: {

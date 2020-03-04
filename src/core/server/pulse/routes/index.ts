@@ -20,8 +20,10 @@ import { IRouter } from 'src/core/server';
 import { registerIndexRoute } from './index_route';
 import { PulseChannel } from '../channel';
 import { registerGetRoute } from './get_route';
+import { registerBehaviorRoutes } from './behavior_routes';
 
 export function registerPulseRoutes(router: IRouter, channels: Map<string, PulseChannel>) {
   registerIndexRoute(router, channels);
   registerGetRoute(router, channels);
+  registerBehaviorRoutes(router, channels);
 }

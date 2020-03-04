@@ -24,6 +24,8 @@ import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elas
 import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line
 import { NotificationInstruction } from 'src/core/server/pulse/collectors/notifications';
+// eslint-disable-next-line
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import moment from 'moment';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../../types';
@@ -39,6 +41,7 @@ export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
 export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
   notificationsChannel: PulseChannel<NotificationInstruction>;
+  errorsChannel: PulseChannel<ErrorInstruction>;
 }
 
 const NEWSFEED_LAST_HASH = 'pulse_news_last_hash';
@@ -75,15 +78,23 @@ window.notificationsChannel.sendPulse([{
 // on every fresh page reload, fetch news all over again.
 updateLastHash('');
 
-export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Props) => {
+export const NewsfeedNavButton = ({
+  apiFetchResult,
+  notificationsChannel,
+  errorsChannel,
+}: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const [showPulseBadge, setShowPulseBadge] = useState<boolean>(false);
+  const [errorsInstructionsToShow, setErrorsInstructionsToShow] = useState<ErrorInstruction[]>([]);
   // hack to test updating news;
   (window as any).moment = moment;
   (window as any).notificationsChannel = notificationsChannel;
   // Pulse notifications
   const notificationsInstructions$ = notificationsChannel.instructions$();
+  // Error Instructions
+  const errorsInstructions$ = errorsChannel.instructions$();
   useEffect(() => {
     function handleStatusChange(instructions: NotificationInstruction[]) {
       const lastNotificationHash = getLastItemHash(instructions);
@@ -129,6 +140,29 @@ export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Prop
   //   return () => subscription.unsubscribe();
   // }, [apiFetchResult]);
 
+  // Errors Instructions
+  useEffect(() => {
+    function handleErrorsInstructionsChange(instructions: ErrorInstruction[]) {
+      if (instructions.length) {
+        setShowPulseBadge(instructions.length > 0);
+        setErrorsInstructionsToShow(instructions);
+      } else {
+        setShowPulseBadge(false);
+        setErrorsInstructionsToShow([]);
+      }
+    }
+    const subscription = errorsInstructions$.subscribe(instructions => {
+      if (instructions && instructions.length) {
+        const newInstructions = instructions.filter(
+          instruction =>
+            instruction.fixedVersion && instruction.status === 'new' && !instructions.seenOn
+        );
+        handleErrorsInstructionsChange(newInstructions);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [errorsInstructions$]);
+
   function showFlyout() {
     setShowBadge(false);
     setFlyoutVisible(!flyoutVisible);
@@ -146,13 +180,19 @@ export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Prop
           onClick={showFlyout}
         >
           <EuiIcon type="email" size="m" />
-          {showBadge ? (
+          {showBadge || showPulseBadge ? (
             <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
               &#9642;
             </EuiNotificationBadge>
           ) : null}
         </EuiHeaderSectionItemButton>
-        {flyoutVisible ? <NewsfeedFlyout notificationsChannel={notificationsChannel} /> : null}
+        {flyoutVisible ? (
+          <NewsfeedFlyout
+            notificationsChannel={notificationsChannel}
+            errorsChannel={errorsChannel}
+            errorsInstructionsToShow={errorsInstructionsToShow}
+          />
+        ) : null}
       </Fragment>
     </NewsfeedContext.Provider>
   );
