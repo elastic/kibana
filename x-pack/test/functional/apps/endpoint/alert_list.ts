@@ -26,6 +26,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('endpoint/alerts/api_feature');
-    })
+    });
   });
 }
