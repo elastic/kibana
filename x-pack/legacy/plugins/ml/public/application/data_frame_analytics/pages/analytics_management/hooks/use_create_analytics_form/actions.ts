@@ -24,6 +24,7 @@ export enum ACTION {
   SET_JOB_CONFIG,
   SET_JOB_IDS,
   SWITCH_TO_ADVANCED_EDITOR,
+  SET_ESTIMATED_MODEL_MEMORY_LIMIT,
 }
 
 export type Action =
@@ -59,7 +60,8 @@ export type Action =
     }
   | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: State['isModalVisible'] }
   | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
-  | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] };
+  | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] }
+  | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] };
 
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
@@ -73,4 +75,5 @@ export interface ActionDispatchers {
   setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
+  setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
 }
