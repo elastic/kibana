@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointDocGenerator, generateEventAncestry, generateResolverTree } from './generate_data';
-import { EndpointEvent } from './types';
+import { EndpointDocGenerator, Event } from './generate_data';
 
 interface Node {
-  events: EndpointEvent[];
+  events: Event[];
   children: Node[];
   parent_entity_id?: string;
 }
@@ -41,7 +40,7 @@ describe('data generator', () => {
 
   it('creates process event documents', () => {
     const timestamp = new Date().getTime();
-    const processEvent = generator.generateEvent(timestamp);
+    const processEvent = generator.generateEvent({ timestamp });
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('process');
     expect(processEvent.event.kind).toEqual('event');
@@ -53,7 +52,7 @@ describe('data generator', () => {
 
   it('creates other event documents', () => {
     const timestamp = new Date().getTime();
-    const processEvent = generator.generateEvent(timestamp, undefined, undefined, 'dns');
+    const processEvent = generator.generateEvent({ timestamp, eventCategory: 'dns' });
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
@@ -64,7 +63,7 @@ describe('data generator', () => {
   });
 
   it('creates alert ancestor tree', () => {
-    const events = generateEventAncestry(generator, 3);
+    const events = generator.generateAlertEventAncestry(3);
     for (let i = 1; i < events.length - 1; i++) {
       expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
       expect(events[i].event.kind).toEqual('event');
@@ -83,9 +82,9 @@ describe('data generator', () => {
 
   it('creates tree of process children', () => {
     const timestamp = new Date().getTime();
-    const root = generator.generateEvent(timestamp);
+    const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = generateResolverTree(root, generator, generations);
+    const events = generator.generateDescendantsTree(root, generations);
     const tree: Record<string, Node> = {};
     // First pass we gather up all the events by entity_id
     events.forEach(event => {

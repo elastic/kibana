@@ -7,6 +7,16 @@
 import uuid from 'uuid';
 import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
 
+export type Event = AlertEvent | EndpointEvent;
+
+interface EventOptions {
+  timestamp: number;
+  entityID?: string;
+  parentEntityID?: string;
+  eventType?: string;
+  eventCategory?: string;
+}
+
 const Windows: OSFields[] = [
   {
     name: 'windows 10.0',
@@ -99,108 +109,8 @@ function randomHostname(): string {
   return `Host-${randomString(10)}`;
 }
 
-export function generateRelatedEvents(
-  node: EndpointEvent,
-  generator: EndpointDocGenerator,
-  numRelatedEvents = 10
-): EndpointEvent[] {
-  const ts = node['@timestamp'] + 1000;
-  const relatedEvents: EndpointEvent[] = [];
-  for (let i = 0; i < numRelatedEvents; i++) {
-    relatedEvents.push(
-      generator.generateEvent(
-        ts,
-        node.process.entity_id,
-        node.process.parent?.entity_id,
-        randomChoice(OTHER_EVENT_CATEGORIES)
-      )
-    );
-  }
-  return relatedEvents;
-}
-
-export function generateResolverTree(
-  root: EndpointEvent,
-  generator: EndpointDocGenerator,
-  generations = 2,
-  maxChildrenPerNode = 2,
-  relatedEventsPerNode = 3,
-  percentNodesWithRelated = 100,
-  percentChildrenTerminated = 100
-): EndpointEvent[] {
-  let events: EndpointEvent[] = [root];
-  let parents = [root];
-  let timestamp = root['@timestamp'];
-  for (let i = 0; i < generations; i++) {
-    const newParents: EndpointEvent[] = [];
-    parents.forEach(element => {
-      // const numChildren = randomN(maxChildrenPerNode);
-      const numChildren = maxChildrenPerNode;
-      for (let j = 0; j < numChildren; j++) {
-        timestamp = timestamp + 1000;
-        const child = generator.generateEvent(timestamp, undefined, element.process.entity_id);
-        newParents.push(child);
-      }
-    });
-    events = events.concat(newParents);
-    parents = newParents;
-  }
-  const terminationEvents: EndpointEvent[] = [];
-  let relatedEvents: EndpointEvent[] = [];
-  events.forEach(element => {
-    if (randomN(100) < percentChildrenTerminated) {
-      timestamp = timestamp + 1000;
-      terminationEvents.push(
-        generator.generateEvent(
-          timestamp,
-          element.process.entity_id,
-          element.process.parent?.entity_id,
-          'process',
-          'end'
-        )
-      );
-    }
-    if (randomN(100) < percentNodesWithRelated) {
-      relatedEvents = relatedEvents.concat(
-        generateRelatedEvents(element, generator, relatedEventsPerNode)
-      );
-    }
-  });
-  events = events.concat(terminationEvents);
-  events = events.concat(relatedEvents);
-  return events;
-}
-
-export function generateEventAncestry(
-  generator: EndpointDocGenerator,
-  alertAncestors = 3
-): Array<AlertEvent | EndpointEvent> {
-  const events = [];
-  const startDate = new Date().getTime();
-  const root = generator.generateEvent(startDate + 1000);
-  events.push(root);
-  let ancestor = root;
-  for (let i = 0; i < alertAncestors; i++) {
-    ancestor = generator.generateEvent(
-      startDate + 1000 * (i + 1),
-      undefined,
-      ancestor.process.entity_id
-    );
-    events.push(ancestor);
-  }
-  events.push(
-    generator.generateAlert(
-      startDate + 1000 * alertAncestors,
-      ancestor.process.entity_id,
-      ancestor.process.parent?.entity_id
-    )
-  );
-  return events;
-}
-
 export class EndpointDocGenerator {
   agentId: string;
-  agentName: string;
   hostId: string;
   hostname: string;
   lastDHCPLeaseAt: number;
@@ -213,7 +123,6 @@ export class EndpointDocGenerator {
   constructor() {
     this.hostId = uuid.v4();
     this.agentId = uuid.v4();
-    this.agentName = 'Elastic Endpoint';
     this.hostname = randomHostname();
     this.lastDHCPLeaseAt = new Date().getTime();
     this.ip = randomArray(3, () => randomIP());
@@ -223,7 +132,9 @@ export class EndpointDocGenerator {
     this.policy = randomChoice(POLICIES);
   }
 
-  generateEndpointMetadata(ts: number): EndpointMetadata {
+  public generateEndpointMetadata(ts: number): EndpointMetadata {
+    // If we generate metadata with a timestamp at least 12 hours after the last generated doc,
+    // change the IPs for the host
     if (Math.abs(ts - this.lastDHCPLeaseAt) > 3600 * 12 * 1000) {
       this.lastDHCPLeaseAt = ts;
       this.ip = randomArray(3, () => randomIP());
@@ -241,7 +152,6 @@ export class EndpointDocGenerator {
       agent: {
         version: this.agentVersion,
         id: this.agentId,
-        name: this.agentName,
       },
       host: {
         id: this.hostId,
@@ -253,12 +163,11 @@ export class EndpointDocGenerator {
     };
   }
 
-  generateAlert(ts: number, entityID?: string, parentEntityID?: string): AlertEvent {
+  public generateAlert(ts: number, entityID?: string, parentEntityID?: string): AlertEvent {
     return {
       '@timestamp': ts,
       agent: {
         id: this.agentId,
-        name: this.agentName,
         version: this.agentVersion,
       },
       event: {
@@ -370,18 +279,11 @@ export class EndpointDocGenerator {
     };
   }
 
-  generateEvent(
-    ts: number,
-    entityID?: string,
-    parentEntityID?: string,
-    eventCategory?: string,
-    eventType?: string
-  ): EndpointEvent {
+  public generateEvent(options: EventOptions): EndpointEvent {
     return {
-      '@timestamp': ts,
+      '@timestamp': options.timestamp,
       agent: {
         id: this.agentId,
-        name: this.agentName,
         version: this.agentVersion,
         type: 'endpoint',
       },
@@ -389,9 +291,9 @@ export class EndpointDocGenerator {
         version: '1.4.0',
       },
       event: {
-        category: eventCategory ? eventCategory : 'process',
+        category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
-        type: eventType ? eventType : 'creation',
+        type: options.eventType ? options.eventType : 'creation',
         id: uuid.v4(),
       },
       host: {
@@ -402,9 +304,123 @@ export class EndpointDocGenerator {
         os: this.os,
       },
       process: {
-        entity_id: entityID ? entityID : randomString(10),
-        parent: parentEntityID ? { entity_id: parentEntityID } : undefined,
+        entity_id: options.entityID ? options.entityID : randomString(10),
+        parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
       },
     };
+  }
+
+  public generateFullResolverTree(
+    alertAncestors?: number,
+    childGenerations?: number,
+    maxChildrenPerNode?: number,
+    relatedEventsPerNode?: number,
+    percentNodesWithRelated?: number,
+    percentChildrenTerminated?: number
+  ): Event[] {
+    const ancestry = this.generateAlertEventAncestry(alertAncestors);
+    // ancestry will always have at least 2 elements, and the second to last element will be the process associated with the alert
+    const descendants = this.generateDescendantsTree(
+      ancestry[ancestry.length - 2],
+      childGenerations,
+      maxChildrenPerNode,
+      relatedEventsPerNode,
+      percentNodesWithRelated,
+      percentChildrenTerminated
+    );
+    return ancestry.concat(descendants);
+  }
+
+  public generateAlertEventAncestry(alertAncestors = 3): Event[] {
+    const events = [];
+    const startDate = new Date().getTime();
+    const root = this.generateEvent({ timestamp: startDate + 1000 });
+    events.push(root);
+    let ancestor = root;
+    for (let i = 0; i < alertAncestors; i++) {
+      ancestor = this.generateEvent({
+        timestamp: startDate + 1000 * (i + 1),
+        parentEntityID: ancestor.process.entity_id,
+      });
+      events.push(ancestor);
+    }
+    events.push(
+      this.generateAlert(
+        startDate + 1000 * alertAncestors,
+        ancestor.process.entity_id,
+        ancestor.process.parent?.entity_id
+      )
+    );
+    return events;
+  }
+
+  public generateDescendantsTree(
+    root: Event,
+    generations = 2,
+    maxChildrenPerNode = 2,
+    relatedEventsPerNode = 3,
+    percentNodesWithRelated = 100,
+    percentChildrenTerminated = 100
+  ): Event[] {
+    let events: Event[] = [root];
+    let parents = [root];
+    let timestamp = root['@timestamp'];
+    for (let i = 0; i < generations; i++) {
+      const newParents: EndpointEvent[] = [];
+      parents.forEach(element => {
+        // const numChildren = randomN(maxChildrenPerNode);
+        const numChildren = maxChildrenPerNode;
+        for (let j = 0; j < numChildren; j++) {
+          timestamp = timestamp + 1000;
+          const child = this.generateEvent({
+            timestamp,
+            parentEntityID: element.process.entity_id,
+          });
+          newParents.push(child);
+        }
+      });
+      events = events.concat(newParents);
+      parents = newParents;
+    }
+    const terminationEvents: EndpointEvent[] = [];
+    let relatedEvents: EndpointEvent[] = [];
+    events.forEach(element => {
+      if (randomN(100) < percentChildrenTerminated) {
+        timestamp = timestamp + 1000;
+        terminationEvents.push(
+          this.generateEvent({
+            timestamp,
+            entityID: element.process.entity_id,
+            parentEntityID: element.process.parent?.entity_id,
+            eventCategory: 'process',
+            eventType: 'end',
+          })
+        );
+      }
+      if (randomN(100) < percentNodesWithRelated) {
+        relatedEvents = relatedEvents.concat(
+          this.generateRelatedEvents(element, relatedEventsPerNode)
+        );
+      }
+    });
+    events = events.concat(terminationEvents);
+    events = events.concat(relatedEvents);
+    return events;
+  }
+
+  public generateRelatedEvents(node: Event, numRelatedEvents = 10): EndpointEvent[] {
+    const ts = node['@timestamp'] + 1000;
+    const relatedEvents: EndpointEvent[] = [];
+    for (let i = 0; i < numRelatedEvents; i++) {
+      relatedEvents.push(
+        this.generateEvent({
+          timestamp: ts,
+          entityID: node.process.entity_id,
+          parentEntityID: node.process.parent?.entity_id,
+          eventCategory: randomChoice(OTHER_EVENT_CATEGORIES),
+        })
+      );
+    }
+    return relatedEvents;
   }
 }

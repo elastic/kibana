@@ -158,7 +158,6 @@ export type AlertEvent = Immutable<{
   agent: {
     id: string;
     version: string;
-    name: string;
   };
   event: {
     id: string;
@@ -259,7 +258,6 @@ export interface EndpointMetadata {
   agent: {
     id: string;
     version: string;
-    name: string;
   };
   host: HostFields;
 }
@@ -309,7 +307,6 @@ export interface EndpointEvent {
   agent: {
     id: string;
     version: string;
-    name: string;
     type: string;
   };
   ecs: {
