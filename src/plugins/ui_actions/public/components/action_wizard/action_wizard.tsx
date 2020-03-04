@@ -23,7 +23,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiKeyPadMenuItem,
@@ -194,7 +193,6 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
       {actionFactories.map(actionFactory => (
         <EuiKeyPadMenuItem
           className="uiaActionWizard__actionFactoryItem"
-          grow={false}
           key={actionFactory.type}
           label={actionFactory.displayName}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
