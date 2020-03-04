@@ -5,9 +5,14 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
-import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { LegacyServices } from '../../../types';
+
+import {
+  RouteValidationFunction,
+  KibanaResponseFactory,
+  CustomHttpResponseOptions,
+} from '../../../../../../../../src/core/server';
 
 export interface OutputError {
   message: string;
@@ -215,12 +220,63 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
-  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  const spaceId = getSpaceId();
-
-  return `${signalsIndex}-${spaceId}`;
+export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
+  payload: T,
+  { ok, badRequest }
+) => {
+  const { value, error } = schema.validate(payload);
+  if (error) {
+    return badRequest(error.message);
+  }
+  return ok(value);
 };
+
+const statusToErrorMessage = (statusCode: number) => {
+  switch (statusCode) {
+    case 400:
+      return 'Bad Request';
+    case 401:
+      return 'Unauthorized';
+    case 403:
+      return 'Forbidden';
+    case 404:
+      return 'Not Found';
+    case 409:
+      return 'Conflict';
+    case 500:
+      return 'Internal Error';
+    default:
+      return '(unknown error)';
+  }
+};
+
+export class SiemResponseFactory {
+  constructor(private response: KibanaResponseFactory) {}
+
+  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    const contentType: CustomHttpResponseOptions<T>['headers'] = {
+      'content-type': 'application/json',
+    };
+    const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
+      ...contentType,
+      ...(headers ?? {}),
+    };
+
+    return this.response.custom({
+      headers: defaultedHeaders,
+      statusCode,
+      body: Buffer.from(
+        JSON.stringify({
+          message: body ?? statusToErrorMessage(statusCode),
+          status_code: statusCode,
+        })
+      ),
+    });
+  }
+}
+
+export const buildSiemResponse = (response: KibanaResponseFactory) =>
+  new SiemResponseFactory(response);
 
 export const convertToSnakeCase = <T extends Record<string, unknown>>(
   obj: T

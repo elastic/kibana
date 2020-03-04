@@ -154,6 +154,11 @@ export interface SavedObjectsServiceSetup {
    * This API is the single entry point to register saved object types in the new platform.
    */
   registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * Returns the maximum number of objects allowed for import or export operations.
+   */
+  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -344,6 +349,7 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
+      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 

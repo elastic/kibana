@@ -17,12 +17,6 @@
  * under the License.
  */
 
-jest.mock('ui/vis/vis_filters');
-jest.mock('ui/vis/default_feedback_message');
-jest.mock('ui/vis/vis_factory');
-jest.mock('ui/registry/vis_types');
-jest.mock('./types/vis_type_alias_registry');
-
 import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
@@ -67,6 +61,11 @@ const createInstance = async () => {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      __LEGACY: {
+        aggs: {
+          createAggConfigs: jest.fn(),
+        } as any,
+      },
     });
 
   return {

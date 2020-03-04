@@ -70,7 +70,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '#/link-to/case',
             id: 'case',
-            name: 'Case',
+            name: 'Cases',
             urlKey: 'case',
           },
           detections: {
@@ -163,7 +163,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '#/link-to/case',
             id: 'case',
-            name: 'Case',
+            name: 'Cases',
             urlKey: 'case',
           },
           detections: {

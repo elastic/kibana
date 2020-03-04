@@ -38,6 +38,7 @@ import {
   setUiActions,
   setSavedVisualizationsLoader,
   setTimeFilter,
+  setAggs,
 } from './services';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
@@ -53,6 +54,7 @@ import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visuali
 import { VisImpl, VisImplConstructor } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
+import { DataStart as LegacyDataStart } from '../../../../data/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -81,6 +83,9 @@ export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
+  __LEGACY: {
+    aggs: LegacyDataStart['search']['aggs'];
+  };
 }
 
 /**
@@ -123,7 +128,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: VisualizationsStartDeps
+    { data, expressions, uiActions, __LEGACY: { aggs } }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -136,6 +141,7 @@ export class VisualizationsPlugin
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);
+    setAggs(aggs);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
