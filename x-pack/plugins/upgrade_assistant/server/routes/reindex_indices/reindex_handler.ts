@@ -8,10 +8,10 @@ import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { ReindexStatus } from '../../../common/types';
+import { ReindexOptions, ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
+import { reindexServiceFactory } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { error } from '../../lib/reindexing/error';
 
@@ -23,7 +23,7 @@ interface ReindexHandlerArgs {
   licensing: LicensingPluginSetup;
   headers: Record<string, any>;
   credentialStore: CredentialStore;
-  getWorker: () => ReindexWorker;
+  enqueue?: boolean;
 }
 
 export const reindexHandler = async ({
@@ -34,7 +34,7 @@ export const reindexHandler = async ({
   licensing,
   log,
   savedObjects,
-  getWorker,
+  enqueue,
 }: ReindexHandlerArgs) => {
   const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
@@ -51,17 +51,18 @@ export const reindexHandler = async ({
 
   const existingOp = await reindexService.findReindexOperation(indexName);
 
+  const opts: ReindexOptions | undefined = enqueue
+    ? { queueSettings: { queuedAt: Date.now() } }
+    : undefined;
+
   // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
       ? await reindexService.resumeReindexOperation(indexName)
-      : await reindexService.createReindexOperation(indexName);
+      : await reindexService.createReindexOperation(indexName, opts);
 
   // Add users credentials for the worker to use
   credentialStore.set(reindexOp, headers);
-
-  // Kick the worker on this node to immediately pickup the new reindex operation.
-  getWorker().forceRefresh();
 
   return reindexOp.attributes;
 };

@@ -104,17 +104,21 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params;
         try {
+          const result = await reindexHandler({
+            savedObjects: savedObjectsClient,
+            dataClient,
+            indexName,
+            log,
+            licensing,
+            headers: request.headers,
+            credentialStore,
+          });
+
+          // Kick the worker on this node to immediately pickup the new reindex operation.
+          getWorker().forceRefresh();
+
           return response.ok({
-            body: await reindexHandler({
-              savedObjects: savedObjectsClient,
-              dataClient,
-              indexName,
-              log,
-              licensing,
-              headers: request.headers,
-              credentialStore,
-              getWorker,
-            }),
+            body: result,
           });
         } catch (e) {
           return mapAnyErrorToKibanaHttpResponse(e);
@@ -158,7 +162,7 @@ export function registerReindexIndicesRoutes(
               licensing,
               headers: request.headers,
               credentialStore,
-              getWorker,
+              enqueue: true,
             });
             results.started.push(result);
           } catch (e) {
@@ -167,6 +171,11 @@ export function registerReindexIndicesRoutes(
               message: e.message,
             });
           }
+        }
+
+        if (results.errors.length < indexNames.length) {
+          // Kick the worker on this node to immediately pickup the batch.
+          getWorker().forceRefresh();
         }
 
         return response.ok({ body: results });

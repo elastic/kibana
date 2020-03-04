@@ -28,6 +28,19 @@ export enum ReindexStatus {
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+
+export interface QueueSettings extends SavedObjectAttributes {
+  queuedAt: number;
+}
+
+export interface ReindexOptions extends SavedObjectAttributes {
+  /**
+   * Set this key to configure a reindex operation as part of a
+   * batch to be run in series.
+   */
+  queueSettings?: QueueSettings;
+}
+
 export interface ReindexOperation extends SavedObjectAttributes {
   indexName: string;
   newIndexName: string;
@@ -40,6 +53,15 @@ export interface ReindexOperation extends SavedObjectAttributes {
 
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+
+  /**
+   * Options for the reindexing strategy.
+   *
+   * @remark
+   * Marked as optional for backwards compatibility. We should still
+   * be able to handle older ReindexOperation objects.
+   */
+  reindexOptions?: ReindexOptions;
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;

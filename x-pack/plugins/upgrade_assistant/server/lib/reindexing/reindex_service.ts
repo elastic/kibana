@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 
 import {
   IndexGroup,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -51,8 +52,9 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
+   * @param opts
    */
-  createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -517,7 +519,7 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string) {
+    async createReindexOperation(indexName: string, opts?: ReindexOptions) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -539,7 +541,7 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(indexName);
+      return actions.createReindexOp(indexName, opts);
     },
 
     async findReindexOperation(indexName: string) {
