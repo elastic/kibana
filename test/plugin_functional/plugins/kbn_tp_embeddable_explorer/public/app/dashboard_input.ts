@@ -92,6 +92,7 @@ export const dashboardInput: DashboardContainerInput = {
       },
     },
   },
+  isEmbedded: false,
   isFullScreenMode: false,
   filters: [],
   useMargins: true,

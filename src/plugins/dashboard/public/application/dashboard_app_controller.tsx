@@ -314,6 +314,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmbedded: Boolean($routeParams.embed),
         isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
