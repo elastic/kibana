@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler, KibanaRequest } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   GetAgentsResponse,
@@ -29,6 +29,13 @@ import {
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
+
+function getInternalUserSOClient(request: KibanaRequest) {
+  // soClient as kibana internal users, be carefull on how you use it, security is not enabled
+  return appContextService.getSavedObjects().getScopedClient(request, {
+    excludedWrappers: ['security'],
+  });
+}
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -167,18 +174,9 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-    const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
-    if (!res.valid) {
-      return response.unauthorized({
-        body: { message: 'Invalid Access API Key' },
-      });
-    }
-    const agent = await AgentService.getAgentByAccessAPIKeyId(
-      soClient,
-      res.accessApiKeyId as string
-    );
+    const soClient = getInternalUserSOClient(request);
+    const res = APIKeyService.parseApiKey(request.headers);
+    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
@@ -217,18 +215,9 @@ export const postAgentAcksHandler: RequestHandler<
   TypeOf<typeof PostAgentAcksRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-    const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
-    if (!res.valid) {
-      return response.unauthorized({
-        body: { message: 'Invalid Access API Key' },
-      });
-    }
-    const agent = await AgentService.getAgentByAccessAPIKeyId(
-      soClient,
-      res.accessApiKeyId as string
-    );
+    const soClient = getInternalUserSOClient(request);
+    const res = APIKeyService.parseApiKey(request.headers);
+    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId as string);
 
     await AgentService.acknowledgeAgentActions(soClient, agent, request.body.action_ids);
 
@@ -259,22 +248,20 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-    const res = await APIKeyService.verifyEnrollmentAPIKey({
-      soClient,
-      headers: request.headers,
-      callCluster,
-    });
-    if (!res.valid || !res.enrollmentAPIKey) {
+    const soClient = getInternalUserSOClient(request);
+    const { apiKeyId } = APIKeyService.parseApiKey(request.headers);
+    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
+
+    if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
       return response.unauthorized({
         body: { message: 'Invalid Enrollment API Key' },
       });
     }
+
     const agent = await AgentService.enroll(
       soClient,
       request.body.type,
-      res.enrollmentAPIKey.config_id as string,
+      enrollmentAPIKey.config_id as string,
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
