@@ -34,7 +34,6 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
-import { useKibanaContext } from '../../../../lib/kibana';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
@@ -76,7 +75,8 @@ export const StepCreateForm: FC<Props> = React.memo(
     );
 
     const deps = useAppDependencies();
-    const kibanaContext = useKibanaContext();
+    const indexPatterns = deps.plugins.data.indexPatterns;
+    const uiSettings = deps.core.uiSettings;
     const toastNotifications = useToastNotifications();
 
     useEffect(() => {
@@ -176,7 +176,7 @@ export const StepCreateForm: FC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await kibanaContext.indexPatterns.make();
+        const newIndexPattern = await indexPatterns.make();
 
         Object.assign(newIndexPattern, {
           id: '',
@@ -200,8 +200,8 @@ export const StepCreateForm: FC<Props> = React.memo(
 
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
-        if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
-          await kibanaContext.kibanaConfig.set('defaultIndex', id);
+        if (!uiSettings.get('defaultIndex')) {
+          await uiSettings.set('defaultIndex', id);
         }
 
         toastNotifications.addSuccess(

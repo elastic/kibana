@@ -7,14 +7,16 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../lib/kibana';
-
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
+
 import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
 
 // workaround to make React.memo() work with enzyme
@@ -23,18 +25,16 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
+    const Providers = getAppProviders(createPublicShim());
     const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <StepDefineForm onChange={() => {}} />
-        </KibanaContext.Provider>
-      </div>
+      <Providers>
+        <StepDefineForm onChange={() => {}} searchItems={{} as SearchItems} />
+      </Providers>
     );
 
     expect(wrapper).toMatchSnapshot();

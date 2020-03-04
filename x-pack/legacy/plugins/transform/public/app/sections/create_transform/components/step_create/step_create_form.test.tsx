@@ -7,7 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../lib/kibana';
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 
 import { StepCreateForm } from './step_create_form';
 
@@ -17,6 +18,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <StepCreateForm />', () => {
@@ -29,14 +31,11 @@ describe('Transform: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
+    const Providers = getAppProviders(createPublicShim());
     const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <StepCreateForm {...props} />
-        </KibanaContext.Provider>
-      </div>
+      <Providers>
+        <StepCreateForm {...props} />
+      </Providers>
     );
 
     expect(wrapper).toMatchSnapshot();

@@ -398,8 +398,12 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
           desc: schema.maybe(schema.boolean()),
           end: schema.maybe(schema.string()),
           exclude_interim: schema.maybe(schema.boolean()),
-          'page.from': schema.maybe(schema.number()),
-          'page.size': schema.maybe(schema.number()),
+          page: schema.maybe(
+            schema.object({
+              from: schema.maybe(schema.number()),
+              size: schema.maybe(schema.number()),
+            })
+          ),
           record_score: schema.maybe(schema.number()),
           sort: schema.maybe(schema.string()),
           start: schema.maybe(schema.string()),
@@ -410,7 +414,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.records', {
           jobId: request.params.jobId,
-          ...request.body,
+          body: request.body,
         });
         return response.ok({
           body: results,
@@ -448,8 +452,12 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
           end: schema.maybe(schema.string()),
           exclude_interim: schema.maybe(schema.boolean()),
           expand: schema.maybe(schema.boolean()),
-          'page.from': schema.maybe(schema.number()),
-          'page.size': schema.maybe(schema.number()),
+          page: schema.maybe(
+            schema.object({
+              from: schema.maybe(schema.number()),
+              size: schema.maybe(schema.number()),
+            })
+          ),
           sort: schema.maybe(schema.string()),
           start: schema.maybe(schema.string()),
         }),
@@ -460,7 +468,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.buckets', {
           jobId: request.params.jobId,
           timestamp: request.params.timestamp,
-          ...request.body,
+          body: request.body,
         });
         return response.ok({
           body: results,

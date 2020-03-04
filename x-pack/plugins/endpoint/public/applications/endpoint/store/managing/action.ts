@@ -4,12 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManagementListPagination } from '../../types';
-import { EndpointResultList } from '../../../../../common/types';
+import { ManagementListPagination, ServerApiError } from '../../types';
+import { EndpointResultList, EndpointMetadata } from '../../../../../common/types';
 
 interface ServerReturnedManagementList {
   type: 'serverReturnedManagementList';
   payload: EndpointResultList;
+}
+
+interface ServerReturnedManagementDetails {
+  type: 'serverReturnedManagementDetails';
+  payload: EndpointMetadata;
+}
+
+interface ServerFailedToReturnManagementDetails {
+  type: 'serverFailedToReturnManagementDetails';
+  payload: ServerApiError;
 }
 
 interface UserExitedManagementList {
@@ -23,5 +33,7 @@ interface UserPaginatedManagementList {
 
 export type ManagementAction =
   | ServerReturnedManagementList
+  | ServerReturnedManagementDetails
+  | ServerFailedToReturnManagementDetails
   | UserExitedManagementList
   | UserPaginatedManagementList;
