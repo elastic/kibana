@@ -133,37 +133,31 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .kbnLoader path:nth-of-type(1) {
-            fill: #EE5097;
             animation-delay: 0s;
           }
 
 
           .kbnLoader path:nth-of-type(2) {
-            fill: #17A7E0;
             animation-delay: 0.035s;
           }
 
 
           .kbnLoader path:nth-of-type(3) {
-            fill: #23BAB1;
             animation-delay: 0.125s;
           }
 
 
           .kbnLoader path:nth-of-type(4) {
-            fill: #92C73D;
             animation-delay: 0.155s;
           }
 
 
           .kbnLoader path:nth-of-type(5) {
-            fill: #0678A0;
             animation-delay: 0.075s;
           }
 
 
           .kbnLoader path:nth-of-type(6) {
-            fill: #FDD009;
             animation-delay: 0.06s;
           };
 
