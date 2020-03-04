@@ -10,7 +10,7 @@ import {
   importRulesPayloadSchema,
 } from './import_rules_schema';
 import { ThreatParams, ImportRuleAlertRest } from '../../types';
-import { ImportRulesRequest } from '../../rules/types';
+import { ImportRulesRequestParams } from '../../rules/types';
 
 describe('import rules schema', () => {
   describe('importRulesSchema', () => {
@@ -1331,13 +1331,14 @@ describe('import rules schema', () => {
   describe('importRulesQuerySchema', () => {
     test('overwrite gets a default value of false', () => {
       expect(
-        importRulesQuerySchema.validate<Partial<ImportRulesRequest['query']>>({}).value.overwrite
+        importRulesQuerySchema.validate<Partial<ImportRulesRequestParams['query']>>({}).value
+          .overwrite
       ).toEqual(false);
     });
 
     test('overwrite validates with a boolean true', () => {
       expect(
-        importRulesQuerySchema.validate<Partial<ImportRulesRequest['query']>>({
+        importRulesQuerySchema.validate<Partial<ImportRulesRequestParams['query']>>({
           overwrite: true,
         }).error
       ).toBeFalsy();
@@ -1347,7 +1348,7 @@ describe('import rules schema', () => {
       expect(
         importRulesQuerySchema.validate<
           Partial<
-            Omit<ImportRulesRequest['query'], 'overwrite'> & {
+            Omit<ImportRulesRequestParams['query'], 'overwrite'> & {
               overwrite: string;
             }
           >

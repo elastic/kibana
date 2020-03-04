@@ -18,7 +18,7 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { KpiHostsData, KpiHostDetailsData, KpiNetworkData } from '../../graphql/types';
+import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
@@ -112,12 +112,12 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 
 export const addValueToFields = (
   fields: StatItem[],
-  data: KpiHostsData | KpiHostDetailsData | KpiNetworkData
+  data: KpiHostsData | KpiNetworkData
 ): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
-  data: KpiHostsData | KpiHostDetailsData | KpiNetworkData
+  data: KpiHostsData | KpiNetworkData
 ): ChartSeriesData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
@@ -129,7 +129,7 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: StatItem[],
-  data: KpiHostsData | KpiHostDetailsData | KpiNetworkData
+  data: KpiHostsData | KpiNetworkData
 ): ChartSeriesData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
@@ -158,7 +158,7 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: KpiHostsData | KpiHostDetailsData | KpiNetworkData,
+  data: KpiHostsData | KpiNetworkData,
   id: string,
   from: number,
   to: number,

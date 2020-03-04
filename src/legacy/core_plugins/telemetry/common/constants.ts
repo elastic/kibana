@@ -67,6 +67,11 @@ export const TELEMETRY_STATS_TYPE = 'telemetry';
 export const UI_METRIC_USAGE_TYPE = 'ui_metric';
 
 /**
+ * Application Usage type
+ */
+export const APPLICATION_USAGE_TYPE = 'application_usage';
+
+/**
  * Link to Advanced Settings.
  */
 export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';

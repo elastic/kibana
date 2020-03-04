@@ -10,7 +10,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId, setInspector } from './kibana_services';
+import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -52,5 +52,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
 
   public start(core: CoreStart, plugins: any) {
     setInspector(plugins.np.inspector);
+    setFileUpload(plugins.np.file_upload);
   }
 }

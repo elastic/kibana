@@ -14,26 +14,22 @@ import {
 } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
-import { ConfigType } from '../../config';
 import { defineBasicRoutes } from './basic';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authenticationMock } from '../../authentication/index.mock';
-import { authorizationMock } from '../../authorization/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Basic authentication routes', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    authc = authenticationMock.create();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
+
+    authc = routeParamsMock.authc;
+    authc.isProviderEnabled.mockImplementation(provider => provider === 'basic');
 
     mockContext = ({
       licensing: {
@@ -41,16 +37,7 @@ describe('Basic authentication routes', () => {
       },
     } as unknown) as RequestHandlerContext;
 
-    defineBasicRoutes({
-      router,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineBasicRoutes(routeParamsMock);
   });
 
   describe('login', () => {
@@ -163,6 +150,22 @@ describe('Basic authentication routes', () => {
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
           provider: 'basic',
+          value: { username: 'user', password: 'password' },
+        });
+      });
+
+      it('prefers `token` authentication provider if it is enabled', async () => {
+        authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
+        authc.isProviderEnabled.mockImplementation(
+          provider => provider === 'token' || provider === 'basic'
+        );
+
+        const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+        expect(response.status).toBe(204);
+        expect(response.payload).toBeUndefined();
+        expect(authc.login).toHaveBeenCalledWith(mockRequest, {
+          provider: 'token',
           value: { username: 'user', password: 'password' },
         });
       });

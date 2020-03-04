@@ -17,8 +17,17 @@
  * under the License.
  */
 
-import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
+import { ConnectableObservable, Observable, Subscription, Subject } from 'rxjs';
+import {
+  filter,
+  first,
+  map,
+  publishReplay,
+  switchMap,
+  take,
+  shareReplay,
+  takeUntil,
+} from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
@@ -47,13 +56,8 @@ interface SetupDeps {
 export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscriptions: {
-    client?: Subscription;
-    esNodesCompatibility?: Subscription;
-  } = {
-    client: undefined,
-    esNodesCompatibility: undefined,
-  };
+  private subscription: Subscription | undefined;
+  private stop$ = new Subject();
   private kibanaVersion: string;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -69,7 +73,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
     const clients$ = this.config$.pipe(
       filter(() => {
-        if (this.subscriptions.client !== undefined) {
+        if (this.subscription !== undefined) {
           this.log.error('Clients cannot be changed after they are created');
           return false;
         }
@@ -100,7 +104,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       publishReplay(1)
     ) as ConnectableObservable<CoreClusterClients>;
 
-    this.subscriptions.client = clients$.connect();
+    this.subscription = clients$.connect();
 
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -164,18 +168,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(publishReplay(1));
-
-    this.subscriptions.esNodesCompatibility = (esNodesCompatibility$ as ConnectableObservable<
-      unknown
-    >).connect();
-
-    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
+    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
@@ -195,12 +188,10 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.client?.unsubscribe();
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.esNodesCompatibility?.unsubscribe();
-    this.subscriptions = { client: undefined, esNodesCompatibility: undefined };
+    if (this.subscription !== undefined) {
+      this.subscription.unsubscribe();
+    }
+    this.stop$.next();
   }
 
   private createClusterClient(

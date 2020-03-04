@@ -232,6 +232,36 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 
+    it('throws when calling setup APIs once started', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setup = await soService.setup(createSetupDeps());
+      await soService.start({});
+
+      expect(() => {
+        setup.setClientFactoryProvider(jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`setClientFactoryProvider\` after service startup."`
+      );
+
+      expect(() => {
+        setup.addClientWrapper(0, 'dummy', jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`addClientWrapper\` after service startup."`
+      );
+
+      expect(() => {
+        setup.registerType({
+          name: 'someType',
+          hidden: false,
+          namespaceAgnostic: false,
+          mappings: { properties: {} },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`registerType\` after service startup."`
+      );
+    });
+
     describe('#getTypeRegistry', () => {
       it('returns the internal type registry of the service', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
