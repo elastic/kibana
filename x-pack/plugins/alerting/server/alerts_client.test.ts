@@ -1984,6 +1984,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2186,6 +2187,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2332,6 +2334,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2441,6 +2444,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2509,6 +2513,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2613,6 +2618,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2742,6 +2748,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2772,6 +2779,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2808,6 +2816,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2843,6 +2852,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
