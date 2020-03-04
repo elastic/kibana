@@ -45,11 +45,13 @@ const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
 const getMetric: (
   services: AlertServices,
   params: MetricExpressionParams,
-  groupBy: string | undefined
+  groupBy: string | undefined,
+  filterQuery: string | undefined
 ) => Promise<Record<string, number>> = async function(
   { callCluster },
-  { metric, filterQuery, aggType, timeUnit, timeSize, indexPattern },
-  groupBy
+  { metric, aggType, timeUnit, timeSize, indexPattern },
+  groupBy,
+  filterQuery
 ) {
   const interval = `${timeSize}${timeUnit}`;
 
@@ -127,8 +129,8 @@ const getMetric: (
             },
           },
         ],
+        ...parsedFilterQuery,
       },
-      ...parsedFilterQuery,
     },
     size: 0,
     aggs,
@@ -200,20 +202,22 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
           })
         ),
         groupBy: schema.maybe(schema.string()),
+        filterQuery: schema.maybe(schema.string()),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     async executor({ services, params }) {
-      const { criteria, groupBy } = params as {
+      const { criteria, groupBy, filterQuery } = params as {
         criteria: MetricExpressionParams[];
         groupBy: string | undefined;
+        filterQuery: string | undefined;
       };
 
       const alertResults = await Promise.all(
         criteria.map(criterion =>
           (async () => {
-            const currentValues = await getMetric(services, criterion, groupBy);
+            const currentValues = await getMetric(services, criterion, groupBy, filterQuery);
             if (typeof currentValues === 'undefined')
               throw new Error('Could not get current value of metric');
             const { threshold, comparator } = criterion;
