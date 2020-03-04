@@ -160,7 +160,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
   // Table and search states
   const [search, setSearch] = useState<string>('');
-  const { pagination, setPagination } = usePagination();
+  const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
 
   // Fetch agent configs
@@ -428,6 +428,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
           totalItemCount: agentConfigData ? agentConfigData.total : 0,
+          pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {
           const newPagination = {
