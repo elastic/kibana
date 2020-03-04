@@ -69,16 +69,6 @@ type Props = OwnProps;
  * data provider associated with the item being dropped
  */
 
-<<<<<<< HEAD
-const DraggableWrapperComponent = React.memo<Props>(
-  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
-    useEffect(() => {
-      registerProvider!({ provider: dataProvider });
-      return () => {
-        unRegisterProvider!({ id: dataProvider.id });
-      };
-    }, []);
-=======
 export const DraggableWrapper = React.memo<Props>(
   ({ dataProvider, render, truncate }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
@@ -103,7 +93,6 @@ export const DraggableWrapper = React.memo<Props>(
       },
       []
     );
->>>>>>> 543481ba539b5003bbb8f7b2ed987a7c747c964d
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -116,15 +105,11 @@ export const DraggableWrapper = React.memo<Props>(
                 key={getDraggableId(dataProvider.id)}
               >
                 {(provided, snapshot) => (
-<<<<<<< HEAD
-                  <ConditionalPortal usePortal={snapshot.isDragging}>
-=======
                   <ConditionalPortal
                     isDragging={snapshot.isDragging}
                     registerProvider={registerProvider}
                     usePortal={snapshot.isDragging && usePortal}
                   >
->>>>>>> 543481ba539b5003bbb8f7b2ed987a7c747c964d
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}

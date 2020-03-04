@@ -23,11 +23,10 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
+import { TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
-import { eventIsPinned } from './helpers';
 import { getActionsColumnWidth } from './column_headers/helpers';
-import { Events } from './events';
+import { eventIsPinned } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -114,9 +113,9 @@ export const Body = React.memo<BodyProps>(
       [actionsColumnWidth, columnHeaders]
     );
 
-    const rowHeights = [];
+    const rowHeights: number[] = [];
 
-    const getItemSize = index => rowHeights[index] || 33;
+    const getItemSize = (index: number) => rowHeights[index] || 33;
 
     const Row = React.memo(({ index, style }) => {
       const ref = useRef();

@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled, { css } from 'styled-components';
-import areEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -184,6 +184,6 @@ export const InspectButton = connect(
     InspectButtonComponent,
     // @ts-ignore
     ({ refetch: prevRefetch, ...prevProps }, { refetch: nextRefetch, ...nextProps }) =>
-      areEqual(prevProps, nextProps)
+      deepEqual(prevProps, nextProps)
   )
 );

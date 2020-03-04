@@ -8,7 +8,7 @@ import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import {

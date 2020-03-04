@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';

@@ -7,7 +7,7 @@
 import { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
 import React from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../store';
 import { SetQuery } from '../../pages/hosts/navigation/types';

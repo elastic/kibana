@@ -61,17 +61,6 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
     };
   }, []);
 
-  const setQuery = useCallback(
-    ({ id, inspect, loading, refetch }: SetQuery) =>
-      setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
-    [setGlobalQuery]
-  );
-
-  const deleteQuery = useCallback(
-    ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
-    [deleteOneQuery]
-  );
-
   return (
     <>
       {children({
