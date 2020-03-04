@@ -41,6 +41,11 @@ interface CreateReindexWorker {
   licensing: LicensingPluginSetup;
 }
 
+interface BatchResponse {
+  enqueued: ReindexOperation[];
+  errors: Array<{ indexName: string; message: string }>;
+}
+
 export function createReindexWorker({
   logger,
   elasticsearchService,
@@ -148,9 +153,9 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { indexNames } = request.body;
-        const results = {
-          started: [] as ReindexOperation[],
-          errors: [] as Array<{ indexName: string; message: string }>,
+        const results: BatchResponse = {
+          enqueued: [],
+          errors: [],
         };
         for (const indexName of indexNames) {
           try {
@@ -164,7 +169,7 @@ export function registerReindexIndicesRoutes(
               credentialStore,
               enqueue: true,
             });
-            results.started.push(result);
+            results.enqueued.push(result);
           } catch (e) {
             results.errors.push({
               indexName,
