@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -14,24 +14,18 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import * as i18n from '../../translations';
-import { Form, useForm } from '../../../shared_imports';
+import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 
-interface IconAction {
-  'aria-label': string;
-  iconType: string;
-  onClick: (b: boolean) => void;
-  onSubmit: (a: string[]) => void;
-}
-
 interface TagListProps {
+  isLoading: boolean;
+  onSubmit: (a: string[]) => void;
   tags: string[];
-  iconAction?: IconAction;
-  isEditTags?: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -43,37 +37,35 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProps) => {
+export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) => {
   const { form } = useForm({
     defaultValue: { tags },
     options: { stripEmptyFields: false },
     schema,
   });
+  const [isEditTags, setIsEditTags] = useState(false);
 
-  const onSubmit = useCallback(async () => {
+  const onSubmitTags = useCallback(async () => {
     const { isValid, data: newData } = await form.submit();
-    if (isValid && iconAction) {
-      iconAction.onSubmit(newData.tags);
-      iconAction.onClick(false);
+    if (isValid && newData.tags) {
+      onSubmit(newData.tags);
+      setIsEditTags(false);
     }
-  }, [form]);
+  }, [form, onSubmit]);
 
-  const onActionClick = useCallback(
-    (cb: (b: boolean) => void, onClickBool: boolean) => cb(onClickBool),
-    [iconAction]
-  );
   return (
     <EuiText>
       <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <h4>{i18n.TAGS}</h4>
         </EuiFlexItem>
-        {iconAction && (
+        {isLoading && <EuiLoadingSpinner />}
+        {!isLoading && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label={iconAction['aria-label']}
-              iconType={iconAction.iconType}
-              onClick={() => onActionClick(iconAction.onClick, true)}
+              aria-label={'tags'}
+              iconType={'pencil'}
+              onClick={setIsEditTags.bind(null, true)}
             />
           </EuiFlexItem>
         )}
@@ -88,7 +80,7 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
               <EuiBadge color="hollow">{tag}</EuiBadge>
             </EuiFlexItem>
           ))}
-        {isEditTags && iconAction && (
+        {isEditTags && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <Form form={form}>
@@ -106,14 +98,22 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
               </Form>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton fill onClick={onSubmit}>
-                {i18n.SUBMIT}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => onActionClick(iconAction.onClick, false)}>
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="secondary" fill iconType="save" onClick={onSubmitTags} size="s">
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    onClick={setIsEditTags.bind(null, false)}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

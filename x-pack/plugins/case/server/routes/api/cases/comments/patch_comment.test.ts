@@ -22,7 +22,7 @@ describe('PATCH comment', () => {
   });
   it(`Patch a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comment',
+      path: '/api/cases/{case_id}/comments',
       method: 'patch',
       params: {
         case_id: 'mock-id-1',
@@ -45,9 +45,33 @@ describe('PATCH comment', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.comment).toEqual('Update my comment');
   });
+
+  it(`Fails with 409 if version does not match`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases/{case_id}/comments',
+      method: 'patch',
+      params: {
+        id: 'mock-comment-1',
+      },
+      body: {
+        comment: 'Update my comment',
+        version: 'badv=',
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(409);
+  });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comment',
+      path: '/api/cases/{case_id}/comments',
       method: 'patch',
       params: {
         case_id: 'mock-id-1',
