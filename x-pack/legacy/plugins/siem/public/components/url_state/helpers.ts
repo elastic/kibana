@@ -57,7 +57,7 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 
-    return stringify(url.encodeQuery(previousQueryValues));
+    return url.makeUrlFromQuery(previousQueryValues);
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
@@ -65,13 +65,10 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return stringify(
-    url.encodeQuery({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    }),
-    { sort: false, encode: false }
-  );
+  return url.makeUrlFromQuery({
+    ...previousQueryValues,
+    [stateKey]: encodedUrlState,
+  });
 };
 
 export const replaceQueryStringInLocation = (

@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
-import { parse, stringify } from 'querystring';
+import { parse } from 'querystring';
 import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
@@ -37,7 +37,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
 
-        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+        const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
 
         return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
@@ -57,7 +57,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         }
 
         if (emptyEntity(ip)) {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
 
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
@@ -67,10 +67,10 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             ips,
             queryStringDecoded.query || ''
           );
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
           return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}

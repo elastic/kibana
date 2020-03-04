@@ -18,7 +18,6 @@
  */
 
 import { format as formatUrl } from 'url';
-// import { stringify } from 'querystring';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';

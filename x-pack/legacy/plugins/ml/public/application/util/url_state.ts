@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+import { url } from '../../../../../../../src/plugins/kibana_utils/common/url';
 
 import { Dictionary } from '../../../common/types/common';
 
@@ -83,7 +84,7 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = stringify(parsedQueryString);
+        const oldLocationSearch = url.makeUrlFromQuery(parsedQueryString);
 
         Object.keys(urlState).forEach(a => {
           if (isRisonSerializationRequired(a)) {
@@ -92,7 +93,7 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = stringify(parsedQueryString);
+        const newLocationSearch = url.makeUrlFromQuery(parsedQueryString);
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({

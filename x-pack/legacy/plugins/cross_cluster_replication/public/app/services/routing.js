@@ -24,8 +24,8 @@ const queryParamsFromObject = (params, encodeParams = false) => {
 
   const paramStr = stringify(
     params,
-    '&',
-    '=',
+    undefined,
+    undefined,
     encodeParams
       ? {}
       : {
