@@ -17,7 +17,12 @@ export const datafeedConfigSchema = schema.object({
   feed_id: schema.maybe(schema.string()),
   aggregations: schema.maybe(schema.any()),
   aggs: schema.maybe(schema.any()),
-  chunking_config: schema.maybe(schema.any()),
+  chunking_config: schema.maybe(
+    schema.object({
+      mode: schema.maybe(schema.string()),
+      time_span: schema.maybe(schema.string()),
+    })
+  ),
   frequency: schema.maybe(schema.string()),
   indices: schema.arrayOf(schema.string()),
   indexes: schema.maybe(schema.arrayOf(schema.string())),
@@ -28,4 +33,12 @@ export const datafeedConfigSchema = schema.object({
   script_fields: schema.maybe(schema.any()),
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
+  indices_options: schema.maybe(
+    schema.object({
+      expand_wildcards: schema.maybe(schema.arrayOf(schema.string())),
+      ignore_unavailable: schema.maybe(schema.boolean()),
+      allow_no_indices: schema.maybe(schema.boolean()),
+      ignore_throttled: schema.maybe(schema.boolean()),
+    })
+  ),
 });
