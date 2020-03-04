@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AbstractESSource } from './es_source';
-import { esAggFieldsFactory, ESAggMetricField } from '../fields/es_agg_field';
+import { esAggFieldsFactory } from '../fields/es_agg_field';
 
 import {
   AGG_TYPE,

@@ -55,9 +55,9 @@ export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
 
-export const FIELD_ORIGIN = {
-  SOURCE: 'source',
-  JOIN: 'join',
+export enum FIELD_ORIGIN {
+  SOURCE = 'source',
+  JOIN = 'join',
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';

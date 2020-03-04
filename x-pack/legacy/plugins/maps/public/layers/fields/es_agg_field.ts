@@ -4,55 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractField } from './field';
+import { AbstractField, IField } from './field';
+import { AggDescriptor } from  '../../../common/descriptor_types';
+import { IESAggSource } from '../sources/es_agg_source';
 import { ESDocField } from './es_doc_field';
-import { AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { getField, addFieldToDSL } from '../util/es_agg_utils';
 import { TopTermPercentageField } from './top_term_percentage_field';
+import { IIndexPattern } from 'src/plugins/data/public';
 
-export class ESAggMetricField extends AbstractField {
+export interface IESAggField extends IField {
+  getValueAggDsl(indexPattern: IIndexPattern): unknown;
+  getBucketCount(): number;
+}
+
+export class ESAggField extends AbstractField implements IESAggField {
   static type = 'ES_AGG';
 
-  constructor({ label, source, aggType, esDocField, origin }) {
+  private _label?: string;
+  private _aggType: AGG_TYPE;
+  private _esDocField?: unknown;
+
+  constructor({
+    label,
+    source,
+    aggType,
+    esDocField,
+    origin
+  }: {
+    label?: string,
+    source: IESAggSource,
+    aggType: AGG_TYPE,
+    esDocField?: unknown,
+    origin: FIELD_ORIGIN,
+  }) {
     super({ source, origin });
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
   }
 
-  getName() {
+  getName(): string {
     return this._source.getAggKey(this.getAggType(), this.getRootName());
   }
 
-  getRootName() {
+  getRootName(): string {
     return this._getESDocFieldName();
   }
 
-  async getLabel() {
+  async getLabel(): Promise<string> {
     return this._label
       ? this._label
       : this._source.getAggLabel(this.getAggType(), this.getRootName());
   }
 
-  getAggType() {
+  getAggType(): AGG_TYPE {
     return this._aggType;
   }
 
-  isValid() {
+  isValid(): boolean {
     return this.getAggType() === AGG_TYPE.COUNT ? true : !!this._esDocField;
   }
 
-  async getDataType() {
+  async getDataType(): Promise<string> {
     return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
-  _getESDocFieldName() {
+  _getESDocFieldName(): unknown {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
-  async createTooltipProperty(value) {
+  async createTooltipProperty(value: number | string): Promise<unknown> {
     const indexPattern = await this._source.getIndexPattern();
     return new ESAggMetricTooltipProperty(
       this.getName(),
@@ -63,7 +87,7 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-  getValueAggDsl(indexPattern) {
+  getValueAggDsl(indexPattern: IIndexPattern): unknown {
     if (this.getAggType() === AGG_TYPE.COUNT) {
       return null;
     }
@@ -76,32 +100,32 @@ export class ESAggMetricField extends AbstractField {
     };
   }
 
-  getBucketCount() {
+  getBucketCount(): number {
     // terms aggregation increases the overall number of buckets per split bucket
     return this.getAggType() === AGG_TYPE.TERMS ? 1 : 0;
   }
 
-  supportsFieldMeta() {
+  supportsFieldMeta(): boolean {
     // count and sum aggregations are not within field bounds so they do not support field meta.
     return !isMetricCountable(this.getAggType());
   }
 
-  canValueBeFormatted() {
+  canValueBeFormatted(): boolean {
     // Do not use field formatters for counting metrics
     return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());
   }
 
-  async getOrdinalFieldMetaRequest(config) {
-    return this._esDocField.getOrdinalFieldMetaRequest(config);
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return this._esDocField.getOrdinalFieldMetaRequest();
   }
 
-  async getCategoricalFieldMetaRequest() {
+  async getCategoricalFieldMetaRequest(): Promise<unknown> {
     return this._esDocField.getCategoricalFieldMetaRequest();
   }
 }
 
-export function esAggFieldsFactory(aggDescriptor, source, origin) {
-  const aggField = new ESAggMetricField({
+export function esAggFieldsFactory(aggDescriptor: AggDescriptor, source: IESAggSource, origin: FIELD_ORIGIN): IESAggField[] {
+  const aggField = new ESAggField({
     label: aggDescriptor.label,
     esDocField: aggDescriptor.field
       ? new ESDocField({ fieldName: aggDescriptor.field, source })

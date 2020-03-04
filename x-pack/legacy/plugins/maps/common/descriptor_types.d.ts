@@ -40,8 +40,8 @@ export type AbstractESAggDescriptor = AbstractESSourceDescriptor & {
 };
 
 export type ESGeoGridSourceDescriptor = AbstractESAggDescriptor & {
-  requestType: RENDER_AS;
-  resolution: GRID_RESOLUTION;
+  requestType?: RENDER_AS;
+  resolution?: GRID_RESOLUTION;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {

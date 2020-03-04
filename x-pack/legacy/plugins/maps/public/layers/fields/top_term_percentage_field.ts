@@ -5,11 +5,12 @@
  */
 
 import { AbstractField } from './field';
+import { IESAggField } from './es_agg_field';
 import { TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 
-export class TopTermPercentageField extends AbstractField {
-  constructor(topTermAggField) {
+export class TopTermPercentageField extends AbstractField implements IESAggField {
+  constructor(topTermAggField: IESAggField) {
     super({ source: topTermAggField.getSource(), origin: topTermAggField.getOrigin() });
     this._topTermAggField = topTermAggField;
   }

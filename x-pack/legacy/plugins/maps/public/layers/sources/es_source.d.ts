@@ -6,4 +6,10 @@
 
 import { AbstractVectorSource } from './vector_source';
 
-export class AbstractESSource extends AbstractVectorSource {}
+export interface IESSource extends ISource {
+  getIndexPattern(): Promise<IIndexPattern>;
+}
+
+export class AbstractESSource extends AbstractVectorSource implements IESSource {
+  getIndexPattern(): Promise<IIndexPattern>;
+}
