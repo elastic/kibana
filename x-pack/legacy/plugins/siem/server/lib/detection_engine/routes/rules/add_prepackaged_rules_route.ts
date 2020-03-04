@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { LegacyServices, LegacyRequest } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
-import { getIndex, transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
@@ -23,33 +20,27 @@ import {
 } from '../schemas/response/prepackaged_rules_schema';
 import { validate } from './validate';
 
-export const createAddPrepackedRulesRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: DETECTION_ENGINE_PREPACKAGED_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const addPrepackedRulesRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: DETECTION_ENGINE_PREPACKAGED_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: LegacyRequest, headers) {
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const {
-          actionsClient,
-          alertsClient,
-          clusterClient,
-          savedObjectsClient,
-          spacesClient,
-        } = await getClients(request);
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return headers.response().code(404);
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const rulesFromFileSystem = getPrepackagedRules();
@@ -58,30 +49,28 @@ export const createAddPrepackedRulesRoute = (
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const spaceIndex = getIndex(spacesClient.getSpaceId, config);
+        const { signalsIndex } = siemClient;
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(
+          const signalsIndexExists = await getIndexExists(
             clusterClient.callAsCurrentUser,
-            spaceIndex
+            signalsIndex
           );
-          if (!spaceIndexExists) {
-            return headers
-              .response({
-                message: `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`,
-                status_code: 400,
-              })
-              .code(400);
+          if (!signalsIndexExists) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,
+            });
           }
         }
         await Promise.all(
-          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex)
+          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, signalsIndex)
         );
         await updatePrepackagedRules(
           alertsClient,
           actionsClient,
           savedObjectsClient,
           rulesToUpdate,
-          spaceIndex
+          signalsIndex
         );
         const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
@@ -89,32 +78,17 @@ export const createAddPrepackedRulesRoute = (
         };
         const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
         if (errors != null) {
-          return headers
-            .response({
-              message: errors,
-              status_code: 500,
-            })
-            .code(500);
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return validated;
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const addPrepackedRulesRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createAddPrepackedRulesRoute(config, getClients));
+    }
+  );
 };

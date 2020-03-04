@@ -11,6 +11,7 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
@@ -24,9 +25,7 @@ import { HeaderNavigation } from './components/header_nav';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory(coreStart);
-
-  ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
-
+  ReactDOM.render(<AppRoot basename={appBasePath} store={store} coreStart={coreStart} />, element);
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
@@ -35,35 +34,46 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 interface RouterProps {
   basename: string;
   store: Store;
+  coreStart: CoreStart;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
-  <Provider store={store}>
-    <I18nProvider>
-      <BrowserRouter basename={basename}>
-        <RouteCapture>
-          <HeaderNavigation basename={basename} />
-          <Switch>
-            <Route
-              exact
-              path="/"
-              render={() => (
-                <h1 data-test-subj="welcomeTitle">
-                  <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-                </h1>
-              )}
-            />
-            <Route path="/management" component={ManagementList} />
-            <Route path="/alerts" render={() => <AlertIndex />} />
-            <Route path="/policy" exact component={PolicyList} />
-            <Route
-              render={() => (
-                <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-              )}
-            />
-          </Switch>
-        </RouteCapture>
-      </BrowserRouter>
-    </I18nProvider>
-  </Provider>
-));
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
+  ({ basename, store, coreStart: { http, notifications } }) => (
+    <Provider store={store}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ http, notifications }}>
+          <BrowserRouter basename={basename}>
+            <RouteCapture>
+              <HeaderNavigation basename={basename} />
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={() => (
+                    <h1 data-test-subj="welcomeTitle">
+                      <FormattedMessage
+                        id="xpack.endpoint.welcomeTitle"
+                        defaultMessage="Hello World"
+                      />
+                    </h1>
+                  )}
+                />
+                <Route path="/management" component={ManagementList} />
+                <Route path="/alerts" component={AlertIndex} />
+                <Route path="/policy" exact component={PolicyList} />
+                <Route
+                  render={() => (
+                    <FormattedMessage
+                      id="xpack.endpoint.notFound"
+                      defaultMessage="Page Not Found"
+                    />
+                  )}
+                />
+              </Switch>
+            </RouteCapture>
+          </BrowserRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </Provider>
+  )
+);

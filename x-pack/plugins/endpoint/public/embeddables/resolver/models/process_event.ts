@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessEvent } from '../types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
  * Resolver will only render 'graphable' process events.
  */
-export function isGraphableProcess(event: ProcessEvent) {
-  return eventType(event) === 'processCreated' || eventType(event) === 'processRan';
+export function isGraphableProcess(passedEvent: LegacyEndpointEvent) {
+  return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
 /**
  * Returns a custom event type for a process event based on the event's metadata.
  */
-export function eventType(event: ProcessEvent) {
+export function eventType(passedEvent: LegacyEndpointEvent) {
   const {
-    data_buffer: { event_type_full: type, event_subtype_full: subType },
-  } = event;
+    endgame: { event_type_full: type, event_subtype_full: subType },
+  } = passedEvent;
 
   if (type === 'process_event') {
     if (subType === 'creation_event' || subType === 'fork_event' || subType === 'exec_event') {
@@ -41,13 +41,13 @@ export function eventType(event: ProcessEvent) {
 /**
  * Returns the process event's pid
  */
-export function uniquePidForProcess(event: ProcessEvent) {
-  return event.data_buffer.node_id;
+export function uniquePidForProcess(event: LegacyEndpointEvent) {
+  return event.endgame.unique_pid;
 }
 
 /**
  * Returns the process event's parent pid
  */
-export function uniqueParentPidForProcess(event: ProcessEvent) {
-  return event.data_buffer.source_id;
+export function uniqueParentPidForProcess(event: LegacyEndpointEvent) {
+  return event.endgame.unique_ppid;
 }

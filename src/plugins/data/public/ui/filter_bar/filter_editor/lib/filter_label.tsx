@@ -98,7 +98,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       return (
         <Fragment>
           {prefix}
-          {JSON.stringify(filter.query)}
+          {JSON.stringify(filter.query) || filter.meta.value}
         </Fragment>
       );
   }
