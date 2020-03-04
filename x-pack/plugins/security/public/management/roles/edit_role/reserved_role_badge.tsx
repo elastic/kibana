@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Role, isReservedRole } from '../../../../common/model';
+import { Role, isRoleReserved } from '../../../../common/model';
 
 interface Props {
   role: Role;
@@ -17,7 +17,7 @@ interface Props {
 export const ReservedRoleBadge = (props: Props) => {
   const { role } = props;
 
-  if (isReservedRole(role)) {
+  if (isRoleReserved(role)) {
     return (
       <EuiToolTip
         data-test-subj="reservedRoleBadgeTooltip"

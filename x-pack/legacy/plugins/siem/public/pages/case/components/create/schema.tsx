@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../../shared_imports';
 import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from '../../translations';
 
@@ -13,7 +13,7 @@ const { emptyField } = fieldValidators;
 export const schema: FormSchema = {
   title: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.CASE_TITLE,
+    label: i18n.NAME,
     validations: [
       {
         validator: emptyField(i18n.TITLE_REQUIRED),
@@ -21,7 +21,7 @@ export const schema: FormSchema = {
     ],
   },
   description: {
-    type: FIELD_TYPES.TEXTAREA,
+    label: i18n.DESCRIPTION,
     validations: [
       {
         validator: emptyField(i18n.DESCRIPTION_REQUIRED),

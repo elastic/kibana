@@ -26,7 +26,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import { CoreStart, AppMountParams } from 'src/core/public';
 import { MyPluginDepsStart } from './plugin';
 
-export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
    const { renderApp, hasUnsavedChanges } = await import('./application');
    onAppLeave(actions => {
      if(hasUnsavedChanges()) {
@@ -34,7 +34,7 @@ export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
      }
      return actions.default();
    });
-   return renderApp(params);
+   return renderApp({ element, history });
 }
 
 ```
