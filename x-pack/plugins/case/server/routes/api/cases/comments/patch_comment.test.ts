@@ -51,9 +51,10 @@ describe('PATCH comment', () => {
       path: '/api/cases/{case_id}/comments',
       method: 'patch',
       params: {
-        id: 'mock-comment-1',
+        case_id: 'mock-id-1',
       },
       body: {
+        id: 'mock-comment-1',
         comment: 'Update my comment',
         version: 'badv=',
       },
