@@ -14,12 +14,12 @@ import {
   ClusterDetailsGetter,
   StatsCollectionConfig,
   ClusterDetails,
-} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
+} from '../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
-export const getClusterUuids: ClusterDetailsGetter = async config => {
+export const getClusterUuids: ClusterDetailsGetter = async (config: any) => {
   const response = await fetchClusterUuids(config);
   return handleClusterUuidsResponse(response);
 };
