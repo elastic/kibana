@@ -5,30 +5,15 @@
  */
 
 import { defineAuthenticationRoutes } from '.';
-import { ConfigType } from '../../config';
 
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
-import { authenticationMock } from '../../authentication/index.mock';
-import { authorizationMock } from '../../authorization/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Authentication routes', () => {
   it('does not register any SAML related routes if SAML auth provider is not enabled', () => {
-    const router = httpServiceMock.createRouter();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    const router = routeParamsMock.router;
 
-    defineAuthenticationRoutes({
-      router,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['basic'] } } as ConfigType,
-      authc: authenticationMock.create(),
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineAuthenticationRoutes(routeParamsMock);
 
     const samlRoutePathPredicate = ([{ path }]: [{ path: string }, any]) =>
       path.startsWith('/api/security/saml/');
