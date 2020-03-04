@@ -13,7 +13,7 @@ export const dashboards = [
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
-export const DashboardDrilldownActionFactory: ActionFactory<
+export const dashboardDrilldownActionFactory: ActionFactory<
   {
     dashboardId: string;
     useCurrentDashboardFilters: boolean;
@@ -101,7 +101,7 @@ export const DashboardDrilldownActionFactory: ActionFactory<
   },
 };
 
-export const UrlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTab: boolean }> = {
+export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTab: boolean }> = {
   type: 'Url',
   displayName: 'Go to URL',
   iconType: 'link',
@@ -145,6 +145,6 @@ export const UrlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
 };
 
 export const ACTION_FACTORIES = [
-  DashboardDrilldownActionFactory,
-  UrlDrilldownActionFactory,
+  dashboardDrilldownActionFactory,
+  urlDrilldownActionFactory,
 ] as Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;

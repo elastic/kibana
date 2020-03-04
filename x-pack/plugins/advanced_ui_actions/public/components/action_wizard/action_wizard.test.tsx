@@ -15,8 +15,8 @@ import {
   TEST_SUBJ_SELECTED_ACTION_FACTORY,
 } from './action_wizard';
 import {
-  DashboardDrilldownActionFactory,
-  UrlDrilldownActionFactory,
+  dashboardDrilldownActionFactory,
+  urlDrilldownActionFactory,
   dashboards,
 } from './test_data';
 
@@ -30,7 +30,7 @@ test('Pick and configure action', () => {
   const screen = render(
     <ActionWizard
       actionFactories={
-        [DashboardDrilldownActionFactory, UrlDrilldownActionFactory] as Array<
+        [dashboardDrilldownActionFactory, urlDrilldownActionFactory] as Array<
           ActionFactory<ActionFactoryBaseConfig, unknown>
         >
       }
@@ -45,7 +45,7 @@ test('Pick and configure action', () => {
   fireEvent.click(screen.getByText(/Go to URL/i));
 
   // check that wizard emitted change event. null means config is invalid. this is because URL is empty string yet
-  expect(wizardChangeFn).lastCalledWith(UrlDrilldownActionFactory, null);
+  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, null);
 
   // Input url
   const URL = 'https://elastic.co';
@@ -54,7 +54,7 @@ test('Pick and configure action', () => {
   });
 
   // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(UrlDrilldownActionFactory, {
+  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, {
     url: URL,
     openInNewTab: false,
   });
@@ -65,7 +65,7 @@ test('Pick and configure action', () => {
 
   // check that wizard emitted change event
   // null config means it is invalid. This is because no dashboard selected yet
-  expect(wizardChangeFn).lastCalledWith(DashboardDrilldownActionFactory, null);
+  expect(wizardChangeFn).lastCalledWith(dashboardDrilldownActionFactory, null);
 
   // Select dashboard
   fireEvent.change(screen.getByLabelText(/Choose destination dashboard/i), {
@@ -73,7 +73,7 @@ test('Pick and configure action', () => {
   });
 
   // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(DashboardDrilldownActionFactory, {
+  expect(wizardChangeFn).lastCalledWith(dashboardDrilldownActionFactory, {
     dashboardId: dashboards[1].id,
     useCurrentDashboardDataRange: false,
     useCurrentDashboardFilters: false,
@@ -85,7 +85,7 @@ test('If only one actions factory is available, then no selection step is render
 
   const screen = render(
     <ActionWizard
-      actionFactories={[UrlDrilldownActionFactory] as Array<ActionFactory<any, unknown>>}
+      actionFactories={[urlDrilldownActionFactory] as Array<ActionFactory<any, unknown>>}
       onChange={wizardChangeFn}
     />
   );
@@ -101,7 +101,7 @@ test('If only one actions factory is available, then no selection step is render
   });
 
   // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(UrlDrilldownActionFactory, {
+  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, {
     url: URL,
     openInNewTab: false,
   });
