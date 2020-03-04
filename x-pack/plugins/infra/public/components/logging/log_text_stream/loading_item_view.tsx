@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Unit } from '@elastic/datemath';
 
@@ -84,7 +84,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     return (
       <ProgressEntryWrapper className={className} position={position}>
         {position === 'start' ? <>{extra}</> : null}
-        <ProgressMessage timestamp={timestamp} />
+        <ProgressMessage timestamp={timestamp} relative={position === 'end' && isStreaming} />
         {position === 'end' ? <>{extra}</> : null}
       </ProgressEntryWrapper>
     );
@@ -99,23 +99,37 @@ const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
     props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
 `;
 
-const ProgressMessage: React.FC<{ timestamp?: number }> = ({ timestamp }) => {
+const ProgressMessage: React.FC<{ timestamp?: number; relative?: boolean }> = ({
+  timestamp,
+  relative = false,
+}) => {
+  let message;
+
+  if (timestamp) {
+    const formattedTimestamp = relative ? (
+      <FormattedRelative units="second" value={timestamp} updateInterval={1} />
+    ) : (
+      <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
+    );
+    message = (
+      <FormattedMessage
+        id="xpack.infra.logs.showingEntriesUntilTimestamp"
+        defaultMessage="Showing entries until {timestamp}"
+        values={{ timestamp: formattedTimestamp }}
+      />
+    );
+  } else {
+    message = (
+      <FormattedMessage
+        id="xpack.infra.logs.noAdditionalEntriesFoundText"
+        defaultMessage="No additional entries found"
+      />
+    );
+  }
+
   return (
     <LogTextSeparator>
-      <EuiTitle size="xxs">
-        {timestamp ? (
-          <FormattedMessage
-            id="xpack.infra.logs.showingEntriesUntilTimestamp"
-            defaultMessage="Showing entries until {timestamp}"
-            values={{ timestamp: <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} /> }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.infra.logs.noAdditionalEntriesFoundText"
-            defaultMessage="No additional entries found"
-          />
-        )}
-      </EuiTitle>
+      <EuiTitle size="xxs">{message}</EuiTitle>
     </LogTextSeparator>
   );
 };
