@@ -7,12 +7,7 @@
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import {
-  SavedObjectsLegacyService,
-  CoreSetup,
-  Logger,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
+import { CoreSetup, Logger, PluginInitializerContext } from '../../../../src/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -40,7 +35,6 @@ import { SpacesSavedObjectsService } from './saved_objects';
  * to function properly.
  */
 export interface LegacyAPI {
-  savedObjects: SavedObjectsLegacyService;
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
@@ -108,11 +102,11 @@ export class Plugin {
     core: CoreSetup<PluginsStart>,
     plugins: PluginsSetup
   ): Promise<SpacesPluginSetup> {
-    const service = new SpacesService(this.log, this.getLegacyAPI);
+    const service = new SpacesService(this.log);
 
     const spacesService = await service.setup({
       http: core.http,
-      elasticsearch: core.elasticsearch,
+      getStartServices: core.getStartServices,
       authorization: plugins.security ? plugins.security.authz : null,
       getSpacesAuditLogger: this.getSpacesAuditLogger,
       config$: this.config$,
@@ -131,7 +125,7 @@ export class Plugin {
     initExternalSpacesApi({
       externalRouter,
       log: this.log,
-      getSavedObjects: () => this.getLegacyAPI().savedObjects,
+      getStartServices: core.getStartServices,
       spacesService,
     });
 
@@ -175,9 +169,9 @@ export class Plugin {
           this.legacyAPI = legacyAPI;
         },
         createDefaultSpace: async () => {
+          const [coreStart] = await core.getStartServices();
           return await createDefaultSpace({
-            esClient: core.elasticsearch.adminClient,
-            savedObjects: this.getLegacyAPI().savedObjects,
+            savedObjects: coreStart.savedObjects,
           });
         },
       },

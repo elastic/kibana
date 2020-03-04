@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createSpaces } from './create_spaces';
-export { createMockSavedObjectsRepository } from './create_mock_so_repository';
-export { mockRouteContext, mockRouteContextWithInvalidLicense } from './route_contexts';
+import { Readable } from 'stream';
+
+export const createExportSavedObjectsToStreamMock = () => {
+  return jest.fn().mockResolvedValue(
+    new Readable({
+      objectMode: true,
+      read() {
+        this.push(null);
+      },
+    })
+  );
+};

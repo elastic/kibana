@@ -2106,6 +2106,7 @@ export interface SavedObjectsServiceStart {
     createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
+    getImportExportObjectLimit: () => number;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
     getTypeRegistry: () => ISavedObjectTypeRegistry;
 }

@@ -5,9 +5,11 @@
  */
 
 import {
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
   SavedObject,
+  exportSavedObjectsToStream,
+  resolveSavedObjectsImportErrors,
+  CoreStart,
+  KibanaRequest,
 } from 'src/core/server';
 import { Readable } from 'stream';
 import { spaceIdToNamespace } from '../utils/namespace';
@@ -16,25 +18,29 @@ import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
+import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsLegacyService
+  core: CoreStart,
+  request: KibanaRequest
 ) {
-  const { importExport, types, schema } = savedObjectsService;
-  const eligibleTypes = getEligibleTypes({ types, schema });
+  const { getTypeRegistry, getImportExportObjectLimit, getScopedClient } = core.savedObjects;
+
+  const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
+
+  const eligibleTypes = getEligibleTypes(getTypeRegistry());
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
-    const objectStream = await importExport.getSortedObjectsForExport({
+    const objectStream = await exportSavedObjectsToStream({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      exportSizeLimit: importExport.objectLimit,
+      exportSizeLimit: getImportExportObjectLimit(),
     });
     return readStreamToCompletion<SavedObject>(objectStream);
   };
@@ -50,9 +56,9 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     }>
   ) => {
     try {
-      const importResponse = await importExport.resolveImportErrors({
+      const importResponse = await resolveSavedObjectsImportErrors({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: importExport.objectLimit,
+        objectLimit: getImportExportObjectLimit(),
         savedObjectsClient,
         supportedTypes: eligibleTypes,
         readStream: objectsStream,

@@ -86,7 +86,6 @@ export const spaces = (kibana: Record<string, any>) =>
       const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),

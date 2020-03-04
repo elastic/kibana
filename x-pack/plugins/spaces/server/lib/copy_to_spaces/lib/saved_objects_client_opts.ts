@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createSpaces } from './create_spaces';
-export { createMockSavedObjectsRepository } from './create_mock_so_repository';
-export { mockRouteContext, mockRouteContextWithInvalidLicense } from './route_contexts';
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
+
+export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
+  excludedWrappers: ['spaces'],
+};
