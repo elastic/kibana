@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   Draggable,
   DraggableProvided,
   DraggableStateSnapshot,
   Droppable,
 } from 'react-beautiful-dnd';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -47,34 +47,50 @@ const ProviderContentWrapper = styled.span`
   }
 `;
 
+type RenderFunctionProp = (
+  props: DataProvider,
+  provided: DraggableProvided,
+  state: DraggableStateSnapshot
+) => React.ReactNode;
+
 interface OwnProps {
   dataProvider: DataProvider;
   inline?: boolean;
-  render: (
-    props: DataProvider,
-    provided: DraggableProvided,
-    state: DraggableStateSnapshot
-  ) => React.ReactNode;
+  render: RenderFunctionProp;
   truncate?: boolean;
 }
 
-type Props = OwnProps & PropsFromRedux;
+type Props = OwnProps;
 
 /**
  * Wraps a draggable component to handle registration / unregistration of the
  * data provider associated with the item being dropped
  */
 
-const DraggableWrapperComponent = React.memo<Props>(
-  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
+export const DraggableWrapper = React.memo<Props>(
+  ({ dataProvider, render, truncate }) => {
+    const [providerRegistered, setProviderRegistered] = useState(false);
+    const dispatch = useDispatch();
     const usePortal = useDraggablePortalContext();
 
-    useEffect(() => {
-      registerProvider!({ provider: dataProvider });
-      return () => {
-        unRegisterProvider!({ id: dataProvider.id });
-      };
-    }, []);
+    const registerProvider = useCallback(() => {
+      if (!providerRegistered) {
+        dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
+        setProviderRegistered(true);
+      }
+    }, [dispatch, providerRegistered, dataProvider]);
+
+    const unRegisterProvider = useCallback(
+      () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
+      [dispatch, dataProvider]
+    );
+
+    useEffect(
+      () => () => {
+        unRegisterProvider();
+      },
+      []
+    );
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -87,13 +103,18 @@ const DraggableWrapperComponent = React.memo<Props>(
                 key={getDraggableId(dataProvider.id)}
               >
                 {(provided, snapshot) => (
-                  <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>
+                  <ConditionalPortal
+                    isDragging={snapshot.isDragging}
+                    registerProvider={registerProvider}
+                    usePortal={snapshot.isDragging && usePortal}
+                  >
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       ref={provided.innerRef}
                       data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
+                      registerProvider={registerProvider}
                       style={{
                         ...provided.draggableProps.style,
                       }}
@@ -120,27 +141,11 @@ const DraggableWrapperComponent = React.memo<Props>(
       </Wrapper>
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
-      prevProps.render !== nextProps.render &&
-      prevProps.truncate === nextProps.truncate
-    );
-  }
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+    prevProps.render !== nextProps.render &&
+    prevProps.truncate === nextProps.truncate
 );
-
-DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
-
-const mapDispatchToProps = {
-  registerProvider: dragAndDropActions.registerProvider,
-  unRegisterProvider: dragAndDropActions.unRegisterProvider,
-};
-
-const connector = connect(null, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const DraggableWrapper = connector(DraggableWrapperComponent);
 
 DraggableWrapper.displayName = 'DraggableWrapper';
 
@@ -150,8 +155,24 @@ DraggableWrapper.displayName = 'DraggableWrapper';
  *
  * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
  */
-const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
-  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+
+interface ConditionalPortalProps {
+  children: React.ReactNode;
+  usePortal: boolean;
+  isDragging: boolean;
+  registerProvider: () => void;
+}
+
+export const ConditionalPortal = React.memo<ConditionalPortalProps>(
+  ({ children, usePortal, registerProvider, isDragging }) => {
+    useEffect(() => {
+      if (isDragging) {
+        registerProvider();
+      }
+    }, [isDragging, registerProvider]);
+
+    return usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>;
+  }
 );
 
 ConditionalPortal.displayName = 'ConditionalPortal';

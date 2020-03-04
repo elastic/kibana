@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { maxLengthValidator } from './validators';
+import { maxLengthValidator, memoryInputValidator } from './validators';
 
 describe('maxLengthValidator', () => {
   test('should allow a valid input', () => {
@@ -16,6 +16,32 @@ describe('maxLengthValidator', () => {
       maxLength: {
         requiredLength: 3,
         actualLength: 7,
+      },
+    });
+  });
+});
+
+describe('memoryInputValidator', () => {
+  test('should detect missing units', () => {
+    expect(memoryInputValidator()('10')).toEqual({
+      invalidUnits: {
+        allowedUnits: 'B, KB, MB, GB, TB, PB',
+      },
+    });
+  });
+
+  test('should accept valid input', () => {
+    expect(memoryInputValidator()('100PB')).toEqual(null);
+  });
+
+  test('should accept valid input with custom allowed units', () => {
+    expect(memoryInputValidator(['B', 'KB'])('100KB')).toEqual(null);
+  });
+
+  test('should detect not allowed units', () => {
+    expect(memoryInputValidator(['B', 'KB'])('100MB')).toEqual({
+      invalidUnits: {
+        allowedUnits: 'B, KB',
       },
     });
   });

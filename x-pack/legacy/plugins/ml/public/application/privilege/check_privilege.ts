@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { hasLicenseExpired } from '../license/check_license';
+import { hasLicenseExpired } from '../license';
 
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
 import { getPrivileges, getManageMlPrivileges } from './get_privileges';
