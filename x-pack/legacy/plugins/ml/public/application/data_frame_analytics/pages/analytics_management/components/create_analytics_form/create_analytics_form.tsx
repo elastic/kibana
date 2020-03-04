@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect } from 'react';
+import React, { Fragment, FC, useEffect, useMemo } from 'react';
 
 import {
   EuiComboBox,
@@ -36,7 +36,7 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { Messages } from './messages';
 import { JobType } from './job_type';
 import { JobDescriptionInput } from './job_description';
-import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
+import { getModelMemoryLimitErrors } from '../../hooks/use_create_analytics_form/reducer';
 import {
   IndexPattern,
   indexPatterns,
@@ -49,7 +49,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     services: { docLinks },
   } = useMlKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const { setFormState } = actions;
+  const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
@@ -77,7 +77,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     loadingFieldOptions,
     maxDistinctValuesError,
     modelMemoryLimit,
-    modelMemoryLimitUnitValid,
+    modelMemoryLimitValidationResult,
     previousJobType,
     previousSourceIndex,
     sourceIndex,
@@ -88,6 +88,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     trainingPercent,
   } = form;
   const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
+
+  const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
+    modelMemoryLimitValidationResult,
+  ]);
 
   const isJobTypeWithDepVar =
     jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
@@ -154,6 +158,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
+      const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
+
+      setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -168,7 +175,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         }
 
         setFormState({
-          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
           excludesOptions: analyzedFieldsOptions,
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
@@ -176,7 +183,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       } else {
         setFormState({
-          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
         });
       }
     } catch (e) {
@@ -189,14 +196,16 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       ) {
         errorMessage = e.message;
       }
+      const fallbackModelMemoryLimit =
+        jobType !== undefined
+          ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+          : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
+      setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
       setFormState({
         fieldOptionsFetchFail: true,
         maxDistinctValuesError: errorMessage,
         loadingFieldOptions: false,
-        modelMemoryLimit:
-          jobType !== undefined
-            ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
-            : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
+        modelMemoryLimit: fallbackModelMemoryLimit,
       });
     }
   }, 400);
@@ -642,7 +651,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
             })}
-            helpText={!modelMemoryLimitUnitValid && mmlUnitInvalidErrorMessage}
+            isInvalid={modelMemoryLimitValidationResult !== null}
+            error={mmlErrors}
           >
             <EuiFieldText
               placeholder={
@@ -653,7 +663,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={modelMemoryLimit === ''}
+              isInvalid={modelMemoryLimitValidationResult !== null}
               data-test-subj="mlAnalyticsCreateJobFlyoutModelMemoryInput"
             />
           </EuiFormRow>
