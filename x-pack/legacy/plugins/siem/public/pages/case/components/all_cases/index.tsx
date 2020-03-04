@@ -186,7 +186,11 @@ export const AllCases = React.memo(() => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon href={getConfigureCasesUrl()} iconType="gear" />
+            <EuiButtonIcon
+              aria-label={i18n.CONFIGURE_CASES_BUTTON}
+              href={getConfigureCasesUrl()}
+              iconType="gear"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>

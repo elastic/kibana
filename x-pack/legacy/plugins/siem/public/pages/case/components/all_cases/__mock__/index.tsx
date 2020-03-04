@@ -75,6 +75,12 @@ export const useGetCasesMockState: UseGetCasesState = {
     perPage: 5,
     total: 10,
   },
+  caseCount: {
+    open: 0,
+    closed: 0,
+  },
+  loading: [],
+  selectedCases: [],
   isLoading: false,
   isError: false,
   queryParams: {
@@ -83,5 +89,5 @@ export const useGetCasesMockState: UseGetCasesState = {
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
-  filterOptions: { search: '', tags: [] },
+  filterOptions: { search: '', tags: [], state: 'open' },
 };
