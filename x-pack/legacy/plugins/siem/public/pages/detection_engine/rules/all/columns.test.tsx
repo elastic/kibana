@@ -31,13 +31,7 @@ describe('AllRulesTable Columns', () => {
     beforeEach(() => {
       results = [];
 
-      reFetchRules.mockImplementation(
-        () =>
-          new Promise(resolve => {
-            results.push('reFetchRules');
-            resolve();
-          })
-      );
+      reFetchRules.mockImplementation(() => Promise.resolve(results.push('reFetchRules')));
     });
 
     test('duplicate rule onClick should call refetch after the rule is duplicated', async () => {
@@ -45,8 +39,7 @@ describe('AllRulesTable Columns', () => {
         () =>
           new Promise(resolve =>
             setTimeout(() => {
-              results.push('duplicateRulesAction');
-              resolve();
+              resolve(results.push('duplicateRulesAction'));
             }, 500)
           )
       );
