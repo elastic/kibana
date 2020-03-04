@@ -145,6 +145,7 @@ export const ArgTypesStrings = {
 };
 
 export const ExpressionDataSourceStrings = {
+  // Elasticsearch raw documents
   ESDocs: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {
@@ -223,6 +224,53 @@ export const ExpressionDataSourceStrings = {
     getDescendingOption: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.descendingDropDown', {
         defaultMessage: 'Descending',
+      }),
+  },
+  // Elasticsearch basic data source
+  ESBasic: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasicTitle', {
+        defaultMessage: 'Elasticsearch basic',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasicLabel', {
+        defaultMessage: 'Pull back raw documents from elasticsearch',
+      }),
+    getWarningTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.warningTitle', {
+        defaultMessage: 'Query with caution',
+      }),
+    getWarning: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.warningDescription', {
+        defaultMessage: `
+          This datasource pulls directly from {elasticsearch}
+          without the use of aggregations. It is best used with low volume datasets and in
+          situations where you need to view raw documents or plot exact, non-aggregated values on a
+          chart.`,
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
+      }),
+    getIndexTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.indexTitle', {
+        defaultMessage: 'Index',
+      }),
+    getIndexLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.indexLabel', {
+        defaultMessage: 'Enter an index name or select an index pattern',
+      }),
+
+    getFieldsTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.fieldsTitle', {
+        defaultMessage: 'Fields',
+      }),
+    getFieldsLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.fieldsLabel', {
+        defaultMessage: 'The fields to extract. Kibana scripted fields are not currently available',
+      }),
+    getFieldsWarningLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esbasic.fieldsWarningLabel', {
+        defaultMessage: 'This datasource performs best with 10 or fewer fields',
       }),
   },
 };

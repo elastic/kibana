@@ -5,5 +5,6 @@
  */
 
 import { esdocs } from './esdocs';
+import { esbasic } from './esbasic';
 
-export const datasourceSpecs = [esdocs];
+export const datasourceSpecs = [esdocs, esbasic];

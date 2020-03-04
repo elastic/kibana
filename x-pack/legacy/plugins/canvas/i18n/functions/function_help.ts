@@ -28,6 +28,7 @@ import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
+import { help as esbasic } from './dict/esbasic';
 import { help as essql } from './dict/essql';
 import { help as exactly } from './dict/exactly';
 import { help as filterrows } from './dict/filterrows';
@@ -182,6 +183,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   eq,
   escount,
   esdocs,
+  esbasic,
   essql,
   exactly,
   filterrows,

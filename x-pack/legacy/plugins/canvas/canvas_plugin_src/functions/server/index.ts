@@ -7,7 +7,8 @@
 import { demodata } from './demodata';
 import { escount } from './escount';
 import { esdocs } from './esdocs';
+import { esbasic } from './esbasic';
 import { pointseries } from './pointseries';
 import { essql } from './essql';
 
-export const functions = [demodata, esdocs, escount, essql, pointseries];
+export const functions = [demodata, esdocs, esbasic, escount, essql, pointseries];
