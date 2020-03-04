@@ -40,7 +40,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis: Vis;
 
   beforeAll(() => {
-    visualizationsSetup.types.createReactVisualization(createMetricVisTypeDefinition());
+    visualizationsSetup.createReactVisualization(createMetricVisTypeDefinition());
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
@@ -80,7 +80,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     };
 
     const el = document.createElement('div');
-    const metricVisType = visualizationsStart.types.get('metric');
+    const metricVisType = visualizationsStart.get('metric');
     const Controller = metricVisType.visualization;
     const controller = new Controller(el, vis);
     const render = (esResponse: any) => {

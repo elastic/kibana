@@ -43,7 +43,7 @@ describe('Vis Class', function() {
   beforeEach(
     ngMock.inject(function(Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      visTypes = visualizations.types;
+      visTypes = visualizations;
     })
   );
 

@@ -29,7 +29,7 @@ import { getServices } from '../../../../kibana_services';
 
 function getMapsAppBaseUrl() {
   const mapsAppVisAlias = getServices()
-    .visualizations.types.getAliases()
+    .visualizations.getAliases()
     .find(({ name }) => {
       return name === 'maps';
     });
@@ -38,7 +38,7 @@ function getMapsAppBaseUrl() {
 
 export function isMapsAppRegistered() {
   return getServices()
-    .visualizations.types.getAliases()
+    .visualizations.getAliases()
     .some(({ name }) => {
       return name === 'maps';
     });

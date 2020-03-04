@@ -61,12 +61,10 @@ import { DataStart as LegacyDataStart } from '../../../../data/public';
  *
  * @public
  */
-export interface VisualizationsSetup {
-  types: TypesSetup;
-}
 
-export interface VisualizationsStart {
-  types: TypesStart;
+export type VisualizationsSetup = TypesSetup;
+
+export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
   Vis: VisImplConstructor;
   showNewVisModal: typeof showNewVisModal;
@@ -122,7 +120,7 @@ export class VisualizationsPlugin
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
-      types: this.types.setup(),
+      ...this.types.setup(),
     };
   }
 
@@ -152,7 +150,7 @@ export class VisualizationsPlugin
     setSavedVisualizationsLoader(savedVisualizationsLoader);
 
     return {
-      types,
+      ...types,
       showNewVisModal,
       Vis: VisImpl,
       savedVisualizationsLoader,

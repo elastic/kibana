@@ -72,7 +72,7 @@ export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
 
     visFunctions.forEach((fn: any) => expressions.registerFunction(fn));
     visTypeDefinitions.forEach((vis: any) =>
-      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+      visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
   }
 

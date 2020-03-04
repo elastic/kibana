@@ -103,7 +103,7 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
 
-    visualizations.types.registerAlias(getLensAliasConfig());
+    visualizations.registerAlias(getLensAliasConfig());
 
     kibanaLegacy.registerLegacyApp({
       id: 'lens',

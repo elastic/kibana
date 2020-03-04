@@ -66,7 +66,7 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.types.createReactVisualization(getTimelionVisDefinition(dependencies));
+    visualizations.createReactVisualization(getTimelionVisDefinition(dependencies));
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
