@@ -7,6 +7,7 @@
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DrilldownService } from './service';
+import { FlyoutCreateDrilldownActionContext, OPEN_FLYOUT_ADD_DRILLDOWN } from './actions';
 
 export interface DrilldownsSetupDependencies {
   uiActions: UiActionsSetup;
@@ -20,6 +21,12 @@ export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'
 
 // eslint-disable-next-line
 export interface DrilldownsStartContract {}
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [OPEN_FLYOUT_ADD_DRILLDOWN]: FlyoutCreateDrilldownActionContext;
+  }
+}
 
 export class DrilldownsPlugin
   implements

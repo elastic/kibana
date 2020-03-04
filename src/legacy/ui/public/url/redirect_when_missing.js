@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple } from '../../../core_plugins/kibana_react/public/markdown';
+import { MarkdownSimple } from '../../../../plugins/kibana_react/public';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import { uiModules } from '../modules';
