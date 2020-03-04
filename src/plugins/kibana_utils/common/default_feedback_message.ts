@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const defaultFeedbackMessage = i18n.translate('visualizations.defaultFeedbackMessage', {
+export const defaultFeedbackMessage = i18n.translate('kibana_utils.defaultFeedbackMessage', {
   defaultMessage: 'Have feedback? Please create an issue in {link}.',
   values: {
     link:

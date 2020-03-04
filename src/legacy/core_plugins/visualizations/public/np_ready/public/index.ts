@@ -51,6 +51,3 @@ export { SchemaConfig } from './legacy/build_pipeline';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
 }
-
-/** @public static code */
-export { defaultFeedbackMessage } from './misc/default_feedback_message'; // move to utils?
