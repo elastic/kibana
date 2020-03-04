@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { NewAgentConfig } from '../../../types';
 
 interface ValidationResults {
@@ -53,9 +54,11 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
   validation,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+  const [showNamespace, setShowNamespace] = useState<boolean>(false);
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
     label: JSX.Element;
+    placeholder: string;
   }> = useMemo(() => {
     return [
       {
@@ -66,6 +69,9 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             defaultMessage="Name"
           />
         ),
+        placeholder: i18n.translate('xpack.ingestManager.agentConfigForm.nameFieldPlaceholder', {
+          defaultMessage: 'Choose a name',
+        }),
       },
       {
         name: 'description',
@@ -75,14 +81,11 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             defaultMessage="Description"
           />
         ),
-      },
-      {
-        name: 'namespace',
-        label: (
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfigForm.namespaceFieldLabel"
-            defaultMessage="Namespace"
-          />
+        placeholder: i18n.translate(
+          'xpack.ingestManager.agentConfigForm.descriptionFieldPlaceholder',
+          {
+            defaultMessage: 'How will this configuration be used?',
+          }
         ),
       },
     ];
@@ -90,7 +93,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
 
   return (
     <EuiForm>
-      {fields.map(({ name, label }) => {
+      {fields.map(({ name, label, placeholder }) => {
         return (
           <EuiFormRow
             fullWidth
@@ -105,10 +108,33 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
               onChange={e => updateAgentConfig({ [name]: e.target.value })}
               isInvalid={Boolean(touchedFields[name] && validation[name])}
               onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
+              placeholder={placeholder}
             />
           </EuiFormRow>
         );
       })}
+      <EuiFormRow
+        label={
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
+        <EuiSwitch
+          showLabel={true}
+          label={
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigForm.systemMonitoringText"
+              defaultMessage="Enable system monitoring"
+            />
+          }
+          checked={true}
+          onChange={() => {}}
+        />
+      </EuiFormRow>
       <EuiHorizontalRule />
       <EuiSpacer size="xs" />
       <EuiAccordion
@@ -148,22 +174,34 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                   defaultMessage="Use default namespace"
                 />
               }
-              checked={false}
-              onChange={() => {}}
+              checked={showNamespace}
+              onChange={() => {
+                setShowNamespace(!showNamespace);
+                if (showNamespace) {
+                  updateAgentConfig({ namespace: '' });
+                }
+              }}
             />
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-              isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-            >
-              <EuiFieldText
-                fullWidth
-                value={agentConfig.namespace}
-                isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-                onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
-              />
-            </EuiFormRow>
+            {showNamespace && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  fullWidth
+                  error={
+                    touchedFields.namespace && validation.namespace ? validation.namespace : null
+                  }
+                  isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+                >
+                  <EuiFieldText
+                    fullWidth
+                    value={agentConfig.namespace}
+                    onChange={e => updateAgentConfig({ namespace: e.target.value })}
+                    isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+                    onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
+                  />
+                </EuiFormRow>
+              </>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>
