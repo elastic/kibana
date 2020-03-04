@@ -6,12 +6,10 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 // @ts-ignore
-import { setInjectedVarFunc } from './kibana_services';
+import { MapView } from './inspector/views/map_view';
 
 export interface MapsPluginSetupDependencies {
-  data: DataPublicPluginSetup;
   inspector: InspectorSetupContract;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -35,7 +33,7 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    plugins.inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {}

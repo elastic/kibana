@@ -36,6 +36,8 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 
+// NP Migration
+// Temporarily redundant with x-pack/plugins/maps/public/actions/map_actions.js
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -78,6 +80,7 @@ export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
+// End temporary redundancy
 
 function getLayerLoadingCallbacks(dispatch, getState, layerId) {
   return {

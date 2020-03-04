@@ -10,8 +10,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapView } from '../../../../plugins/maps/public/inspector/views/map_view';
 import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -34,13 +32,12 @@ interface MapsPluginSetupDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing, inspector } = plugins;
+  const { licensing } = plugins;
   const { injectedMetadata } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  inspector.registerView(MapView);
 };
 
 /** @internal */

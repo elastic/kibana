@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// NP Migration
+// Temporarily redundant with x-pack/plugins/maps/public/actions/ui_actions.js
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
@@ -14,6 +16,7 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
+// End temporary redundancy
 
 export function updateFlyout(display) {
   return {
@@ -35,12 +38,6 @@ export function setIsLayerTOCOpen(isLayerTOCOpen) {
   return {
     type: SET_IS_LAYER_TOC_OPEN,
     isLayerTOCOpen,
-  };
-}
-export function exitFullScreen() {
-  return {
-    type: SET_FULL_SCREEN,
-    isFullScreen: false,
   };
 }
 export function enableFullScreen() {
