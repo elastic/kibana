@@ -5,19 +5,19 @@
  */
 
 import {
-  StyleMetaDescriptor,
-  GeometryTypesDescriptor,
-  RangeFieldMetaDescriptor,
-  CategoryFieldMetaDescriptor,
+  StyleMeta,
+  GeometryTypes,
+  RangeFieldMeta,
+  CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
-  private readonly _descriptor: StyleMetaDescriptor;
-  constructor(styleMetaDescriptor: StyleMetaDescriptor) {
+  private readonly _descriptor: StyleMeta;
+  constructor(styleMetaDescriptor: StyleMeta) {
     this._descriptor = styleMetaDescriptor;
   }
 
-  _getGeometryTypes(): GeometryTypesDescriptor {
+  _getGeometryTypes(): GeometryTypes {
     return this._descriptor.geometryTypes
       ? this._descriptor.geometryTypes
       : {
@@ -27,13 +27,13 @@ export class StyleMeta {
         };
   }
 
-  getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMetaDescriptor | null {
+  getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
     return this._descriptor && this._descriptor.fieldMeta[fieldName]
       ? this._descriptor.fieldMeta[fieldName].RANGE
       : null;
   }
 
-  getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMetaDescriptor | null {
+  getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMeta | null {
     return this._descriptor && this._descriptor.fieldMeta[fieldName]
       ? this._descriptor.fieldMeta[fieldName].CATEGORIES
       : null;
