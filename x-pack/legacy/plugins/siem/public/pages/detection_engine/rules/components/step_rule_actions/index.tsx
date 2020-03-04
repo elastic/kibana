@@ -76,7 +76,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
 
-  console.error('form', form, myStepData);
+  // console.error('form', form, myStepData);
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {

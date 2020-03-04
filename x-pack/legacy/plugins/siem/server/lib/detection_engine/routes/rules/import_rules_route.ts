@@ -138,6 +138,7 @@ export const createImportRulesRoute = (
                     severity,
                     tags,
                     threat,
+                    throttle,
                     to,
                     type,
                     references,

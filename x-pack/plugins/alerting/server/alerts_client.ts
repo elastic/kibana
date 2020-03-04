@@ -106,7 +106,7 @@ interface UpdateOptions {
     tags: string[];
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
-    throttle: string | null;
+    throttle?: string | null;
     params: Record<string, any>;
   };
 }

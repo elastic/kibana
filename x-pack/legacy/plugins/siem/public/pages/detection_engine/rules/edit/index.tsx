@@ -218,7 +218,7 @@ const EditRulePageComponent: FC = () => {
     const activeFormId = selectedTab?.id as RuleStep;
     const activeForm = await stepsForm.current[activeFormId]?.submit();
 
-    console.error('submit', myActionsRuleForm, activeForm);
+    // console.error('submit', myActionsRuleForm, activeForm);
 
     const invalidForms = [
       RuleStep.aboutRule,
@@ -252,7 +252,7 @@ const EditRulePageComponent: FC = () => {
             ? activeForm.data
             : myScheduleRuleForm.data) as ScheduleStepRule,
           (activeFormId === RuleStep.ruleActions &&
-            deepMerge(myActionsRuleForm.data, activeForm.data)) as ActionsStepRule,
+            deepMerge(myActionsRuleForm.data!, activeForm.data)) as ActionsStepRule,
           ruleId
         )
       );
