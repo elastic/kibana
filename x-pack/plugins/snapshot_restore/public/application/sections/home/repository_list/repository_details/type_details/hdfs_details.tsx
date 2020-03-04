@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { HDFSRepository } from '../../../../../../../common/types';
-import { useServices } from '../../../../../app_context';
 
 interface Props {
   repository: HDFSRepository;
