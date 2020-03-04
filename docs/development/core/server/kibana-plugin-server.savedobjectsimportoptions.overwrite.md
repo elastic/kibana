@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportOptions.overwrite property
 
+if true, will override existing object if present
+
 <b>Signature:</b>
 
 ```typescript
