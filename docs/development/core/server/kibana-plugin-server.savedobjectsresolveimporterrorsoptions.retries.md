@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions.retries property
 
+saved object import references to retry
+
 <b>Signature:</b>
 
 ```typescript
