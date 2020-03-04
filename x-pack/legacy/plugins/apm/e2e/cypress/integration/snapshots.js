@@ -8,7 +8,7 @@ module.exports = {
       }
     }
   },
-  "__version": "3.8.3",
+  "__version": "4.1.0",
   "APM": {
     "Transaction duration charts": {
       "1": "3.7 min",

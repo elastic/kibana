@@ -10,6 +10,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+killall node &> /dev/null # TODO: REMOVE!!
+sleep 2
+
 # Ensure Kibana port is available
 if lsof -Pi :$KIBANA_PORT -sTCP:LISTEN -t >/dev/null ; then
     printf "⚠️  Cannot start Kibana because another process is already running on port ${KIBANA_PORT}:\n\n"
@@ -21,19 +24,17 @@ fi
 # trap "exit" INT TERM ERR
 # trap "kill 0" EXIT
 
+
 # Create tmp folder
-echo "Creating ./tmp"
 mkdir -p tmp
 
 # Start Kibana in background
 printf "\n===Kibana===\n"
 echo "Starting (logs: tmp/kibana.logs)"
 (cd ../../../../../ && \
-yarn kbn bootstrap && \
 node ./scripts/kibana \
-    --dev \
-    --no-dev-config \
     --no-base-path \
+    --optimize.watch=false \
     --server.port=${KIBANA_PORT} \
     --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
 ) &> ./tmp/kibana.log &
@@ -99,6 +100,5 @@ yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
 echo "✅ Setup completed successfully. Running tests..."
 
 # run cypress tests
-yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
-
+yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
 
