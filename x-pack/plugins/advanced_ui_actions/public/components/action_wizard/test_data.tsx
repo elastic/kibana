@@ -13,16 +13,11 @@ export const dashboards = [
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
-export const dashboardDrilldownActionFactory: ActionFactory<
-  {
-    dashboardId: string;
-    useCurrentDashboardFilters: boolean;
-    useCurrentDashboardDataRange: boolean;
-  },
-  {
-    dashboards: Array<{ id: string; title: string }>;
-  }
-> = {
+export const dashboardDrilldownActionFactory: ActionFactory<{
+  dashboardId: string;
+  useCurrentDashboardFilters: boolean;
+  useCurrentDashboardDataRange: boolean;
+}> = {
   type: 'Dashboard',
   displayName: 'Go to Dashboard',
   iconType: 'dashboardApp',
@@ -57,7 +52,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<
           <EuiSelect
             name="selectDashboard"
             hasNoInitialSelection={true}
-            options={props.context.dashboards.map(({ id, title }) => ({ value: id, text: title }))}
+            options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
             value={config.dashboardId}
             onChange={e => {
               setAndSubmit({
@@ -95,9 +90,6 @@ export const dashboardDrilldownActionFactory: ActionFactory<
         </EuiFormRow>
       </>
     );
-  },
-  context: {
-    dashboards,
   },
 };
 
@@ -141,10 +133,9 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
       </>
     );
   },
-  context: null,
 };
 
-export const ACTION_FACTORIES = [
+export const ACTION_FACTORIES = ([
   dashboardDrilldownActionFactory,
   urlDrilldownActionFactory,
-] as Array<ActionFactory<ActionFactoryBaseConfig, unknown>>;
+] as unknown) as Array<ActionFactory<ActionFactoryBaseConfig>>;
