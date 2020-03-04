@@ -69,7 +69,7 @@ kibanaPipeline(timeoutMinutes: 135) {
             // 'kibana-functional-36': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 36),
             // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
           ],
-          post: {
+          postProcess: {
             catchError {
               def metricsJson = toJSON(finishedSuites).toString()
               writeFile(file: "target/functional_test_suite_metrics.json", text: metricsJson)

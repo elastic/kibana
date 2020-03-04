@@ -122,7 +122,7 @@ def functional(Map params) {
     label: gobld/agent label to use, e.g. 'linux && immutable'. Default: 'tests-xl', a 32 CPU machine used for running many functional test suites in parallel
 */
 def parallelProcesses(Map params) {
-  def config = [name: 'parallel-worker', setup: {}, parallelExtra: {}, processes: [:], post: {}, delayBetweenProcesses: 0, label: 'tests-xxl'] + params
+  def config = [name: 'parallel-worker', setup: {}, parallelExtra: {}, processes: [:], postProcess: {}, delayBetweenProcesses: 0, label: 'tests-xxl'] + params
 
   ci(label: config.label, name: config.name) {
     config.setup()
@@ -154,7 +154,7 @@ def parallelProcesses(Map params) {
         parallelExtra: config.parallelExtra,
       ])
     } finally {
-      config.post()
+      config.postProcess()
     }
   }
 }
