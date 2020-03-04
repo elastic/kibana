@@ -9,6 +9,10 @@ import {
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
+  createExportSavedObjectsToStreamMock,
+  createImportSavedObjectsFromStreamMock,
+  createResolveSavedObjectsImportErrorsMock,
+  createMockSavedObjectsService,
 } from '../__fixtures__';
 import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
@@ -37,10 +41,6 @@ import {
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from 'src/core/server';
-import { createExportSavedObjectsToStreamMock } from '../__fixtures__/create_export_so_mock';
-import { createImportSavedObjectsFromStreamMock } from '../__fixtures__/create_import_so_mock';
-import { createResolveSavedObjectsImportErrorsMock } from '../__fixtures__/create_resolve_so_import_errors_mock';
-import { createMockSavedObjectsService } from '../__fixtures__/create_mock_so_service';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
