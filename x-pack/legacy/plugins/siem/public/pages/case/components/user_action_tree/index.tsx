@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from '../case_view/translations';
 
 import { Case } from '../../../../containers/case/types';
@@ -15,54 +13,11 @@ import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
 import { AddComment } from '../add_comment';
 
-export interface UserActionItem {
-  avatarName: string;
-  children?: ReactNode;
-  skipPanel?: boolean;
-  title?: ReactNode;
-}
-
 export interface UserActionTreeProps {
   data: Case;
   isLoadingDescription: boolean;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
-
-const UserAction = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    & {
-      background-image: linear-gradient(
-        to right,
-        transparent 0,
-        transparent 15px,
-        ${theme.eui.euiBorderColor} 15px,
-        ${theme.eui.euiBorderColor} 17px,
-        transparent 17px,
-        transparent 100%
-      );
-      background-repeat: no-repeat;
-      background-position: left ${theme.eui.euiSizeXXL};
-      margin-bottom: ${theme.eui.euiSizeS};
-    }
-    .userAction__panel {
-      margin-bottom: ${theme.eui.euiSize};
-    }
-    .userAction__circle {
-      flex-shrink: 0;
-      margin-right: ${theme.eui.euiSize};
-      vertical-align: top;
-    }
-    .userAction__title {
-      padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
-      background: ${theme.eui.euiColorLightestShade};
-      border-bottom: ${theme.eui.euiBorderThin};
-      border-radius: ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius} 0 0;
-    }
-    .euiText--small * {
-      margin-bottom: 0;
-    }
-  `}
-`;
 
 const DescriptionId = 'description';
 const NewId = 'newComent';
@@ -113,7 +68,7 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(() => <AddComment caseId={data.caseId} />, [data.caseId]);
 
     return (
-      <UserAction data-test-subj="user-action-description" gutterSize={'none'}>
+      <>
         <UserActionItem
           createdAt={data.createdAt}
           id={DescriptionId}
@@ -159,7 +114,7 @@ export const UserActionTree = React.memo(
           onEdit={handleManageMarkdownEditId.bind(null, NewId)}
           userName="to be determined"
         />
-      </UserAction>
+      </>
     );
   }
 );
