@@ -53,5 +53,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 /** @public static code */
-export { calculateObjectHash } from './legacy/calculate_object_hash'; // move to utils
 export { defaultFeedbackMessage } from './misc/default_feedback_message'; // move to utils?
