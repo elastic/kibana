@@ -4,28 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { TimeRange } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
-import { Filter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { Filter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;
-  hideLayer: string[];
   title: string | null;
   timerange: TimeRangeArg | null;
 }
 
-// Map embeddable is missing proper typings, so type is just to document what we
-// are expecting to pass to the embeddable
 export type SavedLensInput = EmbeddableInput & {
   id: string;
   isLayerTOCOpen: boolean;
@@ -35,8 +31,7 @@ export type SavedLensInput = EmbeddableInput & {
     interval: number;
   };
   hideFilterActions: true;
-  filters: esFilters.Filter[];
-  hiddenLayers?: string[];
+  filters: Filter[];
 };
 
 const defaultTimeRange = {
@@ -46,9 +41,13 @@ const defaultTimeRange = {
 
 type Return = EmbeddableExpression<SavedLensInput>;
 
-export function savedLens(): ExpressionFunction<'savedLens', Filter | null, Arguments, Return> {
-  // TODO: update function help
-  const { help, args: argHelp } = getFunctionHelp().savedMap;
+export function savedLens(): ExpressionFunctionDefinition<
+  'savedLens',
+  Filter | null,
+  Arguments,
+  Return
+> {
+  const { help, args: argHelp } = getFunctionHelp().savedLens;
   return {
     name: 'savedLens',
     help,
@@ -57,12 +56,6 @@ export function savedLens(): ExpressionFunction<'savedLens', Filter | null, Argu
         types: ['string'],
         required: false,
         help: argHelp.id,
-      },
-      hideLayer: {
-        types: ['string'],
-        help: argHelp.hideLayer,
-        required: false,
-        multi: true,
       },
       timerange: {
         types: ['timerange'],
@@ -92,7 +85,6 @@ export function savedLens(): ExpressionFunction<'savedLens', Filter | null, Argu
           hideFilterActions: true,
           title: args.title ? args.title : undefined,
           isLayerTOCOpen: false,
-          hiddenLayers: args.hideLayer || [],
         },
         embeddableType: EmbeddableTypes.lens,
       };
