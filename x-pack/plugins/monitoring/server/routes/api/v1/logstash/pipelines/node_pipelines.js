@@ -6,10 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
-import {
-  getPipelines,
-  processPipelinesAPIResponse,
-} from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
@@ -56,10 +52,8 @@ export function logstashNodePipelinesRoute(server) {
 
       const throughputMetric = 'logstash_node_pipeline_throughput';
       const nodesCountMetric = 'logstash_node_pipeline_nodes_count';
-      const metricSet = [throughputMetric, nodesCountMetric];
 
-      // The client side fields do not match the server side metric names
-      // so adjust that here. See processPipelinesAPIResponse
+      // Mapping client and server metric keys together
       const sortMetricSetMap = {
         latestThroughput: throughputMetric,
         latestNodesCount: nodesCountMetric,
@@ -68,28 +62,20 @@ export function logstashNodePipelinesRoute(server) {
         sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
 
-      const { pageOfPipelines, totalPipelineCount } = await getPaginatedPipelines(
-        req,
-        lsIndexPattern,
-        { clusterUuid, logstashUuid },
-        metricSet,
-        pagination,
-        sort,
-        queryText
-      );
       try {
-        const pipelineData = await getPipelines(req, lsIndexPattern, pageOfPipelines, metricSet);
-        const response = await processPipelinesAPIResponse(
-          {
-            pipelines: pipelineData,
-            nodeSummary: await getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
-          },
-          throughputMetric,
-          nodesCountMetric
+        const response = await getPaginatedPipelines(
+          req,
+          lsIndexPattern,
+          { clusterUuid, logstashUuid },
+          { throughputMetric, nodesCountMetric },
+          pagination,
+          sort,
+          queryText
         );
+
         return {
           ...response,
-          totalPipelineCount,
+          nodeSummary: await getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
         };
       } catch (err) {
         throw handleError(err, req);

@@ -19,7 +19,6 @@
 
 import {
   FeatureCatalogueRegistrySetup,
-  FeatureCatalogueRegistryStart,
   FeatureCatalogueRegistry,
 } from './feature_catalogue_registry';
 
@@ -30,25 +29,17 @@ const createSetupMock = (): jest.Mocked<FeatureCatalogueRegistrySetup> => {
   return setup;
 };
 
-const createStartMock = (): jest.Mocked<FeatureCatalogueRegistryStart> => {
-  const start = {
-    get: jest.fn(),
-  };
-  return start;
-};
-
 const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> => {
   const service = {
     setup: jest.fn(),
     start: jest.fn(),
+    get: jest.fn(() => []),
   };
   service.setup.mockImplementation(createSetupMock);
-  service.start.mockImplementation(createStartMock);
   return service;
 };
 
 export const featureCatalogueRegistryMock = {
   createSetup: createSetupMock,
-  createStart: createStartMock,
   create: createMock,
 };

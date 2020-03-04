@@ -40,12 +40,13 @@ function DefaultEditor({
   appState,
   optionTabs,
   query,
+  linked,
 }: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
   const visHandler = useRef<VisualizeEmbeddable | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
-  const { vis } = savedObj;
+  const { vis, savedSearch } = savedObj;
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed(value => !value);
@@ -117,6 +118,8 @@ function DefaultEditor({
           optionTabs={optionTabs}
           vis={vis}
           uiState={uiState}
+          isLinkedSearch={linked}
+          savedSearch={savedSearch}
         />
       </Panel>
     </PanelsContainer>
