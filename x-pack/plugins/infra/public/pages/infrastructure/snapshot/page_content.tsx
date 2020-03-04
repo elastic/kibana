@@ -6,57 +6,57 @@
 
 import React from 'react';
 
-import { WithWaffleFilter } from '../../../containers/waffle/with_waffle_filters';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
-import { WithOptions } from '../../../containers/with_options';
 import { WithSource } from '../../../containers/with_source';
 import { Layout } from '../../../components/inventory/layout';
+import { InfraWaffleMapLegendMode, InfraFormatterType } from '../../../lib/lib';
+
+const euiVisColorPalette = euiPaletteColorBlind();
 
 export const SnapshotPageContent: React.FC = () => (
   <WithSource>
-    {({ configuration, createDerivedIndexPattern, sourceId }) => (
-      <WithOptions>
-        {({ wafflemap }) => (
-          <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
-            {({ filterQueryAsJson, applyFilterQuery }) => (
-              <WithWaffleOptions>
-                {({
-                  metric,
-                  groupBy,
-                  nodeType,
-                  view,
-                  changeView,
-                  autoBounds,
-                  boundsOverride,
-                  accountId,
-                  region,
-                }) => (
-                  <Layout
-                    filterQuery={filterQueryAsJson}
-                    metric={metric}
-                    groupBy={groupBy}
-                    nodeType={nodeType}
-                    sourceId={sourceId}
-                    options={{
-                      ...wafflemap,
-                      metric,
-                      fields: configuration && configuration.fields,
-                      groupBy,
-                    }}
-                    onDrilldown={applyFilterQuery}
-                    view={view}
-                    onViewChange={changeView}
-                    autoBounds={autoBounds}
-                    boundsOverride={boundsOverride}
-                    accountId={accountId}
-                    region={region}
-                  />
-                )}
-              </WithWaffleOptions>
-            )}
-          </WithWaffleFilter>
+    {({ configuration, sourceId }) => (
+      <WithWaffleOptions>
+        {({
+          metric,
+          groupBy,
+          nodeType,
+          view,
+          changeView,
+          autoBounds,
+          boundsOverride,
+          accountId,
+          region,
+        }) => (
+          <Layout
+            metric={metric}
+            groupBy={groupBy}
+            nodeType={nodeType}
+            sourceId={sourceId}
+            options={{
+              formatter: InfraFormatterType.percent,
+              formatTemplate: '{{value}}',
+              legend: {
+                type: InfraWaffleMapLegendMode.gradient,
+                rules: [
+                  { value: 0, color: '#D3DAE6' },
+                  { value: 1, color: euiVisColorPalette[1] },
+                ],
+              },
+              metric,
+              fields: configuration && configuration.fields,
+              groupBy,
+            }}
+            view={view}
+            onViewChange={changeView}
+            autoBounds={autoBounds}
+            boundsOverride={boundsOverride}
+            accountId={accountId}
+            region={region}
+          />
         )}
-      </WithOptions>
+      </WithWaffleOptions>
     )}
   </WithSource>
 );

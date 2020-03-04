@@ -17,16 +17,15 @@ import { useInventoryMeta } from '../../containers/inventory_metadata/use_invent
 import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
+import { useWaffleFilters } from '../../pages/inventory_view/hooks/use_waffle_filters';
 
 export interface LayoutProps {
   options: InfraWaffleMapOptions;
   nodeType: InventoryItemType;
-  onDrilldown: (filter: KueryFilterQuery) => void;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
-  filterQuery: string | null | undefined;
   metric: SnapshotMetricInput;
   groupBy: SnapshotGroupBy;
   sourceId: string;
@@ -37,8 +36,9 @@ export interface LayoutProps {
 export const Layout = (props: LayoutProps) => {
   const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTime();
+  const { filterQueryAsJson, applyFilterQuery } = useWaffleFilters();
   const { loading, nodes, reload, interval } = useSnapshot(
-    props.filterQuery,
+    filterQueryAsJson,
     props.metric,
     props.groupBy,
     props.nodeType,
@@ -67,7 +67,7 @@ export const Layout = (props: LayoutProps) => {
           nodeType={props.nodeType}
           loading={loading}
           reload={reload}
-          onDrilldown={props.onDrilldown}
+          onDrilldown={applyFilterQuery}
           currentTime={currentTime}
           onViewChange={props.onViewChange}
           view={props.view}

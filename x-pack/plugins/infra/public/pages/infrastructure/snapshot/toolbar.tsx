@@ -17,6 +17,7 @@ import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocomp
 import { WithSource } from '../../../containers/with_source';
 import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
 import { WaffleInventorySwitcher } from '../../../components/waffle/waffle_inventory_switcher';
+import { SearchBar } from '../../inventory_view/compontents/search_bar';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
@@ -45,39 +46,7 @@ export const SnapshotToolbar = () => (
         </WithWaffleOptions>
       </EuiFlexItem>
       <EuiFlexItem>
-        <WithSource>
-          {({ createDerivedIndexPattern }) => (
-            <WithKueryAutocompletion indexPattern={createDerivedIndexPattern('metrics')}>
-              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
-                  {({
-                    applyFilterQueryFromKueryExpression,
-                    filterQueryDraft,
-                    isFilterQueryDraftValid,
-                    setFilterQueryDraftFromKueryExpression,
-                  }) => (
-                    <AutocompleteField
-                      isLoadingSuggestions={isLoadingSuggestions}
-                      isValid={isFilterQueryDraftValid}
-                      loadSuggestions={loadSuggestions}
-                      onChange={setFilterQueryDraftFromKueryExpression}
-                      onSubmit={applyFilterQueryFromKueryExpression}
-                      placeholder={i18n.translate(
-                        'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
-                        {
-                          defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-                        }
-                      )}
-                      suggestions={suggestions}
-                      value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                      autoFocus={true}
-                    />
-                  )}
-                </WithWaffleFilter>
-              )}
-            </WithKueryAutocompletion>
-          )}
-        </WithSource>
+        <SearchBar />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <WaffleTimeControls />
