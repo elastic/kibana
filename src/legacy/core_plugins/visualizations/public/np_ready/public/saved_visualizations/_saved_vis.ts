@@ -30,7 +30,7 @@ import {
   SavedObjectKibanaServices,
 } from '../../../../../../../plugins/saved_objects/public';
 // @ts-ignore
-import { updateOldState } from '../vis_update_state';
+import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../../../plugins/data/public';
 import { VisSavedObject } from '../types';

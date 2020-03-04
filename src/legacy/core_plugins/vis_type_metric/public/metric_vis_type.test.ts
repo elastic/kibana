@@ -59,7 +59,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
     // TODO: remove when Vis is converted to typescript. Only importing Vis as type
     // @ts-ignore
-    vis = new visualizationsStart.Vis(stubIndexPattern, {
+    vis = visualizationsStart.createVis(stubIndexPattern, {
       type: 'metric',
       aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
     });
