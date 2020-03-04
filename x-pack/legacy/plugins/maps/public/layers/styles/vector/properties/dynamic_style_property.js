@@ -35,13 +35,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
-  getRangeFieldMeta() {
-    const style = this._layer.getStyle();
-    const styleMeta = style.getStyleMeta();
-    const fieldName = this.getFieldName();
-
-    const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
-
+  _getStyleMetaDataRequestId(fieldName) {
     let dataRequestId;
     if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
       dataRequestId = SOURCE_META_ID_ORIGIN;
@@ -53,7 +47,16 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
         dataRequestId = join.getSourceMetaDataRequestId();
       }
     }
+    return dataRequestId;
+  }
 
+  getRangeFieldMeta() {
+    const style = this._layer.getStyle();
+    const styleMeta = style.getStyleMeta();
+    const fieldName = this.getFieldName();
+    const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
+
+    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
     if (!dataRequestId) {
       return rangeFieldMetaFromLocalFeatures;
     }
@@ -72,21 +75,9 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const style = this._layer.getStyle();
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
-
     const rangeFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
 
-    let dataRequestId;
-    if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      dataRequestId = SOURCE_META_ID_ORIGIN;
-    } else {
-      const join = this._layer.getValidJoins().find(join => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
-      });
-      if (join) {
-        dataRequestId = join.getSourceMetaDataRequestId();
-      }
-    }
-
+    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
     if (!dataRequestId) {
       return rangeFieldMetaFromLocalFeatures;
     }
