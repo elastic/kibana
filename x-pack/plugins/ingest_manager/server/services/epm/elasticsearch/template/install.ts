@@ -4,16 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetReference, Dataset, RegistryPackage, IngestAssetType } from '../../../../types';
+import {
+  AssetReference,
+  Dataset,
+  RegistryPackage,
+  IngestAssetType,
+  ElasticsearchAssetType,
+} from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
+import * as Registry from '../../registry';
 
 export const installTemplates = async (
   registryPackage: RegistryPackage,
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  pkgkey: string
 ) => {
+  // install any pre-built index template assets,
+  // atm, this is only the base package's global template
+  installPreBuiltTemplates(pkgkey, callCluster);
+
+  // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
   if (datasets) {
     const templates = datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
@@ -29,6 +42,26 @@ export const installTemplates = async (
     return Promise.all(templates).then(results => results.flat());
   }
   return [];
+};
+
+// this is temporary until we update the registry to use index templates v2 structure
+const installPreBuiltTemplates = async (pkgkey: string, callCluster: CallESAsCurrentUser) => {
+  const templatePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isTemplate(entry)
+  );
+  templatePaths.forEach(async path => {
+    const { file } = Registry.pathParts(path);
+    const templateName = file.substr(0, file.lastIndexOf('.'));
+    const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+    await callCluster('indices.putTemplate', {
+      name: templateName,
+      body: content,
+    });
+  });
+};
+const isTemplate = ({ path }: Registry.ArchiveEntry) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
 /**
  * installTemplatesForDataset installs one template for each dataset
@@ -75,7 +108,7 @@ export async function installTemplate({
       packageVersion,
     });
   }
-  const template = getTemplate(templateName + '-*', mappings, pipelineName);
+  const template = getTemplate(dataset.type, templateName, mappings, pipelineName);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
     name: templateName,

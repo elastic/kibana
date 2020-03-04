@@ -192,3 +192,11 @@ export enum IngestAssetType {
   MlJob = 'ml-job',
   RollupJob = 'rollup-job',
 }
+
+export interface IndexTemplate {
+  order: number;
+  index_patterns: string[];
+  settings: any;
+  mappings: object;
+  aliases: object;
+}

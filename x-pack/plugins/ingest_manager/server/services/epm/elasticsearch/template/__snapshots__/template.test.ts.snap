@@ -4,13 +4,12 @@ exports[`tests loading fields.yml: base.yml 1`] = `
 {
   "order": 1,
   "index_patterns": [
-    "foo"
+    "foo-*"
   ],
   "settings": {
     "index": {
       "lifecycle": {
-        "name": "logs-default",
-        "rollover_alias": "logs-nginx-access-abcd"
+        "name": "logs-default"
       },
       "codec": "best_compression",
       "mapping": {

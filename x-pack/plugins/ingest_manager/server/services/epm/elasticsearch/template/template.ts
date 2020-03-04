@@ -5,37 +5,27 @@
  */
 
 import { Field } from '../../fields/field';
-import { Dataset } from '../../../../types';
+import { Dataset, IndexTemplate } from '../../../../types';
 import { getDatasetAssetBaseName } from '../index';
-
-export interface Template {
-  order: number;
-  index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
-}
 
 interface Properties {
   [key: string]: any;
 }
-
-export interface Mappings {
+interface Mappings {
   properties: any;
 }
-
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
  * @param indexPattern String with the index pattern
  */
 export function getTemplate(
-  indexPattern: string,
+  type: string,
+  templateName: string,
   mappings: Mappings,
   pipelineName?: string | undefined
-): Template {
-  const template = getBaseTemplate(mappings);
-  template.index_patterns = [indexPattern];
+): IndexTemplate {
+  const template = getBaseTemplate(type, templateName, mappings);
   if (pipelineName) {
     template.settings.index.default_pipeline = pipelineName;
   }
@@ -75,18 +65,17 @@ export function generateTemplateName(dataset: Dataset): string {
   return getDatasetAssetBaseName(dataset);
 }
 
-function getBaseTemplate(mappings: Mappings): Template {
+function getBaseTemplate(type: string, templateName: string, mappings: Mappings): IndexTemplate {
   return {
     // We need to decide which order we use for the templates
     order: 1,
     // To be completed with the correct index patterns
-    index_patterns: [],
+    index_patterns: [`${templateName}-*`],
     settings: {
       index: {
-        // ILM Policy must be added here
+        // ILM Policy must be added here, for now point to the default global ILM policy name
         lifecycle: {
-          name: 'logs-default',
-          rollover_alias: 'logs-nginx-access-abcd',
+          name: `${type}-default`,
         },
         // What should be our default for the compression?
         codec: 'best_compression',
