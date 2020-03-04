@@ -9,9 +9,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReportListing } from './report_listing';
 import { Observable } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
-import { JobQueueClient } from '../lib/job_queue_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-const jobQueueClient = {
+const reportingAPIClient = {
   list: () =>
     Promise.resolve([
       { _index: '.reporting-2019.08.18', _id: 'jzoik8dh1q2i89fb5f19znm6', _source: { payload: { layout: { id: 'preserve_layout', dimensions: { width: 1635, height: 792 } }, type: 'dashboard', title: 'Names', }, max_attempts: 3, browser_type: 'chromium', created_at: '2019-08-23T19:34:24.869Z', jobtype: 'printable_pdf', created_by: 'elastic', attempts: 0, status: 'pending', }, }, // prettier-ignore
@@ -49,7 +49,7 @@ describe('ReportListing', () => {
   it('Report job listing with some items', () => {
     const wrapper = mountWithIntl(
       <ReportListing
-        jobQueueClient={jobQueueClient as JobQueueClient}
+        apiClient={reportingAPIClient as ReportingAPIClient}
         license$={license$}
         redirect={jest.fn()}
         toasts={toasts}
@@ -70,7 +70,7 @@ describe('ReportListing', () => {
 
     const wrapper = mountWithIntl(
       <ReportListing
-        jobQueueClient={jobQueueClient as JobQueueClient}
+        apiClient={reportingAPIClient as ReportingAPIClient}
         license$={subMock as Observable<ILicense>}
         redirect={jest.fn()}
         toasts={toasts}

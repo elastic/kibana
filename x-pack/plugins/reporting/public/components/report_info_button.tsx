@@ -18,11 +18,11 @@ import {
 import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { USES_HEADLESS_JOB_TYPES } from '../../constants';
-import { JobInfo, JobQueueClient } from '../lib/job_queue_client';
+import { JobInfo, ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
   jobId: string;
-  jobQueueClient: JobQueueClient;
+  apiClient: ReportingAPIClient;
 }
 
 interface State {
@@ -255,7 +255,7 @@ export class ReportInfoButton extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info: JobInfo = await this.props.jobQueueClient.getInfo(this.props.jobId);
+      const info: JobInfo = await this.props.apiClient.getInfo(this.props.jobId);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }

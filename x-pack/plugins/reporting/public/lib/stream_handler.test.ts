@@ -7,7 +7,7 @@
 import sinon, { stub } from 'sinon';
 import { HttpSetup, NotificationsStart } from '../../../../../src/core/public';
 import { SourceJob, JobSummary, HttpService } from '../../index.d';
-import { JobQueue } from './job_queue';
+import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
 Object.defineProperty(window, 'sessionStorage', {
@@ -44,7 +44,7 @@ const mockJobsFound = [
   },
 ];
 
-const jobQueueClientMock: JobQueue = {
+const jobQueueClientMock: ReportingAPIClient = {
   findForJobIds: async (http: HttpService, jobIds: string[]) => {
     return mockJobsFound as SourceJob[];
   },

@@ -11,26 +11,39 @@ import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { I18nProvider } from '@kbn/i18n/react';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+
+import { ReportListing } from './components/report_listing';
+import { getGeneralErrorToast } from './components';
+
+import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { ReportingAPIClient } from './lib/reporting_api_client';
+import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
+import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
+import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
+
+import { LicensingPluginSetup } from '../../licensing/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
+
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+
 import {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+
 import {
   JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG,
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
 } from '../constants';
-import { JobId, JobStatusBuckets, NotificationsService } from '../index.d';
-import { ReportListing } from './components/report_listing';
-import { getGeneralErrorToast } from './components';
-import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { JobQueueClient } from './lib/job_queue_client';
+
+import { JobId, JobStatusBuckets, NotificationsService } from '..';
 
 const {
   jobCompletionNotifier: { interval: JOBS_REFRESH_INTERVAL },
@@ -76,8 +89,27 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
       home,
       management,
       licensing,
-    }: { home: HomePublicPluginSetup; management: ManagementSetup; licensing: LicensingPluginSetup }
+      uiActions,
+      share,
+    }: {
+      home: HomePublicPluginSetup;
+      management: ManagementSetup;
+      licensing: LicensingPluginSetup;
+      uiActions: UiActionsSetup;
+      share: SharePluginSetup;
+    }
   ) {
+    const {
+      http,
+      notifications: { toasts },
+      getStartServices,
+      uiSettings,
+    } = core;
+    const { license$ } = licensing;
+
+    const apiClient = new ReportingAPIClient(http);
+    const action = new GetCsvReportPanelAction(core);
+
     home.featureCatalogue.register({
       id: 'reporting',
       title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
@@ -97,15 +129,15 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
       title: this.title,
       order: 15,
       mount: async params => {
-        const [start] = await core.getStartServices();
+        const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         ReactDOM.render(
           <I18nProvider>
             <ReportListing
-              toasts={core.notifications.toasts}
-              license$={licensing.license$}
+              toasts={toasts}
+              license$={license$}
               redirect={start.application.navigateToApp}
-              jobQueueClient={new JobQueueClient(core.http)}
+              apiClient={apiClient}
             />
           </I18nProvider>,
           params.element
@@ -116,13 +148,27 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
         };
       },
     });
+
+    uiActions.registerAction(action);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+
+    share.register(csvReportingProvider({ apiClient, toasts, license$ }));
+    share.register(
+      reportingPDFPNGProvider({
+        apiClient,
+        toasts,
+        license$,
+        uiSettings,
+      })
+    );
   }
 
   // FIXME: only perform these actions for authenticated routes
   // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
-    const streamHandler = new StreamHandler(http, notifications);
+    const apiClient = new ReportingAPIClient(http);
+    const streamHandler = new StreamHandler(notifications, apiClient);
 
     Rx.timer(0, JOBS_REFRESH_INTERVAL)
       .pipe(

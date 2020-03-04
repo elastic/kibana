@@ -26,7 +26,7 @@ import { ToastsSetup, ApplicationStart } from '../../';
 import { LicensingPluginSetup, LICENSE_CHECK_STATE, ILicense } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
-import { JobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
+import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
 import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
@@ -49,7 +49,7 @@ interface Job {
 
 interface Props {
   intl: InjectedIntl;
-  jobQueueClient: JobQueueClient;
+  apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
   redirect: ApplicationStart['navigateToApp'];
   toasts: ToastsSetup;
@@ -350,7 +350,7 @@ class ReportListingUi extends Component<Props, State> {
     const { intl } = this.props;
     const button = (
       <EuiButtonIcon
-        onClick={() => this.props.jobQueueClient.downloadReport(record.id)}
+        onClick={() => this.props.apiClient.downloadReport(record.id)}
         iconType="importAction"
         aria-label={intl.formatMessage({
           id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
@@ -396,11 +396,11 @@ class ReportListingUi extends Component<Props, State> {
       return;
     }
 
-    return <ReportErrorButton jobQueueClient={this.props.jobQueueClient} jobId={record.id} />;
+    return <ReportErrorButton apiClient={this.props.apiClient} jobId={record.id} />;
   };
 
   private renderInfoButton = (record: Job) => {
-    return <ReportInfoButton jobQueueClient={this.props.jobQueueClient} jobId={record.id} />;
+    return <ReportInfoButton apiClient={this.props.apiClient} jobId={record.id} />;
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
@@ -417,8 +417,8 @@ class ReportListingUi extends Component<Props, State> {
     let jobs: JobQueueEntry[];
     let total: number;
     try {
-      jobs = await this.props.jobQueueClient.list(this.state.page);
-      total = await this.props.jobQueueClient.total();
+      jobs = await this.props.apiClient.list(this.state.page);
+      total = await this.props.apiClient.total();
       this.isInitialJobsFetch = false;
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {

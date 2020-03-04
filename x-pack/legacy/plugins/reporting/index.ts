@@ -25,11 +25,6 @@ export const reporting = (kibana: any) => {
     config: reportingConfig,
 
     uiExports: {
-      shareContextMenuExtensions: [
-        'plugins/reporting/share_context_menu/register_csv_reporting',
-        'plugins/reporting/share_context_menu/register_reporting',
-      ],
-      embeddableActions: ['plugins/reporting/panel_actions/get_csv_panel_action'],
       injectDefaultVars(server: Legacy.Server, options?: ReportingConfigOptions) {
         const config = server.config();
         return {

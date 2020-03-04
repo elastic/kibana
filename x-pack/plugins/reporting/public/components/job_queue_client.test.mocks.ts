@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const mockJobQueueClient = {
+export const mockAPIClient = {
   http: jest.fn(),
   list: jest.fn(),
   total: jest.fn(),
@@ -14,4 +14,4 @@ export const mockJobQueueClient = {
   downloadReport: jest.fn(),
 };
 
-jest.mock('../lib/job_queue_client', () => mockJobQueueClient);
+jest.mock('../lib/reporting_api_client', () => mockAPIClient);

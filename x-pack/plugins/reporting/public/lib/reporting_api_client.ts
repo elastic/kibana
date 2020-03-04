@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { stringify } from 'query-string';
+import rison from 'rison-node';
+
+import { add } from './job_completion_notifications';
 import { HttpSetup } from '../../';
-import { API_LIST_URL, API_BASE_URL } from '../../constants';
+import {
+  API_LIST_URL,
+  API_BASE_URL,
+  API_BASE_GENERATE,
+  REPORTING_MANAGEMENT_HOME,
+} from '../../constants';
+import { JobId, SourceJob } from '../..';
 
 export interface JobQueueEntry {
   _id: string;
@@ -50,7 +60,11 @@ export interface JobInfo {
   status: string;
 }
 
-export class JobQueueClient {
+interface JobParams {
+  [paramName: string]: any;
+}
+
+export class ReportingAPIClient {
   private http: HttpSetup;
 
   constructor(http: HttpSetup) {
@@ -58,7 +72,7 @@ export class JobQueueClient {
   }
 
   public getReportURL(jobId: string) {
-    const apiBaseUrl = this.http.basePath.prepend(API_BASE_URL);
+    const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
     const downloadLink = `${apiBaseUrl}/download/${jobId}`;
 
     return downloadLink;
@@ -100,4 +114,38 @@ export class JobQueueClient {
       asSystemRequest: true,
     });
   }
+
+  public findForJobIds = (jobIds: JobId[]): Promise<SourceJob[]> => {
+    return this.http.fetch(`${API_LIST_URL}/list`, {
+      query: { page: 0, ids: jobIds.join(',') },
+      method: 'GET',
+    });
+  };
+
+  public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
+    const params = stringify({ jobParams: rison.encode(jobParams) });
+
+    return `${this.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
+  };
+
+  public createReportingJob = async (exportType: string, jobParams: any) => {
+    const jobParamsRison = rison.encode(jobParams);
+    const resp = await this.http.post(`${API_BASE_GENERATE}/${exportType}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        jobParams: jobParamsRison,
+      }),
+    });
+
+    add(resp.job.id);
+
+    return resp;
+  };
+
+  public getManagementLink = () => this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
+
+  public getDownloadLink = (jobId: JobId) =>
+    this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
+
+  public getBasePath = () => this.http.basePath.get();
 }
