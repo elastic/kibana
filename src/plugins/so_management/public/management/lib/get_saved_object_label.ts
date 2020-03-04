@@ -17,31 +17,13 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
-
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
+export function getSavedObjectLabel(type: string) {
+  switch (type) {
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return 'index patterns';
+    default:
+      return type;
   }
 }

@@ -17,31 +17,29 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { HttpStart } from 'src/core/public';
+import { SavedObjectWithMetadata } from '../../types';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
+// TODO: same as in `src/plugins/so_management/server/lib/find_relationships.ts`, create common folder
+interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectWithMetadata['meta'];
 }
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
+export async function getRelationships(
+  type: string,
+  id: string,
+  savedObjectTypes: string[],
+  http: HttpStart
+): Promise<SavedObjectRelation[]> {
+  const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
+    type
+  )}/${encodeURIComponent(id)}`;
+  return http.get<SavedObjectRelation[]>(url, {
+    query: {
+      savedObjectTypes: savedObjectTypes as any, // TODO: is sending array  allowed ?
+    },
+  });
 }

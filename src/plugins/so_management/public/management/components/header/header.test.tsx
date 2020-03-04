@@ -17,31 +17,21 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { Header } from './header';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
+describe('Header', () => {
+  it('should render normally', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      filteredCount: 2,
+    };
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
+    const component = shallow(<Header {...props} />);
 
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-}
+    expect(component).toMatchSnapshot();
+  });
+});

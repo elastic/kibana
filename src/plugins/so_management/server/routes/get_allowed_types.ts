@@ -17,31 +17,27 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { IRouter } from 'src/core/server';
+import { SavedObjectsManagement } from '../services';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
+export const registerGetAllowedTypesRoute = (
+  router: IRouter,
+  managementServicePromise: Promise<SavedObjectsManagement>
+) => {
+  router.get(
+    {
+      path: '/api/kibana/management/saved_objects/_allowed_types', // TODO: change base
+      validate: false,
+    },
+    async (context, req, res) => {
+      const managementService = await managementServicePromise;
+      const allowedTypes = managementService.getImportableAndExportableTypes();
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-}
+      return res.ok({
+        body: {
+          types: allowedTypes,
+        },
+      });
+    }
+  );
+};

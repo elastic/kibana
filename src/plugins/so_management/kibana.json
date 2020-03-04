@@ -3,5 +3,5 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["management"]
+  "requiredPlugins": ["management", "data"]
 }

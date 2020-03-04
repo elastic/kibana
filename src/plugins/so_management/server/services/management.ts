@@ -24,6 +24,14 @@ export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
 export class SavedObjectsManagement {
   constructor(private readonly registry: ISavedObjectTypeRegistry) {}
 
+  // TODO: add tests
+  public getImportableAndExportableTypes() {
+    return this.registry
+      .getAllTypes()
+      .map(type => type.name)
+      .filter(type => this.isImportAndExportable(type));
+  }
+
   public isImportAndExportable(type: string) {
     return this.registry.isImportableAndExportable(type);
   }

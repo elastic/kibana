@@ -17,31 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { HttpStart } from 'src/core/public';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
+export async function fetchExportByTypeAndSearch(
+  http: HttpStart,
+  types: string[],
+  search: string | undefined,
+  includeReferencesDeep: boolean = false
+): Promise<Blob> {
+  return http.post('/api/saved_objects/_export', {
+    body: JSON.stringify({
+      type: types,
+      search,
+      includeReferencesDeep,
+    }),
+  });
 }

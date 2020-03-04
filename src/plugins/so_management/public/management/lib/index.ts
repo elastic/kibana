@@ -17,31 +17,13 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
-
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-}
+export { fetchExportByTypeAndSearch } from './fetch_export_by_type_and_search';
+export { fetchExportObjects } from './fetch_export_objects';
+export { findObjects } from './find_objects';
+export { getRelationships } from './get_relationships';
+export { getSavedObjectCounts } from './get_saved_object_counts';
+export { getSavedObjectLabel } from './get_saved_object_label';
+export { getDefaultTitle } from './get_default_title';
+export { parseQuery } from './parse_query';
+export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
+export { getAllowedTypes } from './get_allowed_types';

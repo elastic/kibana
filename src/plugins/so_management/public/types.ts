@@ -17,31 +17,13 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { SavedObject } from 'src/core/public';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-}
+export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+  meta: {
+    icon?: string;
+    title?: string;
+    editUrl?: string;
+    inAppUrl?: { path: string; uiCapabilitiesPath: string };
+  };
+};

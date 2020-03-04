@@ -17,31 +17,27 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
+import { keysToCamelCaseShallow } from './case_conversion';
+import { SavedObjectWithMetadata } from '../../types';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
+interface SavedObjectsFindResponse {
+  total: number;
+  page: number;
+  perPage: number;
+  savedObjects: SavedObjectWithMetadata[]; // TODO: this is camelCased, so not exactly the same type...
 }
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
+export async function findObjects(
+  http: HttpStart,
+  findOptions: SavedObjectsFindOptions
+): Promise<SavedObjectsFindResponse> {
+  const response = await http.get<Record<string, any>>(
+    '/api/kibana/management/saved_objects/_find',
+    {
+      query: findOptions as Record<string, any>,
+    }
+  );
 
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
+  return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
 }

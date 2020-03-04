@@ -17,31 +17,15 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { HttpStart } from 'src/core/public';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
+export async function getSavedObjectCounts(
+  http: HttpStart,
+  typesToInclude: string[],
+  searchString: string
+): Promise<Record<string, number>> {
+  return await http.post<Record<string, number>>(
+    `/api/kibana/management/saved_objects/scroll/counts`,
+    { body: JSON.stringify({ typesToInclude, searchString }) }
+  );
 }

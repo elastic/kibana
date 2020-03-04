@@ -22,7 +22,7 @@ import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
-  router.get(
+  router.post(
     {
       path: '/api/kibana/management/saved_objects/scroll/counts', // TODO: change
       validate: {

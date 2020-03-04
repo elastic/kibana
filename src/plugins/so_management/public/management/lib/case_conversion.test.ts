@@ -17,31 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { keysToCamelCaseShallow } from './case_conversion';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
+describe('keysToCamelCaseShallow', () => {
+  test("should convert all of an object's keys to camel case", () => {
+    const data = {
+      camelCase: 'camelCase',
+      'kebab-case': 'kebabCase',
+      snake_case: 'snakeCase',
+    };
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
+    const result = keysToCamelCaseShallow(data);
 
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-}
+    expect(result.camelCase).toBe('camelCase');
+    expect(result.kebabCase).toBe('kebabCase');
+    expect(result.snakeCase).toBe('snakeCase');
+  });
+});

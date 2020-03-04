@@ -17,31 +17,15 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+import { HttpStart } from 'src/core/public';
 
-export interface SetupDependencies {
-  management: ManagementSetup;
+interface GetAllowedTypesResponse {
+  types: string[];
 }
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
+export async function getAllowedTypes(http: HttpStart) {
+  const response = await http.get<GetAllowedTypesResponse>(
+    '/api/kibana/management/saved_objects/_allowed_types'
+  );
+  return response.types;
 }

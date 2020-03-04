@@ -17,31 +17,24 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { registerManagementSection } from './management';
+export function parseQuery(query: any) {
+  let queryText;
+  let visibleTypes;
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class SavedObjectsManagementPlugin
-  implements Plugin<{}, {}, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies) {
-    registerManagementSection({
-      core,
-      sections: management.sections,
-    });
-
-    return {};
+  if (query) {
+    if (query.ast.getTermClauses().length) {
+      queryText = query.ast
+        .getTermClauses()
+        .map((clause: any) => clause.value)
+        .join(' ');
+    }
+    if (query.ast.getFieldClauses('type')) {
+      visibleTypes = query.ast.getFieldClauses('type')[0].value;
+    }
   }
 
-  public start(core: CoreStart) {
-    return {};
-  }
+  return {
+    queryText,
+    visibleTypes,
+  };
 }
