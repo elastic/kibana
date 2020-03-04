@@ -23,7 +23,7 @@ export interface UseRules {
   pagination: PaginationOptions;
   filterOptions: FilterOptions;
   refetchPrePackagedRulesStatus?: () => void;
-  dispatchRulesInReducer?: (rules: Rule[]) => void;
+  dispatchRulesInReducer?: (rules: Rule[], pagination: Partial<PaginationOptions>) => void;
 }
 
 /**
@@ -59,14 +59,18 @@ export const useRules = ({
         if (isSubscribed) {
           setRules(fetchRulesResult);
           if (dispatchRulesInReducer != null) {
-            dispatchRulesInReducer(fetchRulesResult.data);
+            dispatchRulesInReducer(fetchRulesResult.data, {
+              page: fetchRulesResult.page,
+              perPage: fetchRulesResult.perPage,
+              total: fetchRulesResult.total,
+            });
           }
         }
       } catch (error) {
         if (isSubscribed) {
           errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
           if (dispatchRulesInReducer != null) {
-            dispatchRulesInReducer([]);
+            dispatchRulesInReducer([], {});
           }
         }
       }

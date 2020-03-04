@@ -12,11 +12,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { parseDuration } from '../../../../../alerting/server';
 import { MAX_INTERVALS } from '../index';
-import {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-  validateDuration,
-} from './core_query_types';
+import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
   getTooManyIntervalsErrorMessage,
   getDateStartAfterDateEndErrorMessage,
@@ -100,6 +96,19 @@ function validateDate(dateString: string): string | undefined {
       defaultMessage: 'invalid date {date}',
       values: {
         date: dateString,
+      },
+    });
+  }
+}
+
+export function validateDuration(duration: string): string | undefined {
+  try {
+    parseDuration(duration);
+  } catch (err) {
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDurationErrorMessage', {
+      defaultMessage: 'invalid duration: "{duration}"',
+      values: {
+        duration,
       },
     });
   }

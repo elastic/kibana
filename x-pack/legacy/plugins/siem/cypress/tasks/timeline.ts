@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
+
 import {
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
@@ -12,6 +14,7 @@ import {
   ID_TOGGLE_FIELD,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_DESCRIPTION,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
@@ -24,12 +27,29 @@ import { drag, drop } from '../tasks/common';
 
 export const hostExistsQuery = 'host.name: *';
 
+export const addDescriptionToTimeline = (description: string) => {
+  cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
+    .click()
+    .invoke('text')
+    .should('not.equal', 'Updating');
+};
+
+export const addNameToTimeline = (name: string) => {
+  cy.get(TIMELINE_TITLE).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
+};
+
 export const checkIdToggleField = () => {
-  cy.get(ID_TOGGLE_FIELD).should('not.exist');
+  cy.get(ID_HEADER_FIELD).should('not.exist');
 
   cy.get(ID_TOGGLE_FIELD).check({
     force: true,
   });
+};
+
+export const closeTimeline = () => {
+  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
 
 export const createNewTimeline = () => {
@@ -85,8 +105,4 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
     drop(headersDropArea)
   );
-};
-
-export const addNameToTimeline = (name: string) => {
-  cy.get(TIMELINE_TITLE).type(name);
 };
