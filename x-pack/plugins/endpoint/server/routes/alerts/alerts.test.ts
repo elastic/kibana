@@ -9,9 +9,9 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { alertingIndexGetQuerySchema } from '../schema';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
+import { alertingIndexGetQuerySchema } from '../../../common/types';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
