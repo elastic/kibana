@@ -400,9 +400,6 @@ export class AggConfig {
 
     // clear out the previous params except for a few special ones
     this.setParams({
-      // split row/columns is "outside" of the agg, so don't reset it
-      row: this.params.row,
-
       // almost every agg has fields, so we try to persist that when type changes
       field: availableFields.find((field: any) => field.name === this.getField()),
     });
