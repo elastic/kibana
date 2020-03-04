@@ -18,8 +18,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function DiscoverPageProvider({ getService, getPageObjects }) {
+export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -33,20 +34,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
-    async getQueryField() {
-      return await find.byCssSelector("input[ng-model='state.query']");
-    }
-
-    async getQuerySearchButton() {
-      return await find.byCssSelector("button[aria-label='Search']");
-    }
-
     async getChartTimespan() {
       const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
-    async saveSearch(searchName) {
+    async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
       await testSubjects.setValue('savedObjectTitle', searchName);
@@ -63,7 +56,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async inputSavedSearchTitle(searchName) {
+    async inputSavedSearchTitle(searchName: string) {
       await testSubjects.setValue('savedObjectTitle', searchName);
     }
 
@@ -86,7 +79,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openLoadSavedSearchPanel() {
-      const isOpen = await testSubjects.exists('loadSearchForm');
+      let isOpen = await testSubjects.exists('loadSearchForm');
       if (isOpen) {
         return;
       }
@@ -96,7 +89,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.clickLoadSavedSearchButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOpen = await testSubjects.exists('loadSearchForm');
+        isOpen = await testSubjects.exists('loadSearchForm');
         expect(isOpen).to.be(true);
       });
     }
@@ -105,12 +98,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await flyout.ensureClosed('loadSearchForm');
     }
 
-    async hasSavedSearch(searchName) {
+    async hasSavedSearch(searchName: string) {
       const searchLink = await find.byButtonText(searchName);
-      return searchLink.isDisplayed();
+      return await searchLink.isDisplayed();
     }
 
-    async loadSavedSearch(searchName) {
+    async loadSavedSearch(searchName: string) {
       await this.openLoadSavedSearchPanel();
       const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
@@ -133,16 +126,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('euiFlyoutCloseButton');
     }
 
-    async getChartCanvas() {
-      return await find.byCssSelector('.echChart canvas:last-of-type');
-    }
-
-    async chartCanvasExist() {
-      return await find.existsByCssSelector('.echChart canvas:last-of-type');
-    }
-
     async clickHistogramBar() {
-      const el = await this.getChartCanvas();
+      const el = await elasticChart.getCanvas();
 
       await browser
         .getActions()
@@ -152,7 +137,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async brushHistogram() {
-      const el = await this.getChartCanvas();
+      const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
         { location: el, offset: { x: 200, y: 20 } },
@@ -164,39 +149,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await globalNav.getLastBreadcrumb();
     }
 
-    async getBarChartData() {
-      let yAxisLabel = 0;
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const y = await find.byCssSelector(
-        'div.visAxis__splitAxes--y > div > svg > g > g:last-of-type'
-      );
-      const yLabel = await y.getVisibleText();
-      yAxisLabel = yLabel.replace(',', '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
-      // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-      const svg = await find.byCssSelector('div.chart > svg');
-      const $ = await svg.parseDomContent();
-      const yAxisHeight = $('rect.background').attr('height');
-      log.debug('theHeight = ' + yAxisHeight);
-      const bars = $('g > g.series > rect')
-        .toArray()
-        .map(chart => {
-          const barHeight = $(chart).attr('height');
-          return Math.round((barHeight / yAxisHeight) * yAxisLabel);
-        });
-
-      return bars;
-    }
-
     async getChartInterval() {
       const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
 
-    async setChartInterval(interval) {
-      const optionElement = await find.byCssSelector('option[label="' + interval + '"]', 5000);
+    async setChartInterval(interval: string) {
+      const optionElement = await find.byCssSelector(`option[label="'${interval}'"]`, 5000);
       await optionElement.click();
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -211,12 +171,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await header.getVisibleText();
     }
 
-    async getDocTableIndex(index) {
-      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + index + ')');
+    async getDocTableIndex(index: number) {
+      const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child('${index}')`);
       return await row.getVisibleText();
     }
 
-    async getDocTableField(index) {
+    async getDocTableField(index: number) {
       const field = await find.byCssSelector(
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
@@ -258,44 +218,44 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('discoverNoResultsTimefilter');
     }
 
-    async clickFieldListItem(field) {
+    async clickFieldListItem(field: string) {
       return await testSubjects.click(`field-${field}`);
     }
 
-    async clickFieldListItemAdd(field) {
+    async clickFieldListItemAdd(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
-    async clickFieldListItemVisualize(field) {
+    async clickFieldListItemVisualize(field: string) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
     }
 
-    async expectFieldListItemVisualize(field) {
+    async expectFieldListItemVisualize(field: string) {
       await testSubjects.existOrFail(`fieldVisualize-${field}`);
     }
 
-    async expectMissingFieldListItemVisualize(field) {
+    async expectMissingFieldListItemVisualize(field: string) {
       await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
-    async clickFieldListPlusFilter(field, value) {
+    async clickFieldListPlusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickFieldListMinusFilter(field, value) {
+    async clickFieldListMinusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async selectIndexPattern(indexPattern) {
+    async selectIndexPattern(indexPattern: string) {
       await testSubjects.click('indexPattern-switch-link');
       await find.clickByCssSelector(
         `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
@@ -303,7 +263,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async removeHeaderColumn(name) {
+    async removeHeaderColumn(name: string) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
     }
@@ -318,7 +278,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
-    async waitForChartLoadingComplete(renderCount) {
+    async waitForChartLoadingComplete(renderCount: number) {
       await elasticChart.waitForRenderingCount('discoverChart', renderCount);
     }
 
