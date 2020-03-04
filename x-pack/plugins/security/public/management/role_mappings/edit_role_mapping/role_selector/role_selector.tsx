@@ -6,11 +6,13 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { RoleMapping, Role } from '../../../../../common/model';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
+import { RoleMapping, Role, isRoleDeprecated } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
+import { RoleComboBox } from '../../../role_combo_box';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -40,7 +42,7 @@ export class RoleSelector extends React.Component<Props, State> {
   public render() {
     const { mode } = this.props;
     return (
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth helpText={this.getHelpText()}>
         {mode === 'roles' ? this.getRoleComboBox() : this.getRoleTemplates()}
       </EuiFormRow>
     );
@@ -49,19 +51,18 @@ export class RoleSelector extends React.Component<Props, State> {
   private getRoleComboBox = () => {
     const { roles = [] } = this.props.roleMapping;
     return (
-      <EuiComboBox
-        data-test-subj="roleMappingFormRoleComboBox"
+      <RoleComboBox
         placeholder={i18n.translate(
           'xpack.security.management.editRoleMapping.selectRolesPlaceholder',
           { defaultMessage: 'Select one or more roles' }
         )}
         isLoading={this.state.roles.length === 0}
-        options={this.state.roles.map(r => ({ label: r.name }))}
-        selectedOptions={roles!.map(r => ({ label: r }))}
-        onChange={selectedOptions => {
+        availableRoles={this.state.roles}
+        selectedRoleNames={roles}
+        onChange={selectedRoles => {
           this.props.onChange({
             ...this.props.roleMapping,
-            roles: selectedOptions.map(so => so.label),
+            roles: selectedRoles,
             role_templates: [],
           });
         }}
@@ -128,6 +129,27 @@ export class RoleSelector extends React.Component<Props, State> {
           }}
         />
       </div>
+    );
+  };
+
+  private getHelpText = () => {
+    if (this.props.mode === 'roles' && this.hasDeprecatedRolesAssigned()) {
+      return (
+        <span data-test-subj="deprecatedRolesAssigned">
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.deprecatedRolesAssigned"
+            defaultMessage="This mapping is assigned a deprecated role. Please migrate to a supported role."
+          />
+        </span>
+      );
+    }
+  };
+
+  private hasDeprecatedRolesAssigned = () => {
+    return (
+      this.props.roleMapping.roles?.some(r =>
+        this.state.roles.some(role => role.name === r && isRoleDeprecated(role))
+      ) ?? false
     );
   };
 }
