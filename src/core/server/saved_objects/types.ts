@@ -61,7 +61,6 @@ export interface SavedObjectsMigrationVersion {
 }
 
 /**
- *
  * @public
  */
 export interface SavedObject<T = unknown> {

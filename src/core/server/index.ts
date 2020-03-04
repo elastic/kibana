@@ -236,6 +236,9 @@ export {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {

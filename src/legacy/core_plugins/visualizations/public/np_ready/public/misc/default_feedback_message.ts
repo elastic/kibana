@@ -17,11 +17,12 @@
  * under the License.
  */
 
-export {
-  IAggConfig,
-  IAggConfigs,
-  isDateHistogramBucketAggConfig,
-  setBounds,
-} from '../../data/public';
-export { createAggConfigs } from 'ui/agg_types';
-export { createSavedSearchesLoader } from '../../../../plugins/discover/public';
+import { i18n } from '@kbn/i18n';
+
+export const defaultFeedbackMessage = i18n.translate('visualizations.defaultFeedbackMessage', {
+  defaultMessage: 'Have feedback? Please create an issue in {link}.',
+  values: {
+    link:
+      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
+  },
+});
