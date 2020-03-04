@@ -18,8 +18,7 @@
  */
 
 import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
-import { FilterStateStore, buildQueryFilter } from '../../../../common';
-import { esFilters } from '../../..';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {
@@ -216,12 +215,20 @@ describe('filter manager utilities', () => {
 
     test('should compare alias with COMPARE_ALL_OPTIONS', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       };
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       };
 
       f2.meta.alias = 'wassup';
