@@ -66,6 +66,7 @@ export default function({ getService }) {
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta:
                       resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
+                    visible: resp.body.saved_objects[0].attributes.visible,
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   references: [
