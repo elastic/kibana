@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MutableRefObject, useRef } from 'react';
+import { useRef } from 'react';
 import { useWindowSize } from 'react-use';
 
-export function useRefHeight(): [
-  MutableRefObject<HTMLDivElement | null>,
-  number
-] {
+export function useRefDimensions() {
   const ref = useRef<HTMLDivElement>(null);
   const windowHeight = useWindowSize().height;
-  const topOffset = ref.current?.getBoundingClientRect()?.top ?? 0;
 
-  const height = ref.current ? windowHeight - topOffset : 0;
+  if (!ref.current) {
+    return { ref, width: 0, height: 0 };
+  }
 
-  return [ref, height];
+  const { top, width } = ref.current.getBoundingClientRect();
+  const height = windowHeight - top;
+
+  return { ref, width, height };
 }

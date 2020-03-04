@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'cytoscape-dagre';
+export { RoleTableDisplay } from './role_table_display';
