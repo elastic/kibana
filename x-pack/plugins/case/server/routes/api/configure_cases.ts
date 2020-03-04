@@ -5,10 +5,24 @@
  */
 
 import axios from 'axios';
+
 import { RouteDeps } from '.';
 import { CASES_API_BASE_URL, SUPPORTED_ACTIONS } from '../../constants';
-import { NewActionSchema, FindActionsSchema, CheckActionHealthSchema } from './schema';
-import { CaseRequestHandler, NewActionType, CheckActionHealthType } from './types';
+import {
+  NewActionSchema,
+  FindActionsSchema,
+  CheckActionHealthSchema,
+  IdSchema,
+  CasesConfigurationSchema,
+} from './schema';
+import {
+  CaseRequestHandler,
+  NewActionType,
+  CheckActionHealthType,
+  CasesConfigurationType,
+  UpdateCaseConfiguration,
+  IdType,
+} from './types';
 import { createRequestHandler } from './utils';
 import { HttpRequestError } from './errors';
 
@@ -82,6 +96,25 @@ const checkActionHealthHandler: CaseRequestHandler = async (
   }
 };
 
+const updateActionHandler: CaseRequestHandler = async (service, context, request, response) => {
+  const savedObjectsClient = context.core.savedObjects.client;
+  try {
+    const { id } = request.params as IdType;
+    const { closure, mapping } = request.body as CasesConfigurationType;
+
+    const action = await savedObjectsClient.get('action', id);
+    const { actionTypeId, name, config } = action.attributes as UpdateCaseConfiguration;
+    const res = await savedObjectsClient.update('action', id, {
+      actionTypeId,
+      name,
+      config: { ...config, casesConfiguration: { closure, mapping } },
+    });
+    return response.ok({ body: { ...res.attributes, version: res.version } });
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createNewAction = ({ caseService, router }: RouteDeps) => {
   router.post(
     {
@@ -91,6 +124,19 @@ export const createNewAction = ({ caseService, router }: RouteDeps) => {
       },
     },
     createRequestHandler(caseService, createNewActionHandler)
+  );
+};
+
+export const updateAction = ({ caseService, router }: RouteDeps) => {
+  router.put(
+    {
+      path: `${CASES_API_BASE_URL}/configure/action/{id}`,
+      validate: {
+        params: IdSchema,
+        body: CasesConfigurationSchema,
+      },
+    },
+    createRequestHandler(caseService, updateActionHandler)
   );
 };
 
