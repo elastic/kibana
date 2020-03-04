@@ -43,7 +43,7 @@ describe('parsing units', () => {
 
   test('throws an error when unsupported unit specified', () => {
     expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingInlineSnapshot(
-      `"Failed to parse [1tb] as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+      `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
     );
   });
 });

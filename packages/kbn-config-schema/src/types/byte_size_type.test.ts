@@ -162,10 +162,10 @@ test('returns error when not valid string or positive safe integer', () => {
   );
 
   expect(() => byteSize().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse [123foo] as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
   );
 
   expect(() => byteSize().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse [123 456] as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
   );
 });
