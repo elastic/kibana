@@ -39,9 +39,9 @@ export const createFleetSetupHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await outputService.createDefaultOutput(soClient, {
-      username: request.body.admin_username,
-      password: request.body.admin_password,
+    await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+      admin_username: request.body.admin_username,
+      admin_password: request.body.admin_password,
     });
     await generateEnrollmentAPIKey(soClient, {
       name: 'Default',

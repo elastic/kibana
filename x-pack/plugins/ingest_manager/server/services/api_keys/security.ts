@@ -15,6 +15,9 @@ export async function createAPIKey(
   roleDescriptors: any
 ) {
   const adminUser = await outputService.getAdminUser(soClient);
+  if (!adminUser) {
+    throw new Error('No admin user configured');
+  }
   const request: FakeRequest = {
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
@@ -45,6 +48,9 @@ export async function authenticate(callCluster: CallESAsCurrentUser) {
 
 export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id: string) {
   const adminUser = await outputService.getAdminUser(soClient);
+  if (!adminUser) {
+    throw new Error('No admin user configured');
+  }
   const request: FakeRequest = {
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
