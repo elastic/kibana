@@ -14,8 +14,6 @@ import {
 
 import { matchAllQuery } from '../../common';
 
-export type SavedSearchQuery = object;
-
 type IndexPatternId = string;
 type SavedSearchId = string;
 
@@ -62,7 +60,7 @@ export function getIndexPatternIdByTitle(indexPatternTitle: string): string | un
   return indexPatternCache.find(d => d?.attributes?.title === indexPatternTitle)?.id;
 }
 
-type CombinedQuery = Record<'bool', any> | object;
+type CombinedQuery = Record<'bool', any> | unknown;
 
 export function loadCurrentIndexPattern(
   indexPatterns: IndexPatternsContract,
@@ -81,20 +79,17 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
 function isIndexPattern(arg: any): arg is IndexPattern {
   return arg !== undefined;
 }
-
-export interface SearchItems {
-  indexPattern: IndexPattern;
-  savedSearch: any;
-  query: any;
-  combinedQuery: CombinedQuery;
-}
-
 // Helper for creating the items used for searching and job creation.
 export function createSearchItems(
   indexPattern: IndexPattern | undefined,
   savedSearch: any,
   config: IUiSettingsClient
-): SearchItems {
+): {
+  indexPattern: IndexPattern;
+  savedSearch: any;
+  query: any;
+  combinedQuery: CombinedQuery;
+} {
   // query is only used by the data visualizer as it needs
   // a lucene query_string.
   // Using a blank query will cause match_all:{} to be used

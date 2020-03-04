@@ -7,14 +7,14 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { KibanaContext } from '../../../../lib/kibana';
+
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
-
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
@@ -40,7 +40,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       aggName: 'the-group-by-agg-name',
       dropDownName: 'the-group-by-drop-down-name',
     };
-    const formState: StepDefineExposedState = {
+    const props: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedPivotEditorEnabled: false,
@@ -51,8 +51,14 @@ describe('Transform: <DefinePivotSummary />', () => {
       valid: true,
     };
 
+    // Using a wrapping <div> element because shallow() would fail
+    // with the Provider being the outer most component.
     const wrapper = shallow(
-      <StepDefineSummary formState={formState} searchItems={{} as SearchItems} />
+      <div>
+        <KibanaContext.Provider value={{ initialized: false }}>
+          <StepDefineSummary {...props} />
+        </KibanaContext.Provider>
+      </div>
     );
 
     expect(wrapper).toMatchSnapshot();

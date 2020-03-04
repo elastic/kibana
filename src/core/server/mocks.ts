@@ -128,6 +128,7 @@ function createCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
       .mockResolvedValue([createCoreStartMock(), {}]),
