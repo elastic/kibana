@@ -41,15 +41,19 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchLatestPackage(
+export async function fetchFindLatestPackage(
   packageName: string,
-  internal: boolean = false
+  internal: boolean = true
 ): Promise<RegistrySearchResult> {
   const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
-  const searchResults = await fetchUrl(url.toString());
-  const latestPackage = JSON.parse(searchResults);
-  return latestPackage[0];
+  const res = await fetchUrl(url.toString());
+  const searchResults = JSON.parse(res);
+  if (searchResults.length) {
+    return searchResults[0];
+  } else {
+    throw new Error('package not found');
+  }
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {

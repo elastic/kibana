@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
-import { installLatestPackage } from './epm/packages/install';
+import { ensureInstalledDefaultPackages } from './epm/packages/install';
 
 export async function setup(
   soClient: SavedObjectsClientContract,
@@ -19,12 +19,6 @@ export async function setup(
     agentConfigService.ensureDefaultAgentConfig(soClient),
 
     // packages installed by default
-    installLatestPackage({
-      savedObjectsClient: soClient,
-      pkgName: 'base',
-      callCluster,
-      internal: true,
-    }),
-    installLatestPackage({ savedObjectsClient: soClient, pkgName: 'system', callCluster }),
+    ensureInstalledDefaultPackages(soClient, callCluster),
   ]);
 }

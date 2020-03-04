@@ -43,6 +43,7 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
+  DefaultPackages,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
