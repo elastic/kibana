@@ -171,6 +171,7 @@ class ColorRulesUI extends Component {
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleChange(model, 'operator')}
             singleSelection={{ asPlainText: true }}
+            data-test-subj="colorRuleOperator"
             fullWidth
           />
         </EuiFlexItem>
@@ -183,6 +184,7 @@ class ColorRulesUI extends Component {
             })}
             value={model.value}
             onChange={this.handleChange(model, 'value', Number)}
+            data-test-subj="colorRuleValue"
             fullWidth
           />
         </EuiFlexItem>
