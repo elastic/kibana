@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiPopover, EuiFormRow, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiPopover, EuiFormRow, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
@@ -21,7 +21,7 @@ export const TakeActionDropdown = styled(
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           <FormattedMessage
-            id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+            id="xpack.endpoint.application.endpoint.alertDetails.takeAction.title"
             defaultMessage="Take Action"
           />
         </EuiButton>
@@ -35,23 +35,21 @@ export const TakeActionDropdown = styled(
         closePopover={() => setIsDropdownOpen(false)}
       >
         <EuiFormRow>
-          <EuiLink color="text" href="#">
-            <EuiIcon type="folderCheck" />
+          <EuiButtonEmpty color="text" onClick={() => {}} iconType="folderCheck">
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+              id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"
               defaultMessage="Close Alert"
             />
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFormRow>
 
         <EuiFormRow>
-          <EuiLink color="text" href="#">
-            <EuiIcon type="listAdd" />
+          <EuiButtonEmpty color="text" onClick={() => {}} iconType="listAdd">
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+              id="xpack.endpoint.application.endpoint.alertDetails.takeAction.whitelist"
               defaultMessage="Whitelist..."
             />
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFormRow>
       </EuiPopover>
     );
