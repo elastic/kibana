@@ -20,6 +20,7 @@
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
@@ -619,6 +620,7 @@ export class DashboardAppController {
         showQueryInput,
         showDatePicker,
         showFilterBar: showFilterBar(),
+        justifyContent: (chrome.isEmbedded ? 'flexStart' : 'flexEnd') as FlexGroupJustifyContent,
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,

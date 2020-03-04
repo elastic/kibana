@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
@@ -48,6 +49,7 @@ export interface SearchBarOwnProps {
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
   dataTestSubj?: string;
+  justifyContent?: FlexGroupJustifyContent;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -402,6 +404,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          justifyContent={this.props.justifyContent}
         />
       );
     }

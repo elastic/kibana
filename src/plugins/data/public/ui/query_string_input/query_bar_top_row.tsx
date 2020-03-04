@@ -31,6 +31,7 @@ import {
   EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
+import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,6 +57,7 @@ interface Props {
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  justifyContent?: FlexGroupJustifyContent;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
@@ -347,7 +349,7 @@ export function QueryBarTopRow(props: Props) {
       className={classes}
       responsive={!!props.showDatePicker}
       gutterSize="s"
-      justifyContent="flexStart"
+      justifyContent={props.justifyContent || 'flexEnd'}
     >
       {renderQueryInput()}
       {renderSharingMetaFields()}
