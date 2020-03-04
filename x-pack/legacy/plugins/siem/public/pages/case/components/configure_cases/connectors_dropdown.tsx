@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EuiSuperSelect, EuiIcon, EuiSuperSelectOption } from '@elastic/eui';
 import styled from 'styled-components';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
 const ICON_SIZE = 'm';
 
@@ -40,15 +40,14 @@ const connectors: Array<EuiSuperSelectOption<string>> = [
 ];
 
 const ConnectorsDropdownComponent: React.FC = () => {
-  const [selectedConnector, selectConnector] = useState(connectors[0].value);
-  const onChange = useCallback(connector => selectConnector(connector), [selectedConnector]);
+  const [selectedConnector, setSelectedConnector] = useState(connectors[0].value);
 
   return (
     <EuiSuperSelect
       options={connectors}
       valueOfSelected={selectedConnector}
       fullWidth
-      onChange={onChange}
+      onChange={setSelectedConnector}
     />
   );
 };
