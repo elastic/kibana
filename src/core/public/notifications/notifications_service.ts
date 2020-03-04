@@ -24,9 +24,11 @@ import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
+import { PulseServiceContext } from '../pulse';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  pulse: PulseServiceContext;
 }
 
 interface StartDeps {
@@ -45,8 +47,8 @@ export class NotificationsService {
     this.toasts = new ToastsService();
   }
 
-  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
-    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
+  public setup({ uiSettings, pulse }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ uiSettings, pulse }) };
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {

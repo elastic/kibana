@@ -20,13 +20,17 @@
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ErrorInstruction } from 'src/core/server/pulse/collectors/errors';
 import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
 import { mountReactNode } from '../../utils';
 import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 import { I18nStart } from '../../i18n';
+import { PulseServiceContext } from '../../pulse';
 
 /**
  * Allowed fields for {@link ToastInput}.
@@ -95,18 +99,33 @@ export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
   private uiSettings: IUiSettingsClient;
+  private readonly pulse: PulseServiceContext;
+  private readonly fixedErrors = new Map<string, string>();
 
   private overlays?: OverlayStart;
   private i18n?: I18nStart;
 
-  constructor(deps: { uiSettings: IUiSettingsClient }) {
+  constructor(deps: { uiSettings: IUiSettingsClient; pulse: PulseServiceContext }) {
     this.uiSettings = deps.uiSettings;
+    this.pulse = deps.pulse;
   }
 
   /** @internal */
   public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
     this.overlays = overlays;
     this.i18n = i18n;
+    this.pulse
+      .getChannel<ErrorInstruction>('errors')
+      .instructions$()
+      .pipe(
+        map(instructions => instructions.filter(instruction => instruction.fixedVersion)),
+        filter(instructions => instructions.length > 0)
+      )
+      .subscribe(instructions =>
+        instructions.forEach(instruction =>
+          this.fixedErrors.set(instruction.hash, instruction.fixedVersion!)
+        )
+      );
   }
 
   /** Observable of the toast messages to show to the user. */
@@ -198,6 +217,14 @@ export class ToastsApi implements IToasts {
    */
   public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
+
+    let fixedVersionMsg = '';
+    this.fixedErrors.forEach((fixedVersion, hash) => {
+      if (options.title === `Error:${hash}`) {
+        fixedVersionMsg = `. This error has been fixed in ${fixedVersion}.`;
+      }
+    });
+
     return this.add({
       color: 'danger',
       iconType: 'alert',
@@ -208,7 +235,7 @@ export class ToastsApi implements IToasts {
           openModal={this.openModal.bind(this)}
           error={error}
           title={options.title}
-          toastMessage={message}
+          toastMessage={message + fixedVersionMsg}
           i18nContext={() => this.i18n!.Context}
         />
       ),

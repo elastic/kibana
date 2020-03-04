@@ -164,8 +164,8 @@ export class CoreSystem {
       await this.integrations.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
-      const notifications = this.notifications.setup({ uiSettings });
       const pulse = await this.pulse.setup();
+      const notifications = this.notifications.setup({ uiSettings, pulse });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -293,18 +293,17 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
-
       let sequence = 0;
       const clicks: Array<Record<string, any>> = [];
-      $('body').on('click', 'a', (event) => {
+      $('body').on('click', 'a', event => {
         handleClick($(event.currentTarget));
       });
-      $('body').on('click', 'button', (event) => {
+      $('body').on('click', 'button', event => {
         handleClick($(event.currentTarget));
       });
 
       let currentAppId: string | undefined;
-      application.currentAppId$.subscribe(appId => currentAppId = appId);
+      application.currentAppId$.subscribe(appId => (currentAppId = appId));
 
       function handleClick(element: any) {
         clicks.push({
@@ -339,7 +338,6 @@ export class CoreSystem {
       }
 
       bufferAndSendClicks();
-
 
       await this.legacy.start({
         core,

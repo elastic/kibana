@@ -34,10 +34,9 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
 
   public async setup(core: CoreSetup) {
     this.errorsChannel = core.pulse.getChannel('errors');
-    errorChannelPayloads.forEach(element => {
-      // tmp disable errors channel
-      // core.pulse.getChannel('errors').sendPulse(element)
-    });
+    (window as any).throwErrors = () => {
+      errorChannelPayloads().forEach(element => core.pulse.getChannel('errors').sendPulse(element));
+    };
   }
 
   public start(core: CoreStart) {
@@ -50,15 +49,25 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
       .pipe(takeUntil(this.stop$))
       .subscribe(instructions => {
         if (instructions && instructions.length) {
-          instructions.forEach((instruction: any) => {
+          instructions.forEach(instruction => {
             // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
-            if (instruction) {
-              if (!instruction.fixedVersion && !this.noFixedVersionsSeen.has(instruction.hash))
+            if (instruction.status === 'new') {
+              if (!instruction.fixedVersion && !this.noFixedVersionsSeen.has(instruction.hash)) {
                 core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
-                  // @ts-ignore-next-line
                   title: `Error:${instruction.hash}`,
                   toastMessage: `An error occurred: ${instruction.message}. The error has been reported to Pulse`,
                 });
+              } else if (instruction.fixedVersion) {
+                core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
+                  title: `Error:${instruction.hash}`,
+                  toastMessage: `An error occurred: ${instruction.message}`,
+                });
+              }
+              this.errorsChannel!.sendPulse({
+                ...instruction,
+                status: 'seen',
+                timestamp: new Date().toISOString(),
+              });
               this.noFixedVersionsSeen.add(instruction.hash);
             }
           });

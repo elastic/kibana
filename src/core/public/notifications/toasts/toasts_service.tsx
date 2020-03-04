@@ -25,9 +25,11 @@ import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
+import { PulseServiceContext } from '../../pulse';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  pulse: PulseServiceContext;
 }
 
 interface StartDeps {
@@ -52,8 +54,8 @@ export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
 
-  public setup({ uiSettings }: SetupDeps) {
-    this.api = new ToastsApi({ uiSettings });
+  public setup({ uiSettings, pulse }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings, pulse });
     return this.api!;
   }
 

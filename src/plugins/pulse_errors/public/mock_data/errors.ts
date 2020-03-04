@@ -21,73 +21,87 @@ import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors';
 
-export const errorChannelPayloads: PulseErrorPayloadRecord[] = [
+/**
+ * How to demo:
+ *
+ * 1. Open the browser
+ * 2. In the Browser console run window.throwErrors()
+ * 3. You should see a toast notification with "... has been reported to Pulse."
+ * 4. Run the following request in the Dev Console
+PUT pulse-poc-raw-errors/_bulk
+{"update":{"_id":"[xpack][plugins][pulse] This super weird error happened"}}
+{"doc":{"fixedVersion":"7.6.2"}}
+ * 5. Make the error happen again (call window.throwErrors() again)
+ * 6. You should see a new toast notification but this time with "... This error has been fixed in version 7.6.2"
+ */
+
+export const errorChannelPayloads: () => PulseErrorPayloadRecord[] = () => [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: 'The index [pulse-poc-raw-default/1234567890]',
-    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1234567890]',
+    message: 'This super weird error happened',
+    hash: '[xpack][plugins][pulse] This super weird error happened',
     status: 'new',
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),
   },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'The index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
-    hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg]',
-    status: 'new',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(30, 'seconds')
-      .toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
-    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
-    status: 'new',
-    fixedVersion: 'v7.4.2',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(15, 'seconds')
-      .toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: '[Error]: Test',
-    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 2',
-    status: 'new',
-    fixedVersion: 'v7.5.2',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(20, 'seconds')
-      .toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
-    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 3',
-    status: 'new',
-    fixedVersion: 'v7.5.1',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(25, 'seconds')
-      .toDate(),
-  },
-  {
-    channel_id: 'errors',
-    deployment_id: '123',
-    message: '[Error]: Test2',
-    hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 4',
-    status: 'new',
-    fixedVersion: 'v7.5.2',
-    currentKibanaVersion: 'v7.x',
-    timestamp: moment()
-      .add(30, 'seconds')
-      .toDate(),
-  },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg] already exists',
+  //   hash: '[xpack][plugins][pulse] index [pulse-poc-raw-default/1QJURO2GRfqpFfuOp12rIg]',
+  //   status: 'new',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(30, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 1',
+  //   status: 'new',
+  //   fixedVersion: 'v7.4.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(15, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: '[Error]: Test',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 2',
+  //   status: 'new',
+  //   fixedVersion: 'v7.5.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(20, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: 'The SampleDataSetCard [key=ecommerce] component failed to mount',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 3',
+  //   status: 'new',
+  //   fixedVersion: 'v7.5.1',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(25, 'seconds')
+  //     .toDate(),
+  // },
+  // {
+  //   channel_id: 'errors',
+  //   deployment_id: '123',
+  //   message: '[Error]: Test2',
+  //   hash: '[plugins][pulse_errors]: [Error]: fakeError:arbitraryError 4',
+  //   status: 'new',
+  //   fixedVersion: 'v7.5.2',
+  //   currentKibanaVersion: 'v7.x',
+  //   timestamp: moment()
+  //     .add(30, 'seconds')
+  //     .toDate(),
+  // },
 ];

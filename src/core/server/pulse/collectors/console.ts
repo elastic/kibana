@@ -54,7 +54,6 @@ export class Collector extends PulseCollector {
   private readonly channelName = 'console';
   private readonly indexName = '.kibana_pulse_local_console';
   public async putRecord(payload: Payload) {
-    console.log('payload::', payload);
     if (this.rawElasticsearch) {
       await this.rawElasticsearch.callAsInternalUser<any>('bulk', {
         // index: this.indexName,
