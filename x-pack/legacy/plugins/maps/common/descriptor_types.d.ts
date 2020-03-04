@@ -89,7 +89,6 @@ export type XYZTMSSourceDescriptor = {
 };
 
 export type JoinDescriptor = {
-  leftField: string;
   right: ESTermSourceDescriptor;
 };
 
@@ -143,7 +142,7 @@ export type GeometryTypes = {
   isPolygonsOnly: boolean;
 };
 
-export type StyleMeta = {
+export type StyleMetaValues = {
   geometryTypes?: GeometryTypes;
   fieldMeta: {
     [key: string]: {

@@ -5,15 +5,15 @@
  */
 
 import {
-  StyleMeta,
+  StyleMetaValues,
   GeometryTypes,
   RangeFieldMeta,
   CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
-  private readonly _descriptor: StyleMeta;
-  constructor(styleMetaDescriptor: StyleMeta) {
+  private readonly _descriptor: StyleMetaValues;
+  constructor(styleMetaDescriptor: StyleMetaValues) {
     this._descriptor = styleMetaDescriptor;
   }
 
