@@ -11,6 +11,7 @@ core: {
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
+            typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
             dataClient: IScopedClusterClient;

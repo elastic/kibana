@@ -1352,6 +1352,7 @@ export interface RequestHandlerContext {
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
+            typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
             dataClient: IScopedClusterClient;
@@ -2050,10 +2051,24 @@ export interface SavedObjectsType {
     convertToAliasScript?: string;
     hidden: boolean;
     indexPattern?: string;
+    management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceAgnostic: boolean;
+}
+
+// @public
+export interface SavedObjectsTypeManagementDefinition {
+    defaultSearchField?: string;
+    getEditUrl?: (savedObject: SavedObject<any>) => string;
+    getInAppUrl?: (savedObject: SavedObject<any>) => {
+        path: string;
+        uiCapabilitiesPath: string;
+    };
+    getTitle?: (savedObject: SavedObject<any>) => string;
+    icon?: string;
+    importableAndExportable?: boolean;
 }
 
 // @public
@@ -2083,6 +2098,7 @@ export class SavedObjectTypeRegistry {
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
+    isImportableAndExportable(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
