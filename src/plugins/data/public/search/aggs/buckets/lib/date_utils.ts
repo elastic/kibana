@@ -17,18 +17,9 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
-
-export * from './search_source/mocks';
-
-export const searchSetupMock = {
-  aggs: {
-    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
-      return getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings);
-    }),
-  },
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-};
+/**
+ * This temporarily re-exports a static function from the data shim plugin until
+ * the final agg_types cutover is complete. It is needed for use in Lens; and they
+ * are not currently using the legacy data shim, so we are moving it here first.
+ */
+export { getCalculateAutoTimeExpression } from '../../../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_utils';

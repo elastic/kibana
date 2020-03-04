@@ -30,7 +30,7 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { fieldFormats, KBN_FIELD_TYPES, TimeRange } from '../../../../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import {
   getFieldFormats,
   getQueryService,

@@ -20,14 +20,9 @@
 import dateMath from '@elastic/datemath';
 import { TimeBuckets } from './time_buckets';
 import { TimeRange } from '../../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getUiSettings } from '../../../../../../../../plugins/data/public/services';
+import { IUiSettingsClient } from '../../../../../../../../core/public';
 
-export function toAbsoluteDates(range?: TimeRange) {
-  if (!range) {
-    return;
-  }
-
+export function toAbsoluteDates(range: TimeRange) {
   const fromDate = dateMath.parse(range.from);
   const toDate = dateMath.parse(range.to, { roundUp: true });
 
@@ -41,19 +36,21 @@ export function toAbsoluteDates(range?: TimeRange) {
   };
 }
 
-export function calculateAutoTimeExpression(range?: TimeRange, defaultValue: string = '1h') {
-  const dates = toAbsoluteDates(range);
-  if (!dates) {
-    return defaultValue;
-  }
+export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
+  return function calculateAutoTimeExpression(range: TimeRange) {
+    const dates = toAbsoluteDates(range);
+    if (!dates) {
+      return;
+    }
 
-  const buckets = new TimeBuckets({ uiSettings: getUiSettings() });
+    const buckets = new TimeBuckets({ uiSettings });
 
-  buckets.setInterval('auto');
-  buckets.setBounds({
-    min: dates.from,
-    max: dates.to,
-  });
+    buckets.setInterval('auto');
+    buckets.setBounds({
+      min: dates.from,
+      max: dates.to,
+    });
 
-  return buckets.getInterval().expression;
+    return buckets.getInterval().expression;
+  };
 }

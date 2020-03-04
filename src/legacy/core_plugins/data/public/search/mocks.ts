@@ -17,8 +17,11 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { SearchSetup, SearchStart } from './search_service';
 import { AggTypesRegistrySetup, AggTypesRegistryStart } from './aggs/agg_types_registry';
+import { getCalculateAutoTimeExpression } from './aggs';
 import { AggConfigs } from './aggs/agg_configs';
 import { mockAggTypesRegistry } from './aggs/test_helpers';
 
@@ -58,12 +61,18 @@ export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> =
 
 export const searchSetupMock = (): MockedKeys<SearchSetup> => ({
   aggs: {
+    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
+      return getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings);
+    }),
     types: aggTypesRegistrySetupMock(),
   },
 });
 
 export const searchStartMock = (): MockedKeys<SearchStart> => ({
   aggs: {
+    calculateAutoTimeExpression: jest.fn().mockImplementation(() => {
+      return getCalculateAutoTimeExpression(coreMock.createStart().uiSettings);
+    }),
     createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
       return new AggConfigs(indexPattern, configStates, {
         schemas,

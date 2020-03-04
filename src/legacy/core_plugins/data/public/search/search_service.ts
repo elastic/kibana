@@ -27,9 +27,9 @@ import {
   AggTypesRegistryStart,
   AggConfig,
   AggConfigs,
-  calculateAutoTimeExpression,
   CreateAggConfigParams,
   FieldParamType,
+  getCalculateAutoTimeExpression,
   MetricAggType,
   aggTypeFieldFilters,
   parentPipelineAggHelper,
@@ -37,6 +37,7 @@ import {
 } from './aggs';
 
 interface AggsSetup {
+  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
 }
 
@@ -51,7 +52,7 @@ interface AggsStartLegacy {
 }
 
 interface AggsStart {
-  calculateAutoTimeExpression: typeof calculateAutoTimeExpression;
+  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
@@ -85,6 +86,7 @@ export class SearchService {
 
     return {
       aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         types: aggTypesSetup,
       },
     };
@@ -94,7 +96,7 @@ export class SearchService {
     const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
-        calculateAutoTimeExpression,
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             schemas,
