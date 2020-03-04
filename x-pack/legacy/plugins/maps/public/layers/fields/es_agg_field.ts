@@ -8,6 +8,7 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { IField } from './field';
 import { AggDescriptor } from '../../../common/descriptor_types';
 import { IESAggSource } from '../sources/es_agg_source';
+import { IVectorSource } from '../sources/vector_source';
 // @ts-ignore
 import { ESDocField } from './es_doc_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
@@ -51,7 +52,7 @@ export class ESAggField implements IESAggField {
     this._esDocField = esDocField;
   }
 
-  getSource(): IESAggSource {
+  getSource(): IVectorSource {
     return this._source;
   }
 

@@ -5,7 +5,7 @@
  */
 
 import { IESAggField } from './es_agg_field';
-import { IESAggSource } from '../sources/es_agg_source';
+import { IVectorSource } from '../sources/vector_source';
 // @ts-ignore
 import { TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
@@ -18,7 +18,7 @@ export class TopTermPercentageField implements IESAggField {
     this._topTermAggField = topTermAggField;
   }
 
-  getSource(): IESAggSource {
+  getSource(): IVectorSource {
     return this._topTermAggField.getSource();
   }
 
