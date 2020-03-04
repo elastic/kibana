@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`BatchQueues prevents adding items that have already been queued 1`] = `"The following item(s) are already enqueued: [s, t]"`;

@@ -19,9 +19,7 @@ import {
 import { CloudSetup } from '../../cloud/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
-import { credentialStoreFactory } from './lib/reindexing/credential_store';
-import { BatchQueues } from './lib/reindexing/batch_queues';
-
+import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
@@ -38,9 +36,7 @@ interface PluginsSetup {
 
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
-
-  private readonly credentialStore = credentialStoreFactory();
-  private readonly batchQueues = new BatchQueues();
+  private readonly credentialStore: CredentialStore;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -52,6 +48,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   constructor({ logger }: PluginInitializerContext) {
     this.logger = logger.get();
+    this.credentialStore = credentialStoreFactory();
   }
 
   private getWorker() {
@@ -117,7 +114,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       ),
     });
 
-    this.worker!.start();
+    this.worker.start();
   }
 
   stop(): void {
