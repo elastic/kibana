@@ -174,13 +174,54 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.existingFieldNames.sort()).to.eql(metricBeatData.sort());
       });
 
-      it('should throw a 404 for a non-existent index', async () => {
-        await supertest
+      it('should return fields filtered by query and filters', async () => {
+        const expectedFieldNames = [
+          '@message',
+          '@message.raw',
+          '@tags',
+          '@tags.raw',
+          '@timestamp',
+          'agent',
+          'agent.raw',
+          'bytes',
+          'clientip',
+          'extension',
+          'extension.raw',
+          'headings',
+          'headings.raw',
+          'host',
+          'host.raw',
+          'index',
+          'index.raw',
+          'referer',
+          'request',
+          'request.raw',
+          'response',
+          'response.raw',
+          'spaces',
+          'spaces.raw',
+          'type',
+          'url',
+          'url.raw',
+          'utc_time',
+          'xss',
+          'xss.raw',
+        ];
+
+        const dslQueryFiltered = JSON.stringify({
+          bool: {
+            filter: [{ match: { referer: 'https://www.taylorswift.com/' } }],
+          },
+        });
+        const { body } = await supertest
           .get(
-            `/api/lens/existing_fields/nadachance?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}&dslQuery=${DSL_QUERY}`
+            `/api/lens/existing_fields/${encodeURIComponent(
+              'logstash-*'
+            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}&dslQuery=${dslQueryFiltered}`
           )
           .set(COMMON_HEADERS)
-          .expect(404);
+          .expect(200);
+        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
       });
     });
   });
