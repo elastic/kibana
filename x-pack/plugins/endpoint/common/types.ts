@@ -29,10 +29,7 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
+export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
@@ -50,7 +47,7 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
+  static ALERT_LIST_DEFAULT_ORDER = 'desc';
 }
 
 export interface AlertResultList {
@@ -362,15 +359,17 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
-      })
+      }) as kbnConfigSchemaTypes.Type<[string, string]>
     ),
     before: schema.maybe(
       schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
-      })
+      }) as kbnConfigSchemaTypes.Type<[string, string]>
     ),
     sort: schema.maybe(schema.string()),
+    order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+    /*
     order: schema.maybe(
       schema.string({
         validate(value) {
@@ -382,6 +381,7 @@ export const alertingIndexGetQuerySchema = schema.object(
         },
       })
     ),
+    */
     query: schema.maybe(
       schema.string({
         validate(value) {
@@ -471,7 +471,9 @@ export const alertingIndexGetQuerySchema = schema.object(
 type KbnConfigSchemaInputTypeOf<
   T extends kbnConfigSchemaTypes.Type<unknown>
 > = T extends kbnConfigSchemaTypes.ObjectType
-  ? KbnConfigSchemaInputObjectTypeOf<T>
+  ? KbnConfigSchemaInputObjectTypeOf<
+      T
+    > /** The schema.number() schema accepts strings, so accept them here to. There's no good way to make this happen ONLY when schema.number is called? i dont think it matters? */
   : kbnConfigSchemaTypes.Type<number> extends T
   ? TypeOf<T> | string
   : TypeOf<T>;
@@ -486,6 +488,9 @@ type KbnConfigSchemaInputObjectTypeOf<
   T extends kbnConfigSchemaTypes.ObjectType
 > = T extends kbnConfigSchemaTypes.ObjectType<infer P>
   ? {
+      /** Use ? to make the field optional if the prop accepts undefined.
+       * This allows us to avoid writing `field: undefined` for optional fields.
+       */
       [K in Exclude<
         keyof P,
         keyof KbnConfigSchemaNonOptionalProps<P>
@@ -510,6 +515,11 @@ type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> =
 /**
  * Query params to pass to the alert API when fetching new data.
  */
-export type AlertingIndexGetQuerySchema = KbnConfigSchemaInputTypeOf<
+// TODO rename to Input....
+// the type you use when calling the api.
+export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
   typeof alertingIndexGetQuerySchema
 >;
+
+// The type resulting from validating input. used in the handler
+export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;

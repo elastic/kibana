@@ -10,7 +10,7 @@ import {
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
 import { AlertListState, AlertingIndexUIQueryParams, CreateStructuredSelector } from '../../types';
-import { Immutable, AlertingIndexGetQuerySchema } from '../../../../../common/types';
+import { Immutable, AlertingIndexGetQueryInput } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 
@@ -78,7 +78,7 @@ export const uiQueryParams: (
  */
 export const apiQueryParams: (
   state: AlertListState
-) => Immutable<AlertingIndexGetQuerySchema> = createSelector(
+) => Immutable<AlertingIndexGetQueryInput> = createSelector(
   uiQueryParams,
   ({ page_size, page_index }) => ({
     page_size,

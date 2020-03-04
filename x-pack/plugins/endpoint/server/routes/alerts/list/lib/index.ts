@@ -15,13 +15,14 @@ import {
   AlertHits,
   EndpointAppConstants,
   ESTotal,
+  AlertingIndexGetQueryResult,
 } from '../../../../../common/types';
 import { EndpointAppContext } from '../../../../types';
-import { AlertSearchQuery, AlertListRequestQuery } from '../../types';
+import { AlertSearchQuery } from '../../types';
 import { AlertListPagination } from './pagination';
 
 export const getRequestData = async (
-  request: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
+  request: KibanaRequest<unknown, AlertingIndexGetQueryResult, unknown>,
   endpointAppContext: EndpointAppContext
 ): Promise<AlertSearchQuery> => {
   const config = await endpointAppContext.config();
