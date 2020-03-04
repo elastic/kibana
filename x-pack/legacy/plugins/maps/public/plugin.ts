@@ -5,7 +5,7 @@
  */
 
 // @ts-nocheck
-import { Plugin, CoreStart } from 'src/core/public';
+import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -33,30 +33,32 @@ interface MapsPluginSetupDependencies {
   };
 }
 
-export const bindCoreAndPlugins = ({ injectedMetadata }, { inspector }) => {
-  setInspector(inspector);
+export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
+  const { licensing } = plugins;
+  const { injectedMetadata } = core;
+  if (licensing) {
+    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
+  }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
 };
 
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup(core: any, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
       .directive('mapListing', function(reactDirective: any) {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    if (np.licensing) {
-      np.licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
-    }
+    bindSetupCoreAndPlugins(core, np);
+
     np.home.featureCatalogue.register(featureCatalogueEntry);
-
-    // NP setup
-    np.inspector.registerView(MapView);
-
-    bindCoreAndPlugins(core, np);
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    const { inspector } = np.plugins;
+    setInspector(inspector);
+    inspector.registerView(MapView);
+  }
 }
