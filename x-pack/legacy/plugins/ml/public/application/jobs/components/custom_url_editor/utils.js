@@ -7,6 +7,10 @@
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import rison from 'rison-node';
+import url from 'url';
+
+import { npStart } from 'ui/new_platform';
+import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../../src/plugins/dashboard_embeddable_container/public';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
@@ -152,52 +156,42 @@ function buildDashboardUrlFromSettings(settings) {
           query = searchSourceData.query;
         }
 
-        // Add time settings to the global state URL parameter with $earliest$ and
-        // $latest$ tokens which get substituted for times around the time of the
-        // anomaly on which the URL will be run against.
-        const _g = rison.encode({
-          time: {
-            from: '$earliest$',
-            to: '$latest$',
-            mode: 'absolute',
-          },
-        });
-
-        const appState = {
-          filters,
-        };
-
-        // To put entities in filters section would involve creating parameters of the form
-        // filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b30fd340-efb4-11e7-a600-0f58b1422b87,
-        // key:airline,negate:!f,params:(query:AAL,type:phrase),type:phrase,value:AAL),query:(match:(airline:(query:AAL,type:phrase)))))
-        // which includes the ID of the index holding the field used in the filter.
-
-        // So for simplicity, put entities in the query, replacing any query which is there already.
-        // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
         const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
         if (queryFromEntityFieldNames !== undefined) {
           query = queryFromEntityFieldNames;
         }
 
-        if (query !== undefined) {
-          appState.query = query;
-        }
+        const generator = npStart.plugins.share.urlGenerators.getUrlGenerator(
+          DASHBOARD_APP_URL_GENERATOR
+        );
 
-        const _a = rison.encode(appState);
+        return generator
+          .createUrl({
+            dashboardId,
+            timeRange: {
+              from: '$earliest$',
+              to: '$latest$',
+              mode: 'absolute',
+            },
+            filters,
+            query,
+            // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
+            // template to inject the time parameters.
+            useHash: false,
+          })
+          .then(urlValue => {
+            const urlToAdd = {
+              url_name: settings.label,
+              url_value: decodeURIComponent(`kibana${url.parse(urlValue).hash}`),
+              time_range: TIME_RANGE_TYPE.AUTO,
+            };
 
-        const urlValue = `kibana#/dashboard/${dashboardId}?_g=${_g}&_a=${_a}`;
+            if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
+              urlToAdd.time_range = settings.timeRange.interval;
+            }
 
-        const urlToAdd = {
-          url_name: settings.label,
-          url_value: urlValue,
-          time_range: TIME_RANGE_TYPE.AUTO,
-        };
-
-        if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
-          urlToAdd.time_range = settings.timeRange.interval;
-        }
-
-        resolve(urlToAdd);
+            resolve(urlToAdd);
+          });
       })
       .catch(resp => {
         reject(resp);
