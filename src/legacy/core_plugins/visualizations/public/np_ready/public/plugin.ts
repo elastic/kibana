@@ -48,13 +48,15 @@ import { visualization as visualizationRenderer } from './expressions/visualizat
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
+  IIndexPattern,
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { VisImpl, VisImplConstructor } from './vis_impl';
+import { VisImpl } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { DataStart as LegacyDataStart } from '../../../../data/public';
+import { VisState } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -66,7 +68,7 @@ export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  Vis: VisImplConstructor;
+  createVis: (indexPattern: IIndexPattern, visState?: VisState) => VisImpl;
   showNewVisModal: typeof showNewVisModal;
 }
 
@@ -152,7 +154,13 @@ export class VisualizationsPlugin
     return {
       ...types,
       showNewVisModal,
-      Vis: VisImpl,
+      /**
+       * creates new instance of Vis
+       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {VisState} visState - visualization configuration
+       */
+      createVis: (indexPattern: IIndexPattern, visState?: VisState) =>
+        new VisImpl(indexPattern, visState),
       savedVisualizationsLoader,
     };
   }

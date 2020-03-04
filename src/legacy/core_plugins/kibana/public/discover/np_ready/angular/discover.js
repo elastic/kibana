@@ -1006,7 +1006,7 @@ function discoverController(
       },
     };
 
-    $scope.vis = new visualizations.Vis(
+    $scope.vis = visualizations.createVis(
       $scope.searchSource.getField('index'),
       visSavedObject.visState
     );
