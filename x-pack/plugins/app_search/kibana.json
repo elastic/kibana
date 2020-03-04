@@ -1,0 +1,8 @@
+{
+  "id": "appSearch",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["appSearch"],
+  "server": true,
+  "ui": true
+}

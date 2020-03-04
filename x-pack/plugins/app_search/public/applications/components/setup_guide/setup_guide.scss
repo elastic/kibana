@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+/**
+ * Setup Guide
+ */
+.setup-guide {
+  &.euiPage {
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .euiPageSideBar {
+    flex-basis: 300px;
+    flex-shrink: 0;
+    padding: 24px;
+    margin-right: 0;
+
+    background-color: #f5f7fa; // $euiColorLightestShade
+    border-color: #d3dae6; // $euiColorLightShade
+    border-style: solid;
+    border-width: 0 0 1px 0; // bottom - mobile view
+
+    @media (min-width: 766px) {
+      border-width: 0 1px 0 0; // right - desktop view
+    }
+    @media (min-width: 1000px) {
+      flex-basis: 400px;
+    }
+    @media (min-width: 1200px) {
+      flex-basis: 500px;
+    }
+  }
+
+  .euiPageBody {
+    align-self: start;
+    padding: 24px;
+
+    @media (min-width: 1000px) {
+      padding: 40px 50px;
+    }
+  }
+
+  &__thumbnail {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 24px auto;
+  }
+}
