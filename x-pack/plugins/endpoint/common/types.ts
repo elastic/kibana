@@ -115,6 +115,10 @@ export type AlertEvent = Immutable<{
       score: number;
     };
   };
+  process?: {
+    unique_pid: number;
+    pid: number;
+  };
   host: {
     hostname: string;
     ip: string;
@@ -122,10 +126,9 @@ export type AlertEvent = Immutable<{
       name: string;
     };
   };
-  process: {
-    pid: number;
-  };
   thread: {};
+  endpoint?: {};
+  endgame?: {};
 }>;
 
 /**
@@ -184,22 +187,34 @@ export interface ESTotal {
 export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
 export interface LegacyEndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': number;
   endgame: {
-    event_type_full: string;
-    event_subtype_full: string;
+    pid?: number;
+    ppid?: number;
+    event_type_full?: string;
+    event_subtype_full?: string;
+    event_timestamp?: number;
+    event_type?: number;
     unique_pid: number;
-    unique_ppid: number;
-    serial_event_id: number;
+    unique_ppid?: number;
+    machine_id?: string;
+    process_name?: string;
+    process_path?: string;
+    timestamp_utc?: string;
+    serial_event_id?: number;
   };
   agent: {
     id: string;
     type: string;
+    version: string;
   };
+  process?: object;
+  rule?: object;
+  user?: object;
 }
 
 export interface EndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': number;
   event: {
     category: string;
     type: string;
@@ -214,6 +229,7 @@ export interface EndpointEvent {
     };
   };
   agent: {
+    id: string;
     type: string;
   };
 }
