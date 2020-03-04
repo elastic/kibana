@@ -7,7 +7,10 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 import { getHistogramIntervalFormatted } from '../helper';
-import { LocationDurationLine, MonitorChart } from '../../../common/types';
+import {
+  LocationDurationLine,
+  MonitorChart,
+} from '../../../../../legacy/plugins/uptime/common/types';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */

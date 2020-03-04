@@ -19,12 +19,7 @@ import {
 
 interface Props {
   isOpen: boolean;
-  hasMLJob: boolean;
-  isMLJobCreating: boolean;
   onClose: () => void;
-  loadMLJob: () => void;
-  createMLJob: () => void;
-  mlError: any;
 }
 
 const showMLJobNotification = (

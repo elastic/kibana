@@ -6,10 +6,10 @@
 
 import { createAction } from 'redux-actions';
 
-export const createAsyncAction = <G, S, F>(actionStr: string) => {
+export function createAsyncAction<G, S, F>(actionStr: string) {
   return {
     get: createAction<G>(actionStr),
     success: createAction<S>(`${actionStr}_SUCCESS`),
     fail: createAction<F>(`${actionStr}_FAIL`),
   };
-};
+}

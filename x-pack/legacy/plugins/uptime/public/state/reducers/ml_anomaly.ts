@@ -21,7 +21,6 @@ export interface MLJobState extends IReducerState {
 
 const initialState: MLJobState = {
   mlJob: null,
-  newMlJob: null,
   anomalies: null,
   loading: false,
   errors: [],
@@ -29,10 +28,10 @@ const initialState: MLJobState = {
 
 export const mlJobsReducer = handleActions<MLJobState>(
   {
-    ...handleAsyncAction('mlJob', getMLJobAction),
-    ...handleAsyncAction('mlJob', createMLJobAction),
-    ...handleAsyncAction('mlJob', deleteMLJobAction),
-    ...handleAsyncAction('anomalies', anomalyRecordsAction),
+    ...handleAsyncAction<MLJobState>('mlJob', getMLJobAction),
+    ...handleAsyncAction<MLJobState>('mlJob', createMLJobAction),
+    ...handleAsyncAction<MLJobState>('mlJob', deleteMLJobAction),
+    ...handleAsyncAction<MLJobState>('anomalies', anomalyRecordsAction),
   },
   initialState
 );

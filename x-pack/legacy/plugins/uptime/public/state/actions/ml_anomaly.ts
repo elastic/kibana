@@ -6,10 +6,10 @@
 
 import { createAsyncAction } from './utils';
 
-export const getMLJobAction = createAsyncAction<{ jobId: string }, any, any>('GET_ML_JOB');
+export const getMLJobAction = createAsyncAction<{ jobId: string }, any, Error>('GET_ML_JOB');
 
-export const createMLJobAction = createAsyncAction<any, any, any>('CREATE_ML_JOB');
+export const createMLJobAction = createAsyncAction<any, any, Error>('CREATE_ML_JOB');
 
-export const deleteMLJobAction = createAsyncAction<any, any, any>('DELETE_ML_JOB');
+export const deleteMLJobAction = createAsyncAction<any, any, Error>('DELETE_ML_JOB');
 
-export const anomalyRecordsAction = createAsyncAction<any, any, any>('GET_ANOMALY_RECORDS');
+export const anomalyRecordsAction = createAsyncAction<any, any, Error>('GET_ANOMALY_RECORDS');

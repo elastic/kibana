@@ -7,9 +7,9 @@
 import { Action } from 'redux-actions';
 
 export interface AsyncAction {
-  get: Action;
-  success: Action;
-  fail: Action;
+  get: Action<any>;
+  success: Action<any>;
+  fail: Action<any>;
 }
 
 export interface QueryParams {

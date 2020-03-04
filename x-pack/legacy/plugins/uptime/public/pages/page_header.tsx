@@ -13,8 +13,6 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
 import { MLIntegrationComponent } from '../components/functional/ml/ml_integeration';
-import { MONITOR_ROUTE } from '../../common/constants';
-import { Ping } from '../../common/graphql/types';
 import { UptimeUrlParams } from '../lib/helper';
 
 interface PageHeaderProps {

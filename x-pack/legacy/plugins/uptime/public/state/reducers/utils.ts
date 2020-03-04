@@ -7,23 +7,23 @@
 import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
 
-export const handleAsyncAction = (storeKey: string, asyncAction: AsyncAction) => {
+export function handleAsyncAction<ST>(storeKey: string, asyncAction: AsyncAction) {
   return {
-    [String(asyncAction.get)]: state => ({
+    [String(asyncAction.get)]: (state: ST) => ({
       ...state,
       loading: true,
     }),
 
-    [String(asyncAction.success)]: (state, action: Action<any>) => ({
+    [String(asyncAction.success)]: (state: ST, action: Action<any>) => ({
       ...state,
       loading: false,
       [storeKey]: action.payload === null ? action.payload : { ...action.payload },
     }),
 
-    [String(asyncAction.fail)]: (state, action: Action<any>) => ({
+    [String(asyncAction.fail)]: (state: ST, action: Action<any>) => ({
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,
     }),
   };
-};
+}
