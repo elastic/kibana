@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GRID_RESOLUTION = {
-  COARSE: 'COARSE',
-  FINE: 'FINE',
-  MOST_FINE: 'MOST_FINE',
+import { httpServerMock } from '../../../../../../../../../src/core/server/mocks';
+
+export const requestMock = {
+  create: httpServerMock.createKibanaRequest,
 };

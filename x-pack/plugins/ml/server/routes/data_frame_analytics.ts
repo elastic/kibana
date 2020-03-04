@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
+import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
@@ -17,7 +18,7 @@ import {
 /**
  * Routes for the data frame analytics
  */
-export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataFrameAnalyticsRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -35,7 +36,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: schema.object({ analyticsId: schema.maybe(schema.string()) }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
         return response.ok({
@@ -63,7 +64,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
@@ -90,7 +91,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/_stats',
       validate: false,
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.getDataFrameAnalyticsStats'
@@ -120,7 +121,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -158,7 +159,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         body: schema.object(dataAnalyticsJobConfigSchema),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -191,7 +192,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         body: schema.object({ ...dataAnalyticsEvaluateSchema }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.evaluateDataFrameAnalytics',
@@ -231,7 +232,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         body: schema.object({ ...dataAnalyticsExplainSchema }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.explainDataFrameAnalytics',
@@ -266,7 +267,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -302,7 +303,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
@@ -336,7 +337,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const options: { analyticsId: string; force?: boolean | undefined } = {
           analyticsId: request.params.analyticsId,
@@ -376,7 +377,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
