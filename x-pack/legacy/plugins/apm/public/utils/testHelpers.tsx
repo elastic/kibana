@@ -119,6 +119,7 @@ interface MockSetup {
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
     apmAgentConfigurationIndex: string;
+    apmCustomLinkIndex: string;
   };
 }
 

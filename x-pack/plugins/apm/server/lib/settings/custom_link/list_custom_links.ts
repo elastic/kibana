@@ -13,7 +13,7 @@ import {
   SERVICE_ENVIRONMENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { CustomAction } from './custom_link_types';
+import { CustomLink } from './custom_link_types';
 
 export const FilterOptions = t.partial({
   [SERVICE_NAME]: t.string,
@@ -57,7 +57,7 @@ export async function listCustomLinks({
       }
     }
   };
-  const resp = await internalClient.search<CustomAction>(params);
+  const resp = await internalClient.search<CustomLink>(params);
   return resp.hits.hits.map(item => ({
     id: item._id,
     ...item._source
