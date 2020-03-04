@@ -106,8 +106,6 @@ describe('alert_form', () => {
           wrapper = mountWithIntl(
             <AlertsContextProvider
               value={{
-                addFlyoutVisible: true,
-                setAddFlyoutVisibility: state => {},
                 reloadAlerts: () => {
                   return new Promise<void>(() => {});
                 },
@@ -204,8 +202,6 @@ describe('alert_form', () => {
           wrapper = mountWithIntl(
             <AlertsContextProvider
               value={{
-                addFlyoutVisible: true,
-                setAddFlyoutVisibility: state => {},
                 reloadAlerts: () => {
                   return new Promise<void>(() => {});
                 },
