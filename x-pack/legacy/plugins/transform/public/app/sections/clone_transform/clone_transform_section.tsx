@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useApi } from '../../hooks/use_api';
+import { useSearchItems } from '../../hooks/use_search_items';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 
@@ -29,12 +30,6 @@ import { useAppDependencies, useDocumentationLinks } from '../../app_dependencie
 import { TransformPivotConfig } from '../../common';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
-import {
-  getIndexPatternIdByTitle,
-  loadIndexPatterns,
-  KibanaProvider,
-  RenderOnlyWithInitializedKibanaContext,
-} from '../../lib/kibana';
 
 import { Wizard } from '../create_transform/components/wizard';
 
@@ -80,7 +75,12 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
   const [errorMessage, setErrorMessage] = useState();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [savedObjectId, setSavedObjectId] = useState<string | undefined>(undefined);
+  const {
+    getIndexPatternIdByTitle,
+    loadIndexPatterns,
+    searchItems,
+    setSavedObjectId,
+  } = useSearchItems(undefined);
 
   const fetchTransformConfig = async () => {
     try {
@@ -169,12 +169,8 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
               <pre>{JSON.stringify(errorMessage)}</pre>
             </EuiCallOut>
           )}
-          {savedObjectId !== undefined && isInitialized === true && transformConfig !== undefined && (
-            <KibanaProvider savedObjectId={savedObjectId}>
-              <RenderOnlyWithInitializedKibanaContext>
-                <Wizard cloneConfig={transformConfig} />
-              </RenderOnlyWithInitializedKibanaContext>
-            </KibanaProvider>
+          {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
+            <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
           )}
         </EuiPageContentBody>
       </EuiPageContent>
