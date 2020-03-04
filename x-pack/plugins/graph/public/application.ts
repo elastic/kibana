@@ -9,7 +9,7 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import 'angular-ui-ace';
+import '../../../../webpackShims/ace';
 import 'angular-sanitize';
 // type imports
 import {

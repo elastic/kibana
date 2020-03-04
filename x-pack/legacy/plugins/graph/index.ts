@@ -28,7 +28,7 @@ export const graph: LegacyPluginInitializer = kibana => {
       //   main: 'plugins/graph/index',
       //   category: DEFAULT_APP_CATEGORIES.analyze,
       // },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       migrations,
     },

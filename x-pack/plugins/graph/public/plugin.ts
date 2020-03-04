@@ -24,7 +24,9 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { ConfigSchema } from '../config';
 
-// import './index.scss';
+import './index.scss';
+// import '../../../../src/legacy/ui/public/styles/_styling_constants.scss';
+import '../../../../src/legacy/ui/public/styles/_legacy/_index.scss';
 
 export interface GraphPluginSetupDependencies {
   graph: GraphSetup;
