@@ -368,47 +368,6 @@ export class VectorStyle extends AbstractStyle {
     return this._styleMeta;
   }
 
-  // _getFieldMeta = fieldName => {
-  //   const fieldMetaFromLocalFeatures = this._styleMeta.getFieldMetaFromLocalFeaturesDescriptor(fieldName);
-  //   const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
-  //   if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
-  //     return fieldMetaFromLocalFeatures;
-  //   }
-  //
-  //   let dataRequestId;
-  //   if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-  //     dataRequestId = SOURCE_META_ID_ORIGIN;
-  //   } else {
-  //     const join = this._layer.getValidJoins().find(join => {
-  //       return join.getRightJoinSource().hasMatchingMetricField(fieldName);
-  //     });
-  //     if (join) {
-  //       dataRequestId = join.getSourceMetaDataRequestId();
-  //     }
-  //   }
-  //
-  //   if (!dataRequestId) {
-  //     return fieldMetaFromLocalFeatures;
-  //   }
-  //
-  //   const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
-  //   if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-  //     return fieldMetaFromLocalFeatures;
-  //   }
-  //
-  //   const data = styleMetaDataRequest.getData();
-  //   const categoricalFieldMeta = dynamicProp.pluckCategoricalStyleMetaFromFieldMetaData(data);
-  //   const rangeFieldMeta = dynamicProp.pluckOrdinalStyleMetaFromFieldMetaData(data);
-  //
-  //   if (categoricalFieldMeta || rangeFieldMeta) {
-  //     return {
-  //
-  //     };
-  //   } else {
-  //   }
-  //   return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
-  // };
-
   _getFieldFormatter = fieldName => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp) {
