@@ -27,10 +27,6 @@ export class StyleMeta {
         };
   }
 
-  // (field: string): FieldMetaDescriptor | unknown {
-  //   return this._descriptor ? this._descriptor.fieldMeta[field] : null;
-  // }
-
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMetaDescriptor | null {
     return this._descriptor && this._descriptor.fieldMeta[fieldName]
       ? this._descriptor.fieldMeta[fieldName].RANGE
@@ -38,7 +34,9 @@ export class StyleMeta {
   }
 
   getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMetaDescriptor | null {
-    return this._descriptor ? this._descriptor.fieldMeta[fieldName].CATEGORIES : null;
+    return this._descriptor && this._descriptor.fieldMeta[fieldName]
+      ? this._descriptor.fieldMeta[fieldName].CATEGORIES
+      : null;
   }
 
   isPointsOnly(): boolean {

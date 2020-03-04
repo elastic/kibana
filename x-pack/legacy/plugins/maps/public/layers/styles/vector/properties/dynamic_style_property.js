@@ -22,19 +22,11 @@ import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(
-    options,
-    styleName,
-    field,
-    vectorLayer,
-    // getFieldMeta,
-    getFieldFormatter
-  ) {
+  constructor(options, styleName, field, vectorLayer, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
-    // this._getFieldMeta = getFieldMeta;
-    this._getFieldFormatter = getFieldFormatter;
     this._layer = vectorLayer;
+    this._getFieldFormatter = getFieldFormatter;
   }
 
   getValueSuggestions = query => {
@@ -77,12 +69,37 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   getCategoryFieldMeta() {
-    throw new Error('todo category field meta');
-  }
+    const style = this._layer.getStyle();
+    const styleMeta = style.getStyleMeta();
+    const fieldName = this.getFieldName();
 
-  // getFieldMeta() {
-  //   return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
-  // }
+    const rangeFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+
+    let dataRequestId;
+    if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_META_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+      });
+      if (join) {
+        dataRequestId = join.getSourceMetaDataRequestId();
+      }
+    }
+
+    if (!dataRequestId) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const data = styleMetaDataRequest.getData();
+    const rangeFieldMeta = this.pluckCategoricalStyleMetaFromFieldMetaData(data);
+    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
+  }
 
   getField() {
     return this._field;
