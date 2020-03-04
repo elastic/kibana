@@ -8,8 +8,8 @@ import { Dataset } from '../../../types';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of
- * {type}-{datasetName}
+ * {type}-{id}
  */
 export function getDatasetAssetBaseName(dataset: Dataset): string {
-  return `${dataset.type}-${dataset.name}`;
+  return `${dataset.type}-${dataset.id}`;
 }

@@ -80,7 +80,7 @@ export async function installPipelinesForDataset({
   packageVersion: string;
 }): Promise<AssetReference[]> {
   const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isDatasetPipeline(entry, dataset.name)
+    isDatasetPipeline(entry, dataset.path)
   );
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
@@ -188,9 +188,8 @@ export const getPipelineNameForInstallation = ({
   dataset: Dataset;
   packageVersion: string;
 }): string => {
-  const isPipelineEntry = pipelineName === dataset.ingest_pipeline ? true : false;
+  const isPipelineEntry = pipelineName === dataset.ingest_pipeline;
+  const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
   // if this is the pipeline entry, don't add a suffix
-  return `${dataset.type}-${dataset.name}-${packageVersion}${
-    isPipelineEntry ? '' : `-${pipelineName}`
-  }`;
+  return `${dataset.type}-${dataset.id}-${packageVersion}${suffix}`;
 };
