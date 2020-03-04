@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { Action, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  ActionByType,
+  IncompatibleActionError,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 import {
   ViewMode,
@@ -29,11 +32,17 @@ function isSavedSearchEmbeddable(
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
 
-interface ActionContext {
+export interface CSVActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-class GetCsvReportPanelAction implements Action<ActionContext> {
+declare module '../../../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [CSV_REPORTING_ACTION]: CSVActionContext;
+  }
+}
+
+class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTION> {
   private isDownloading: boolean;
   public readonly type = CSV_REPORTING_ACTION;
   public readonly id = CSV_REPORTING_ACTION;
@@ -65,13 +74,13 @@ class GetCsvReportPanelAction implements Action<ActionContext> {
     return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
-  public isCompatible = async (context: ActionContext) => {
+  public isCompatible = async (context: CSVActionContext) => {
     const { embeddable } = context;
 
     return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
-  public execute = async (context: ActionContext) => {
+  public execute = async (context: CSVActionContext) => {
     const { embeddable } = context;
 
     if (!isSavedSearchEmbeddable(embeddable)) {
@@ -167,4 +176,4 @@ class GetCsvReportPanelAction implements Action<ActionContext> {
 const action = new GetCsvReportPanelAction();
 
 npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
