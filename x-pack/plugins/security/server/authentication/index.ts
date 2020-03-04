@@ -153,9 +153,7 @@ export async function setupAuthentication({
     }
 
     authLogger.debug('Could not handle authentication attempt');
-    return t.notHandled({
-      responseHeaders: authenticationResult.authResponseHeaders,
-    });
+    return t.notHandled();
   });
 
   authLogger.debug('Successfully registered core authentication handler.');

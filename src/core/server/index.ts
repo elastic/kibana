@@ -97,7 +97,6 @@ export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
-  AuthNotHandledResultParams,
   AuthStatus,
   AuthToolkit,
   AuthResult,

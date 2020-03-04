@@ -701,27 +701,6 @@ describe('Auth', () => {
     expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
   });
 
-  it('attach security header to not handled auth response', async () => {
-    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    const authResponseHeader = {
-      'www-authenticate': 'from auth interceptor',
-    };
-    registerAuth((req, res, toolkit) => {
-      return toolkit.notHandled({ responseHeaders: authResponseHeader });
-    });
-
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    await server.start();
-
-    const response = await supertest(innerServer.listener)
-      .get('/')
-      .expect(401);
-
-    expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
-  });
-
   it('attach security header to an error response', async () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');

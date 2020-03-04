@@ -323,11 +323,6 @@ export class HttpServer {
             // where some plugin read directly from headers to identify whether a user is authenticated.
             Object.assign(req.headers, requestHeaders);
           }
-        },
-        (req, { responseHeaders }) => {
-          if (responseHeaders) {
-            this.authResponseHeaders.set(req, responseHeaders);
-          }
         }
       ),
     }));

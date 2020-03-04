@@ -85,26 +85,18 @@ describe('Options', () => {
       it('User with no credentials can access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
-        const authResponseHeader = {
-          'www-authenticate': 'from auth interceptor',
-        };
 
-        registerAuth((req, res, toolkit) => {
-          return toolkit.notHandled({
-            responseHeaders: authResponseHeader,
-          });
-        });
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+
         router.get(
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
 
-        const response = await supertest(innerServer.listener)
+        await supertest(innerServer.listener)
           .get('/')
           .expect(200, 'ok');
-
-        expect(response.header['www-authenticate']).toBe(undefined);
       });
 
       it('User with invalid credentials cannot access a route', async () => {
@@ -147,26 +139,17 @@ describe('Options', () => {
       it('User with no credentials cannot access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
-        const authResponseHeader = {
-          'www-authenticate': 'from auth interceptor',
-        };
 
-        registerAuth((req, res, toolkit) => {
-          return toolkit.notHandled({
-            responseHeaders: authResponseHeader,
-          });
-        });
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
         router.get(
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
 
-        const response = await supertest(innerServer.listener)
+        await supertest(innerServer.listener)
           .get('/')
           .expect(401);
-
-        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
       });
       it('User with invalid credentials cannot access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);

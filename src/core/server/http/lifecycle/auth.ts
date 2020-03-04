@@ -39,7 +39,7 @@ export interface Authenticated extends AuthResultParams {
 }
 
 /** @public */
-export interface AuthNotHandled extends AuthNotHandledResultParams {
+export interface AuthNotHandled {
   type: AuthResultType.notHandled;
 }
 
@@ -55,10 +55,9 @@ const authResult = {
       responseHeaders: data.responseHeaders,
     };
   },
-  notHandled(data: AuthNotHandledResultParams = {}): AuthResult {
+  notHandled(): AuthResult {
     return {
       type: AuthResultType.notHandled,
-      responseHeaders: data.responseHeaders,
     };
   },
   isAuthenticated(result: AuthResult): result is Authenticated {
@@ -98,18 +97,6 @@ export interface AuthResultParams {
 }
 
 /**
- * Result of unhandled authentication.
- * @public
- */
-export interface AuthNotHandledResultParams {
-  /**
-   * Auth specific headers to attach to a response object.
-   * Used to send back authentication mechanism related headers to a client when needed.
-   */
-  responseHeaders?: AuthHeaders;
-}
-
-/**
  * @public
  * A tool set defining an outcome of Auth interceptor for incoming request.
  */
@@ -117,7 +104,7 @@ export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
   authenticated: (data?: AuthResultParams) => AuthResult;
   /** User has no credentials */
-  notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
+  notHandled: () => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
@@ -139,8 +126,7 @@ export type AuthenticationHandler = (
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,
-  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined,
-  onNotHandled: (request: Request, data: AuthNotHandledResultParams) => void = () => undefined
+  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
     request: Request,
@@ -169,9 +155,6 @@ export function adoptToHapiAuthFormat(
           return responseToolkit.continue;
         }
         if (kibanaRequest.route.options.authRequired) {
-          onNotHandled(request, {
-            responseHeaders: result.responseHeaders,
-          });
           return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
         }
         throw new Error(
