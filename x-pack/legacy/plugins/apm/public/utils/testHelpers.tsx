@@ -15,7 +15,6 @@ import React, { ReactNode } from 'react';
 import { render, waitForElement } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
-import { HttpSetup } from 'kibana/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
