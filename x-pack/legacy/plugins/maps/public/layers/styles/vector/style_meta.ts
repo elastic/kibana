@@ -5,26 +5,26 @@
  */
 
 import {
-  StyleMetaValues,
+  StyleMetaDescriptor,
   RangeFieldMeta,
   CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
-  private readonly _descriptor: StyleMetaValues;
-  constructor(styleMetaDescriptor: StyleMetaValues) {
+  private readonly _descriptor: StyleMetaDescriptor;
+  constructor(styleMetaDescriptor: StyleMetaDescriptor) {
     this._descriptor = styleMetaDescriptor;
   }
 
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
     return this._descriptor && this._descriptor.fieldMeta[fieldName]
-      ? this._descriptor.fieldMeta[fieldName].RANGE
+      ? this._descriptor.fieldMeta[fieldName].range
       : null;
   }
 
   getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMeta | null {
     return this._descriptor && this._descriptor.fieldMeta[fieldName]
-      ? this._descriptor.fieldMeta[fieldName].CATEGORIES
+      ? this._descriptor.fieldMeta[fieldName].categories
       : null;
   }
 

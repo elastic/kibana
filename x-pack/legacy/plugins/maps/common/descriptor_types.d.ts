@@ -89,6 +89,7 @@ export type XYZTMSSourceDescriptor = {
 };
 
 export type JoinDescriptor = {
+  leftField: string;
   right: ESTermSourceDescriptor;
 };
 
@@ -127,13 +128,13 @@ export type RangeFieldMeta = {
   isMaxOutsideStdRange?: boolean;
 };
 
-export type CategoryMeta = {
+export type Category = {
   key: string;
   count: number;
 };
 
 export type CategoryFieldMeta = {
-  categories: CategoryMeta[];
+  categories: Category[];
 };
 
 export type GeometryTypes = {
@@ -142,12 +143,12 @@ export type GeometryTypes = {
   isPolygonsOnly: boolean;
 };
 
-export type StyleMetaValues = {
+export type StyleMetaDescriptor = {
   geometryTypes?: GeometryTypes;
   fieldMeta: {
     [key: string]: {
-      RANGE: RangeFieldMeta;
-      CATEGORIES: CategoryFieldMeta;
+      range: RangeFieldMeta;
+      categories: CategoryFieldMeta;
     };
   };
 };

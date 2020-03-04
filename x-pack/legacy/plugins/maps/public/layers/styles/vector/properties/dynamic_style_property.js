@@ -36,18 +36,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   };
 
   _getStyleMetaDataRequestId(fieldName) {
-    let dataRequestId;
     if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      dataRequestId = SOURCE_META_ID_ORIGIN;
-    } else {
-      const join = this._layer.getValidJoins().find(join => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
-      });
-      if (join) {
-        dataRequestId = join.getSourceMetaDataRequestId();
-      }
+      return SOURCE_META_ID_ORIGIN;
     }
-    return dataRequestId;
+
+    const join = this._layer.getValidJoins().find(join => {
+      return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+    });
+    return join ? join.getSourceMetaDataRequestId() : null;
   }
 
   getRangeFieldMeta() {
@@ -82,7 +78,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return rangeFieldMetaFromLocalFeatures;
     }

@@ -309,11 +309,11 @@ export class VectorStyle extends AbstractStyle {
         styleMeta.fieldMeta[name] = {};
       }
       if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].CATEGORIES = categoricalStyleMeta;
+        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
       }
 
       if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].RANGE = ordinalStyleMeta;
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
     });
 
@@ -635,7 +635,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticOrientationProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicOrientationProperty(descriptor.options, styleName, field, this._layer);
+      return new DynamicOrientationProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._layer,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
