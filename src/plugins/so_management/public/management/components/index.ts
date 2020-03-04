@@ -20,3 +20,4 @@
 export { Header } from './header';
 export { Table } from './table';
 export { Relationships } from './relationships';
+export { Flyout } from './flyout';

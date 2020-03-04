@@ -27,3 +27,8 @@ export { getDefaultTitle } from './get_default_title';
 export { parseQuery } from './parse_query';
 export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
 export { getAllowedTypes } from './get_allowed_types';
+export { importFile } from './import_file';
+export { importLegacyFile } from './import_legacy_file';
+export { logLegacyImport } from './log_legacy_import';
+export { processImportResponse, ProcessedImportResponse } from './process_import_response';
+export { resolveImportErrors } from './resolve_import_errors';

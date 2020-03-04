@@ -70,7 +70,7 @@ import {
   extractExportDetails,
   SavedObjectsExportResultDetails,
 } from './lib';
-import { Table, Header, Relationships } from './components';
+import { Table, Header, Relationships, Flyout } from './components';
 
 interface SavedObjectsTableProps {
   allowedTypes: string[];
@@ -83,7 +83,6 @@ interface SavedObjectsTableProps {
   capabilities: Capabilities;
   perPageConfig: number;
   // newIndexPatternUrl - kbnUrl.eval('#/management/kibana/index_pattern')
-  // service - savedObjectManagementRegistry.all().map(obj => obj.service);
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
 }
@@ -459,19 +458,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
 
-    /* TODO wire
     return (
       <Flyout
         close={this.hideImportFlyout}
         done={this.finishImport}
-        services={this.props.services}
+        http={this.props.http}
+        serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
-        newIndexPatternUrl={this.props.newIndexPatternUrl}
-        savedObjectTypes={this.props.savedObjectTypes}
-        confirmModalPromise={this.props.confirmModalPromise}
+        newIndexPatternUrl={''} // TODO: fix
+        allowedTypes={this.props.allowedTypes}
+        overlays={this.props.overlays}
       />
     );
-    */
   }
 
   renderRelationships() {

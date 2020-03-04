@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export function getDefaultTitle(object: { id: string; type: string }) {
-  return `${object.type} [id=${object.id}]`;
-}
+export { Flyout } from './flyout';

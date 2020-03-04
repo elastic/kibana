@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export function getDefaultTitle(object: { id: string; type: string }) {
-  return `${object.type} [id=${object.id}]`;
+import { HttpStart } from 'src/core/public';
+
+export async function logLegacyImport(http: HttpStart) {
+  return http.post('/api/saved_objects/_log_legacy_import');
 }

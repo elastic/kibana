@@ -17,6 +17,26 @@
  * under the License.
  */
 
-export function getDefaultTitle(object: { id: string; type: string }) {
-  return `${object.type} [id=${object.id}]`;
+import { HttpStart, SavedObjectsImportError } from 'src/core/public';
+
+interface ImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: SavedObjectsImportError[];
+}
+
+export async function importFile(http: HttpStart, file: File, overwriteAll: boolean = false) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return await http.post<ImportResponse>('/api/saved_objects/_import', {
+    body: formData,
+    headers: {
+      // TODO: this was for kfetch. is this also needed here?
+      // Important to be undefined, it forces proper headers to be set for FormData
+      'Content-Type': undefined,
+    },
+    query: {
+      overwrite: overwriteAll,
+    },
+  });
 }
