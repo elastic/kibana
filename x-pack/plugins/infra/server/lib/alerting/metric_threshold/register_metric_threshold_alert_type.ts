@@ -120,6 +120,8 @@ const getMetric: (
                 gte: `now-${interval}`,
               },
             },
+          },
+          {
             exists: {
               field: metric,
             },
