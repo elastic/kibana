@@ -38,9 +38,11 @@ export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }
             <EuiFlexItem>
               <EuiCard
                 title="Have you considered Elastic Cloud?"
-                description={`Based on your current cluster's size, it will only cost you ${Number(
-                  hourlyCost
-                ).toPrecision(4)}/hour.`}
+                description={`Based on your current cluster's size, it will only cost you $${Number(
+                  hourlyCost * 30 * 24
+                ).toPrecision(
+                  4
+                )}/month. With Elastic Cloud you'll also benefit from Elastic Support, blah, blah, ...`}
                 footer={
                   <EuiButton
                     data-test-subj="updateLicenseButton"
