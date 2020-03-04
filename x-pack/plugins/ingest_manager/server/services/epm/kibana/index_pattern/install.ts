@@ -127,7 +127,7 @@ export const getAllDatasetFieldsByType = async (
     if (pkg.datasets) {
       // filter out datasets by datasetType
       const matchingDatasets = pkg.datasets.filter(dataset => dataset.type === datasetType);
-      matchingDatasets.forEach(dataset => acc.push(loadFieldsFromYaml(pkg, dataset.name)));
+      matchingDatasets.forEach(dataset => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
     }
     return acc;
   }, []);

@@ -78,7 +78,7 @@ export async function installTemplateForDataset({
   callCluster: CallESAsCurrentUser;
   dataset: Dataset;
 }): Promise<AssetReference> {
-  const fields = await loadFieldsFromYaml(pkg, dataset.name);
+  const fields = await loadFieldsFromYaml(pkg, dataset.path);
   return installTemplate({
     callCluster,
     fields,

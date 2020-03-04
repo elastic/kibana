@@ -9,10 +9,14 @@ import { getDatasetAssetBaseName } from './index';
 
 test('getBaseName', () => {
   const dataset: Dataset = {
-    name: 'bar',
-    package: 'foo',
+    id: 'nginx.access',
+    title: 'Nginx Acess Logs',
+    release: 'beta',
     type: 'logs',
-  } as Dataset;
+    ingest_pipeline: 'default',
+    package: 'nginx',
+    path: 'access',
+  };
   const name = getDatasetAssetBaseName(dataset);
-  expect(name).toStrictEqual('logs-bar');
+  expect(name).toStrictEqual('logs-nginx.access');
 });

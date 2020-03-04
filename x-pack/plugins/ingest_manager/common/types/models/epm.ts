@@ -130,7 +130,8 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface Dataset {
   title: string;
-  name: string;
+  path: string;
+  id: string;
   release: string;
   ingest_pipeline: string;
   vars?: VarsEntry[];
