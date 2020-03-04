@@ -37,13 +37,13 @@ class ServiceNow {
     });
   }
 
-  _throwIfNotAlive(status: number, contentType: string) {
+  private _throwIfNotAlive(status: number, contentType: string) {
     if (!validStatusCodes.includes(status) || !contentType.includes('application/json')) {
       throw new Error('[ServiceNow]: Instance is not alive.');
     }
   }
 
-  async _request({
+  private async _request({
     url,
     method = 'get',
     data = {},
