@@ -39,7 +39,6 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
-  // @ts-ignore
 } from './_terms_other_bucket_helper';
 
 export const termsAggFilter = [
