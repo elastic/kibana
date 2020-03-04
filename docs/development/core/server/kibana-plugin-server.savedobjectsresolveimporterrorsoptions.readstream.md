@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions.readStream property
 
+The stream of [saved objects](./kibana-plugin-server.savedobject.md) to resolve errors from
+
 <b>Signature:</b>
 
 ```typescript

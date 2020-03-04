@@ -18,7 +18,6 @@ import {
   Mappings,
 } from '../models/file_data_visualizer';
 
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
 
@@ -43,7 +42,7 @@ function importData(
 /**
  * Routes for the file data visualizer.
  */
-export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
    *
@@ -82,7 +81,7 @@ export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: Rou
         },
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const result = await analyzeFiles(context, request.body, request.query);
         return response.ok({ body: result });
@@ -124,7 +123,7 @@ export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: Rou
         },
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;

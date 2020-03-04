@@ -4,64 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { LegacyServices, LegacyRequest } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
-import { transformError, getIndex } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
-export const createReadIndexRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: DETECTION_ENGINE_INDEX_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const readIndexRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: DETECTION_ENGINE_INDEX_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: LegacyRequest, headers) {
-      try {
-        const { clusterClient, spacesClient } = await getClients(request);
-        const callCluster = clusterClient.callAsCurrentUser;
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
 
-        const index = getIndex(spacesClient.getSpaceId, config);
-        const indexExists = await getIndexExists(callCluster, index);
+      try {
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+
+        const index = siemClient.signalsIndex;
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
 
         if (indexExists) {
-          return headers.response({ name: index }).code(200);
+          return response.ok({ body: { name: index } });
         } else {
-          return headers
-            .response({
-              message: 'index for this space does not exist',
-              status_code: 404,
-            })
-            .code(404);
+          return siemResponse.error({
+            statusCode: 404,
+            body: 'index for this space does not exist',
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const readIndexRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-) => {
-  route(createReadIndexRoute(config, getClients));
+    }
+  );
 };

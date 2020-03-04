@@ -19,11 +19,27 @@
 
 import { RouteValidatorFullConfig } from './validator';
 
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
+}
+
+/**
+ * Set of HTTP methods changing the state of the server.
+ * @public
+ */
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+/**
+ * Set of HTTP methods not changing the state of the server.
+ * @public
+ */
+export type SafeRouteMethod = 'get' | 'options';
+
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
  */
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 /**
  * The set of valid body.output
@@ -107,6 +123,15 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Enabled by default.
    */
   authRequired?: boolean;
+
+  /**
+   * Defines xsrf protection requirements for a route:
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
+   * - false. Disables xsrf protection.
+   *
+   * Set to true by default
+   */
+  xsrfRequired?: Method extends 'get' ? never : boolean;
 
   /**
    * Additional metadata tag strings to attach to the route.
