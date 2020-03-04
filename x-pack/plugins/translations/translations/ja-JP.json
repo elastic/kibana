@@ -316,7 +316,6 @@
     "data.search.aggs.metrics.medianLabel": "中央 {field}",
     "data.search.aggs.metrics.medianTitle": "中央",
     "data.search.aggs.metrics.metricAggregationsSubtypeTitle": "メトリック集約",
-    "data.search.aggs.metrics.metricAggTitle": "メトリック集約",
     "data.search.aggs.metrics.minBucketTitle": "最低バケット",
     "data.search.aggs.metrics.minLabel": "最低 {field}",
     "data.search.aggs.metrics.minTitle": "最低",

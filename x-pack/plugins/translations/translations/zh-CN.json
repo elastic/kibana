@@ -316,7 +316,6 @@
     "data.search.aggs.metrics.medianLabel": "{field}中值",
     "data.search.aggs.metrics.medianTitle": "中值",
     "data.search.aggs.metrics.metricAggregationsSubtypeTitle": "指标聚合",
-    "data.search.aggs.metrics.metricAggTitle": "指标聚合",
     "data.search.aggs.metrics.minBucketTitle": "最小存储桶",
     "data.search.aggs.metrics.minLabel": "{field}最小值",
     "data.search.aggs.metrics.minTitle": "最小值",
