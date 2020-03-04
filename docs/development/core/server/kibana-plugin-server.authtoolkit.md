@@ -17,5 +17,5 @@ export interface AuthToolkit
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [authenticated](./kibana-plugin-server.authtoolkit.authenticated.md) | <code>(data?: AuthResultParams) =&gt; AuthResult</code> | Authentication is successful with given credentials, allow request to pass through |
-|  [notHandled](./kibana-plugin-server.authtoolkit.nothandled.md) | <code>(data?: AuthNotHandledResultParams) =&gt; AuthResult</code> | User has no credentials |
+|  [notHandled](./kibana-plugin-server.authtoolkit.nothandled.md) | <code>() =&gt; AuthResult</code> | User has no credentials |
 

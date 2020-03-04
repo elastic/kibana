@@ -9,7 +9,7 @@
 ```typescript
 core: {
         auth: {
-            isAuthenticated: IsAuthenticated;
+            isAuthenticated: boolean;
         };
         rendering: IScopedRenderingClient;
         savedObjects: {

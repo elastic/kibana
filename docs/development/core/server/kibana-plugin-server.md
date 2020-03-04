@@ -46,7 +46,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
 |  [AuthNotHandled](./kibana-plugin-server.authnothandled.md) |  |
-|  [AuthNotHandledResultParams](./kibana-plugin-server.authnothandledresultparams.md) | Result of unhandled authentication. |
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |

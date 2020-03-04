@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface AuthNotHandled extends AuthNotHandledResultParams 
+export interface AuthNotHandled 
 ```
 
 ## Properties

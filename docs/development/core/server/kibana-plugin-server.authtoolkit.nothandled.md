@@ -9,5 +9,5 @@ User has no credentials
 <b>Signature:</b>
 
 ```typescript
-notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
+notHandled: () => AuthResult;
 ```

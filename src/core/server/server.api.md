@@ -419,14 +419,9 @@ export type AuthenticationHandler = (request: KibanaRequest, response: Lifecycle
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public (undocumented)
-export interface AuthNotHandled extends AuthNotHandledResultParams {
+export interface AuthNotHandled {
     // (undocumented)
     type: AuthResultType.notHandled;
-}
-
-// @public
-export interface AuthNotHandledResultParams {
-    responseHeaders?: AuthHeaders;
 }
 
 // @public (undocumented)
@@ -457,7 +452,7 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
-    notHandled: (data?: AuthNotHandledResultParams) => AuthResult;
+    notHandled: () => AuthResult;
 }
 
 // @public
@@ -1429,7 +1424,7 @@ export interface RequestHandlerContext {
     // (undocumented)
     core: {
         auth: {
-            isAuthenticated: IsAuthenticated;
+            isAuthenticated: boolean;
         };
         rendering: IScopedRenderingClient;
         savedObjects: {
