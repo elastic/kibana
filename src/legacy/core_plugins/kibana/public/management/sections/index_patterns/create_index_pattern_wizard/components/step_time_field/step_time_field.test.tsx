@@ -292,4 +292,28 @@ describe('StepTimeField', () => {
       error: 'foobar',
     });
   });
+
+  it('should call createIndexPattern with undefined time field when no time filter chosen', async () => {
+    const createIndexPattern = jest.fn();
+
+    const component = shallowWithI18nProvider(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={createIndexPattern}
+        indexPatternCreationType={mockIndexPatternCreationType}
+      />
+    );
+
+    (component.instance() as StepTimeField).onTimeFieldChanged(({
+      target: { value: undefined },
+    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    component.update();
+
+    await (component.instance() as StepTimeField).createIndexPattern();
+    component.update();
+
+    expect(createIndexPattern).toHaveBeenCalledWith(undefined, '');
+  });
 });
