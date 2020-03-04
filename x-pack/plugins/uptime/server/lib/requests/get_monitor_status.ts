@@ -51,7 +51,7 @@ const getLocationClause = (locations: string[]) => ({
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, filters, locations, numTimes, timerange: { from: gte, to: lte } }) => {
+> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
   const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
@@ -59,7 +59,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
     const STATUS = 'down';
-    const esParams = {
+    const esParams: any = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
@@ -73,8 +73,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
               {
                 range: {
                   '@timestamp': {
-                    gte,
-                    lte,
+                    gte: from,
+                    lte: to,
                   },
                 },
               },
@@ -115,23 +115,36 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
         },
       },
     };
+
+    /**
+     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
+     * to the bool of the parsed filters.
+     */
     if (filters) {
-      // console.log(JSON.stringify(JSON.parse(filters), null, 2));
       const parsedFilters = JSON.parse(filters);
       esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
     }
+
+    /**
+     * Perform a logical `and` against the selected location filters.
+     */
     if (locations.length) {
-      // @ts-ignore this type of addition does not work with TS's type inference
       esParams.body.query.bool.filter.push(getLocationClause(locations));
     }
+
+    /**
+     * We "paginate" results by utilizing the `afterKey` field
+     * to tell Elasticsearch where it should start on subsequent queries.
+     */
     if (afterKey) {
-      // @ts-ignore the `after` defined here is not available
-      // on the inferred type, so TS says it's an error
       esParams.body.aggs.monitors.composite.after = afterKey;
     }
+
     const result = await callES('search', esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
+
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], numTimes));
   } while (afterKey !== undefined);
+
   return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);
 };
