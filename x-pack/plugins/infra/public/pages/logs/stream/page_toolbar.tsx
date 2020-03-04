@@ -22,6 +22,7 @@ import { LogFilterState } from '../../../containers/logs/log_filter';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
+import { LogDatepicker } from '../../../components/logging/log_datepicker';
 
 export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
@@ -54,15 +55,6 @@ export const LogsToolbar = () => {
     endDateExpression,
     updateDateRange,
   } = useContext(LogPositionState.Context);
-
-  const handleTimeChange = useCallback(
-    ({ start, end, isInvalid }) => {
-      if (!isInvalid) {
-        updateDateRange({ startDateExpression: start, endDateExpression: end });
-      }
-    },
-    [updateDateRange]
-  );
 
   return (
     <Toolbar>
@@ -119,40 +111,14 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiSuperDatePicker
-                start={startDateExpression}
-                end={endDateExpression}
-                onTimeChange={handleTimeChange}
-                showUpdateButton={false}
-                // @ts-ignore: EuiSuperDatePicker doesn't expose the `isDisabled` prop, although it exists.
-                isDisabled={isStreaming}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isStreaming ? (
-                <EuiButtonEmpty
-                  color="primary"
-                  iconType="pause"
-                  iconSide="left"
-                  onClick={stopLiveStreaming}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.logs.stopStreamingButtonLabel"
-                    defaultMessage="Stop streaming"
-                  />
-                </EuiButtonEmpty>
-              ) : (
-                <EuiButtonEmpty iconType="play" iconSide="left" onClick={startLiveStreaming}>
-                  <FormattedMessage
-                    id="xpack.infra.logs.startStreamingButtonLabel"
-                    defaultMessage="Stream live"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <LogDatepicker
+            startDateExpression={startDateExpression}
+            endDateExpression={endDateExpression}
+            onStartStreaming={startLiveStreaming}
+            onStopStreaming={stopLiveStreaming}
+            isStreaming={isStreaming}
+            onUpdateDateRange={updateDateRange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>
