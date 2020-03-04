@@ -80,3 +80,7 @@ export const CheckActionHealthSchema = schema.object({
   username: schema.string(),
   password: schema.string(),
 });
+
+export const IdSchema = schema.object({
+  id: schema.string(),
+});
