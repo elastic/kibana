@@ -143,6 +143,10 @@ export class PipelineListing extends Component {
       className,
     } = this.props;
 
+    const sortingOptions = sorting || { field: 'id', direction: 'asc' };
+    if (sortingOptions.field === 'name') {
+      sortingOptions.field = 'id';
+    }
     const columns = this.getColumns();
 
     return (
@@ -155,7 +159,7 @@ export class PipelineListing extends Component {
               className={className || 'logstashNodesTable'}
               rows={data}
               columns={columns}
-              sorting={sorting}
+              sorting={sortingOptions}
               message={upgradeMessage}
               pagination={pagination}
               fetchMoreData={fetchMoreData}
