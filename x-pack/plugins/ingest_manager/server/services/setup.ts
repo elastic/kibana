@@ -5,14 +5,26 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
+import { installLatestPackage } from './epm/packages/install';
 
-export async function setup(soClient: SavedObjectsClientContract) {
-  // TODO install default packages
-
+export async function setup(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+) {
   await Promise.all([
     outputService.ensureDefaultOutput(soClient),
     agentConfigService.ensureDefaultAgentConfig(soClient),
+
+    // packages installed by default
+    installLatestPackage({
+      savedObjectsClient: soClient,
+      pkgName: 'base',
+      callCluster,
+      internal: true,
+    }),
+    installLatestPackage({ savedObjectsClient: soClient, pkgName: 'system', callCluster }),
   ]);
 }

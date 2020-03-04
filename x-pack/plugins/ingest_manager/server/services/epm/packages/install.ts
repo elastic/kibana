@@ -15,6 +15,17 @@ import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
+export async function installLatestPackage(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  internal?: boolean;
+  callCluster: CallESAsCurrentUser;
+}): Promise<AssetReference[]> {
+  const { savedObjectsClient, pkgName, callCluster, internal } = options;
+  const latestPackage = await Registry.fetchLatestPackage(pkgName, internal);
+  const pkgkey = Registry.pkgToPkgKey({ name: latestPackage.name, version: latestPackage.version });
+  return installPackage({ savedObjectsClient, pkgkey, callCluster });
+}
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;

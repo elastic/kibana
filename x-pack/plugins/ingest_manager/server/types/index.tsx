@@ -40,8 +40,9 @@ export {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
-  RegistrySearchResults,
   IndexTemplate,
+  RegistrySearchResults,
+  RegistrySearchResult,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
