@@ -100,16 +100,21 @@ async function serviceNowExecutor(
     mapping: finalMap,
   };
 
-  let res = {};
+  const res: Pick<ActionTypeExecutorResult, 'status'> &
+    Pick<ActionTypeExecutorResult, 'actionId'> = {
+    status: 'ok',
+    actionId,
+  };
+
+  let data = {};
 
   switch (executorAction) {
     case 'newIncident':
-      res = await handleCreateIncident(handlerInput);
+      data = await handleCreateIncident(handlerInput);
 
       return {
-        status: 'ok',
-        actionId,
-        data: { ...res },
+        ...res,
+        data,
       };
 
     case 'updateIncident':
@@ -119,13 +124,11 @@ async function serviceNowExecutor(
 
       await handleUpdateIncident({ incidentId, ...handlerInput });
       return {
-        status: 'ok',
-        actionId,
+        ...res,
       };
     default:
       return {
-        status: 'ok',
-        actionId,
+        ...res,
         serviceMessage: '[Action][ServiceNow]: Unimplemented executor action.',
       };
   }
