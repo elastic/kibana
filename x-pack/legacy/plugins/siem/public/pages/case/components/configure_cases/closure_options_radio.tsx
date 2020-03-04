@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EuiRadioGroup } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-const idPrefix = 'closure_options';
-const defaultRadio = `${idPrefix}_manual`;
+const ID_PREFIX = 'closure_options';
+const defaultRadio = `${ID_PREFIX}_manual`;
 
 const radios = [
   {
@@ -18,11 +18,11 @@ const radios = [
     label: i18n.CASE_CLOSURE_OPTIONS_MANUAL,
   },
   {
-    id: `${idPrefix}_new_incident`,
+    id: `${ID_PREFIX}_new_incident`,
     label: i18n.CASE_CLOSURE_OPTIONS_NEW_INCIDENT,
   },
   {
-    id: `${idPrefix}_closed_incident`,
+    id: `${ID_PREFIX}_closed_incident`,
     label: i18n.CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT,
   },
 ];

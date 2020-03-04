@@ -35,34 +35,32 @@ const supportedThirdPartyFields = [
   },
 ];
 
-const FieldMappingComponent: React.FC = () => {
-  return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
-      description={i18n.FIELD_MAPPING_DESC}
-    >
-      <EuiFormRow fullWidth>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL}</span>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <FieldRowWrapper>
-        <FieldMappingRow siemField="Name" thirdPartyFields={supportedThirdPartyFields} />
-        <FieldMappingRow siemField="Tags" thirdPartyFields={supportedThirdPartyFields} />
-        <FieldMappingRow siemField="Description" thirdPartyFields={supportedThirdPartyFields} />
-        <FieldMappingRow siemField="Comment" thirdPartyFields={supportedThirdPartyFields} />
-      </FieldRowWrapper>
-    </EuiDescribedFormGroup>
-  );
-};
+const FieldMappingComponent: React.FC = () => (
+  <EuiDescribedFormGroup
+    fullWidth
+    title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
+    description={i18n.FIELD_MAPPING_DESC}
+  >
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL}</span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+    <FieldRowWrapper>
+      <FieldMappingRow siemField="Name" thirdPartyFields={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Tags" thirdPartyFields={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Description" thirdPartyFields={supportedThirdPartyFields} />
+      <FieldMappingRow siemField="Comment" thirdPartyFields={supportedThirdPartyFields} />
+    </FieldRowWrapper>
+  </EuiDescribedFormGroup>
+);
 
 export const FieldMapping = React.memo(FieldMappingComponent);
