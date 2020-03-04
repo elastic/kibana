@@ -27,15 +27,7 @@ export interface GetPackagesResponse {
     Installable<
       Pick<
         RegistryPackage,
-        | 'name'
-        | 'title'
-        | 'version'
-        | 'description'
-        | 'type'
-        | 'icons'
-        | 'internal'
-        | 'download'
-        | 'path'
+        'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'download' | 'path'
       >
     >
   >;

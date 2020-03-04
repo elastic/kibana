@@ -47,13 +47,13 @@ export const sendGetFileByPath = (filePath: string) => {
 export const sendInstallPackage = (pkgkey: string) => {
   return sendRequest<InstallPackageResponse>({
     path: epmRouteService.getInstallPath(pkgkey),
-    method: 'get',
+    method: 'post',
   });
 };
 
 export const sendRemovePackage = (pkgkey: string) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgkey),
-    method: 'get',
+    method: 'post',
   });
 };
