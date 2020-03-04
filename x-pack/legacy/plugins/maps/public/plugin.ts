@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart } from 'src/core/public';
+import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
@@ -20,6 +20,13 @@ import { setLicenseId } from './kibana_services';
 export type MapsPluginSetup = ReturnType<MapsPlugin['setup']>;
 export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 
+export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
+  const { licensing } = plugins;
+  if (licensing) {
+    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
+  }
+};
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, plugins: any) {
@@ -34,9 +41,9 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    if (licensing) {
-      licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
-    }
+    bindSetupCoreAndPlugins(core, np);
+
+    np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: any) {}
