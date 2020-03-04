@@ -11,7 +11,7 @@ import { getColumns } from './anomalies_table_columns';
 jest.mock('../../privilege/check_privilege', () => ({
   checkPermission: () => false,
 }));
-jest.mock('../../license', () => ({
+jest.mock('../../license/check_license', () => ({
   hasLicenseExpired: () => false,
 }));
 jest.mock('../../privilege/get_privileges', () => ({

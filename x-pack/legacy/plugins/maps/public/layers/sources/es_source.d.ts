@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  checkBasicLicense,
-  checkFullLicense,
-  hasLicenseExpired,
-  isFullLicense,
-  setLicenseCache,
-} from './check_license';
+import { AbstractVectorSource } from './vector_source';
+
+export class AbstractESSource extends AbstractVectorSource {}
