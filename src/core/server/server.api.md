@@ -606,6 +606,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
+    metrics: MetricsServiceSetup;
+    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
