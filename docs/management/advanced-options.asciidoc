@@ -116,7 +116,8 @@ cluster alert notifications from Monitoring.
 ==== Dashboard
 
 [horizontal]
-`xpackDashboardMode:roles`:: The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+`xpackDashboardMode:roles`::  **Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]
