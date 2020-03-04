@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
+import { Settings } from './settings';
 
-export class EditorRegistry {
-  private inputEditor: SenseEditor | undefined;
-
-  setInputEditor(inputEditor: SenseEditor) {
-    this.inputEditor = inputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor!;
-  }
+export class SettingsMock extends Settings {
+  getAutocomplete = jest.fn();
+  getFontSize = jest.fn();
+  getPolling = jest.fn();
+  getTripleQuotes = jest.fn();
+  getWrapMode = jest.fn();
+  setAutocomplete = jest.fn();
+  setFontSize = jest.fn();
+  setPolling = jest.fn();
+  setTripleQuotes = jest.fn();
+  setWrapMode = jest.fn();
+  toJSON = jest.fn();
+  updateSettings = jest.fn();
 }
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
