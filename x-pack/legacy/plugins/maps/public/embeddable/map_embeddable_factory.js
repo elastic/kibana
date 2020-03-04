@@ -23,7 +23,7 @@ import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
-import { bindCoreAndPlugins } from '../plugin';
+import { bindSetupCoreAndPlugins } from '../plugin';
 import { npSetup } from 'ui/new_platform';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
@@ -39,7 +39,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         getIconForSavedObject: () => APP_ICON,
       },
     });
-    bindCoreAndPlugins(npSetup.core, npSetup.plugins);
+    bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
   }
   isEditable() {
     return capabilities.get().maps.save;

@@ -31,9 +31,8 @@ interface MapsPluginSetupDependencies {
   };
 }
 
-export const bindCoreAndPlugins = (core, plugins) => {
-  const { licensing, inspector } = plugins;
-  setInspector(inspector);
+export const bindSetupCoreAndPlugins = (core, plugins) => {
+  const { licensing } = plugins;
   if (licensing) {
     licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
   }
@@ -48,10 +47,12 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindCoreAndPlugins(core, np);
+    bindSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    setInspector(plugins.np.inspector);
+  }
 }
