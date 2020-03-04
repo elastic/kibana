@@ -80,7 +80,6 @@ export type RuleAlertParamsRest = Omit<
     | 'lastSuccessMessage'
     | 'lastFailureMessage'
   > & {
-    actions: RuleAlertParams['actions'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];
@@ -97,7 +96,6 @@ export type RuleAlertParamsRest = Omit<
     last_success_at?: IRuleStatusAttributes['lastSuccessAt'] | undefined;
     last_failure_message?: IRuleStatusAttributes['lastFailureMessage'] | undefined;
     last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
-    throttle: RuleAlertParams['throttle'];
   };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {

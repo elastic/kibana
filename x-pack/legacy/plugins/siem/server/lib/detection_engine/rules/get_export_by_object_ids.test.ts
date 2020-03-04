@@ -118,7 +118,6 @@ describe('get_export_by_object_ids', () => {
                 ],
               },
             ],
-            throttle: null,
             version: 1,
           },
         ],

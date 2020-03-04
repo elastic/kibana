@@ -77,7 +77,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -103,6 +102,7 @@ describe('utils', () => {
       const fullRule = getResult();
       const { from, language, ...omitData } = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -140,7 +140,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -167,6 +166,7 @@ describe('utils', () => {
       fullRule.params.query = null;
       const rule = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -205,7 +205,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -232,6 +231,7 @@ describe('utils', () => {
       fullRule.params.query = undefined;
       const rule = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -270,7 +270,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -298,6 +297,7 @@ describe('utils', () => {
       fullRule.params.language = null;
       const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -333,7 +333,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -400,7 +399,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -467,7 +465,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -534,7 +531,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -687,7 +683,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -770,7 +765,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -944,7 +938,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: null,
         filters: [
           {
             query: {
@@ -1066,7 +1059,6 @@ describe('utils', () => {
               ],
             },
           ],
-          throttle: null,
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',

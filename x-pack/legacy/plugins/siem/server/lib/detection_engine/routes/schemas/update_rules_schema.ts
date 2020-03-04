@@ -49,7 +49,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *   - id is on here because you can pass in an id to update using it instead of rule_id.
  */
 export const updateRulesSchema = Joi.object({
-  actions,
+  actions: actions.default([]),
   description: description.required(),
   enabled: enabled.default(true),
   id,

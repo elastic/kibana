@@ -9,6 +9,8 @@
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import memoizeOne from 'memoize-one';
+import styled from 'styled-components';
 
 import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 
@@ -35,7 +37,25 @@ const ACTION_TYPES = [
   { id: '.example-action', name: 'Example Action', enabled: false },
 ];
 
-const MESSAGE_VARIABLES = ['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId', 'ruleLink'];
+const DEFAULT_ACTION_GROUP_ID = 'default';
+const DEFAULT_ACTION_MESSAGE = 'Rule generated {{state.signalsCount}} singals';
+
+const MESSAGE_STATE_VARIABLES = ['signalsCount'];
+const MESSAGE_CONTEXT_VARIABLES = [
+  'inputIndexes',
+  'outputIndex',
+  'name',
+  'alertId',
+  'ruleId',
+  'ruleLink',
+];
+
+const getMessageVariables = memoizeOne(() => {
+  const stateVariables = MESSAGE_STATE_VARIABLES.map(variableName => `state.${variableName}`);
+  const contextVariables = MESSAGE_CONTEXT_VARIABLES.map(variableName => `context.${variableName}`);
+
+  return [...stateVariables, ...contextVariables];
+});
 
 const THROTTLE_OPTIONS = [
   // { value: 'signal', text: 'On each signal detected' },
@@ -44,6 +64,12 @@ const THROTTLE_OPTIONS = [
   { value: '1h', text: 'Hourly' },
   { value: '1d', text: 'Daily' },
 ];
+
+const StyledActionForm = styled(ActionForm)`
+  .euiAccordionForm:first-child {
+    border-top: none;
+  }
+`;
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -69,14 +95,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const { http, triggers_actions_ui } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
+  const messageVariables = getMessageVariables();
 
   const { form } = useForm({
     defaultValue: myStepData,
     options: { stripEmptyFields: false },
     schema,
   });
-
-  // console.error('form', form, myStepData);
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {
@@ -164,17 +189,17 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           />
           <UseField path="actions" defaultValue={myStepData.actions}>
             {() => (
-              <ActionForm
+              <StyledActionForm
                 actions={myStepData.actions}
-                messageVariables={MESSAGE_VARIABLES}
-                defaultActionGroupId={'default'}
+                messageVariables={messageVariables}
+                defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
                 setActionIdByIndex={setActionIdByIndex}
                 setAlertProperty={setAlertProperty}
                 setActionParamsProperty={setActionParamsProperty}
                 http={http}
                 actionTypeRegistry={actionTypeRegistry}
                 actionTypes={ACTION_TYPES}
-                defaultActionMessage={'Rule [{{context.metadata.name}}] has exceeded the threshold'}
+                defaultActionMessage={DEFAULT_ACTION_MESSAGE}
               />
             )}
           </UseField>
