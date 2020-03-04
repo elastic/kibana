@@ -13,61 +13,12 @@ import {
   BarSeries,
   getSpecId,
   ScaleType,
-  RectAnnotation,
   Theme
 } from '@elastic/charts';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IWaterfall } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 import { SelectionText } from './SelectionText';
-
-export type Selection = [number, number] | [undefined, undefined];
-
-function SelectionAnnotation({
-  maxY,
-  selection,
-  waterfall
-}: {
-  maxY: number;
-  selection: Selection;
-  waterfall: IWaterfall;
-}) {
-  const x0 = 0;
-  const x1 = selection[0] ? waterfall.items.length - 1 : 0;
-  const y1left = (selection[0] ?? 0) * 100;
-  const y0right = (selection[1] ?? 0) * 100;
-
-  return (
-    <RectAnnotation
-      dataValues={[
-        {
-          coordinates: {
-            x0,
-            x1,
-            y0: 0,
-            y1: y1left
-          }
-        },
-        {
-          coordinates: {
-            x0,
-            x1,
-            y0: y0right,
-            y1: maxY
-          }
-        }
-      ]}
-      id="selection"
-      style={{
-        strokeWidth: parseInt(theme.euiBorderWidthThin, 10),
-        stroke: theme.euiBorderColor,
-        // fill: theme.euiColorLightestShade,
-        fill: 'green',
-        opacity: 0.5
-      }}
-      zIndex={1}
-    />
-  );
-}
+import { SelectionAnnotation } from './SelectionAnnotation';
+import { WaterfallSelection } from '..';
 
 const chartTheme: Partial<Theme> = {
   chartPaddings: { left: 0, top: 0, bottom: 0, right: 0 },
@@ -76,15 +27,18 @@ const chartTheme: Partial<Theme> = {
 };
 
 interface Props {
+  onBrushEnd: BrushEndListener;
+  resetSelection: () => void;
+  selection: WaterfallSelection;
   waterfall: IWaterfall;
 }
 
-export function MiniWaterfall({ waterfall }: Props) {
-  const [selection, setSelection] = React.useState<Selection>([
-    undefined,
-    undefined
-  ]);
-
+export function MiniWaterfall({
+  onBrushEnd,
+  resetSelection,
+  selection,
+  waterfall
+}: Props) {
   const data = waterfall.items.map((item, index) => ({
     ...item,
     min: item.offset + item.skew,
@@ -92,15 +46,7 @@ export function MiniWaterfall({ waterfall }: Props) {
     x: index
   }));
   const maxY = Math.max(...data.map(item => item.max));
-
-  const onBrushEnd: BrushEndListener = (y1, y2) => {
-    setSelection([y1, y2]);
-  };
-
-  function resetSelection() {
-    setSelection([undefined, undefined]);
-  }
-
+  console.log({ data });
   return (
     <>
       <SelectionText selection={selection} resetSelection={resetSelection} />

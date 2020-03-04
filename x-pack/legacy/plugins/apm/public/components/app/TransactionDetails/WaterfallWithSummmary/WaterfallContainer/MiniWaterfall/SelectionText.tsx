@@ -7,10 +7,11 @@
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { CSSProperties } from 'react';
-import { Selection } from './';
+import { WaterfallSelection } from '../';
+import { asDuration } from '../../../../../../utils/formatters';
 
 interface SelectionTextProps {
-  selection: Selection;
+  selection: WaterfallSelection;
   resetSelection: () => void;
 }
 
@@ -18,11 +19,13 @@ export function SelectionText({
   selection,
   resetSelection
 }: SelectionTextProps) {
-  const start = selection[0] && (selection[0] / 100).toFixed(0);
-  const end = selection[1] && (selection[1] / 100).toFixed(0);
   const style: CSSProperties = {
     visibility: selection[0] ? 'visible' : 'hidden'
   };
+
+  const start = asDuration(selection[0]);
+  const end = asDuration(selection[1]);
+  const range = `${start} – ${end}`;
 
   return (
     <span style={style}>
@@ -30,10 +33,10 @@ export function SelectionText({
         {i18n.translate(
           'xpack.apm.transactionDetails.miniWaterfall.selectionText',
           {
-            defaultMessage: 'Selected {start} – {end} ms',
-            values: { start, end }
+            defaultMessage: 'Selected {range}',
+            values: { range }
           }
-        )}
+        )}{' '}
         |{' '}
         <EuiLink onClick={resetSelection}>
           {i18n.translate(
