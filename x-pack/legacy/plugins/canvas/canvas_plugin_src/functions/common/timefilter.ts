@@ -62,11 +62,9 @@ export function timefilter(): ExpressionFunctionDefinition<
         type: 'time',
         column,
         and: [],
-        to,
-        from,
       };
 
-      function parseAndValidate(str: string, roundUp: boolean): string {
+      function parseAndValidate(str: string, { roundUp }: { roundUp: boolean }): string {
         const moment = dateMath.parse(str, { roundUp });
 
         if (!moment || !moment.isValid()) {
@@ -77,11 +75,11 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       if (!!to) {
-        (filter as any).to = parseAndValidate(to, true);
+        (filter as any).to = parseAndValidate(to, { roundUp: true });
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from, false);
+        (filter as any).from = parseAndValidate(from, { roundUp: true });
       }
 
       return { ...input, and: [...input.and, filter] };
