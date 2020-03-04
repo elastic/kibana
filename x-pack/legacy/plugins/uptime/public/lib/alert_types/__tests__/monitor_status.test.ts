@@ -29,66 +29,106 @@ describe('monitor status alert type', () => {
       `);
     });
 
-    it('missing timerange', () => {
-      delete params.timerange;
-      expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }"`
-      );
-    });
+    describe('timerange', () => {
+      it('is undefined', () => {
+        delete params.timerange;
+        expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
+          `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }"`
+        );
+      });
 
-    it('timerange missing `from` or `to` value', () => {
-      expect(() =>
-        validate({
-          ...params,
-          timerange: {},
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`
+      it('is missing `from` or `to` value', () => {
+        expect(() =>
+          validate({
+            ...params,
+            timerange: {},
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
 "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/from: string
 Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/to: string"
 `);
-    });
+      });
 
-    it('invalid time range', () => {
-      expect(
-        validate({
-          ...params,
-          timerange: {
-            from: 'now',
-            to: 'now-15m',
-          },
-        })
-      ).toMatchInlineSnapshot(`
+      it('is invalid timespan', () => {
+        expect(
+          validate({
+            ...params,
+            timerange: {
+              from: 'now',
+              to: 'now-15m',
+            },
+          })
+        ).toMatchInlineSnapshot(`
             Object {
               "errors": Object {
                 "invalidTimeRange": "Time range start cannot exceed time range end",
               },
             }
           `);
+      });
+
+      it('has unparse-able `from` value', () => {
+        expect(
+          validate({
+            ...params,
+            timerange: {
+              from: 'cannot parse this to a date',
+              to: 'now',
+            },
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {
+              "timeRangeStartValueNaN": "Specified time range \`from\` is an invalid value",
+            },
+          }
+        `);
+      });
+
+      it('has unparse-able `to` value', () => {
+        expect(
+          validate({
+            ...params,
+            timerange: {
+              from: 'now-15m',
+              to: 'cannot parse this to a date',
+            },
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {
+              "timeRangeEndValueNaN": "Specified time range \`to\` is an invalid value",
+            },
+          }
+        `);
+      });
     });
 
-    it('missing numTimes', () => {
-      delete params.numTimes;
-      expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
-      );
-    });
+    describe('numTimes', () => {
+      it('is missing', () => {
+        delete params.numTimes;
+        expect(() => validate(params)).toThrowErrorMatchingInlineSnapshot(
+          `"Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
+        );
+      });
 
-    it('NaN numTimes', () => {
-      expect(() =>
-        validate({ ...params, numTimes: `this isn't a number` })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"this isn't a number\\" supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
-      );
-    });
+      it('is NaN', () => {
+        expect(() =>
+          validate({ ...params, numTimes: `this isn't a number` })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Invalid value \\"this isn't a number\\" supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number"`
+        );
+      });
 
-    it('numTimes < 1', () => {
-      expect(validate({ ...params, numTimes: 0 })).toMatchInlineSnapshot(`
+      it('is < 1', () => {
+        expect(validate({ ...params, numTimes: 0 })).toMatchInlineSnapshot(`
           Object {
             "errors": Object {
               "invalidNumTimes": "Number of alert check down times must be an integer greater than 0",
             },
           }
         `);
+      });
     });
   });
 

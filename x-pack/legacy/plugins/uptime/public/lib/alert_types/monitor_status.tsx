@@ -50,10 +50,10 @@ export const validate = (alertParams: any): ValidationResult => {
     const fromAbs = DateMath.parse(from)?.valueOf();
     const toAbs = DateMath.parse(to)?.valueOf();
     if (!fromAbs || isNaN(fromAbs)) {
-      errors.timeRangeStartValueNaN = 'Specified time range start is invalid';
+      errors.timeRangeStartValueNaN = 'Specified time range `from` is an invalid value';
     }
-    if (!toAbs && isNaN(toAbs)) {
-      errors.timeRangeEndValueNaN = 'Specified time range end is invalid';
+    if (!toAbs || isNaN(toAbs)) {
+      errors.timeRangeEndValueNaN = 'Specified time range `to` is an invalid value';
     }
 
     // the default values for this test will pass, we only want to specify an error
