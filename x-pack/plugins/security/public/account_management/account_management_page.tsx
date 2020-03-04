@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { NotificationsStart } from 'src/core/public';
+import ReactDOM from 'react-dom';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { CoreStart, NotificationsStart } from 'src/core/public';
 import { getUserDisplayName, AuthenticatedUser } from '../../common/model';
 import { AuthenticationServiceSetup } from '../authentication';
-import { ChangePassword } from './change_password';
 import { UserAPIClient } from '../management';
+import { ChangePassword } from './change_password';
 import { PersonalInfo } from './personal_info';
 
 interface Props {
@@ -50,3 +51,18 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
     </EuiPage>
   );
 };
+
+export function renderAccountManagementPage(
+  i18nStart: CoreStart['i18n'],
+  element: Element,
+  props: Props
+) {
+  ReactDOM.render(
+    <i18nStart.Context>
+      <AccountManagementPage {...props} />
+    </i18nStart.Context>,
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+}
