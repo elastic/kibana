@@ -39,7 +39,15 @@ export const SecretsSchemaProps = {
 
 export const SecretsSchema = schema.object(SecretsSchemaProps);
 
+export const CommentSchema = schema.object({
+  id: schema.string(),
+  comment: schema.string(),
+  version: schema.maybe(schema.string()),
+});
+
 export const ParamsSchema = schema.object({
-  comments: schema.maybe(schema.string()),
-  short_description: schema.string(),
+  id: schema.nullable(schema.string()),
+  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  description: schema.maybe(schema.string()),
+  title: schema.string(),
 });
