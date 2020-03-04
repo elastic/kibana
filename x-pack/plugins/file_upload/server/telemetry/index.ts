@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-import { plugin } from '.';
-
-const pluginInstance = plugin();
-
-export const start = pluginInstance.start(npStart.core);
+export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
+export { fileUploadTelemetryMappingsType } from './mappings';

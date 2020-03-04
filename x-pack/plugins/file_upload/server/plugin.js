@@ -6,22 +6,22 @@
 
 import { initRoutes } from './routes/file_upload';
 import { setElasticsearchClientServices, setInternalRepository } from './kibana_server_services';
-import { registerFileUploadUsageCollector } from './telemetry';
+import { registerFileUploadUsageCollector, fileUploadTelemetryMappingsType } from './telemetry';
 
 export class FileUploadPlugin {
   constructor() {
     this.router = null;
   }
 
-  setup(core) {
+  setup(core, plugins) {
+    core.savedObjects.registerType(fileUploadTelemetryMappingsType);
     setElasticsearchClientServices(core.elasticsearch);
     this.router = core.http.createRouter();
+    registerFileUploadUsageCollector(plugins.usageCollection);
   }
 
-  start(core, plugins) {
+  start(core) {
     initRoutes(this.router, core.savedObjects.getSavedObjectsRepository);
     setInternalRepository(core.savedObjects.createInternalRepository);
-
-    registerFileUploadUsageCollector(plugins.usageCollection);
   }
 }
