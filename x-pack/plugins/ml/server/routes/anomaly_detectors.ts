@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
@@ -16,7 +15,7 @@ import {
 /**
  * Routes for the anomaly detectors
  */
-export function jobRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
@@ -32,7 +31,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
       path: '/api/ml/anomaly_detectors',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs');
         return response.ok({
@@ -62,7 +61,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs', { jobId });
@@ -90,7 +89,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
       path: '/api/ml/anomaly_detectors/_stats',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats');
         return response.ok({
@@ -120,7 +119,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats', { jobId });
@@ -152,7 +151,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         body: schema.object({ ...anomalyDetectionJobSchema }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
@@ -187,7 +186,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         body: schema.object({ ...anomalyDetectionUpdateJobSchema }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.updateJob', {
@@ -221,7 +220,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.openJob', {
@@ -254,7 +253,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const options: { jobId: string; force?: boolean } = {
           jobId: request.params.jobId,
@@ -291,7 +290,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const options: { jobId: string; force?: boolean } = {
           jobId: request.params.jobId,
@@ -326,7 +325,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         body: schema.any(),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.validateDetector', {
           body: request.body,
@@ -359,7 +358,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         body: schema.object({ duration: schema.any() }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const jobId = request.params.jobId;
         const duration = request.body.duration;
@@ -407,7 +406,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.records', {
           jobId: request.params.jobId,
@@ -456,7 +455,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.buckets', {
           jobId: request.params.jobId,
@@ -499,7 +498,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.overallBuckets', {
           jobId: request.params.jobId,
@@ -537,7 +536,7 @@ export function jobRoutes({ router, getLicenseCheckResults }: RouteInitializatio
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const options = {
           jobId: request.params.jobId,
