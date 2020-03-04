@@ -17,22 +17,20 @@ export class Plugin {
     const {
       http,
       chrome,
-      documentation,
       docLinks,
-      docTitle,
       injectedMetadata,
       notifications,
       uiSettings,
       savedObjects,
       overlays,
     } = core;
-    const { data, management, uiMetric, xsrfToken } = plugins;
+    const { data, management, uiMetric } = plugins;
+    const { docTitle } = chrome;
 
     // AppCore/AppPlugins to be passed on as React context
     const appDependencies = {
       core: {
         chrome,
-        documentation,
         docLinks,
         http,
         i18n: core.i18n,
@@ -45,7 +43,6 @@ export class Plugin {
       plugins: {
         data,
         management,
-        xsrfToken,
       },
     };
 

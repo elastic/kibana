@@ -27,7 +27,6 @@ const setAppDependencies = (deps: AppDependencies) => {
     autocomplete: deps.plugins.data.autocomplete,
     docLinks: deps.core.docLinks,
     basePath: legacyBasePath as any,
-    XSRF: deps.plugins.xsrfToken,
   });
   DependenciesContext = createContext<AppDependencies>(deps);
   return DependenciesContext.Provider;
@@ -39,13 +38,6 @@ export const useAppDependencies = () => {
     Use the "setAppDependencies()" method when bootstrapping the app.`);
   }
   return useContext<AppDependencies>(DependenciesContext);
-};
-
-export const useDocumentationLinks = () => {
-  const {
-    core: { documentation },
-  } = useAppDependencies();
-  return documentation;
 };
 
 export const useToastNotifications = () => {

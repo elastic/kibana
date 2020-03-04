@@ -13,12 +13,9 @@ import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
-import {
-  useAppDependencies,
-  useDocumentationLinks,
-  useToastNotifications,
-} from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 

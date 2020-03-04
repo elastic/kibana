@@ -22,11 +22,12 @@ import {
 } from '@elastic/eui';
 
 import { useApi } from '../../hooks/use_api';
+import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 
-import { useAppDependencies, useDocumentationLinks } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_dependencies';
 import { TransformPivotConfig } from '../../common';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';

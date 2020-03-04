@@ -21,7 +21,7 @@ import {
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 
-import { useDocumentationLinks } from '../../app_dependencies';
+import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';

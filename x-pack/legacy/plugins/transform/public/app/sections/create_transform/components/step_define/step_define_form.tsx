@@ -26,9 +26,10 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
-import { useDocumentationLinks, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';

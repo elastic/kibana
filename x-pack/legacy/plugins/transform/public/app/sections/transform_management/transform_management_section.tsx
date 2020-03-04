@@ -22,8 +22,9 @@ import {
 } from '@elastic/eui';
 
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-import { useDocumentationLinks } from '../../app_dependencies';
+
 import { useRefreshTransformList, TransformListRow } from '../../common';
+import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';

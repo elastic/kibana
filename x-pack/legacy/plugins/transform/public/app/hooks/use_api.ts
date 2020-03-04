@@ -6,98 +6,60 @@
 
 import { useAppDependencies } from '../app_dependencies';
 import { PreviewRequestBody, TransformId } from '../common';
-import { httpFactory, Http } from '../services/http_service';
 
 import { EsIndex, TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
 
-const apiFactory = (basePath: string, indicesBasePath: string, http: Http) => ({
-  getTransforms(transformId?: TransformId): Promise<any> {
-    const transformIdString = transformId !== undefined ? `/${transformId}` : '';
-    return http({
-      url: `${basePath}/transforms${transformIdString}`,
-      method: 'GET',
-    });
-  },
-  getTransformsStats(transformId?: TransformId): Promise<any> {
-    if (transformId !== undefined) {
-      return http({
-        url: `${basePath}/transforms/${transformId}/_stats`,
-        method: 'GET',
-      });
-    }
-
-    return http({
-      url: `${basePath}/transforms/_stats`,
-      method: 'GET',
-    });
-  },
-  createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
-    return http({
-      url: `${basePath}/transforms/${transformId}`,
-      method: 'PUT',
-      data: transformConfig,
-    });
-  },
-  deleteTransforms(transformsInfo: TransformEndpointRequest[]) {
-    return http({
-      url: `${basePath}/delete_transforms`,
-      method: 'POST',
-      data: transformsInfo,
-    }) as Promise<TransformEndpointResult>;
-  },
-  getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
-    return http({
-      url: `${basePath}/transforms/_preview`,
-      method: 'POST',
-      data: obj,
-    });
-  },
-  startTransforms(transformsInfo: TransformEndpointRequest[]) {
-    return http({
-      url: `${basePath}/start_transforms`,
-      method: 'POST',
-      data: {
-        transformsInfo,
-      },
-    }) as Promise<TransformEndpointResult>;
-  },
-  stopTransforms(transformsInfo: TransformEndpointRequest[]) {
-    return http({
-      url: `${basePath}/stop_transforms`,
-      method: 'POST',
-      data: {
-        transformsInfo,
-      },
-    }) as Promise<TransformEndpointResult>;
-  },
-  getTransformAuditMessages(transformId: TransformId): Promise<any> {
-    return http({
-      url: `${basePath}/transforms/${transformId}/messages`,
-      method: 'GET',
-    });
-  },
-  esSearch(payload: any) {
-    return http({
-      url: `${basePath}/es_search`,
-      method: 'POST',
-      data: payload,
-    }) as Promise<any>;
-  },
-  getIndices() {
-    return http({
-      url: `${indicesBasePath}/index_management/indices`,
-      method: 'GET',
-    }) as Promise<EsIndex[]>;
-  },
-});
-
 export const useApi = () => {
-  const appDeps = useAppDependencies();
+  const {
+    core: { http },
+  } = useAppDependencies();
 
-  const basePath = appDeps.core.http.basePath.prepend('/api/transform');
-  const indicesBasePath = appDeps.core.http.basePath.prepend('/api');
-  const xsrfToken = appDeps.plugins.xsrfToken;
-  const http = httpFactory(xsrfToken);
+  const basePath = http.basePath.prepend('/api/transform');
+  const indicesBasePath = http.basePath.prepend('/api');
 
-  return apiFactory(basePath, indicesBasePath, http);
+  return {
+    getTransforms(transformId?: TransformId): Promise<any> {
+      const transformIdString = transformId !== undefined ? `/${transformId}` : '';
+      return http.get(`${basePath}/transforms${transformIdString}`);
+    },
+    getTransformsStats(transformId?: TransformId): Promise<any> {
+      if (transformId !== undefined) {
+        return http.get(`${basePath}/transforms/${transformId}/_stats`);
+      }
+
+      return http.get(`${basePath}/transforms/_stats`);
+    },
+    createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
+      return http.put(`${basePath}/transforms/${transformId}`, {
+        body: JSON.stringify(transformConfig),
+      });
+    },
+    deleteTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
+      return http.post(`${basePath}/delete_transforms`, {
+        body: JSON.stringify(transformsInfo),
+      });
+    },
+    getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
+      return http.post(`${basePath}/transforms/_preview`, { body: JSON.stringify(obj) });
+    },
+    startTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
+      return http.post(`${basePath}/start_transforms`, {
+        body: JSON.stringify(transformsInfo),
+      });
+    },
+    stopTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
+      return http.post(`${basePath}/stop_transforms`, {
+        body: JSON.stringify(transformsInfo),
+      });
+    },
+    getTransformAuditMessages(transformId: TransformId): Promise<any> {
+      return http.get(`${basePath}/transforms/${transformId}/messages`);
+    },
+    esSearch(payload: any): Promise<any> {
+      return http.post(`${basePath}/es_search`, { body: JSON.stringify(payload) });
+    },
+    getIndices(): Promise<EsIndex[]> {
+      return http.get(`${indicesBasePath}/index_management/indices`);
+    },
+  };
 };
