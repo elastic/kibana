@@ -18,18 +18,24 @@
  */
 
 import { Url } from 'url';
-import { Request } from 'hapi';
+import { Request, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
 
+/**
+ * @internal
+ */
+export interface KibanaRouteState extends ApplicationState {
+  xsrfRequired: boolean;
+}
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -184,8 +190,10 @@ export class KibanaRequest<
 
     const options = ({
       authRequired: request.route.settings.auth !== false,
+      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
-      body: ['get', 'options'].includes(method)
+      body: isSafeMethod(method)
         ? undefined
         : {
             parse,

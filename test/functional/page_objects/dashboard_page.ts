@@ -65,6 +65,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await this.waitForRenderComplete();
     }
 
+    public async exitFullScreenMode() {
+      log.debug(`exitFullScreenMode`);
+      const logoButton = await this.getExitFullScreenLogoButton();
+      await logoButton.moveMouseTo();
+      await this.clickExitFullScreenTextButton();
+    }
+
     public async fullScreenModeMenuItemExists() {
       return await testSubjects.exists('dashboardFullScreenMode');
     }
