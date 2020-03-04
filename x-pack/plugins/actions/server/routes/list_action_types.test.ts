@@ -58,7 +58,7 @@ describe('listActionTypesRoute', () => {
       }
     `);
 
-    expect(context.actions.listTypes).toHaveBeenCalledTimes(1);
+    expect(context.actions!.listTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
