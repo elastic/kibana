@@ -19,6 +19,7 @@
 
 const { resolve } = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
@@ -90,6 +91,12 @@ module.exports = async ({ config }) => {
       {
         loader: 'sass-loader',
         options: {
+          prependData(loaderContext) {
+            return `@import ${stringifyRequest(
+              loaderContext,
+              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+            )};\n`;
+          },
           sassOptions: {
             includePaths: [resolve(REPO_ROOT, 'node_modules')],
           },

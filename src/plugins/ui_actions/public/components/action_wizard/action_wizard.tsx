@@ -23,12 +23,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiKeyPadMenuItem,
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
-import './index.scss';
+import './action_wizard.scss';
 
 // TODO: this interface is temporary for just moving forward with the component
 // and it will be imported from the ../ui_actions when implemented properly
@@ -137,7 +137,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(null);
   return (
     <div
-      className="uiActions__selectedActionFactoryContainer"
+      className="uiaActionWizard__selectedActionFactoryContainer"
       data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
     >
       <header>
@@ -192,30 +192,17 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   }
 
   return (
-    <EuiFlexGroup wrap={true}>
+    <EuiFlexGroup wrap>
       {actionFactories.map(actionFactory => (
-        <EuiFlexItem
-          className="uiActions__ActionFactory"
-          grow={false}
+        <EuiKeyPadMenuItem
+          className="uiaActionWizard__actionFactoryItem"
           key={actionFactory.type}
+          label={actionFactory.displayName}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+          onClick={() => onActionFactorySelected(actionFactory)}
         >
-          <EuiPanel
-            onClick={() => onActionFactorySelected(actionFactory)}
-            className="eui-textCenter"
-            paddingSize="s"
-          >
-            {actionFactory.iconType && (
-              <>
-                <EuiIcon type={actionFactory.iconType} size="m" />
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <EuiText size="xs">
-              <h4>{actionFactory.displayName}</h4>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexItem>
+          {actionFactory.iconType && <EuiIcon type={actionFactory.iconType} size="m" />}
+        </EuiKeyPadMenuItem>
       ))}
     </EuiFlexGroup>
   );
