@@ -137,7 +137,5 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
       await a11y.testAppSnapshot();
     });
-
-    // Context view tests
   });
 }
