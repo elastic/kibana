@@ -28,11 +28,23 @@ export interface ManagementListState {
   pageSize: number;
   pageIndex: number;
   loading: boolean;
+  detailsError?: ServerApiError;
+  details?: Immutable<EndpointMetadata>;
+  location?: Immutable<EndpointAppLocation>;
 }
 
 export interface ManagementListPagination {
   pageIndex: number;
   pageSize: number;
+}
+export interface ManagingIndexUIQueryParams {
+  selected_host?: string;
+}
+
+export interface ServerApiError {
+  statusCode: number;
+  error: string;
+  message: string;
 }
 
 // REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150

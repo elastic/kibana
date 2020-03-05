@@ -4,45 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-
+import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { ActionWizard } from './action_wizard';
-import { ACTION_FACTORIES } from './test_data';
-
-function Demo() {
-  const [state, setState] = useState();
-
-  return (
-    <>
-      <ActionWizard
-        actionFactories={ACTION_FACTORIES}
-        onChange={(factory, config) => {
-          setState({
-            factory,
-            config,
-          });
-        }}
-      />
-      <div style={{ marginTop: '44px' }} />
-      <hr />
-      <div>Action Factory Type: {state?.factory?.type}</div>
-      <div>Action Factory Config: {JSON.stringify(state?.config)}</div>
-    </>
-  );
-}
+import { dashboardDrilldownActionFactory, Demo, urlDrilldownActionFactory } from './test_data';
 
 storiesOf('components/ActionWizard', module)
-  .add('default', () => <Demo />)
+  .add('default', () => (
+    <Demo actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]} />
+  ))
+  .add('Only one factory is available', () => (
+    // to make sure layout doesn't break
+    <Demo actionFactories={[dashboardDrilldownActionFactory]} />
+  ))
   .add('Long list of action factories', () => (
     // to make sure layout doesn't break
-    <ActionWizard
+    <Demo
       actionFactories={[
-        ...ACTION_FACTORIES,
-        ...ACTION_FACTORIES,
-        ...ACTION_FACTORIES,
-        ...ACTION_FACTORIES,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
       ]}
-      onChange={() => {}}
     />
   ));

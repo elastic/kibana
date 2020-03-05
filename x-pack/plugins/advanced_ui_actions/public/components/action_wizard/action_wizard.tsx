@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -21,89 +21,74 @@ import './action_wizard.scss';
 // and it will be imported from the ../ui_actions when implemented properly
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ActionFactoryBaseConfig = {};
-export interface ActionFactory<
-  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
-  Context = unknown
-> {
-  type: string;
+export interface ActionFactory<Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig> {
+  type: string; // TODO: type should be tied to Action and ActionByType
   displayName: string;
   iconType?: string;
-  wizard: React.FC<ActionFactoryWizardProps<Config, Context>>;
-  context: Context;
+  wizard: React.FC<ActionFactoryWizardProps<Config>>;
+  createConfig: () => Config;
+  isValid: (name: string, config: Config) => boolean;
 }
 
-export interface ActionFactoryWizardProps<
-  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
-  Context = unknown
-> {
-  /**
-   * Context represents environment where this component is being rendered.
-   */
-  context: Context;
-
-  /**
-   * Current (latest) config of the item. (state)
-   */
-  config: Config | null;
+export interface ActionFactoryWizardProps<Config extends ActionFactoryBaseConfig> {
+  config?: Config;
 
   /**
    * Callback called when user updates the config in UI.
-   * ActionFactory's wizard should do validations to the user's input
-   * In case input is complete and valid - config: Config object should be emitted
-   * In case input has changed to the invalid state: null should be emitted
    */
-  onConfig: (config: Config | null) => void;
+  onConfig: (config: Config) => void;
 }
 
 export interface ActionWizardProps {
   /**
-   * Initial action factory & config. To be used in editing flow
-   */
-  initialActionConfig?: {
-    actionFactory: ActionFactory | null;
-    config: ActionFactoryBaseConfig | null;
-  };
-
-  /**
    * List of available action factories
    */
-  actionFactories: ActionFactory[];
+  actionFactories: Array<ActionFactory<any>>; // any here to be able to pass array of ActionFactory<Config> with different configs
 
   /**
-   * Notifies when wizard's state changes because of user's interaction
-   *
-   * @param actionFactory - current selected action factory. null if none is selected
-   * @param config - current config for current action factory. null if no action factory or if wizard's inputs are invalid or incomplete
+   * Currently selected action factory
+   * undefined - is allowed and means that non is selected
    */
-  onChange: (actionFactory: ActionFactory | null, config: ActionFactoryBaseConfig | null) => void;
+  currentActionFactory?: ActionFactory;
+  /**
+   * Action factory selected changed
+   * null - means user click "change" and removed action factory selection
+   */
+  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
+
+  /**
+   * current config for currently selected action factory
+   */
+  config?: ActionFactoryBaseConfig;
+
+  /**
+   * config changed
+   */
+  onConfigChange: (config: ActionFactoryBaseConfig) => void;
 }
 export const ActionWizard: React.FC<ActionWizardProps> = ({
+  currentActionFactory,
   actionFactories,
-  onChange,
-  initialActionConfig = null,
+  onActionFactoryChange,
+  onConfigChange,
+  config,
 }) => {
-  // eslint-disable-next-line prefer-const
-  let [selectedActionFactory, setSelectedActionFactory] = useState<ActionFactory | null>(
-    initialActionConfig?.actionFactory ?? null
-  );
-
   // auto pick action factory if there is only 1 available
-  if (!selectedActionFactory && actionFactories.length === 1) {
-    selectedActionFactory = actionFactories[0];
+  if (!currentActionFactory && actionFactories.length === 1) {
+    onActionFactoryChange(actionFactories[0]);
   }
 
-  if (selectedActionFactory) {
+  if (currentActionFactory && config) {
     return (
       <SelectedActionFactory
-        actionFactory={selectedActionFactory}
+        actionFactory={currentActionFactory}
         showDeselect={actionFactories.length > 1}
         onDeselect={() => {
-          setSelectedActionFactory(null);
-          onChange(null, null);
+          onActionFactoryChange(null);
         }}
-        initialConfig={initialActionConfig?.config}
+        config={config}
         onConfigChange={newConfig => {
-          onChange(selectedActionFactory, newConfig);
+          onConfigChange(newConfig);
         }}
       />
     );
@@ -113,20 +98,18 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
     <ActionFactorySelector
       actionFactories={actionFactories}
       onActionFactorySelected={actionFactory => {
-        setSelectedActionFactory(actionFactory);
-        onChange(actionFactory, null);
+        onActionFactoryChange(actionFactory);
       }}
     />
   );
 };
 
 interface SelectedActionFactoryProps<
-  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig,
-  Context = unknown
+  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
 > {
-  actionFactory: ActionFactory<Config, Context>;
-  initialConfig?: Config | null;
-  onConfigChange: (config: Config | null) => void;
+  actionFactory: ActionFactory<Config>;
+  config: Config;
+  onConfigChange: (config: Config) => void;
   showDeselect: boolean;
   onDeselect: () => void;
 }
@@ -136,9 +119,8 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   onDeselect,
   showDeselect,
   onConfigChange,
-  initialConfig = null,
+  config,
 }) => {
-  const [config, setConfig] = useState<ActionFactoryBaseConfig | null>(initialConfig);
   return (
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
@@ -168,10 +150,8 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       <EuiSpacer size="m" />
       <div>
         {actionFactory.wizard({
-          context: actionFactory.context,
           config,
           onConfig: newConfig => {
-            setConfig(newConfig);
             onConfigChange(newConfig);
           },
         })}
