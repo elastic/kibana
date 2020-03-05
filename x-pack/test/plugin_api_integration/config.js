@@ -37,8 +37,6 @@ export default async function({ readConfigFile }) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.triggers_actions_ui.enabled=true',
-        '--xpack.triggers_actions_ui.createAlertUiEnabled=true',
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

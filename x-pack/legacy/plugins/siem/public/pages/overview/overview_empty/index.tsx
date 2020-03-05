@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import * as i18nCommon from '../../common/translations';
 import { EmptyPage } from '../../../components/empty_page';
 import { useKibana } from '../../../lib/kibana';
