@@ -54,6 +54,7 @@ import {
   VerifyExistingNodeBuildsTask,
   PathLengthTask,
   WriteShaSumsTask,
+  UuidVerificationTask,
 } from './tasks';
 
 export async function buildDistributables(options) {
@@ -136,6 +137,7 @@ export async function buildDistributables(options) {
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
+  await run(UuidVerificationTask);
 
   /**
    * package platform-specific builds into archives

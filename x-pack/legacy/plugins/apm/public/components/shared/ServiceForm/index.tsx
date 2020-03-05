@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   omitAllOption,
   getOptionLabel
-} from '../../../../common/agent_configuration_constants';
+} from '../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { SelectWithPlaceholder } from '../SelectWithPlaceholder';
 

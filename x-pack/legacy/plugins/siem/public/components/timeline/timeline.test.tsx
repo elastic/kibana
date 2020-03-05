@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -31,7 +31,7 @@ const testFlyoutHeight = 980;
 jest.mock('../../lib/kibana');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {
@@ -212,6 +212,49 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
+    });
+
+    test('it defaults to showing `All events`', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent
+              browserFields={mockBrowserFields}
+              columns={defaultHeaders}
+              id="foo"
+              dataProviders={mockDataProviders}
+              end={endDate}
+              filters={[]}
+              flyoutHeight={testFlyoutHeight}
+              flyoutHeaderHeight={flyoutHeaderHeight}
+              indexPattern={indexPattern}
+              indexToAdd={[]}
+              isLive={false}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              kqlMode="search"
+              kqlQueryExpression=""
+              loadingIndexName={false}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onChangeItemsPerPage={jest.fn()}
+              onDataProviderEdited={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              start={startDate}
+              sort={sort}
+              toggleColumn={jest.fn()}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
+        'All events'
+      );
     });
   });
 

@@ -34,7 +34,7 @@ exports[`Should render icon select 1`] = `
     </EuiFormControlLayout>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="block"
   hasArrow={true}
   isOpen={false}
   ownFocus={true}

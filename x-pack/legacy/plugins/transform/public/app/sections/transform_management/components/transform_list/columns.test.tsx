@@ -6,7 +6,7 @@
 
 import { getColumns } from './columns';
 
-jest.mock('ui/new_platform');
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: Job List Columns', () => {
   test('getColumns()', () => {

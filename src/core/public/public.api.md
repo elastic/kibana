@@ -4,25 +4,30 @@
 
 ```ts
 
+import { Action } from 'history';
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
+import { History } from 'history';
 import { IconType } from '@elastic/eui';
+import { Location } from 'history';
+import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
 import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
-export interface App extends AppBase {
+export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
     chromeless?: boolean;
-    mount: AppMount | AppMountDeprecated;
+    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 }
 
 // @public (undocumented)
@@ -89,7 +94,7 @@ export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction
 
 // @public (undocumented)
 export interface ApplicationSetup {
-    register(app: App): void;
+    register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
     registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
@@ -112,7 +117,7 @@ export interface ApplicationStart {
 }
 
 // @public
-export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public @deprecated
 export interface AppMountContext {
@@ -133,12 +138,14 @@ export interface AppMountContext {
 }
 
 // @public @deprecated
-export type AppMountDeprecated = (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMountDeprecated<HistoryLocationState = unknown> = (context: AppMountContext, params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
-export interface AppMountParameters {
+export interface AppMountParameters<HistoryLocationState = unknown> {
+    // @deprecated
     appBasePath: string;
     element: HTMLElement;
+    history: ScopedHistory<HistoryLocationState>;
     onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
@@ -718,6 +725,8 @@ export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
     remove: (url: string) => string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
+    readonly serverBasePath: string;
 }
 
 // @public
@@ -930,7 +939,7 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public (undocumented)
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
@@ -973,13 +982,13 @@ export interface SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBatchResponse<T = unknown> {
     // (undocumented)
     savedObjects: Array<SimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -992,7 +1001,7 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1015,17 +1024,17 @@ export interface SavedObjectsBulkUpdateOptions {
 export class SavedObjectsClient {
     // @internal
     constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkGet: (objects?: {
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+    create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
-    get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    find: <T = unknown>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
@@ -1067,7 +1076,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
 }
 
 // @public
-export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1174,7 +1183,24 @@ export interface SavedObjectsUpdateOptions {
 }
 
 // @public
-export class SimpleSavedObject<T extends SavedObjectAttributes> {
+export class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> {
+    constructor(parentHistory: History, basePath: string);
+    get action(): Action;
+    block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    go: (n: number) => void;
+    goBack: () => void;
+    goForward: () => void;
+    get length(): number;
+    listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
+    get location(): Location<HistoryLocationState>;
+    push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    }
+
+// @public
+export class SimpleSavedObject<T = unknown> {
     constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
     // (undocumented)
     attributes: T;

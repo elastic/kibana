@@ -40,6 +40,7 @@ describe('loadAlertTypes', () => {
         name: 'Test',
         actionVariables: ['var1'],
         actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -442,7 +443,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
       ]
     `);

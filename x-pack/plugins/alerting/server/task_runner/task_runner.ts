@@ -5,8 +5,7 @@
  */
 
 import { pick, mapValues, omit } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
-import { SavedObject } from '../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';

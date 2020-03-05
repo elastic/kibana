@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { timelineDefaults, SubsetTimelineModel } from '../../store/timeline/model';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 
-export const alertsHeaders: ColumnHeader[] = [
+export const alertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

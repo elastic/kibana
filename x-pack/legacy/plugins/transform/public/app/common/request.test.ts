@@ -12,19 +12,26 @@ import { StepDetailsExposedState } from '../sections/create_transform/components
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
 import {
+  defaultQuery,
   getPreviewRequestBody,
   getCreateRequestBody,
   getPivotQuery,
   isDefaultQuery,
+  isMatchAllQuery,
   isSimpleQuery,
+  matchAllQuery,
   PivotQuery,
 } from './request';
 
-const defaultQuery: PivotQuery = { query_string: { query: '*' } };
-const matchAllQuery: PivotQuery = { match_all: {} };
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
 describe('Transform: Common', () => {
+  test('isMatchAllQuery()', () => {
+    expect(isMatchAllQuery(defaultQuery)).toBe(false);
+    expect(isMatchAllQuery(matchAllQuery)).toBe(true);
+    expect(isMatchAllQuery(simpleQuery)).toBe(false);
+  });
+
   test('isSimpleQuery()', () => {
     expect(isSimpleQuery(defaultQuery)).toBe(true);
     expect(isSimpleQuery(matchAllQuery)).toBe(false);

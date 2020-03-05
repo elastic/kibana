@@ -6,8 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { KibanaResponseFactory } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,

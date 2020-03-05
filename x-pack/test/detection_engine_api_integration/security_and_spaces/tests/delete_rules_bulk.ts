@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message: 'id: "fake_id" not found',
               status_code: 404,
             },
-            rule_id: 'fake_id', // TODO This is a known issue where it should be id and not rule_id
+            id: 'fake_id',
           },
         ]);
       });
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { rule_id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
         ]);
       });
     });
@@ -262,7 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message: 'id: "fake_id" not found',
               status_code: 404,
             },
-            rule_id: 'fake_id', // TODO This is a known issue where it should be id and not rule_id
+            id: 'fake_id',
           },
         ]);
       });
@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { rule_id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
         ]);
       });
     });

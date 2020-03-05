@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Plugin,
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  IndexPatternsContract,
-  IFieldFormatsRegistry,
-} from '.';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from '../../../../src/core/public/mocks';
+import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
+import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
+import { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -33,23 +32,6 @@ const autocompleteMock: any = {
   getValueSuggestions: jest.fn(),
   getQuerySuggestions: jest.fn(),
   hasQuerySuggestions: jest.fn(),
-};
-
-const fieldFormatsMock: IFieldFormatsRegistry = {
-  getByFieldType: jest.fn(),
-  getDefaultConfig: jest.fn(),
-  getDefaultInstance: jest.fn() as any,
-  getDefaultInstanceCacheResolver: jest.fn(),
-  getDefaultInstancePlain: jest.fn(),
-  getDefaultType: jest.fn(),
-  getDefaultTypeName: jest.fn(),
-  getInstance: jest.fn() as any,
-  getType: jest.fn(),
-  getTypeNameByEsTypes: jest.fn(),
-  init: jest.fn(),
-  register: jest.fn(),
-  parseDefaultTypeMap: jest.fn(),
-  deserialize: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
@@ -71,13 +53,16 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
+  const coreStart = coreMock.createStart();
   const queryStartMock = queryServiceMock.createStartContract();
   const startContract = {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: {
+      aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
+      },
       search: jest.fn(),
-
       __LEGACY: {
         esClient: {
           search: jest.fn(),
@@ -97,12 +82,20 @@ const createStartContract = (): Start => {
         msearch: jest.fn(),
       },
     },
-    indexPatterns: {} as IndexPatternsContract,
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+    } as unknown) as IndexPatternsContract,
   };
   return startContract;
 };
 
 export { searchSourceMock } from './search/mocks';
+export { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
 
 export const dataPluginMock = {
   createSetupContract,

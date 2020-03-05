@@ -5,8 +5,12 @@
  */
 import { ValuesType } from 'utility-types';
 import { sortBy, isEqual } from 'lodash';
-import { Connection, ConnectionNode } from '../../../../common/service_map';
-import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
+import {
+  Connection,
+  ConnectionNode
+} from '../../../../../../../plugins/apm/common/service_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 
 function getConnectionNodeId(node: ConnectionNode): string {
@@ -101,7 +105,8 @@ export function getCytoscapeElements(
             `/services/${node['service.name']}/service-map`,
             search
           ),
-          agentName: node['agent.name'] || node['agent.name'],
+          agentName: node['agent.name'],
+          frameworkName: node['service.framework.name'],
           type: 'service'
         };
       }

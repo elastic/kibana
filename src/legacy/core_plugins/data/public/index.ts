@@ -35,18 +35,18 @@ export {
 } from '../../../../plugins/data/public';
 export {
   // agg_types
-  AggParam,
-  AggParamOption,
-  DateRangeKey,
+  AggParam, // only the type is used externally, only in vis editor
+  AggParamOption, // only the type is used externally
+  DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
   IAggConfigs,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  IpRangeKey,
+  IpRangeKey, // only used in field formatter deserialization, which will live in data
   ISchemas,
-  OptionedParamEditorProps,
-  OptionedValueProp,
+  OptionedParamEditorProps, // only type is used externally
+  OptionedValueProp, // only type is used externally
 } from './search/types';
 
 /** @public static code */
@@ -54,6 +54,7 @@ export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
 export {
   // agg_types TODO need to group these under a namespace or prefix
+  AggConfigs,
   AggParamType,
   AggTypeFilters, // TODO convert to interface
   aggTypeFilters,
@@ -78,7 +79,10 @@ export {
   Schemas,
   siblingPipelineType,
   termsAggFilter,
+  toAbsoluteDates,
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from './search';

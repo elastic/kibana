@@ -22,7 +22,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-import fixtures from 'fixtures/fake_hierarchical_data';
+import { threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 import { start as visualizationsStart } from '../../../../../visualizations/public/np_ready/public/legacy';
@@ -147,7 +147,7 @@ describe('No global chart settings', function() {
   });
 
   beforeEach(async () => {
-    const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, {
+    const table1 = tabifyAggResponse(stubVis1.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
     data1 = await responseHandler(table1, rowAggDimensions);
@@ -234,7 +234,7 @@ describe('Vislib PieChart Class Test Suite', function() {
       });
 
       beforeEach(async () => {
-        const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, {
+        const table = tabifyAggResponse(stubVis.aggs, threeTermBuckets, {
           metricsAtAllLevels: true,
         });
         data = await responseHandler(table, dataDimensions);

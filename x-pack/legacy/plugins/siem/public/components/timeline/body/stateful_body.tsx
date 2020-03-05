@@ -13,6 +13,9 @@ import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { appSelectors, State, timelineSelectors } from '../../../store';
+import { timelineActions, appActions } from '../../../store/actions';
+import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -24,16 +27,13 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-
-import { ColumnHeader } from './column_headers/column_header';
-import { getColumnHeaders, getEventIdToDataMapping } from './helpers';
+import { useTimelineTypeContext } from '../timeline_context';
+import { getColumnHeaders } from './column_headers/helpers';
+import { getEventIdToDataMapping } from './helpers';
 import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-import { timelineActions, appActions } from '../../../store/actions';
-import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { useTimelineTypeContext } from '../timeline_context';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -42,12 +42,12 @@ interface OwnProps {
   isEventViewer?: boolean;
   height: number;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
 
-export const emptyColumnHeaders: ColumnHeader[] = [];
+export const emptyColumnHeaders: ColumnHeaderOptions[] = [];
 
 const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
   ({
@@ -214,9 +214,9 @@ StatefulBodyComponent.displayName = 'StatefulBodyComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
-    headers: ColumnHeader[],
+    headers: ColumnHeaderOptions[],
     browserFields: BrowserFields
-  ) => ColumnHeader[] = memoizeOne(getColumnHeaders);
+  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();

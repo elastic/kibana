@@ -32,12 +32,14 @@ export interface CaseAttributes extends NewCaseType, SavedObjectAttributes {
 
 export type FlattenedCaseSavedObject = CaseAttributes & {
   case_id: string;
+  version: string;
   comments: FlattenedCommentSavedObject[];
 };
 
 export type FlattenedCasesSavedObject = Array<
   CaseAttributes & {
     case_id: string;
+    version: string;
     // TO DO it is partial because we need to add it the commentCount
     commentCount?: number;
   }
@@ -52,6 +54,7 @@ export interface AllCases {
 
 export type FlattenedCommentSavedObject = CommentAttributes & {
   comment_id: string;
+  version: string;
   // TO DO We might want to add the case_id where this comment is related too
 };
 
@@ -69,3 +72,13 @@ export interface UpdatedCaseType {
   title?: UpdatedCaseTyped['title'];
   updated_at: string;
 }
+
+export enum SortFieldCase {
+  createdAt = 'created_at',
+  state = 'state',
+  updatedAt = 'updated_at',
+}
+
+export type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};

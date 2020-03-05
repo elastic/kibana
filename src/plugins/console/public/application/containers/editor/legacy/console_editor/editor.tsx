@@ -17,31 +17,26 @@
  * under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useServicesContext, useEditorReadContext } from '../../../../contexts';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
-import { ConsoleMenu } from '../../../../components';
-
-import { autoIndent, getDocumentation } from '../console_menu_actions';
-import { registerCommands } from './keyboard_shortcuts';
-import { applyCurrentSettings } from './apply_editor_settings';
-
-import {
-  useSendCurrentRequestToES,
-  useSetInputEditor,
-  useSaveCurrentTextObject,
-} from '../../../../hooks';
-
-import * as senseEditor from '../../../../models/sense_editor';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
-
+import { ConsoleMenu } from '../../../../components';
+import { useEditorReadContext, useServicesContext } from '../../../../contexts';
+import {
+  useSaveCurrentTextObject,
+  useSendCurrentRequestToES,
+  useSetInputEditor,
+} from '../../../../hooks';
+import * as senseEditor from '../../../../models/sense_editor';
+import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
+import { applyCurrentSettings } from './apply_editor_settings';
+import { registerCommands } from './keyboard_shortcuts';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -66,9 +61,11 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
+const inputId = 'ConAppInputTextarea';
+
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications },
+    services: { history, notifications, settings: settingsService },
     docLinkVersion,
     elasticsearchUrl,
   } = useServicesContext();
@@ -95,6 +92,11 @@ function EditorUI({ initialTextValue }: EditorProps) {
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
+    const textareaElement = editorRef.current!.querySelector('textarea');
+
+    if (textareaElement) {
+      textareaElement.setAttribute('id', inputId);
+    }
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
@@ -170,7 +172,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    mappings.retrieveAutoCompleteInfo();
+    mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -180,7 +182,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -244,19 +246,19 @@ function EditorUI({ initialTextValue }: EditorProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
-        automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
-        satisfy Axe. */}
-
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label className="conApp__textAreaLabelHack">
-          <div
-            ref={editorRef}
-            id="ConAppEditor"
-            className="conApp__editorContent"
-            data-test-subj="request-editor"
-          />
-        </label>
+        <EuiScreenReaderOnly>
+          <label htmlFor={inputId}>
+            {i18n.translate('console.inputTextarea', {
+              defaultMessage: 'Dev Tools Console',
+            })}
+          </label>
+        </EuiScreenReaderOnly>
+        <div
+          ref={editorRef}
+          id="ConAppEditor"
+          className="conApp__editorContent"
+          data-test-subj="request-editor"
+        />
       </div>
     </div>
   );

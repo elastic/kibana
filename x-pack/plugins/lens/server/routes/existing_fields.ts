@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+import {
+  IndexPatternsFetcher,
+  IndexPatternAttributes,
+} from '../../../../../src/plugins/data/server';
 
 /**
  * The number of docs to sample to determine field empty status.
@@ -125,7 +128,10 @@ async function fetchFieldExistence({
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
   const requestClient = context.core.elasticsearch.dataClient;
-  const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternId);
+  const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
+    'index-pattern',
+    indexPatternId
+  );
   const indexPatternTitle = indexPattern.attributes.title;
   // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
   // to look up field values in the resulting documents. We can accomplish the same
@@ -155,7 +161,7 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
  * Exported only for unit tests.
  */
 export function buildFieldList(
-  indexPattern: SavedObject,
+  indexPattern: SavedObject<IndexPatternAttributes>,
   mappings: MappingResult,
   fieldDescriptors: FieldDescriptor[]
 ): Field[] {

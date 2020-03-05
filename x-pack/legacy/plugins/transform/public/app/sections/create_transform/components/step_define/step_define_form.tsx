@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { metadata } from 'ui/metadata';
-import { toastNotifications } from 'ui/notify';
 
 import {
   EuiButton,
@@ -19,6 +17,7 @@ import {
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   // @ts-ignore
@@ -27,7 +26,11 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { dictionaryToArray } from '../../../../../../common/types/common';
+import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
+import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
+import { useDocumentationLinks, useToastNotifications } from '../../../../app_dependencies';
+import { TransformPivotConfig } from '../../../../common';
+import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
@@ -37,16 +40,12 @@ import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
-  useKibanaContext,
-  InitializedKibanaContextValue,
-  SavedSearchQuery,
-} from '../../../../lib/kibana';
-
-import {
-  AggName,
-  DropDownLabel,
   getPivotQuery,
   getPreviewRequestBody,
+  isMatchAllQuery,
+  matchAllQuery,
+  AggName,
+  DropDownLabel,
   PivotAggDict,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -55,6 +54,7 @@ import {
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PIVOT_SUPPORTED_AGGS,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
 import { getPivotDropdownOptions } from './common';
@@ -73,48 +73,94 @@ export interface StepDefineExposedState {
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultStepDefineState(
-  kibanaContext: InitializedKibanaContextValue
-): StepDefineExposedState {
+export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
-    searchString:
-      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
-    searchQuery:
-      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
+    searchString: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
+    searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
   };
 }
-export function isAggNameConflict(
+
+export function applyTransformConfigToDefineState(
+  state: StepDefineExposedState,
+  transformConfig?: TransformPivotConfig
+): StepDefineExposedState {
+  // apply the transform configuration to wizard DEFINE state
+  if (transformConfig !== undefined) {
+    // transform aggregations config to wizard state
+    state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce((aggList, aggName) => {
+      const aggConfig = transformConfig.pivot.aggregations[aggName] as Dictionary<any>;
+      const agg = Object.keys(aggConfig)[0];
+      aggList[aggName] = {
+        ...aggConfig[agg],
+        agg: agg as PIVOT_SUPPORTED_AGGS,
+        aggName,
+        dropDownName: aggName,
+      } as PivotAggsConfig;
+      return aggList;
+    }, {} as PivotAggsConfigDict);
+
+    // transform group by config to wizard state
+    state.groupByList = Object.keys(transformConfig.pivot.group_by).reduce(
+      (groupByList, groupByName) => {
+        const groupByConfig = transformConfig.pivot.group_by[groupByName] as Dictionary<any>;
+        const groupBy = Object.keys(groupByConfig)[0];
+        groupByList[groupByName] = {
+          agg: groupBy as PIVOT_SUPPORTED_GROUP_BY_AGGS,
+          aggName: groupByName,
+          dropDownName: groupByName,
+          ...groupByConfig[groupBy],
+        } as PivotGroupByConfig;
+        return groupByList;
+      },
+      {} as PivotGroupByConfigDict
+    );
+
+    // only apply the query from the transform config to wizard state if it's not the default query
+    const query = transformConfig.source.query;
+    if (query !== undefined && !isEqual(query, matchAllQuery)) {
+      state.isAdvancedSourceEditorEnabled = true;
+      state.searchString = '';
+      state.searchQuery = query;
+      state.sourceConfigUpdated = true;
+    }
+
+    // applying a transform config to wizard state will always result in a valid configuration
+    state.valid = true;
+  }
+
+  return state;
+}
+
+export function getAggNameConflictToastMessages(
   aggName: AggName,
   aggList: PivotAggsConfigDict,
   groupByList: PivotGroupByConfigDict
-) {
+): string[] {
   if (aggList[aggName] !== undefined) {
-    toastNotifications.addDanger(
+    return [
       i18n.translate('xpack.transform.stepDefineForm.aggExistsErrorMessage', {
         defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
         values: { aggName },
-      })
-    );
-    return true;
+      }),
+    ];
   }
 
   if (groupByList[aggName] !== undefined) {
-    toastNotifications.addDanger(
+    return [
       i18n.translate('xpack.transform.stepDefineForm.groupByExistsErrorMessage', {
         defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
         values: { aggName },
-      })
-    );
-    return true;
+      }),
+    ];
   }
 
-  let conflict = false;
+  const conflicts: string[] = [];
 
   // check the new aggName against existing aggs and groupbys
   const aggNameSplit = aggName.split('.');
@@ -122,29 +168,28 @@ export function isAggNameConflict(
   aggNameSplit.forEach(aggNamePart => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
-      toastNotifications.addDanger(
+      conflicts.push(
         i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
           defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
           values: { aggName, aggNameCheck },
         })
       );
-      conflict = true;
     }
   });
 
-  if (conflict) {
-    return true;
+  if (conflicts.length > 0) {
+    return conflicts;
   }
 
   // check all aggs against new aggName
-  conflict = Object.keys(aggList).some(aggListName => {
+  Object.keys(aggList).some(aggListName => {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string;
     return aggListNameSplit.some(aggListNamePart => {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
-        toastNotifications.addDanger(
+        conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedAggListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
             values: { aggName, aggListName },
@@ -156,12 +201,12 @@ export function isAggNameConflict(
     });
   });
 
-  if (conflict) {
-    return true;
+  if (conflicts.length > 0) {
+    return conflicts;
   }
 
   // check all group-bys against new aggName
-  conflict = Object.keys(groupByList).some(groupByListName => {
+  Object.keys(groupByList).some(groupByListName => {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string;
     return groupByListNameSplit.some(groupByListNamePart => {
@@ -170,7 +215,7 @@ export function isAggNameConflict(
           ? groupByListNamePart
           : `${groupByListNameCheck}.${groupByListNamePart}`;
       if (groupByListNameCheck === aggName) {
-        toastNotifications.addDanger(
+        conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
             values: { aggName, groupByListName },
@@ -182,36 +227,30 @@ export function isAggNameConflict(
     });
   });
 
-  return conflict;
+  return conflicts;
 }
 
 interface Props {
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
+  searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useKibanaContext();
+export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange, searchItems }) => {
+  const toastNotifications = useToastNotifications();
+  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
-  const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
+  const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
 
   // The search filter
   const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
   const [useKQL] = useState(true);
 
-  const addToSearch = (newSearch: string) => {
-    const currentDisplaySearch = searchString === defaultSearch ? emptySearch : searchString;
-    setSearchString(`${currentDisplaySearch} ${newSearch}`.trim());
-  };
-
   const searchHandler = (d: Record<string, any>) => {
     const { filterQuery, queryString } = d;
     const newSearch = queryString === emptySearch ? defaultSearch : queryString;
-    const newSearchQuery =
-      filterQuery.match_all && Object.keys(filterQuery.match_all).length === 0
-        ? defaultSearch
-        : filterQuery;
+    const newSearchQuery = isMatchAllQuery(filterQuery) ? defaultSearch : filterQuery;
     setSearchString(newSearch);
     setSearchQuery(newSearchQuery);
   };
@@ -219,7 +258,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
 
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const { indexPattern } = searchItems;
 
   const {
     groupByOptions,
@@ -233,7 +272,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const config: PivotGroupByConfig = groupByOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isAggNameConflict(aggName, aggList, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -245,7 +286,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const groupByListWithoutPrevious = { ...groupByList };
     delete groupByListWithoutPrevious[previousAggName];
 
-    if (isAggNameConflict(item.aggName, aggList, groupByListWithoutPrevious)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(
+      item.aggName,
+      aggList,
+      groupByListWithoutPrevious
+    );
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -266,7 +313,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const config: PivotAggsConfig = aggOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isAggNameConflict(aggName, aggList, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -278,7 +327,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const aggListWithoutPrevious = { ...aggList };
     delete aggListWithoutPrevious[previousAggName];
 
-    if (isAggNameConflict(item.aggName, aggListWithoutPrevious, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(
+      item.aggName,
+      aggListWithoutPrevious,
+      groupByList
+    );
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -329,7 +384,17 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
     stringifiedPivotConfig
   );
-  const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+
+  const {
+    convertToJson,
+    setXJson: setAdvancedEditorConfig,
+    xJson: advancedEditorConfig,
+  } = useXJsonMode(stringifiedPivotConfig);
+
+  useEffect(() => {
+    setAdvancedEditorConfig(stringifiedPivotConfig);
+  }, [setAdvancedEditorConfig, stringifiedPivotConfig]);
+
   // source config
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
   const [
@@ -353,7 +418,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   };
 
   const applyAdvancedPivotEditorChanges = () => {
-    const pivotConfig = JSON.parse(advancedEditorConfig);
+    const pivotConfig = JSON.parse(convertToJson(advancedEditorConfig));
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
@@ -363,10 +428,10 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         const aggConfigKeys = Object.keys(aggConfig);
         const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
         newGroupByList[aggName] = {
+          ...aggConfig[agg],
           agg,
           aggName,
           dropDownName: '',
-          ...aggConfig[agg],
         };
       });
     }
@@ -380,18 +445,16 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         const aggConfigKeys = Object.keys(aggConfig);
         const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
         newAggList[aggName] = {
+          ...aggConfig[agg],
           agg,
           aggName,
           dropDownName: '',
-          ...aggConfig[agg],
         };
       });
     }
     setAggList(newAggList);
-    const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
 
-    setAdvancedEditorConfig(prettyPivotConfig);
-    setAdvancedEditorConfigLastApplied(prettyPivotConfig);
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
     setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
@@ -418,15 +481,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     setAdvancedSourceEditorApplyButtonEnabled(false);
   };
 
-  // metadata.branch corresponds to the version used in documentation links.
-  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-resource.html#transform-pivot`;
   const advancedEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the pivot configuration of the transform.',
       })}{' '}
-      <EuiLink href={docsUrl} target="_blank">
+      <EuiLink href={esTransformPivot} target="_blank">
         {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
@@ -434,14 +495,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     </Fragment>
   );
 
-  const sourceDocsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/query-dsl.html`;
   const advancedSourceEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the source query clause of the transform.',
       })}{' '}
-      <EuiLink href={sourceDocsUrl} target="_blank">
+      <EuiLink href={esQueryDsl} target="_blank">
         {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
@@ -459,13 +519,11 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       pivotAggsArr
     );
 
-    const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
     const stringifiedSourceConfigUpdate = JSON.stringify(
       previewRequestUpdate.source.query,
       null,
       2
     );
-    setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
     setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
 
     onChange({
@@ -497,11 +555,11 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const disabledQuery = numIndexFields > maxIndexFields;
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
+    <EuiFlexGroup className="transform__stepDefineForm">
+      <EuiFlexItem grow={false} className="transform__stepDefineFormLeftColumn">
         <div data-test-subj="transformStepDefineForm">
           <EuiForm>
-            {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
+            {searchItems.savedSearch === undefined && typeof searchString === 'string' && (
               <Fragment>
                 <EuiFormRow
                   label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
@@ -602,7 +660,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 </EuiFormRow>
               </Fragment>
             )}
-            {kibanaContext.currentSavedSearch === undefined && (
+            {searchItems.savedSearch === undefined && (
               <EuiFormRow>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem>
@@ -653,16 +711,15 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 </EuiFlexGroup>
               </EuiFormRow>
             )}
-            {kibanaContext.currentSavedSearch !== undefined &&
-              kibanaContext.currentSavedSearch.id !== undefined && (
-                <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-                    defaultMessage: 'Saved search',
-                  })}
-                >
-                  <span>{kibanaContext.currentSavedSearch.title}</span>
-                </EuiFormRow>
-              )}
+            {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })}
+              >
+                <span>{searchItems.savedSearch.title}</span>
+              </EuiFormRow>
+            )}
 
             {!isAdvancedPivotEditorEnabled && (
               <Fragment>
@@ -730,7 +787,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 >
                   <EuiPanel grow={false} paddingSize="none">
                     <EuiCodeEditor
-                      mode="json"
+                      data-test-subj="transformAdvancedPivotEditor"
+                      mode={xJsonMode}
                       width="100%"
                       value={advancedEditorConfig}
                       onChange={(d: string) => {
@@ -745,7 +803,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                         // Try to parse the string passed on from the editor.
                         // If parsing fails, the "Apply"-Button will be disabled
                         try {
-                          JSON.parse(d);
+                          JSON.parse(convertToJson(d));
                           setAdvancedPivotEditorApplyButtonEnabled(true);
                         } catch (e) {
                           setAdvancedPivotEditorApplyButtonEnabled(false);
@@ -834,10 +892,15 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         </div>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
-        <EuiSpacer size="m" />
-        <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
+      <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
+        <SourceIndexPreview indexPattern={searchItems.indexPattern} query={pivotQuery} />
+        <EuiHorizontalRule />
+        <PivotPreview
+          aggs={aggList}
+          groupBy={groupByList}
+          indexPattern={searchItems.indexPattern}
+          query={pivotQuery}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

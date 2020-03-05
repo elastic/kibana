@@ -23,7 +23,6 @@ import { securityMock } from '../../../security/server/mocks';
 const log = loggingServiceMock.createLogger();
 
 const legacyAPI: LegacyAPI = {
-  legacyConfig: {},
   savedObjects: {} as SavedObjectsLegacyService,
 } as LegacyAPI;
 

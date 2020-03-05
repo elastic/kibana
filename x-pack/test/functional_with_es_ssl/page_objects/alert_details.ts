@@ -92,5 +92,9 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
         ).to.eql(shouldExist ? 1 : 0);
       });
     },
+    async clickPaginationNextPage() {
+      const nextButton = await testSubjects.find(`pagination-button-next`);
+      nextButton.click();
+    },
   };
 }

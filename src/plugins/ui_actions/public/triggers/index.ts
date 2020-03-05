@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { Trigger } from './trigger';
+export * from './trigger';
+export * from './trigger_contract';
+export * from './trigger_internal';

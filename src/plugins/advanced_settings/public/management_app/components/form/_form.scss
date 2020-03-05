@@ -1,0 +1,13 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
+
+.mgtAdvancedSettingsForm__bottomBar {
+  margin-left: $euiNavDrawerWidthCollapsed;
+  z-index: 9; // Puts it inuder the nav drawer when expanded
+  &--pushForNav {
+    margin-left: $euiNavDrawerWidthExpanded;
+  }
+  @include euiBreakpoint('xs', 's') {
+    margin-left: 0;
+  }
+}

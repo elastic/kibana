@@ -133,11 +133,10 @@ export default async function({ readConfigFile }) {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra',
+        pathname: '/app/metrics',
       },
       infraLogs: {
-        pathname: '/app/infra',
-        hash: '/logs',
+        pathname: '/app/logs',
       },
       canvas: {
         pathname: '/app/canvas',

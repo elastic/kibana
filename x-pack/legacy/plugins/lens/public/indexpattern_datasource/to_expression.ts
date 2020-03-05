@@ -40,6 +40,21 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
+    const formatterOverrides = columnEntries
+      .map(([id, col]) => {
+        const format = col.params && 'format' in col.params ? col.params.format : undefined;
+        if (!format) {
+          return null;
+        }
+        const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
+        if (typeof format.params?.decimals === 'number') {
+          return base + ` decimals=${format.params.decimals}`;
+        }
+        return base;
+      })
+      .filter(expr => !!expr)
+      .join(' ');
+
     return `esaggs
       index="${indexPattern.id}"
       metricsAtAllLevels=false
@@ -47,7 +62,7 @@ function getExpressionForLayer(
       includeFormatHints=true
       aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
         aggs
-      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}' ${formatterOverrides}`;
   }
 
   return null;

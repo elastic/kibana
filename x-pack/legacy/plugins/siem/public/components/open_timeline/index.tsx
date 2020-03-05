@@ -15,12 +15,12 @@ import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timel
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
-import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -335,7 +335,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     show,
   }: {
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
   updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>

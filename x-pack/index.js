@@ -30,13 +30,12 @@ import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { crossClusterReplication } from './legacy/plugins/cross_cluster_replication';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
-import { fileUpload } from './legacy/plugins/file_upload';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
-import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { ingestManager } from './legacy/plugins/ingest_manager';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
 module.exports = function(kibana) {
@@ -68,12 +67,11 @@ module.exports = function(kibana) {
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
-    fileUpload(kibana),
     encryptedSavedObjects(kibana),
     lens(kibana),
-    snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    ingestManager(kibana),
     triggersActionsUI(kibana),
   ];
 };

@@ -44,5 +44,3 @@ package-lock.json
 *.sublime-*
 npm-debug.log*
 .tern-project
-x-pack/legacy/plugins/apm/tsconfig.json
-apm.tsconfig.json

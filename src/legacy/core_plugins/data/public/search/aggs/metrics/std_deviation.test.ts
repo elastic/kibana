@@ -19,11 +19,11 @@
 
 import { IStdDevAggConfig, stdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 
-jest.mock('ui/new_platform');
-
 describe('AggTypeMetricStandardDeviationProvider class', () => {
+  const typesRegistry = mockAggTypesRegistry([stdDeviationMetricAgg]);
   const getAggConfigs = (customLabel?: string) => {
     const field = {
       name: 'memory',
@@ -52,7 +52,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
           },
         },
       ],
-      null
+      { typesRegistry }
     );
   };
 

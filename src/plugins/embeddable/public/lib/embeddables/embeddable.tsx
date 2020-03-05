@@ -22,6 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
+import { EmbeddableActionStorage } from './embeddable_action_storage';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -48,6 +49,11 @@ export abstract class Embeddable<
 
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
+
+  private __actionStorage?: EmbeddableActionStorage;
+  public get actionStorage(): EmbeddableActionStorage {
+    return this.__actionStorage || (this.__actionStorage = new EmbeddableActionStorage(this));
+  }
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;

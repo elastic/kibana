@@ -23,7 +23,6 @@ import { noop, identity } from 'lodash';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
-
 import { Schemas } from '../../schemas';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
 

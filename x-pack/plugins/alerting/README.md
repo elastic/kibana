@@ -249,6 +249,7 @@ Payload:
 |tags|A list of keywords to reference and search in the future.|string[]|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
 |schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
+|throttle|A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.|string|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
@@ -299,6 +300,7 @@ Payload:
 |Property|Description|Type|
 |---|---|---|
 |schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
+|throttle|A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.|string|
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|

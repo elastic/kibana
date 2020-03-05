@@ -36,8 +36,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   ) {
     home.featureCatalogue.register({
       id: 'stack-management',
-      title: i18n.translate('management.stackManagement.managementLabel', {
-        defaultMessage: 'Stack Management',
+      title: i18n.translate('management.displayName', {
+        defaultMessage: 'Management',
       }),
       description: i18n.translate('management.stackManagement.managementDescription', {
         defaultMessage: 'Your center console for managing the Elastic Stack.',

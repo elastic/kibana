@@ -106,7 +106,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
 
     it('renders "legacy" application', async () => {
-      await navigateTo('/render/core_plugin_legacy');
+      await navigateTo('/render/legacy_app');
 
       const [loadingMessage, legacyMode, userSettings] = await Promise.all([
         findLoadingMessage(),
@@ -119,12 +119,12 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       await find.waitForElementStale(loadingMessage);
 
-      expect(await exists('coreLegacyCompatH1')).to.be(true);
+      expect(await exists('legacyAppH1')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
     });
 
     it('renders "legacy" application without user settings', async () => {
-      await navigateTo('/render/core_plugin_legacy?includeUserSettings=false');
+      await navigateTo('/render/legacy_app?includeUserSettings=false');
 
       const [loadingMessage, legacyMode, userSettings] = await Promise.all([
         findLoadingMessage(),
@@ -137,7 +137,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       await find.waitForElementStale(loadingMessage);
 
-      expect(await exists('coreLegacyCompatH1')).to.be(true);
+      expect(await exists('legacyAppH1')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
     });
 

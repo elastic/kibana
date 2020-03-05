@@ -20,6 +20,7 @@
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
+import { IKibanaMigrator } from '../migrations';
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
@@ -32,17 +33,20 @@ import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
+import { registerMigrateRoute } from './migrate';
 
 export function registerRoutes({
   http,
   logger,
   config,
   importableExportableTypes,
+  migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
   logger: Logger;
   config: SavedObjectConfig;
   importableExportableTypes: string[];
+  migratorPromise: Promise<IKibanaMigrator>;
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
@@ -58,4 +62,8 @@ export function registerRoutes({
   registerExportRoute(router, config, importableExportableTypes);
   registerImportRoute(router, config, importableExportableTypes);
   registerResolveImportErrorsRoute(router, config, importableExportableTypes);
+
+  const internalRouter = http.createRouter('/internal/saved_objects/');
+
+  registerMigrateRoute(internalRouter, migratorPromise);
 }

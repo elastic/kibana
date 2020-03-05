@@ -11,7 +11,7 @@ import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../plugins/apm/common/index_pattern_constants';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 

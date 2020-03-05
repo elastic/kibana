@@ -10,4 +10,7 @@ export const getDocumentationLinks = () => ({
   canvas: `${getCoreStart().docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
     getCoreStart().docLinks.DOC_LINK_VERSION
   }/canvas.html`,
+  numeral: `${getCoreStart().docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
+    getCoreStart().docLinks.DOC_LINK_VERSION
+  }/guide/numeral.html`,
 });

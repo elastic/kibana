@@ -279,10 +279,17 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+
+    const currentFilters = this._filterManager.getFilters();
+    const existingFilter = currentFilters.find(filter =>
+      esFilters.compareFilters(filter, filterToRemove)
+    );
+
+    if (!existingFilter) return;
 
     try {
-      this._filterManager.removeFilter(filter);
+      this._filterManager.removeFilter(existingFilter);
     } catch (err) {
       this.onError(err);
     }

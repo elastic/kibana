@@ -79,7 +79,7 @@
         </div>
         <string-field-progress-bar
           percent="{{bucket.percent}}"
-          count="{{::bucket.count}}"        
+          count="{{::bucket.count}}"
         ></string-field-progress-bar>
       </div>
     </div>
@@ -87,7 +87,7 @@
 
   <a
     ng-href="{{field.details.visualizeUrl}}"
-    ng-show="field.visualizable && canVisualize"
+    ng-show="field.details.visualizeUrl && canVisualize"
     class="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
     data-test-subj="fieldVisualize-{{::field.name}}"
   >

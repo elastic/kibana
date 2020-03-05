@@ -21,9 +21,9 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer } from '../../../kibana_utils/common';
+import { Defer, now } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
-import { isExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
   ExpressionAstFunction,
@@ -32,7 +32,7 @@ import {
   parseExpression,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType } from '../expression_types';
+import { getType, ExpressionValue } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
@@ -44,6 +44,13 @@ export interface ExecutionParams<
   ast?: ExpressionAstExpression;
   expression?: string;
   context?: ExtraContext;
+
+  /**
+   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
+   * outputs as well as all resolved arguments and time it took to execute each
+   * function are saved and are available for introspection.
+   */
+  debug?: boolean;
 }
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
@@ -190,23 +197,55 @@ export class Execution<
       }
 
       const { function: fnName, arguments: fnArgs } = link;
-      const fnDef = getByAlias(this.state.get().functions, fnName);
+      const fn = getByAlias(this.state.get().functions, fnName);
 
-      if (!fnDef) {
+      if (!fn) {
         return createError({ message: `Function ${fnName} could not be found.` });
       }
 
+      let args: Record<string, ExpressionValue> = {};
+      let timeStart: number | undefined;
+
       try {
-        // Resolve arguments before passing to function
-        // resolveArgs returns an object because the arguments themselves might
-        // actually have a 'then' function which would be treated as a promise
-        const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
-        const output = await this.invokeFunction(fnDef, input, resolvedArgs);
+        // `resolveArgs` returns an object because the arguments themselves might
+        // actually have a `then` function which would be treated as a `Promise`.
+        const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
+        args = resolvedArgs;
+        timeStart = this.params.debug ? now() : 0;
+        const output = await this.invokeFunction(fn, input, resolvedArgs);
+
+        if (this.params.debug) {
+          const timeEnd: number = now();
+          (link as ExpressionAstFunction).debug = {
+            success: true,
+            fn,
+            input,
+            args: resolvedArgs,
+            output,
+            duration: timeEnd - timeStart,
+          };
+        }
+
         if (getType(output) === 'error') return output;
         input = output;
-      } catch (e) {
-        e.message = `[${fnName}] > ${e.message}`;
-        return createError(e);
+      } catch (rawError) {
+        const timeEnd: number = this.params.debug ? now() : 0;
+        const error = createError(rawError) as ExpressionValueError;
+        error.error.message = `[${fnName}] > ${error.error.message}`;
+
+        if (this.params.debug) {
+          (link as ExpressionAstFunction).debug = {
+            success: false,
+            fn,
+            input,
+            args,
+            error,
+            rawError,
+            duration: timeStart ? timeEnd - timeStart : undefined,
+          };
+        }
+
+        return error;
       }
     }
 
@@ -327,7 +366,9 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput);
+          const output = await this.params.executor.interpret(item, subInput, {
+            debug: this.params.debug,
+          });
           if (isExpressionValueError(output)) throw output.error;
           const casted = this.cast(output, argDefs[argName as any].types);
           return casted;

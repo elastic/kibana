@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
   EmptyState,
   MonitorList,
@@ -15,11 +16,12 @@ import {
 } from '../components/functional';
 import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { useTrackPageview } from '../../../infra/public';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
+import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -71,8 +73,14 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   const linkParameters = stringifyUrlParams(params, true);
 
+  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
+    defaultMessage: 'Overview',
+    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+  });
+
   return (
     <>
+      <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

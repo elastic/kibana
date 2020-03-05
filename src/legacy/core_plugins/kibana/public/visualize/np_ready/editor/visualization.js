@@ -18,7 +18,7 @@
  */
 
 export function initVisualizationDirective(app, deps) {
-  app.directive('visualizationEmbedded', function($timeout, getAppState) {
+  app.directive('visualizationEmbedded', function($timeout) {
     return {
       restrict: 'E',
       scope: {
@@ -27,6 +27,7 @@ export function initVisualizationDirective(app, deps) {
         timeRange: '=',
         filters: '=',
         query: '=',
+        appState: '=',
       },
       link: function($scope, element) {
         $scope.renderFunction = async () => {
@@ -37,7 +38,7 @@ export function initVisualizationDirective(app, deps) {
                 timeRange: $scope.timeRange,
                 filters: $scope.filters || [],
                 query: $scope.query,
-                appState: getAppState(),
+                appState: $scope.appState,
                 uiState: $scope.uiState,
               });
             $scope._handler.render(element[0]);

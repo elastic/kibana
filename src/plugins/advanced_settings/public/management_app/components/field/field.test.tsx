@@ -20,21 +20,14 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { Field } from './field';
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: () => {},
-    add: jest.fn(),
-  },
-}));
+import { Field, getEditableValue } from './field';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
@@ -43,6 +36,18 @@ const defaults = {
   requiresPageReload: false,
   readOnly: false,
   category: ['category'],
+};
+
+const exampleValues = {
+  array: ['example_value'],
+  boolean: false,
+  image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
+  json: { foo: 'bar2' },
+  markdown: 'Hello World',
+  number: 1,
+  select: 'banana',
+  string: 'hello world',
+  stringWithValidation: 'foo',
 };
 
 const settings: Record<string, FieldSetting> = {
@@ -161,7 +166,7 @@ const settings: Record<string, FieldSetting> = {
     description: 'Description for String test validation setting',
     type: 'string',
     validation: {
-      regex: new RegExp('/^foo'),
+      regex: new RegExp('^foo'),
       message: 'must start with "foo"',
     },
     value: undefined,
@@ -182,11 +187,22 @@ const userValues = {
   string: 'foo',
   stringWithValidation: 'fooUserValue',
 };
+
 const invalidUserValues = {
   stringWithValidation: 'invalidUserValue',
 };
-const save = jest.fn(() => Promise.resolve(true));
-const clear = jest.fn(() => Promise.resolve(true));
+
+const handleChange = jest.fn();
+const clearChange = jest.fn();
+
+const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string) => {
+  const field = findTestSubject(wrapper, `advancedSetting-editField-${name}`);
+  if (type === 'boolean') {
+    return field.props()['aria-checked'];
+  } else {
+    return field.props().value;
+  }
+};
 
 describe('Field', () => {
   Object.keys(settings).forEach(type => {
@@ -197,8 +213,7 @@ describe('Field', () => {
         const component = shallowWithI18nProvider(
           <Field
             setting={setting}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
@@ -217,8 +232,7 @@ describe('Field', () => {
               value: userValues[type],
               isOverridden: true,
             }}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
@@ -232,14 +246,12 @@ describe('Field', () => {
         const component = shallowWithI18nProvider(
           <Field
             setting={setting}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={false}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
-
         expect(component).toMatchSnapshot();
       });
 
@@ -251,8 +263,7 @@ describe('Field', () => {
               // @ts-ignore
               value: userValues[type],
             }}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
@@ -269,28 +280,44 @@ describe('Field', () => {
               ...setting,
               isCustom: true,
             }}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
-
+        expect(component).toMatchSnapshot();
+      });
+      it('should render unsaved value if there are unsaved changes', async () => {
+        const component = shallowWithI18nProvider(
+          <Field
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            handleChange={handleChange}
+            enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+            unsavedChanges={{
+              // @ts-ignore
+              value: exampleValues[setting.type],
+            }}
+          />
+        );
         expect(component).toMatchSnapshot();
       });
     });
 
     if (type === 'select') {
-      it('should use options for rendering values', () => {
+      it('should use options for rendering values and optionsLabels for rendering labels', () => {
         const component = mountWithI18nProvider(
           <Field
             setting={{
               ...setting,
               isCustom: true,
             }}
-            save={save}
-            clear={clear}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
@@ -298,25 +325,8 @@ describe('Field', () => {
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
         // @ts-ignore
-        const labels = select.find('option').map(option => option.prop('value'));
-        expect(labels).toEqual(['apple', 'orange', 'banana']);
-      });
-
-      it('should use optionLabels for rendering labels', () => {
-        const component = mountWithI18nProvider(
-          <Field
-            setting={{
-              ...setting,
-              isCustom: true,
-            }}
-            save={save}
-            clear={clear}
-            enableSaving={true}
-            toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
-          />
-        );
-        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        const values = select.find('option').map(option => option.prop('value'));
+        expect(values).toEqual(['apple', 'orange', 'banana']);
         // @ts-ignore
         const labels = select.find('option').map(option => option.text());
         expect(labels).toEqual(['Apple', 'Orange', 'banana']);
@@ -328,8 +338,8 @@ describe('Field', () => {
         <I18nProvider>
           <Field
             setting={setting}
-            save={save}
-            clear={clear}
+            clearChange={clearChange}
+            handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
@@ -352,90 +362,52 @@ describe('Field', () => {
         const userValue = userValues[type];
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
-        it('should be able to change value from no value and cancel', async () => {
-          await (component.instance() as Field).onImageChange([userValue]);
-          const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            (component.instance() as Field).state.unsavedValue ===
-              (component.instance() as Field).state.savedValue
-          ).toBe(true);
-        });
-
-        it('should be able to change value and save', async () => {
-          await (component.instance() as Field).onImageChange([userValue]);
-          const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(save).toBeCalled();
-          component.setState({ savedValue: userValue });
+        it('should be able to change value and cancel', async () => {
+          (component.instance() as Field).onImageChange([userValue]);
+          expect(handleChange).toBeCalled();
           await wrapper.setProps({
+            unsavedChanges: {
+              value: userValue,
+              changeImage: true,
+            },
             setting: {
               ...(component.instance() as Field).props.setting,
               value: userValue,
             },
           });
-
           await (component.instance() as Field).cancelChangeImage();
+          expect(clearChange).toBeCalledWith(setting.name);
           wrapper.update();
         });
 
-        it('should be able to change value from existing value and save', async () => {
+        it('should be able to change value from existing value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+          });
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
-
           const newUserValue = `${userValue}=`;
           await (component.instance() as Field).onImageChange([newUserValue]);
-          const updated2 = wrapper.update();
-          findTestSubject(updated2, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(save).toBeCalled();
-          component.setState({ savedValue: newUserValue });
-          await wrapper.setProps({
-            setting: {
-              ...(component.instance() as Field).props.setting,
-              value: newUserValue,
-            },
-          });
-          wrapper.update();
+          expect(handleChange).toBeCalled();
         });
 
         it('should be able to reset to default value', async () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-          expect(clear).toBeCalled();
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: getEditableValue(setting.type, setting.defVal),
+            changeImage: true,
+          });
         });
       });
     } else if (type === 'markdown' || type === 'json') {
       describe(`for changing ${type} setting`, () => {
         const { wrapper, component } = setup();
         const userValue = userValues[type];
-        const fieldUserValue = userValue;
 
-        it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
-          const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            (component.instance() as Field).state.unsavedValue ===
-              (component.instance() as Field).state.savedValue
-          ).toBe(true);
-        });
-
-        it('should be able to change value and save', async () => {
-          (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
-          const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(save).toBeCalled();
-          component.setState({ savedValue: fieldUserValue });
+        it('should be able to change value', async () => {
+          (component.instance() as Field).onCodeEditorChange(userValue as UiSettingsType);
+          expect(handleChange).toBeCalledWith(setting.name, { value: userValue });
           await wrapper.setProps({
             setting: {
               ...(component.instance() as Field).props.setting,
@@ -445,19 +417,21 @@ describe('Field', () => {
           wrapper.update();
         });
 
-        if (type === 'json') {
-          it('should be able to clear value and have empty object populate', async () => {
-            (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
-            wrapper.update();
-            expect((component.instance() as Field).state.unsavedValue).toEqual('{}');
-          });
-        }
-
         it('should be able to reset to default value', async () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-          expect(clear).toBeCalled();
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: getEditableValue(setting.type, setting.defVal),
+          });
         });
+
+        if (type === 'json') {
+          it('should be able to clear value and have empty object populate', async () => {
+            await (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
+            wrapper.update();
+            expect(handleChange).toBeCalledWith(setting.name, { value: setting.defVal });
+          });
+        }
       });
     } else {
       describe(`for changing ${type} setting`, () => {
@@ -470,76 +444,45 @@ describe('Field', () => {
           // @ts-ignore
           const invalidUserValue = invalidUserValues[type];
           it('should display an error when validation fails', async () => {
-            (component.instance() as Field).onFieldChange(invalidUserValue);
+            await (component.instance() as Field).onFieldChange(invalidUserValue);
+            const expectedUnsavedChanges = {
+              value: invalidUserValue,
+              error: (setting.validation as StringValidation).message,
+              isInvalid: true,
+            };
+            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
+            wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
             const updated = wrapper.update();
             const errorMessage = updated.find('.euiFormErrorText').text();
-            expect(errorMessage).toEqual((setting.validation as StringValidation).message);
+            expect(errorMessage).toEqual(expectedUnsavedChanges.error);
           });
         }
 
-        it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onFieldChange(fieldUserValue);
+        it('should be able to change value', async () => {
+          await (component.instance() as Field).onFieldChange(fieldUserValue);
           const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            (component.instance() as Field).state.unsavedValue ===
-              (component.instance() as Field).state.savedValue
-          ).toBe(true);
-        });
-
-        it('should be able to change value and save', async () => {
-          (component.instance() as Field).onFieldChange(fieldUserValue);
-          const updated = wrapper.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(save).toBeCalled();
-          component.setState({ savedValue: fieldUserValue });
-          await wrapper.setProps({
-            setting: {
-              ...(component.instance() as Field).props.setting,
-              value: userValue,
-            },
-          });
-          wrapper.update();
+          expect(handleChange).toBeCalledWith(setting.name, { value: fieldUserValue });
+          updated.setProps({ unsavedChanges: { value: fieldUserValue } });
+          const currentValue = getFieldSettingValue(updated, setting.name, type);
+          expect(currentValue).toEqual(fieldUserValue);
         });
 
         it('should be able to reset to default value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+            setting: { ...setting, value: fieldUserValue },
+          });
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-          expect(clear).toBeCalled();
+          const expectedEditableValue = getEditableValue(setting.type, setting.defVal);
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: expectedEditableValue,
+          });
+          updated.setProps({ unsavedChanges: { value: expectedEditableValue } });
+          const currentValue = getFieldSettingValue(updated, setting.name, type);
+          expect(currentValue).toEqual(expectedEditableValue);
         });
       });
     }
-  });
-
-  it('should show a reload toast when saving setting requiring a page reload', async () => {
-    const setting = {
-      ...settings.string,
-      requiresPageReload: true,
-    };
-    const toasts = notificationServiceMock.createStartContract().toasts;
-    const wrapper = mountWithI18nProvider(
-      <Field
-        setting={setting}
-        save={save}
-        clear={clear}
-        enableSaving={true}
-        toasts={toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
-      />
-    );
-    (wrapper.instance() as Field).onFieldChange({ target: { value: 'a new value' } });
-    const updated = wrapper.update();
-    findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
-    expect(save).toHaveBeenCalled();
-    await save();
-    expect(toasts.add).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('Please reload the page'),
-      })
-    );
   });
 });

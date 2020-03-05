@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Vis, VisState } from './vis';
-import { VisType } from './types';
+import { Vis, VisState, VisParams } from './vis';
+import { VisType } from './vis_types';
 import { IIndexPattern } from '../../../../../../plugins/data/common';
 
 type InitVisStateType =
@@ -35,6 +35,14 @@ export declare class VisImpl implements Vis {
   constructor(indexPattern: IIndexPattern, visState?: InitVisStateType);
 
   type: VisType;
+  getCurrentState: (
+    includeDisabled?: boolean
+  ) => {
+    title: string;
+    type: string;
+    params: VisParams;
+    aggs: Array<{ [key: string]: any }>;
+  };
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

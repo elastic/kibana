@@ -11,9 +11,10 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
@@ -32,7 +33,7 @@ import {
   getUseField,
   UseField,
   useForm,
-} from '../../../../shared_imports';
+} from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
 
@@ -126,9 +127,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   useEffect(() => {
     if (indicesConfig != null && defaultValues != null) {
       const myDefaultValues = getStepDefaultValue(indicesConfig, defaultValues);
-      if (!isEqual(myDefaultValues, myStepData)) {
+      if (!deepEqual(myDefaultValues, myStepData)) {
         setMyStepData(myDefaultValues);
-        setLocalUseIndicesConfig(isEqual(myDefaultValues.index, indicesConfig));
+        setLocalUseIndicesConfig(deepEqual(myDefaultValues.index, indicesConfig));
         setFieldValue(form, schema, myDefaultValues);
       }
     }
@@ -212,13 +213,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <FormDataProvider pathsToWatch="index">
             {({ index }) => {
               if (index != null) {
-                if (isEqual(index, indicesConfig) && !localUseIndicesConfig) {
+                if (deepEqual(index, indicesConfig) && !localUseIndicesConfig) {
                   setLocalUseIndicesConfig(true);
                 }
-                if (!isEqual(index, indicesConfig) && localUseIndicesConfig) {
+                if (!deepEqual(index, indicesConfig) && localUseIndicesConfig) {
                   setLocalUseIndicesConfig(false);
                 }
-                if (index != null && !isEmpty(index) && !isEqual(index, mylocalIndicesConfig)) {
+                if (index != null && !isEmpty(index) && !deepEqual(index, mylocalIndicesConfig)) {
                   setMyLocalIndicesConfig(index);
                 }
               }

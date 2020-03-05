@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
+import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
 export const waitForElementsToBeInDOM = async (
   browser: HeadlessBrowser,
@@ -16,13 +17,17 @@ export const waitForElementsToBeInDOM = async (
 ): Promise<number> => {
   logger.debug(`waiting for ${itemsCount} rendered elements to be in the DOM`);
 
-  await browser.waitFor({
-    fn: selector => {
-      return document.querySelectorAll(selector).length;
+  await browser.waitFor(
+    {
+      fn: selector => {
+        return document.querySelectorAll(selector).length;
+      },
+      args: [layout.selectors.renderComplete],
+      toEqual: itemsCount,
     },
-    args: [layout.selectors.renderComplete],
-    toEqual: itemsCount,
-  });
+    { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
+    logger
+  );
 
   logger.info(`found ${itemsCount} rendered elements in the DOM`);
   return itemsCount;

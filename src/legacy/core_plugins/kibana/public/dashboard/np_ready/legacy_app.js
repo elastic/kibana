@@ -33,7 +33,7 @@ import {
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { syncQuery } from '../../../../../../plugins/data/public';
+import { syncQueryStateWithUrl } from '../../../../../../plugins/data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -98,7 +98,7 @@ export function initDashboardApp(app, deps) {
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
-          const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(
+          const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
             deps.data.query,
             kbnUrlStateStorage
           );
@@ -132,7 +132,7 @@ export function initDashboardApp(app, deps) {
           $scope.core = deps.core;
 
           $scope.$on('$destroy', () => {
-            stopSyncingGlobalStateWithUrl();
+            stopSyncingQueryServiceStateWithUrl();
           });
         },
         resolve: {

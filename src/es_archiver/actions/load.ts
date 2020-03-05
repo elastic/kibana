@@ -106,7 +106,7 @@ export async function loadAction({
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, log, kibanaPluginIds });
+    await migrateKibanaIndex({ client, kbnClient });
 
     if (kibanaPluginIds.includes('spaces')) {
       await createDefaultSpace({ client, index: '.kibana' });

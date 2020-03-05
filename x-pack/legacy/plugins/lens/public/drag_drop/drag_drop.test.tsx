@@ -14,7 +14,7 @@ jest.useFakeTimers();
 describe('DragDrop', () => {
   test('renders if nothing is being dragged', () => {
     const component = render(
-      <DragDrop value="hello" draggable>
+      <DragDrop value="hello" draggable label="dragging">
         Hello!
       </DragDrop>
     );
@@ -50,7 +50,9 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider dragging={undefined} setDragging={setDragging}>
-        <DragDrop value={value}>Hello!</DragDrop>
+        <DragDrop value={value} draggable={true} label="drag label">
+          Hello!
+        </DragDrop>
       </ChildDragDropProvider>
     );
 
@@ -58,7 +60,7 @@ describe('DragDrop', () => {
 
     jest.runAllTimers();
 
-    expect(dataTransfer.setData).toBeCalledWith('text', 'dragging');
+    expect(dataTransfer.setData).toBeCalledWith('text', 'drag label');
     expect(setDragging).toBeCalledWith(value);
   });
 

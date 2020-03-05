@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../../../../../plugins/apm/common/service_nodes';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
@@ -20,7 +20,7 @@ import { ApmIndices } from '../../Settings/ApmIndices';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 

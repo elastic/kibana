@@ -13,10 +13,20 @@ export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observ
 
 export const EndpointConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+
+  /**
+   * Host Configuration
+   */
   endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
   endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
-  alertResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
+
+  /**
+   * Alert Configuration
+   */
+  alertResultListDefaultDateRange: schema.object({
+    from: schema.string({ defaultValue: 'now-15m' }),
+    to: schema.string({ defaultValue: 'now' }),
+  }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

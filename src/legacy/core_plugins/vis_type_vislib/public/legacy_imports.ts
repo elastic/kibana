@@ -19,10 +19,8 @@
 
 export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-// @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
 // @ts-ignore
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
-export { tabifyGetColumns } from '../../../ui/public/agg_response/tabify/_get_columns';

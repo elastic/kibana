@@ -18,7 +18,7 @@
  */
 
 export function initVisEditorDirective(app, deps) {
-  app.directive('visualizationEditor', function($timeout, getAppState) {
+  app.directive('visualizationEditor', function($timeout) {
     return {
       restrict: 'E',
       scope: {
@@ -27,9 +27,10 @@ export function initVisEditorDirective(app, deps) {
         timeRange: '=',
         filters: '=',
         query: '=',
+        appState: '=',
       },
       link: function($scope, element) {
-        const Editor = $scope.savedObj.vis.type.editor;
+        const Editor = $scope.savedObj.vis.type.editor || deps.DefaultVisualizationEditor;
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
@@ -41,7 +42,8 @@ export function initVisEditorDirective(app, deps) {
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
-            appState: getAppState(),
+            appState: $scope.appState,
+            linked: !!$scope.savedObj.savedSearchId,
           });
         };
 

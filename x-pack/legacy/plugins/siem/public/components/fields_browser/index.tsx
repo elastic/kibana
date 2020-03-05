@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
@@ -124,7 +124,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Pro
      * columns in the timeline, this function dispatches the action that
      * causes the timeline display those columns.
      */
-    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeader[]) => {
+    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
       onUpdateColumns(columns); // show the category columns in the timeline
     }, []);
 

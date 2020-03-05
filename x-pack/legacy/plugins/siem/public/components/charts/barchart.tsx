@@ -8,7 +8,7 @@ import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { useTimeZone } from '../../lib/kibana';
 import { ChartPlaceHolder } from './chart_place_holder';

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runGulpTask('canvas:test:server');
+require('./_helpers').runGulpTask('canvas:test:mocha');

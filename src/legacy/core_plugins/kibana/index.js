@@ -115,7 +115,7 @@ export default function(kibana) {
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,

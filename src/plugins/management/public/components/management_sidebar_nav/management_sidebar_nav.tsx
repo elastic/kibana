@@ -168,8 +168,7 @@ export class ManagementSidebarNav extends React.Component<
         <EuiScreenReaderOnly>
           <h2 id={HEADER_ID}>
             {i18n.translate('management.nav.label', {
-              // todo
-              defaultMessage: 'Stack Management',
+              defaultMessage: 'Management',
             })}
           </h2>
         </EuiScreenReaderOnly>
