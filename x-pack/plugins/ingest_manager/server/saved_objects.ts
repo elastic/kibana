@@ -108,18 +108,12 @@ export const savedObjectMappings = {
   [DATASOURCE_SAVED_OBJECT_TYPE]: {
     properties: {
       name: { type: 'keyword' },
+      description: { type: 'text' },
       namespace: { type: 'keyword' },
       config_id: { type: 'keyword' },
       enabled: { type: 'boolean' },
       package: {
         properties: {
-          assets: {
-            properties: {
-              id: { type: 'keyword' },
-              type: { type: 'keyword' },
-            },
-          },
-          description: { type: 'keyword' },
           name: { type: 'keyword' },
           title: { type: 'keyword' },
           version: { type: 'keyword' },
