@@ -46,7 +46,8 @@ const prokStatsTimeStampBuildId = pipe(
   buildId,
   addPrePopulatedTimeStamp,
 );
-const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase, 'live_cc_app'));
+const addTestRunnerAndStaticSiteUrl =
+  pipe(testRunner, staticSite(staticSiteUrlBase, 'live_cc_app'));
 
 
 export default ({ jsonSummaryPath }, log) => {

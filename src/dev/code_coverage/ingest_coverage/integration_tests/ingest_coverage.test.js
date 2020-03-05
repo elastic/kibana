@@ -75,6 +75,11 @@ describe('Ingesting Coverage to Cluster', () => {
     F(siteUrlsSplitByNewLineWithoutBlanks(chunks)
       .forEach(expectAllRegexesToPass(regexes))));
 
+  describe(`to a 'totals' index`, () => {
+    it(`should have a link to the index page for the specific test runner`, () => {
+      throw new Error('NOT IMPLEMENTED Yet')
+    });
+  });
   describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
     const combinedMsg = 'combined';
 
