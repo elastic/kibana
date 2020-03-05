@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,44 +32,54 @@ function RawJsonParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  const [isFormValid, setFormValidity] = useState(true);
+  const [isFieldValid, setFieldValidity] = useState(true);
   const [editorReady, setEditorReady] = useState(false);
 
-  const editorTooltipText = i18n.translate('visDefaultEditor.controls.jsonInputTooltip', {
-    defaultMessage:
-      "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
-  });
-
-  const jsonEditorLabelText = i18n.translate('visDefaultEditor.controls.jsonInputLabel', {
-    defaultMessage: 'JSON input',
-  });
-
-  const label = (
-    <>
-      {jsonEditorLabelText}{' '}
-      <EuiIconTip position="right" content={editorTooltipText} type="questionInCircle" />
-    </>
+  const editorTooltipText = useMemo(
+    () =>
+      i18n.translate('visDefaultEditor.controls.jsonInputTooltip', {
+        defaultMessage:
+          "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
+      }),
+    []
   );
 
-  const onChange = (newValue: string) => {
-    setValue(newValue);
-  };
+  const jsonEditorLabelText = useMemo(
+    () =>
+      i18n.translate('visDefaultEditor.controls.jsonInputLabel', {
+        defaultMessage: 'JSON input',
+      }),
+    []
+  );
 
-  const onEditorValidate = (annotations: unknown[]) => {
-    // The first onValidate returned from EuiCodeEditor is a false positive
-    if (editorReady) {
-      const validity = annotations.length === 0;
-      setFormValidity(validity);
-      setValidity(validity);
-    } else {
-      setEditorReady(true);
-    }
-  };
+  const label = useMemo(
+    () => (
+      <>
+        {jsonEditorLabelText}{' '}
+        <EuiIconTip position="right" content={editorTooltipText} type="questionInCircle" />
+      </>
+    ),
+    []
+  );
+
+  const onEditorValidate = useCallback(
+    (annotations: unknown[]) => {
+      // The first onValidate returned from EuiCodeEditor is a false negative
+      if (editorReady) {
+        const validity = annotations.length === 0;
+        setFieldValidity(validity);
+        setValidity(validity);
+      } else {
+        setEditorReady(true);
+      }
+    },
+    [setValidity]
+  );
 
   return (
     <EuiFormRow
       label={label}
-      isInvalid={showValidation ? !isFormValid : false}
+      isInvalid={showValidation ? !isFieldValid : false}
       fullWidth={true}
       compressed
     >
@@ -85,7 +95,7 @@ function RawJsonParamEditor({
           setOptions={{
             fontSize: '14px',
           }}
-          onChange={onChange}
+          onChange={setValue}
           fullWidth={true}
           onBlur={setTouched}
           aria-label={jsonEditorLabelText}
