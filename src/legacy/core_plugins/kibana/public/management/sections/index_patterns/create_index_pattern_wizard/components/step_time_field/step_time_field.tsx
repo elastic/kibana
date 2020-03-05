@@ -41,7 +41,7 @@ interface StepTimeFieldProps {
   indexPattern: string;
   indexPatternsService: DataPublicPluginStart['indexPatterns'];
   goToPreviousStep: () => void;
-  createIndexPattern: (selectedTimeField: string, indexPatternId: string) => void;
+  createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
 }
 
@@ -143,7 +143,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     const { selectedTimeField, indexPatternId } = this.state;
     this.setState({ isCreating: true });
     try {
-      await createIndexPattern(selectedTimeField || '', indexPatternId);
+      await createIndexPattern(selectedTimeField, indexPatternId);
     } catch (error) {
       if (!this.mounted) return;
       this.setState({
