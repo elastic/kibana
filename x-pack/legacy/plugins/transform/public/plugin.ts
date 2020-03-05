@@ -27,7 +27,7 @@ export class Plugin {
       savedObjects,
       overlays,
     } = core;
-    const { data, management, savedSearches: coreSavedSearches, uiMetric, xsrfToken } = plugins;
+    const { data, management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const appDependencies = {
@@ -47,7 +47,6 @@ export class Plugin {
         data,
         management,
         savedSearches: coreSavedSearches,
-        xsrfToken,
       },
     };
 

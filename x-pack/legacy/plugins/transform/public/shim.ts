@@ -6,7 +6,6 @@
 
 import { npStart } from 'ui/new_platform';
 
-import chrome from 'ui/chrome';
 import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
@@ -33,7 +32,7 @@ export type AppCore = Pick<
   | 'overlays'
   | 'notifications'
 >;
-export type AppPlugins = Pick<ShimPlugins, 'data' | 'management' | 'savedSearches' | 'xsrfToken'>;
+export type AppPlugins = Pick<ShimPlugins, 'data' | 'management' | 'savedSearches'>;
 
 export interface AppDependencies {
   core: AppCore;
@@ -65,7 +64,6 @@ export interface ShimPlugins extends NpPlugins {
     getClient(): any;
     setClient(client: any): void;
   };
-  xsrfToken: string;
 }
 
 export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
@@ -103,7 +101,6 @@ export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
       uiMetric: {
         createUiStatsReporter,
       },
-      xsrfToken: chrome.getXsrfToken(),
     },
   };
 }
