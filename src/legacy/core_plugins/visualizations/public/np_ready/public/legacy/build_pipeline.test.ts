@@ -27,8 +27,7 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis } from '..';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { searchSourceMock } from '../../../../../../../plugins/data/public/search/search_source/mocks';
+import { searchSourceMock, dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
 import { IAggConfig } from '../../../../../data/public';
 
 jest.mock('ui/new_platform');
@@ -344,6 +343,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipeline', () => {
+    const dataStart = dataPluginMock.createStartContract();
+
     it('calls toExpression on vis_type if it exists', async () => {
       const vis = ({
         getCurrentState: () => {},
@@ -357,12 +358,17 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           toExpression: () => 'testing custom expressions',
         },
       } as unknown) as Vis;
-      const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
+      const expression = await buildPipeline(vis, {
+        searchSource: searchSourceMock,
+        timefilter: dataStart.query.timefilter.timefilter,
+      });
       expect(expression).toMatchSnapshot();
     });
   });
 
   describe('buildVislibDimensions', () => {
+    const dataStart = dataPluginMock.createStartContract();
+
     let aggs: IAggConfig[];
     let visState: any;
     let vis: Vis;
@@ -386,11 +392,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       params = {
         searchSource: null,
+        timefilter: dataStart.query.timefilter.timefilter,
         timeRange: null,
       };
     });
-
-    // todo: cover basic buildVislibDimensions's functionalities
 
     describe('test y dimension format for histogram chart', () => {
       beforeEach(() => {

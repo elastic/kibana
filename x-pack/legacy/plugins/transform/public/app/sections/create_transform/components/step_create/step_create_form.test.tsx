@@ -4,25 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
 import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
 
 import { StepCreateForm } from './step_create_form';
 
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
-
 jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
+    // Arrange
     const props = {
       createIndexPattern: false,
       transformId: 'the-transform-id',
@@ -32,12 +28,14 @@ describe('Transform: <StepCreateForm />', () => {
     };
 
     const Providers = getAppProviders(createPublicShim());
-    const wrapper = shallow(
+    const { getByText } = render(
       <Providers>
         <StepCreateForm {...props} />
       </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByText('Create and start')).toBeInTheDocument();
   });
 });
