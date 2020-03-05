@@ -74,6 +74,20 @@ async function attemptToCreateCommand(
 
   const buildDriverInstance = async () => {
     switch (browserType) {
+      case 'edge': {
+        const session = new Builder()
+          .withCapabilities({
+            browserName: 'MicrosoftEdge',
+            'ms:edgeChromium': true,
+          })
+          .build();
+
+        return {
+          session,
+          consoleLog$: Rx.EMPTY,
+        };
+      }
+
       case 'chrome': {
         const chromeCapabilities = Capabilities.chrome();
         const chromeOptions = [

@@ -473,7 +473,7 @@
     "react-textarea-autosize": "^7.1.2",
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
-    "selenium-webdriver": "^4.0.0-alpha.5",
+    "selenium-webdriver": "^4.0.0-alpha.7",
     "simple-git": "1.116.0",
     "simplebar-react": "^2.1.0",
     "sinon": "^7.4.2",
