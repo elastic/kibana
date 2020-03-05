@@ -74,7 +74,7 @@ export class PulseService {
     setInterval(() => {
       // eslint-disable-next-line no-console
       this.loadInstructions().catch(err => console.error(err.stack));
-    }, 10000);
+    }, 3000);
 
     if (sendUsageFrom === 'browser') {
       // eslint-disable-next-line no-console

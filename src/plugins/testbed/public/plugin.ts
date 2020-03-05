@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
 
 interface ConfigType {
   uiProp: string;
@@ -28,6 +28,15 @@ export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginSt
 
   public async setup(core: CoreSetup, deps: {}) {
     const config = this.initializerContext.config.get<ConfigType>();
+
+    core.application.register({
+      id: 'testbed',
+      title: 'This is a big red button!',
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./app');
+        return renderApp(params);
+      },
+    });
 
     // eslint-disable-next-line no-console
     console.log(`Testbed plugin set up. uiProp: '${config.uiProp}'`);

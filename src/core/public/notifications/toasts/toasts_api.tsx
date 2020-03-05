@@ -237,6 +237,7 @@ export class ToastsApi implements IToasts {
           title={options.title}
           toastMessage={message + fixedVersionMsg}
           i18nContext={() => this.i18n!.Context}
+          fixedVersion={fixedVersionMsg}
         />
       ),
     });

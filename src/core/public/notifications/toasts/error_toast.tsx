@@ -41,6 +41,7 @@ interface ErrorToastProps {
   toastMessage: string;
   openModal: OverlayStart['openModal'];
   i18nContext: () => I18nStart['Context'];
+  fixedVersion?: string;
 }
 
 /**
@@ -54,7 +55,8 @@ function showErrorDialog({
   error,
   openModal,
   i18nContext,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
+  fixedVersion,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext' | 'fixedVersion'>) {
   const I18nContext = i18nContext();
   const modal = openModal(
     mount(
@@ -65,6 +67,14 @@ function showErrorDialog({
           </EuiModalHeader>
           <EuiModalBody>
             <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            {fixedVersion ? (
+              <EuiCallOut
+                size="s"
+                color="primary"
+                iconType="alert"
+                title={`It's fixed in version ${fixedVersion}`}
+              />
+            ) : null}
             {error.stack && (
               <React.Fragment>
                 <EuiSpacer size="s" />

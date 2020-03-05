@@ -29,7 +29,7 @@ import { PulseErrorPayloadRecord } from 'src/core/server/pulse/collectors/errors
  * 3. You should see a toast notification with "... has been reported to Pulse."
  * 4. Run the following request in the Dev Console
 PUT pulse-poc-raw-errors/_bulk
-{"update":{"_id":"[xpack][plugins][pulse] This super weird error happened"}}
+{"update":{"_id":"You pressed the button"}}
 {"doc":{"fixedVersion":"7.6.2"}}
  * 5. Make the error happen again (call window.throwErrors() again)
  * 6. You should see a new toast notification but this time with "... This error has been fixed in version 7.6.2"
@@ -39,8 +39,8 @@ export const errorChannelPayloads: () => PulseErrorPayloadRecord[] = () => [
   {
     channel_id: 'errors',
     deployment_id: '123',
-    message: 'This super weird error happened',
-    hash: '[xpack][plugins][pulse] This super weird error happened',
+    message: 'You pressed the button! Something went terribly wrong!',
+    hash: 'You pressed the button',
     status: 'new',
     currentKibanaVersion: 'v7.x',
     timestamp: moment().toDate(),

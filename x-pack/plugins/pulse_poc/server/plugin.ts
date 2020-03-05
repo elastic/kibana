@@ -103,21 +103,22 @@ export class PulsePocPlugin {
         const { channels } = request.body;
         const es = context.core.elasticsearch.adminClient;
 
-        for (const channel of channels) {
-          const index = PulsePocPlugin.getIndexName(channel.channel_id);
-
-          for (const record of channel.records) {
-            await es.callAsInternalUser('index', {
-              index,
-              id: (record as any).hash,
-              body: {
-                ...record,
-                timestamp: new Date(),
-                channel_id: channel.channel_id,
-                deployment_id: deploymentId,
+        const body = channels.reduce((acc, { channel_id, records }) => {
+          return records.reduce(
+            (acc2, record) => [
+              ...acc2,
+              { update: { _index: PulsePocPlugin.getIndexName(channel_id), _id: record.hash } },
+              {
+                doc: { ...record, timestamp: new Date(), channel_id, deployment_id: deploymentId },
+                doc_as_upsert: true,
               },
-            });
-          }
+            ],
+            acc
+          );
+        }, [] as object[]);
+
+        if (body.length > 0) {
+          await es.callAsInternalUser('bulk', { body });
         }
 
         return response.ok();

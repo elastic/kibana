@@ -153,10 +153,7 @@ export const NewsfeedNavButton = ({
     }
     const subscription = errorsInstructions$.subscribe(instructions => {
       if (instructions && instructions.length) {
-        const newInstructions = instructions.filter(
-          instruction =>
-            instruction.fixedVersion && instruction.status === 'new' && !instructions.seenOn
-        );
+        const newInstructions = instructions.filter(instruction => instruction.fixedVersion);
         handleErrorsInstructionsChange(newInstructions);
       }
     });

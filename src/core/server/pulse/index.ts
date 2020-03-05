@@ -106,11 +106,7 @@ export class PulseService {
     if (sendUsageFrom === 'server') {
       this.log.debug('Will attempt first telemetry collection in 5 seconds...');
 
-      setTimeout(() => {
-        setInterval(() => {
-          this.sendTelemetry().catch(err => this.log.error(err.stack));
-        }, 5000);
-      }, 5000);
+      this.scheduleTelemetry(5000);
     }
 
     return {
@@ -127,6 +123,18 @@ export class PulseService {
   public async stop() {
     this.channels.forEach(channel => channel.stop());
     // TODO: Stop Instructions and SendTelemetry timers
+  }
+
+  private scheduleTelemetry(time: number) {
+    setTimeout(async () => {
+      try {
+        await this.sendTelemetry();
+      } catch (err) {
+        this.log.error(err.stack);
+      } finally {
+        this.scheduleTelemetry(1000);
+      }
+    }, time);
   }
 
   private async loadInstructions() {

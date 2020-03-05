@@ -141,7 +141,7 @@ export class Collector extends PulseCollector<Payload> {
           filter: {
             range: {
               timestamp: {
-                gte: 'now-20s',
+                gte: 'now-2s',
                 lte: 'now',
               },
             },
