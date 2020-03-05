@@ -180,5 +180,21 @@ describe('filter manager utilities', () => {
 
       expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeTruthy();
     });
+
+    test('should compare alias with COMPARE_ALL_OPTIONS', () => {
+      const f1 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+      const f2 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+
+      f2.meta.alias = 'wassup';
+      f2.meta.alias = 'dog';
+
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
+    });
   });
 });

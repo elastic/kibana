@@ -58,7 +58,7 @@ describe('usersManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Users' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Users Page: {"notifications":{"toasts":{}},"apiClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}}}
+        Users Page: {"notifications":{"toasts":{}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}}}
       </div>
     `);
 
@@ -80,7 +80,7 @@ describe('usersManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}}}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}}}
       </div>
     `);
 
@@ -103,7 +103,7 @@ describe('usersManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName"}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName"}
       </div>
     `);
 
