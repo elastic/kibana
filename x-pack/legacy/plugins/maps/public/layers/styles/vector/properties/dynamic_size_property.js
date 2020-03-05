@@ -6,7 +6,6 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression } from '../style_util';
-
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
@@ -44,8 +43,8 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
-    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+  constructor(options, styleName, field, vectorLayer, getFieldFormatter, isSymbolizedAsIcon) {
+    super(options, styleName, field, vectorLayer, getFieldFormatter);
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 

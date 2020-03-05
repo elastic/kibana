@@ -44,7 +44,6 @@ export {
   IFieldParamType,
   IMetricAggType,
   IpRangeKey, // only used in field formatter deserialization, which will live in data
-  ISchemas,
   OptionedParamEditorProps, // only type is used externally
   OptionedValueProp, // only type is used externally
 } from './search/types';
@@ -75,8 +74,6 @@ export {
   OptionedParamType,
   parentPipelineType,
   propFilter,
-  Schema,
-  Schemas,
   siblingPipelineType,
   termsAggFilter,
   toAbsoluteDates,

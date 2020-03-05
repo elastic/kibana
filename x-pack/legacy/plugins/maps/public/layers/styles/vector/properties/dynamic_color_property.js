@@ -183,7 +183,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       };
     }
 
-    const fieldMeta = this.getFieldMeta();
+    const fieldMeta = this.getCategoryFieldMeta();
     if (!fieldMeta || !fieldMeta.categories) {
       return EMPTY_STOPS;
     }
