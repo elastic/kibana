@@ -63,6 +63,9 @@ describe('defaultSearchStrategy', function() {
         ],
         esShardTimeout: 0,
         searchService: {
+          aggs: {
+            calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
+          },
           search: newSearchMock,
           __LEGACY: {
             esClient: {

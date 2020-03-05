@@ -67,7 +67,6 @@ export {
   convertIPRangeToString,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
-  setBounds,
   isStringType,
   isType,
   isValidInterval,
@@ -80,6 +79,7 @@ export {
   Schemas,
   siblingPipelineType,
   termsAggFilter,
+  toAbsoluteDates,
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,
