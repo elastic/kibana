@@ -99,7 +99,7 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
           <EuiLink
             href={field.details.visualizeUrl}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
-            data-test-subj="fieldVisualize-{{::field.name}}"
+            data-test-subj={`fieldVisualize-${field.name}`}
           >
             <FormattedMessage
               id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
