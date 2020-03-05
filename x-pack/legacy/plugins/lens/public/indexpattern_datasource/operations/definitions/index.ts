@@ -15,6 +15,7 @@ import { DimensionPriority, StateSetter, OperationMetadata } from '../../../type
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 import { DateRange } from '../../../../../../../plugins/lens/common';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and
@@ -49,6 +50,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   dateRange: DateRange;
+  data: DataPublicPluginStart;
 }
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
