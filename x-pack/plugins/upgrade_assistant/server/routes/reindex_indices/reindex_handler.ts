@@ -8,7 +8,7 @@ import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { ReindexOptions, ReindexStatus } from '../../../common/types';
+import { ReindexOperation, ReindexOptions, ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../../lib/reindexing';
@@ -35,7 +35,7 @@ export const reindexHandler = async ({
   log,
   savedObjects,
   enqueue,
-}: ReindexHandlerArgs) => {
+}: ReindexHandlerArgs): ReindexOperation => {
   const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);

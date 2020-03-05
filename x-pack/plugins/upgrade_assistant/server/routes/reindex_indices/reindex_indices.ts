@@ -5,33 +5,35 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  Logger,
   ElasticsearchServiceSetup,
-  SavedObjectsClient,
   kibanaResponseFactory,
+  Logger,
+  SavedObjectsClient,
 } from '../../../../../../src/core/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { ReindexOperation } from '../../../common/types';
+import { ReindexStatus } from '../../../common/types';
 
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
+import { sortAndOrderReindexOperations } from '../../lib/reindexing/op_utils';
 import { ReindexError } from '../../lib/reindexing/error';
 import { RouteDependencies } from '../../types';
 import {
   AccessForbidden,
-  IndexNotFound,
   CannotCreateIndex,
+  IndexNotFound,
+  MultipleReindexJobsFound,
   ReindexAlreadyInProgress,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
-  MultipleReindexJobsFound,
 } from '../../lib/reindexing/error_symbols';
 
 import { reindexHandler } from './reindex_handler';
+import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
 interface CreateReindexWorker {
   logger: Logger;
@@ -39,11 +41,6 @@ interface CreateReindexWorker {
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
-}
-
-interface BatchResponse {
-  enqueued: ReindexOperation[];
-  errors: Array<{ indexName: string; message: string }>;
 }
 
 export function createReindexWorker({
@@ -132,6 +129,41 @@ export function registerReindexIndicesRoutes(
     )
   );
 
+  // Get the current batch queue
+  router.get(
+    {
+      path: `${BASE_PATH}/batch/queue`,
+      validate: {},
+    },
+    async (
+      {
+        core: {
+          elasticsearch: { dataClient },
+          savedObjects,
+        },
+      },
+      request,
+      response
+    ) => {
+      const { client } = savedObjects;
+      const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+      const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+      try {
+        const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
+        const { queue } = sortAndOrderReindexOperations(inProgressOps);
+        const result: GetBatchQueueResponse = {
+          queue: queue.map(savedObject => savedObject.attributes),
+        };
+        return response.ok({
+          body: result,
+        });
+      } catch (e) {
+        return mapAnyErrorToKibanaHttpResponse(e);
+      }
+    }
+  );
+
+  // Add indices for reindexing to the worker's batch
   router.post(
     {
       path: `${BASE_PATH}/batch`,
@@ -153,7 +185,7 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { indexNames } = request.body;
-        const results: BatchResponse = {
+        const results: PostBatchResponse = {
           enqueued: [],
           errors: [],
         };

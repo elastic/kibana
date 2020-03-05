@@ -32,18 +32,6 @@ export default function({ getService }) {
     return lastState;
   };
 
-  const assertInProgress = async indexName => {
-    const lastState = (
-      await supertest.get(`/api/upgrade_assistant/reindex/${indexName}`).expect(200)
-    ).body.reindexOp;
-
-    if (lastState.status !== ReindexStatus.inProgress) {
-      throw new Error(
-        `${indexName} status ${lastState.status}, expected ${ReindexStatus.inProgress}`
-      );
-    }
-  };
-
   describe('reindexing', () => {
     afterEach(() => {
       // Cleanup saved objects
@@ -148,7 +136,26 @@ export default function({ getService }) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
-    it('should reindex a batch in order', async () => {
+    it('should reindex a batch in order and report queue state', async () => {
+      const assertQueueState = async (firstInQueueIndexName, queueLength) => {
+        const response = await supertest
+          .get(`/api/upgrade_assistant/reindex/batch/queue`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const { queue } = response.body;
+
+        const [firstInQueue] = queue;
+
+        if (!firstInQueueIndexName) {
+          expect(firstInQueueIndexName).to.be(undefined);
+        } else {
+          expect(firstInQueue.indexName).to.be(firstInQueueIndexName);
+        }
+
+        expect(queue.length).to.be(queueLength);
+      };
+
       const test1 = 'batch-reindex-test1';
       const test2 = 'batch-reindex-test2';
       const test3 = 'batch-reindex-test3';
@@ -166,6 +173,7 @@ export default function({ getService }) {
       };
 
       try {
+        // Set up indices for the batch
         await es.indices.create({ index: test1 });
         await es.indices.create({ index: test2 });
         await es.indices.create({ index: test3 });
@@ -179,14 +187,16 @@ export default function({ getService }) {
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
 
-        await assertInProgress(test1);
+        await assertQueueState(test1, 3);
         await waitForReindexToComplete(test1);
 
-        await assertInProgress(test2);
+        await assertQueueState(test2, 2);
         await waitForReindexToComplete(test2);
 
-        await assertInProgress(test3);
+        await assertQueueState(test3, 1);
         await waitForReindexToComplete(test3);
+
+        await assertQueueState(undefined, 0);
       } finally {
         await cleanupReindex(test1);
         await cleanupReindex(test2);
