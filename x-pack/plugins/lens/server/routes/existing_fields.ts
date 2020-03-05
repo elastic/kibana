@@ -92,7 +92,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
-  dslQuery,
+  dslQuery = JSON.stringify({ match_all: {} }),
   fromDate,
   toDate,
   timeFieldName,
