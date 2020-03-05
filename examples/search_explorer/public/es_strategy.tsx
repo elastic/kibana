@@ -34,8 +34,6 @@ import { DoSearch } from './do_search';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
-import serverPlugin from '!!raw-loader!./../../../src/plugins/data/server/search/es_search/es_search_service';
-// @ts-ignore
 import serverStrategy from '!!raw-loader!./../../../src/plugins/data/server/search/es_search/es_search_strategy';
 
 // @ts-ignore
@@ -127,10 +125,7 @@ export class EsSearchTest extends React.Component<Props, State> {
             },
             {
               title: 'Server',
-              code: [
-                { description: 'es_search_service.ts', snippet: serverPlugin },
-                { description: 'es_search_strategy.ts', snippet: serverStrategy },
-              ],
+              code: [{ description: 'es_search_strategy.ts', snippet: serverStrategy }],
             },
           ]}
           demo={this.renderDemo()}
