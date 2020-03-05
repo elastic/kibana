@@ -125,7 +125,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             visState: resp.body.saved_objects[0].attributes.visState,
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
-            visible: resp.body.saved_objects[0].attributes[0],
+            visible: resp.body.saved_objects[0].attributes.visible,
           },
           references: [
             {

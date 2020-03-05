@@ -133,6 +133,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           const inputs = await form.findAllByCssSelector('input');
           expect(inputs.length).to.be.greaterThan(0);
           for (const input of inputs) {
+            const type = await input.getAttribute('type');
+            if (type === 'checkbox') continue; // checkbox is for visible property only and should not be editable
             const isEnabled = await input.isEnabled();
             expect(isEnabled).to.be(true);
           }

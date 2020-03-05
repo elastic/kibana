@@ -110,6 +110,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         visState: resp.body.attributes.visState,
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
+        visible: resp.body.attributes.visible,
       },
       references: [
         {
