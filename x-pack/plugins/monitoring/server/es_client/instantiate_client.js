@@ -27,7 +27,7 @@ export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) 
 }
 
 export function hasMonitoringCluster(config) {
-  return Boolean(config.hosts && config.hosts.length);
+  return Boolean(config.hosts && config.hosts[0]);
 }
 
 export const instantiateClient = once(exposeClient);
