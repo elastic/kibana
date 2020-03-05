@@ -33,8 +33,7 @@
 // NAVIGATION
 //
 
-.visEditorSidebar__indexPattern {
-  @include euiTextTruncate;
+.visEditorSidebar__titleContainer {
   padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
 }
 
@@ -43,7 +42,8 @@
   border-bottom: $euiBorderThin;
 }
 
-.visEditorSidebar__nav {
+.visEditorSidebar__nav,
+.visEditorSidebar__linkedSearch {
   flex-grow: 0;
 }
 

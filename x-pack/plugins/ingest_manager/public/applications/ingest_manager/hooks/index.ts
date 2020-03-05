@@ -12,3 +12,4 @@ export { usePagination, Pagination } from './use_pagination';
 export { useDebounce } from './use_debounce';
 export * from './use_request';
 export * from './use_input';
+export * from './use_url_params';

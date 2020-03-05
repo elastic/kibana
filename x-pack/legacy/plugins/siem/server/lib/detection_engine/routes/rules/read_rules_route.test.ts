@@ -4,105 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
-import { omit } from 'lodash/fp';
-
-import * as utils from './utils';
-import * as readRules from '../../rules/read_rules';
-
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { readRulesRoute } from './read_rules_route';
 import {
-  getFindResult,
-  getResult,
+  getEmptyFindResult,
   getReadRequest,
   getFindResultWithSingleHit,
-  getFindResultStatus,
+  nonRuleFindResult,
+  getFindResultStatusEmpty,
 } from '../__mocks__/request_responses';
-import { createMockServer, clientsServiceMock } from '../__mocks__';
+import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
 describe('read_signals', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    getClients.mockResolvedValue(clients);
-    readRulesRoute(server.route, getClients);
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
+
+    readRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getReadRequest());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
-      readRulesRoute(route, getClients);
-      const { statusCode } = await inject(getReadRequest());
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('returns error if readRules returns null', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      jest.spyOn(readRules, 'readRules').mockResolvedValue(null);
-      const { payload, statusCode } = await server.inject(getReadRequest());
-      expect(JSON.parse(payload).message).toBe('rule_id: "rule-1" not found');
-      expect(statusCode).toBe(404);
+    test('returns error if requesting a non-rule', async () => {
+      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: 'rule_id: "rule-1" not found',
+        status_code: 404,
+      });
     });
 
-    test('returns 500 when transform fails', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      jest.spyOn(utils, 'transform').mockReturnValue(null);
-      const { payload, statusCode } = await server.inject(getReadRequest());
-      expect(JSON.parse(payload).message).toBe('Internal error transforming');
-      expect(statusCode).toBe(500);
-    });
-
-    test('catches error if readRules throws error', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
+    test('catches error if search throws error', async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const { payload, statusCode } = await server.inject(getReadRequest());
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if given a non-existent id', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.delete.mockResolvedValue({});
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: DETECTION_ENGINE_RULES_URL,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+  describe('data validation', () => {
+    test('returns 404 if given a non-existent id', async () => {
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL,
+        query: { rule_id: 'DNE_RULE' },
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', status_code: 404 });
     });
   });
 });

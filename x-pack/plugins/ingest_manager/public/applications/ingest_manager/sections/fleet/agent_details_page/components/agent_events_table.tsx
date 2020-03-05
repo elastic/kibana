@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { Agent, AgentEvent } from '../../../../types';
 import { usePagination, useGetOneAgentEvents } from '../../../../hooks';
-import { SearchBar } from '../../components/search_bar';
+import { SearchBar } from '../../../../components/search_bar';
 
 function useSearch() {
   const [state, setState] = useState<{ search: string }>({

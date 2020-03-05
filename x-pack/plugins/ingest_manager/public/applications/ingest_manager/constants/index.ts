@@ -11,5 +11,6 @@ export const EPM_DETAIL_VIEW_PATH = `${EPM_PATH}/detail/:pkgkey/:panel?`;
 export const AGENT_CONFIG_PATH = '/configs';
 export const AGENT_CONFIG_DETAILS_PATH = `${AGENT_CONFIG_PATH}/`;
 export const FLEET_PATH = '/fleet';
+export const FLEET_AGENTS_PATH = `${FLEET_PATH}/agents`;
 
 export const INDEX_NAME = '.kibana';

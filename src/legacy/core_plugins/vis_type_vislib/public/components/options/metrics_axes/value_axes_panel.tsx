@@ -78,7 +78,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
         />
       </EuiToolTip>
     ),
-    [removeValueAxis]
+    [removeValueAxis, removeButtonTooltip]
   );
 
   const addButtonTooltip = useMemo(

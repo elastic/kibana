@@ -24,6 +24,7 @@ export interface FilterCompareOptions {
   disabled?: boolean;
   negate?: boolean;
   state?: boolean;
+  alias?: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   disabled: true,
   negate: true,
   state: true,
+  alias: true,
 };
 
 const mapFilter = (
@@ -44,6 +46,7 @@ const mapFilter = (
 
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
   if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
+  if (comparators.disabled) cleaned.alias = filter.meta?.alias;
 
   return cleaned;
 };
@@ -79,6 +82,7 @@ export const compareFilters = (
     state: false,
     negate: false,
     disabled: false,
+    alias: false,
   });
 
   if (!comparators.state) excludedAttributes.push('$state');
