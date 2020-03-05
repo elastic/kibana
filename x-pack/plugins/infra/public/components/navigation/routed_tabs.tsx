@@ -26,7 +26,7 @@ export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
       {tabs.map(tab => {
-        return <Tab {...tab} />;
+        return <Tab key={`${tab.path}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>
   );
