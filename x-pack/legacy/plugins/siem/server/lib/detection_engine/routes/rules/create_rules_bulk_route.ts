@@ -4,48 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import uuid from 'uuid';
 
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { GetScopedClients } from '../../../../services';
-import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
-import { BulkRulesRequest } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
-import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
+import {
+  transformBulkError,
+  createBulkErrorObject,
+  buildRouteValidation,
+  buildSiemResponse,
+} from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
-export const createCreateRulesBulkRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    options: {
-      tags: ['access:siem'],
+export const createRulesBulkRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: createRulesBulkSchema,
+        body: buildRouteValidation<RuleAlertParamsRest[]>(createRulesBulkSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: BulkRulesRequest, headers) {
-      const { actionsClient, alertsClient, clusterClient, spacesClient } = await getClients(
-        request
-      );
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const actionsClient = context.actions.getActionsClient();
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
-      const ruleDefinitions = request.payload;
+      const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
       const rules = await Promise.all(
@@ -81,7 +81,7 @@ export const createCreateRulesBulkRoute = (
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
-              const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+              const finalIndex = outputIndex ?? siemClient.signalsIndex;
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
@@ -148,23 +148,10 @@ export const createCreateRulesBulkRoute = (
       ];
       const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
       if (errors != null) {
-        return headers
-          .response({
-            message: errors,
-            status_code: 500,
-          })
-          .code(500);
+        return siemResponse.error({ statusCode: 500, body: errors });
       } else {
-        return validated;
+        return response.ok({ body: validated ?? {} });
       }
-    },
-  };
-};
-
-export const createRulesBulkRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createCreateRulesBulkRoute(config, getClients));
+    }
+  );
 };

@@ -4,93 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
-import { getFindResultStatus } from '../__mocks__/request_responses';
-import { createMockServer } from '../__mocks__';
-import { clientsServiceMock } from '../__mocks__/clients_service_mock';
-
-import { findRulesStatusesRoute } from './find_rules_status_route';
-import { ServerInjectOptions } from 'hapi';
-
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
+import { serverMock, requestContextMock, requestMock } from '../__mocks__';
+import { findRulesStatusesRoute } from './find_rules_status_route';
 
 describe('find_statuses', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
 
-    getClients.mockResolvedValue(clients);
-
-    findRulesStatusesRoute(server.route, getClients);
+    findRulesStatusesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when finding a single rule status with a valid alertsClient', async () => {
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find_statuses?ids=["someid"]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+      const response = await server.inject(ruleStatusRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find_statuses?ids=["someid"]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(ruleStatusRequest(), context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('catch error when savedObjectsClient find function throws error', async () => {
+    test('catch error when status search throws error', async () => {
       clients.savedObjectsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find_statuses?ids=["someid"]`,
-      };
-      const { payload, statusCode } = await server.inject(request);
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(ruleStatusRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if id is given instead of ids', async () => {
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find_statuses?id=["someid"]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
-    });
+  describe('request validation', () => {
+    test('disallows singular id query param', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+        query: { id: ['someId'] },
+      });
+      const result = server.validate(request);
 
-    test('returns 200 if the set of optional query parameters are given', async () => {
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find_statuses?ids=["someid"]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+      expect(result.badRequest).toHaveBeenCalledWith('"id" is not allowed');
     });
   });
 });

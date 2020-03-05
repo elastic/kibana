@@ -9,7 +9,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
-import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
+import { UptimeRefreshContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
@@ -46,20 +46,12 @@ export const MonitorPageComponent: React.FC<Props> = ({
   }, [dispatchGetMonitorStatus, monitorId]);
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { colors } = useContext(UptimeThemeContext);
   const { refreshApp } = useContext(UptimeRefreshContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
-  const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
+  const { selectedPingStatus } = params;
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
-
-  const sharedVariables = {
-    dateRangeStart,
-    dateRangeEnd,
-    location: selectedLocation,
-    monitorId,
-  };
 
   useUptimeTelemetry(UptimePage.Monitor);
 
@@ -74,7 +66,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
+      <MonitorCharts monitorId={monitorId} />
       <EuiSpacer size="s" />
       <PingList
         onPageCountChange={setPingListPageCount}

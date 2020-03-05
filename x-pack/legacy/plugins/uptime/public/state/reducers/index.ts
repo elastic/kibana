@@ -13,6 +13,7 @@ import { monitorStatusReducer } from './monitor_status';
 import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
 import { pingListReducer } from './ping_list';
+import { monitorDurationReducer } from './monitor_duration';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -23,4 +24,5 @@ export const rootReducer = combineReducers({
   indexPattern: indexPatternReducer,
   ping: pingReducer,
   pingList: pingListReducer,
+  monitorDuration: monitorDurationReducer,
 });

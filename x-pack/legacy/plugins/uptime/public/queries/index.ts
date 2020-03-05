@@ -5,4 +5,3 @@
  */
 
 export { docCountQuery, docCountQueryString } from './doc_count_query';
-export { monitorChartsQuery, monitorChartsQueryString } from './monitor_charts_query';

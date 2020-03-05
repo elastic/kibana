@@ -42,6 +42,8 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
-export const selectPingList = ({ pingList }: AppState) => {
-  return pingList;
+export const selectPingList = ({ pingList }: AppState) => pingList;
+
+export const selectDurationLines = ({ monitorDuration }: AppState) => {
+  return monitorDuration;
 };

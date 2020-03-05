@@ -4,5 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/** Represents a bucket of monitor status information. */
+export interface StatusData {
+  /** The timeseries point for this status data. */
+  x: number;
+  /** The value of up counts for this point. */
+  up?: number | null;
+  /** The value for down counts for this point. */
+  down?: number | null;
+  /** The total down counts for this point. */
+  total?: number | null;
+}
+
+/** Represents the average monitor duration ms at a point in time. */
+export interface MonitorDurationAveragePoint {
+  /** The timeseries value for this point. */
+  x: number;
+  /** The average duration ms for the monitor. */
+  y?: number | null;
+}
+
+export interface LocationDurationLine {
+  name: string;
+
+  line: MonitorDurationAveragePoint[];
+}
+
+/** The data used to populate the monitor charts. */
+export interface MonitorDurationResult {
+  /** The average values for the monitor duration. */
+  locationDurationLines: LocationDurationLine[];
+  /** The counts of up/down checks for the monitor. */
+  status: StatusData[];
+  /** The maximum status doc count in this chart. */
+  statusMaxCount: number;
+  /** The maximum duration value in this chart. */
+  durationMaxValue: number;
+}
+
 export * from './ping/histogram';
 export * from './pings/ping';
