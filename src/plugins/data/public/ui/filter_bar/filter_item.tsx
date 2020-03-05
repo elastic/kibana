@@ -92,12 +92,12 @@ class FilterItemUI extends Component<Props, State> {
     const classes = classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': disabled,
+        'globalFilterItem-isDisabled': disabled || hasError,
+        'globalFilterItem-isInvalid': hasError,
         'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
-      this.props.className,
-      hasError ? 'filterError' : ''
+      this.props.className
     );
 
     const badge = (

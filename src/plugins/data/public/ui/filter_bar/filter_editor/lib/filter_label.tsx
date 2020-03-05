@@ -42,7 +42,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
     );
 
   const getValue = (text?: string) => {
-    return <span className="filterValue">{text}</span>;
+    return <span className="globalFilterLabel__value">{text}</span>;
   };
 
   if (filter.meta.alias !== null) {
