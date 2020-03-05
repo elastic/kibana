@@ -10,6 +10,7 @@ import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { sortAndOrderReindexOperations } from './op_utils';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
@@ -130,31 +131,17 @@ export class ReindexWorker {
   private updateInProgressOps = async () => {
     try {
       const inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
-      const parallelOps: ReindexSavedObject[] = [];
-      const queueOps: ReindexSavedObject[] = [];
-      for (const inProgressOp of inProgressOps) {
-        if (inProgressOp.attributes.reindexOptions?.queueSettings) {
-          queueOps.push(inProgressOp);
-        } else {
-          parallelOps.push(inProgressOp);
-        }
-      }
+      const { parallel, queue } = sortAndOrderReindexOperations(inProgressOps);
 
-      if (queueOps.length) {
-        const [firstInQueueOp] = queueOps.sort(
-          (a, b) =>
-            a.attributes.reindexOptions!.queueSettings!.queuedAt -
-            b.attributes.reindexOptions!.queueSettings!.queuedAt
-        );
+      const [firstOpInQueue] = queue;
 
+      if (firstOpInQueue) {
         this.log.debug(
-          `Queue detected; current length ${queueOps.length}, current item ReindexOperation(id: ${firstInQueueOp.id}, indexName: ${firstInQueueOp.attributes.indexName})`
+          `Queue detected; current length ${queue.length}, current item ReindexOperation(id: ${firstOpInQueue.id}, indexName: ${firstOpInQueue.attributes.indexName})`
         );
-
-        this.inProgressOps = parallelOps.concat(firstInQueueOp);
-      } else {
-        this.inProgressOps = parallelOps;
       }
+
+      this.inProgressOps = parallel.concat(firstOpInQueue ? [firstOpInQueue] : []);
     } catch (e) {
       this.log.debug(`Could not fetch reindex operations from Elasticsearch, ${e.message}`);
       this.inProgressOps = [];
