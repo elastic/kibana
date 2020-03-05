@@ -16,9 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createMemoryHistory } from 'history';
+
+// Only import types from '.' to avoid triggering default Jest mocks.
+import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
+// Import values from their individual modules instead.
+import { ScopedHistory } from './application';
+
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, PluginInitializerContext } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -41,6 +47,7 @@ export { notificationServiceMock } from './notifications/notifications_service.m
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { scopedHistoryMock } from './application/scoped_history.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
   const mock = {
@@ -138,10 +145,27 @@ function createStorageMock() {
   return storageMock;
 }
 
+function createAppMountParametersMock(appBasePath = '') {
+  // Assemble an in-memory history mock using the provided basePath
+  const rawHistory = createMemoryHistory();
+  rawHistory.push(appBasePath);
+  const history = new ScopedHistory(rawHistory, appBasePath);
+
+  const params: jest.Mocked<AppMountParameters> = {
+    appBasePath,
+    element: document.createElement('div'),
+    history,
+    onAppLeave: jest.fn(),
+  };
+
+  return params;
+}
+
 export const coreMock = {
   createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createStorage: createStorageMock,
+  createAppMountParamters: createAppMountParametersMock,
 };

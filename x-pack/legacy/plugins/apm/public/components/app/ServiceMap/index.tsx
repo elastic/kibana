@@ -32,7 +32,7 @@ import { Cytoscape } from './Cytoscape';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
-import { useRefHeight } from './useRefHeight';
+import { useRefDimensions } from './useRefDimensions';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -196,7 +196,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elements]);
 
-  const [wrapperRef, height] = useRefHeight();
+  const { ref: wrapperRef, width, height } = useRefDimensions();
 
   if (!license) {
     return null;
@@ -211,6 +211,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={renderedElements.current}
         serviceName={serviceName}
         height={height}
+        width={width}
         style={cytoscapeDivStyle}
       >
         <Controls />

@@ -113,7 +113,6 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
       expect(wrapper.text()).toEqual('Cu0n232QMyvNtzb75jfilessha1: fa5195a...md5: f7653f1...');
     });
 

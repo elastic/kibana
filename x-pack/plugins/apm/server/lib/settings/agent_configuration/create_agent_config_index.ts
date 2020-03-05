@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient } from 'src/core/server';
+import { IClusterClient, Logger } from 'src/core/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
   esClient,
-  config
+  config,
+  logger
 }: {
   esClient: IClusterClient;
   config: APMConfig;
+  logger: Logger;
 }) {
   try {
     const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
@@ -32,8 +34,7 @@ export async function createApmAgentConfigurationIndex({
       );
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create APM Agent configuration:', e.message);
+    logger.error(`Could not create APM Agent configuration: ${e.message}`);
   }
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, ChangeEvent } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -14,19 +14,24 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import * as i18n from './translations';
 
 import { Title } from './title';
 
-const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
     margin-left: ${theme.eui.euiSize};
   `}
 `;
 
-StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
+const MySpinner = styled(EuiLoadingSpinner)`
+  ${({ theme }) => css`
+    margin-left: ${theme.eui.euiSize};
+  `}
+`;
 
 interface Props {
   isLoading: boolean;
@@ -36,24 +41,30 @@ interface Props {
 
 const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
   const [editMode, setEditMode] = useState(false);
-  const [changedTitle, onTitleChange] = useState(title);
+  const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
 
   const onCancel = useCallback(() => setEditMode(false), []);
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
 
-  const onClickSubmit = useCallback(
-    (newTitle: string): void => {
-      onSubmit(newTitle);
-      setEditMode(false);
+  const onClickSubmit = useCallback((): void => {
+    if (changedTitle !== title) {
+      onSubmit(changedTitle);
+    }
+    setEditMode(false);
+  }, [changedTitle, title]);
+
+  const handleOnChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onTitleChange(e.target.value);
     },
-    [changedTitle]
+    [onTitleChange]
   );
 
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFieldText
-          onChange={e => onTitleChange(e.target.value)}
+          onChange={handleOnChange}
           value={`${changedTitle}`}
           data-test-subj="editable-title-input-field"
         />
@@ -61,17 +72,23 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
-            isDisabled={isLoading}
-            isLoading={isLoading}
-            onClick={() => onClickSubmit(changedTitle as string)}
+            color="secondary"
             data-test-subj="editable-title-submit-btn"
+            fill
+            iconType="save"
+            onClick={onClickSubmit}
+            size="s"
           >
-            {i18n.SUBMIT}
+            {i18n.SAVE}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} data-test-subj="editable-title-cancel-btn">
+          <EuiButtonEmpty
+            data-test-subj="editable-title-cancel-btn"
+            iconType="cross"
+            onClick={onCancel}
+            size="s"
+          >
             {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -84,12 +101,15 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
         <Title title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <StyledEuiButtonIcon
-          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-          iconType="pencil"
-          onClick={onClickEditIcon}
-          data-test-subj="editable-title-edit-icon"
-        />
+        {isLoading && <MySpinner />}
+        {!isLoading && (
+          <MyEuiButtonIcon
+            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+            iconType="pencil"
+            onClick={onClickEditIcon}
+            data-test-subj="editable-title-edit-icon"
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -28,8 +28,6 @@ import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
-import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
-
 function canRequire(path) {
   try {
     require.resolve(path);
@@ -90,7 +88,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH } = require('@kbn/dev-utils');
+      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
         : [].concat(get('elasticsearch.hosts') || []);
@@ -104,6 +102,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
+      ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
@@ -121,10 +120,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       });
 
       set('server.ssl.enabled', true);
-      // TODO: change this cert/key to KBN_CERT_PATH and KBN_KEY_PATH from '@kbn/dev-utils'; will require some work to avoid breaking
-      // functional tests. Once that is done, the existing test cert/key at DEV_SSL_CERT_PATH and DEV_SSL_KEY_PATH can be deleted.
-      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
-      set('server.ssl.key', DEV_SSL_KEY_PATH);
+      set('server.ssl.certificate', KBN_CERT_PATH);
+      set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
       set('elasticsearch.hosts', elasticsearchHosts);
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { setRootControllerMock } from './new_platform.test.mocks';
+jest.mock('history');
+
+import { setRootControllerMock, historyMock } from './new_platform.test.mocks';
 import { legacyAppRegister, __reset__, __setup__ } from './new_platform';
 import { coreMock } from '../../../../core/public/mocks';
 
@@ -63,6 +65,7 @@ describe('ui/new_platform', () => {
         element: elementMock[0],
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
+        history: historyMock,
       });
     });
 
@@ -84,6 +87,7 @@ describe('ui/new_platform', () => {
         element: elementMock[0],
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
+        history: historyMock,
       });
     });
 

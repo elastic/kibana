@@ -22,7 +22,6 @@ import {
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiFormLabel,
 } from '@elastic/eui';
@@ -281,6 +280,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     .slice(0, pageSize);
   const hilight = localState.nameFilter.toLowerCase();
 
+  const filterByTypeLabel = i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
+    defaultMessage: 'Filter by type',
+  });
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -367,18 +370,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     }));
                   }}
                 >
-                  <FormattedMessage
-                    id="xpack.lens.indexPatterns.toggleFiltersPopover"
-                    defaultMessage="Filter by type"
-                  />
+                  {filterByTypeLabel}
                 </EuiFacetButton>
               }
             >
-              <EuiPopoverTitle>
-                {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
-                  defaultMessage: 'Filter by type',
-                })}
-              </EuiPopoverTitle>
+              <EuiPopoverTitle>{filterByTypeLabel}</EuiPopoverTitle>
               <FixedEuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
@@ -481,39 +477,43 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   size="s"
                   color="warning"
                   title={
-                    showEmptyFields
-                      ? localState.typeFilter.length || localState.nameFilter.length
-                        ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
-                            defaultMessage:
-                              'No fields match the current filters. Try changing your filters or time range.',
-                          })
-                        : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
-                            defaultMessage: 'No fields exist in this index pattern.',
-                          })
+                    localState.typeFilter.length || localState.nameFilter.length
+                      ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
+                          defaultMessage: 'No fields match the current filters.',
+                        })
+                      : showEmptyFields
+                      ? i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
+                          defaultMessage: 'No fields exist in this index pattern.',
+                        })
                       : i18n.translate('xpack.lens.indexPatterns.emptyFieldsWithDataLabel', {
-                          defaultMessage:
-                            'No fields have data with the current filters and time range. Try changing your filters or time range.',
+                          defaultMessage: 'Looks like you don’t have any data.',
                         })
                   }
                 >
                   {(!showEmptyFields ||
                     localState.typeFilter.length ||
                     localState.nameFilter.length) && (
-                    <EuiButtonEmpty
-                      size="xs"
-                      color="primary"
-                      flush="left"
-                      data-test-subj="lnsDataPanelShowAllFields"
-                      onClick={() => {
-                        trackUiEvent('indexpattern_show_all_fields_clicked');
-                        clearLocalState();
-                        onToggleEmptyFields(true);
-                      }}
-                    >
-                      {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
-                        defaultMessage: 'Show all fields',
-                      })}
-                    </EuiButtonEmpty>
+                    <>
+                      <strong>
+                        {i18n.translate('xpack.lens.indexPatterns.noFields.tryText', {
+                          defaultMessage: 'Try:',
+                        })}
+                      </strong>
+                      <ul>
+                        <li>
+                          {i18n.translate('xpack.lens.indexPatterns.noFields.extendTimeBullet', {
+                            defaultMessage: 'Extending the time range',
+                          })}
+                        </li>
+                        <li>
+                          {i18n.translate('xpack.lens.indexPatterns.noFields.fieldFilterBullet', {
+                            defaultMessage:
+                              'Using {filterByTypeLabel} {arrow} to show fields without data',
+                            values: { filterByTypeLabel, arrow: '↑' },
+                          })}
+                        </li>
+                      </ul>
+                    </>
                   )}
                 </EuiCallOut>
               )}

@@ -213,6 +213,49 @@ describe('Timeline', () => {
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
+
+    test('it defaults to showing `All events`', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent
+              browserFields={mockBrowserFields}
+              columns={defaultHeaders}
+              id="foo"
+              dataProviders={mockDataProviders}
+              end={endDate}
+              filters={[]}
+              flyoutHeight={testFlyoutHeight}
+              flyoutHeaderHeight={flyoutHeaderHeight}
+              indexPattern={indexPattern}
+              indexToAdd={[]}
+              isLive={false}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              kqlMode="search"
+              kqlQueryExpression=""
+              loadingIndexName={false}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onChangeItemsPerPage={jest.fn()}
+              onDataProviderEdited={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              start={startDate}
+              sort={sort}
+              toggleColumn={jest.fn()}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
+        'All events'
+      );
+    });
   });
 
   describe('event wire up', () => {

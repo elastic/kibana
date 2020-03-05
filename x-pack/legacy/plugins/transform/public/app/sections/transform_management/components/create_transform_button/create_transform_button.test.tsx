@@ -9,8 +9,6 @@ import React from 'react';
 
 import { CreateTransformButton } from './create_transform_button';
 
-jest.mock('ui/new_platform');
-
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List <CreateTransformButton />', () => {

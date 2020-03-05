@@ -39,6 +39,16 @@ export class ESTestIndexTool {
               enabled: false,
               type: 'object',
             },
+            date: {
+              type: 'date',
+              format: 'strict_date_time',
+            },
+            testedValue: {
+              type: 'long',
+            },
+            group: {
+              type: 'keyword',
+            },
           },
         },
       },

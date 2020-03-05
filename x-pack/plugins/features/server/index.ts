@@ -14,7 +14,7 @@ import { Plugin } from './plugin';
 export { uiCapabilitiesRegex } from './feature_schema';
 
 export { Feature, FeatureWithAllOrReadPrivileges, FeatureKibanaPrivileges } from '../common';
-export { PluginSetupContract } from './plugin';
+export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);

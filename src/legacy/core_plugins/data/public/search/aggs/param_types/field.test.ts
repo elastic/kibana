@@ -25,8 +25,6 @@ import { IAggConfig } from '../agg_config';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
 import { Schema } from '../schemas';
 
-jest.mock('ui/new_platform');
-
 describe('Field', () => {
   const indexPattern = {
     id: '1234',

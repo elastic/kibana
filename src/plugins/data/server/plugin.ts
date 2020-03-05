@@ -44,7 +44,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
-  private readonly autocompleteService = new AutocompleteService();
+  private readonly autocompleteService: AutocompleteService;
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
 
@@ -52,6 +52,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
+    this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
   public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {

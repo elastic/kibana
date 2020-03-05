@@ -7,10 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import './transform_list.test.mocks';
 import { TransformList } from './transform_list';
-
-jest.mock('ui/new_platform');
 
 jest.mock('../../../../../shared_imports');
 
