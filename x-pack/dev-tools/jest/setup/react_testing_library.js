@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
-  Global import, so we don't need to remember to import the lib in each file
-  https://www.npmjs.com/package/jest-styled-components#global-installation
-*/
+import '@testing-library/jest-dom/extend-expect';
+import { configure } from '@testing-library/react';
 
-import 'jest-styled-components';
+// instead of default 'data-testid', use kibana's 'data-test-subj'
+configure({ testIdAttribute: 'data-test-subj' });
