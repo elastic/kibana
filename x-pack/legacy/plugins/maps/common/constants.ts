@@ -58,7 +58,7 @@ export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a l
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
   JOIN = 'join',
-};
+}
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
