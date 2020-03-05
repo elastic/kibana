@@ -17,25 +17,16 @@
  * under the License.
  */
 
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+import { UrlGeneratorId, UrlGeneratorStateMapping } from './url_generator_definition';
 
-export { SharePluginSetup, SharePluginStart } from './plugin';
-export {
-  ShareContext,
-  ShareMenuProvider,
-  ShareMenuItem,
-  ShowShareMenuOptions,
-  ShareContextMenuPanelItem,
-} from './types';
-
-export {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorsDefinition,
-  UrlGeneratorContract,
-  UrlGeneratorsService,
-} from './url_generators';
-
-import { SharePlugin } from './plugin';
-
-export const plugin = () => new SharePlugin();
+export interface UrlGeneratorContract<Id extends UrlGeneratorId> {
+  id: Id;
+  createUrl(state: UrlGeneratorStateMapping[Id]['State']): Promise<string>;
+  isDeprecated: boolean;
+  migrate(
+    state: UrlGeneratorStateMapping[Id]['State']
+  ): Promise<{
+    state: UrlGeneratorStateMapping[Id]['MigratedState'];
+    id: UrlGeneratorStateMapping[Id]['MigratedId'];
+  }>;
+}
