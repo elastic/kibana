@@ -816,10 +816,7 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query, dateRange }) {
-    if (dateRange) {
-      timefilter.setTime(dateRange);
-    }
+  $scope.updateQuery = function({ query }) {
     setAppState({ query });
     $fetchObservable.next();
   };
