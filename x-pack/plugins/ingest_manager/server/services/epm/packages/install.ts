@@ -6,14 +6,60 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AssetReference, Installation, KibanaAssetType, CallESAsCurrentUser } from '../../../types';
+import {
+  AssetReference,
+  Installation,
+  KibanaAssetType,
+  CallESAsCurrentUser,
+  DefaultPackages,
+} from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
-import { getInstallation } from './index';
+import { getInstallation, findInstalledPackageByName } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
+
+export async function installLatestPackage(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  callCluster: CallESAsCurrentUser;
+}): Promise<AssetReference[]> {
+  const { savedObjectsClient, pkgName, callCluster } = options;
+  try {
+    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    const pkgkey = Registry.pkgToPkgKey({
+      name: latestPackage.name,
+      version: latestPackage.version,
+    });
+    return installPackage({ savedObjectsClient, pkgkey, callCluster });
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function ensureInstalledDefaultPackages(
+  savedObjectsClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<void> {
+  for (const pkgName in DefaultPackages) {
+    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
+    const installedPackage = await findInstalledPackageByName({ savedObjectsClient, pkgName });
+    // if the requested packaged was not found to be installed, try installing
+    if (!installedPackage) {
+      try {
+        await installLatestPackage({
+          savedObjectsClient,
+          pkgName,
+          callCluster,
+        });
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    }
+  }
+}
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -22,6 +68,7 @@ export async function installPackage(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
+  const { name: pkgName, version: pkgVersion } = registryPackageInfo;
 
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
@@ -48,6 +95,8 @@ export async function installPackage(options: {
   await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
+    pkgName,
+    pkgVersion,
     toSave,
   });
   return toSave;
@@ -75,9 +124,11 @@ export async function installKibanaAssets(options: {
 export async function saveInstallationReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
+  pkgName: string;
+  pkgVersion: string;
   toSave: AssetReference[];
 }) {
-  const { savedObjectsClient, pkgkey, toSave } = options;
+  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSave } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
   const savedRefs = installation?.installed || [];
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
@@ -89,7 +140,7 @@ export async function saveInstallationReferences(options: {
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    { installed: toInstall },
+    { installed: toInstall, name: pkgName, version: pkgVersion },
     { id: pkgkey, overwrite: true }
   );
 

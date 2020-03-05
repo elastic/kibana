@@ -14,6 +14,7 @@ import {
   KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
+  RegistrySearchResult,
 } from '../../../types';
 import { appContextService } from '../../';
 import { cacheGet, cacheSet } from './cache';
@@ -27,7 +28,8 @@ export interface SearchParams {
   category?: CategoryId;
 }
 
-export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
+export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
+  `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = appContextService.getConfig()?.epm.registryUrl;
@@ -37,6 +39,21 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   }
 
   return fetchUrl(url.toString()).then(JSON.parse);
+}
+
+export async function fetchFindLatestPackage(
+  packageName: string,
+  internal: boolean = true
+): Promise<RegistrySearchResult> {
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
+  const res = await fetchUrl(url.toString());
+  const searchResults = JSON.parse(res);
+  if (searchResults.length) {
+    return searchResults[0];
+  } else {
+    throw new Error('package not found');
+  }
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {

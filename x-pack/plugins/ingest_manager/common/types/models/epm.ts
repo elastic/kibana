@@ -165,6 +165,8 @@ export type PackageInfo = Installable<
 
 export interface Installation extends SavedObjectAttributes {
   installed: AssetReference[];
+  name: string;
+  version: string;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -192,6 +194,11 @@ export enum IngestAssetType {
   IngestPipeline = 'ingest-pipeline',
   MlJob = 'ml-job',
   RollupJob = 'rollup-job',
+}
+
+export enum DefaultPackages {
+  base = 'base',
+  system = 'system',
 }
 
 export interface IndexTemplate {
