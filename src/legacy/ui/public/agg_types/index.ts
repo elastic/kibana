@@ -37,7 +37,6 @@ export const {
   FieldParamType,
   MetricAggType,
   parentPipelineAggHelper,
-  setBounds,
   siblingPipelineAggHelper,
 } = dataStart.search.aggs.__LEGACY;
 
