@@ -105,7 +105,8 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+ completely changed and prevent highlighting in Discover from working."
           id="common.ui.fieldEditor.formatLabel"
           values={Object {}}
         />
@@ -342,7 +343,8 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+ completely changed and prevent highlighting in Discover from working."
           id="common.ui.fieldEditor.formatLabel"
           values={Object {}}
         />
@@ -553,7 +555,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           />
            
           <FormattedMessage
-            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
+            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with
+ the same name means you won't be able to query both fields at the same time."
             id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
             values={
               Object {
@@ -638,7 +641,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+ completely changed and prevent highlighting in Discover from working."
           id="common.ui.fieldEditor.formatLabel"
           values={Object {}}
         />
@@ -846,7 +850,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           </strong>
            
           <FormattedMessage
-            defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
+            defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch.
+ We recommend using {painlessLink} for new scripted fields."
             id="common.ui.fieldEditor.warningLabel.warningDetail"
             values={
               Object {
@@ -946,6 +951,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "_source",
             },
             Object {
+              "text": "histogram",
+              "value": "histogram",
+            },
+            Object {
               "text": "conflict",
               "value": "conflict",
             },
@@ -961,7 +970,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+ completely changed and prevent highlighting in Discover from working."
           id="common.ui.fieldEditor.formatLabel"
           values={Object {}}
         />
@@ -1172,7 +1182,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           />
            
           <FormattedMessage
-            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
+            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with
+ the same name means you won't be able to query both fields at the same time."
             id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
             values={
               Object {
@@ -1271,7 +1282,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         }
       >
         <FormattedMessage
-          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
+ The indices per type are as follows:"
           id="common.ui.fieldEditor.multiTypeLabelDesc"
           values={Object {}}
         />
@@ -1313,7 +1325,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+ completely changed and prevent highlighting in Discover from working."
           id="common.ui.fieldEditor.formatLabel"
           values={Object {}}
         />
