@@ -69,7 +69,9 @@ function asyncSearch(
   const path = request.id ? `_async_search/${request.id}` : `${request.params.index}/_async_search`;
 
   // Wait up to 1s for the initial response to return
-  const { body = {}, ...params } = request.id ? {} : { waitForCompletion: '1s', ...request.params };
+  const { body = undefined, ...params } = request.id
+    ? {}
+    : { waitForCompletion: '1s', ...request.params };
   const query = toSnakeCase(params ?? {});
 
   return caller('transport.request', { method, path, body, query }, options);
