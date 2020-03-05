@@ -8,7 +8,7 @@ export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
 export { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
 export { getMonitor, GetMonitorParams } from './get_monitor';
-export { getMonitorCharts, GetMonitorChartsParams } from './get_monitor_charts';
+export { getMonitorDurationChart, GetMonitorChartsParams } from './get_monitor_duration';
 export { getMonitorDetails, GetMonitorDetailsParams } from './get_monitor_details';
 export { getMonitorLocations, GetMonitorLocationsParams } from './get_monitor_locations';
 export { getMonitorStates, GetMonitorStatesParams } from './get_monitor_states';

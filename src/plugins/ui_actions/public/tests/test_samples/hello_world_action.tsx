@@ -20,8 +20,9 @@
 import React from 'react';
 import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { createAction, Action } from '../../actions';
+import { createAction, ActionByType } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
+import { ActionType } from '../../types';
 
 const ReactMenuItem: React.FC = () => {
   return (
@@ -36,11 +37,15 @@ const ReactMenuItem: React.FC = () => {
 
 const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
-export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD' as ActionType;
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): Action {
-  return createAction({
-    type: HELLO_WORLD_ACTION_ID,
+export function createHelloWorldAction(
+  overlays: CoreStart['overlays']
+): ActionByType<typeof ACTION_HELLO_WORLD> {
+  return createAction<typeof ACTION_HELLO_WORLD>({
+    type: ACTION_HELLO_WORLD,
     getIconType: () => 'lock',
     MenuItem: UiMenuItem,
     execute: async () => {
