@@ -68,7 +68,7 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Link to={`${SETTINGS_ROUTE}`}>
-            <EuiButton data-test-subj="settings-page-link">{settingsLinkText}</EuiButton>
+            <EuiButtonEmpty data-test-subj="settings-page-link">{settingsLinkText}</EuiButtonEmpty>
           </Link>
         </EuiFlexItem>
         {datePickerComponent}

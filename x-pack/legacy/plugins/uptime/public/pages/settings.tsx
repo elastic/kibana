@@ -170,12 +170,10 @@ export const SettingsPageComponent = ({
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiButtonEmpty
                 data-test-subj="discardSettingsButton"
-                color="danger"
-                iconType="cross"
                 isDisabled={!isFormDirty || dss.loading}
                 onClick={() => {
                   resetForm();
@@ -183,7 +181,7 @@ export const SettingsPageComponent = ({
               >
                 <FormattedMessage
                   id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-                  defaultMessage="Discard"
+                  defaultMessage="Cancel"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -198,7 +196,7 @@ export const SettingsPageComponent = ({
               >
                 <FormattedMessage
                   id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
-                  defaultMessage="Apply"
+                  defaultMessage="Apply changes"
                 />
               </EuiButton>
             </EuiFlexItem>
