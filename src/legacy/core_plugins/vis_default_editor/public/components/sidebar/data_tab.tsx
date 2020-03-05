@@ -40,7 +40,7 @@ import {
   toggleEnabledAgg,
 } from './state';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
-import { TimeRange } from '../../../../../../plugins/data/common';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
@@ -131,8 +131,8 @@ function DefaultEditorDataTab({
       <DefaultEditorAggGroup
         groupName={AggGroupNames.Buckets}
         schemas={schemas.buckets}
-        {...commonProps}
         timeRange={timeRange}
+        {...commonProps}
       />
     </>
   );

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback, createContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
@@ -35,6 +35,7 @@ import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { TimeRange } from '../../../../../plugins/data/public';
+import { buildAggDescription } from './agg_params_helper';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -48,8 +49,6 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   setAggsState: React.Dispatch<AggsAction>;
   timeRange?: TimeRange;
 }
-
-export const DefaultEditorAggParamsContext = createContext({} as any);
 
 function DefaultEditorAgg({
   agg,
@@ -75,7 +74,6 @@ function DefaultEditorAgg({
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
-  const [, setLocalTimeRange] = useState(timeRange);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
   const aggName = agg.type?.name;
@@ -107,25 +105,15 @@ function DefaultEditorAgg({
     }
   }
 
-  // A description of the aggregation, for displaying in the collapsed agg header
-  let aggDescription = '';
+  const [aggDescription, setAggDescription] = useState(buildAggDescription(agg));
 
-  if (agg.type && agg.type.makeLabel) {
-    try {
-      aggDescription = agg.type.makeLabel(agg);
-    } catch (e) {
-      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
-      // which throws an error when interval is undefined.
-      aggDescription = '';
-    }
-  }
-
-  // This useEffect is required to initiate rerender to keep labels up to date (Issue #57822).
+  // This useEffect is required to update the timeRange value and initiate rerender to keep labels up to date (Issue #57822).
   useEffect(() => {
-    if (aggName === 'date_histogram') {
-      setLocalTimeRange(timeRange);
+    if (timeRange && agg.type.name === 'date_histogram') {
+      agg.aggConfigs.setTimeRange(timeRange);
     }
-  }, [aggName, timeRange]);
+    setAggDescription(buildAggDescription(agg));
+  }, [agg, timeRange]);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
@@ -301,24 +289,22 @@ function DefaultEditorAgg({
             setStateParamValue={setStateParamValue}
           />
         )}
-        <DefaultEditorAggParamsContext.Provider value={timeRange}>
-          <DefaultEditorAggParams
-            agg={agg}
-            aggError={aggError}
-            aggIndex={aggIndex}
-            aggIsTooLow={aggIsTooLow}
-            disabledParams={disabledParams}
-            formIsTouched={formIsTouched}
-            groupName={groupName}
-            indexPattern={agg.getIndexPattern()}
-            metricAggs={metricAggs}
-            state={state}
-            setAggParamValue={setAggParamValue}
-            onAggTypeChange={onAggTypeChange}
-            setTouched={setTouched}
-            setValidity={setValidity}
-          />
-        </DefaultEditorAggParamsContext.Provider>
+        <DefaultEditorAggParams
+          agg={agg}
+          aggError={aggError}
+          aggIndex={aggIndex}
+          aggIsTooLow={aggIsTooLow}
+          disabledParams={disabledParams}
+          formIsTouched={formIsTouched}
+          groupName={groupName}
+          indexPattern={agg.getIndexPattern()}
+          metricAggs={metricAggs}
+          state={state}
+          setAggParamValue={setAggParamValue}
+          onAggTypeChange={onAggTypeChange}
+          setTouched={setTouched}
+          setValidity={setValidity}
+        />
       </>
     </EuiAccordion>
   );

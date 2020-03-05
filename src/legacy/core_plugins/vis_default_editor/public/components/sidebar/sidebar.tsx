@@ -31,7 +31,7 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
-import { TimeRange } from '../../../../../../plugins/data/common';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
