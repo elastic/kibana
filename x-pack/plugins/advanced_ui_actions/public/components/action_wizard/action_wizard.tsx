@@ -20,8 +20,8 @@ import './action_wizard.scss';
 // TODO: this interface is temporary for just moving forward with the component
 // and it will be imported from the ../ui_actions when implemented properly
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ActionFactoryBaseConfig = {};
-export interface ActionFactory<Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig> {
+export type ActionBaseConfig = {};
+export interface ActionFactory<Config extends ActionBaseConfig = ActionBaseConfig> {
   type: string; // TODO: type should be tied to Action and ActionByType
   displayName: string;
   iconType?: string;
@@ -30,7 +30,7 @@ export interface ActionFactory<Config extends ActionFactoryBaseConfig = ActionFa
   isValid: (name: string, config: Config) => boolean;
 }
 
-export interface ActionFactoryWizardProps<Config extends ActionFactoryBaseConfig> {
+export interface ActionFactoryWizardProps<Config extends ActionBaseConfig> {
   config?: Config;
 
   /**
@@ -59,12 +59,12 @@ export interface ActionWizardProps {
   /**
    * current config for currently selected action factory
    */
-  config?: ActionFactoryBaseConfig;
+  config?: ActionBaseConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: ActionFactoryBaseConfig) => void;
+  onConfigChange: (config: ActionBaseConfig) => void;
 }
 export const ActionWizard: React.FC<ActionWizardProps> = ({
   currentActionFactory,
@@ -104,9 +104,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   );
 };
 
-interface SelectedActionFactoryProps<
-  Config extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
-> {
+interface SelectedActionFactoryProps<Config extends ActionBaseConfig = ActionBaseConfig> {
   actionFactory: ActionFactory<Config>;
   config: Config;
   onConfigChange: (config: Config) => void;

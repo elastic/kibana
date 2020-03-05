@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { ActionFactory, ActionFactoryBaseConfig, ActionWizard } from './action_wizard';
+import { ActionFactory, ActionBaseConfig, ActionWizard } from './action_wizard';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -129,7 +129,7 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
-    config?: ActionFactoryBaseConfig;
+    config?: ActionBaseConfig;
   }>({});
 
   function changeActionFactory(newActionFactory: ActionFactory | null) {
