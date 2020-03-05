@@ -58,10 +58,11 @@ export function FlyoutDrilldownWizard<
   );
 
   const isActionValid = (): boolean => {
+    if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
 
-    return wizardConfig.actionFactory.isValid(wizardConfig.name, wizardConfig.actionConfig);
+    return wizardConfig.actionFactory.isValid(wizardConfig.actionConfig);
   };
 
   const footer = (
