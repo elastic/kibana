@@ -30,9 +30,13 @@ export const readRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const { id, rule_id: ruleId } = request.query;
+      const siemResponse = buildSiemResponse(response);
+
+      if (!context.alerting) {
+        return siemResponse.error({ statusCode: 404 });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemResponse = buildSiemResponse(response);
 
       try {
         if (!alertsClient) {
