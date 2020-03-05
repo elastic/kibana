@@ -37,6 +37,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultType](./kibana-plugin-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-server.savedobjectsexportoptions.md) for more detailed information. |
+|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
+
 ## Interfaces
 
 |  Interface | Description |
