@@ -45,6 +45,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     );
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
+    loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
     this.service = {
       basePath,
