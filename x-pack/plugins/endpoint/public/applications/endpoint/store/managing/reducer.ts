@@ -15,6 +15,9 @@ const initialState = (): ManagementListState => {
     pageIndex: 0,
     total: 0,
     loading: false,
+    detailsError: undefined,
+    details: undefined,
+    location: undefined,
   };
 };
 
@@ -37,17 +40,29 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
       pageIndex,
       loading: false,
     };
-  }
-
-  if (action.type === 'userExitedManagementList') {
+  } else if (action.type === 'serverReturnedManagementDetails') {
+    return {
+      ...state,
+      details: action.payload,
+    };
+  } else if (action.type === 'serverFailedToReturnManagementDetails') {
+    return {
+      ...state,
+      detailsError: action.payload,
+    };
+  } else if (action.type === 'userExitedManagementList') {
     return initialState();
-  }
-
-  if (action.type === 'userPaginatedManagementList') {
+  } else if (action.type === 'userPaginatedManagementList') {
     return {
       ...state,
       ...action.payload,
       loading: true,
+    };
+  } else if (action.type === 'userChangedUrl') {
+    return {
+      ...state,
+      location: action.payload,
+      detailsError: undefined,
     };
   }
 
