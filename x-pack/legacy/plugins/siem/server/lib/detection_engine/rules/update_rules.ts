@@ -85,7 +85,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions,
-      throttle,
+      throttle: ['no_actions', 'signal', 'rule'].includes(throttle as string) ? null : throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,
@@ -105,6 +105,7 @@ export const updateRules = async ({
         riskScore,
         severity,
         threat,
+        throttle,
         to,
         type,
         references,

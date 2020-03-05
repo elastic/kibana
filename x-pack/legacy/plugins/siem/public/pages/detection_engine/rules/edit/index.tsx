@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
-import deepMerge from 'deepmerge';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -251,8 +250,9 @@ const EditRulePageComponent: FC = () => {
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
             : myScheduleRuleForm.data) as ScheduleStepRule,
-          (activeFormId === RuleStep.ruleActions &&
-            deepMerge(myActionsRuleForm.data!, activeForm.data)) as ActionsStepRule,
+          (activeFormId === RuleStep.ruleActions
+            ? activeForm.data
+            : myActionsRuleForm.data) as ActionsStepRule,
           ruleId
         )
       );

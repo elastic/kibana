@@ -10,6 +10,7 @@ import { Plugin } from './plugin';
 export { AlertsContextProvider } from './application/context/alerts_context';
 export { AlertAdd } from './application/sections/alert_form';
 export { ActionForm } from './application/sections/action_connector_form';
+export { AlertAction, Alert } from './types';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new Plugin(ctx);

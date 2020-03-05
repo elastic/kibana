@@ -101,8 +101,6 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
     alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
-  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   // load alert types

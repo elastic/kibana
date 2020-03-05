@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
@@ -72,6 +74,7 @@ export const signalRulesAlertType = ({
         riskScore: schema.number(),
         severity: schema.string(),
         threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+        throttle: schema.nullable(schema.string()),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -80,6 +83,7 @@ export const signalRulesAlertType = ({
     },
     // fun fact: previousStartedAt is not actually a Date but a String of a date
     async executor({ previousStartedAt, alertId, services, params }) {
+      // console.log('params', params);
       const {
         from,
         ruleId,
@@ -91,9 +95,13 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
+        throttle,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      // if (savedObject.attributes.name === 'Query with a rule id') {
+      //   console.log('saved', savedObject);
+      // }
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -209,30 +217,60 @@ export const signalRulesAlertType = ({
             `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           const noReIndexResult = await services.callCluster('search', noReIndex);
-          if (noReIndexResult.hits.total.value !== 0) {
-            const alertInstance = services.alertInstanceFactory(ruleId!);
-            const newSignalsCount = noReIndexResult.hits.total.value;
-            const inputIndexes = inputIndex.join(', ');
-            const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
-            const signalsCount = currentSignalsCount + newSignalsCount;
 
-            alertInstance
-              .replaceState({
-                signalsCount,
-              })
-              .scheduleActions(
-                'default',
-                {
-                  inputIndexes,
-                  outputIndex,
-                  name,
-                  alertId,
-                  ruleId,
-                },
-                true
-              );
+          if (noReIndexResult.hits.total.value !== 0) {
+            // if (savedObject.attributes.name === 'Query with a rule id') {
+            //   console.log('noReIndexResult', noReIndexResult.hits.hits[0]);
+            // }
+
+            const inputIndexes = inputIndex.join(', ');
+
+            if (throttle) {
+              if (throttle === 'signal') {
+                (noReIndexResult.hits.hits as Array<Record<string, string>>).forEach(signal => {
+                  const alertInstance = services.alertInstanceFactory(signal._id!);
+                  alertInstance.scheduleActions(
+                    'default',
+                    {
+                      inputIndexes,
+                      outputIndex,
+                      name,
+                      alertId,
+                      ruleId,
+                      signal,
+                    },
+                    true
+                  );
+                });
+              }
+
+              if (!['no_actions', 'signal'].includes(throttle)) {
+                const alertInstance = services.alertInstanceFactory(ruleId!);
+
+                const newSignalsCount = noReIndexResult.hits.total.value;
+                const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
+                const signalsCount = currentSignalsCount + newSignalsCount;
+
+                alertInstance
+                  .replaceState({
+                    signalsCount,
+                  })
+                  .scheduleActions(
+                    'default',
+                    {
+                      inputIndexes,
+                      outputIndex,
+                      name,
+                      alertId,
+                      ruleId,
+                    },
+                    true // clears state after the throttled rule has been executed
+                  );
+              }
+            }
+
             logger.info(
-              `Found ${newSignalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${noReIndexResult.hits.total.value} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 

@@ -429,18 +429,20 @@ export const ActionForm = ({
     }
   }
 
-  const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
-    return (
-      <EuiKeyPadMenuItem
-        key={index}
-        data-test-subj={`${item.id}-ActionTypeSelectOption`}
-        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
-        onClick={() => addActionType(item)}
-      >
-        <EuiIcon size="xl" type={item.iconClass} />
-      </EuiKeyPadMenuItem>
-    );
-  });
+  const actionTypeNodes = actionTypesIndex
+    ? actionTypeRegistry.list().map(function(item, index) {
+        return actionTypesIndex[item.id] ? (
+          <EuiKeyPadMenuItem
+            key={index}
+            data-test-subj={`${item.id}-ActionTypeSelectOption`}
+            label={actionTypesIndex[item.id].name}
+            onClick={() => addActionType(item)}
+          >
+            <EuiIcon size="xl" type={item.iconClass} />
+          </EuiKeyPadMenuItem>
+        ) : null;
+      })
+    : null;
 
   return (
     <Fragment>
