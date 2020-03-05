@@ -14,6 +14,9 @@ describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -27,6 +30,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "secureCookies": false,
@@ -39,6 +43,9 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -52,6 +59,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "secureCookies": false,
@@ -64,6 +72,9 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
       Object {
+        "audit": Object {
+          "enabled": false,
+        },
         "authc": Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -77,6 +88,7 @@ describe('config schema', () => {
           ],
         },
         "cookieName": "sid",
+        "enabled": true,
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {

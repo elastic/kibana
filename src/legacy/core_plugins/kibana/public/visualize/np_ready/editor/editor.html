@@ -1,28 +1,4 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
-  <!-- Linked search. -->
-  <div
-      ng-show="isVisible"
-      ng-if="vis.type.requiresSearch && linked"
-      class="fullWidth visEditor__linkedMessage"
-    >
-    <div class="kuiVerticalRhythmSmall">
-      {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
-      <a
-        href="#/discover/{{savedVis.savedSearch.id}}"
-      >
-        {{ savedVis.savedSearch.title }}
-      </a>
-      &nbsp;
-      <a
-        data-test-subj="unlinkSavedSearch"
-        href=""
-        ng-dblclick="unlink()"
-        tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
-      >
-        <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
-      </a>
-    </div>
-  </div>
 
   <!--
     Local nav.

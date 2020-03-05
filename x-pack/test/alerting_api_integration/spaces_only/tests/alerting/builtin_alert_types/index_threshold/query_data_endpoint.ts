@@ -25,8 +25,8 @@ const INTERVAL_MINUTES = 1;
 const INTERVAL_DURATION = `${INTERVAL_MINUTES}m`;
 const INTERVAL_MILLIS = INTERVAL_MINUTES * 60 * 1000;
 
-const WINDOW_MINUTES = 5;
-const WINDOW_DURATION = `${WINDOW_MINUTES}m`;
+const WINDOW_DURATION_SIZE = 5;
+const WINDOW_DURATION_UNITS = 'm';
 
 // interesting dates pertaining to docs and intervals
 const START_DATE_PLUS_YEAR = `2021-${START_DATE_MM_DD_HH_MM_SS_MS}`;
@@ -154,7 +154,7 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
 
     it('should return correct count for all intervals, grouped', async () => {
       const query = getQueryBody({
-        groupField: 'group',
+        termField: 'group',
         dateStart: START_DATE_MINUS_2INTERVALS,
         dateEnd: START_DATE_MINUS_0INTERVALS,
       });
@@ -185,9 +185,11 @@ export default function queryDataEndpointTests({ getService }: FtrProviderContex
 
     it('should return correct average for all intervals, grouped', async () => {
       const query = getQueryBody({
-        aggType: 'average',
+        aggType: 'avg',
         aggField: 'testedValue',
-        groupField: 'group',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 100,
         dateStart: START_DATE_MINUS_2INTERVALS,
         dateEnd: START_DATE_MINUS_0INTERVALS,
       });
@@ -266,11 +268,13 @@ function getQueryBody(body: Partial<TimeSeriesQuery> = {}): TimeSeriesQuery {
     timeField: 'date',
     aggType: 'count',
     aggField: undefined,
-    groupField: undefined,
-    groupLimit: undefined,
+    groupBy: 'all',
+    termField: undefined,
+    termSize: undefined,
     dateStart: START_DATE_MINUS_0INTERVALS,
     dateEnd: undefined,
-    window: WINDOW_DURATION,
+    timeWindowSize: WINDOW_DURATION_SIZE,
+    timeWindowUnit: WINDOW_DURATION_UNITS,
     interval: INTERVAL_DURATION,
   };
   return Object.assign({}, defaults, body);

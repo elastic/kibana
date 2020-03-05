@@ -20,7 +20,7 @@
 import { set } from 'lodash';
 // @ts-ignore
 import { FormattedData } from '../../../../../../plugins/inspector/public';
-// @ts-ignore
+
 import { createFilter } from './create_filter';
 
 import { TabbedTable } from '../tabify';
@@ -66,7 +66,10 @@ export async function buildTabularInspectorData(
             row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
-          queryFilter.addFilters(filter);
+
+          if (filter) {
+            queryFilter.addFilters(filter);
+          }
         }),
       filterOut:
         isCellContentFilterable &&
@@ -75,14 +78,17 @@ export async function buildTabularInspectorData(
             row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
-          const notOther = value.raw !== '__other__';
-          const notMissing = value.raw !== '__missing__';
-          if (Array.isArray(filter)) {
-            filter.forEach(f => set(f, 'meta.negate', notOther && notMissing));
-          } else {
-            set(filter, 'meta.negate', notOther && notMissing);
+
+          if (filter) {
+            const notOther = value.raw !== '__other__';
+            const notMissing = value.raw !== '__missing__';
+            if (Array.isArray(filter)) {
+              filter.forEach(f => set(f, 'meta.negate', notOther && notMissing));
+            } else {
+              set(filter, 'meta.negate', notOther && notMissing);
+            }
+            queryFilter.addFilters(filter);
           }
-          queryFilter.addFilters(filter);
         }),
     };
   });

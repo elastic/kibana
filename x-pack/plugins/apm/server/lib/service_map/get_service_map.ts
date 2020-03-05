@@ -16,7 +16,8 @@ import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
   SERVICE_AGENT_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
+  SERVICE_FRAMEWORK_NAME
 } from '../../../common/elasticsearch_fieldnames';
 
 export interface IEnvOptions {
@@ -92,6 +93,11 @@ async function getServicesData(options: IEnvOptions) {
               terms: {
                 field: SERVICE_AGENT_NAME
               }
+            },
+            service_framework_name: {
+              terms: {
+                field: SERVICE_FRAMEWORK_NAME
+              }
             }
           }
         }
@@ -109,7 +115,11 @@ async function getServicesData(options: IEnvOptions) {
         'service.name': bucket.key as string,
         'agent.name':
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        'service.environment': options.environment || null
+        'service.environment': options.environment || null,
+        'service.framework.name':
+          (bucket.service_framework_name.buckets[0]?.key as
+            | string
+            | undefined) || null
       };
     }) || []
   );

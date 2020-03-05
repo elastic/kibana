@@ -126,6 +126,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickLoadSavedSearchButton() {
+      await testSubjects.moveMouseTo('discoverOpenButton');
       await testSubjects.click('discoverOpenButton');
     }
 
@@ -204,12 +205,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async getHitCount() {
       await PageObjects.header.waitUntilLoadingHasFinished();
       return await testSubjects.getVisibleText('discoverQueryHits');
-    }
-
-    async query(queryString) {
-      await find.setValue('input[aria-label="Search input"]', queryString);
-      await find.clickByCssSelector('button[aria-label="Search"]');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getDocHeader() {

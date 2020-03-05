@@ -46,8 +46,6 @@ const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
-  TRIGGER_INTERVAL_SIZE: 1,
-  TRIGGER_INTERVAL_UNIT: 'm',
   THRESHOLD: [1000, 5000],
   GROUP_BY: 'all',
 };
@@ -134,17 +132,25 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   );
 
-  const setDefaultExpressionValues = () => {
+  const setDefaultExpressionValues = async () => {
     setAlertProperty('params', {
-      aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-      termSize: DEFAULT_VALUES.TERM_SIZE,
-      thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
-      groupBy: DEFAULT_VALUES.GROUP_BY,
-      threshold: DEFAULT_VALUES.THRESHOLD,
+      ...alertParams,
+      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
+
+    if (index && index.length > 0) {
+      const currentEsFields = await getFields(index);
+      const timeFields = getTimeFieldOptions(currentEsFields as any);
+
+      setEsFields(currentEsFields);
+      setTimeFieldOptions([firstFieldOption, ...timeFields]);
+    }
   };
 
   const getFields = async (indexes: string[]) => {
@@ -261,7 +267,17 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
                   setTimeFieldOptions([firstFieldOption]);
-                  setDefaultExpressionValues();
+                  setAlertProperty('params', {
+                    ...alertParams,
+                    index: indices,
+                    aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                    termSize: DEFAULT_VALUES.TERM_SIZE,
+                    thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                    timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                    timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                    groupBy: DEFAULT_VALUES.GROUP_BY,
+                    threshold: DEFAULT_VALUES.THRESHOLD,
+                  });
                   return;
                 }
                 const currentEsFields = await getFields(indices);

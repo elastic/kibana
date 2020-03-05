@@ -8,10 +8,8 @@ import React, { useEffect, FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,18 +49,6 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
                   <FormattedMessage
                     id="xpack.transform.transformsWizard.createTransformTitle"
                     defaultMessage="Create transform"
-                  />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
-                      defaultMessage: `Beta`,
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.transform.transformsWizard.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
                   />
                 </h1>
               </EuiFlexItem>

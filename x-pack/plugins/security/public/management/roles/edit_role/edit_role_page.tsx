@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -44,11 +45,13 @@ import {
   RawKibanaPrivileges,
   Role,
   BuiltinESPrivileges,
-  isReadOnlyRole as checkIfRoleReadOnly,
-  isReservedRole as checkIfRoleReserved,
+  isRoleReadOnly as checkIfRoleReadOnly,
+  isRoleReserved as checkIfRoleReserved,
+  isRoleDeprecated as checkIfRoleDeprecated,
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
+  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
@@ -299,8 +302,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   }
 
   const isEditingExistingRole = !!roleName && action === 'edit';
-  const isReadOnlyRole = checkIfRoleReadOnly(role);
-  const isReservedRole = checkIfRoleReserved(role);
+  const isRoleReadOnly = checkIfRoleReadOnly(role);
+  const isRoleReserved = checkIfRoleReserved(role);
+  const isDeprecatedRole = checkIfRoleDeprecated(role);
 
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
 
@@ -309,7 +313,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isReservedRole) {
+    if (isRoleReserved) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
@@ -343,7 +347,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   };
 
   const getActionButton = () => {
-    if (isEditingExistingRole && !isReadOnlyRole) {
+    if (isEditingExistingRole && !isRoleReadOnly) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteRoleButton canDelete={true} onDelete={handleDeleteRole} />
@@ -365,7 +369,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           }
           helpText={
-            !isReservedRole && isEditingExistingRole ? (
+            !isRoleReserved && isEditingExistingRole ? (
               <FormattedMessage
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
@@ -381,7 +385,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             value={role.name || ''}
             onChange={onNameChange}
             data-test-subj={'roleFormNameInput'}
-            readOnly={isReservedRole || isEditingExistingRole}
+            readOnly={isRoleReserved || isEditingExistingRole}
           />
         </EuiFormRow>
       </EuiPanel>
@@ -400,7 +404,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <EuiSpacer />
         <ElasticsearchPrivileges
           role={role}
-          editable={!isReadOnlyRole}
+          editable={!isRoleReadOnly}
           indicesAPIClient={indicesAPIClient}
           onChange={onRoleChange}
           runAsUsers={runAsUsers}
@@ -426,7 +430,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           spacesEnabled={spacesEnabled}
           features={features}
           uiCapabilities={uiCapabilities}
-          editable={!isReadOnlyRole}
+          editable={!isRoleReadOnly}
           role={role}
           onChange={onRoleChange}
           validator={validator}
@@ -436,7 +440,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   };
 
   const getFormButtons = () => {
-    if (isReadOnlyRole) {
+    if (isRoleReadOnly) {
       return getReturnToRoleListButton();
     }
 
@@ -479,7 +483,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={saveRole}
-        disabled={isReservedRole}
+        disabled={isRoleReserved}
       >
         {saveText}
       </EuiButton>
@@ -563,7 +567,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
         <EuiText size="s">{description}</EuiText>
 
-        {isReservedRole && (
+        {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
@@ -574,6 +578,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 />
               </p>
             </EuiText>
+          </Fragment>
+        )}
+
+        {isDeprecatedRole && (
+          <Fragment>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={getExtendedRoleDeprecationNotice(role)}
+              color="warning"
+              iconType="alert"
+            />
           </Fragment>
         )}
 

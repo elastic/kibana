@@ -12,8 +12,6 @@ import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
 export interface AlertsContextValue {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
@@ -25,6 +23,7 @@ export interface AlertsContextValue {
   >;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
+  metadata?: Record<string, any>;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

@@ -10,9 +10,7 @@ import {
   getDefaultPrivileges,
 } from '../../../../../legacy/plugins/ml/common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
-import { checkLicense } from '../check_license';
-import { LICENSE_TYPE } from '../../../../../legacy/plugins/ml/common/constants/license';
-import { LicenseCheckResult } from '../../types';
+import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 
 import { mlPrivileges } from './privileges';
 
@@ -27,7 +25,7 @@ interface Response {
 
 export function privilegesProvider(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  licenseCheckResult: LicenseCheckResult,
+  mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>,
   ignoreSpaces: boolean = false
 ) {
@@ -37,9 +35,9 @@ export function privilegesProvider(
     const privileges = getDefaultPrivileges();
 
     const upgradeInProgress = await isUpgradeInProgress();
-    const securityDisabled = licenseCheckResult.isSecurityDisabled;
-    const license = checkLicense(licenseCheckResult);
-    const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
+    const isSecurityEnabled = mlLicense.isSecurityEnabled();
+
+    const isPlatinumOrTrialLicense = mlLicense.isFullLicense();
     const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 
     const setGettingPrivileges = isPlatinumOrTrialLicense
@@ -61,7 +59,7 @@ export function privilegesProvider(
       };
     }
 
-    if (securityDisabled === true) {
+    if (isSecurityEnabled === false) {
       if (upgradeInProgress === true) {
         // if security is disabled and an upgrade in is progress,
         // force all "getting" privileges to be true

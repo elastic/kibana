@@ -1,92 +1,36 @@
-def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
-  return {
-    jobRunner('tests-xl', true) {
-      withGcsArtifactUpload(machineName, {
-        withPostBuildReporting {
-          doSetup()
-          preWorkerClosure()
-
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
-
-            return {
-              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-              def delay = (workerNumber-1)*20
-              sleep(delay)
-
-              workerClosure(workerNumber)
-            }
-          }
-
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
-          }
-
-          parallel(workers)
-        }
-      })
-    }
-  }
-}
-
-def withWorker(machineName, label, Closure closure) {
-  return {
-    jobRunner(label, false) {
-      withGcsArtifactUpload(machineName) {
-        withPostBuildReporting {
-          doSetup()
-          closure()
-        }
-      }
-    }
-  }
-}
-
-def intakeWorker(jobName, String script) {
-  return withWorker(jobName, 'linux && immutable') {
-    withEnv([
-      "JOB=${jobName}",
-    ]) {
-      runbld(script, "Execute ${jobName}")
-    }
-  }
-}
-
 def withPostBuildReporting(Closure closure) {
   try {
     closure()
   } finally {
-    catchError {
+    catchErrors {
       runErrorReporter()
     }
 
-    catchError {
+    catchErrors {
       runbld.junit()
     }
 
-    catchError {
+    catchErrors {
       publishJunit()
     }
   }
 }
 
-def getPostBuildWorker(name, closure) {
-  return { workerNumber ->
-    def kibanaPort = "61${workerNumber}1"
-    def esPort = "61${workerNumber}2"
-    def esTransportPort = "61${workerNumber}3"
+def functionalTestProcess(String name, Closure closure) {
+  return { processNumber ->
+    def kibanaPort = "61${processNumber}1"
+    def esPort = "61${processNumber}2"
+    def esTransportPort = "61${processNumber}3"
 
     withEnv([
-      "CI_WORKER_NUMBER=${workerNumber}",
+      "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
       "IS_PIPELINE_JOB=1",
+      "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
     ]) {
       closure()
@@ -94,8 +38,16 @@ def getPostBuildWorker(name, closure) {
   }
 }
 
-def getOssCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("ciGroup" + ciGroup, {
+def functionalTestProcess(String name, String script) {
+  return functionalTestProcess(name) {
+    retryable(name) {
+      runbld(script, "Execute ${name}")
+    }
+  }
+}
+
+def ossCiGroupProcess(ciGroup) {
+  return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -104,67 +56,17 @@ def getOssCiGroupWorker(ciGroup) {
         runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
       }
     }
-  })
+  }
 }
 
-def getXpackCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+def xpackCiGroupProcess(ciGroup) {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
       retryable("xpack-kibana-ciGroup${ciGroup}") {
         runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
-      }
-    }
-  })
-}
-
-def jobRunner(label, useRamDisk, closure) {
-  node(label) {
-    agentInfo.print()
-
-    if (useRamDisk) {
-      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
-      def originalWorkspace = env.WORKSPACE
-      ws('/tmp/workspace') {
-        sh(
-          script: """
-            mkdir -p /dev/shm/workspace
-            mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-            rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
-            ln -s /dev/shm/workspace '${originalWorkspace}'
-          """,
-          label: "Move workspace to RAM - /dev/shm/workspace"
-        )
-      }
-    }
-
-    def scmVars
-
-    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retryWithDelay(8, 15) {
-      scmVars = checkout scm
-    }
-
-    withEnv([
-      "CI=true",
-      "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
-      "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
-    ]) {
-      withCredentials([
-        string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
-        string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
-        string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
-      ]) {
-        // scm is configured to check out to the ./kibana directory
-        dir('kibana') {
-          closure()
-        }
       }
     }
   }
@@ -210,7 +112,7 @@ def withGcsArtifactUpload(workerName, closure) {
     try {
       closure()
     } finally {
-      catchError {
+      catchErrors {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
         }
@@ -243,7 +145,7 @@ def sendMail() {
 }
 
 def sendInfraMail() {
-  catchError {
+  catchErrors {
     step([
       $class: 'Mailer',
       notifyEveryUnstableBuild: true,
@@ -254,7 +156,7 @@ def sendInfraMail() {
 }
 
 def sendKibanaMail() {
-  catchError {
+  catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
@@ -297,6 +199,20 @@ def runErrorReporter() {
     """,
     "Report failed tests, if necessary"
   )
+}
+
+def call(Map params = [:], Closure closure) {
+  def config = [timeoutMinutes: 135] + params
+
+  stage("Kibana Pipeline") {
+    timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
+      timestamps {
+        ansiColor('xterm') {
+          closure()
+        }
+      }
+    }
+  }
 }
 
 return this
