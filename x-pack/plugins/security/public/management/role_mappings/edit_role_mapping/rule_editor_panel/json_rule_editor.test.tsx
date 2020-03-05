@@ -55,7 +55,7 @@ describe('JSONRuleEditor', () => {
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     const { value } = wrapper.find(EuiCodeEditor).props();
-    expect(JSON.parse(value)).toEqual({
+    expect(JSON.parse(value as string)).toEqual({
       all: [
         {
           any: [{ field: { username: '*' } }],
@@ -90,10 +90,7 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper
-        .find(EuiCodeEditor)
-        .props()
-        .onChange(allRule + ', this makes invalid JSON');
+      wrapper.find(EuiCodeEditor).props().onChange!(allRule + ', this makes invalid JSON');
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -121,10 +118,7 @@ describe('JSONRuleEditor', () => {
     });
 
     act(() => {
-      wrapper
-        .find(EuiCodeEditor)
-        .props()
-        .onChange(invalidRule);
+      wrapper.find(EuiCodeEditor).props().onChange!(invalidRule);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -143,10 +137,7 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper
-        .find(EuiCodeEditor)
-        .props()
-        .onChange(allRule + ', this makes invalid JSON');
+      wrapper.find(EuiCodeEditor).props().onChange!(allRule + ', this makes invalid JSON');
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -156,10 +147,7 @@ describe('JSONRuleEditor', () => {
     props.onValidityChange.mockReset();
 
     act(() => {
-      wrapper
-        .find(EuiCodeEditor)
-        .props()
-        .onChange(allRule);
+      wrapper.find(EuiCodeEditor).props().onChange!(allRule);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
