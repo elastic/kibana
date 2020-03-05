@@ -28,8 +28,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
       useCurrentDashboardFilters: true,
     };
   },
-  isValid: (name, config) => {
-    if (!name) return false;
+  isValid: config => {
     if (!config.dashboardId) return false;
     return true;
   },
@@ -93,8 +92,7 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
       openInNewTab: false,
     };
   },
-  isValid: (name, config) => {
-    if (!name) return false;
+  isValid: config => {
     if (!config.url) return false;
     return true;
   },
@@ -166,7 +164,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>
       <div>
         Is config valid:{' '}
-        {JSON.stringify(state.currentActionFactory?.isValid('fake name', state.config!) ?? false)}
+        {JSON.stringify(state.currentActionFactory?.isValid(state.config!) ?? false)}
       </div>
     </>
   );
