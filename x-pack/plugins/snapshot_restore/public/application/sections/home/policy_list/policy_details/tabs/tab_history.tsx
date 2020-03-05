@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeEditor,
@@ -155,15 +156,13 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
                   maxLines={12}
                   wrapEnabled={true}
                   showGutter={false}
-                  aria-label={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyDetails.lastFailure.detailsAriaLabel"
-                      defaultMessage="Last failure details for policy '{name}'"
-                      values={{
-                        name,
-                      }}
-                    />
-                  }
+                  aria-label={i18n.translate(
+                    'xpack.snapshotRestore.policyDetails.lastFailure.detailsAriaLabel',
+                    {
+                      defaultMessage: `Last failure details for policy '{name}'`,
+                      values: { name },
+                    }
+                  )}
                 />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
