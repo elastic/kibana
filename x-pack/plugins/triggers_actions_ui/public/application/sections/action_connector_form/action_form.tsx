@@ -44,13 +44,13 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  actionTypes?: ActionType[];
-  messageVariables?: string[];
-  defaultActionMessage?: string;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  actionTypes?: ActionType[];
+  messageVariables?: string[];
+  defaultActionMessage?: string;
 }
 
 interface ActiveActionConnectorState {

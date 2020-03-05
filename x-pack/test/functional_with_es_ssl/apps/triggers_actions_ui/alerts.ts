@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const find = getService('find');
-  const retry = getService('retry');
 
   async function createAlert(alertTypeId?: string, name?: string, params?: any) {
     const { body: createdAlert } = await supertest

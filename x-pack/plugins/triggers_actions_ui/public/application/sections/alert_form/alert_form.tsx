@@ -117,14 +117,12 @@ export const AlertForm = ({
         }
         setAlertTypesIndex(index);
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-              { defaultMessage: 'Unable to load alert types' }
-            ),
-          });
-        }
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+            { defaultMessage: 'Unable to load alert types' }
+          ),
+        });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
