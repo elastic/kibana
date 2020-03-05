@@ -74,7 +74,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncIconSizeWithMb(symbolLayerId, mbMap) {
-    const rangeFieldMeta = this.getFieldMeta();
+    const rangeFieldMeta = this.getRangeFieldMeta();
     if (this._isSizeDynamicConfigComplete(this._options) && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getComputedFieldName();
@@ -120,7 +120,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   getMbSizeExpression() {
-    const rangeFieldMeta = this.getFieldMeta();
+    const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete(this._options) || !rangeFieldMeta) {
       return null;
     }

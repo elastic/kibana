@@ -139,7 +139,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         ...colorStops,
       ];
     } else {
-      const rangeFieldMeta = this.getFieldMeta();
+      const rangeFieldMeta = this.getRangeFieldMeta();
       if (!rangeFieldMeta) {
         return null;
       }
@@ -246,7 +246,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
     } else {
-      const rangeFieldMeta = this.getFieldMeta();
+      const rangeFieldMeta = this.getRangeFieldMeta();
       if (!rangeFieldMeta) {
         return null;
       }
