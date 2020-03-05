@@ -54,7 +54,7 @@ describe('Test discover state', () => {
   });
   test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(index:modified)');
-    await history.push('/');
+    history.push('/');
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "index": "modified",
