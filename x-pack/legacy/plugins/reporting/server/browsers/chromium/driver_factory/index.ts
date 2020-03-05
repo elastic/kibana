@@ -110,8 +110,8 @@ export class HeadlessChromiumDriverFactory {
 
         page = await browser.newPage();
 
-        // All navigation methods default to 30 seconds,
-        // All waitFor methods have their own timeout config
+        // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
+        // All waitFor methods have their own timeout config passed in to them
         page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
 
         logger.debug(`Browser page driver created`);
