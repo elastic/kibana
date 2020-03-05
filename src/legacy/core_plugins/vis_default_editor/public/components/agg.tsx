@@ -109,11 +109,11 @@ function DefaultEditorAgg({
 
   // This useEffect is required to update the timeRange value and initiate rerender to keep labels up to date (Issue #57822).
   useEffect(() => {
-    if (timeRange && agg.type.name === 'date_histogram') {
+    if (timeRange && aggName === 'date_histogram') {
       agg.aggConfigs.setTimeRange(timeRange);
     }
     setAggDescription(buildAggDescription(agg));
-  }, [agg, timeRange]);
+  }, [agg, aggName, timeRange]);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
