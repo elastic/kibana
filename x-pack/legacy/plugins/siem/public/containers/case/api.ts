@@ -47,6 +47,7 @@ export const getTags = async (): Promise<string[]> => {
 export const getCases = async ({
   filterOptions = {
     search: '',
+    state: 'open',
     tags: [],
   },
   queryParams = {
@@ -56,7 +57,12 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
-  const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
+  const stateFilter = `case-workflow.attributes.state: ${filterOptions.state}`;
+  const tags = [
+    ...(filterOptions.tags?.reduce((acc, t) => [...acc, `case-workflow.attributes.tags: ${t}`], [
+      stateFilter,
+    ]) ?? [stateFilter]),
+  ];
   const query = {
     ...queryParams,
     ...(tags.length > 0 ? { filter: tags.join(' AND ') } : {}),

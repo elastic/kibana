@@ -43,7 +43,7 @@ interface Props {
   /** Function to invoke when the modal is closed */
   onClose: () => void;
   /** Function to invoke when a file is uploaded */
-  onFileUpload: (assets: FileList) => void;
+  onFileUpload: (assets: FileList | null) => void;
   /** Function to invoke when an asset is copied */
   onAssetCopy: (asset: AssetType) => void;
   /** Function to invoke when an asset is created */

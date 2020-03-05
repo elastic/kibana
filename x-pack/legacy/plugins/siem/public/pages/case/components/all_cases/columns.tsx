@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiBadge, EuiTableFieldDataColumnType, EuiTableComputedColumnType } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiTableActionsColumnType,
+  EuiAvatar,
+} from '@elastic/eui';
+import styled from 'styled-components';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
@@ -12,17 +20,61 @@ import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
 
-export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
+export type CasesColumns =
+  | EuiTableFieldDataColumnType<Case>
+  | EuiTableComputedColumnType<Case>
+  | EuiTableActionsColumnType<Case>;
 
-const renderStringField = (field: string, dataTestSubj: string) =>
-  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
+const MediumShadeText = styled.p`
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+`;
 
-export const getCasesColumns = (): CasesColumns[] => [
+const Spacer = styled.span`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+const TempNumberComponent = () => <span>{1}</span>;
+TempNumberComponent.displayName = 'TempNumberComponent';
+
+export const getCasesColumns = (
+  actions: Array<DefaultItemIconButtonAction<Case>>
+): CasesColumns[] => [
   {
     name: i18n.NAME,
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>;
+        const caseDetailsLinkComponent = (
+          <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>
+        );
+        return theCase.state === 'open' ? (
+          caseDetailsLinkComponent
+        ) : (
+          <>
+            <MediumShadeText>
+              {caseDetailsLinkComponent}
+              <Spacer>{i18n.CLOSED}</Spacer>
+            </MediumShadeText>
+          </>
+        );
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
+    field: 'createdBy',
+    name: i18n.REPORTER,
+    render: (createdBy: Case['createdBy']) => {
+      if (createdBy != null) {
+        return (
+          <>
+            <EuiAvatar
+              className="userAction__circle"
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              size="s"
+            />
+            <Spacer data-test-subj="case-table-column-createdBy">{createdBy.username}</Spacer>
+          </>
+        );
       }
       return getEmptyTagValue();
     },
@@ -51,8 +103,15 @@ export const getCasesColumns = (): CasesColumns[] => [
     truncateText: true,
   },
   {
+    align: 'right',
+    field: 'commentCount', // TO DO once we have commentCount returned in the API: https://github.com/elastic/kibana/issues/58525
+    name: i18n.COMMENTS,
+    sortable: true,
+    render: TempNumberComponent,
+  },
+  {
     field: 'createdAt',
-    name: i18n.CREATED_AT,
+    name: i18n.OPENED_ON,
     sortable: true,
     render: (createdAt: Case['createdAt']) => {
       if (createdAt != null) {
@@ -67,31 +126,7 @@ export const getCasesColumns = (): CasesColumns[] => [
     },
   },
   {
-    field: 'createdBy.username',
-    name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']['username']) =>
-      renderStringField(createdBy, `case-table-column-username`),
-  },
-  {
-    field: 'updatedAt',
-    name: i18n.LAST_UPDATED,
-    sortable: true,
-    render: (updatedAt: Case['updatedAt']) => {
-      if (updatedAt != null) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={updatedAt}
-            data-test-subj={`case-table-column-updatedAt`}
-          />
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: 'state',
-    name: i18n.STATE,
-    sortable: true,
-    render: (state: Case['state']) => renderStringField(state, `case-table-column-state`),
+    name: 'Actions',
+    actions,
   },
 ];
