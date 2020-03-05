@@ -9,7 +9,7 @@ import React from 'react';
 import { toExpression } from '@kbn/interpreter/common';
 import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../i18n';
-import { TimeFilter } from './components/time_filter';
+import { TimeFilter } from './component/time_filter';
 
 const { timeFilter: strings } = RendererStrings;
 
