@@ -26,12 +26,11 @@ more detailed information.
 
 [float]
 [[snapshot-permissions]]
-=== Permissions required for Snapshot and Restore
-The minimum required permissions to access *Snapshot and Restore* are:
+=== Required permissions
+The minimum required permissions to access *Snapshot and Restore* follow:
 
 * Cluster privileges: `monitor`, `manage_slm`, `cluster:admin/snapshot`, and `cluster:admin/repository`
-* Index privileges (optional): `all` on the `monitor` index if you want to access content on the *Restore Status* tab
-* {kib} privileges: Read-only access to *Advanced Settings*
+* Index privileges: `all` on the `monitor` index if you want to access content on the *Restore Status* tab
 
 You can add these privileges in *Management > Security > Roles*.
 
