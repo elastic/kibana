@@ -43,9 +43,6 @@ export const updateActionRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
-      if (!context.actions) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
-      }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       const { name, config, secrets } = req.body;

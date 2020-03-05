@@ -29,9 +29,6 @@ export const listActionTypesRoute = (router: IRouter, licenseState: LicenseState
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
-      if (!context.actions) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
-      }
       return res.ok({
         body: context.actions.listTypes(),
       });
