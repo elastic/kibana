@@ -276,7 +276,6 @@ function discoverController(
   subscriptions.add(
     subscribeWithScope($scope, filterManager.getUpdates$(), {
       next: () => {
-        $scope.state.filters = filterManager.getAppFilters();
         $scope.updateDataSource();
       },
     })
