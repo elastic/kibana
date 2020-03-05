@@ -93,7 +93,10 @@ export function MachineLearningJobWizardCommonProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardAggSelection > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected  agg and field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
@@ -110,7 +113,10 @@ export function MachineLearningJobWizardCommonProvider(
         'mlJobWizardInputBucketSpan',
         'value'
       );
-      expect(actualBucketSpan).to.eql(expectedValue);
+      expect(actualBucketSpan).to.eql(
+        expectedValue,
+        `Expected  bucket span to be '${expectedValue}' (got '${actualBucketSpan}')`
+      );
     },
 
     async setBucketSpan(bucketSpan: string) {
@@ -127,7 +133,10 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertJobIdValue(expectedValue: string) {
       const actualJobId = await testSubjects.getAttribute('mlJobWizardInputJobId', 'value');
-      expect(actualJobId).to.eql(expectedValue);
+      expect(actualJobId).to.eql(
+        expectedValue,
+        `Expected  job id to be '${expectedValue}' (got '${actualJobId}')`
+      );
     },
 
     async setJobId(jobId: string) {
@@ -145,7 +154,10 @@ export function MachineLearningJobWizardCommonProvider(
       const actualJobDescription = await testSubjects.getVisibleText(
         'mlJobWizardInputJobDescription'
       );
-      expect(actualJobDescription).to.eql(expectedValue);
+      expect(actualJobDescription).to.eql(
+        expectedValue,
+        `Expected  job description to be '${expectedValue}' (got '${actualJobDescription}')`
+      );
     },
 
     async setJobDescription(jobDescription: string) {
@@ -166,12 +178,20 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertJobGroupSelection(jobGroups: string[]) {
-      expect(await this.getSelectedJobGroups()).to.eql(jobGroups);
+      const actualJobGroups = await this.getSelectedJobGroups();
+      expect(actualJobGroups).to.eql(
+        jobGroups,
+        `Expected  job groups to be '${jobGroups}' (got '${actualJobGroups}')`
+      );
     },
 
     async addJobGroup(jobGroup: string) {
       await comboBox.setCustom('mlJobWizardComboBoxJobGroups > comboBoxInput', jobGroup);
-      expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
+      const actualJobGroups = await this.getSelectedJobGroups();
+      expect(actualJobGroups).to.contain(
+        jobGroup,
+        `Expected  job groups to contain '${jobGroup}' (got '${actualJobGroups}')`
+      );
     },
 
     async getSelectedCalendars(): Promise<string[]> {
@@ -182,13 +202,21 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertCalendarsSelection(calendars: string[]) {
-      expect(await this.getSelectedCalendars()).to.eql(calendars);
+      const actualCalendars = await this.getSelectedCalendars();
+      expect(actualCalendars).to.eql(
+        calendars,
+        `Expected  calendars to be '${calendars}' (got '${actualCalendars}')`
+      );
     },
 
     async addCalendar(calendarId: string) {
       await this.ensureAdditionalSettingsSectionOpen();
       await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
-      expect(await this.getSelectedCalendars()).to.contain(calendarId);
+      const actualCalendars = await this.getSelectedCalendars();
+      expect(actualCalendars).to.contain(
+        calendarId,
+        `Expected  calendars to contain '${calendarId}' (got '${actualCalendars}')`
+      );
     },
 
     async assertModelPlotSwitchExists(
@@ -221,7 +249,12 @@ export function MachineLearningJobWizardCommonProvider(
       const actualCheckedState = await this.getModelPlotSwitchCheckedState({
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });
-      expect(actualCheckedState).to.eql(expectedValue);
+      expect(actualCheckedState).to.eql(
+        expectedValue,
+        `Expected  model plot switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          actualCheckedState ? 'enabled' : 'disabled'
+        }')`
+      );
     },
 
     async assertModelPlotSwitchEnabled(expectedValue: boolean) {
@@ -264,7 +297,12 @@ export function MachineLearningJobWizardCommonProvider(
       const actualCheckedState = await this.getDedicatedIndexSwitchCheckedState({
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });
-      expect(actualCheckedState).to.eql(expectedValue);
+      expect(actualCheckedState).to.eql(
+        expectedValue,
+        `Expected  dedicated index switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          actualCheckedState ? 'enabled' : 'disabled'
+        }')`
+      );
     },
 
     async activateDedicatedIndexSwitch(
@@ -308,7 +346,10 @@ export function MachineLearningJobWizardCommonProvider(
         subj = advancedSectionSelector(subj);
       }
       const actualModelMemoryLimit = await testSubjects.getAttribute(subj, 'value');
-      expect(actualModelMemoryLimit).to.eql(expectedValue);
+      expect(actualModelMemoryLimit).to.eql(
+        expectedValue,
+        `Expected  model memory limit to be '${expectedValue}' (got '${actualModelMemoryLimit}')`
+      );
     },
 
     async setModelMemoryLimit(
@@ -335,12 +376,20 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertInfluencerSelection(influencers: string[]) {
-      expect(await this.getSelectedInfluencers()).to.eql(influencers);
+      const actualInfluencers = await this.getSelectedInfluencers();
+      expect(actualInfluencers).to.eql(
+        influencers,
+        `Expected  influencers to be '${influencers}' (got '${actualInfluencers}')`
+      );
     },
 
     async addInfluencer(influencer: string) {
       await comboBox.set('mlInfluencerSelect > comboBoxInput', influencer);
-      expect(await this.getSelectedInfluencers()).to.contain(influencer);
+      const actualInfluencers = await this.getSelectedInfluencers();
+      expect(actualInfluencers).to.contain(
+        influencer,
+        `Expected  influencers to contain '${influencer}' (got '${actualInfluencers}')`
+      );
     },
 
     async assertAnomalyChartExists(chartType: string, preSelector?: string) {
@@ -355,9 +404,13 @@ export function MachineLearningJobWizardCommonProvider(
     ) {
       await testSubjects.existOrFail(`mlDetector ${detectorPosition}`);
       await testSubjects.existOrFail(`mlDetector ${detectorPosition} > mlDetectorTitle`);
-      expect(
-        await testSubjects.getVisibleText(`mlDetector ${detectorPosition} > mlDetectorTitle`)
-      ).to.eql(aggAndFieldIdentifier);
+      const actualDetectorIdentifier = await testSubjects.getVisibleText(
+        `mlDetector ${detectorPosition} > mlDetectorTitle`
+      );
+      expect(actualDetectorIdentifier).to.eql(
+        aggAndFieldIdentifier,
+        `Expected  identifier of detector number '${detectorPosition}' to be '${aggAndFieldIdentifier}' (got '${actualDetectorIdentifier}')`
+      );
 
       await this.assertAnomalyChartExists(chartType, `mlDetector ${detectorPosition}`);
     },
@@ -381,10 +434,14 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertDateRangeSelection(expectedStartDate: string, expectedEndDate: string) {
       await retry.tryForTime(5000, async () => {
-        expect(await this.getSelectedDateRange()).to.eql({
-          startDate: expectedStartDate,
-          endDate: expectedEndDate,
-        });
+        const actualDateRange = await this.getSelectedDateRange();
+        expect(actualDateRange).to.eql(
+          {
+            startDate: expectedStartDate,
+            endDate: expectedEndDate,
+          },
+          `Expected  date range selection to be '[${expectedStartDate} - ${expectedEndDate}]' (got '[${actualDateRange.startDate} - ${actualDateRange.endDate}]')`
+        );
       });
     },
 

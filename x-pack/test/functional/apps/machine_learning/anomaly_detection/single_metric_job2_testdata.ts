@@ -6,7 +6,7 @@
 
 const testDataList = [
   {
-    suiteTitle: 'with farequote dataset and 30m bucket span',
+    suiteSuffix: 'with farequote dataset and 30m bucket span',
     jobSource: 'farequote',
     jobId: `fq_single_1_${Date.now()}`,
     get jobIdClone(): string {
