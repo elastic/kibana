@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -31,7 +31,13 @@ import {
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-import { useGetAgentConfigs, usePagination, useLink, useConfig } from '../../../hooks';
+import {
+  useGetAgentConfigs,
+  usePagination,
+  useLink,
+  useConfig,
+  useUrlParams,
+} from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
@@ -162,6 +168,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const [search, setSearch] = useState<string>('');
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
+  const urlParams = useUrlParams();
 
   // Fetch agent configs
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
@@ -173,6 +180,17 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   // Base path for config details
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
   const FLEET_URI = useLink(FLEET_AGENTS_PATH);
+
+  useEffect(() => {
+    if ('kuery' in urlParams) {
+      const kuery = Array.isArray(urlParams.kuery)
+        ? urlParams.kuery[urlParams.kuery.length - 1]
+        : urlParams.kuery;
+      if (kuery) {
+        setSearch(kuery);
+      }
+    }
+  }, [urlParams]);
 
   // Some configs retrieved, set up table props
   const columns = useMemo(() => {
