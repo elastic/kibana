@@ -35,10 +35,7 @@ interface PluginsStart {
 
 export class Plugin
   implements
-    CorePlugin<
-      TriggersAndActionsUIPublicPluginSetup,
-      TriggersAndActionsUIPublicPluginStart | undefined
-    > {
+    CorePlugin<TriggersAndActionsUIPublicPluginSetup, TriggersAndActionsUIPublicPluginStart> {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
@@ -65,10 +62,7 @@ export class Plugin
     };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: PluginsStart
-  ): TriggersAndActionsUIPublicPluginStart | undefined {
+  public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const { capabilities } = core.application;
 
     const canShowActions = hasShowActionsCapability(capabilities);
@@ -76,37 +70,34 @@ export class Plugin
 
     // Don't register routes when user doesn't have access to the application
     if (!canShowActions && !canShowAlerts) {
-      return;
+      plugins.management.sections.getSection('kibana')!.registerApp({
+        id: 'triggersActions',
+        title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+          defaultMessage: 'Alerts and Actions',
+        }),
+        order: 7,
+        mount: params => {
+          boot({
+            dataPlugin: plugins.data,
+            charts: plugins.charts,
+            element: params.element,
+            toastNotifications: core.notifications.toasts,
+            injectedMetadata: core.injectedMetadata,
+            http: core.http,
+            uiSettings: core.uiSettings,
+            docLinks: core.docLinks,
+            chrome: core.chrome,
+            savedObjects: core.savedObjects.client,
+            I18nContext: core.i18n.Context,
+            capabilities: core.application.capabilities,
+            setBreadcrumbs: params.setBreadcrumbs,
+            actionTypeRegistry: this.actionTypeRegistry,
+            alertTypeRegistry: this.alertTypeRegistry,
+          });
+          return () => {};
+        },
+      });
     }
-
-    plugins.management.sections.getSection('kibana')!.registerApp({
-      id: 'triggersActions',
-      title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-        defaultMessage: 'Alerts and Actions',
-      }),
-      order: 7,
-      mount: params => {
-        boot({
-          dataPlugin: plugins.data,
-          charts: plugins.charts,
-          element: params.element,
-          toastNotifications: core.notifications.toasts,
-          injectedMetadata: core.injectedMetadata,
-          http: core.http,
-          uiSettings: core.uiSettings,
-          docLinks: core.docLinks,
-          chrome: core.chrome,
-          savedObjects: core.savedObjects.client,
-          I18nContext: core.i18n.Context,
-          capabilities: core.application.capabilities,
-          setBreadcrumbs: params.setBreadcrumbs,
-          actionTypeRegistry: this.actionTypeRegistry,
-          alertTypeRegistry: this.alertTypeRegistry,
-        });
-        return () => {};
-      },
-    });
-
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       alertTypeRegistry: this.alertTypeRegistry,

@@ -16,11 +16,11 @@ export interface AlertsContextValue {
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
 }
