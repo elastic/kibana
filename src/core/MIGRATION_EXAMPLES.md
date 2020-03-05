@@ -918,3 +918,9 @@ Would be converted to:
 ```typescript
 const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
 ```
+
+### Remarks
+
+The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
+legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
+saved object types until migrated.

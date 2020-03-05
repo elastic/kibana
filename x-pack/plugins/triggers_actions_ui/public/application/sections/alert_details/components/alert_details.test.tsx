@@ -8,9 +8,17 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiBadge,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiSwitch,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -54,7 +62,19 @@ describe('alert_details', () => {
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(
         <EuiTitle size="m">
-          <h1>{alert.name}</h1>
+          <h1>
+            {alert.name}
+            &emsp;
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
+                {
+                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                }
+              )}
+            />
+          </h1>
         </EuiTitle>
       )
     ).toBeTruthy();

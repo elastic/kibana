@@ -5,6 +5,7 @@
  */
 
 export { AggName, isAggName } from './aggregations';
+export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
 export {
   getDefaultSelectableFields,
   getFlattenedFields,
@@ -13,7 +14,6 @@ export {
   EsDoc,
   EsDocSource,
   EsFieldName,
-  MAX_COLUMNS,
 } from './fields';
 export { DropDownLabel, DropDownOption, Label } from './dropdown';
 export {

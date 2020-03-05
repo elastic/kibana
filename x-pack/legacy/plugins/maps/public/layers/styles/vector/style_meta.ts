@@ -5,43 +5,38 @@
  */
 
 import {
-  IFieldMetaDescriptor,
-  IStyleMetaDescriptor,
-  IGeometryTypesDescriptor,
+  StyleMetaDescriptor,
+  RangeFieldMeta,
+  CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
-  private _descriptor: IStyleMetaDescriptor;
-  constructor(styleMetaDescriptor: IStyleMetaDescriptor) {
-    this._descriptor = styleMetaDescriptor;
+  private readonly _descriptor: StyleMetaDescriptor;
+  constructor(styleMetaDescriptor: StyleMetaDescriptor | null | undefined) {
+    this._descriptor = styleMetaDescriptor ? styleMetaDescriptor : { fieldMeta: {} };
   }
 
-  getGeometryTypes(): IGeometryTypesDescriptor {
-    return this._descriptor.geometryTypes
-      ? this._descriptor.geometryTypes
-      : {
-          isPointsOnly: false,
-          isLinesOnly: false,
-          isPolygonsOnly: false,
-        };
+  getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
+    return this._descriptor && this._descriptor.fieldMeta[fieldName]
+      ? this._descriptor.fieldMeta[fieldName].range
+      : null;
   }
 
-  getFieldMetaDescriptor(field: string): IFieldMetaDescriptor | unknown {
-    if (field === 'geometryTypes') {
-      throw new Error('Cannot use geometryTypes as field-key');
-    }
-    return this._descriptor[field];
+  getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMeta | null {
+    return this._descriptor && this._descriptor.fieldMeta[fieldName]
+      ? this._descriptor.fieldMeta[fieldName].categories
+      : null;
   }
 
   isPointsOnly(): boolean {
-    return this.getGeometryTypes().isPointsOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isPointsOnly : false;
   }
 
   isLinesOnly(): boolean {
-    return this.getGeometryTypes().isLinesOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isLinesOnly : false;
   }
 
   isPolygonsOnly(): boolean {
-    return this.getGeometryTypes().isPolygonsOnly;
+    return this._descriptor.geometryTypes ? !!this._descriptor.geometryTypes.isPolygonsOnly : false;
   }
 }

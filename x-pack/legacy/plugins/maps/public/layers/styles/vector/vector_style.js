@@ -18,7 +18,6 @@ import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
   STYLE_TYPE,
-  SOURCE_META_ID_ORIGIN,
   SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
@@ -72,7 +71,7 @@ export class VectorStyle extends AbstractStyle {
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
 
-    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta || {});
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
@@ -275,7 +274,7 @@ export class VectorStyle extends AbstractStyle {
       }
     }
 
-    const featuresMeta = {
+    const styleMeta = {
       geometryTypes: {
         isPointsOnly: isOnlySingleFeatureType(
           VECTOR_SHAPE_TYPES.POINT,
@@ -293,23 +292,32 @@ export class VectorStyle extends AbstractStyle {
           hasFeatureType
         ),
       },
+      fieldMeta: {},
     };
 
     const dynamicProperties = this.getDynamicPropertiesArray();
     if (dynamicProperties.length === 0 || features.length === 0) {
       // no additional meta data to pull from source data request.
-      return featuresMeta;
+      return styleMeta;
     }
 
     dynamicProperties.forEach(dynamicProperty => {
-      const styleMeta = dynamicProperty.pluckStyleMetaFromFeatures(features);
-      if (styleMeta) {
-        const name = dynamicProperty.getField().getName();
-        featuresMeta[name] = styleMeta;
+      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+      const name = dynamicProperty.getField().getName();
+      if (!styleMeta.fieldMeta[name]) {
+        styleMeta.fieldMeta[name] = {};
+      }
+      if (categoricalStyleMeta) {
+        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+      }
+
+      if (ordinalStyleMeta) {
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
     });
 
-    return featuresMeta;
+    return styleMeta;
   }
 
   getSourceFieldNames() {
@@ -356,39 +364,9 @@ export class VectorStyle extends AbstractStyle {
     });
   }
 
-  _getFieldMeta = fieldName => {
-    const fieldMetaFromLocalFeatures = this._styleMeta.getFieldMetaDescriptor(fieldName);
-
-    const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
-    if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
-      return fieldMetaFromLocalFeatures;
-    }
-
-    let dataRequestId;
-    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      dataRequestId = SOURCE_META_ID_ORIGIN;
-    } else {
-      const join = this._layer.getValidJoins().find(join => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
-      });
-      if (join) {
-        dataRequestId = join.getSourceMetaDataRequestId();
-      }
-    }
-
-    if (!dataRequestId) {
-      return fieldMetaFromLocalFeatures;
-    }
-
-    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
-    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return fieldMetaFromLocalFeatures;
-    }
-
-    const data = styleMetaDataRequest.getData();
-    const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
-    return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
-  };
+  getStyleMeta() {
+    return this._styleMeta;
+  }
 
   _getFieldFormatter = fieldName => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
@@ -412,7 +390,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer._findDataRequestById(dataRequestId);
+    const formattersDataRequest = this._layer.findDataRequestById(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }
@@ -622,7 +600,7 @@ export class VectorStyle extends AbstractStyle {
         descriptor.options,
         styleName,
         field,
-        this._getFieldMeta,
+        this._layer,
         this._getFieldFormatter,
         isSymbolizedAsIcon
       );
@@ -642,7 +620,7 @@ export class VectorStyle extends AbstractStyle {
         descriptor.options,
         styleName,
         field,
-        this._getFieldMeta,
+        this._layer,
         this._getFieldFormatter
       );
     } else {
@@ -657,7 +635,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticOrientationProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicOrientationProperty(descriptor.options, styleName, field);
+      return new DynamicOrientationProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._layer,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
@@ -674,7 +658,7 @@ export class VectorStyle extends AbstractStyle {
         descriptor.options,
         VECTOR_STYLES.LABEL_TEXT,
         field,
-        this._getFieldMeta,
+        this._layer,
         this._getFieldFormatter
       );
     } else {
@@ -693,7 +677,7 @@ export class VectorStyle extends AbstractStyle {
         descriptor.options,
         VECTOR_STYLES.ICON,
         field,
-        this._getFieldMeta,
+        this._layer,
         this._getFieldFormatter
       );
     } else {

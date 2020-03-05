@@ -29,7 +29,6 @@ export { State } from 'ui/state_management/state';
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-export { PersistedState } from 'ui/persisted_state';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore

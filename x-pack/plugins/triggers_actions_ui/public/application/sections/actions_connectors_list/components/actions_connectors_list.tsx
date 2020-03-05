@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiTitle,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -370,8 +371,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
+      {(isLoadingActions || isLoadingActionTypes) && <EuiLoadingSpinner size="xl" />}
       {data.length !== 0 && table}
-      {data.length === 0 && canSave && emptyPrompt}
+      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
       {data.length === 0 && !canSave && noPermissionPrompt}
       <ActionsConnectorsContextProvider
         value={{

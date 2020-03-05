@@ -16,7 +16,12 @@ describe('CaseView ', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue([{ data }, dispatchUpdateCaseProperty]);
+    jest
+      .spyOn(apiHook, 'useUpdateCase')
+      .mockReturnValue([
+        { data, isLoading: false, isError: false, updateKey: null },
+        dispatchUpdateCaseProperty,
+      ]);
   });
 
   it('should render CaseComponent', () => {
@@ -78,5 +83,39 @@ describe('CaseView ', () => {
       updateKey: 'state',
       updateValue: 'closed',
     });
+  });
+
+  it('should render comments', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].commentId}-avatar"] [data-test-subj="user-action-avatar"]`
+        )
+        .first()
+        .prop('name')
+    ).toEqual(data.comments[0].createdBy.fullName);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="user-action-title"] strong`
+        )
+        .first()
+        .text()
+    ).toEqual(data.comments[0].createdBy.username);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="markdown"]`
+        )
+        .first()
+        .prop('source')
+    ).toEqual(data.comments[0].comment);
   });
 });
