@@ -383,6 +383,7 @@ function discoverController(
               defaultMessage:
                 'Save your Discover search so you can use it in visualizations and dashboards',
             })}
+            showDescription={false}
           />
         );
         showSaveModal(saveModal, core.i18n.Context);
@@ -848,6 +849,7 @@ function discoverController(
       $scope.searchSource.rawResponse = resp;
       Promise.resolve(
         buildVislibDimensions($scope.vis, {
+          timefilter,
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })

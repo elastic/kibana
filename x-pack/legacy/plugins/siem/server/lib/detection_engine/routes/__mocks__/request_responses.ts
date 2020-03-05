@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../../../plugins/actions/server';
-import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  SignalsStatusRestParams,
+  SignalsQueryRestParams,
+  SignalSearchResponse,
+} from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -18,9 +21,13 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
-import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  RuleAlertType,
+  IRuleSavedAttributesSavedObjectAttributes,
+  HapiReadableStream,
+} from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
-import { TEST_BOUNDARY } from './utils';
+import { requestMock } from './request';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -101,88 +108,99 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
   status: 'closed',
 });
 
-export const getUpdateRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getUpdateRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getPatchRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getPatchRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getReadRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getReadRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
-export const getFindRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}/_find`,
-});
+export const getFindRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+  });
 
-export const getReadBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-  payload: [typicalPayload()],
-});
+export const getReadBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    body: [typicalPayload()],
+  });
 
-export const getUpdateBulkRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getUpdateBulkRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
-export const getPatchBulkRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getPatchBulkRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
-export const getDeleteBulkRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteBulkRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
-export const getDeleteBulkRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteBulkRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequestById = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteAsPostBulkRequestById = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteAsPostBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
-export const getPrivilegeRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: DETECTION_ENGINE_PRIVILEGES_URL,
-});
+export const getPrivilegeRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_PRIVILEGES_URL,
+  });
 
-export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_PREPACKAGED_URL,
-});
+export const addPrepackagedRulesRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_PREPACKAGED_URL,
+  });
 
-export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
-});
+export const getPrepackagedRulesStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+  });
 
 export interface FindHit {
   page: number;
@@ -191,7 +209,7 @@ export interface FindHit {
   data: RuleAlertType[];
 }
 
-export const getFindResult = (): FindHit => ({
+export const getEmptyFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,
@@ -203,6 +221,13 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   perPage: 1,
   total: 1,
   data: [getResult()],
+});
+
+export const nonRuleFindResult = (): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [nonRuleAlert()],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -224,75 +249,96 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
-export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const ruleStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+    query: { ids: ['someId'] },
+  });
 
-export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    body: { file: hapiStream },
+  });
 
-export const getDeleteRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStream) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    body: { file: hapiStream },
+    query: { overwrite: true },
+  });
 
-export const getDeleteRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
-});
+export const getDeleteRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
-export const getCreateRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getDeleteRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
+  });
 
-export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByIdsPayload(),
-  },
-});
+export const getCreateRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByQueryPayload(),
-  },
-});
+export const getSetSignalStatusByIdsRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByIdsPayload(),
+  });
 
-export const getSignalsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQuery() },
-});
+export const getSetSignalStatusByQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByQueryPayload(),
+  });
 
-export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQueryAggs() },
-});
+export const getSignalsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQuery(),
+  });
+
+export const getSignalsAggsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQueryAggs(),
+  });
+
+export const getSignalsAggsAndQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
+  });
 
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+});
+
+export const nonRuleAlert = () => ({
+  ...getResult(),
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
+  name: 'Non-Rule Alert',
+  alertTypeId: 'something',
 });
 
 export const getResult = (): RuleAlertType => ({
@@ -471,6 +517,32 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
       version: 'WzMyLDFd',
     },
   ],
+});
+
+export const getEmptySignalsResponse = (): SignalSearchResponse => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+  aggregations: {
+    signalsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+  },
+});
+
+export const getSuccessfulSignalUpdateResponse = () => ({
+  took: 18,
+  timed_out: false,
+  total: 1,
+  updated: 1,
+  deleted: 0,
+  batches: 1,
+  version_conflicts: 0,
+  noops: 0,
+  retries: { bulk: 0, search: 0 },
+  throttled_millis: 0,
+  requests_per_second: -1,
+  throttled_until_millis: 0,
+  failures: [],
 });
 
 export const getIndexName = () => 'index-name';
