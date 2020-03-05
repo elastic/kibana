@@ -17,6 +17,14 @@
   &__scratchPadEntry {
     font-style: italic;
   }
+  &__entryContainer {
+    // TODO: Find a better way to get these px values (2 + 3)
+    // 1. Subtract the header size (height of Console app)
+    // 2. Subtract tab height
+    // 3. Subtract File actions height
+    height: calc(100vh - calc(#{$euiHeaderChildSize} * 2) - 37px - 24px);
+    overflow: auto;
+  }
 
   &__entry {
     font-size: $euiSizeM;
@@ -50,10 +58,6 @@
 
     &__fileName {
       cursor: pointer;
-    }
-
-    &:hover {
-      background-color: $euiColorLightShade;
     }
 
     &:focus {

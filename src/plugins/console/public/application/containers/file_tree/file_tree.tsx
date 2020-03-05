@@ -95,7 +95,7 @@ export const FileTree: FunctionComponent = () => {
         )}
 
         {/* File Tree */}
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <FileTreeComponent
             entries={filteredTextObjects
               .sort((a, b) =>

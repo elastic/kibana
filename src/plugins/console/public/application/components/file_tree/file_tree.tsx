@@ -39,7 +39,12 @@ export interface Props {
 
 export const FileTree: FunctionComponent<Props> = ({ entries, editingDisabled }) => {
   return (
-    <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+    <EuiFlexGroup
+      className="conApp__fileTree__entryContainer"
+      gutterSize="none"
+      responsive={false}
+      direction="column"
+    >
       {entries.map(
         ({ name, id, className, canDelete, onDelete, onSelect, onEdit, canEdit }, idx) => (
           <EuiFlexItem key={idx} grow={false}>
