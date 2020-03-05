@@ -62,7 +62,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') && license === 'trial'}`,
+          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
+            ['trial', 'basic'].includes(license)}`,
         ],
       },
       kbnTestServer: {
