@@ -29,8 +29,8 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       }
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
-        `/${logsUiTab}${decodeURI(queryString)}`,
-        decodeURI(queryString),
+        `/${logsUiTab}`,
+        queryString,
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
     },
