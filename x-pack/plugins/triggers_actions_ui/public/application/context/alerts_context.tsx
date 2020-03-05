@@ -23,6 +23,7 @@ export interface AlertsContextValue {
   >;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
+  metadata?: Record<string, any>;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);
