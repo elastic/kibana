@@ -136,13 +136,17 @@ export interface Dataset {
   ingest_pipeline: string;
   vars?: VarsEntry[];
   type: string;
+  streams?: Stream[];
   package: string;
 }
-
-export interface VarsEntry {
-  name: string;
-  default: string;
+export interface Stream {
+  input: string;
+  vars?: VarsEntry[];
+  dataset?: string;
+  description?: string;
 }
+
+export type VarsEntry = Record<string, any>;
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
