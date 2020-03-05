@@ -307,6 +307,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     layerId={layerId}
                     http={props.http}
                     dateRange={props.dateRange}
+                    data={props.data}
                   />
                   <EuiSpacer size="m" />
                 </>
