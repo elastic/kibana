@@ -73,44 +73,39 @@ export function http$<T>(url: string, options: RequestOptions): Observable<T> {
     headers: getResultHeaders(options.headers ?? {}),
   };
 
-  return kibanaFromFetch<T>(url, requestInit);
+  return fromHttpHandler<T>(url, requestInit);
 }
 
 /**
- * Adjusted rxjs fromFetch to use Kibana's HttpHandler.
+ * Creates an Observable from Kibana's HttpHandler.
  */
-export function kibanaFromFetch<T>(input: string, init?: RequestInit): Observable<T> {
+export function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
   return new Observable<T>(subscriber => {
     const controller = new AbortController();
     const signal = controller.signal;
-    let outerSignalHandler: () => void;
+
     let abortable = true;
     let unsubscribed = false;
 
-    let perSubscriberInit: RequestInit;
-    if (init) {
-      // If a signal is provided, just have it teardown. It's a cancellation token, basically.
-      if (init.signal) {
-        if (init.signal.aborted) {
-          controller.abort();
-        } else {
-          outerSignalHandler = () => {
-            if (!signal.aborted) {
-              controller.abort();
-            }
-          };
-          init.signal.addEventListener('abort', outerSignalHandler);
-        }
+    if (init?.signal) {
+      if (init.signal.aborted) {
+        controller.abort();
+      } else {
+        init.signal.addEventListener('abort', () => {
+          if (!signal.aborted) {
+            controller.abort();
+          }
+        });
       }
-      // init cannot be mutated or reassigned as it's closed over by the
-      // subscriber callback and is shared between subscribers.
-      perSubscriberInit = { ...init, signal };
-    } else {
-      perSubscriberInit = { signal };
     }
 
+    const perSubscriberInit: RequestInit = {
+      ...(init ? init : {}),
+      signal,
+    };
+
     getHttp()
-      .fetch(input, perSubscriberInit)
+      .fetch<T>(input, perSubscriberInit)
       .then(response => {
         abortable = false;
         subscriber.next(response);
@@ -119,7 +114,6 @@ export function kibanaFromFetch<T>(input: string, init?: RequestInit): Observabl
       .catch(err => {
         abortable = false;
         if (!unsubscribed) {
-          // Only forward the error if it wasn't an abort.
           subscriber.error(err);
         }
       });
