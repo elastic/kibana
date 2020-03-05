@@ -10,13 +10,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState } from '../../../utils/use_url_state';
 
-const INITIAL_STATE = {
+const INITIAL_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,
 };
 
 export const useWaffleTime = () => {
-  const [state, setState] = useUrlState<TimeState>({
+  const [state, setState] = useUrlState<WaffleTimeState>({
     defaultState: INITIAL_STATE,
     decodeUrlState,
     encodeUrlState,
@@ -53,15 +53,16 @@ export const useWaffleTime = () => {
     startAutoReload,
     stopAutoReload,
     jumpToTime,
+    setWaffleTimeState: setState,
   };
 };
 
-const TimeStateRT = rt.type({
+export const WaffleTimeStateRT = rt.type({
   currentTime: rt.number,
   isAutoReloading: rt.boolean,
 });
 
-type TimeState = rt.TypeOf<typeof TimeStateRT>;
-const encodeUrlState = TimeStateRT.encode;
+export type WaffleTimeState = rt.TypeOf<typeof WaffleTimeStateRT>;
+const encodeUrlState = WaffleTimeStateRT.encode;
 const decodeUrlState = (value: unknown) =>
-  pipe(TimeStateRT.decode(value), fold(constant(undefined), identity));
+  pipe(WaffleTimeStateRT.decode(value), fold(constant(undefined), identity));

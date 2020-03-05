@@ -6,47 +6,62 @@
 
 import React from 'react';
 import { useInterval } from 'react-use';
-import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
-import { KueryFilterQuery } from '../../store/local/waffle_filter';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { NodesOverview } from '../nodes_overview';
 import { Toolbar } from './toolbars/toolbar';
 import { PageContent } from '../page';
 import { useSnapshot } from '../../containers/waffle/use_snaphot';
 import { useInventoryMeta } from '../../containers/inventory_metadata/use_inventory_meta';
-import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
-import { InventoryItemType } from '../../../common/inventory_models/types';
 import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
 import { useWaffleFilters } from '../../pages/inventory_view/hooks/use_waffle_filters';
+import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
+import { useSourceContext } from '../../containers/source';
+import { InfraFormatterType, InfraWaffleMapGradientLegend } from '../../lib/lib';
 
-export interface LayoutProps {
-  options: InfraWaffleMapOptions;
-  nodeType: InventoryItemType;
-  onViewChange: (view: string) => void;
-  view: string;
-  boundsOverride: InfraWaffleMapBounds;
-  autoBounds: boolean;
-  metric: SnapshotMetricInput;
-  groupBy: SnapshotGroupBy;
-  sourceId: string;
-  accountId: string;
-  region: string;
-}
+const euiVisColorPalette = euiPaletteColorBlind();
 
-export const Layout = (props: LayoutProps) => {
-  const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
+export const Layout = () => {
+  const { sourceId, source } = useSourceContext();
+  const {
+    metric,
+    groupBy,
+    nodeType,
+    accountId,
+    region,
+    changeView,
+    view,
+    autoBounds,
+    boundsOverride,
+  } = useWaffleOptions();
+  const { accounts, regions } = useInventoryMeta(sourceId, nodeType);
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTime();
   const { filterQueryAsJson, applyFilterQuery } = useWaffleFilters();
   const { loading, nodes, reload, interval } = useSnapshot(
     filterQueryAsJson,
-    props.metric,
-    props.groupBy,
-    props.nodeType,
-    props.sourceId,
+    metric,
+    groupBy,
+    nodeType,
+    sourceId,
     currentTime,
-    props.accountId,
-    props.region
+    accountId,
+    region
   );
+
+  const options = {
+    formatter: InfraFormatterType.percent,
+    formatTemplate: '{{value}}',
+    legend: {
+      type: 'gradient',
+      rules: [
+        { value: 0, color: '#D3DAE6' },
+        { value: 1, color: euiVisColorPalette[1] },
+      ],
+    } as InfraWaffleMapGradientLegend,
+    metric,
+    fields: source?.configuration?.fields,
+    groupBy,
+  };
 
   useInterval(
     () => {
@@ -59,20 +74,20 @@ export const Layout = (props: LayoutProps) => {
 
   return (
     <>
-      <Toolbar accounts={accounts} regions={regions} nodeType={props.nodeType} />
+      <Toolbar accounts={accounts} regions={regions} nodeType={nodeType} />
       <PageContent>
         <NodesOverview
           nodes={nodes}
-          options={props.options}
-          nodeType={props.nodeType}
+          options={options}
+          nodeType={nodeType}
           loading={loading}
           reload={reload}
           onDrilldown={applyFilterQuery}
           currentTime={currentTime}
-          onViewChange={props.onViewChange}
-          view={props.view}
-          autoBounds={props.autoBounds}
-          boundsOverride={props.boundsOverride}
+          onViewChange={changeView}
+          view={view}
+          autoBounds={autoBounds}
+          boundsOverride={boundsOverride}
           interval={interval}
         />
       </PageContent>

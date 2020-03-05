@@ -16,36 +16,23 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import {
-  SnapshotMetricInput,
-  SnapshotGroupBy,
-  SnapshotCustomMetricInput,
-} from '../../../common/http_api/snapshot_api';
-
-interface WaffleInventorySwitcherProps {
-  nodeType: InventoryItemType;
-  changeNodeType: (nodeType: InventoryItemType) => void;
-  changeGroupBy: (groupBy: SnapshotGroupBy) => void;
-  changeMetric: (metric: SnapshotMetricInput) => void;
-  changeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
-  changeAccount: (id: string) => void;
-  changeRegion: (name: string) => void;
-}
+import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
 
 const getDisplayNameForType = (type: InventoryItemType) => {
   const inventoryModel = findInventoryModel(type);
   return inventoryModel.displayName;
 };
 
-export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = ({
-  changeNodeType,
-  changeGroupBy,
-  changeMetric,
-  changeAccount,
-  changeRegion,
-  changeCustomMetrics,
-  nodeType,
-}) => {
+export const WaffleInventorySwitcher: React.FC = () => {
+  const {
+    changeNodeType,
+    changeGroupBy,
+    changeMetric,
+    changeAccount,
+    changeRegion,
+    changeCustomMetrics,
+    nodeType,
+  } = useWaffleOptions();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const openPopover = useCallback(() => setIsOpen(true), []);

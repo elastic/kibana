@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState } from '../../../utils/use_url_state';
-import { Source } from '../../../containers/source';
+import { useSourceContext } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 
@@ -24,10 +24,10 @@ const validateKuery = (expression: string) => {
 };
 
 export const useWaffleFilters = () => {
-  const { createDerivedIndexPattern } = useContext(Source.Context);
+  const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern('metrics');
 
-  const [filterQuery, setFilterQuery] = useUrlState<FilterQuery>({
+  const [filterQuery, setFilterQuery] = useUrlState<WaffleFiltersState>({
     defaultState: { kind: 'kuery', expression: '' },
     decodeUrlState,
     encodeUrlState,
@@ -63,15 +63,16 @@ export const useWaffleFilters = () => {
     setFilterQueryDraftFromKueryExpression: setFilterQueryDraft,
     applyFilterQueryFromKueryExpression,
     isFilterQueryDraftValid,
+    setWaffleFiltersState: setFilterQuery,
   };
 };
 
-const FilterQueryRT = rt.type({
+export const WaffleFiltersStateRT = rt.type({
   kind: rt.literal('kuery'),
   expression: rt.string,
 });
 
-type FilterQuery = rt.TypeOf<typeof FilterQueryRT>;
-const encodeUrlState = FilterQueryRT.encode;
+export type WaffleFiltersState = rt.TypeOf<typeof WaffleFiltersStateRT>;
+const encodeUrlState = WaffleFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>
-  pipe(FilterQueryRT.decode(value), fold(constant(undefined), identity));
+  pipe(WaffleFiltersStateRT.decode(value), fold(constant(undefined), identity));

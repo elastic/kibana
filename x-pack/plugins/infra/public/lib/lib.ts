@@ -136,18 +136,13 @@ export interface InfraWaffleMapGradientRule {
   color: string;
 }
 
-export enum InfraWaffleMapLegendMode {
-  step = 'step',
-  gradient = 'gradient',
-}
-
 export interface InfraWaffleMapStepLegend {
-  type: InfraWaffleMapLegendMode.step;
+  type: 'step';
   rules: InfraWaffleMapStepRule[];
 }
 
 export interface InfraWaffleMapGradientLegend {
-  type: InfraWaffleMapLegendMode.gradient;
+  type: 'gradient';
   rules: InfraWaffleMapGradientRule[];
 }
 

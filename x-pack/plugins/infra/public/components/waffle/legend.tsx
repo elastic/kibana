@@ -6,12 +6,12 @@
 import React from 'react';
 
 import { euiStyled } from '../../../../observability/public';
-import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';
 import { LegendControls } from './legend_controls';
 import { isInfraWaffleMapGradientLegend, isInfraWaffleMapStepLegend } from './lib/type_guards';
 import { StepLegend } from './steps_legend';
+import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;
@@ -25,22 +25,19 @@ interface LegendControlOptions {
 }
 
 export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
+  const { changeBoundsOverride, changeAutoBounds, autoBounds, boundsOverride } = useWaffleOptions();
   return (
     <LegendContainer>
-      <WithWaffleOptions>
-        {({ changeBoundsOverride, changeAutoBounds, autoBounds, boundsOverride }) => (
-          <LegendControls
-            dataBounds={dataBounds}
-            bounds={bounds}
-            autoBounds={autoBounds}
-            boundsOverride={boundsOverride}
-            onChange={(options: LegendControlOptions) => {
-              changeBoundsOverride(options.bounds);
-              changeAutoBounds(options.auto);
-            }}
-          />
-        )}
-      </WithWaffleOptions>
+      <LegendControls
+        dataBounds={dataBounds}
+        bounds={bounds}
+        autoBounds={autoBounds}
+        boundsOverride={boundsOverride}
+        onChange={(options: LegendControlOptions) => {
+          changeBoundsOverride(options.bounds);
+          changeAutoBounds(options.auto);
+        }}
+      />
       {isInfraWaffleMapGradientLegend(legend) && (
         <GradientLegend formatter={formatter} legend={legend} bounds={bounds} />
       )}

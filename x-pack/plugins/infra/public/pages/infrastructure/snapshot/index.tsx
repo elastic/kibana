@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { identity } from 'fp-ts/lib/function';
 import React, { useContext } from 'react';
 
-import { SnapshotPageContent } from './page_content';
 import { SnapshotToolbar } from './toolbar';
 
 import { DocumentTitle } from '../../../components/document_title';
@@ -24,6 +23,7 @@ import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { Layout } from '../../../components/inventory/layout';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -56,10 +56,8 @@ export const SnapshotPage = () => {
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
-          <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
-          <WithWaffleOptionsUrlState />
           <SnapshotToolbar />
-          <SnapshotPageContent />
+          <Layout />
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

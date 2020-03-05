@@ -8,58 +8,52 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { WithSource } from '../../../containers/with_source';
-import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
 import { Toolbar } from '../../eui/toolbar';
 import { ToolbarProps } from './toolbar';
 import { fieldToName } from '../../waffle/lib/field_to_display_name';
+import { useSourceContext } from '../../../containers/source';
+import { useWaffleOptions } from '../../../pages/inventory_view/hooks/use_waffle_options';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
 }
 
 export const ToolbarWrapper = (props: Props) => {
+  const {
+    changeMetric,
+    changeGroupBy,
+    changeCustomOptions,
+    changeAccount,
+    changeRegion,
+    customOptions,
+    groupBy,
+    metric,
+    nodeType,
+    accountId,
+    region,
+    customMetrics,
+    changeCustomMetrics,
+  } = useWaffleOptions();
+  const { createDerivedIndexPattern } = useSourceContext();
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" gutterSize="m">
-        <WithSource>
-          {({ createDerivedIndexPattern }) => (
-            <WithWaffleOptions>
-              {({
-                changeMetric,
-                changeGroupBy,
-                changeCustomOptions,
-                changeAccount,
-                changeRegion,
-                customOptions,
-                groupBy,
-                metric,
-                nodeType,
-                accountId,
-                region,
-                customMetrics,
-                changeCustomMetrics,
-              }) =>
-                props.children({
-                  createDerivedIndexPattern,
-                  changeMetric,
-                  changeGroupBy,
-                  changeAccount,
-                  changeRegion,
-                  changeCustomOptions,
-                  customOptions,
-                  groupBy,
-                  metric,
-                  nodeType,
-                  region,
-                  accountId,
-                  customMetrics,
-                  changeCustomMetrics,
-                })
-              }
-            </WithWaffleOptions>
-          )}
-        </WithSource>
+        {props.children({
+          createDerivedIndexPattern,
+          changeMetric,
+          changeGroupBy,
+          changeAccount,
+          changeRegion,
+          changeCustomOptions,
+          customOptions,
+          groupBy,
+          metric,
+          nodeType,
+          region,
+          accountId,
+          customMetrics,
+          changeCustomMetrics,
+        })}
       </EuiFlexGroup>
     </Toolbar>
   );
