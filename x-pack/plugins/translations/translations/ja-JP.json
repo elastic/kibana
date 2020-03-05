@@ -12670,7 +12670,6 @@
     "xpack.uptime.locationName.helpLinkAnnotation": "場所を追加",
     "xpack.uptime.monitorCharts.durationChart.bottomAxis.title": "タイムスタンプ",
     "xpack.uptime.monitorCharts.durationChart.leftAxis.title": "期間ms",
-    "xpack.uptime.monitorCharts.loadingMessage": "読み込み中…",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "ミリ秒単位の監視時間",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
     "xpack.uptime.monitorList.expandDrawerButton.ariaLabel": "ID {id}のモニターの行を展開",
