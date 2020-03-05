@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiToast,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
@@ -183,7 +184,7 @@ export const SettingsPageComponent = ({
                   id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
                   defaultMessage="Cancel"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

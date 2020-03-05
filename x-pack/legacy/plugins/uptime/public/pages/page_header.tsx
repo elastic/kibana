@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';

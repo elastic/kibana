@@ -7,7 +7,10 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
-export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({ callES, dynamicSettings }) => {
+export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
+  callES,
+  dynamicSettings,
+}) => {
   const {
     _shards: { total },
     count,
