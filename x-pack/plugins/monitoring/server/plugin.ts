@@ -272,7 +272,6 @@ export class Plugin {
           ) => {
             const legacyRequest = {
               ...req,
-              // TODO: NP
               logger: this.log,
               getLogger: this.getLogger,
               payload: req.body,
