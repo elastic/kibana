@@ -12,7 +12,7 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger } from '../../../event_log/server';
@@ -21,7 +21,7 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
 }
@@ -37,6 +37,11 @@ export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
 export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
+  private readonly isESOUsingEphemeralEncryptionKey: boolean;
+
+  constructor({ isESOUsingEphemeralEncryptionKey }: { isESOUsingEphemeralEncryptionKey: boolean }) {
+    this.isESOUsingEphemeralEncryptionKey = isESOUsingEphemeralEncryptionKey;
+  }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
     if (this.isInitialized) {
@@ -53,6 +58,12 @@ export class ActionExecutor {
   }: ExecuteOptions): Promise<ActionTypeExecutorResult> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
+    }
+
+    if (this.isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
     }
 
     const {

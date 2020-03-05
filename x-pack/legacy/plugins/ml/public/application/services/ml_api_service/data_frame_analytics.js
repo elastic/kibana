@@ -4,75 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
 import { http } from '../http_service';
 
-const basePath = chrome.addBasePath('/api/ml');
+import { basePath } from './index';
 
 export const dataFrameAnalytics = {
   getDataFrameAnalytics(analyticsId) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http({
-      url: `${basePath}/data_frame/analytics${analyticsIdString}`,
+      url: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
     });
   },
   getDataFrameAnalyticsStats(analyticsId) {
     if (analyticsId !== undefined) {
       return http({
-        url: `${basePath}/data_frame/analytics/${analyticsId}/_stats`,
+        url: `${basePath()}/data_frame/analytics/${analyticsId}/_stats`,
         method: 'GET',
       });
     }
 
     return http({
-      url: `${basePath}/data_frame/analytics/_stats`,
+      url: `${basePath()}/data_frame/analytics/_stats`,
       method: 'GET',
     });
   },
   createDataFrameAnalytics(analyticsId, analyticsConfig) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}`,
+      url: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
       data: analyticsConfig,
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig) {
     return http({
-      url: `${basePath}/data_frame/_evaluate`,
+      url: `${basePath()}/data_frame/_evaluate`,
       method: 'POST',
       data: evaluateConfig,
     });
   },
   explainDataFrameAnalytics(jobConfig) {
     return http({
-      url: `${basePath}/data_frame/analytics/_explain`,
+      url: `${basePath()}/data_frame/analytics/_explain`,
       method: 'POST',
       data: jobConfig,
     });
   },
   deleteDataFrameAnalytics(analyticsId) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}`,
+      url: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'DELETE',
     });
   },
   startDataFrameAnalytics(analyticsId) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}/_start`,
+      url: `${basePath()}/data_frame/analytics/${analyticsId}/_start`,
       method: 'POST',
     });
   },
   stopDataFrameAnalytics(analyticsId, force = false) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}/_stop?force=${force}`,
+      url: `${basePath()}/data_frame/analytics/${analyticsId}/_stop?force=${force}`,
       method: 'POST',
     });
   },
   getAnalyticsAuditMessages(analyticsId) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}/messages`,
+      url: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });
   },

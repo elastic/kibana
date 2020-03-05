@@ -9,7 +9,7 @@ Find all SavedObjects matching the search query
 <b>Signature:</b>
 
 ```typescript
-find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
 ```
 
 ## Parameters

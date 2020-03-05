@@ -1,5 +1,5 @@
 {
-  "description": "Iodine is a tool for tunneling Internet protocol version 4 (IPV4) traffic over the DNS protocol in order to circumvent firewalls, network security groups or network access lists while evading detection.",
+  "description": "Iodine is a tool for tunneling Internet protocol version 4 (IPV4) traffic over the DNS protocol to circumvent firewalls, network security groups, and network access lists while evading detection.",
   "false_positives": [
     "Normal use of Iodine is uncommon apart from security testing and research. Use by non-security engineers is very uncommon."
   ],
@@ -7,7 +7,7 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Potential DNS Tunneling via Iodine",
   "query": "process.name: (iodine or iodined) and event.action:executed",
   "references": [

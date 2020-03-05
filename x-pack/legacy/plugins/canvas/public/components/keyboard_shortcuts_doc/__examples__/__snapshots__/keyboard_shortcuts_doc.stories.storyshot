@@ -104,24 +104,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       X
                     </code>
                   </span>
@@ -136,24 +126,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       C
                     </code>
                   </span>
@@ -168,24 +148,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       V
                     </code>
                   </span>
@@ -200,24 +170,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       D
                     </code>
                   </span>
@@ -232,13 +192,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       DEL
                     </code>
                   </span>
@@ -249,13 +204,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       BACKSPACE
                     </code>
                   </span>
@@ -270,24 +220,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↑
                     </code>
                   </span>
@@ -302,35 +242,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↑
                     </code>
                   </span>
@@ -345,24 +270,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↓
                     </code>
                   </span>
@@ -377,35 +292,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↓
                     </code>
                   </span>
@@ -420,13 +320,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       G
                     </code>
                   </span>
@@ -441,13 +336,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       U
                     </code>
                   </span>
@@ -462,13 +352,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↑
                     </code>
                   </span>
@@ -483,13 +368,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↓
                     </code>
                   </span>
@@ -504,13 +384,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ←
                     </code>
                   </span>
@@ -525,13 +400,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       →
                     </code>
                   </span>
@@ -546,24 +416,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↑
                     </code>
                   </span>
@@ -578,24 +438,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ↓
                     </code>
                   </span>
@@ -610,24 +460,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ←
                     </code>
                   </span>
@@ -642,24 +482,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       →
                     </code>
                   </span>
@@ -693,24 +523,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ENTER
                     </code>
                   </span>
@@ -744,24 +564,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CLICK
                     </code>
                   </span>
@@ -776,24 +586,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       DRAG
                     </code>
                   </span>
@@ -808,24 +608,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       DRAG
                     </code>
                   </span>
@@ -840,24 +630,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CLICK
                     </code>
                   </span>
@@ -872,24 +652,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       Z
                     </code>
                   </span>
@@ -904,35 +674,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SHIFT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       Z
                     </code>
                   </span>
@@ -947,24 +702,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       [
                     </code>
                   </span>
@@ -979,24 +724,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ]
                     </code>
                   </span>
@@ -1011,24 +746,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       E
                     </code>
                   </span>
@@ -1043,24 +768,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       G
                     </code>
                   </span>
@@ -1075,24 +790,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       R
                     </code>
                   </span>
@@ -1107,35 +812,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       +
                     </code>
                   </span>
@@ -1150,35 +840,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       -
                     </code>
                   </span>
@@ -1193,35 +868,20 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       CTRL
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       [
                     </code>
                   </span>
@@ -1236,24 +896,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       F
                     </code>
                   </span>
@@ -1264,24 +914,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       P
                     </code>
                   </span>
@@ -1315,24 +955,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       F
                     </code>
                   </span>
@@ -1343,24 +973,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       P
                     </code>
                   </span>
@@ -1375,13 +995,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ESC
                     </code>
                   </span>
@@ -1396,24 +1011,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       [
                     </code>
                   </span>
@@ -1424,13 +1029,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       BACKSPACE
                     </code>
                   </span>
@@ -1441,13 +1041,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ←
                     </code>
                   </span>
@@ -1462,24 +1057,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ]
                     </code>
                   </span>
@@ -1490,13 +1075,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       SPACE
                     </code>
                   </span>
@@ -1507,13 +1087,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                    
                 </span>
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       →
                     </code>
                   </span>
@@ -1528,24 +1103,14 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       ALT
                     </code>
                   </span>
                    
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       R
                     </code>
                   </span>
@@ -1560,13 +1125,8 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 className="euiDescriptionList__description"
               >
                 <span>
-                  <span
-                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                    style={Object {}}
-                  >
-                    <code
-                      className="euiCodeBlock__code"
-                    >
+                  <span>
+                    <code>
                       P
                     </code>
                   </span>

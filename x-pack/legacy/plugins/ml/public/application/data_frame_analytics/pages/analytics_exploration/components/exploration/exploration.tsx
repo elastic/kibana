@@ -64,11 +64,11 @@ import {
   Query as QueryType,
 } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 
 const FEATURE_INFLUENCE = 'feature_influence';
 
@@ -115,13 +115,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
 
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
   const initializeJobCapsService = async () => {
     if (jobConfig !== undefined) {
       const sourceIndex = jobConfig.source.index[0];
       const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      const indexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
       }

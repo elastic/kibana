@@ -5,11 +5,12 @@
  */
 
 import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
-import { checkFullLicense } from '../license/check_license';
+import { checkFullLicense } from '../license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
-import { PageDependencies } from './router';
+
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;
@@ -17,11 +18,16 @@ export interface Resolvers {
 export interface ResolverResults {
   [name: string]: any;
 }
-export const basicResolvers = (deps: PageDependencies): Resolvers => ({
+
+interface BasicResolverDependencies {
+  indexPatterns: IndexPatternsContract;
+}
+
+export const basicResolvers = ({ indexPatterns }: BasicResolverDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+  loadIndexPatterns: () => loadIndexPatterns(indexPatterns),
   checkGetJobsPrivilege,
   loadSavedSearches,
 });

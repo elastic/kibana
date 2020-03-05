@@ -6,7 +6,7 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { PluginSetupContract } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../plugins/encrypted_saved_objects/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 
@@ -29,7 +29,7 @@ export const encryptedSavedObjects = (kibana: {
 
     init(server: Legacy.Server) {
       const encryptedSavedObjectsPlugin = (server.newPlatform.setup.plugins
-        .encryptedSavedObjects as unknown) as PluginSetupContract;
+        .encryptedSavedObjects as unknown) as EncryptedSavedObjectsPluginSetup;
       if (!encryptedSavedObjectsPlugin) {
         throw new Error('New Platform XPack EncryptedSavedObjects plugin is not available.');
       }

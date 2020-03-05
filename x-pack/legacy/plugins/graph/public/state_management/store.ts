@@ -6,7 +6,7 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart, I18nStart } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
 import {
   fieldsReducer,
@@ -54,7 +54,7 @@ export interface GraphStoreDependencies {
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  showSaveModal: (el: React.ReactNode) => void;
+  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
@@ -62,6 +62,7 @@ export interface GraphStoreDependencies {
   setUrlTemplates: (templates: UrlTemplate[]) => void;
   setWorkspaceInitialized: () => void;
   chrome: ChromeStart;
+  I18nContext: I18nStart['Context'];
 }
 
 export function createRootReducer(basePath: string) {

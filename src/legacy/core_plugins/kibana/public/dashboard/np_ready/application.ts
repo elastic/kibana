@@ -17,51 +17,60 @@
  * under the License.
  */
 
-import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,
   IUiSettingsClient,
-  LegacyCoreStart,
+  CoreStart,
   SavedObjectsClientContract,
+  PluginInitializerContext,
 } from 'kibana/public';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
-  confirmModalFactory,
-  createTopNavDirective,
-  createTopNavHelper,
   IPrivate,
   KbnUrlProvider,
   PrivateProvider,
   PromiseServiceCreator,
   RedirectWhenMissingProvider,
-  SavedObjectLoader,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
+import {
+  KibanaLegacyStart,
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
+import { SavedObjectLoader } from '../../../../../../plugins/saved_objects/public';
 
 export interface RenderDeps {
-  core: LegacyCoreStart;
-  npDataStart: NpDataStart;
+  pluginInitializerContext: PluginInitializerContext;
+  core: CoreStart;
+  data: DataPublicPluginStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  savedQueryService: NpDataStart['query']['savedQueries'];
-  embeddables: IEmbeddableStart;
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  embeddable: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
+  config: KibanaLegacyStart['config'];
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -70,8 +79,11 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     initDashboardApp(angularModuleInstance, deps);
   }
 
@@ -110,7 +122,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
   createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
@@ -121,7 +132,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/TopNav',
     'app/dashboard/KbnUrl',
     'app/dashboard/Promise',
-    'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
@@ -131,13 +141,6 @@ function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
     .directive('icon', reactDirective => reactDirective(EuiIcon));
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/dashboard/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
 function createLocalKbnUrlModule() {

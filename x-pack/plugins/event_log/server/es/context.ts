@@ -8,6 +8,7 @@ import { Logger, ClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
+import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
 export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -15,9 +16,9 @@ export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScop
 export interface EsContext {
   logger: Logger;
   esNames: EsNames;
+  esAdapter: IClusterClientAdapter;
   initialize(): void;
   waitTillReady(): Promise<boolean>;
-  callEs(operation: string, body?: any): Promise<any>;
 }
 
 export interface EsError {
@@ -38,16 +39,19 @@ export interface EsContextCtorParams {
 class EsContextImpl implements EsContext {
   public readonly logger: Logger;
   public readonly esNames: EsNames;
-  private readonly clusterClient: EsClusterClient;
+  public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
   private initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
     this.esNames = getEsNames(params.indexNameRoot);
-    this.clusterClient = params.clusterClient;
     this.readySignal = createReadySignal();
     this.initialized = false;
+    this.esAdapter = new ClusterClientAdapter({
+      logger: params.logger,
+      clusterClient: params.clusterClient,
+    });
   }
 
   initialize() {
@@ -73,27 +77,7 @@ class EsContextImpl implements EsContext {
     return await this.readySignal.wait();
   }
 
-  async callEs(operation: string, body?: any): Promise<any> {
-    try {
-      this.debug(`callEs(${operation}) calls:`, body);
-      const result = await this.clusterClient.callAsInternalUser(operation, body);
-      this.debug(`callEs(${operation}) result:`, result);
-      return result;
-    } catch (err) {
-      this.debug(`callEs(${operation}) error:`, {
-        message: err.message,
-        statusCode: err.statusCode,
-      });
-      throw err;
-    }
-  }
-
   private async _initialize() {
     await initializeEs(this);
-  }
-
-  private debug(message: string, object?: any) {
-    const objectString = object == null ? '' : JSON.stringify(object);
-    this.logger.debug(`esContext: ${message} ${objectString}`);
   }
 }

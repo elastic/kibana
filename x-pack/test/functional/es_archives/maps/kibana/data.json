@@ -281,6 +281,62 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:4ea1e4f0-4dba-11ea-b554-4ba0def79f86",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example top hits split with scripted field",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-24T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"useTopHits\":true,\"topHitsSplitField\":\"hour_of_day\",\"topHitsSize\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"applyGlobalQuery\":true,\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -141.61334,
+                47.30762
+              ],
+              [
+                -141.61334,
+                16.49119
+              ],
+              [
+                -59.60848,
+                16.49119
+              ],
+              [
+                -59.60848,
+                47.30762
+              ],
+              [
+                -141.61334,
+                47.30762
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.7.0"
+      },
+      "updated_at" : "2020-02-12T17:08:36.671Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:c9734720-eb7f-11e9-8f42-fb14e91ef4b8",
     "index": ".kibana",
     "source": {

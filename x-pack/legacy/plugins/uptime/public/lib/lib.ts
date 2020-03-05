@@ -10,7 +10,6 @@ import React from 'react';
 import { ChromeBreadcrumb } from 'src/core/public';
 import { UMBadge } from '../badge';
 import { UptimeAppProps } from '../uptime_app';
-import { CreateGraphQLClient } from './adapters/framework/framework_adapter_types';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
@@ -25,5 +24,5 @@ export type UMGraphQLClient = ApolloClient<NormalizedCacheObject>; // | OtherCli
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
 
 export interface UMFrameworkAdapter {
-  render(createComponent: BootstrapUptimeApp, createGraphQLClient: CreateGraphQLClient): void;
+  render(element: any): void;
 }

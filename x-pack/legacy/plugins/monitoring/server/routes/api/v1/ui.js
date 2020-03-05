@@ -6,7 +6,7 @@
 
 // all routes for the app
 export { checkAccessRoute } from './check_access';
-export { clusterAlertsRoute } from './alerts/';
+export * from './alerts/';
 export { beatsDetailRoute, beatsListingRoute, beatsOverviewRoute } from './beats';
 export { clusterRoute, clustersRoute } from './cluster';
 export {

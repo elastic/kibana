@@ -50,7 +50,7 @@ instructions.
 [[upgrade-6x]]
 === Upgrading from 6.x
 
-The recommended path is to upgrade to 6.7 before upgrading to 7.0. This makes it 
+The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it 
 easier to identify the required changes, and enables you to use the Upgrade 
 Assistant to prepare for your upgrade to 7.0.
 
@@ -59,11 +59,11 @@ dashboards is supported.
 
 [float]
 [[upgrade-67]]
-=== Upgrading from 6.7
-To help you prepare for your upgrade to 7.0, 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+=== Upgrading from 6.8
+To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant] 
+To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
-After you have addressed any issues that were identified by the Upgrade 
+After you have addressed any issues that were identified by the Upgrade
 Assistant, <<upgrade-standard,upgrade to 7.0>>.
 
 

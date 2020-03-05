@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
-import { SavedSearchQuery } from '../../contexts/kibana';
+import { SavedSearchQuery } from '../../contexts/ml';
 import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;

@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
 import {
   ICustomClusterClient,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
@@ -40,7 +39,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  * to function properly.
  */
 export interface LegacyAPI {
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -49,7 +47,7 @@ export interface LegacyAPI {
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
  */
-export interface PluginSetupContract {
+export interface SecurityPluginSetup {
   authc: Authentication;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
 
@@ -67,11 +65,7 @@ export interface PluginSetupContract {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
-    config: RecursiveReadonly<{
-      secureCookies: boolean;
-      cookieName: string;
-      loginAssistanceMessage: string;
-    }>;
+    config: RecursiveReadonly<{ secureCookies: boolean }>;
   };
 }
 
@@ -133,7 +127,6 @@ export class Plugin {
       config,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
     const authz = await setupAuthorization({
@@ -164,9 +157,10 @@ export class Plugin {
       authc,
       authz,
       csp: core.http.csp,
+      license,
     });
 
-    return deepFreeze<PluginSetupContract>({
+    return deepFreeze<SecurityPluginSetup>({
       authc,
 
       authz: {
@@ -190,13 +184,10 @@ export class Plugin {
 
         license,
 
-        // We should stop exposing this config as soon as only new platform plugin consumes it. The only
-        // exception may be `sessionTimeout` as other parts of the app may want to know it.
-        config: {
-          loginAssistanceMessage: config.loginAssistanceMessage,
-          secureCookies: config.secureCookies,
-          cookieName: config.cookieName,
-        },
+        // We should stop exposing this config as soon as only new platform plugin consumes it.
+        // This is only currently required because we use legacy code to inject this as metadata
+        // for consumption by public code in the new platform.
+        config: { secureCookies: config.secureCookies },
       },
     });
   }

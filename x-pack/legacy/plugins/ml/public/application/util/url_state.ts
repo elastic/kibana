@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
-// @ts-ignore
-import queryString from 'query-string';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -33,12 +32,12 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString = queryString.parse(search);
+  const parsedQueryString = parse(search, { sort: false });
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
       if (isRisonSerializationRequired(a)) {
-        urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
+        urlState[a] = decode(parsedQueryString[a] as string);
       } else {
         urlState[a] = parsedQueryString[a];
       }
@@ -64,7 +63,7 @@ export const useUrlState = (accessor: string): UrlState => {
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
       const urlState = getUrlState(search);
-      const parsedQueryString = queryString.parse(search);
+      const parsedQueryString = parse(search, { sort: false });
 
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
@@ -84,7 +83,7 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+        const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
 
         Object.keys(urlState).forEach(a => {
           if (isRisonSerializationRequired(a)) {
@@ -93,11 +92,11 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+        const newLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({
-            search: queryString.stringify(parsedQueryString),
+            search: stringify(parsedQueryString, { sort: false }),
           });
         }
       } catch (error) {

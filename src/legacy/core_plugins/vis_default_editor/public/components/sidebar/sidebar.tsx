@@ -20,14 +20,17 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { PersistedState, AggGroupNames } from '../../legacy_imports';
+import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, useEditorReducer, useEditorFormState } from './state';
+import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
+import { SidebarTitle } from './sidebar_title';
+import { PersistedState } from '../../../../../../plugins/visualizations/public';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -35,6 +38,8 @@ interface DefaultEditorSideBarProps {
   optionTabs: OptionTab[];
   uiState: PersistedState;
   vis: Vis;
+  isLinkedSearch: boolean;
+  savedSearch?: SavedSearch;
 }
 
 function DefaultEditorSideBar({
@@ -43,6 +48,8 @@ function DefaultEditorSideBar({
   optionTabs,
   uiState,
   vis,
+  isLinkedSearch,
+  savedSearch,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
@@ -104,14 +111,25 @@ function DefaultEditorSideBar({
   );
 
   useEffect(() => {
-    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
+    const changeHandler = ({ isDirty: dirty }: { isDirty: boolean }) => {
       setDirty(dirty);
 
       if (!dirty) {
         resetValidity();
       }
-    });
+    };
+    vis.on('dirtyStateChange', changeHandler);
+
+    return () => vis.off('dirtyStateChange', changeHandler);
   }, [resetValidity, vis]);
+
+  // subscribe on external vis changes using browser history, for example press back button
+  useEffect(() => {
+    const resetHandler = () => dispatch(discardChanges(vis));
+    vis.on('updateEditor', resetHandler);
+
+    return () => vis.off('updateEditor', resetHandler);
+  }, [dispatch, vis]);
 
   const dataTabProps = {
     dispatch,
@@ -150,21 +168,8 @@ function DefaultEditorSideBar({
             name="visualizeEditor"
             onKeyDownCapture={onSubmit}
           >
-            {vis.type.requiresSearch && vis.type.options.showIndexSelection ? (
-              <EuiTitle size="xs" className="visEditorSidebar__indexPattern">
-                <h2
-                  title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
-                    defaultMessage: 'Index pattern: {title}',
-                    values: {
-                      title: vis.indexPattern.title,
-                    },
-                  })}
-                >
-                  {vis.indexPattern.title}
-                </h2>
-              </EuiTitle>
-            ) : (
-              <div className="visEditorSidebar__indexPatternPlaceholder" />
+            {vis.type.requiresSearch && (
+              <SidebarTitle isLinkedSearch={isLinkedSearch} savedSearch={savedSearch} vis={vis} />
             )}
 
             {optionTabs.length > 1 && (

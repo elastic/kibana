@@ -74,6 +74,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('initiating SPNEGO', () => {
@@ -129,6 +130,7 @@ export default function({ getService }: FtrProviderContext) {
             enabled: true,
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
+            authentication_provider: 'kerberos',
           });
       });
 
@@ -197,7 +199,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -240,7 +242,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
 
         // Token that was stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.

@@ -47,6 +47,7 @@ export function createLegacyApi(legacyTaskManager: Promise<TaskManager>): Legacy
       legacyTaskManager.then((tm: TaskManager) => tm.registerTaskDefinitions(taskDefinitions));
     },
     fetch: (opts: SearchOpts) => legacyTaskManager.then((tm: TaskManager) => tm.fetch(opts)),
+    get: (id: string) => legacyTaskManager.then((tm: TaskManager) => tm.get(id)),
     remove: (id: string) => legacyTaskManager.then((tm: TaskManager) => tm.remove(id)),
     schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) =>
       legacyTaskManager.then((tm: TaskManager) => tm.schedule(taskInstance, options)),

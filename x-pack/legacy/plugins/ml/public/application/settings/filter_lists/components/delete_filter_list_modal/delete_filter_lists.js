@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -12,6 +12,8 @@ export async function deleteFilterLists(filterListsToDelete) {
   if (filterListsToDelete === undefined || filterListsToDelete.length === 0) {
     return;
   }
+
+  const toastNotifications = getToastNotifications();
 
   // Delete each of the specified filter lists in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.

@@ -39,7 +39,6 @@ export function copySavedObjectsToSpacesFactory(
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      types: eligibleTypes,
       exportSizeLimit: importExport.objectLimit,
     });
 

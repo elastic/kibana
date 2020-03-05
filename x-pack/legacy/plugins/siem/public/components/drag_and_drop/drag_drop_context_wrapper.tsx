@@ -7,7 +7,7 @@
 import { defaultTo, noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { BeforeCapture } from './drag_drop_context';
@@ -30,7 +30,6 @@ import {
 interface Props {
   browserFields: BrowserFields;
   children: React.ReactNode;
-  dataProviders?: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
 
@@ -59,7 +58,7 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export const DragDropContextWrapperComponent = React.memo<Props>(
+export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux>(
   ({ browserFields, children, dataProviders, dispatch }) => {
     const onDragEnd = useCallback(
       (result: DropResult) => {
@@ -112,7 +111,11 @@ const mapStateToProps = (state: State) => {
   return { dataProviders };
 };
 
-export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
+const connector = connect(mapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const DragDropContextWrapper = connector(DragDropContextWrapperComponent);
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 

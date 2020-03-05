@@ -39,7 +39,12 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import {
+  ElasticsearchServiceSetup,
+  IScopedClusterClient,
+  configSchema as elasticsearchConfigSchema,
+} from './elasticsearch';
+
 import { HttpServiceSetup } from './http';
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -49,6 +54,7 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
+import { MetricsServiceSetup } from './metrics';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -78,6 +84,7 @@ export {
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
+  ElasticsearchConfig,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
@@ -103,6 +110,7 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
+  HttpServerInfo,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
@@ -152,6 +160,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -194,8 +204,10 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
@@ -210,6 +222,19 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
@@ -225,6 +250,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -303,6 +336,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /**
    * Allows plugins to get access to APIs available in start inside async handlers.
    * Promise will not resolve until Core and plugin dependencies have completed `start`.
@@ -335,4 +370,15 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+};
+
+/**
+ * Config schemas for the platform services.
+ *
+ * @alpha
+ */
+export const config = {
+  elasticsearch: {
+    schema: elasticsearchConfigSchema,
+  },
 };

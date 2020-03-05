@@ -9,8 +9,6 @@
  * - windows_priv_escalation_via_accessibility_features.json
  * - windows_persistence_via_application_shimming.json
  * - windows_execution_via_trusted_developer_utilities.json
- * - windows_execution_via_net_com_assemblies.json
- * - windows_execution_via_connection_manager.json
  *
  * MIT License
  *

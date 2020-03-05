@@ -5,20 +5,20 @@
  */
 
 import { forEach, isArray } from 'lodash';
-import { encodeUriQuery } from './encode_uri_query';
+import { url } from '../../../../../../../../src/plugins/kibana_utils/server';
 
 function toKeyValue(obj) {
   const parts = [];
   forEach(obj, function(value, key) {
     if (isArray(value)) {
       forEach(value, function(arrayValue) {
-        const keyStr = encodeUriQuery(key, true);
-        const valStr = arrayValue === true ? '' : '=' + encodeUriQuery(arrayValue, true);
+        const keyStr = url.encodeUriQuery(key, true);
+        const valStr = arrayValue === true ? '' : '=' + url.encodeUriQuery(arrayValue, true);
         parts.push(keyStr + valStr);
       });
     } else {
-      const keyStr = encodeUriQuery(key, true);
-      const valStr = value === true ? '' : '=' + encodeUriQuery(value, true);
+      const keyStr = url.encodeUriQuery(key, true);
+      const valStr = value === true ? '' : '=' + url.encodeUriQuery(value, true);
       parts.push(keyStr + valStr);
     }
   });
@@ -27,5 +27,5 @@ function toKeyValue(obj) {
 
 export const uriEncode = {
   stringify: toKeyValue,
-  string: encodeUriQuery,
+  string: url.encodeUriQuery,
 };

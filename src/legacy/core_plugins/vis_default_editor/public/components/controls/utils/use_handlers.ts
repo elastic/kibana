@@ -19,14 +19,14 @@
 
 import { useCallback } from 'react';
 
-import { AggConfig, AggParamType } from '../../../legacy_imports';
+import { IAggConfig, AggParamType } from '../../../legacy_imports';
 
-type SetValue = (value?: AggConfig) => void;
+type SetValue = (value?: IAggConfig) => void;
 
 function useSubAggParamsHandlers(
-  agg: AggConfig,
+  agg: IAggConfig,
   aggParam: AggParamType,
-  subAgg: AggConfig,
+  subAgg: IAggConfig,
   setValue: SetValue
 ) {
   const setAggParamValue = useCallback(

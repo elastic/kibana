@@ -33,7 +33,7 @@ import {
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { syncQuery } from '../../../../../../plugins/data/public';
+import { syncQueryStateWithUrl } from '../../../../../../plugins/data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -98,8 +98,8 @@ export function initDashboardApp(app, deps) {
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
-          const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(
-            deps.npDataStart.query,
+          const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+            deps.data.query,
             kbnUrlStateStorage
           );
 
@@ -132,41 +132,36 @@ export function initDashboardApp(app, deps) {
           $scope.core = deps.core;
 
           $scope.$on('$destroy', () => {
-            stopSyncingGlobalStateWithUrl();
+            stopSyncingQueryServiceStateWithUrl();
           });
         },
         resolve: {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl).then(
-              () => {
-                const savedObjectsClient = deps.savedObjectsClient;
-                const title = $route.current.params.title;
-                if (title) {
-                  return savedObjectsClient
-                    .find({
-                      search: `"${title}"`,
-                      search_fields: 'title',
-                      type: 'dashboard',
-                    })
-                    .then(results => {
-                      // The search isn't an exact match, lets see if we can find a single exact match to use
-                      const matchingDashboards = results.savedObjects.filter(
-                        dashboard =>
-                          dashboard.attributes.title.toLowerCase() === title.toLowerCase()
-                      );
-                      if (matchingDashboards.length === 1) {
-                        history.replace(createDashboardEditUrl(matchingDashboards[0].id));
-                      } else {
-                        history.replace(
-                          `${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`
-                        );
-                        $route.reload();
-                      }
-                      return new Promise(() => {});
-                    });
-                }
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl).then(() => {
+              const savedObjectsClient = deps.savedObjectsClient;
+              const title = $route.current.params.title;
+              if (title) {
+                return savedObjectsClient
+                  .find({
+                    search: `"${title}"`,
+                    search_fields: 'title',
+                    type: 'dashboard',
+                  })
+                  .then(results => {
+                    // The search isn't an exact match, lets see if we can find a single exact match to use
+                    const matchingDashboards = results.savedObjects.filter(
+                      dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+                    );
+                    if (matchingDashboards.length === 1) {
+                      history.replace(createDashboardEditUrl(matchingDashboards[0].id));
+                    } else {
+                      history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+                      $route.reload();
+                    }
+                    return new Promise(() => {});
+                  });
               }
-            );
+            });
           },
         },
       })
@@ -177,7 +172,7 @@ export function initDashboardApp(app, deps) {
         requireUICapability: 'dashboard.createNew',
         resolve: {
           dash: function(redirectWhenMissing, $rootScope, kbnUrl) {
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get();
               })
@@ -197,7 +192,7 @@ export function initDashboardApp(app, deps) {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get(id);
               })
@@ -246,10 +241,10 @@ export function initDashboardApp(app, deps) {
         },
       })
       .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
+        redirectTo: `/${deps.config.defaultAppId}`,
       })
       .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
+        redirectTo: `/${deps.config.defaultAppId}`,
       });
   });
 }

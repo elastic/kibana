@@ -22,6 +22,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
@@ -47,6 +48,8 @@ let mockPluginSystem: jest.Mocked<PluginsSystem>;
 
 const setupDeps = coreMock.createInternalSetup();
 const logger = loggingServiceMock.create();
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
   jest.doMock(join(path, 'server'), () => ({}), {
@@ -540,10 +543,10 @@ describe('PluginsService', () => {
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {
-              "entryPointPath": "path-1/public",
+              "publicTargetDir": <absolute path>/path-1/target/public,
             },
             "plugin-2" => Object {
-              "entryPointPath": "path-2/public",
+              "publicTargetDir": <absolute path>/path-2/target/public,
             },
           }
         `);

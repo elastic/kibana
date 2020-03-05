@@ -4,48 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
+  UpdateRuleAlertParamsRest,
 } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
-import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
+import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { updateRules } from '../../rules/update_rules';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 
-export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    options: {
-      tags: ['access:siem'],
+export const updateRulesBulkRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: updateRulesBulkSchema,
+        body: buildRouteValidation<UpdateRuleAlertParamsRest[]>(updateRulesBulkSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: BulkUpdateRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const actionsClient = context.actions.getActionsClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
+
+      if (!actionsClient || !alertsClient) {
+        return siemResponse.error({ statusCode: 404 });
       }
 
-      const rules = Promise.all(
-        request.payload.map(async payloadRule => {
+      const rules = await Promise.all(
+        request.body.map(async payloadRule => {
           const {
             description,
             enabled,
@@ -74,6 +70,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             references,
             version,
           } = payloadRule;
+          const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -81,11 +78,12 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
               timelineId,
@@ -118,7 +116,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -127,11 +125,13 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
           }
         })
       );
-      return rules;
-    },
-  };
-};
 
-export const updateRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createUpdateRulesBulkRoute(server));
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return siemResponse.error({ statusCode: 500, body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
+    }
+  );
 };

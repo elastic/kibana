@@ -6,12 +6,13 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction } from './types';
+import { GetBasePathFunction, RawAction } from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
+  isESOUsingEphemeralEncryptionKey: boolean;
 }
 
 export interface ExecuteOptions {
@@ -25,8 +26,15 @@ export function createExecuteFunction({
   getBasePath,
   taskManager,
   getScopedSavedObjectsClient,
+  isESOUsingEphemeralEncryptionKey,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+    if (isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
+    }
+
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -51,7 +59,7 @@ export function createExecuteFunction({
     };
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get('action', id);
+    const actionSavedObject = await savedObjectsClient.get<RawAction>('action', id);
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,

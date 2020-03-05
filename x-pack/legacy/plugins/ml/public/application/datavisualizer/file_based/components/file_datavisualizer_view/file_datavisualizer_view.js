@@ -36,6 +36,7 @@ export class FileDataVisualizerView extends Component {
 
     this.state = {
       files: {},
+      fileName: '',
       fileContents: '',
       fileSize: 0,
       fileTooLarge: false,
@@ -71,6 +72,7 @@ export class FileDataVisualizerView extends Component {
         loading: files.length > 0,
         bottomBarVisible: files.length > 0,
         loaded: false,
+        fileName: '',
         fileContents: '',
         fileSize: 0,
         fileTooLarge: false,
@@ -93,6 +95,7 @@ export class FileDataVisualizerView extends Component {
         const data = fileContents.data;
         this.setState({
           fileContents: data,
+          fileName: file.name,
           fileSize: file.size,
         });
 
@@ -110,6 +113,7 @@ export class FileDataVisualizerView extends Component {
         loaded: false,
         loading: false,
         fileTooLarge: true,
+        fileName: file.name,
         fileSize: file.size,
       });
     }
@@ -240,6 +244,7 @@ export class FileDataVisualizerView extends Component {
       loaded,
       results,
       fileContents,
+      fileName,
       fileSize,
       fileTooLarge,
       fileCouldNotBeRead,
@@ -256,7 +261,7 @@ export class FileDataVisualizerView extends Component {
         : [];
 
     return (
-      <div className="file-datavisualizer__content">
+      <div>
         {mode === MODE.READ && (
           <React.Fragment>
             {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
@@ -275,6 +280,7 @@ export class FileDataVisualizerView extends Component {
             {loaded && (
               <ResultsView
                 results={results}
+                fileName={fileName}
                 data={fileContents}
                 showEditFlyout={() => this.showEditFlyout()}
               />
@@ -304,8 +310,8 @@ export class FileDataVisualizerView extends Component {
           <React.Fragment>
             <ImportView
               results={results}
+              fileName={fileName}
               fileContents={fileContents}
-              fileSize={fileSize}
               indexPatterns={this.props.indexPatterns}
               kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}

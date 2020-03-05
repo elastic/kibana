@@ -20,17 +20,17 @@
 import { Readable, Transform, Writable, TransformOptions } from 'stream';
 
 export function concatStreamProviders(
-  sourceProviders: Readable[],
+  sourceProviders: Array<() => Readable>,
   options: TransformOptions
 ): Transform;
 export function createIntersperseStream(intersperseChunk: string | Buffer): Transform;
 export function createSplitStream<T>(splitChunk: T): Transform;
-export function createListStream(items: any[]): Readable;
+export function createListStream(items: any | any[]): Readable;
 export function createReduceStream<T>(reducer: (value: any, chunk: T, enc: string) => T): Transform;
 export function createPromiseFromStreams<T>([first, ...rest]: [Readable, ...Writable[]]): Promise<
   T
 >;
-export function createConcatStream(initial: any): Transform;
+export function createConcatStream(initial?: any): Transform;
 export function createMapStream<T>(fn: (value: T, i: number) => void): Transform;
 export function createReplaceStream(toReplace: string, replacement: string | Buffer): Transform;
 export function createFilterStream<T>(fn: (obj: T) => boolean): Transform;

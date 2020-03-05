@@ -34,7 +34,9 @@
     padding: $euiSize;
 
     .panel-title {
-      color: $euiTitleColor;
+      font-size: $euiFontSizeM;
+      font-weight: 400;
+      color: $euiColorDarkShade;
     }
 
     .entity-count-text {
@@ -78,7 +80,8 @@
       font-family: $euiFontFamily;
     }
 
-    .axis path, .axis line {
+    .axis path,
+    .axis line {
       fill: none;
       stroke: $euiBorderColor;
       shape-rendering: crispEdges;
@@ -104,6 +107,7 @@
       stroke: $euiColorDarkShade;
       stroke-width: 2;
     }
+
     .chart-border-highlight:hover {
       opacity: 1;
     }
@@ -191,6 +195,7 @@
     }
 
     .forecast {
+
       .metric-value,
       .metric-value:hover {
         stroke: #cca300;
@@ -220,7 +225,9 @@
           }
         }
 
-        a:hover, a:active, a:focus {
+        a:hover,
+        a:active,
+        a:focus {
           text-decoration: underline;
         }
 
@@ -321,6 +328,7 @@
     div.brush-handle-inner-left {
       border-radius: $euiBorderRadius 0px 0px $euiBorderRadius;
     }
+
     div.brush-handle-inner-right {
       border-radius: 0px $euiBorderRadius $euiBorderRadius 0px;
     }
@@ -342,7 +350,9 @@
    of the horizontal bar below the tab menu elements in its inactive state. */
 .mlTimeSeriesExplorerProgress {
   background-color: $euiColorEmptyShade;
-  &::-moz-progress-bar, &::-webkit-progress-bar {
+
+  &::-moz-progress-bar,
+  &::-webkit-progress-bar {
     background-color: $euiColorEmptyShade;
   }
 }

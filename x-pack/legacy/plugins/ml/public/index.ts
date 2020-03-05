@@ -5,8 +5,8 @@
  */
 
 import { PluginInitializer } from '../../../../../src/core/public';
-import { MlPlugin, MlPluginSetup, MlPluginStart } from './plugin';
+import { MlPlugin, Setup, Start } from './plugin';
 
-export const plugin: PluginInitializer<MlPluginSetup, MlPluginStart> = () => new MlPlugin();
+export const plugin: PluginInitializer<Setup, Start> = () => new MlPlugin();
 
-export { MlPluginSetup, MlPluginStart };
+export { Setup, Start };

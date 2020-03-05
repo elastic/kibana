@@ -17,25 +17,33 @@
  * under the License.
  */
 
-import * as utils from '../../../lib/utils/utils';
+import { extractDeprecationMessages } from '../../../lib/utils';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types/common';
+import { BaseResponseType } from '../../../types';
 
 export interface EsRequestArgs {
   requests: any;
 }
 
-export interface ESRequestResult {
-  request: {
-    path: string;
-    data: any;
-    method: string;
-  };
-  response: {
-    contentType: BaseResponseType;
-    value: unknown;
-  };
+export interface ESRequestObject {
+  path: string;
+  data: any;
+  method: string;
+}
+
+export interface ESResponseObject<V = unknown> {
+  statusCode: number;
+  statusText: string;
+  timeMs: number;
+  contentType: BaseResponseType;
+  value: V;
+}
+
+export interface ESRequestResult<V = unknown> {
+  request: ESRequestObject;
+  response: ESResponseObject<V>;
 }
 
 let CURRENT_REQ_ID = 0;
@@ -66,11 +74,12 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
       const req = requests.shift();
       const esPath = req.url;
       const esMethod = req.method;
-      let esData = utils.collapseLiteralStrings(req.data.join('\n'));
+      let esData = collapseLiteralStrings(req.data.join('\n'));
       if (esData) {
         esData += '\n';
       } // append a new line for bulk requests.
 
+      const startTime = Date.now();
       es.send(esMethod, esPath, esData).always(
         (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
           if (reqId !== CURRENT_REQ_ID) {
@@ -89,7 +98,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
-              const deprecationMessages = utils.extractDeprecationMessages(warnings);
+              const deprecationMessages = extractDeprecationMessages(warnings);
               value = deprecationMessages.join('\n') + '\n' + value;
             }
 
@@ -99,6 +108,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             results.push({
               response: {
+                timeMs: Date.now() - startTime,
+                statusCode: xhr.status,
+                statusText: xhr.statusText,
                 contentType: xhr.getResponseHeader('Content-Type'),
                 value,
               },
@@ -124,7 +136,20 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            reject({ value, contentType });
+            reject({
+              response: {
+                value,
+                contentType,
+                timeMs: Date.now() - startTime,
+                statusCode: xhr.status,
+                statusText: xhr.statusText,
+              },
+              request: {
+                data: esData,
+                method: esMethod,
+                path: esPath,
+              },
+            });
           }
         }
       );

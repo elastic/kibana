@@ -30,7 +30,7 @@ export async function verifyMonitoringAuth(req) {
 
 /**
  * Reach out to the Monitoring cluster and ensure that it believes the current user has the privileges necessary
- * to make API calls against .monitoring-*,monitoring-* indices.
+ * to make API calls against .monitoring-* indices.
  *
  * @param req {Object} the server route handler request object
  * @return {Promise} That either resolves with no response (void) or an exception.
@@ -38,19 +38,29 @@ export async function verifyMonitoringAuth(req) {
 async function verifyHasPrivileges(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'POST',
-    path: '/_security/user/_has_privileges',
-    body: {
-      index: [
-        {
-          names: [INDEX_PATTERN], // uses wildcard
-          privileges: ['read'],
-        },
-      ],
-    },
-    ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
-  });
+  let response;
+  try {
+    response = await callWithRequest(req, 'transport.request', {
+      method: 'POST',
+      path: '/_security/user/_has_privileges',
+      body: {
+        index: [
+          {
+            names: [INDEX_PATTERN], // uses wildcard
+            privileges: ['read'],
+          },
+        ],
+      },
+      ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
+    });
+  } catch (err) {
+    if (
+      err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
+    ) {
+      return;
+    }
+    throw err;
+  }
 
   // we assume true because, if the response 404ed, then it will not exist but we should try to continue
   const hasAllRequestedPrivileges = get(response, 'has_all_requested', true);

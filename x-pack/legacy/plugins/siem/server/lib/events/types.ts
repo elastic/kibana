@@ -11,14 +11,8 @@ import {
   SourceConfiguration,
   TimelineData,
   TimelineDetailsData,
-  EventsOverTimeData,
 } from '../../graphql/types';
-import {
-  FrameworkRequest,
-  RequestOptions,
-  RequestOptionsPaginated,
-  RequestBasicOptions,
-} from '../framework';
+import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
@@ -31,10 +25,6 @@ export interface EventsAdapter {
     req: FrameworkRequest,
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData>;
-  getEventsOverTime(
-    req: FrameworkRequest,
-    options: RequestBasicOptions
-  ): Promise<EventsOverTimeData>;
 }
 
 export interface TimelineRequestOptions extends RequestOptions {

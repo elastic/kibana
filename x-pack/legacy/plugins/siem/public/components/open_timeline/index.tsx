@@ -6,7 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
@@ -15,12 +15,12 @@ import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timel
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
-import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -39,8 +39,6 @@ import {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
-  OpenTimelineDispatchProps,
-  OpenTimelineReduxProps,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
@@ -55,8 +53,7 @@ interface OwnProps<TCache = object> {
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
-  OpenTimelineDispatchProps &
-  OpenTimelineReduxProps;
+  PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
 export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
@@ -338,7 +335,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     show,
   }: {
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
   updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
@@ -346,7 +343,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const StatefulOpenTimeline = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulOpenTimelineComponent);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulOpenTimeline = connector(StatefulOpenTimelineComponent);

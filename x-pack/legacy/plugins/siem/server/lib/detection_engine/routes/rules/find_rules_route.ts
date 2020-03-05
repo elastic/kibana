@@ -4,41 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  FindRulesRequestParams,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { transformFindAlertsOrError } from './utils';
-import { transformError } from '../utils';
+import { transformValidateFindAlerts } from './validate';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createFindRulesRoute = (): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
-    options: {
-      tags: ['access:siem'],
+export const findRulesRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_find`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        query: findRulesSchema,
+        query: buildRouteValidation<FindRulesRequestParams>(findRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: FindRulesRequest, headers) {
-      const { query } = request;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
 
       try {
+        const { query } = request;
+        const alertsClient = context.alerting.getAlertsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+
+        if (!alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const rules = await findRules({
           alertsClient,
           perPage: query.per_page,
@@ -62,14 +62,19 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
             return results;
           })
         );
-        return transformFindAlertsOrError(rules, ruleStatuses);
+        const [validated, errors] = transformValidateFindAlerts(rules, ruleStatuses);
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const findRulesRoute = (server: ServerFacade) => {
-  server.route(createFindRulesRoute());
+    }
+  );
 };

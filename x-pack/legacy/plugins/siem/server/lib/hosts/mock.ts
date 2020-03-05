@@ -49,8 +49,7 @@ export const mockGetHostsOptions: HostsRequestOptions = {
 };
 
 export const mockGetHostsRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetHostsTableQuery',
     variables: {
       sourceId: 'default',
@@ -67,7 +66,6 @@ export const mockGetHostsRequest = {
     query:
       'query GetHostsTableQuery($sourceId: ID!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $sort: HostsSortField!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    Hosts(timerange: $timerange, pagination: $pagination, sort: $sort, filterQuery: $filterQuery) {\n      totalCount\n      edges {\n        node {\n          _id\n          host {\n            id\n            name\n            os {\n              name\n              version\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        cursor {\n          value\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        endCursor {\n          value\n          __typename\n        }\n        hasNextPage\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockGetHostsResponse = {
@@ -327,14 +325,12 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
 };
 
 export const mockGetHostOverviewRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetHostOverviewQuery',
     variables: { sourceId: 'default', hostName: 'siem-es' },
     query:
       'query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {\n  source(id: $sourceId) {\n    id\n    HostOverview(hostName: $hostName, timerange: $timerange) {\n      _id\n      host {\n        architecture\n        id\n        ip\n        mac\n        name\n        os {\n          family\n          name\n          platform\n          version\n          __typename\n        }\n        type\n        __typename\n      }\n      cloud {\n        instance {\n          id\n          __typename\n        }\n        machine {\n          type\n          __typename\n        }\n        provider\n        region\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockGetHostOverviewResponse = {
@@ -520,14 +516,12 @@ export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = 
 };
 
 export const mockGetHostLastFirstSeenRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetHostLastFirstSeenQuery',
     variables: { sourceId: 'default', hostName: 'siem-es' },
     query:
       'query GetHostLastFirstSeenQuery($sourceId: ID!, $hostName: String!) {\n  source(id: $sourceId) {\n    id\n    HostLastFirstSeen(hostName: $hostName) {\n      firstSeen\n      lastSeen\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockGetHostLastFirstSeenResponse = {

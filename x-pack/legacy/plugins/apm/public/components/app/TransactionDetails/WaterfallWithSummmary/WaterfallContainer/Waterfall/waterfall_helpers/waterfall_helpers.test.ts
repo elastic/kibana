@@ -5,16 +5,17 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
   getWaterfall,
   IWaterfallItem,
-  IWaterfallTransaction
+  IWaterfallTransaction,
+  IWaterfallError
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -100,7 +101,9 @@ describe('waterfall_helpers', () => {
           }
         },
         timestamp: { us: 1549324795823304 }
-      } as unknown) as Transaction,
+      } as unknown) as Transaction
+    ];
+    const errorDocs = [
       ({
         processor: { event: 'error' },
         parent: { id: 'myTransactionId1' },
@@ -130,14 +133,15 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(
         {
-          trace: { items: hits, exceedsMax: false },
+          trace: { items: hits, errorDocs, exceedsMax: false },
           errorsPerTransaction
         },
         entryTransactionId
       );
 
-      expect(waterfall.items.length).toBe(7);
+      expect(waterfall.items.length).toBe(6);
       expect(waterfall.items[0].id).toBe('myTransactionId1');
+      expect(waterfall.errorItems.length).toBe(1);
       expect(waterfall.errorsCount).toEqual(1);
       expect(waterfall).toMatchSnapshot();
     });
@@ -150,7 +154,7 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(
         {
-          trace: { items: hits, exceedsMax: false },
+          trace: { items: hits, errorDocs, exceedsMax: false },
           errorsPerTransaction
         },
         entryTransactionId
@@ -158,6 +162,7 @@ describe('waterfall_helpers', () => {
 
       expect(waterfall.items.length).toBe(4);
       expect(waterfall.items[0].id).toBe('myTransactionId2');
+      expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.errorsCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
@@ -386,7 +391,7 @@ describe('waterfall_helpers', () => {
     it('should return parent skew for errors', () => {
       const child = {
         docType: 'error'
-      } as IWaterfallItem;
+      } as IWaterfallError;
 
       const parent = {
         docType: 'transaction',

@@ -19,12 +19,12 @@
 
 import { IContainer } from '../../containers';
 import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
-import { esFilters } from '../../../../../data/public';
+import { Filter } from '../../../../../data/public';
 
 export const FILTERABLE_EMBEDDABLE = 'FILTERABLE_EMBEDDABLE';
 
 export interface FilterableEmbeddableInput extends EmbeddableInput {
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 export class FilterableEmbeddable extends Embeddable<FilterableEmbeddableInput, EmbeddableOutput> {

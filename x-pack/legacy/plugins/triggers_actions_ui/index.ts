@@ -29,7 +29,6 @@ export function triggersActionsUI(kibana: any) {
         .default();
     },
     uiExports: {
-      managementSections: ['plugins/triggers_actions_ui/legacy'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       injectDefaultVars(server: Legacy.Server) {
         const serverConfig = server.config();

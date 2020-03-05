@@ -9,9 +9,10 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import { canRedirectRequest } from '../can_redirect_request';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { Tokens, TokenPair } from '../tokens';
-import { canRedirectRequest } from '..';
+import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -66,6 +67,11 @@ export function isSAMLRequestQuery(query: any): query is { SAMLRequest: string }
  * Provider that supports SAML request authentication.
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'saml';
+
   /**
    * Specifies Elasticsearch SAML realm name that Kibana should use.
    */
@@ -175,17 +181,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-    let {
-      authenticationResult,
-      // eslint-disable-next-line prefer-const
-      headerNotRecognized,
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return authenticationResult;
+    if (getHTTPAuthenticationScheme(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    if (state && authenticationResult.notHandled()) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -229,7 +231,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
 
       return DeauthenticationResult.redirectTo(
-        `${this.options.basePath.serverBasePath}/logged_out`
+        `${this.options.basePath.serverBasePath}/security/logged_out`
       );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
@@ -238,37 +240,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Bearer ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return { authenticationResult: AuthenticationResult.notHandled() };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return {
-        authenticationResult: AuthenticationResult.notHandled(),
-        headerNotRecognized: true,
-      };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-      return { authenticationResult: AuthenticationResult.succeeded(user) };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return { authenticationResult: AuthenticationResult.failed(err) };
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
@@ -390,7 +366,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         'Login initiated by Identity Provider is for a different user than currently authenticated.'
       );
       return AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/overwritten_session`,
+        `${this.options.basePath.serverBasePath}/security/overwritten_session`,
         { state: newState }
       );
     }

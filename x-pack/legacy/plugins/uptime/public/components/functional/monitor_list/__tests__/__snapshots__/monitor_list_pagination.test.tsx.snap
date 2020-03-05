@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MonitorList component renders a no items message when no data is provided 1`] = `
+exports[`MonitorListPagination component renders a no items message when no data is provided 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -105,7 +105,7 @@ exports[`MonitorList component renders a no items message when no data is provid
 </Fragment>
 `;
 
-exports[`MonitorList component renders the monitor list 1`] = `
+exports[`MonitorListPagination component renders the monitor list 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle

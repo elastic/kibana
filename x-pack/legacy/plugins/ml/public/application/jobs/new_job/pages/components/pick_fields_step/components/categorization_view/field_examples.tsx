@@ -57,7 +57,13 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
     txt.push(buffer);
     return { example: txt };
   });
-  return <EuiBasicTable columns={columns} items={items} />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={items}
+      data-test-subj="mlJobWizardCategorizationExamplesTable"
+    />
+  );
 };
 
 const Token: FC = ({ children }) => (

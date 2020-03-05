@@ -47,7 +47,7 @@ import {
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../plugins/data/public';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -439,7 +439,7 @@ test('Test nested reactions', async done => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const { start } = await creatHelloWorldContainerAndEmbeddable();
-  const derivedFilter: esFilters.Filter = {
+  const derivedFilter: Filter = {
     $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },

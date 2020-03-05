@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Potential Application Shimming via Sdbinst",
   "query": "event.code:1 and process.name:sdbinst.exe",
   "risk_score": 21,
@@ -12,7 +12,6 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "D-SA",
     "Windows"
   ],
   "threat": [

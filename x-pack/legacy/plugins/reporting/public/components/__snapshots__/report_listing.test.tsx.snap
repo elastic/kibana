@@ -91,10 +91,7 @@ Array [
           >
             <EuiScreenReaderOnly>
               <caption
-                aria-live="polite"
-                aria-relevant="text"
                 className="euiScreenReaderOnly euiTableCaption"
-                role="status"
               >
                 <EuiDelayRender
                   delay={500}
@@ -297,10 +294,7 @@ Array [
         >
           <EuiScreenReaderOnly>
             <caption
-              aria-live="polite"
-              aria-relevant="text"
               className="euiScreenReaderOnly euiTableCaption"
-              role="status"
             >
               <EuiDelayRender
                 delay={500}

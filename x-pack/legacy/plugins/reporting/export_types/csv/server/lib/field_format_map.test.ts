@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { fieldFormats } from '../../../../../../../../src/plugins/data/server';
+import {
+  fieldFormats,
+  FieldFormatsGetConfigFn,
+} from '../../../../../../../../src/plugins/data/server';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
@@ -29,7 +32,7 @@ describe('field format map', function() {
     number: { id: 'number', params: {} },
   };
   configMock['format:number:defaultPattern'] = '0,0.[000]';
-  const getConfig = ((key: string) => configMock[key]) as fieldFormats.GetConfigFn;
+  const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
 
   const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();

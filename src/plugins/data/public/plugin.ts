@@ -36,7 +36,7 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatterns } from './index_patterns';
+import { IndexPatternsService } from './index_patterns';
 import {
   setNotifications,
   setFieldFormats,
@@ -44,9 +44,16 @@ import {
   setIndexPatterns,
   setUiSettings,
 } from './services';
-import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
+import { createFilterAction, ACTION_GLOBAL_APPLY_FILTER } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
+import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
+
+declare module '../../ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
+  }
+}
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteService();
@@ -57,7 +64,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.searchService = new SearchService(initializerContext);
+    this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.storage = new Storage(window.localStorage);
@@ -90,10 +97,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setOverlays(overlays);
     setUiSettings(core.uiSettings);
 
-    const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
+    const indexPatternsService = new IndexPatternsService(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),

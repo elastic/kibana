@@ -1,0 +1,578 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RemoteClusterForm renders untouched state 1`] = `
+Array [
+  <div
+    class="euiForm"
+  >
+    <fieldset
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+    >
+      <legend
+        class="euiScreenReaderOnly"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Name
+            </h2>
+          </span>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              A unique name for the remote cluster.
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--fullWidth"
+            data-test-subj="remoteClusterFormNameFormRow"
+            id="mockId-row"
+          >
+            <div
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label"
+                for="mockId"
+              >
+                Name
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="mockId-help"
+                    class="euiFieldText euiFieldText--fullWidth"
+                    data-test-subj="remoteClusterFormNameInput"
+                    id="mockId"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <div
+                class="euiFormHelpText euiFormRow__text"
+                id="mockId-help"
+              >
+                Name can only contain letters, numbers, underscores, and dashes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+    >
+      <legend
+        class="euiScreenReaderOnly"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Seed nodes for cluster discovery
+            </h2>
+          </span>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--fullWidth"
+            data-test-subj="remoteClusterFormSeedNodesFormRow"
+            id="mockId-row"
+          >
+            <div
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label"
+                for="mockId"
+              >
+                Seed nodes
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                aria-describedby="mockId-help"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                class="euiComboBox euiComboBox--fullWidth"
+                data-test-subj="remoteClusterFormSeedsInput"
+                role="combobox"
+              >
+                <div
+                  class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <div
+                      class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap-isClearable"
+                      data-test-subj="comboBoxInput"
+                      tabindex="-1"
+                    >
+                      <p
+                        class="euiComboBoxPlaceholder"
+                      >
+                        host:port
+                      </p>
+                      <div
+                        class="euiComboBox__input"
+                        style="font-size:14px;display:inline-block"
+                      >
+                        <input
+                          data-test-subj="comboBoxSearchInput"
+                          id="mockId"
+                          role="textbox"
+                          style="box-sizing:content-box;width:1px"
+                          value=""
+                        />
+                        <div
+                          style="position:absolute;top:0;left:0;visibility:hidden;height:0;overflow:scroll;white-space:pre"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFormHelpText euiFormRow__text"
+                id="mockId-help"
+              >
+                An IP address or host name, followed by the 
+                <button
+                  class="euiLink euiLink--primary"
+                  type="button"
+                >
+                  transport port
+                </button>
+                 of the remote cluster.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+    >
+      <legend
+        class="euiScreenReaderOnly"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Make remote cluster optional
+            </h2>
+          </span>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <p>
+                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                <strong>
+                  Skip if unavailable
+                </strong>
+                . 
+                <button
+                  class="euiLink euiLink--primary"
+                  type="button"
+                >
+                  Learn more.
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
+            data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+            id="mockId-row"
+          >
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiSwitch"
+              >
+                <button
+                  aria-checked="false"
+                  aria-labelledby="mockId"
+                  class="euiSwitch__button"
+                  data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
+                  id="mockId"
+                  role="switch"
+                  type="button"
+                >
+                  <span
+                    class="euiSwitch__body"
+                  >
+                    <span
+                      class="euiSwitch__thumb"
+                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </span>
+                  </span>
+                </button>
+                <span
+                  class="euiSwitch__label"
+                  id="mockId"
+                >
+                  Skip if unavailable
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
+            class="euiButton euiButton--secondary euiButton--fill"
+            data-test-subj="remoteClusterFormSaveButton"
+            type="button"
+          >
+            <span
+              class="euiButton__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiButton__text"
+              >
+                Save
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            Show request
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+]
+`;
+
+exports[`RemoteClusterForm validation renders invalid state and a global form error when the user tries to submit an invalid form 1`] = `
+Array [
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    data-test-subj="remoteClusterFormNameFormRow"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Name
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="mockId-help mockId-error-0"
+            class="euiFieldText euiFieldText--fullWidth"
+            data-test-subj="remoteClusterFormNameInput"
+            id="mockId"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        aria-live="polite"
+        class="euiFormErrorText euiFormRow__text"
+        id="mockId-error-0"
+      >
+        Name is required.
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text"
+        id="mockId-help"
+      >
+        Name can only contain letters, numbers, underscores, and dashes.
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    data-test-subj="remoteClusterFormSeedNodesFormRow"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Seed nodes
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        aria-describedby="mockId-help mockId-error-0"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        class="euiComboBox euiComboBox-isInvalid euiComboBox--fullWidth"
+        data-test-subj="remoteClusterFormSeedsInput"
+        role="combobox"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <div
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap-isClearable"
+              data-test-subj="comboBoxInput"
+              tabindex="-1"
+            >
+              <p
+                class="euiComboBoxPlaceholder"
+              >
+                host:port
+              </p>
+              <div
+                class="euiComboBox__input"
+                style="font-size: 14px; display: inline-block;"
+              >
+                <input
+                  data-test-subj="comboBoxSearchInput"
+                  id="mockId"
+                  role="textbox"
+                  style="box-sizing: content-box; width: 2px;"
+                  value=""
+                />
+                <div
+                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-live="polite"
+        class="euiFormErrorText euiFormRow__text"
+        id="mockId-error-0"
+      >
+        At least one seed node is required.
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text"
+        id="mockId-help"
+      >
+        An IP address or host name, followed by the 
+        <button
+          class="euiLink euiLink--primary"
+          type="button"
+        >
+          transport port
+        </button>
+         of the remote cluster.
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
+    data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiSwitch"
+      >
+        <button
+          aria-checked="false"
+          aria-labelledby="mockId"
+          class="euiSwitch__button"
+          data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
+          id="mockId"
+          role="switch"
+          type="button"
+        >
+          <span
+            class="euiSwitch__body"
+          >
+            <span
+              class="euiSwitch__thumb"
+            />
+            <span
+              class="euiSwitch__track"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiSwitch__label"
+          id="mockId"
+        >
+          Skip if unavailable
+        </span>
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m"
+    data-test-subj="remoteClusterFormGlobalError"
+  />,
+]
+`;

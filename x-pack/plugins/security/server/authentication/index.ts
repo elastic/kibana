@@ -14,7 +14,6 @@ import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
-import { LegacyAPI } from '../plugin';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
 
@@ -36,7 +35,6 @@ interface SetupAuthenticationParams {
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  getLegacyAPI(): Pick<LegacyAPI, 'isSystemAPIRequest'>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -47,7 +45,6 @@ export async function setupAuthentication({
   config,
   license,
   loggers,
-  getLegacyAPI,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -55,14 +52,12 @@ export async function setupAuthentication({
    * Retrieves currently authenticated user associated with the specified request.
    * @param request
    */
-  const getCurrentUser = async (request: KibanaRequest) => {
+  const getCurrentUser = (request: KibanaRequest) => {
     if (!license.isEnabled()) {
       return null;
     }
 
-    return (await clusterClient
-      .asScoped(request)
-      .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
+    return (http.auth.get(request).state ?? null) as AuthenticatedUser | null;
   };
 
   const isValid = (sessionValue: ProviderSession) => {
@@ -85,7 +80,6 @@ export async function setupAuthentication({
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
-    isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
@@ -175,23 +169,12 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
+    isProviderEnabled: authenticator.isProviderEnabled.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
-    isAuthenticated: async (request: KibanaRequest) => {
-      try {
-        await getCurrentUser(request);
-      } catch (err) {
-        // Don't swallow server errors.
-        if (getErrorStatusCode(err) !== 401) {
-          throw err;
-        }
-        return false;
-      }
-
-      return true;
-    },
+    isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),
   };
 }

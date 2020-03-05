@@ -19,15 +19,15 @@
 
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { autocomplete } from '../..';
+import { QuerySuggestion } from '../..';
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
   index: number | null;
-  onClick: (suggestion: autocomplete.QuerySuggestion) => void;
+  onClick: (suggestion: QuerySuggestion) => void;
   onMouseEnter: (index: number) => void;
   show: boolean;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   loadMore: () => void;
 }
 

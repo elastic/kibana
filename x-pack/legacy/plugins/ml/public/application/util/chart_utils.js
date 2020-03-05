@@ -10,7 +10,7 @@ import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impa
 import moment from 'moment';
 import rison from 'rison-node';
 
-import { timefilter } from 'ui/timefilter';
+import { getTimefilter } from '../util/dependency_cache';
 
 import { CHART_TYPE } from '../explorer/explorer_constants';
 
@@ -180,6 +180,7 @@ export function getChartType(config) {
 export function getExploreSeriesLink(series) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
+  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
   const to = bounds.max.toISOString();

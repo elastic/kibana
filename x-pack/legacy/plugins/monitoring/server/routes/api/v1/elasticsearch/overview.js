@@ -12,10 +12,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  INDEX_PATTERN_FILEBEAT,
-} from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
@@ -42,7 +39,11 @@ export function esOverviewRoute(server) {
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
+      const filebeatIndexPattern = prefixIndexPattern(
+        config,
+        config.get('monitoring.ui.logs.index'),
+        '*'
+      );
 
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;

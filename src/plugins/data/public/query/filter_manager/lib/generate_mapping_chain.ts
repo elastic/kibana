@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
 const noop = () => {
   throw new Error('No mappings have been found for filter.');
 };
 
 export const generateMappingChain = (fn: Function, next: Function = noop) => {
-  return (filter: esFilters.Filter) => {
+  return (filter: Filter) => {
     try {
       return fn(filter);
     } catch (result) {

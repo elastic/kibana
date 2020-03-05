@@ -4,46 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transformOrError } from './utils';
-import { transformError } from '../utils';
-import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  DeleteRuleRequestParams,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'DELETE',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const deleteRulesRoute = (router: IRouter) => {
+  router.delete(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        query: queryRulesSchema,
+        query: buildRouteValidation<DeleteRuleRequestParams>(queryRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: QueryRequest, headers) {
-      const { id, rule_id: ruleId } = request.query;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
 
       try {
+        const { id, rule_id: ruleId } = request.query;
+
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+
+        if (!actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const rule = await deleteRules({
           actionsClient,
           alertsClient,
@@ -62,17 +60,26 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         } else {
-          return getIdError({ id, ruleId });
+          const error = getIdError({ id, ruleId });
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const deleteRulesRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesRoute(server));
+    }
+  );
 };

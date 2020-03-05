@@ -1,16 +1,13 @@
 {
-  "description": "This signal detects network events that may indicate the use of VNC traffic\nfrom the Internet. VNC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "description": "This rule detects network events that may indicate the use of VNC traffic\nfrom the Internet. VNC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
   "false_positives": [
-    "VNC connections may be received directly to Linux cloud server instances but such connections are usually made only by engineers. VNC is less common than SSH or RDP but may be required by some work-flows such as remote access and support for specialized software products or servers. Such work-flows are usually known and not unexpected. Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
+    "VNC connections may be received directly to Linux cloud server instances but\n    such connections are usually made only by engineers. VNC is less common than SSH\n    or RDP but may be required by some work-flows such as remote access and support\n    for specialized software products or servers. Such work-flows are usually known\n    and not unexpected. Usage that is unfamiliar to server or network owners can be\n    unexpected and suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "VNC (Virtual Network Computing) from the Internet",
   "query": "network.transport: tcp and (destination.port >= 5800 and destination.port <= 5810) and (\n    network.direction: inbound or (\n        not source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
   "risk_score": 73,
@@ -18,7 +15,7 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "network"
+    "Network"
   ],
   "threat": [
     {
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

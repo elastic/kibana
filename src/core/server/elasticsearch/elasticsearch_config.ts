@@ -31,7 +31,12 @@ export const DEFAULT_API_VERSION = 'master';
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
-const configSchema = schema.object({
+/**
+ * Validation schema for elasticsearch service config. It can be reused when plugins allow users
+ * to specify a local elasticsearch config.
+ * @public
+ */
+export const configSchema = schema.object({
   sniffOnStart: schema.boolean({ defaultValue: false }),
   sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
     defaultValue: false,
@@ -148,6 +153,10 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
   deprecations,
 };
 
+/**
+ * Wrapper of config schema.
+ * @public
+ */
 export class ElasticsearchConfig {
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.

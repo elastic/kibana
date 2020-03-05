@@ -5,7 +5,7 @@
  */
 
 import { createRulesBulkSchema } from './create_rules_bulk_schema';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
 
 // only the basics of testing are here.
 // see: create_rules_schema.test.ts for the bulk of the validation tests
@@ -13,7 +13,7 @@ import { UpdateRuleAlertParamsRest } from '../../rules/types';
 describe('create_rules_bulk_schema', () => {
   test('can take an empty array and validate it', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([]).error
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error
     ).toBeFalsy();
   });
 
@@ -29,7 +29,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('single array of [id] does validate', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -49,7 +49,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('two values of [id] does validate', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -82,7 +82,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('The default for "from" will be "now-6m"', () => {
     expect(
-      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -102,7 +102,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('The default for "to" will be "now"', () => {
     expect(
-      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -122,7 +122,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
     expect(
-      createRulesBulkSchema.validate<Partial<UpdateRuleAlertParamsRest>>([
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,

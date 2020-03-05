@@ -51,7 +51,7 @@ const schema = Joi.object({
   name: Joi.string().required(),
   excludeFromBasePrivileges: Joi.boolean(),
   validLicenses: Joi.array().items(
-    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise')
+    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial')
   ),
   icon: Joi.string(),
   description: Joi.string(),

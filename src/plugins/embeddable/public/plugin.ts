@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
 
 export interface IEmbeddableSetupDependencies {
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface IEmbeddableSetup {

@@ -4,26 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import cytoscape from 'cytoscape';
 import databaseIcon from './icons/database.svg';
 import documentsIcon from './icons/documents.svg';
+import dotNetIcon from './icons/dot-net.svg';
 import globeIcon from './icons/globe.svg';
+import goIcon from './icons/go.svg';
+import javaIcon from './icons/java.svg';
+import nodeJsIcon from './icons/nodejs.svg';
+import phpIcon from './icons/php.svg';
+import pythonIcon from './icons/python.svg';
+import rubyIcon from './icons/ruby.svg';
+import rumJsIcon from './icons/rumjs.svg';
+import defaultIconImport from './icons/default.svg';
 
-function getAvatarIcon(
-  text = '',
-  backgroundColor = 'transparent',
-  foregroundColor = 'white'
-) {
-  return (
-    'data:image/svg+xml;utf8,' +
-    encodeURIComponent(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
-  <circle cx="40" cy="40" fill="${backgroundColor}"  r="40" stroke-width="0" />
-  <text fill="${foregroundColor}" font-family="'Inter UI', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', sans-serif" font-size="36" text-anchor="middle" x="40" xml:space="preserve" y="52">${text}</text>
-</svg>
-`)
-  );
-}
+export const defaultIcon = defaultIconImport;
 
 // The colors here are taken from the logos of the corresponding technologies
 const icons: { [key: string]: string } = {
@@ -35,22 +30,37 @@ const icons: { [key: string]: string } = {
 };
 
 const serviceIcons: { [key: string]: string } = {
-  dotnet: getAvatarIcon('.N', '#8562AD'),
-  go: getAvatarIcon('Go', '#00A9D6'),
-  java: getAvatarIcon('Jv', '#41717E'),
-  'js-base': getAvatarIcon('JS', '#F0DB4E', theme.euiTextColor),
-  nodejs: getAvatarIcon('No', '#689E62'),
-  python: getAvatarIcon('Py', '#376994'),
-  ruby: getAvatarIcon('Rb', '#CC362E')
+  dotnet: dotNetIcon,
+  go: goIcon,
+  java: javaIcon,
+  'js-base': rumJsIcon,
+  nodejs: nodeJsIcon,
+  php: phpIcon,
+  python: pythonIcon,
+  ruby: rubyIcon
 };
 
-export const defaultIcon = getAvatarIcon();
+// IE 11 does not properly load some SVGs, which causes a runtime error and the
+// map to not work at all. We would prefer to do some kind of feature detection
+// rather than browser detection, but IE 11 does support SVG, just not well
+// enough for our use in loading icons.
+//
+// This method of detecting IE is from a Stack Overflow answer:
+// https://stackoverflow.com/a/21825207
+//
+// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
   const type = node.data('type');
+
   if (type === 'service') {
     return serviceIcons[node.data('agentName') as string];
-  } else {
+  } else if (isIE11) {
+    return defaultIcon;
+  } else if (icons[type]) {
     return icons[type];
+  } else {
+    return defaultIcon;
   }
 }

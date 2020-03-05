@@ -6,8 +6,10 @@
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { TriggersActionsPageProvider } from './triggers_actions_ui_page';
+import { AlertDetailsPageProvider } from './alert_details';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   triggersActionsUI: TriggersActionsPageProvider,
+  alertDetailsUI: AlertDetailsPageProvider,
 };

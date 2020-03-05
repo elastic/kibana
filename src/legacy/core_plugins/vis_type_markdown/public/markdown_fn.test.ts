@@ -18,11 +18,11 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
+  const fn = functionWrapper(createMarkdownVisFn());
   const args = {
     font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,

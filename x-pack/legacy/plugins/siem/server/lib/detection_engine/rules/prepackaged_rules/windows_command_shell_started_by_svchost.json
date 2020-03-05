@@ -4,8 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
-  "name": "Svchost spawning cmd.exe",
+  "max_signals": 100,
+  "name": "Svchost spawning Cmd",
   "query": "process.parent.name:svchost.exe and process.name:cmd.exe",
   "risk_score": 21,
   "rule_id": "fd7a6052-58fa-4397-93c3-4795249ccfa2",

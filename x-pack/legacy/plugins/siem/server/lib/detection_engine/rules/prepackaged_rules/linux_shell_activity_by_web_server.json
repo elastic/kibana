@@ -7,9 +7,9 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Potential Shell via Web Server",
-  "query": "process.name: bash and (user.name: apache or www) and event.action:executed",
+  "query": "process.name: bash and user.name: (apache or www or \"www-data\") and event.action:executed",
   "references": [
     "https://pentestlab.blog/tag/web-shell/"
   ],

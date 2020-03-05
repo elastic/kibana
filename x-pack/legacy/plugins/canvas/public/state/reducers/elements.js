@@ -87,6 +87,18 @@ const trimElement = ({ id, position, expression, filter }) => ({
   ...(filter !== void 0 && { filter }),
 });
 
+const getPageWithElementId = (workpad, elementId) => {
+  const matchingPage = workpad.pages.find(page =>
+    page.elements.map(element => element.id).includes(elementId)
+  );
+
+  if (matchingPage) {
+    return matchingPage.id;
+  }
+
+  return undefined;
+};
+
 export const elementsReducer = handleActions(
   {
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
@@ -95,7 +107,8 @@ export const elementsReducer = handleActions(
       return assignNodeProperties(workpadState, pageId, elementId, { expression });
     },
     [actions.setFilter]: (workpadState, { payload }) => {
-      const { filter, pageId, elementId } = payload;
+      const { filter, elementId } = payload;
+      const pageId = getPageWithElementId(workpadState, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>

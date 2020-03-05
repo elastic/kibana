@@ -18,6 +18,7 @@
  */
 import React, { useState } from 'react';
 import { SavedObject } from 'kibana/server';
+import { IndexPatternAttributes } from 'src/plugins/data/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { IndexPatternRef } from './types';
@@ -26,11 +27,11 @@ export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
    */
-  indexPatternList: SavedObject[];
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   /**
    * currently selected index pattern, due to angular issues it's undefined at first rendering
    */
-  selectedIndexPattern: SavedObject;
+  selectedIndexPattern: SavedObject<IndexPatternAttributes>;
   /**
    * triggered when user selects a new index pattern
    */

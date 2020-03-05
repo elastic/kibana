@@ -19,7 +19,7 @@ import {
   Render,
   SeriesStyle,
   Style,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
 } from '../../../types';
 
 interface PieSeriesOptions {
@@ -77,17 +77,15 @@ interface Arguments {
   tilt: number;
 }
 
-export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<Pie>> {
+export function pie(): ExpressionFunctionDefinition<'pie', PointSeries, Arguments, Render<Pie>> {
   const { help, args: argHelp } = getFunctionHelp().pie;
 
   return {
     name: 'pie',
     aliases: [],
     type: 'render',
+    inputTypes: ['pointseries'],
     help,
-    context: {
-      types: ['pointseries'],
-    },
     args: {
       font: {
         types: ['style'],
@@ -136,11 +134,11 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
         help: argHelp.tilt,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } = args;
       const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
-      const data: PieData[] = map(groupBy(context.rows, 'color'), (series, label = '') => {
+      const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {
         const item: PieData = {
           label,
           data: series.map(point => point.size || 1),

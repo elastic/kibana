@@ -21,10 +21,6 @@ import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { EsQueryParser } from './es_query_parser';
 
-jest.mock('../helpers', () => ({
-  getEsShardTimeout: jest.fn(() => '10000'),
-}));
-
 const second = 1000;
 const minute = 60 * second;
 const hour = 60 * minute;
@@ -46,6 +42,8 @@ function create(min, max, dashboardCtx) {
   );
   return inst;
 }
+
+jest.mock('../services');
 
 describe(`EsQueryParser time`, () => {
   test(`roundInterval(4s)`, () => {

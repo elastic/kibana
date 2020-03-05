@@ -50,12 +50,10 @@ export function FlyoutProvider({ getService }: FtrProviderContext) {
         return;
       }
 
-      await Promise.all(
-        flyoutElements.map(async flyoutElement => {
-          const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
-          await closeBtn.click();
-        })
-      );
+      for (let i = 0; i < flyoutElements.length; i++) {
+        const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
+        await closeBtn.click();
+      }
 
       await retry.waitFor(
         'all flyouts to be closed',

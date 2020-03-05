@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createStateContainer } from '../../public/state_containers';
+import { createStateContainer } from '../../common/state_containers';
 
 interface State {
   count: number;

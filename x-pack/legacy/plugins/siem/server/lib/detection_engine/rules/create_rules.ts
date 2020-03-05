@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
@@ -37,7 +38,7 @@ export const createRules = ({
   type,
   references,
   version,
-}: CreateRuleParams) => {
+}: CreateRuleParams): Promise<Alert> => {
   return alertsClient.create({
     data: {
       name,

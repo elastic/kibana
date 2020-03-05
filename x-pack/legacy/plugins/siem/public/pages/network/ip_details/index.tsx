@@ -6,7 +6,7 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../components/filters_global';
@@ -46,7 +46,7 @@ export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent = ({
+export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRedux> = ({
   detailName,
   filters,
   flowTarget,
@@ -57,7 +57,7 @@ export const IPDetailsComponent = ({
   setIpDetailsTablesActivePageToZero,
   setQuery,
   to,
-}: IPDetailsComponentProps) => {
+}) => {
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -73,7 +73,7 @@ export const IPDetailsComponent = ({
   const kibana = useKibana();
 
   useEffect(() => {
-    setIpDetailsTablesActivePageToZero(null);
+    setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
   return (
@@ -279,13 +279,20 @@ IPDetailsComponent.displayName = 'IPDetailsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+
   return (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
   });
 };
 
-export const IPDetails = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
   setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-})(React.memo(IPDetailsComponent));
+};
+
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const IPDetails = connector(React.memo(IPDetailsComponent));

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { searchSourceMock } from '../../../../../../../plugins/data/public/search/search_source/mocks';
+import { searchSourceMock } from '../../../../../../../plugins/data/public/mocks';
 import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
 
 export function getSavedDashboardMock(

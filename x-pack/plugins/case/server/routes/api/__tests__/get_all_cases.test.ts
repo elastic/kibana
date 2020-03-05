@@ -19,7 +19,7 @@ describe('GET all cases', () => {
   beforeAll(async () => {
     routeHandler = await createRoute(initGetAllCasesApi, 'get');
   });
-  it(`returns the case without case comments when includeComments is false`, async () => {
+  it(`gets all the cases`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'get',
@@ -29,6 +29,6 @@ describe('GET all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.saved_objects).toHaveLength(3);
+    expect(response.payload.cases).toHaveLength(3);
   });
 });

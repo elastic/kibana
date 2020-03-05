@@ -11,7 +11,7 @@ This should be only used when renaming properties from different configuration's
 <b>Signature:</b>
 
 ```typescript
-renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
 ```
 
 ## Parameters
@@ -20,6 +20,7 @@ renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
 |  --- | --- | --- |
 |  oldKey | <code>string</code> |  |
 |  newKey | <code>string</code> |  |
+|  silent | <code>boolean</code> |  |
 
 <b>Returns:</b>
 

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
 
-import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -21,9 +22,9 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, timelineDefaults, TimelineModel, EventType } from '../../../store/timeline/model';
-import { DispatchUpdateReduxTime, dispatchUpdateReduxTime } from '../../super_date_picker';
-import { DataProvider } from '../data_providers/data_provider';
+import { KqlMode, TimelineModel, EventType } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { dispatchUpdateReduxTime } from '../../super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
@@ -32,45 +33,7 @@ interface OwnProps {
   timelineId: string;
 }
 
-interface StateReduxProps {
-  dataProviders: DataProvider[];
-  eventType: EventType;
-  filters: esFilters.Filter[];
-  filterQuery: KueryFilterQuery;
-  filterQueryDraft: KueryFilterQuery;
-  from: number;
-  fromStr: string;
-  isRefreshPaused: boolean;
-  kqlMode: KqlMode;
-  refreshInterval: number;
-  savedQueryId: string | null;
-  to: number;
-  toStr: string;
-}
-
-interface DispatchProps {
-  applyKqlFilterQuery: ({
-    id,
-    filterQuery,
-  }: {
-    id: string;
-    filterQuery: SerializedFilterQuery;
-  }) => void;
-  updateEventType: ({ id, eventType }: { id: string; eventType: EventType }) => void;
-  updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
-  setKqlFilterQueryDraft: ({
-    id,
-    filterQueryDraft,
-  }: {
-    id: string;
-    filterQueryDraft: KueryFilterQuery;
-  }) => void;
-  setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) => void;
-  setFilters: ({ id, filters }: { id: string; filters: esFilters.Filter[] }) => void;
-  updateReduxTime: DispatchUpdateReduxTime;
-}
-
-type Props = OwnProps & StateReduxProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
@@ -126,7 +89,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     const setFiltersInTimeline = useCallback(
-      (newFilters: esFilters.Filter[]) =>
+      (newFilters: Filter[]) =>
         setFilters({
           id: timelineId,
           filters: newFilters,
@@ -190,15 +153,15 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
       prevProps.refreshInterval === nextProps.refreshInterval &&
       prevProps.timelineId === nextProps.timelineId &&
-      isEqual(prevProps.browserFields, nextProps.browserFields) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.filterQuery, nextProps.filterQuery) &&
-      isEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
-      isEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-      isEqual(prevProps.kqlMode, nextProps.kqlMode) &&
-      isEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
+      deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
+      deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
+      deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+      deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
+      deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
+      deepEqual(prevProps.timelineId, nextProps.timelineId)
     );
   }
 );
@@ -217,17 +180,17 @@ const makeMapStateToProps = () => {
     return {
       dataProviders: timeline.dataProviders,
       eventType: timeline.eventType ?? 'raw',
-      filterQuery: getKqlFilterQuery(state, timelineId),
-      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
-      filters: timeline.filters,
+      filterQuery: getKqlFilterQuery(state, timelineId)!,
+      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId)!,
+      filters: timeline.filters!,
       from: input.timerange.from,
-      fromStr: input.timerange.fromStr,
+      fromStr: input.timerange.fromStr!,
       isRefreshPaused: policy.kind === 'manual',
       kqlMode: getOr('filter', 'kqlMode', timeline),
       refreshInterval: policy.duration,
       savedQueryId: getOr(null, 'savedQueryId', timeline),
       to: input.timerange.to,
-      toStr: input.timerange.toStr,
+      toStr: input.timerange.toStr!,
     };
   };
   return mapStateToProps;
@@ -260,12 +223,13 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     ),
   setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) =>
     dispatch(timelineActions.setSavedQueryId({ id, savedQueryId })),
-  setFilters: ({ id, filters }: { id: string; filters: esFilters.Filter[] }) =>
+  setFilters: ({ id, filters }: { id: string; filters: Filter[] }) =>
     dispatch(timelineActions.setFilters({ id, filters })),
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const StatefulSearchOrFilter = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulSearchOrFilterComponent);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulSearchOrFilter = connector(StatefulSearchOrFilterComponent);

@@ -44,7 +44,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
@@ -110,7 +110,7 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
     };
     mockStartContext = {

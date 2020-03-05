@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
 import { parseFiltersMap } from '../../functional/filter_group/parse_filter_map';
@@ -12,6 +12,7 @@ import { AppState } from '../../../state';
 import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
 import { FilterGroupComponent } from '../../functional/filter_group';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
+import { UptimeRefreshContext } from '../../../contexts';
 
 interface OwnProps {
   esFilters?: string;
@@ -37,8 +38,9 @@ export const Container: React.FC<Props> = ({
   loadFilterGroup,
   overviewFilters,
 }: Props) => {
-  const [getUrlParams, updateUrl] = useUrlParams();
+  const { lastRefresh } = useContext(UptimeRefreshContext);
 
+  const [getUrlParams, updateUrl] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = getUrlParams();
 
   useEffect(() => {
@@ -53,7 +55,16 @@ export const Container: React.FC<Props> = ({
       statusFilter,
       tags: filterSelections.tags ?? [],
     });
-  }, [dateRangeStart, dateRangeEnd, esKuery, esFilters, statusFilter, urlFilters, loadFilterGroup]);
+  }, [
+    lastRefresh,
+    dateRangeStart,
+    dateRangeEnd,
+    esKuery,
+    esFilters,
+    statusFilter,
+    urlFilters,
+    loadFilterGroup,
+  ]);
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {

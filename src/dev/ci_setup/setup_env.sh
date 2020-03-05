@@ -56,23 +56,23 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 ###
 ### download node
 ###
+nodeVersion="$(cat "$dir/.node-version")"
+nodeDir="$cacheDir/node/$nodeVersion"
+nodeBin="$nodeDir/bin"
+classifier="x64.tar.gz"
+
 UNAME=$(uname)
 OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS="win"
+  nodeBin="$HOME/node"
+  classifier="x64.zip"
+elif [[ "$UNAME" == "Darwin" ]]; then
+  OS="darwin"
 fi
 echo " -- Running on OS: $OS"
 
-nodeVersion="$(cat "$dir/.node-version")"
-nodeDir="$cacheDir/node/$nodeVersion"
-
-if [[ "$OS" == "win" ]]; then
-  nodeBin="$HOME/node"
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
-else
-  nodeBin="$nodeDir/bin"
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
-fi
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-${OS}-${classifier}"
 
 if [[ "$installNode" == "true" ]]; then
   echo " -- node: version=v${nodeVersion} dir=$nodeDir"

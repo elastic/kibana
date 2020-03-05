@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../../kibana_services';
+import { EsQuerySortValue, IndexPattern } from '../../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
@@ -31,8 +31,8 @@ import { getDefaultSort } from './get_default_sort';
 export function getSortForSearchSource(
   sort?: SortOrder[],
   indexPattern?: IndexPattern,
-  defaultDirection: 'asc' | 'desc' = 'desc'
-) {
+  defaultDirection: string = 'desc'
+): EsQuerySortValue[] {
   if (!sort || !indexPattern) {
     return [];
   } else if (Array.isArray(sort) && sort.length === 0) {
@@ -46,8 +46,8 @@ export function getSortForSearchSource(
           order: sortPair[timeFieldName],
           numeric_type: 'date_nanos',
         },
-      };
+      } as EsQuerySortValue;
     }
-    return sortPair;
+    return sortPair as EsQuerySortValue;
   });
 }

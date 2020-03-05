@@ -4,9 +4,9 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Network Connection via Mshta",
-  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\" and not process.name:\"mshta.exe\"",
+  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\"",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/05/cyber-espionage-apt32.html"
   ],

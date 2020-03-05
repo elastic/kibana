@@ -10,7 +10,6 @@ export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const log = getService('log');
 
   describe('docvalue_fields', () => {
     before(async () => {
@@ -22,7 +21,6 @@ export default function({ getPageObjects, getService }) {
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
       const responseBody = await testSubjects.getVisibleText('inspectorResponseBody');
-      log.info(responseBody);
       await inspector.close();
       return JSON.parse(responseBody);
     }

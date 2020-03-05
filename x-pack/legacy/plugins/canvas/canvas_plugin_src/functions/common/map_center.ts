@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n/functions';
 import { MapCenter } from '../../../types';
 
@@ -14,15 +14,13 @@ interface Args {
   zoom: number;
 }
 
-export function mapCenter(): ExpressionFunction<'mapCenter', null, Args, MapCenter> {
+export function mapCenter(): ExpressionFunctionDefinition<'mapCenter', null, Args, MapCenter> {
   const { help, args: argHelp } = getFunctionHelp().mapCenter;
   return {
     name: 'mapCenter',
     help,
     type: 'mapCenter',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       lat: {
         types: ['number'],
@@ -40,7 +38,7 @@ export function mapCenter(): ExpressionFunction<'mapCenter', null, Args, MapCent
         help: argHelp.zoom,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'mapCenter',
         ...args,

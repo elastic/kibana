@@ -20,7 +20,7 @@
 import React, { FunctionComponent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { AggConfig } from '../../legacy_imports';
+import { IAggConfig } from '../../legacy_imports';
 import {
   safeMakeLabel,
   useAvailableOptions,
@@ -57,7 +57,7 @@ const metricAggs = [
       return 'avg';
     },
   },
-] as AggConfig[];
+] as IAggConfig[];
 
 const incompatibleAggs = [
   {
@@ -74,7 +74,7 @@ const incompatibleAggs = [
       return 'percentiles';
     },
   },
-] as AggConfig[];
+] as IAggConfig[];
 const aggFilter = ['!top_hits', '!percentiles'];
 
 describe('Aggregations utils', () => {
@@ -222,7 +222,7 @@ describe('Aggregations utils', () => {
     });
 
     test('should not fail and return a safety string if makeLabel func is not exist', () => {
-      const label = safeMakeLabel({} as AggConfig);
+      const label = safeMakeLabel({} as IAggConfig);
 
       expect(label).toEqual(expect.any(String));
     });

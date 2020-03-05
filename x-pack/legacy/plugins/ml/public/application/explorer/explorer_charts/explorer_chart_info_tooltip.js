@@ -10,7 +10,6 @@ import React from 'react';
 import { CHART_TYPE } from '../explorer_constants';
 
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
 
 const CHART_DESCRIPTION = {
   [CHART_TYPE.EVENT_DISTRIBUTION]: i18n.translate(
@@ -47,34 +46,30 @@ function TooltipDefinitionList({ toolTipData }) {
   );
 }
 
-export const ExplorerChartInfoTooltip = injectI18n(function ExplorerChartInfoTooltip({
+export const ExplorerChartInfoTooltip = ({
   jobId,
   aggregationInterval,
   chartFunction,
   chartType,
   entityFields = [],
-  intl,
-}) {
+}) => {
   const chartDescription = CHART_DESCRIPTION[chartType];
 
   const toolTipData = [
     {
-      title: intl.formatMessage({
-        id: 'xpack.ml.explorer.charts.infoTooltip.jobIdTitle',
+      title: i18n.translate('xpack.ml.explorer.charts.infoTooltip.jobIdTitle', {
         defaultMessage: 'job ID',
       }),
       description: jobId,
     },
     {
-      title: intl.formatMessage({
-        id: 'xpack.ml.explorer.charts.infoTooltip.aggregationIntervalTitle',
+      title: i18n.translate('xpack.ml.explorer.charts.infoTooltip.aggregationIntervalTitle', {
         defaultMessage: 'aggregation interval',
       }),
       description: aggregationInterval,
     },
     {
-      title: intl.formatMessage({
-        id: 'xpack.ml.explorer.charts.infoTooltip.chartFunctionTitle',
+      title: i18n.translate('xpack.ml.explorer.charts.infoTooltip.chartFunctionTitle', {
         defaultMessage: 'chart function',
       }),
       description: chartFunction,
@@ -99,8 +94,8 @@ export const ExplorerChartInfoTooltip = injectI18n(function ExplorerChartInfoToo
       )}
     </div>
   );
-});
-ExplorerChartInfoTooltip.WrappedComponent.propTypes = {
+};
+ExplorerChartInfoTooltip.propTypes = {
   jobId: PropTypes.string.isRequired,
   aggregationInterval: PropTypes.string,
   chartFunction: PropTypes.string,

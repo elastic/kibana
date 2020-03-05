@@ -628,6 +628,18 @@ export const ViewStrings = {
           markdown: MARKDOWN,
         },
       }),
+    getOpenLinksInNewTabDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.openLinksInNewTabTitle', {
+        defaultMessage: 'Markdown link settings',
+      }),
+    getOpenLinksInNewTabLabelName: () =>
+      i18n.translate('xpack.canvas.uis.views.openLinksInNewTabLabel', {
+        defaultMessage: 'Open all links in a new tab',
+      }),
+    getOpenLinksInNewTabHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.openLinksInNewTabHelpLabel', {
+        defaultMessage: 'Set links to open in new tab',
+      }),
   },
   Metric: {
     getDisplayName: () =>

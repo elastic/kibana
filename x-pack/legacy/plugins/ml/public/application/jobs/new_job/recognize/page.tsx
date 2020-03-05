@@ -20,10 +20,10 @@ import {
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { merge } from 'lodash';
+import { useMlKibana } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
-import { useKibanaContext } from '../../../contexts/kibana';
+import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
   DataRecognizerConfigResponse,
@@ -70,6 +70,9 @@ export enum SAVE_STATE {
 }
 
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
@@ -84,7 +87,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     currentSavedSearch: savedSearch,
     currentIndexPattern: indexPattern,
     combinedQuery,
-  } = useKibanaContext();
+  } = useMlContext();
   const pageTitle =
     savedSearch !== null
       ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
@@ -206,7 +209,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setSaveState(SAVE_STATE.FAILED);
       // eslint-disable-next-line no-console
       console.error('Error setting up module', e);
-      toastNotifications.addDanger({
+      const { toasts } = notifications;
+      toasts.addDanger({
         title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
           defaultMessage: 'Error setting up module {moduleId}',
           values: { moduleId },

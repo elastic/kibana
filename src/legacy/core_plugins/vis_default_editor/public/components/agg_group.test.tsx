@@ -21,7 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfigs, AggConfig, Schema } from '../legacy_imports';
+import { IAggConfigs, IAggConfig, Schema } from '../legacy_imports';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
@@ -56,7 +56,7 @@ jest.mock('./agg_add', () => ({
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggGroupProps;
-  let aggs: AggConfigs;
+  let aggs: IAggConfigs;
   let setTouched: jest.Mock;
   let setValidity: jest.Mock;
   let reorderAggs: jest.Mock;
@@ -76,7 +76,7 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: { group: 'metrics' },
-        } as AggConfig,
+        } as IAggConfig,
         {
           id: '3',
           params: {
@@ -85,7 +85,7 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: { group: 'metrics' },
-        } as AggConfig,
+        } as IAggConfig,
         {
           id: '2',
           params: {
@@ -94,9 +94,9 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: { group: 'buckets' },
-        } as AggConfig,
+        } as IAggConfig,
       ],
-    } as AggConfigs;
+    } as IAggConfigs;
 
     defaultProps = {
       formIsTouched: false,

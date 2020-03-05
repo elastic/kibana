@@ -19,10 +19,12 @@
 
 import {
   ChromeStart,
-  LegacyCoreStart,
+  CoreStart,
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
+  I18nStart,
+  PluginInitializerContext,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -33,17 +35,18 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plu
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { Chrome } from './legacy_imports';
+import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
+  pluginInitializerContext: PluginInitializerContext;
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
-  core: LegacyCoreStart;
+  core: CoreStart;
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: Chrome;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
@@ -52,9 +55,13 @@ export interface VisualizeKibanaServices {
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
+  I18nContext: I18nStart['Context'];
+  setActiveUrl: (newUrl: string) => void;
+  DefaultVisualizationEditor: typeof DefaultEditorController;
 }
 
 let services: VisualizeKibanaServices | null = null;

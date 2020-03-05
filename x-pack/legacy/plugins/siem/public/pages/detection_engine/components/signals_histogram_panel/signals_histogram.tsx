@@ -12,9 +12,11 @@ import {
   HistogramBarSeries,
   Position,
   Settings,
+  ChartSizeArray,
 } from '@elastic/charts';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiProgress } from '@elastic/eui';
+
 import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
 import { HistogramData } from './types';
@@ -43,6 +45,14 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
   }) => {
     const theme = useTheme();
 
+    const chartSize: ChartSizeArray = useMemo(() => ['100%', chartHeight], [chartHeight]);
+    const xAxisId = useMemo(() => getAxisId('signalsHistogramAxisX'), []);
+    const yAxisId = useMemo(() => getAxisId('signalsHistogramAxisY'), []);
+    const id = useMemo(() => getSpecId('signalsHistogram'), []);
+    const yAccessors = useMemo(() => ['y'], []);
+    const splitSeriesAccessors = useMemo(() => ['g'], []);
+    const tickFormat = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
+
     return (
       <>
         {loading && (
@@ -54,7 +64,7 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
           />
         )}
 
-        <Chart size={['100%', chartHeight]}>
+        <Chart size={chartSize}>
           <Settings
             legendPosition={legendPosition}
             onBrushEnd={updateDateRange}
@@ -62,21 +72,17 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
             theme={theme}
           />
 
-          <Axis
-            id={getAxisId('signalsHistogramAxisX')}
-            position="bottom"
-            tickFormat={histogramDateTimeFormatter([from, to])}
-          />
+          <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />
 
-          <Axis id={getAxisId('signalsHistogramAxisY')} position="left" />
+          <Axis id={yAxisId} position="left" />
 
           <HistogramBarSeries
-            id={getSpecId('signalsHistogram')}
+            id={id}
             xScaleType="time"
             yScaleType="linear"
             xAccessor="x"
-            yAccessors={['y']}
-            splitSeriesAccessors={['g']}
+            yAccessors={yAccessors}
+            splitSeriesAccessors={splitSeriesAccessors}
             data={data}
           />
         </Chart>
@@ -84,4 +90,5 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     );
   }
 );
+
 SignalsHistogram.displayName = 'SignalsHistogram';

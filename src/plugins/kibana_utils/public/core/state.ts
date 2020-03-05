@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from './create_getter_setter';
+import { createGetterSetter } from '../../common';
 import { CoreStart } from '../../../../core/public';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');

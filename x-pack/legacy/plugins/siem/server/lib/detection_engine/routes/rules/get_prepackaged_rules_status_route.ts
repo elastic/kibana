@@ -4,35 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import {
+  PrePackagedRulesStatusSchema,
+  prePackagedRulesStatusSchema,
+} from '../schemas/response/prepackaged_rules_status_schema';
+import { validate } from './validate';
 
-export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RequestFacade, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!alertsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
@@ -48,19 +48,25 @@ export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
-        return {
+        const prepackagedRulesStatus: PrePackagedRulesStatusSchema = {
           rules_custom_installed: customRules.total,
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
         };
+        const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const getPrepackagedRulesStatusRoute = (server: ServerFacade): void => {
-  server.route(createGetPrepackagedRulesStatusRoute());
+    }
+  );
 };

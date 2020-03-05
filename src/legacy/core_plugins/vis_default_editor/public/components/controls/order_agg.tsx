@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { AggParamType, AggConfig, AggGroupNames } from '../../legacy_imports';
+import { AggParamType, IAggConfig, AggGroupNames } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
@@ -35,7 +35,7 @@ function OrderAggParamEditor({
   setValue,
   setValidity,
   setTouched,
-}: AggParamEditorProps<AggConfig, AggParamType>) {
+}: AggParamEditorProps<IAggConfig, AggParamType>) {
   const orderBy = agg.params.orderBy;
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function OrderAggParamEditor({
   const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
     agg,
     aggParam,
-    value as AggConfig,
+    value as IAggConfig,
     setValue
   );
 
@@ -63,7 +63,7 @@ function OrderAggParamEditor({
     <>
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
-        agg={value as AggConfig}
+        agg={value as IAggConfig}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}

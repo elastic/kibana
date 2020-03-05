@@ -193,15 +193,22 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    xpack.monitoring.collection.enabled
+                  </div>
+                }
+              >
+                xpack.monitoring.collection.enabled
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  xpack.monitoring.collection.enabled
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>
@@ -214,15 +221,22 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    -1
+                  </div>
+                }
+              >
+                -1
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  -1
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>

@@ -5,20 +5,36 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_ALERTING_ENABLED,
+} from '../common/constants';
 import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 import { registerMonitoringCollection } from './telemetry_collection';
+import { getLicenseExpiration } from './alerts/license_expiration';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
-  setup(core, plugins) {
-    const kbnServer = core._kbnServer;
-    const config = core.config();
-    const usageCollection = plugins.usageCollection;
-    const licensing = plugins.licensing;
+  async setup(_coreSetup, pluginsSetup, __LEGACY) {
+    const {
+      plugins,
+      _kbnServer: kbnServer,
+      log,
+      logger,
+      getOSInfo,
+      _hapi: hapiServer,
+      events,
+      expose,
+      config: monitoringConfig,
+      injectUiAppVars,
+    } = __LEGACY;
+    const config = monitoringConfig();
+
+    const { usageCollection, licensing, alerting } = pluginsSetup;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -26,10 +42,10 @@ export class Plugin {
     registerCollectors(usageCollection, {
       elasticsearchPlugin: plugins.elasticsearch,
       kbnServerConfig: kbnServer.config,
-      log: core.log,
+      log,
       config,
-      getOSInfo: core.getOSInfo,
-      hapiServer: core._hapi,
+      getOSInfo,
+      hapiServer,
     });
 
     /*
@@ -43,6 +59,14 @@ export class Plugin {
      */
     const elasticsearchConfig = parseElasticsearchConfig(config);
 
+    // Create the dedicated client
+    const client = await instantiateClient({
+      log,
+      events,
+      elasticsearchConfig,
+      elasticsearchPlugin: plugins.elasticsearch,
+    });
+
     xpackMainPlugin.status.once('green', async () => {
       // first time xpack_main turns green
       /*
@@ -51,19 +75,15 @@ export class Plugin {
       const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient({
-          log: core.log,
-          events: core.events,
-          elasticsearchConfig,
-          elasticsearchPlugin: plugins.elasticsearch,
-        }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
-          log: core.log,
+          server: hapiServer,
+          client,
+          log,
           xpackMainPlugin: plugins.xpack_main,
-          expose: core.expose,
+          expose,
         }); // Route handlers depend on this for xpackInfo
-        await requireUIRoutes(core);
+        await requireUIRoutes(__LEGACY);
       }
     });
 
@@ -94,7 +114,7 @@ export class Plugin {
     const bulkUploader = initBulkUploader({
       elasticsearchPlugin: plugins.elasticsearch,
       config,
-      log: core.log,
+      log,
       kbnServerStatus: kbnServer.status,
       kbnServerVersion: kbnServer.version,
     });
@@ -116,22 +136,54 @@ export class Plugin {
         }
       });
     } else if (!kibanaCollectionEnabled) {
-      core.log(
+      log(
         ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
         'Internal collection for Kibana monitoring is disabled per configuration.'
       );
     }
 
-    core.injectUiAppVars('monitoring', () => {
-      const config = core.config();
+    injectUiAppVars('monitoring', () => {
       return {
         maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
         minIntervalSeconds: config.get('monitoring.ui.min_interval_seconds'),
         kbnIndex: config.get('kibana.index'),
+        monitoringUiEnabled: config.get('monitoring.ui.enabled'),
         showLicenseExpiration: config.get('monitoring.ui.show_license_expiration'),
         showCgroupMetricsElasticsearch: config.get('monitoring.ui.container.elasticsearch.enabled'),
         showCgroupMetricsLogstash: config.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
+
+    if (KIBANA_ALERTING_ENABLED && alerting) {
+      // this is not ready right away but we need to register alerts right away
+      async function getMonitoringCluster() {
+        const configs = config.get('xpack.monitoring.elasticsearch');
+        if (configs.hosts) {
+          const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
+          const { username, password } = configs;
+          const fakeRequest = {
+            headers: {
+              authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+            },
+          };
+          return {
+            callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args),
+          };
+        }
+        return null;
+      }
+
+      function getLogger(contexts) {
+        return logger.get('plugins', LOGGING_TAG, ...contexts);
+      }
+      alerting.registerType(
+        getLicenseExpiration(
+          hapiServer,
+          getMonitoringCluster,
+          getLogger,
+          config.get('xpack.monitoring.ccs.enabled')
+        )
+      );
+    }
   }
 }

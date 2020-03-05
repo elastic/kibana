@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { SpaceAvatar } from '../../../../../../../../../legacy/plugins/spaces/public/space_avatar';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space, SpaceAvatar } from '../../../../../../../../spaces/public';
 import { Feature } from '../../../../../../../../features/public';
 import { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { CalculatedPrivilege } from '../kibana_privilege_calculator';

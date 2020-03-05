@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Network Connection via Signed Binary",
   "query": "(process.name:expand.exe or process.name:extrac.exe or process.name:ieexec.exe or process.name:makecab.exe) and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 21,

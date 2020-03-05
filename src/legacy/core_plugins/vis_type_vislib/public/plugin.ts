@@ -39,6 +39,7 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -72,11 +73,7 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       charts,
     };
-
-    expressions.registerFunction(createVisTypeVislibVisFn);
-    expressions.registerFunction(createPieVisFn);
-
-    [
+    const vislibTypes = [
       createHistogramVisTypeDefinition,
       createLineVisTypeDefinition,
       createPieVisTypeDefinition,
@@ -85,7 +82,30 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       createHorizontalBarVisTypeDefinition,
       createGaugeVisTypeDefinition,
       createGoalVisTypeDefinition,
-    ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
+    ];
+    const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
+
+    const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
+      | VisTypeXyConfigSchema['visTypeXy']
+      | undefined;
+
+    // if visTypeXy plugin is disabled it's config will be undefined
+    if (!visTypeXy || !visTypeXy.enabled) {
+      const convertedTypes: any[] = [];
+      const convertedFns: any[] = [];
+
+      // Register legacy vislib types that have been converted
+      convertedFns.forEach(expressions.registerFunction);
+      convertedTypes.forEach(vis =>
+        visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+      );
+    }
+
+    // Register non-converted types
+    vislibFns.forEach(expressions.registerFunction);
+    vislibTypes.forEach(vis =>
+      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+    );
   }
 
   public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {

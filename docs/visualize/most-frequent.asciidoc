@@ -11,6 +11,8 @@ The most frequently used visualizations include:
 * Metric, goal, and gauge
 * Tag cloud
 
+[[metric-chart]]
+
 [float]
 [[frequently-used-viz-aggregation]]
 === Supported aggregations

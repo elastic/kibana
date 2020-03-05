@@ -13,10 +13,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  INDEX_PATTERN_FILEBEAT,
-} from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
@@ -51,7 +48,11 @@ export function esNodeRoute(server) {
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
+      const filebeatIndexPattern = prefixIndexPattern(
+        config,
+        config.get('monitoring.ui.logs.index'),
+        '*'
+      );
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;

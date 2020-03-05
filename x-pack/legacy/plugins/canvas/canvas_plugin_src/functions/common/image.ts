@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 // @ts-ignore untyped local
@@ -28,7 +28,7 @@ interface Return {
   dataurl: string;
 }
 
-export function image(): ExpressionFunction<'image', null, Arguments, Return> {
+export function image(): ExpressionFunctionDefinition<'image', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().image;
   const errors = getFunctionErrors().image;
 
@@ -36,10 +36,8 @@ export function image(): ExpressionFunction<'image', null, Arguments, Return> {
     name: 'image',
     aliases: [],
     type: 'image',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       dataurl: {
         // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
@@ -55,7 +53,7 @@ export function image(): ExpressionFunction<'image', null, Arguments, Return> {
         options: Object.values(ImageMode),
       },
     },
-    fn: (_context, { dataurl, mode }) => {
+    fn: (input, { dataurl, mode }) => {
       if (!mode || !Object.values(ImageMode).includes(mode)) {
         throw errors.invalidImageMode();
       }

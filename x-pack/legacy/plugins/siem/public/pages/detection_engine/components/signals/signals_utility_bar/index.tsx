@@ -114,6 +114,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
 export const SignalsUtilityBar = React.memo(
   SignalsUtilityBarComponent,
   (prevProps, nextProps) =>
+    prevProps.areEventsLoading === nextProps.areEventsLoading &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.totalCount === nextProps.totalCount &&
     prevProps.showClearSelection === nextProps.showClearSelection

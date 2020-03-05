@@ -3,7 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    watcher?: WatcherContext;
+  }
+}
+
+import {
+  CoreSetup,
+  IScopedClusterClient,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/server';
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
 import { LICENSE_CHECK_STATE } from '../../licensing/server';
@@ -15,6 +28,11 @@ import { registerWatchesRoutes } from './routes/api/watches';
 import { registerWatchRoutes } from './routes/api/watch';
 import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
+import { elasticsearchJsPlugin } from './lib/elasticsearch_js_plugin';
+
+export interface WatcherContext {
+  client: IScopedClusterClient;
+}
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   log: Logger;
@@ -31,14 +49,19 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     { http, elasticsearch: elasticsearchService }: CoreSetup,
     { licensing }: Dependencies
   ) {
-    const elasticsearch = await elasticsearchService.adminClient;
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
-      elasticsearchService,
       router,
       getLicenseStatus: () => this.licenseStatus,
     };
+
+    const config = { plugins: [elasticsearchJsPlugin] };
+    const watcherESClient = elasticsearchService.createClient('watcher', config);
+    http.registerRouteHandlerContext('watcher', (ctx, request) => {
+      return {
+        client: watcherESClient.asScoped(request),
+      };
+    });
 
     registerListFieldsRoute(routeDependencies);
     registerLoadHistoryRoute(routeDependencies);

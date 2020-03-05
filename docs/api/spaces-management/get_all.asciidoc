@@ -42,7 +42,7 @@ The API returns the following:
     "color": "#aabbcc",
     "disabledFeatures": ["apm"],
     "initials": "MK",
-    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU",
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU"
   },
   {
     "id": "sales",
@@ -50,6 +50,6 @@ The API returns the following:
     "initials": "MK",
     "disabledFeatures": ["discover", "timelion"],
     "imageUrl": ""
-  },
+  }
 ]
 --------------------------------------------------

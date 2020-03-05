@@ -6,8 +6,9 @@
 
 // utility functions for managing which links get added to kibana's recently accessed list
 
-import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
+
+import { getRecentlyAccessed } from './dependency_cache';
 
 export function addItemToRecentlyAccessed(page: string, itemId: string, url: string) {
   let pageLabel = '';
@@ -37,6 +38,6 @@ export function addItemToRecentlyAccessed(page: string, itemId: string, url: str
   }
 
   url = `ml#/${page}/${url}`;
-
-  npStart.core.chrome.recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
+  const recentlyAccessed = getRecentlyAccessed();
+  recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
-import deepEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import deepEqual from 'fast-deep-equal';
 
+import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { makeMapStateToProps } from '../url_state/helpers';
@@ -31,25 +31,30 @@ export const SiemNavigationComponent: React.FC<SiemNavigationComponentProps &
   flowTarget,
   state,
 }) => {
+  const { chrome } = useKibana().services;
+
   useEffect(() => {
     if (pathName) {
-      setBreadcrumbs({
-        query: urlState.query,
-        detailName,
-        filters: urlState.filters,
-        navTabs,
-        pageName,
-        pathName,
-        savedQuery: urlState.savedQuery,
-        search,
-        tabName,
-        flowTarget,
-        timerange: urlState.timerange,
-        timeline: urlState.timeline,
-        state,
-      });
+      setBreadcrumbs(
+        {
+          query: urlState.query,
+          detailName,
+          filters: urlState.filters,
+          navTabs,
+          pageName,
+          pathName,
+          savedQuery: urlState.savedQuery,
+          search,
+          tabName,
+          flowTarget,
+          timerange: urlState.timerange,
+          timeline: urlState.timeline,
+          state,
+        },
+        chrome
+      );
     }
-  }, [pathName, search, navTabs, urlState, state]);
+  }, [chrome, pathName, search, navTabs, urlState, state]);
 
   return (
     <TabNavigation
@@ -75,8 +80,8 @@ export const SiemNavigationRedux = compose<
     (prevProps, nextProps) =>
       prevProps.pathName === nextProps.pathName &&
       prevProps.search === nextProps.search &&
-      isEqual(prevProps.navTabs, nextProps.navTabs) &&
-      isEqual(prevProps.urlState, nextProps.urlState) &&
+      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+      deepEqual(prevProps.urlState, nextProps.urlState) &&
       deepEqual(prevProps.state, nextProps.state)
   )
 );

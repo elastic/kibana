@@ -18,6 +18,9 @@ export const config = Joi => {
     enabled: Joi.boolean().default(true),
     ui: Joi.object({
       enabled: Joi.boolean().default(true),
+      logs: Joi.object({
+        index: Joi.string().default('filebeat-*'),
+      }).default(),
       ccs: Joi.object({
         enabled: Joi.boolean().default(true),
       }).default(),
@@ -80,6 +83,47 @@ export const config = Joi => {
         enabled: Joi.boolean().default(true),
         interval: Joi.number().default(10000), // op status metrics get buffered at `ops.interval` and flushed to the bulk endpoint at this interval
       }).default(),
+    }).default(),
+    elasticsearch: Joi.object({
+      customHeaders: Joi.object().default({}),
+      logQueries: Joi.boolean().default(false),
+      requestHeadersWhitelist: Joi.array()
+        .items()
+        .single()
+        .default(DEFAULT_REQUEST_HEADERS),
+      sniffOnStart: Joi.boolean().default(false),
+      sniffInterval: Joi.number()
+        .allow(false)
+        .default(false),
+      sniffOnConnectionFault: Joi.boolean().default(false),
+      hosts: Joi.array()
+        .items(Joi.string().uri({ scheme: ['http', 'https'] }))
+        .single(), // if empty, use Kibana's connection config
+      username: Joi.string(),
+      password: Joi.string(),
+      requestTimeout: Joi.number().default(30000),
+      pingTimeout: Joi.number().default(30000),
+      ssl: Joi.object({
+        verificationMode: Joi.string()
+          .valid('none', 'certificate', 'full')
+          .default('full'),
+        certificateAuthorities: Joi.array()
+          .single()
+          .items(Joi.string()),
+        certificate: Joi.string(),
+        key: Joi.string(),
+        keyPassphrase: Joi.string(),
+        keystore: Joi.object({
+          path: Joi.string(),
+          password: Joi.string(),
+        }).default(),
+        truststore: Joi.object({
+          path: Joi.string(),
+          password: Joi.string(),
+        }).default(),
+        alwaysPresentCertificate: Joi.boolean().default(false),
+      }).default(),
+      apiVersion: Joi.string().default('master'),
     }).default(),
     cluster_alerts: Joi.object({
       enabled: Joi.boolean().default(true),

@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
+import { flattenCommentSavedObject, wrapError } from './utils';
 
 export function initGetCommentApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -24,7 +24,7 @@ export function initGetCommentApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           commentId: request.params.id,
         });
-        return response.ok({ body: theComment });
+        return response.ok({ body: flattenCommentSavedObject(theComment) });
       } catch (error) {
         return response.customError(wrapError(error));
       }

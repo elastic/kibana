@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
+import { KibanaServices } from '../../../lib/kibana';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -14,40 +13,37 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../common/constants';
 import {
-  QuerySignals,
-  SignalSearchResponse,
-  UpdateSignalStatusProps,
-  SignalsIndex,
-  SignalIndexError,
-  Privilege,
-  PostSignalError,
   BasicSignals,
+  PostSignalError,
+  Privilege,
+  QuerySignals,
+  SignalIndexError,
+  SignalSearchResponse,
+  SignalsIndex,
+  UpdateSignalStatusProps,
 } from './types';
-import { parseJsonFromBody } from '../../../utils/api';
 
 /**
  * Fetch Signals by providing a query
  *
  * @param query String to match a dsl
- * @param signal AbortSignal for cancelling request
  */
 export const fetchQuerySignals = async <Hit, Aggregations>({
   query,
   signal,
 }: QuerySignals): Promise<SignalSearchResponse<Hit, Aggregations>> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_QUERY_SIGNALS_URL}`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
-    body: JSON.stringify(query),
-    signal,
-  });
-  await throwIfNotOk(response);
-  const signals = await response.json();
-  return signals;
+  const response = await KibanaServices.get().http.fetch<SignalSearchResponse<Hit, Aggregations>>(
+    DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(query),
+      asResponse: true,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -62,19 +58,15 @@ export const updateSignalStatus = async ({
   status,
   signal,
 }: UpdateSignalStatusProps): Promise<unknown> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_SIGNALS_STATUS_URL}`, {
+  const response = await KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
     body: JSON.stringify({ status, ...query }),
+    asResponse: true,
     signal,
   });
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -82,25 +74,18 @@ export const updateSignalStatus = async ({
  *
  * @param signal AbortSignal for cancelling request
  */
-export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex | null> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
-    method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
-    signal,
-  });
-  if (response.ok) {
-    const signalIndex = await response.json();
-    return signalIndex;
+export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
+  try {
+    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+      method: 'GET',
+      signal,
+    });
+  } catch (e) {
+    if (e.body) {
+      throw new SignalIndexError(e.body);
+    }
+    throw e;
   }
-  const error = await parseJsonFromBody(response);
-  if (error != null) {
-    throw new SignalIndexError(error);
-  }
-  return null;
 };
 
 /**
@@ -108,19 +93,18 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
  *
  * @param signal AbortSignal for cancelling request
  */
-export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege | null> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PRIVILEGES_URL}`, {
-    method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
-    signal,
-  });
+export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> => {
+  const response = await KibanaServices.get().http.fetch<Privilege>(
+    DETECTION_ENGINE_PRIVILEGES_URL,
+    {
+      method: 'GET',
+      signal,
+      asResponse: true,
+    }
+  );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -128,23 +112,16 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
  *
  * @param signal AbortSignal for cancelling request
  */
-export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex | null> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
-    signal,
-  });
-  if (response.ok) {
-    const signalIndex = await response.json();
-    return signalIndex;
+export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
+  try {
+    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+      method: 'POST',
+      signal,
+    });
+  } catch (e) {
+    if (e.body) {
+      throw new PostSignalError(e.body);
+    }
+    throw e;
   }
-  const error = await parseJsonFromBody(response);
-  if (error != null) {
-    throw new PostSignalError(error);
-  }
-  return null;
 };

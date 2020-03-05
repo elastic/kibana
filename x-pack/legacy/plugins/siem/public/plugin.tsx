@@ -16,9 +16,10 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
-import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
+import { KibanaServices } from './lib/kibana';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
@@ -31,7 +32,7 @@ export interface StartPlugins {
   embeddable: IEmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 
@@ -41,6 +42,7 @@ export type Start = ReturnType<Plugin['start']>;
 export class Plugin implements IPlugin<Setup, Start> {
   public id = 'siem';
   public name = 'SIEM';
+
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
     // but we're not leveraging any of its functionality yet.
@@ -54,10 +56,10 @@ export class Plugin implements IPlugin<Setup, Start> {
       id: this.id,
       title: this.name,
       async mount(context, params) {
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
-        return renderApp(coreStart, pluginsStart as StartPlugins, params);
+        return renderApp(coreStart, startPlugins as StartPlugins, params);
       },
     });
 
@@ -65,6 +67,8 @@ export class Plugin implements IPlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    KibanaServices.init({ ...core, ...plugins });
+
     return {};
   }
 

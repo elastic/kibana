@@ -24,8 +24,7 @@ export const mockOptions: RequestBasicOptions = {
 };
 
 export const mockRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetKpiNetworkQuery',
     variables: {
       sourceId: 'default',
@@ -35,7 +34,6 @@ export const mockRequest = {
     query:
       'fragment KpiNetworkChartFields on KpiNetworkHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!) {\n  source(id: $sourceId) {\n    id\n    KpiNetwork(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      networkEvents\n      uniqueFlowId\n      uniqueSourcePrivateIps\n      uniqueSourcePrivateIpsHistogram {\n        ...KpiNetworkChartFields\n        __typename\n      }\n      uniqueDestinationPrivateIps\n      uniqueDestinationPrivateIpsHistogram {\n        ...KpiNetworkChartFields\n        __typename\n      }\n      dnsQueries\n      tlsHandshakes\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockResponse = {

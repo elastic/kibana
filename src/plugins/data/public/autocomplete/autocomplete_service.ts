@@ -18,26 +18,23 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { QuerySuggestionsGetFn } from './providers/query_suggestion_provider';
+import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   setupValueSuggestionProvider,
   ValueSuggestionsGetFn,
 } from './providers/value_suggestion_provider';
 
 export class AutocompleteService {
-  private readonly querySuggestionProviders: Map<string, QuerySuggestionsGetFn> = new Map();
+  private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
-  private addQuerySuggestionProvider = (
-    language: string,
-    provider: QuerySuggestionsGetFn
-  ): void => {
+  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
     if (language && provider) {
       this.querySuggestionProviders.set(language, provider);
     }
   };
 
-  private getQuerySuggestions: QuerySuggestionsGetFn = args => {
+  private getQuerySuggestions: QuerySuggestionGetFn = args => {
     const { language } = args;
     const provider = this.querySuggestionProviders.get(language);
 

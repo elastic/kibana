@@ -1,5 +1,5 @@
 {
-  "description": "Identifies loadable kernel module errors, often indicative of potential persistence attempts.",
+  "description": "Identifies loadable kernel module errors, which are often indicative of potential persistence attempts.",
   "false_positives": [
     "Security tools and device drivers may run these programs in order to load legitimate kernel modules. Use of these programs by ordinary users is uncommon."
   ],
@@ -7,7 +7,7 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Persistence via Kernel Module Modification",
   "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
   "references": [

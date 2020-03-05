@@ -18,16 +18,36 @@
  */
 
 import React from 'react';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { createAction, IAction } from '../../actions';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { createAction, ActionByType } from '../../actions';
+import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
+import { ActionType } from '../../types';
 
-export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+const ReactMenuItem: React.FC = () => {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>Hello world!</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color={'danger'}>{'secret'}</EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): IAction {
-  return createAction({
-    type: HELLO_WORLD_ACTION_ID,
+const UiMenuItem = reactToUiComponent(ReactMenuItem);
+
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD' as ActionType;
+
+export function createHelloWorldAction(
+  overlays: CoreStart['overlays']
+): ActionByType<typeof ACTION_HELLO_WORLD> {
+  return createAction<typeof ACTION_HELLO_WORLD>({
+    type: ACTION_HELLO_WORLD,
+    getIconType: () => 'lock',
+    MenuItem: UiMenuItem,
     execute: async () => {
       const flyoutSession = overlays.openFlyout(
         toMountPoint(

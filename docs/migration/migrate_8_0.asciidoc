@@ -75,6 +75,12 @@ specified explicitly.
 *Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
 
 [float]
+==== `/api/security/v1/saml` endpoint is no longer supported
+*Details:* The deprecated `/api/security/v1/saml` endpoint is no longer supported. 
+
+*Impact:* Rely on `/api/security/saml/callback` endpoint when using SAML instead. This change should be reflected in Kibana `server.xsrf.whitelist` config as well as in Elasticsearch and Identity Provider SAML settings.
+
+[float]
 === `optimize` directory is now in the `data` folder
 *Details:* Generated bundles have moved to the configured `path.data` folder.
 

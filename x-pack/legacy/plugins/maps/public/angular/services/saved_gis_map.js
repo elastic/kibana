@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+import { createSavedObjectClass } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
   getMapZoom,

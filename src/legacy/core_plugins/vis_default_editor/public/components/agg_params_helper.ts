@@ -19,7 +19,7 @@
 
 import { get, isEmpty } from 'lodash';
 
-import { IndexPattern, Field } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
@@ -29,23 +29,23 @@ import {
   aggTypeFilters,
   aggTypeFieldFilters,
   aggTypes,
-  AggConfig,
+  IAggConfig,
   AggParam,
-  FieldParamType,
-  AggType,
-  EditorConfig,
+  IFieldParamType,
+  IAggType,
 } from '../legacy_imports';
+import { EditorConfig } from './utils';
 
 interface ParamInstanceBase {
-  agg: AggConfig;
+  agg: IAggConfig;
   editorConfig: EditorConfig;
-  metricAggs: AggConfig[];
+  metricAggs: IAggConfig[];
   state: VisState;
 }
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: ComboBoxGroupedOptions<Field>;
+  indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -65,16 +65,16 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: ComboBoxGroupedOptions<Field> = [];
-    let fields: Field[];
+    let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
+    let fields: IndexPatternField[];
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: Field[] = (param as FieldParamType).getAvailableFields(
-        agg.getIndexPattern().fields
+      const availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(
+        agg
       );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
@@ -117,10 +117,10 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 }
 
 function getAggTypeOptions(
-  agg: AggConfig,
+  agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string
-): ComboBoxGroupedOptions<AggType> {
+): ComboBoxGroupedOptions<IAggType> {
   const aggTypeOptions = aggTypeFilters.filter((aggTypes as any)[groupName], indexPattern, agg);
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
@@ -135,7 +135,7 @@ function getAggTypeOptions(
  * @param aggParams State of aggregation parameters.
  */
 function isInvalidParamsTouched(
-  aggType: AggType,
+  aggType: IAggType,
   aggTypeState: AggTypeState,
   aggParams: AggParamsState
 ) {

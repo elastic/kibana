@@ -173,7 +173,7 @@ export function initVisualizeApp(app, deps) {
         },
       })
       .when(`visualize/:tail*?`, {
-        redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
+        redirectTo: `/${deps.config.defaultAppId}`,
       });
   });
 }

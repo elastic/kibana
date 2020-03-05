@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter, Get, Set } from './create_getter_setter';
+import { createGetterSetter, Get, Set } from '../../common';
 import { CoreStart } from '../../../../core/public';
 import { KUSavedObjectClient, createSavedObjectsClient } from './saved_objects_client';
 

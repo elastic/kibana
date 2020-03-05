@@ -1,16 +1,13 @@
 {
-  "description": "This signal detects network events that may indicate the use of RDP traffic\nto the Internet. RDP is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "description": "This rule detects network events that may indicate the use of RDP traffic\nto the Internet. RDP is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
   "false_positives": [
-    "RDP connections may be made directly to Internet destinations in order to access Windows cloud server instances but such connections are usually made only by engineers. In such cases, only RDP gateways, bastions or jump servers may be expected Internet destinations and can be exempted from this rule. RDP may be required by some work-flows such as remote access and support for specialized software products and servers. Such work-flows are usually known and not unexpected. Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
+    "RDP connections may be made directly to Internet destinations in order to access\n    Windows cloud server instances but such connections are usually made only by engineers.\n    In such cases, only RDP gateways, bastions or jump servers may be expected Internet\n    destinations and can be exempted from this rule. RDP may be required by some work-flows\n    such as remote access and support for specialized software products and servers. Such\n    work-flows are usually known and not unexpected. Usage that is unfamiliar to server or\n    network owners can be unexpected and suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "RDP (Remote Desktop Protocol) to the Internet",
   "query": "network.transport: tcp and destination.port: 3389 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
   "risk_score": 21,
@@ -18,7 +15,7 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "network"
+    "Network"
   ],
   "threat": [
     {
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

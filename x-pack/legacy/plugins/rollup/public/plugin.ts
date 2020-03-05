@@ -6,11 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import {
-  EditorConfigProviderRegistry,
-  AggTypeFilters,
-  AggTypeFieldFilters,
-} from './legacy_imports';
+import { AggTypeFilters, AggTypeFieldFilters } from './legacy_imports';
 import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
 import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
@@ -23,8 +19,6 @@ import { getRollupSearchStrategy } from './search/rollup_search_strategy';
 import { initAggTypeFilter } from './visualize/agg_type_filter';
 // @ts-ignore
 import { initAggTypeFieldFilter } from './visualize/agg_type_field_filter';
-// @ts-ignore
-import { initEditorConfig } from './visualize/editor_config';
 import { CONFIG_ROLLUPS } from '../common';
 import {
   FeatureCatalogueCategory,
@@ -33,6 +27,7 @@ import {
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { IndexMgmtSetup } from '../../../../plugins/index_management/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';
@@ -42,36 +37,30 @@ export interface RollupPluginSetupDependencies {
   __LEGACY: {
     aggTypeFilters: AggTypeFilters;
     aggTypeFieldFilters: AggTypeFieldFilters;
-    editorConfigProviders: EditorConfigProviderRegistry;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
-    addBadgeExtension: (badgeExtension: any) => void;
-    addToggleExtension: (toggleExtension: any) => void;
   };
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
+  indexManagement?: IndexMgmtSetup;
 }
 
 export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: {
-        aggTypeFilters,
-        aggTypeFieldFilters,
-        editorConfigProviders,
-        addSearchStrategy,
-        managementLegacy,
-        addBadgeExtension,
-        addToggleExtension,
-      },
+      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, addSearchStrategy, managementLegacy },
       home,
       management,
+      indexManagement,
     }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
-    addBadgeExtension(rollupBadgeExtension);
-    addToggleExtension(rollupToggleExtension);
+
+    if (indexManagement) {
+      indexManagement.extensionsService.addBadge(rollupBadgeExtension);
+      indexManagement.extensionsService.addToggle(rollupToggleExtension);
+    }
 
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 
@@ -81,7 +70,6 @@ export class RollupPlugin implements Plugin {
       addSearchStrategy(getRollupSearchStrategy(core.http.fetch));
       initAggTypeFilter(aggTypeFilters);
       initAggTypeFieldFilter(aggTypeFieldFilters);
-      initEditorConfig(editorConfigProviders);
     }
 
     if (home) {

@@ -4,40 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { SignalsStatusRequest } from '../../signals/types';
+import { SignalsStatusRestParams } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { ServerFacade } from '../../../../types';
-import { transformError, getIndex } from '../utils';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
-export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-    options: {
-      tags: ['access:siem'],
+export const setSignalsStatusRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: setSignalsStatusSchema,
+        body: buildRouteValidation<SignalsStatusRestParams>(setSignalsStatusSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: SignalsStatusRequest) {
-      const { signal_ids: signalIds, query, status } = request.payload;
-      const index = getIndex(request, server);
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+    async (context, request, response) => {
+      const { signal_ids: signalIds, query, status } = request.body;
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
+
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
       }
       if (query) {
-        queryObject = query;
+        queryObject = {
+          bool: {
+            filter: query,
+          },
+        };
       }
       try {
-        return callWithRequest(request, 'updateByQuery', {
-          index,
+        const result = await clusterClient.callAsCurrentUser('updateByQuery', {
+          index: siemClient.signalsIndex,
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -45,15 +48,17 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
             },
             query: queryObject,
           },
+          ignoreUnavailable: true,
         });
-      } catch (exc) {
+        return response.ok({ body: result });
+      } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
-        return transformError(exc);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const setSignalsStatusRoute = (server: ServerFacade) => {
-  server.route(setSignalsStatusRouteDef(server));
+    }
+  );
 };

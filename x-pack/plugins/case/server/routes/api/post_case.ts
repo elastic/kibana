@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { formatNewCase, wrapError } from './utils';
+import { flattenCaseSavedObject, formatNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
 
@@ -31,7 +31,7 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
             ...createdBy,
           }),
         });
-        return response.ok({ body: newCase });
+        return response.ok({ body: flattenCaseSavedObject(newCase, []) });
       } catch (error) {
         return response.customError(wrapError(error));
       }

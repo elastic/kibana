@@ -28,9 +28,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { metadata } from 'ui/metadata';
-// metadata.branch corresponds to the version used in documentation links.
-const jobTipsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/create-jobs.html#job-tips`;
+import { getDocLinks } from '../../util/dependency_cache';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -253,6 +251,8 @@ export class ValidateJob extends Component {
   };
 
   render() {
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+    const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

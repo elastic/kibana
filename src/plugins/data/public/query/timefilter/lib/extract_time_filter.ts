@@ -18,13 +18,13 @@
  */
 
 import { keys, partition } from 'lodash';
-import { esFilters } from '../../../../common';
+import { Filter, isRangeFilter, RangeFilter } from '../../../../common';
 
-export function extractTimeFilter(timeFieldName: string, filters: esFilters.Filter[]) {
-  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: esFilters.Filter) => {
+export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
+  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
     let key;
 
-    if (esFilters.isRangeFilter(obj)) {
+    if (isRangeFilter(obj)) {
       key = keys(obj.range)[0];
     }
 
@@ -33,6 +33,6 @@ export function extractTimeFilter(timeFieldName: string, filters: esFilters.Filt
 
   return {
     restOfFilters,
-    timeRangeFilter: timeRangeFilter[0] as esFilters.RangeFilter | undefined,
+    timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
   };
 }

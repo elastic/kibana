@@ -24,7 +24,6 @@ export interface Trigger {
   id: string;
   title?: string;
   description?: string;
-  actionIds: string[];
 }
 
 export interface PropertySpec {
@@ -41,17 +40,6 @@ export enum ViewMode {
 }
 
 export { Adapters };
-
-// import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
-// TODO: Figure out how to do this import in New Platform.
-export interface SavedObjectMetaData<T> {
-  type: string;
-  name: string;
-  getIconForSavedObject(savedObject: any): any;
-  getTooltipForSavedObject?(savedObject: any): any;
-  showSavedObject?(savedObject: any): boolean;
-  includeFields?: string[];
-}
 
 export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;
 export type GetEmbeddableFactories = () => IterableIterator<EmbeddableFactory>;

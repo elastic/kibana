@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from '../../../core/public';
 import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
@@ -29,3 +31,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DashboardEmbeddableContainerPublicPlugin as Plugin };
+
+export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';

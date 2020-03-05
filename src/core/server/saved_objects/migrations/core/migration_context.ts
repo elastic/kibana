@@ -26,7 +26,7 @@
 
 import { Logger } from 'src/core/server/logging';
 import { SavedObjectsSerializer } from '../../serialization';
-import { MappingProperties } from '../../mappings';
+import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
@@ -40,7 +40,7 @@ export interface MigrationOpts {
   callCluster: CallCluster;
   index: string;
   log: Logger;
-  mappingProperties: MappingProperties;
+  mappingProperties: SavedObjectsTypeMappingDefinitions;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
   convertToAliasScript?: string;
@@ -107,9 +107,9 @@ function createSourceContext(source: FullIndexInfo, alias: string) {
 function createDestContext(
   source: FullIndexInfo,
   alias: string,
-  mappingProperties: MappingProperties
+  mappingProperties: SavedObjectsTypeMappingDefinitions
 ): FullIndexInfo {
-  const activeMappings = buildActiveMappings({ properties: mappingProperties });
+  const activeMappings = buildActiveMappings(mappingProperties);
 
   return {
     aliases: {},
@@ -133,6 +133,5 @@ function createDestContext(
 function nextIndexName(indexName: string, alias: string) {
   const indexSuffix = (indexName.match(/[\d]+$/) || [])[0];
   const indexNum = parseInt(indexSuffix, 10) || 0;
-
   return `${alias}_${indexNum + 1}`;
 }

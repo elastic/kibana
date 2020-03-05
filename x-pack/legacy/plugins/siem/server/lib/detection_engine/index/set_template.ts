@@ -5,11 +5,10 @@
  */
 
 import { IndicesPutTemplateParams } from 'elasticsearch';
-import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { CallWithRequest } from '../types';
 
 export const setTemplate = async (
-  callWithRequest: CallWithRequest<IndicesPutTemplateParams, CallClusterOptions, unknown>,
+  callWithRequest: CallWithRequest<IndicesPutTemplateParams, unknown>,
   name: string,
   body: unknown
 ): Promise<unknown> => {

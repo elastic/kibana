@@ -8,12 +8,12 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { Logger, CoreStart } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];

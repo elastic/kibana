@@ -26,7 +26,8 @@ exports[`Storyshots components/FontPicker default 1`] = `
           className="euiScreenReaderOnly"
           id="generated-id"
         >
-          Select an option: , is selected
+          Select an option: 
+          , is selected
         </span>
         <button
           aria-haspopup="true"
@@ -37,9 +38,7 @@ exports[`Storyshots components/FontPicker default 1`] = `
           onKeyDown={[Function]}
           role="option"
           type="button"
-        >
-          
-        </button>
+        />
         <div
           className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
         >

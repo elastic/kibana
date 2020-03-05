@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { metadata } from 'ui/metadata';
+import { getDocLinks } from '../../../../util/dependency_cache';
 
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
@@ -66,12 +66,12 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
 }
 
 export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
+  const docLinks = getDocLinks();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tabs = getTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
-
-  // metadata.branch corresponds to the version used in documentation links.
-  const anomalyDetectionJobsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-jobs.html`;
-  const anomalyJobsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics.html`;
+  const anomalyDetectionJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`;
+  const anomalyJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`;
 
   const anomalyDetectionDocsLabel = i18n.translate(
     'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',

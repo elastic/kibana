@@ -10,5 +10,6 @@ export default function({ loadTestFile }) {
 
     loadTestFile(require.resolve('./rollup_jobs'));
     loadTestFile(require.resolve('./hybrid_index_pattern'));
+    loadTestFile(require.resolve('./tsvb'));
   });
 }

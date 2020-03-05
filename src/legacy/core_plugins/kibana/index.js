@@ -25,26 +25,23 @@ import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { managementApi } from './server/routes/api/management';
-import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
 export default function(kibana) {
-  const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
     config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false),
         autocompleteTerminateAfter: Joi.number()
           .integer()
           .min(1)
@@ -80,6 +77,7 @@ export default function(kibana) {
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -90,6 +88,7 @@ export default function(kibana) {
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -99,13 +98,8 @@ export default function(kibana) {
           }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
-          // The subUrlBase is the common substring of all urls for this app. If not given, it defaults to the url
-          // above. This app has to use a different subUrlBase, in addition to the url above, because "#/dashboard"
-          // routes to a page that creates a new dashboard. When we introduced a landing page, we needed to change
-          // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
-          // to determine what url to use for the app link.
-          subUrlBase: `${kbnBaseUrl}#/dashboard`,
           euiIconType: 'dashboardApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -121,7 +115,7 @@ export default function(kibana) {
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
@@ -330,7 +324,6 @@ export default function(kibana) {
       exportApi(server);
       managementApi(server);
       registerCspCollector(usageCollection, server);
-      server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });

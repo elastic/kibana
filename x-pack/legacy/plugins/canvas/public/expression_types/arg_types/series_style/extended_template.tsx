@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ExpressionAST } from '../../../../types';
+import { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
@@ -24,9 +24,9 @@ export interface Arguments {
 export type Argument = keyof Arguments;
 
 export interface Props {
-  argValue: ExpressionAST;
+  argValue: ExpressionAstExpression;
   labels: string[];
-  onValueChange: (argValue: ExpressionAST) => void;
+  onValueChange: (argValue: ExpressionAstExpression) => void;
   typeInstance?: {
     name: string;
     options: {

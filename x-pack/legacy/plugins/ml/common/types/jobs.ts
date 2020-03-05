@@ -20,7 +20,10 @@ export interface MlJob {
   };
   create_time: number;
   custom_settings: object;
-  data_counts: object;
+  data_counts: {
+    earliest_record_timestamp: number;
+    latest_record_timestamp: number;
+  };
   data_description: {
     time_field: string;
     time_format: string;

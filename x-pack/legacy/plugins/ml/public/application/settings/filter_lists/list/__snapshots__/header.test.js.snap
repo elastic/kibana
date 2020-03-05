@@ -1,112 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Filter Lists Header renders header 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    alignItems="baseline"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFlexGroup
-        alignItems="baseline"
-        gutterSize="m"
-        responsive={false}
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Filter Lists"
-                id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
-                values={Object {}}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTextColor
-            color="subdued"
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="{totalCount} in total"
-                id="xpack.ml.settings.filterLists.listHeader.filterListsDescription"
-                values={
-                  Object {
-                    "totalCount": 3,
-                  }
-                }
-              />
-            </p>
-          </EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFlexGroup
-        alignItems="baseline"
-        gutterSize="m"
-        responsive={false}
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            iconType="refresh"
-            onClick={[Function]}
-            size="s"
-          >
-            <FormattedMessage
-              defaultMessage="Refresh"
-              id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiText>
-    <p>
-      <EuiTextColor
-        color="subdued"
-      >
-        <FormattedMessage
-          defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
-You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
-          id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription"
-          values={
-            Object {
-              "br": <br />,
-              "learnMoreLink": <ForwardRef
-                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="Learn more"
-                  id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
-                  values={Object {}}
-                />
-              </ForwardRef>,
-            }
-          }
-        />
-      </EuiTextColor>
-    </p>
-  </EuiText>
-  <EuiSpacer
-    size="m"
-  />
-</Fragment>
+<FilterListsHeaderUI
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  kibana={
+    Object {
+      "notifications": Object {
+        "toasts": Object {
+          "danger": [Function],
+          "show": [Function],
+          "success": [Function],
+          "warning": [Function],
+        },
+      },
+      "overlays": Object {
+        "openFlyout": [Function],
+        "openModal": [Function],
+      },
+      "services": Object {},
+    }
+  }
+  refreshFilterLists={[MockFunction]}
+  totalCount={3}
+/>
 `;

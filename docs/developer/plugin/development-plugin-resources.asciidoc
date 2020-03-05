@@ -4,10 +4,6 @@
 Here are some resources that are helpful for getting started with plugin development.
 
 [float]
-==== Our IRC channel
-Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. We *want* to help you with plugin development. Even more than that, we *want your help* in understanding your plugin goals, so we can build a great plugin system for you! If you've never used IRC, welcome to the fun. You can get started with the http://webchat.freenode.net/?channels=kibana[Freenode Web Client].
-
-[float]
 ==== Some light reading
 Our {repo}blob/master/CONTRIBUTING.md[contributing guide] can help you get a development environment going.
 
@@ -50,7 +46,7 @@ You're welcome to use these components, but be aware that they are rapidly evolv
 
 [float]
 ==== TypeScript Support
-Plugin code can be written in http://www.typescriptlang.org/[TypeScript] if desired. 
+Plugin code can be written in http://www.typescriptlang.org/[TypeScript] if desired.
 To enable TypeScript support, create a `tsconfig.json` file at the root of your plugin that looks something like this:
 
 ["source","js"]
@@ -67,6 +63,11 @@ To enable TypeScript support, create a `tsconfig.json` file at the root of your 
 }
 -----------
 
-TypeScript code is automatically converted into JavaScript during development, 
-but not in the distributable version of Kibana. If you use the 
+TypeScript code is automatically converted into JavaScript during development,
+but not in the distributable version of Kibana. If you use the
 {repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build your plugin, then your `.ts` and `.tsx` files will be permanently transpiled before your plugin is archived. If you have your own build process, make sure to run the TypeScript compiler on your source files and ship the compilation output so that your plugin will work with the distributable version of Kibana.
+
+==== {kib} platform migration guide
+
+{repo}blob/{branch}/src/core/MIGRATION.md#migrating-legacy-plugins-to-the-new-platform[This guide]
+provides an action plan for moving a legacy plugin to the new platform. 

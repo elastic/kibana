@@ -21,11 +21,6 @@ export const ColorStopsOrdinal = ({
   colorStops = [{ stop: 0, color: DEFAULT_CUSTOM_COLOR }],
   onChange,
 }) => {
-  const sanitizeStopInput = value => {
-    const sanitizedValue = parseFloat(value);
-    return isNaN(sanitizedValue) ? '' : sanitizedValue;
-  };
-
   const getStopError = (stop, index) => {
     let error;
     if (isOrdinalStopInvalid(stop)) {
@@ -44,13 +39,18 @@ export const ColorStopsOrdinal = ({
   };
 
   const renderStopInput = (stop, onStopChange) => {
+    function handleOnChangeEvent(event) {
+      const sanitizedValue = parseFloat(event.target.value);
+      const newStopValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
+      onStopChange(newStopValue);
+    }
     return (
       <EuiFieldNumber
         aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
           defaultMessage: 'Stop',
         })}
         value={stop}
-        onChange={onStopChange}
+        onChange={handleOnChangeEvent}
         compressed
       />
     );
@@ -65,7 +65,6 @@ export const ColorStopsOrdinal = ({
       onChange={onChange}
       colorStops={colorStops}
       isStopsInvalid={isOrdinalStopsInvalid}
-      sanitizeStopInput={sanitizeStopInput}
       getStopError={getStopError}
       renderStopInput={renderStopInput}
       canDeleteStop={canDeleteStop}

@@ -24,7 +24,10 @@ export interface EmbeddableApi {
   getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
   getEmbeddableFactories: GetEmbeddableFactories;
   // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
+  registerEmbeddableFactory: <TEmbeddableFactory extends EmbeddableFactory>(
+    id: string,
+    factory: TEmbeddableFactory
+  ) => void;
 }
 
 export interface EmbeddableDependencies {

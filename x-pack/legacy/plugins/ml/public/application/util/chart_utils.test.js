@@ -6,7 +6,7 @@
 
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
-jest.mock('ui/timefilter', () => {
+jest.mock('./dependency_cache', () => {
   const dateMath = require('@elastic/datemath');
   let _time = undefined;
   const timefilter = {
@@ -21,23 +21,11 @@ jest.mock('ui/timefilter', () => {
     },
   };
   return {
-    timefilter,
+    getTimefilter: () => timefilter,
   };
 });
-import { timefilter } from 'ui/timefilter';
-
-// A copy of these mocks for ui/chrome and ui/timefilter are also
-// used in explorer_charts_container.test.js.
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: () => {
-      return '<basepath>';
-    },
-  }),
-  { virtual: true }
-);
+import { getTimefilter } from './dependency_cache';
+const timefilter = getTimefilter();
 
 import d3 from 'd3';
 import moment from 'moment';

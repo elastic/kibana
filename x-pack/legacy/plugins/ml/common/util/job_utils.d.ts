@@ -43,3 +43,12 @@ export function processCreatedBy(customSettings: { created_by?: string }): void;
 export function mlFunctionToESAggregation(functionName: string): string | null;
 
 export function isModelPlotEnabled(job: Job, detectorIndex: number, entityFields: any[]): boolean;
+
+export function getSafeAggregationName(fieldName: string, index: number): string;
+
+export function getLatestDataOrBucketTimestamp(
+  latestDataTimestamp: number,
+  latestBucketTimestamp: number
+): number;
+
+export function prefixDatafeedId(datafeedId: string, prefix: string): string;

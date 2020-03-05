@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { ModuleJobUI, SAVE_STATE } from '../page';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { useKibanaContext } from '../../../../contexts/kibana';
+import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,
   maxLengthValidator,
@@ -52,7 +52,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   jobs,
 }) => {
   const { from, to } = getTimeFilterRange();
-  const { currentIndexPattern: indexPattern } = useKibanaContext();
+  const { currentIndexPattern: indexPattern } = useMlContext();
 
   const jobPrefixValidator = composeValidators(
     patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
@@ -98,7 +98,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
     <>
       <EuiForm>
         <EuiDescribedFormGroup
-          idAria="ml_aria_label_new_job_recognizer_job_prefix"
           title={
             <h4>
               <FormattedMessage
@@ -121,7 +120,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                 defaultMessage="Job ID prefix"
               />
             }
-            describedByIds={['ml_aria_label_new_job_recognizer_job_prefix']}
             isInvalid={!!validationResult.jobPrefix}
             error={
               <>
@@ -209,7 +207,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
         <EuiSpacer size="l" />
         <EuiAccordion
           id="advancedOptions"
-          area-label={i18n.translate('xpack.ml.newJob.recognize.advancedSettingsAriaLabel', {
+          aria-label={i18n.translate('xpack.ml.newJob.recognize.advancedSettingsAriaLabel', {
             defaultMessage: 'Advanced settings',
           })}
           buttonContent={
@@ -221,7 +219,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           paddingSize="l"
         >
           <EuiDescribedFormGroup
-            idAria="ml_aria_label_new_job_dedicated_index"
             title={
               <h4>
                 <FormattedMessage
@@ -265,7 +262,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           onClick={() => {
             onSubmit(formState);
           }}
-          area-label={i18n.translate('xpack.ml.newJob.recognize.createJobButtonAriaLabel', {
+          aria-label={i18n.translate('xpack.ml.newJob.recognize.createJobButtonAriaLabel', {
             defaultMessage: 'Create Job',
           })}
         >

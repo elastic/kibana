@@ -19,7 +19,7 @@
 
 import { NotificationsStart } from 'src/core/public';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { FieldFormatsStart } from '.';
+import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
 import { DataPublicPluginStart } from './types';

@@ -20,7 +20,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@kbn/i18n';
-import { EuiModal, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, EuiOverlayMask, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -68,6 +68,7 @@ export interface OverlayModalConfirmOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
+  defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
 }
 
 /**

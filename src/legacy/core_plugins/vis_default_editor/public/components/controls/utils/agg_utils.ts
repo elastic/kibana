@@ -20,7 +20,7 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig } from '../../../legacy_imports';
+import { IAggConfig } from '../../../legacy_imports';
 
 type AggFilter = string[];
 
@@ -43,7 +43,7 @@ function useCompatibleAggCallback(aggFilter: AggFilter) {
 function useFallbackMetric(
   setValue: (value?: string) => void,
   aggFilter: AggFilter,
-  metricAggs?: AggConfig[],
+  metricAggs?: IAggConfig[],
   value?: string,
   fallbackValue?: string
 ) {
@@ -69,7 +69,7 @@ function useFallbackMetric(
  */
 function useAvailableOptions(
   aggFilter: AggFilter,
-  metricAggs: AggConfig[] = [],
+  metricAggs: IAggConfig[] = [],
   defaultOptions: Array<{ text: string; value: string }> = []
 ) {
   const isCompatibleAgg = useCompatibleAggCallback(aggFilter);
@@ -107,7 +107,7 @@ function useValidation(setValidity: (isValid: boolean) => void, isValid: boolean
   }, [isValid, setValidity]);
 }
 
-function safeMakeLabel(agg: AggConfig): string {
+function safeMakeLabel(agg: IAggConfig): string {
   try {
     return agg.makeLabel();
   } catch (e) {
@@ -118,7 +118,7 @@ function safeMakeLabel(agg: AggConfig): string {
 }
 
 function isCompatibleAggregation(aggFilter: string[]) {
-  return (agg: AggConfig) => {
+  return (agg: IAggConfig) => {
     return !aggFilter.includes(`!${agg.type.name}`);
   };
 }

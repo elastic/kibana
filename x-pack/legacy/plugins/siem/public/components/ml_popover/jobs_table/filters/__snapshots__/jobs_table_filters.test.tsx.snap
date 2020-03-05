@@ -110,25 +110,17 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
   >
     <EuiFilterGroup>
       <EuiFilterButton
-        color="text"
         data-test-subj="show-elastic-jobs-filter-button"
-        grow={true}
         hasActiveFilters={false}
-        iconSide="right"
         onClick={[Function]}
-        type="button"
         withNext={true}
       >
         Elastic jobs
       </EuiFilterButton>
       <EuiFilterButton
-        color="text"
         data-test-subj="show-custom-jobs-filter-button"
-        grow={true}
         hasActiveFilters={false}
-        iconSide="right"
         onClick={[Function]}
-        type="button"
       >
         Custom jobs
       </EuiFilterButton>

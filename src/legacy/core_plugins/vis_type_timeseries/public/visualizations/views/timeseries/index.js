@@ -33,9 +33,9 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
-import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { timezoneProvider } from '../../../legacy_imports';
 import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
-import chrome from 'ui/chrome';
+import { getUISettings } from '../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
@@ -85,7 +85,7 @@ export const TimeSeries = ({
   }, []); // eslint-disable-line
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
-  const uiSettings = chrome.getUiSettingsClient();
+  const uiSettings = getUISettings();
   const timeZone = timezoneProvider(uiSettings)();
   const hasBarChart = series.some(({ bars }) => bars.show);
 

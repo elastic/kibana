@@ -27,7 +27,9 @@ const mockTaskManager = taskManagerMock.setup();
 
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+  taskRunnerFactory: new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  ),
   actionsConfigUtils: configUtilsMock,
 };
 
@@ -204,7 +206,9 @@ describe('create()', () => {
 
     const localActionTypeRegistryParams = {
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+      taskRunnerFactory: new TaskRunnerFactory(
+        new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+      ),
       actionsConfigUtils: localConfigUtils,
     };
 

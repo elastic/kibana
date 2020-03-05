@@ -5,7 +5,6 @@
  */
 
 import StatsMock from './__mocks__/analytics_stats.json';
-jest.mock('ui/new_platform');
 
 import {
   isCompletedAnalyticsJob,

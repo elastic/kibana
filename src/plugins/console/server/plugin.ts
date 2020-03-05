@@ -60,9 +60,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
         const legacyConfig = readLegacyEsConfig();
         return {
           ...elasticsearch,
-          hosts: legacyConfig.hosts,
-          requestHeadersWhitelist: legacyConfig.requestHeadersWhitelist,
-          customHeaders: legacyConfig.customHeaders,
+          ...legacyConfig,
         };
       },
       pathFilters: proxyPathFilters,

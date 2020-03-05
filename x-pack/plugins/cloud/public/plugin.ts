@@ -31,6 +31,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (home) {
       home.environment.update({ cloud: isCloudEnabled });
+      if (isCloudEnabled) {
+        home.tutorials.setVariable('cloud', { id });
+      }
     }
 
     return {

@@ -69,7 +69,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
     handler: async request => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameters to retrieve EMS file');
@@ -96,7 +97,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
     handler: async (request, h) => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (
         !request.query.id ||
@@ -127,8 +129,9 @@ export function initRoutes(server, licenseUid) {
   server.route({
     method: 'GET',
     path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
-    handler: async () => {
-      checkEMSProxyConfig();
+    handler: async request => {
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       const main = await emsClient.getMainManifest();
       const proxiedManifest = {
@@ -157,8 +160,9 @@ export function initRoutes(server, licenseUid) {
   server.route({
     method: 'GET',
     path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
-    handler: async () => {
-      checkEMSProxyConfig();
+    handler: async request => {
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       const file = await emsClient.getDefaultFileManifest();
       const layers = file.layers.map(layer => {
@@ -181,8 +185,9 @@ export function initRoutes(server, licenseUid) {
   server.route({
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
-    handler: async () => {
-      checkEMSProxyConfig();
+    handler: async request => {
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       const tilesManifest = await emsClient.getDefaultTMSManifest();
       const newServices = tilesManifest.services.map(service => {
@@ -220,7 +225,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
     handler: async request => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameter to retrieve EMS raster style');
@@ -246,7 +252,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
     handler: async request => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameter to retrieve EMS vector style');
@@ -285,7 +292,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
     handler: async request => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (!request.query.id || !request.query.sourceId) {
         server.log(
@@ -316,7 +324,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
     handler: async (request, h) => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (
         !request.query.id ||
@@ -352,7 +361,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
     handler: async (request, h) => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
       const url = mapConfig.emsFontLibraryUrl
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
@@ -365,7 +375,8 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
     handler: async (request, h) => {
-      checkEMSProxyConfig();
+      const { server } = request;
+      checkEMSProxyConfig(server);
 
       if (!request.params.id) {
         server.log('warning', 'Must supply id parameter to retrieve EMS vector source sprite');
@@ -443,7 +454,7 @@ export function initRoutes(server, licenseUid) {
     },
   });
 
-  function checkEMSProxyConfig() {
+  function checkEMSProxyConfig(server) {
     if (!mapConfig.proxyElasticMapsServiceInMaps) {
       server.log(
         'warning',

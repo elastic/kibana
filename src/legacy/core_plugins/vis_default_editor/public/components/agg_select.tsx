@@ -17,27 +17,28 @@
  * under the License.
  */
 import { get, has } from 'lodash';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggType, documentationLinks } from '../legacy_imports';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IAggType } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;
-  aggTypeOptions: ComboBoxGroupedOptions<AggType>;
+  aggTypeOptions: ComboBoxGroupedOptions<IAggType>;
   id: string;
   indexPattern: IndexPattern;
   showValidation: boolean;
   isSubAggregation: boolean;
-  value: AggType;
+  value: IAggType;
   onChangeAggType: React.Dispatch<AggTypeAction>;
-  setValue: (aggType: AggType) => void;
+  setValue: (aggType: IAggType) => void;
 }
 
 function DefaultEditorAggSelect({
@@ -51,7 +52,9 @@ function DefaultEditorAggSelect({
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOptions<AggType> = value
+  const [isDirty, setIsDirty] = useState(false);
+  const { services } = useKibana();
+  const selectedOptions: ComboBoxGroupedOptions<IAggType> = value
     ? [{ label: value.title, target: value }]
     : [];
 
@@ -69,7 +72,7 @@ function DefaultEditorAggSelect({
 
   let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
-    aggHelpLink = get(documentationLinks, ['aggs', value.name]);
+    aggHelpLink = services.docLinks.links.aggs[value.name];
   }
 
   const helpLink = value && aggHelpLink && (
@@ -98,17 +101,18 @@ function DefaultEditorAggSelect({
     );
   }
 
-  const isValid = !!value && !errors.length;
+  const isValid = !!value && !errors.length && !isDirty;
 
   const onChange = useCallback(
     (options: EuiComboBoxOptionProps[]) => {
       const selectedOption = get(options, '0.target');
       if (selectedOption) {
-        setValue(selectedOption as AggType);
+        setValue(selectedOption as IAggType);
       }
     },
     [setValue]
   );
+  const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
 
   const setTouched = useCallback(
     () => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true }),
@@ -149,6 +153,7 @@ function DefaultEditorAggSelect({
         singleSelection={{ asPlainText: true }}
         onBlur={setTouched}
         onChange={onChange}
+        onSearchChange={onSearchChange}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}
         isInvalid={showValidation ? !isValid : false}

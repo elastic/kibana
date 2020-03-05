@@ -18,3 +18,16 @@
  */
 
 export function unset(object: object, rawPath: string): void;
+
+export {
+  concatStreamProviders,
+  createConcatStream,
+  createFilterStream,
+  createIntersperseStream,
+  createListStream,
+  createMapStream,
+  createPromiseFromStreams,
+  createReduceStream,
+  createReplaceStream,
+  createSplitStream,
+} from './streams';

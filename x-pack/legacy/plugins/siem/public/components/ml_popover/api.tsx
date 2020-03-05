@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import {
   CheckRecognizerProps,
   CloseJobsResponse,
@@ -20,6 +19,7 @@ import {
 } from './types';
 import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
 import { throwIfNotOk } from '../../hooks/api/api';
+import { KibanaServices } from '../../lib/kibana';
 
 /**
  * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules
@@ -31,21 +31,18 @@ export const checkRecognizer = async ({
   indexPatternName,
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/ml/modules/recognize/${indexPatternName}`,
+  const response = await KibanaServices.get().http.fetch<RecognizerModule[]>(
+    `/api/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-system-api': 'true',
-        'kbn-xsrf': 'true',
-      },
+      asResponse: true,
+      asSystemRequest: true,
       signal,
     }
   );
-  await throwIfNotOk(response);
-  return response.json();
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -55,18 +52,18 @@ export const checkRecognizer = async ({
  * @param signal to cancel request
  */
 export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/get_module/${moduleId}`, {
-    method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-    signal,
-  });
-  await throwIfNotOk(response);
-  return response.json();
+  const response = await KibanaServices.get().http.fetch<Module[]>(
+    `/api/ml/modules/get_module/${moduleId}`,
+    {
+      method: 'GET',
+      asResponse: true,
+      asSystemRequest: true,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -77,7 +74,6 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
  * @param jobIdErrorFilter - if provided, filters all errors except for given jobIds
  * @param groups - list of groups to add to jobs being installed
  * @param prefix - prefix to be added to job name
- * @param headers optional headers to add
  */
 export const setupMlJob = async ({
   configTemplate,
@@ -86,25 +82,26 @@ export const setupMlJob = async ({
   groups = ['siem'],
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      prefix,
-      groups,
-      indexPatternName,
-      startDatafeed: false,
-      useDedicatedIndex: true,
-    }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-  });
-  await throwIfNotOk(response);
-  const json = await response.json();
+  const response = await KibanaServices.get().http.fetch<SetupMlResponse>(
+    `/api/ml/modules/setup/${configTemplate}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        prefix,
+        groups,
+        indexPatternName,
+        startDatafeed: false,
+        useDedicatedIndex: true,
+      }),
+      asResponse: true,
+      asSystemRequest: true,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  const json = response.body!;
   throwIfErrorAttachedToSetup(json, jobIdErrorFilter);
+
   return json;
 };
 
@@ -121,22 +118,23 @@ export const startDatafeeds = async ({
   datafeedIds: string[];
   start: number;
 }): Promise<StartDatafeedResponse> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      datafeedIds,
-      ...(start !== 0 && { start }),
-    }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-  });
-  await throwIfNotOk(response);
-  const json = await response.json();
+  const response = await KibanaServices.get().http.fetch<StartDatafeedResponse>(
+    '/api/ml/jobs/force_start_datafeeds',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        datafeedIds,
+        ...(start !== 0 && { start }),
+      }),
+      asResponse: true,
+      asSystemRequest: true,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  const json = response.body!;
   throwIfErrorAttached(json, datafeedIds);
+
   return json;
 };
 
@@ -144,49 +142,46 @@ export const startDatafeeds = async ({
  * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
  * @param datafeedIds
- * @param headers optional headers to add
  */
 export const stopDatafeeds = async ({
   datafeedIds,
 }: {
   datafeedIds: string[];
 }): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
-  const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      datafeedIds,
-    }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-  });
+  const stopDatafeedsResponse = await KibanaServices.get().http.fetch<StopDatafeedResponse>(
+    '/api/ml/jobs/stop_datafeeds',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        datafeedIds,
+      }),
+      asResponse: true,
+      asSystemRequest: true,
+    }
+  );
 
-  await throwIfNotOk(stopDatafeedsResponse);
-  const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
+  await throwIfNotOk(stopDatafeedsResponse.response);
+  const stopDatafeedsResponseJson = stopDatafeedsResponse.body!;
 
   const datafeedPrefix = 'datafeed-';
-  const closeJobsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/close_jobs`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      jobIds: datafeedIds.map(dataFeedId =>
-        dataFeedId.startsWith(datafeedPrefix)
-          ? dataFeedId.substring(datafeedPrefix.length)
-          : dataFeedId
-      ),
-    }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-  });
+  const closeJobsResponse = await KibanaServices.get().http.fetch<CloseJobsResponse>(
+    '/api/ml/jobs/close_jobs',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        jobIds: datafeedIds.map(dataFeedId =>
+          dataFeedId.startsWith(datafeedPrefix)
+            ? dataFeedId.substring(datafeedPrefix.length)
+            : dataFeedId
+        ),
+      }),
+      asResponse: true,
+      asSystemRequest: true,
+    }
+  );
 
-  await throwIfNotOk(closeJobsResponse);
-  return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
+  await throwIfNotOk(closeJobsResponse.response);
+  return [stopDatafeedsResponseJson, closeJobsResponse.body!];
 };
 
 /**
@@ -198,17 +193,17 @@ export const stopDatafeeds = async ({
  * @param signal to cancel request
  */
 export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({}),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
-    signal,
-  });
-  await throwIfNotOk(response);
-  return response.json();
+  const response = await KibanaServices.get().http.fetch<JobSummary[]>(
+    '/api/ml/jobs/jobs_summary',
+    {
+      method: 'POST',
+      body: JSON.stringify({}),
+      asResponse: true,
+      asSystemRequest: true,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };

@@ -131,16 +131,20 @@ export type VarsReplacer = (
  * @internal
  * @deprecated
  */
-export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
+export type LegacyNavLinkSpec = Partial<LegacyNavLink> & {
+  id: string;
+  title: string;
+  url: string;
+};
 
 /**
  * @internal
  * @deprecated
  */
-export type LegacyAppSpec = Pick<
-  ChromeNavLink,
-  'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden' | 'category'
-> & { pluginId?: string; id?: string; listed?: boolean };
+export type LegacyAppSpec = Partial<LegacyNavLink> & {
+  pluginId?: string;
+  listed?: boolean;
+};
 
 /**
  * @internal

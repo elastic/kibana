@@ -10,6 +10,7 @@
  * rescheduling, middleware application, etc.
  */
 
+import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
@@ -156,15 +157,21 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance,
     });
 
+    const apmTrans = apm.startTransaction(
+      `taskManager run ${this.instance.taskType}`,
+      'taskManager'
+    );
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
       const result = await this.task.run();
       const validatedResult = this.validateResult(result);
+      if (apmTrans) apmTrans.end('success');
       return this.processResult(validatedResult);
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
+      if (apmTrans) apmTrans.end('error');
       return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }));
     }
   }
@@ -177,6 +184,11 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async markTaskAsRunning(): Promise<boolean> {
     performance.mark('markTaskAsRunning_start');
+
+    const apmTrans = apm.startTransaction(
+      `taskManager markTaskAsRunning ${this.instance.taskType}`,
+      'taskManager'
+    );
 
     const VERSION_CONFLICT_STATUS = 409;
     const now = new Date();
@@ -227,10 +239,12 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
+      if (apmTrans) apmTrans.end('success');
       performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance)));
       return true;
     } catch (error) {
+      if (apmTrans) apmTrans.end('failure');
       performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (error.statusCode !== VERSION_CONFLICT_STATUS) {

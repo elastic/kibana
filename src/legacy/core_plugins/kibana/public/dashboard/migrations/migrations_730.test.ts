@@ -28,6 +28,7 @@ import {
 
 const mockLogger = {
   warning: () => {},
+  warn: () => {},
   debug: () => {},
   info: () => {},
 };

@@ -18,9 +18,9 @@
  */
 
 import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../../../plugins/data/public';
 
-const filter: esFilters.Filter = {
+const filter: Filter = {
   meta: { disabled: false, negate: false, alias: '' },
   query: {},
   $state: { store: esFilters.FilterStateStore.APP_STATE },

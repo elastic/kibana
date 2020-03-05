@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { TimeRange } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
@@ -15,7 +15,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter as DataFilter } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;
@@ -36,7 +36,7 @@ export type SavedMapInput = EmbeddableInput & {
     interval: number;
   };
   hideFilterActions: true;
-  filters: esFilters.Filter[];
+  filters: DataFilter[];
   mapCenter?: {
     lat: number;
     lon: number;
@@ -50,9 +50,14 @@ const defaultTimeRange = {
   to: 'now',
 };
 
-type Return = EmbeddableExpression<SavedMapInput>;
+type Output = EmbeddableExpression<SavedMapInput>;
 
-export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Arguments, Return> {
+export function savedMap(): ExpressionFunctionDefinition<
+  'savedMap',
+  Filter | null,
+  Arguments,
+  Output
+> {
   const { help, args: argHelp } = getFunctionHelp().savedMap;
   return {
     name: 'savedMap',
@@ -86,8 +91,8 @@ export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Argume
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, args) => {
-      const filters = context ? context.and : [];
+    fn: (input, args) => {
+      const filters = input ? input.and : [];
 
       const center = args.center
         ? {

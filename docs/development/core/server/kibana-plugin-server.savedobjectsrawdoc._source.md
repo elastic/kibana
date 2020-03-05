@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-_source: any;
+_source: SavedObjectsRawDocSource;
 ```

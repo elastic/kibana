@@ -7,22 +7,26 @@
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
-import { TimeHistory } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
 
 import {
   mlTimefilterRefresh$,
   mlTimefilterTimeChange$,
 } from '../../../services/timefilter_refresh_service';
-import { useUiContext } from '../../../contexts/ui/use_ui_context';
 import { useUrlState } from '../../../util/url_state';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface Duration {
   start: string;
   end: string;
 }
 
-function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
+function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
   return function(): Duration[] {
     return (
       timeHistory.get()?.map(({ from, to }: TimeRange) => {
@@ -40,11 +44,14 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const TopNav: FC = () => {
-  const { chrome, timefilter, timeHistory } = useUiContext();
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
+  const { services } = useMlKibana();
+  const config = services.uiSettings;
+  const { timefilter, history } = services.data.query.timefilter;
 
-  const [refreshInterval, setRefreshInterval] = useState(
+  const [globalState, setGlobalState] = useUrlState('_g');
+  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
+
+  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
     globalState?.refreshInterval ?? timefilter.getRefreshInterval()
   );
   useEffect(() => {
@@ -61,7 +68,7 @@ export const TopNav: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
+  const dateFormat = config.get('dateFormat');
 
   useEffect(() => {
     const subscriptions = new Subscription();

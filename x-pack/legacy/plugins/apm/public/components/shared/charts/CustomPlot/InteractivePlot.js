@@ -66,8 +66,12 @@ class InteractivePlot extends PureComponent {
 
     const tooltipPoints = this.getTooltipPoints(hoverX);
     const markPoints = this.getMarkPoints(hoverX);
-    const { x, yTickValues } = plotValues;
+    const { x, xTickValues, yTickValues } = plotValues;
     const yValueMiddle = yTickValues[1];
+
+    if (isEmpty(xTickValues)) {
+      return <SharedPlot plotValues={plotValues} />;
+    }
 
     return (
       <SharedPlot plotValues={plotValues}>

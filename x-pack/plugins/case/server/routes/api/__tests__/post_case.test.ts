@@ -28,7 +28,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['defacement'],
-        case_type: 'security',
       },
     });
 
@@ -36,8 +35,8 @@ describe('POST cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.id).toEqual('mock-it');
-    expect(response.payload.attributes.created_by.username).toEqual('awesome');
+    expect(response.payload.case_id).toEqual('mock-it');
+    expect(response.payload.created_by.username).toEqual('awesome');
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
@@ -48,7 +47,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['error'],
-        case_type: 'security',
       },
     });
 
@@ -69,7 +67,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['defacement'],
-        case_type: 'security',
       },
     });
 

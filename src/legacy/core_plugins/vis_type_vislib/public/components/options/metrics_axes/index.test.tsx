@@ -27,7 +27,7 @@ import { Positions } from '../../../utils/collections';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ChartTypes } from '../../../utils/collections';
-import { AggConfig, AggType } from '../../../legacy_imports';
+import { IAggConfig, IAggType } from '../../../legacy_imports';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
 jest.mock('ui/new_platform');
@@ -44,17 +44,17 @@ jest.mock('./value_axes_panel', () => ({
 const SERIES_PARAMS = 'seriesParams';
 const VALUE_AXES = 'valueAxes';
 
-const aggCount: AggConfig = {
+const aggCount: IAggConfig = {
   id: '1',
   type: { name: 'count' },
   makeLabel: () => 'Count',
-} as AggConfig;
+} as IAggConfig;
 
-const aggAverage: AggConfig = {
+const aggAverage: IAggConfig = {
   id: '2',
-  type: { name: 'average' } as AggType,
+  type: { name: 'average' } as IAggType,
   makeLabel: () => 'Average',
-} as AggConfig;
+} as IAggConfig;
 
 const createAggs = (aggs: any[]) => ({
   aggs,
@@ -193,9 +193,10 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
 
-      expect(setValue).toHaveBeenCalledTimes(3);
-      expect(setValue).toHaveBeenNthCalledWith(2, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(3, VALUE_AXES, updatedValues);
+      expect(setValue).toHaveBeenCalledTimes(5);
+      expect(setValue).toHaveBeenNthCalledWith(3, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(5, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(4, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {

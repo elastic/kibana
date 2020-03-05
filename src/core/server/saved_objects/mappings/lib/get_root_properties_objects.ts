@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { ComplexFieldMapping, IndexMapping, MappingProperties } from '../types';
+import {
+  SavedObjectsComplexFieldMapping,
+  IndexMapping,
+  SavedObjectsMappingProperties,
+} from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -43,10 +47,10 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
     if (
       !blacklist.includes(key) &&
-      ((value as ComplexFieldMapping).properties || value.type === 'object')
+      ((value as SavedObjectsComplexFieldMapping).properties || value.type === 'object')
     ) {
       acc[key] = value;
     }
     return acc;
-  }, {} as MappingProperties);
+  }, {} as SavedObjectsMappingProperties);
 }

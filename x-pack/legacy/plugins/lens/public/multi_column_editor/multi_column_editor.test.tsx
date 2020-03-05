@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockDatasource } from '../editor_frame_service/mocks';
 import { MultiColumnEditor } from './multi_column_editor';
 import { mount } from 'enzyme';
 

@@ -20,8 +20,8 @@ import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
-import { IndexPatternSavedObject } from '../ml_popover/types';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -38,7 +38,7 @@ import { IndexPatternSavedObject } from '../ml_popover/types';
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
   startDate: number,

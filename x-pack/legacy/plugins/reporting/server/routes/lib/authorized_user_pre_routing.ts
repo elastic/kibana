@@ -9,7 +9,7 @@ import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { Logger, ServerFacade } from '../../../types';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingSetupDeps } from '../../plugin';
+import { ReportingSetupDeps } from '../../types';
 
 const superuserRole = 'superuser';
 
@@ -22,7 +22,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const getUser = getUserFactory(server, plugins.security, logger);
+  const getUser = getUserFactory(server, plugins.security);
   const config = server.config();
 
   return async function authorizedUserPreRouting(request: Legacy.Request) {

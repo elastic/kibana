@@ -22,8 +22,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
+import { collapseLiteralStrings } from '../../../../../../es_ui_shared/console_lang/lib';
 const editorInput1 = require('./editor_input1.txt');
-const utils = require('../../../../lib/utils/utils');
 
 describe('Editor', () => {
   let input;
@@ -331,7 +331,7 @@ describe('Editor', () => {
       const expected = {
         method: 'POST',
         url: '_search',
-        data: [utils.collapseLiteralStrings(simpleRequest.data)],
+        data: [collapseLiteralStrings(simpleRequest.data)],
       };
 
       compareRequest(request, expected);

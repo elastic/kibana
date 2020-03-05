@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  setupEnvironment,
-  pageHelpers,
-  nextTick,
-  findTestSubject,
-  getRandomString,
-} from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -136,6 +130,7 @@ describe('<AutoFollowPatternList />', () => {
         [
           '', // Empty because the first column is the checkbox to select row
           autoFollowPattern1.name,
+          ' Paused', // Default paused
           autoFollowPattern1.remoteCluster,
           autoFollowPattern1.leaderIndexPatterns.join(', '),
           testPrefix,
@@ -145,6 +140,7 @@ describe('<AutoFollowPatternList />', () => {
         [
           '',
           autoFollowPattern2.name,
+          ' Paused', // Default paused
           autoFollowPattern2.remoteCluster,
           autoFollowPattern2.leaderIndexPatterns.join(', '),
           '', // no prefix
@@ -154,21 +150,21 @@ describe('<AutoFollowPatternList />', () => {
       ]);
     });
 
-    describe('bulk delete button', () => {
+    describe('manage patterns context menu button', () => {
       test('should be visible when an auto-follow pattern is selected', () => {
-        expect(exists('bulkDeleteButton')).toBe(false);
+        expect(exists('autoFollowPatternActionMenuButton')).toBe(false);
 
         actions.selectAutoFollowPatternAt(0);
 
-        expect(exists('bulkDeleteButton')).toBe(true);
+        expect(exists('autoFollowPatternActionMenuButton')).toBe(true);
       });
 
       test('should update the button label according to the number of patterns selected', () => {
         actions.selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
-        expect(find('bulkDeleteButton').text()).toEqual('Delete auto-follow pattern');
+        expect(find('autoFollowPatternActionMenuButton').text()).toEqual('Manage pattern');
 
         actions.selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
-        expect(find('bulkDeleteButton').text()).toEqual('Delete auto-follow patterns');
+        expect(find('autoFollowPatternActionMenuButton').text()).toEqual('Manage patterns');
       });
 
       test('should open a confirmation modal when clicking the delete button', () => {
@@ -204,21 +200,26 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     describe('table row actions', () => {
-      test('should have a "delete" and an "edit" action button on each row', () => {
+      test('should have a "pause", "delete" and "edit" action button on each row', () => {
         const indexLastColumn = rows[0].columns.length - 1;
         const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
+        const contextMenuButton = tableCellActions.find('button');
+        contextMenuButton.simulate('click');
 
-        const deleteButton = findTestSubject(tableCellActions, 'deleteButton');
-        const editButton = findTestSubject(tableCellActions, 'editButton');
-
-        expect(deleteButton.length).toBe(1);
-        expect(editButton.length).toBe(1);
+        expect(exists('contextMenuDeleteButton')).toBe(true);
+        expect(exists('contextMenuEditButton')).toBe(true);
+        expect(exists('contextMenuResumeButton')).toBe(true);
       });
 
       test('should open a confirmation modal when clicking on "delete" button', async () => {
         expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
 
-        actions.clickRowActionButtonAt(0, 'delete');
+        const indexLastColumn = rows[0].columns.length - 1;
+        const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
+        const contextMenuButton = tableCellActions.find('button');
+        contextMenuButton.simulate('click');
+
+        find('contextMenuDeleteButton').simulate('click');
 
         expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
       });
@@ -281,11 +282,13 @@ describe('<AutoFollowPatternList />', () => {
         );
       });
 
-      test('should have a "close", "delete" and "edit" button in the footer', () => {
+      test('should have a "close", "delete", "edit" and "resume" button in the footer', () => {
         actions.clickAutoFollowPatternAt(0);
+        find('autoFollowPatternActionMenuButton').simulate('click');
         expect(exists('autoFollowPatternDetail.closeFlyoutButton')).toBe(true);
-        expect(exists('autoFollowPatternDetail.deleteButton')).toBe(true);
-        expect(exists('autoFollowPatternDetail.editButton')).toBe(true);
+        expect(actions.getPatternsActionMenuItemText(0)).toEqual('Resume replication');
+        expect(actions.getPatternsActionMenuItemText(1)).toEqual('Edit pattern');
+        expect(actions.getPatternsActionMenuItemText(2)).toEqual('Delete pattern');
       });
 
       test('should close the detail panel when clicking the "close" button', () => {
@@ -301,7 +304,7 @@ describe('<AutoFollowPatternList />', () => {
         actions.clickAutoFollowPatternAt(0);
         expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
 
-        find('autoFollowPatternDetail.deleteButton').simulate('click');
+        actions.clickPatternsActionMenuItem(2);
 
         expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
       });

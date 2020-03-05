@@ -16,45 +16,66 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../ui_actions/public';
+import { Filter } from '../../data/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
+  contextMenuTrigger,
   createFilterAction,
+  panelBadgeTrigger,
+  selectRangeTrigger,
+  valueClickTrigger,
+  EmbeddableVisTriggerContext,
+  IEmbeddable,
+  EmbeddableContext,
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
+  ACTION_ADD_PANEL,
+  ACTION_CUSTOMIZE_PANEL,
+  ACTION_INSPECT_PANEL,
+  REMOVE_PANEL_ACTION,
+  ACTION_EDIT_PANEL,
+  FilterActionContext,
+  ACTION_APPLY_FILTER,
 } from './lib';
+
+declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
+    [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
+    [APPLY_FILTER_TRIGGER]: {
+      embeddable: IEmbeddable;
+      filters: Filter[];
+    };
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+  }
+
+  export interface ActionContextMapping {
+    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
+    [ACTION_ADD_PANEL]: EmbeddableContext;
+    [ACTION_INSPECT_PANEL]: EmbeddableContext;
+    [REMOVE_PANEL_ACTION]: EmbeddableContext;
+    [ACTION_EDIT_PANEL]: EmbeddableContext;
+    [ACTION_APPLY_FILTER]: FilterActionContext;
+  }
+}
 
 /**
  * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
- *
- * @param api
  */
-export const bootstrap = (uiActions: IUiActionsSetup) => {
-  const triggerContext = {
-    id: CONTEXT_MENU_TRIGGER,
-    title: 'Context menu',
-    description: 'Triggered on top-right corner context-menu select.',
-    actionIds: [],
-  };
-  const triggerFilter = {
-    id: APPLY_FILTER_TRIGGER,
-    title: 'Filter click',
-    description: 'Triggered when user applies filter to an embeddable.',
-    actionIds: [],
-  };
-  const triggerBadge = {
-    id: PANEL_BADGE_TRIGGER,
-    title: 'Panel badges',
-    description: 'Actions appear in title bar when an embeddable loads in a panel',
-    actionIds: [],
-  };
+export const bootstrap = (uiActions: UiActionsSetup) => {
+  uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(applyFilterTrigger);
+  uiActions.registerTrigger(panelBadgeTrigger);
+  uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
+
   const actionApplyFilter = createFilterAction();
 
-  uiActions.registerTrigger(triggerContext);
-  uiActions.registerTrigger(triggerFilter);
   uiActions.registerAction(actionApplyFilter);
-  uiActions.registerTrigger(triggerBadge);
-  // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

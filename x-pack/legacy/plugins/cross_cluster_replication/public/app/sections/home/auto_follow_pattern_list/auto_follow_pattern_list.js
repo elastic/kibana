@@ -243,12 +243,12 @@ export class AutoFollowPatternList extends PureComponent {
     const { isDetailPanelOpen } = this.state;
 
     return (
-      <Fragment>
+      <>
         <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
         {isDetailPanelOpen && (
           <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />
         )}
-      </Fragment>
+      </>
     );
   }
 

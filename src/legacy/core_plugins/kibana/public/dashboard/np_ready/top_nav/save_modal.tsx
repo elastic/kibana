@@ -21,7 +21,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
-import { SavedObjectSaveModal } from '../../legacy_imports';
+import { SavedObjectSaveModal } from '../../../../../../../plugins/saved_objects/public';
 
 interface SaveOptions {
   newTitle: string;
@@ -147,6 +147,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         showCopyOnSave={this.props.showCopyOnSave}
         objectType="dashboard"
         options={this.renderDashboardSaveOptions()}
+        showDescription={false}
       />
     );
   }

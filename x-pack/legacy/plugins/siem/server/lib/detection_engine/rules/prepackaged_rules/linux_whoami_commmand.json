@@ -1,5 +1,5 @@
 {
-  "description": "The whoami application was executed on a Linux host. This is often used by tools and persistence mechanisms to test for privileged access.",
+  "description": "The whoami application was executed on a Linux host. This is often used by  tools and persistence mechanisms to test for privileged access.",
   "false_positives": [
     "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
   ],
@@ -7,7 +7,7 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "User Discovery via Whoami",
   "query": "process.name: whoami and event.action:executed",
   "risk_score": 21,

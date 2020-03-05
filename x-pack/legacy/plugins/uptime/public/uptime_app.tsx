@@ -10,10 +10,10 @@ import React, { useEffect } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { I18nStart, ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
-import { PluginsStart } from 'ui/new_platform/new_platform';
+import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBadge } from './lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
@@ -37,19 +37,19 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   client: UMGraphQLClient;
-  core: LegacyCoreStart;
+  core: CoreStart;
   darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   kibanaBreadcrumbs: ChromeBreadcrumb[];
-  plugins: PluginsStart;
+  plugins: PluginsSetup;
   routerBasename: string;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -63,7 +63,6 @@ const Application = (props: UptimeAppProps) => {
     plugins,
     renderGlobalHelpControls,
     routerBasename,
-    setBreadcrumbs,
     setBadge,
   } = props;
 
@@ -84,6 +83,7 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
+  // @ts-ignore
   store.dispatch(setBasePath(basePath));
 
   return (
@@ -98,11 +98,7 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <PageRouter
-                            autocomplete={plugins.data.autocomplete}
-                            basePath={basePath}
-                            setBreadcrumbs={setBreadcrumbs}
-                          />
+                          <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>
                     </UptimeThemeContextProvider>

@@ -18,7 +18,7 @@ import { history } from '../../../utils/history';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
-  autocomplete,
+  QuerySuggestion,
   esKuery,
   IIndexPattern
 } from '../../../../../../../../src/plugins/data/public';
@@ -28,7 +28,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   isLoadingSuggestions: boolean;
 }
 

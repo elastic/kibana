@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
+
 export const PLUGIN = {
   ID: 'rollup',
+  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
+  getI18nName: (i18n: any): string => {
+    return i18n.translate('xpack.rollupJobs.appName', {
+      defaultMessage: 'Rollup jobs',
+    });
+  },
 };
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+
+export const API_BASE_PATH = '/api/rollup';
 
 export {
   UIM_APP_NAME,

@@ -99,16 +99,19 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              modules: true,
-              localIdentName: '[name]__[local]___[hash:base64:5]',
-              camelCase: true,
+              modules: {
+                localIdentName: '[name]__[local]___[hash:base64:5]',
+              },
+              localsConvention: 'camelCase',
               sourceMap: !isProd,
             },
           },
           {
             loader: 'postcss-loader',
             options: {
-              path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+              config: {
+                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+              },
             },
           },
           {

@@ -22,6 +22,7 @@ import {
   DataPublicPluginStart,
   addSearchStrategy,
   defaultSearchStrategy,
+  DataPublicPluginSetup,
 } from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
@@ -32,15 +33,47 @@ import {
   setInjectedMetadata,
   setFieldFormats,
   setSearchService,
+  setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
+import { setSearchServiceShim } from './services';
+import {
+  selectRangeAction,
+  SelectRangeActionContext,
+  ACTION_SELECT_RANGE,
+} from './actions/select_range_action';
+import {
+  valueClickAction,
+  ACTION_VALUE_CLICK,
+  ValueClickActionContext,
+} from './actions/value_click_action';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/embeddable/public/lib/triggers';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
+
+import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
+}
+
+/**
+ * Interface for this plugin's returned `setup` contract.
+ *
+ * @public
+ */
+export interface DataSetup {
+  search: SearchSetup;
 }
 
 /**
@@ -48,7 +81,15 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface DataStart {
+  search: SearchStart;
+}
+declare module '../../../../plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
+    [ACTION_VALUE_CLICK]: ValueClickActionContext;
+  }
+}
 
 /**
  * Data Plugin - public
@@ -63,22 +104,45 @@ export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty
  */
 
 export class DataPlugin
-  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  public setup(core: CoreSetup) {
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
+
+  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
     setInjectedMetadata(core.injectedMetadata);
 
     // This is to be deprecated once we switch to the new search service fully
     addSearchStrategy(defaultSearchStrategy);
+
+    uiActions.attachAction(
+      SELECT_RANGE_TRIGGER,
+      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+
+    uiActions.attachAction(
+      VALUE_CLICK_TRIGGER,
+      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+
+    return {
+      search: this.search.setup(core),
+    };
   }
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    const search = this.search.start(core);
+    setSearchServiceShim(search);
+
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
     setSearchService(data.search);
+    setOverlays(core.overlays);
 
-    return {};
+    return {
+      search,
+    };
   }
 
   public stop() {}

@@ -12,6 +12,8 @@ import {
   createAutoFollowPattern as createAutoFollowPatternRequest,
   updateAutoFollowPattern as updateAutoFollowPatternRequest,
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
+  pauseAutoFollowPattern as pauseAutoFollowPatternRequest,
+  resumeAutoFollowPattern as resumeAutoFollowPatternRequest,
 } from '../../services/api';
 import routing from '../../services/routing';
 import * as t from '../action_types';
@@ -138,6 +140,118 @@ export const deleteAutoFollowPattern = id =>
         if (response.itemsDeleted.includes(autoFollowPatternId)) {
           dispatch(selectDetailAutoFollowPattern(null));
         }
+      }
+    },
+  });
+
+export const pauseAutoFollowPattern = id =>
+  sendApiRequest({
+    label: t.AUTO_FOLLOW_PATTERN_PAUSE,
+    scope: `${scope}-pause`,
+    status: API_STATUS.UPDATING,
+    handler: () => pauseAutoFollowPatternRequest(id),
+    onSuccess: response => {
+      /**
+       * We can have 1 or more auto-follow pattern pause operations
+       * that can fail or succeed. We will show 1 toast notification for each.
+       */
+      if (response.errors.length) {
+        const hasMultipleErrors = response.errors.length > 1;
+        const errorMessage = hasMultipleErrors
+          ? i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.pauseAction.errorMultipleNotificationTitle',
+              {
+                defaultMessage: `Error pausing {count} auto-follow patterns`,
+                values: { count: response.errors.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.pauseAction.errorSingleNotificationTitle',
+              {
+                defaultMessage: `Error pausing the '{name}' auto-follow pattern`,
+                values: { name: response.errors[0].id },
+              }
+            );
+
+        toastNotifications.addDanger(errorMessage);
+      }
+
+      if (response.itemsPaused.length) {
+        const hasMultiple = response.itemsPaused.length > 1;
+
+        const successMessage = hasMultiple
+          ? i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.pauseAction.successMultipleNotificationTitle',
+              {
+                defaultMessage: `{count} auto-follow patterns were paused`,
+                values: { count: response.itemsPaused.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.pauseAction.successSingleNotificationTitle',
+              {
+                defaultMessage: `Auto-follow pattern '{name}' was paused`,
+                values: { name: response.itemsPaused[0] },
+              }
+            );
+
+        toastNotifications.addSuccess(successMessage);
+      }
+    },
+  });
+
+export const resumeAutoFollowPattern = id =>
+  sendApiRequest({
+    label: t.AUTO_FOLLOW_PATTERN_RESUME,
+    scope: `${scope}-resume`,
+    status: API_STATUS.UPDATING,
+    handler: () => resumeAutoFollowPatternRequest(id),
+    onSuccess: response => {
+      /**
+       * We can have 1 or more auto-follow pattern resume operations
+       * that can fail or succeed. We will show 1 toast notification for each.
+       */
+      if (response.errors.length) {
+        const hasMultipleErrors = response.errors.length > 1;
+        const errorMessage = hasMultipleErrors
+          ? i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.resumeAction.errorMultipleNotificationTitle',
+              {
+                defaultMessage: `Error resuming {count} auto-follow patterns`,
+                values: { count: response.errors.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.resumeAction.errorSingleNotificationTitle',
+              {
+                defaultMessage: `Error resuming the '{name}' auto-follow pattern`,
+                values: { name: response.errors[0].id },
+              }
+            );
+
+        toastNotifications.addDanger(errorMessage);
+      }
+
+      if (response.itemsResumed.length) {
+        const hasMultiple = response.itemsResumed.length > 1;
+
+        const successMessage = hasMultiple
+          ? i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.resumeAction.successMultipleNotificationTitle',
+              {
+                defaultMessage: `{count} auto-follow patterns were resumed`,
+                values: { count: response.itemsResumed.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPattern.resumeAction.successSingleNotificationTitle',
+              {
+                defaultMessage: `Auto-follow pattern '{name}' was resumed`,
+                values: { name: response.itemsResumed[0] },
+              }
+            );
+
+        toastNotifications.addSuccess(successMessage);
       }
     },
   });

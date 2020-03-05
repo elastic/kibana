@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
@@ -23,14 +23,17 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       search = location.search;
     }
 
-    const params = search ? { ...qs.parse(search[0] === '?' ? search.slice(1) : search) } : {};
+    const params = search
+      ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
+      : {};
+
     return getSupportedUrlParams(params);
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
     if (!history || !location) return;
     const { pathname, search } = location;
-    const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });
     const mergedParams = {
       ...currentParams,
       ...updatedParams,
@@ -38,7 +41,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
 
     history.push({
       pathname,
-      search: qs.stringify(
+      search: stringify(
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];
@@ -49,7 +52,8 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
             ...params,
             [key]: value,
           };
-        }, {})
+        }, {}),
+        { sort: false }
       ),
     });
   };

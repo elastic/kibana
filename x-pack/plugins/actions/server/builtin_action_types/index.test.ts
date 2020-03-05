@@ -21,7 +21,9 @@ export function createActionTypeRegistry(): {
   const logger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.setup(),
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+    ),
     actionsConfigUtils: configUtilsMock,
   });
   registerBuiltInActionTypes({

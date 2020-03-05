@@ -5,8 +5,9 @@
  */
 
 export {
+  applyTransformConfigToDefineState,
+  getDefaultStepDefineState,
   StepDefineExposedState,
   StepDefineForm,
-  getDefaultStepDefineState,
 } from './step_define_form';
 export { StepDefineSummary } from './step_define_summary';

@@ -20,13 +20,13 @@ import {
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
 
-export interface PluginSetupContract {
+export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
 }
 
-export interface PluginStartContract extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
   isEncryptionError: (error: Error) => boolean;
 }
 
@@ -59,7 +59,7 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup): Promise<PluginSetupContract> {
+  public async setup(core: CoreSetup): Promise<EncryptedSavedObjectsPluginSetup> {
     const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();

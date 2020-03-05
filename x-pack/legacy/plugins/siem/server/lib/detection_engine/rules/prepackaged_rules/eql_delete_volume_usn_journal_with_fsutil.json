@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Delete Volume USN Journal with Fsutil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and   process.name:\"fsutil.exe\" and    process.args:(\"usn\" and \"deletejournal\")",
   "risk_score": 21,

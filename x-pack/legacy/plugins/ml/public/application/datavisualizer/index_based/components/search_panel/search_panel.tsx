@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
-import { SavedSearchQuery } from '../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../contexts/ml';
 
 // @ts-ignore
 import { KqlFilterBar } from '../../../../components/kql_filter_bar/index';

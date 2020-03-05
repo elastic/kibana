@@ -12,10 +12,10 @@ import {
   IEmbeddable,
 } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
-import { esFilters } from '../../../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../../../src/plugins/data/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   refreshConfig: {
     isPaused: boolean;

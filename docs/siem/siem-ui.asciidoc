@@ -34,6 +34,23 @@ investigation.
 image::siem/images/network-ui.png[]
 
 [float]
+[[detections-ui]]
+=== Detections
+
+The Detections feature automatically searches for threats and creates 
+signals when they are detected. Signal detection rules define the conditions 
+for creating signals. The SIEM app comes with prebuilt rules that search for 
+suspicious activity on your network and hosts. Additionally, you can
+create your own rules.
+
+See {siem-guide}/detection-engine-overview.html[Detections] in the SIEM 
+Guide for information on managing detection rules and signals via the UI 
+or the Detections API.
+
+[role="screenshot"]
+image::siem/images/detections-ui.png[]
+
+[float]
 [[timelines-ui]]
 === Timeline
 

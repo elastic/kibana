@@ -96,6 +96,7 @@ export default function(api) {
           doc_values: BOOLEAN,
           eager_global_ordinals: BOOLEAN,
           norms: BOOLEAN,
+          coerce: BOOLEAN,
 
           // Not actually available in V6 of ES. Add when updating the autocompletion system.
           // index_phrases: BOOLEAN,

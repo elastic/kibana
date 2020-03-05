@@ -23,7 +23,9 @@ exports[`ImportedEvents Renders imported events 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <InjectIntl(EventsTable)
+    <EventsTable
+      canCreateCalendar={true}
+      canDeleteCalendar={true}
       eventsList={
         Array [
           Object {
@@ -36,6 +38,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
         ]
       }
       onDeleteClick={[MockFunction]}
+      showSearchBar={false}
     />
   </EuiFlexItem>
   <EuiSpacer

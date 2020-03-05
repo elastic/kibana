@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
@@ -56,6 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       'enabled',
       'authentication_realm',
       'lookup_realm',
+      'authentication_provider',
     ]);
 
     expect(apiResponse.body.username).to.be('a@b.c');
@@ -88,6 +89,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('capture URL fragment', () => {
@@ -328,7 +330,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -441,7 +443,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -477,7 +479,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
@@ -726,7 +728,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
-          .expect('location', '/overwritten_session')
+          .expect('location', '/security/overwritten_session')
           .expect(302);
 
         const newSessionCookie = request.cookie(
