@@ -104,9 +104,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   );
 };
 
-interface SelectedActionFactoryProps<
-  Config extends ActionBaseConfig = ActionBaseConfig
-> {
+interface SelectedActionFactoryProps<Config extends ActionBaseConfig = ActionBaseConfig> {
   actionFactory: ActionFactory<Config>;
   config: Config;
   onConfigChange: (config: Config) => void;
