@@ -10,7 +10,7 @@ import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
 import { hasMonitoringCluster } from '../es_client/instantiate_client';
-import { parseElasticsearchConfig } from '../es_client/parse_elasticsearch_config';
+import { ElasticsearchConfig } from '../../../../../src/core/server';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -52,11 +52,11 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    const directConfig = parseElasticsearchConfig(config, 'elasticsearch');
-    if (hasMonitoringCluster(directConfig)) {
+    const elasticsearchDirectConfig = new ElasticsearchConfig(config.elasticsearch);
+    if (hasMonitoringCluster(elasticsearchDirectConfig)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearch.createClient('monitoring-direct', directConfig);
+      this._cluster = elasticsearch.createClient('monitoring-direct', elasticsearchDirectConfig);
       elasticsearch.adminClient.callAsInternalUser('info').then(data => {
         this._productionClusterUuid = get(data, 'cluster_uuid');
       });

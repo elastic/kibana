@@ -18,6 +18,8 @@ import {
   KibanaResponseFactory,
   CoreSetup,
   ICustomClusterClient,
+  ElasticsearchConfig,
+  ElasticsearchConfigType,
 } from '../../../../src/core/server';
 import { MonitoringConfig } from './config';
 // @ts-ignore
@@ -28,7 +30,6 @@ import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
-import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 import { registerMonitoringCollection } from './telemetry_collection';
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -86,7 +87,9 @@ export class Plugin {
 
     // Monitoring creates and maintains a connection to a potentially
     // separate ES cluster - create this first
-    const elasticsearchConfig = parseElasticsearchConfig(config);
+    const elasticsearchConfig = new ElasticsearchConfig(
+      config.ui.elasticsearch as ElasticsearchConfigType
+    );
     const cluster = (this.cluster = await instantiateClient({
       log: this.log,
       elasticsearchConfig,
@@ -176,6 +179,7 @@ export class Plugin {
       config: legacyConfigWrapper,
       getOSInfo: legacyApi.getOSInfo,
       hapiServer: legacyApi.hapiServer,
+      metrics$: core.metrics.getOpsMetrics$(),
     });
 
     // If collection is enabled, create the bulk uploader

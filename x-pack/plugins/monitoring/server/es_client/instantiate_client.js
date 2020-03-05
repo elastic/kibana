@@ -15,12 +15,6 @@ import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 
 export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
-  // TODO: NP
-  if (elasticsearchConfig && elasticsearchConfig.hosts) {
-    if (!Array.isArray(elasticsearchConfig.hosts)) {
-      elasticsearchConfig.hosts = [elasticsearchConfig.hosts];
-    }
-  }
   const cluster = elasticsearchPlugin.createCluster('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
     plugins: [monitoringBulk],
