@@ -780,8 +780,6 @@ function discoverController(
 
     $scope.fetchError = undefined;
 
-    $scope.updateTime();
-
     // Abort any in-progress requests before fetching again
     if (abortController) abortController.abort();
     abortController = new AbortController();
