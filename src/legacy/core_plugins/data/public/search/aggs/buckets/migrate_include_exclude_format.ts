@@ -21,15 +21,16 @@ import { isString, isObject } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
-export const isType = (type: string) => {
+export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {
     const field = agg.params.field;
 
-    return field && field.type === type;
+    return types.some(type => field && field.type === type);
   };
 };
 
 export const isStringType = isType('string');
+export const isStringOrNumberType = isType('string', 'number');
 
 export const migrateIncludeExcludeFormat = {
   serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
