@@ -42,7 +42,6 @@ describe('Search service', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup).toHaveProperty('registerSearchStrategyContext');
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
-      expect(setup).toHaveProperty('__LEGACY');
     });
   });
 });
