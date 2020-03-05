@@ -62,60 +62,71 @@ const MarkdownContainer = styled(EuiPanel)`
 
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
-  placeholder?: string;
   footerContentRight?: React.ReactNode;
+  headerContentRight?: React.ReactNode;
   initialContent: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
-}>(({ placeholder, footerContentRight, initialContent, isDisabled = false, onChange }) => {
-  const [content, setContent] = useState(initialContent);
-  useEffect(() => {
-    onChange(content);
-  }, [content]);
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'comment',
-        name: i18n.MARKDOWN,
-        content: (
-          <TextArea
-            onChange={e => {
-              setContent(e.target.value);
-            }}
-            aria-label={`markdown-editor-comment`}
-            fullWidth={true}
-            disabled={isDisabled}
-            placeholder={placeholder ?? ''}
-            spellCheck={false}
-            value={content}
-          />
-        ),
-      },
-      {
-        id: 'preview',
-        name: i18n.PREVIEW,
-        content: (
-          <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
-            <Markdown raw={content} />
-          </MarkdownContainer>
-        ),
-      },
-    ],
-    [content, isDisabled, placeholder]
-  );
-  return (
-    <Container>
-      <Tabs data-test-subj={`markdown-tabs`} size="s" tabs={tabs} initialSelectedTab={tabs[0]} />
-      <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
-            {i18n.MARKDOWN_SYNTAX_HELP}
-          </EuiLink>
-        </EuiFlexItem>
-        {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
-      </Footer>
-    </Container>
-  );
-});
+  placeholder?: string;
+}>(
+  ({
+    footerContentRight,
+    headerContentRight,
+    initialContent,
+    isDisabled = false,
+    onChange,
+    placeholder,
+  }) => {
+    const [content, setContent] = useState(initialContent);
+    useEffect(() => {
+      onChange(content);
+    }, [content]);
+    const tabs = useMemo(
+      () => [
+        {
+          id: 'comment',
+          name: i18n.MARKDOWN,
+          content: (
+            <TextArea
+              onChange={e => {
+                setContent(e.target.value);
+              }}
+              aria-label={`markdown-editor-comment`}
+              fullWidth={true}
+              disabled={isDisabled}
+              placeholder={placeholder ?? ''}
+              spellCheck={false}
+              value={content}
+            />
+          ),
+        },
+        {
+          id: 'preview',
+          name: i18n.PREVIEW,
+          content: (
+            <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
+              <Markdown raw={content} />
+            </MarkdownContainer>
+          ),
+        },
+      ],
+      [content, isDisabled, placeholder]
+    );
+    return (
+      <Container>
+        {headerContentRight && <EuiFlexItem grow={false}>{headerContentRight}</EuiFlexItem>}
+        <Tabs data-test-subj={`markdown-tabs`} size="s" tabs={tabs} initialSelectedTab={tabs[0]} />
+        <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
+              {i18n.MARKDOWN_SYNTAX_HELP}
+            </EuiLink>
+          </EuiFlexItem>
+          {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
+        </Footer>
+      </Container>
+    );
+  }
+);
 
 MarkdownEditor.displayName = 'MarkdownEditor';

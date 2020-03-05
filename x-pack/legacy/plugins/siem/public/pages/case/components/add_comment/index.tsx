@@ -12,6 +12,7 @@ import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
+import { AddTimelineToTextArea } from '../add_timeline_to_textarea';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -61,6 +62,7 @@ export const AddComment = React.memo<{
                 {i18n.ADD_COMMENT}
               </EuiButton>
             ),
+            headerContentRight: <AddTimelineToTextArea />,
           }}
         />
       </Form>
