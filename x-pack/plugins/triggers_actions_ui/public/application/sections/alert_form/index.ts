@@ -4,14 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const AGGREGATION_TYPES: { [key: string]: string } = {
-  COUNT: 'count',
-
-  AVERAGE: 'avg',
-
-  SUM: 'sum',
-
-  MIN: 'min',
-
-  MAX: 'max',
-};
+export { AlertAdd } from './alert_add';
+export { AlertEdit } from './alert_edit';
