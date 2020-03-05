@@ -39,7 +39,7 @@ in the {beats} family.)
 * Import static data using the
 https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[file upload feature].
 * Index your data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
- or client libraries.
+ or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
 +
 [role="screenshot"]
 image::images/intro-data-tutorial.png[Ways to get data in from the home page]
