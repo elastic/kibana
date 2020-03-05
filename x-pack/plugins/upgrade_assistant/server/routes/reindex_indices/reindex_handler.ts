@@ -35,7 +35,7 @@ export const reindexHandler = async ({
   log,
   savedObjects,
   enqueue,
-}: ReindexHandlerArgs): ReindexOperation => {
+}: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
@@ -58,7 +58,7 @@ export const reindexHandler = async ({
   // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
-      ? await reindexService.resumeReindexOperation(indexName)
+      ? await reindexService.resumeReindexOperation(indexName, opts)
       : await reindexService.createReindexOperation(indexName, opts);
 
   // Add users credentials for the worker to use

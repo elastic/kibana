@@ -28,6 +28,7 @@ import {
   IndexNotFound,
   MultipleReindexJobsFound,
   ReindexAlreadyInProgress,
+  ReindexCannotBeCancelled,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
 } from '../../lib/reindexing/error_symbols';
@@ -69,6 +70,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
       case ReindexAlreadyInProgress:
       case MultipleReindexJobsFound:
+      case ReindexCannotBeCancelled:
         return kibanaResponseFactory.badRequest({ body: e.message });
       default:
       // nothing matched
