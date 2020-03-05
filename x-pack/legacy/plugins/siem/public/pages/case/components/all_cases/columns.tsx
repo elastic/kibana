@@ -44,7 +44,7 @@ export const getCasesColumns = (
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
         const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>
+          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
         );
         return theCase.state === 'open' ? (
           caseDetailsLinkComponent

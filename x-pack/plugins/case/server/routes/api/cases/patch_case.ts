@@ -69,13 +69,14 @@ export function initPatchCaseApi({ caseService, router }: RouteDeps) {
         );
         if (Object.keys(updateCase).length > 0) {
           const updatedBy = await caseService.getUser({ request, response });
+          const { full_name, username } = updatedBy;
           const updatedCase = await caseService.patchCase({
             client: context.core.savedObjects.client,
             caseId: query.id,
             updatedAttributes: {
               ...updateCase,
               updated_at: new Date().toISOString(),
-              updated_by: updatedBy,
+              updated_by: { full_name, username },
             },
           });
           return response.ok({

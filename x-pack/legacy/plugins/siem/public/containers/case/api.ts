@@ -23,6 +23,8 @@ import {
   decodeCommentResponse,
 } from './utils';
 
+const CaseSavedObjectType = 'cases';
+
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
@@ -57,11 +59,12 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
-  const stateFilter = `case-workflow.attributes.state: ${filterOptions.state}`;
+  const stateFilter = `${CaseSavedObjectType}.attributes.state: ${filterOptions.state}`;
   const tags = [
-    ...(filterOptions.tags?.reduce((acc, t) => [...acc, `case-workflow.attributes.tags: ${t}`], [
-      stateFilter,
-    ]) ?? [stateFilter]),
+    ...(filterOptions.tags?.reduce(
+      (acc, t) => [...acc, `${CaseSavedObjectType}.attributes.tags: ${t}`],
+      [stateFilter]
+    ) ?? [stateFilter]),
   ];
   const query = {
     ...queryParams,
