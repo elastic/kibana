@@ -16,6 +16,7 @@ import { shallow } from 'enzyme';
 
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { DynamicColorProperty } from './dynamic_color_property';
+import { StyleMeta } from '../style_meta';
 import { COLOR_MAP_TYPE, FIELD_ORIGIN } from '../../../../../common/constants';
 
 const mockField = {
@@ -36,29 +37,32 @@ const mockField = {
   },
 };
 
-class MockStyleMeta {
-  getRangeFieldMetaDescriptor() {
-    return { min: 0, max: 100 };
-  }
-  getCategoryFieldMetaDescriptor() {
-    return {
-      categories: [
-        {
-          key: 'US',
-          count: 10,
-        },
-        {
-          key: 'CN',
-          count: 8,
-        },
-      ],
-    };
-  }
-}
-
 class MockStyle {
   getStyleMeta() {
-    return new MockStyleMeta();
+    return new StyleMeta({
+      geometryTypes: {
+        isPointsOnly: false,
+        isLinesOnly: false,
+        isPolygonsOnly: false,
+      },
+      fieldMeta: {
+        foobar: {
+          range: { min: 0, max: 100 },
+          categories: {
+            categories: [
+              {
+                key: 'US',
+                count: 10,
+              },
+              {
+                key: 'CN',
+                count: 8,
+              },
+            ],
+          },
+        },
+      },
+    });
   }
 }
 

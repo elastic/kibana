@@ -279,8 +279,8 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         new MockSource()
       );
 
-      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.fieldMeta.myDynamicField.range).toEqual({
+      const styleMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(styleMeta.fieldMeta.myDynamicField.range).toEqual({
         delta: 9,
         max: 10,
         min: 1,

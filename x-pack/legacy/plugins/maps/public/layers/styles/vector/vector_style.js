@@ -71,7 +71,7 @@ export class VectorStyle extends AbstractStyle {
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
 
-    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta || { fieldMeta: {} });
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,

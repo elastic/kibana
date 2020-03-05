@@ -12,8 +12,8 @@ import {
 
 export class StyleMeta {
   private readonly _descriptor: StyleMetaDescriptor;
-  constructor(styleMetaDescriptor: StyleMetaDescriptor) {
-    this._descriptor = styleMetaDescriptor;
+  constructor(styleMetaDescriptor: StyleMetaDescriptor | null | undefined) {
+    this._descriptor = styleMetaDescriptor ? styleMetaDescriptor : { fieldMeta: {} };
   }
 
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
