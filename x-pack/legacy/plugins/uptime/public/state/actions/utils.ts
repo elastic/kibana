@@ -5,11 +5,12 @@
  */
 
 import { createAction } from 'redux-actions';
+import { AsyncAction } from './types';
 
-export function createAsyncAction<G, S, F>(actionStr: string) {
+export function createAsyncAction<Payload>(actionStr: string): AsyncAction {
   return {
-    get: createAction<G>(actionStr),
-    success: createAction<S>(`${actionStr}_SUCCESS`),
-    fail: createAction<F>(`${actionStr}_FAIL`),
+    get: createAction<Payload>(actionStr),
+    success: createAction<Payload>(`${actionStr}_SUCCESS`),
+    fail: createAction<Payload>(`${actionStr}_FAIL`),
   };
 }

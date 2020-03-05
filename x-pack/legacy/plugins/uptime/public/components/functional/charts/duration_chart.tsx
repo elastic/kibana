@@ -5,13 +5,13 @@
  */
 
 import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine } from '../../../../common/types';
+import { LocationDurationLine, MonitorDurationAveragePoint } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
@@ -19,7 +19,6 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { MLJobLink } from '../ml/ml_job_link';
-import * as labels from '../ml/translations';
 
 interface DurationChartProps {
   /**
@@ -58,7 +57,7 @@ export const DurationChartComponent = ({
     });
   };
 
-  const findMaxInArray = arr => {
+  const findMaxInArray = (arr: MonitorDurationAveragePoint[]) => {
     return Math.max(
       ...arr.map(item => {
         return item.y ? item.y : 0;
@@ -67,7 +66,7 @@ export const DurationChartComponent = ({
   };
 
   const maxY = Math.max(
-    ...locationDurationLines.map(data => {
+    ...locationDurationLines.map((data: LocationDurationLine) => {
       return findMaxInArray(data.line);
     })
   );

@@ -60,6 +60,12 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    ml: {
+      mlJob: null,
+      anomalies: [],
+      loading: false,
+      errors: [],
+    },
   };
 
   it('selects base path from state', () => {

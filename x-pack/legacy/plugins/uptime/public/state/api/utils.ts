@@ -7,7 +7,7 @@
 import { HttpSetup } from '../../../../../../../target/types/core/public';
 
 interface KibanaHttpProp {
-  http: HttpSetup;
+  http: HttpSetup | null;
 }
 
 export const KIBANA_HTTP: KibanaHttpProp = {
@@ -15,16 +15,16 @@ export const KIBANA_HTTP: KibanaHttpProp = {
 };
 
 export const fetchGet = (apiUrl: string) => {
-  return KIBANA_HTTP.http.get(apiUrl);
+  return KIBANA_HTTP!.http!.get(apiUrl);
 };
 
 export const fetchPost = (apiUrl: string, data: any) => {
-  return KIBANA_HTTP.http.post(apiUrl, {
+  return KIBANA_HTTP!.http!.post(apiUrl, {
     method: 'POST',
     body: JSON.stringify(data),
   });
 };
 
 export const fetchDelete = (apiUrl: string) => {
-  return KIBANA_HTTP.http.delete(apiUrl);
+  return KIBANA_HTTP!.http!.delete(apiUrl);
 };

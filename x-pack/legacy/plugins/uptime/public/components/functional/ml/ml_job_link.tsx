@@ -12,10 +12,10 @@ import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 
 interface Props {
-  fill: boolean;
+  fill?: boolean;
 }
 
-export const MLJobLink: React.FC = ({ fill, children }: Props) => {
+export const MLJobLink: React.FC<Props> = ({ fill, children }) => {
   const { basePath } = useContext(UptimeSettingsContext);
 
   const query = {

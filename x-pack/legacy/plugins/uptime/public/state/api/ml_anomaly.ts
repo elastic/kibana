@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchDelete, fetchGet, fetchPost } from './utils';
+import { fetchGet, fetchPost } from './utils';
 import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
+import { DateRange } from './types';
 
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
@@ -35,6 +36,14 @@ export const createMLJob = async () => {
 
   const response = await fetchPost(url, data);
   if (response?.jobs?.[0]?.id === ML_JOB_ID && response?.jobs?.[0]?.success === true) {
+    setTimeout(async () => {
+      // const feedUrl = '/api/ml/jobs/force_start_datafeeds';
+      // const feedResponse = await fetchPost(feedUrl, {
+      //   datafeedIds: ['datafeed-high_latency'],
+      //   start: new Date().getTime(),
+      // });
+    }, 10000);
+
     return {
       count: 1,
     };
@@ -67,14 +76,14 @@ export const getIndexDateRange = async () => {
   return [result.start.epoch, result.end.epoch];
 };
 
-export const fetchAnomalyRecords = async params => {
+export const fetchAnomalyRecords = async (params: DateRange) => {
   const { dateStart, dateEnd } = params;
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/records`;
   try {
     return fetchPost(url, {
       start: dateStart,
       end: dateEnd,
-      record_score: 10,
+      record_score: 5,
     });
   } catch (error) {
     if (error.response.status === 404) {

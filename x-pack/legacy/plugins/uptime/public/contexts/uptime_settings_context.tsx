@@ -13,7 +13,7 @@ import { ILicense } from '../../../../../plugins/licensing/common/types';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
-  license?: ILicense;
+  license?: ILicense | null;
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
@@ -54,8 +54,9 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
 
   const { dateRangeStart, dateRangeEnd } = getUrlParams();
 
-  let license: ILicense = null;
+  let license: ILicense | null = null;
 
+  // @ts-ignore
   plugins.licensing.license$.subscribe((licenseItem: ILicense) => {
     license = licenseItem;
   });

@@ -64,8 +64,9 @@ describe('MonitorCharts component', () => {
   it('renders the component without errors', () => {
     const component = shallowWithRouter(
       <DurationChartComponent
-        locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
         loading={false}
+        anomalies={[]}
+        locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
       />
     );
     expect(component).toMatchSnapshot();

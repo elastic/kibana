@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyoutView } from '../../functional';
 import { hasMLJobSelector, isMLJobCreatingSelector, mlSelector } from '../../../state/selectors';
@@ -47,7 +47,7 @@ const showMLJobNotification = (
   }
 };
 
-export const MachineLearningFlyout: Component<Props> = ({ isOpen, onClose }) => {
+export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   const { notifications } = useKibana();
   const { errors } = useSelector(mlSelector);
 

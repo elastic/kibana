@@ -28,6 +28,7 @@ import { UptimeSettingsContext } from '../../../../contexts';
 interface Props {
   isCreatingJob: boolean;
   onClickCreate: () => void;
+  onClickDelete: () => void;
   onClose: () => void;
   hasMLJob: boolean;
 }

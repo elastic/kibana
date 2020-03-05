@@ -8,6 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { RectAnnotation } from '@elastic/charts';
+import { RectAnnotationDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 interface Props {
   anomalies: any;
@@ -18,13 +19,13 @@ export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
-  const severeAnomalyAnnotations = [];
-  const mildAnnotations = [];
+  const severeAnomalyAnnotations: RectAnnotationDatum[] = [];
+  const mildAnnotations: RectAnnotationDatum[] = [];
   if (anomalies?.records) {
     const records = anomalies.records;
     records.forEach((record: any) => {
       if (record['monitor.id']?.includes(monitorId)) {
-        if (record.record_score > 25) {
+        if (record.record_score > 5) {
           severeAnomalyAnnotations.push({
             coordinates: {
               x0: record.timestamp,
