@@ -16,6 +16,7 @@ export const createUptimeLink = (
 ): LinkDescriptor => {
   if (nodeType === 'host' && node.ip) {
     return {
+      app: 'uptime',
       hash: '/',
       search: {
         search: `host.ip:"${node.ip}"`,
@@ -24,6 +25,7 @@ export const createUptimeLink = (
   }
   const field = get(options, ['fields', nodeType], '');
   return {
+    app: 'uptime',
     hash: '/',
     search: {
       search: `${field ? field + ':' : ''}"${node.id}"`,

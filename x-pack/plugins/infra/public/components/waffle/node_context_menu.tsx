@@ -104,7 +104,6 @@ export const NodeContextMenu: React.FC<Props> = ({
     },
   });
   const uptimeMenuItemLinkProps = useLinkProps({
-    app: 'uptime',
     ...createUptimeLink(options, nodeType, node),
   });
 
