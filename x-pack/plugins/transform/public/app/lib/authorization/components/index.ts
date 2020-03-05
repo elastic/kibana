@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createCapabilityFailureMessage, Privileges } from './common';
+export { createCapabilityFailureMessage } from './common';
 export { AuthorizationProvider, AuthorizationContext } from './authorization_provider';
 export { PrivilegesWrapper } from './with_privileges';
 export { NotAuthorizedSection } from './not_authorized_section';

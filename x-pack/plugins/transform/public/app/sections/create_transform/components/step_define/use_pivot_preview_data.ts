@@ -10,10 +10,7 @@ import { dictionaryToArray } from '../../../../../../common/types/common';
 import { useApi } from '../../../../hooks/use_api';
 
 import { Dictionary } from '../../../../../../common/types/common';
-import {
-  IndexPattern,
-  ES_FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 
 import {
   getPreviewRequestBody,

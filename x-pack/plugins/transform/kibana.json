@@ -4,6 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "data",
     "home",
     "licensing",
     "management"

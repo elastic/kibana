@@ -14,14 +14,14 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { useDeleteTransforms } from '../../../../hooks';
+import { TRANSFORM_STATE } from '../../../../../../common';
 
+import { useDeleteTransforms } from '../../../../hooks';
 import {
   createCapabilityFailureMessage,
   AuthorizationContext,
 } from '../../../../lib/authorization';
-
-import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 
 interface DeleteActionProps {
   items: TransformListRow[];

@@ -9,10 +9,15 @@ import { HashRouter } from 'react-router-dom';
 
 import { API_BASE_PATH } from '../../common/constants';
 
+import { PluginsDependencies } from '../plugin';
 import { setDependencyCache } from '../shared_imports';
-import { AppDependencies } from '../shim';
 
 import { AuthorizationProvider } from './lib/authorization';
+
+export interface AppDependencies {
+  core: any;
+  plugins: PluginsDependencies;
+}
 
 let DependenciesContext: React.Context<AppDependencies>;
 

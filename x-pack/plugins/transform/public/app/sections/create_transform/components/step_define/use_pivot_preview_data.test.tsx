@@ -14,7 +14,7 @@ import {
   UsePivotPreviewDataReturnType,
 } from './use_pivot_preview_data';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../../hooks/use_api');
 

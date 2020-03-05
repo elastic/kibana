@@ -20,7 +20,7 @@ import {
   getPivotPreviewDevConsoleStatement,
   getPivotDropdownOptions,
 } from './common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 describe('Transform: Define Pivot Common', () => {
   test('customSortFactory()', () => {

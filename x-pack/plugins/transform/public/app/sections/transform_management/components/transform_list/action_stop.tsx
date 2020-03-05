@@ -8,7 +8,9 @@ import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common';
+
+import { TransformListRow } from '../../../../common';
 import {
   createCapabilityFailureMessage,
   AuthorizationContext,

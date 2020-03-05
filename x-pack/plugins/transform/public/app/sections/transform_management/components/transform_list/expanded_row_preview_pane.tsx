@@ -19,7 +19,7 @@ import {
   PreviewRequestBody,
   TransformPivotConfig,
 } from '../../../../common';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { transformTableFactory } from './transform_table';
 

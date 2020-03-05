@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
 
 import { TransformListRow } from '../../../../common';
@@ -20,7 +19,7 @@ jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
-    const Providers = getAppProviders(createPublicShim());
+    const Providers = getAppProviders({});
 
     const item: TransformListRow = transformListRow;
     const props = {

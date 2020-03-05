@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  APP_CLUSTER_PRIVILEGES,
-  APP_INDEX_PRIVILEGES,
-} from '../../../../../legacy/plugins/transform/common/constants';
-import { Privileges } from '../../../../../legacy/plugins/transform/public/app/lib/authorization';
+import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
+import { Privileges } from '../../../common';
 
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';

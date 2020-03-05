@@ -5,10 +5,7 @@
  */
 import { get } from 'lodash';
 import { EuiComboBoxOptionProps, EuiDataGridSorting } from '@elastic/eui';
-import {
-  IndexPattern,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 

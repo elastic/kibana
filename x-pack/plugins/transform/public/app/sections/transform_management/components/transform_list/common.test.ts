@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TRANSFORM_STATE } from '../../../../../../common';
+
 import mockTransformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-import { TransformListRow, isCompletedBatchTransform, TRANSFORM_STATE } from '../../../../common';
+import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 describe('Transform: isCompletedBatchTransform()', () => {
   test('isCompletedBatchTransform()', () => {

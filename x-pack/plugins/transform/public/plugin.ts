@@ -4,46 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { renderApp } from './app/app';
-import { ShimCore, ShimPlugins } from './shim';
 
+import { CoreSetup } from '../../../../src/core/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
+
+import { renderApp } from './app/app';
 import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
 
-export class Plugin {
-  public start(core: ShimCore, plugins: ShimPlugins): void {
-    const {
-      http,
-      chrome,
-      docLinks,
-      injectedMetadata,
-      notifications,
-      uiSettings,
-      savedObjects,
-      overlays,
-    } = core;
-    const { data, management } = plugins;
-    const { docTitle } = chrome;
+export interface PluginsDependencies {
+  data: any;
+  management: ManagementSetup;
+}
 
-    // AppCore/AppPlugins to be passed on as React context
-    const appDependencies = {
-      core: {
-        chrome,
-        docLinks,
-        http,
-        i18n: core.i18n,
-        injectedMetadata,
-        notifications,
-        uiSettings,
-        savedObjects,
-        overlays,
-      },
-      plugins: {
-        data,
-        management,
-      },
-    };
+export class TransformUiPlugin {
+  public setup(coreSetup: CoreSetup, pluginsSetup: PluginsDependencies): void {
+    const { management } = pluginsSetup;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -54,23 +31,44 @@ export class Plugin {
           defaultMessage: 'Transforms',
         }),
         order: 3,
-        mount(params) {
-          breadcrumbService.setup(params.setBreadcrumbs);
-          params.setBreadcrumbs([
-            {
-              text: i18n.translate('xpack.transform.breadcrumbsTitle', {
-                defaultMessage: 'Transforms',
-              }),
-            },
-          ]);
+        mount: async ({ element, setBreadcrumbs }) => {
+          const { http, notifications, getStartServices } = coreSetup;
+          const startServices = await getStartServices();
+          const [core, plugins] = startServices;
+          const { chrome, docLinks, injectedMetadata, uiSettings, savedObjects, overlays } = core;
+          const { data } = plugins as PluginsDependencies;
+          const { docTitle } = chrome;
 
-          return renderApp(params.element, appDependencies);
+          // Initialize services
+          textService.init();
+          docTitleService.init(docTitle.change);
+          breadcrumbService.setup(setBreadcrumbs);
+
+          // AppCore/AppPlugins to be passed on as React context
+          const appDependencies = {
+            core: {
+              chrome,
+              docLinks,
+              http,
+              i18n: core.i18n,
+              injectedMetadata,
+              notifications,
+              uiSettings,
+              savedObjects,
+              overlays,
+            },
+            plugins: {
+              data,
+              management,
+            },
+          };
+
+          return renderApp(element, appDependencies);
         },
       });
     }
-
-    // Initialize services
-    textService.init();
-    docTitleService.init(docTitle.change);
   }
+
+  public start() {}
+  public stop() {}
 }

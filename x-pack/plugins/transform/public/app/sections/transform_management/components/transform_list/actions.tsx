@@ -5,7 +5,11 @@
  */
 
 import React from 'react';
-import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
+
+import { TRANSFORM_STATE } from '../../../../../../common';
+
+import { TransformListRow } from '../../../../common';
+
 import { CloneAction } from './action_clone';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';

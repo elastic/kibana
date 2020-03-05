@@ -6,8 +6,12 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
+
+import { TRANSFORM_STATE } from '../../../../../../common';
+
+import { TRANSFORM_MODE, TransformListRow } from '../../../../common';
+
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
-import { TRANSFORM_STATE, TRANSFORM_MODE, TransformListRow } from '../../../../common';
 
 function createTranformStats(transformsList: TransformListRow[]) {
   const transformStats = {

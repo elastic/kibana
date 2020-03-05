@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
 import {
   PivotAggsConfigDict,
@@ -32,7 +31,7 @@ describe('Transform: <DefinePivotForm />', () => {
         fields: [] as any[],
       } as SearchItems['indexPattern'],
     };
-    const Providers = getAppProviders(createPublicShim());
+    const Providers = getAppProviders({});
     const { getByLabelText } = render(
       <Providers>
         <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
+import { LICENSE_TYPE_BASIC, LicenseType } from '../../../legacy/common/constants';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;

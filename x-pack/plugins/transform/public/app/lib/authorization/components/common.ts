@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { Privileges } from '../../../../../common';
+
 export interface Capabilities {
   canGetTransform: boolean;
   canDeleteTransform: boolean;
@@ -15,11 +17,6 @@ export interface Capabilities {
 }
 
 export type Privilege = [string, string];
-
-export interface Privileges {
-  hasAllPrivileges: boolean;
-  missingPrivileges: MissingPrivileges;
-}
 
 function isPrivileges(arg: any): arg is Privileges {
   return (
@@ -33,9 +30,6 @@ function isPrivileges(arg: any): arg is Privileges {
   );
 }
 
-export interface MissingPrivileges {
-  [key: string]: string[] | undefined;
-}
 export const toArray = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
 

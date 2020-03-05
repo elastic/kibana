@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface EsIndex {
-  name: string;
+export function transform(kibana: any) {
+  return new kibana.Plugin({
+    id: 'transform',
+    configPrefix: 'xpack.transform',
+  });
 }

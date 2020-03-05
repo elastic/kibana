@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
 import {
   getPivotQuery,
@@ -49,7 +48,7 @@ describe('Transform: <PivotPreview />', () => {
       query: getPivotQuery('the-query'),
     };
 
-    const Providers = getAppProviders(createPublicShim());
+    const Providers = getAppProviders({});
     const { getByText } = render(
       <Providers>
         <PivotPreview {...props} />

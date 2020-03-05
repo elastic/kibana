@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Plugin as TransformPlugin } from './plugin';
-import { createPublicShim } from './shim';
+import './app/index.scss';
+import { TransformUiPlugin } from './plugin';
 
-const { core, plugins } = createPublicShim();
-const transformPlugin = new TransformPlugin();
-transformPlugin.start(core, plugins);
+/** @public */
+export const plugin = () => {
+  return new TransformUiPlugin();
+};

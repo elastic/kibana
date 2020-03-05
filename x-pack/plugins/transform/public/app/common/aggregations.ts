@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { composeValidators, patternValidator } from '../../../../ml/common/util/validators';
+import {
+  composeValidators,
+  patternValidator,
+} from '../../../../../legacy/plugins/ml/common/util/validators';
 
 export type AggName = string;
 

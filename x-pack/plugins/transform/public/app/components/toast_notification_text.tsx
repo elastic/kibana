@@ -18,7 +18,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 import { useAppDependencies } from '../app_dependencies';
 

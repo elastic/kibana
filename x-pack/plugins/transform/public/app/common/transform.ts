@@ -9,12 +9,13 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
+import { TransformId } from '../../../common';
+
 import { PivotAggDict } from './pivot_aggs';
 import { PivotGroupByDict } from './pivot_group_by';
 
 export type IndexName = string;
 export type IndexPattern = string;
-export type TransformId = string;
 
 // Transform name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // It must also start and end with an alphanumeric character.

@@ -28,7 +28,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 

@@ -19,6 +19,8 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
+import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
+
 import {
   ActionsColumnType,
   ComputedColumnType,
@@ -28,11 +30,9 @@ import {
 
 import {
   getTransformProgress,
-  TransformId,
   TransformListRow,
   TransformStats,
   TRANSFORM_LIST_COLUMN,
-  TRANSFORM_STATE,
 } from '../../../../common';
 import { getActions } from './actions';
 

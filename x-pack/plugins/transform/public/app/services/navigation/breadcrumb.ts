@@ -7,12 +7,11 @@
 import { textService } from '../text';
 import { linkToHome } from './links';
 
-import { ManagementAppMountParams } from '../../../../../../../../src/plugins/management/public';
+import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 export enum BREADCRUMB_SECTION {
-  MANAGEMENT = 'management',
   HOME = 'home',
   CLONE_TRANSFORM = 'cloneTransform',
   CREATE_TRANSFORM = 'createTransform',
@@ -29,7 +28,6 @@ type Breadcrumbs = {
 
 class BreadcrumbService {
   private breadcrumbs: Breadcrumbs = {
-    management: [],
     home: [],
     cloneTransform: [],
     createTransform: [],
@@ -41,7 +39,6 @@ class BreadcrumbService {
 
     // Home and sections
     this.breadcrumbs.home = [
-      ...this.breadcrumbs.management,
       {
         text: textService.breadcrumbs.home,
         href: linkToHome(),

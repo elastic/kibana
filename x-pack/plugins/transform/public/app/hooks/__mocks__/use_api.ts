@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PreviewRequestBody, TransformId } from '../../common';
+import { TransformId, TransformEndpointRequest } from '../../../../common';
 
-import { TransformEndpointRequest } from '../use_api_types';
+import { PreviewRequestBody } from '../../common';
 
 const apiFactory = () => ({
   getTransforms(transformId?: TransformId): Promise<any> {

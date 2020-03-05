@@ -5,8 +5,12 @@
  */
 
 import React, { createContext } from 'react';
+
+import { Privileges } from '../../../../../common';
+
 import { useRequest } from '../../../hooks';
-import { hasPrivilegeFactory, Capabilities, Privileges } from './common';
+
+import { hasPrivilegeFactory, Capabilities } from './common';
 
 interface Authorization {
   isLoading: boolean;

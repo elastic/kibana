@@ -21,15 +21,15 @@ import {
   Direction,
 } from '@elastic/eui';
 
+import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
+
 import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
 
 import {
   useRefreshTransformList,
-  TransformId,
   TransformListRow,
   TRANSFORM_MODE,
   TRANSFORM_LIST_COLUMN,
-  TRANSFORM_STATE,
 } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
 

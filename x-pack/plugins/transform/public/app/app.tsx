@@ -14,7 +14,7 @@ import { SectionError } from './components';
 import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
 import { getAppProviders } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
-import { AppDependencies } from '../shim';
+import { AppDependencies } from './app_dependencies';
 
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';

@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
 import { getPivotQuery } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -28,7 +27,7 @@ describe('Transform: <SourceIndexPreview />', () => {
       } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
-    const Providers = getAppProviders(createPublicShim());
+    const Providers = getAppProviders({});
     const { getByText } = render(
       <Providers>
         <SourceIndexPreview {...props} />

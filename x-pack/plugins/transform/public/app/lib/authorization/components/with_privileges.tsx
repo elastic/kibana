@@ -10,11 +10,13 @@ import { EuiPageContent } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { MissingPrivileges } from '../../../../../common';
+
 import { SectionLoading } from '../../../components';
 
 import { AuthorizationContext } from './authorization_provider';
 import { NotAuthorizedSection } from './not_authorized_section';
-import { hasPrivilegeFactory, toArray, MissingPrivileges, Privilege } from './common';
+import { hasPrivilegeFactory, toArray, Privilege } from './common';
 
 interface Props {
   /**

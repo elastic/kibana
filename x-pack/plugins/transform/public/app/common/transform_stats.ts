@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId } from './transform';
-import { TransformListRow } from './transform_list';
+import { TransformId, TRANSFORM_STATE } from '../../../common';
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
-export enum TRANSFORM_STATE {
-  ABORTING = 'aborting',
-  FAILED = 'failed',
-  INDEXING = 'indexing',
-  STARTED = 'started',
-  STOPPED = 'stopped',
-  STOPPING = 'stopping',
-}
+import { TransformListRow } from './transform_list';
 
 export enum TRANSFORM_MODE {
   BATCH = 'batch',

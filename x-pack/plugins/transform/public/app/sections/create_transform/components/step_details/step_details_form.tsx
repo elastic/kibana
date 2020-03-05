@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
@@ -19,7 +20,7 @@ import { useDocumentationLinks } from '../../../../hooks/use_documentation_links
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 
-import { isTransformIdValid, TransformId, TransformPivotConfig } from '../../../../common';
+import { isTransformIdValid, TransformPivotConfig } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
 

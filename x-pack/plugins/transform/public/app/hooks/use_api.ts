@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useAppDependencies } from '../app_dependencies';
-import { PreviewRequestBody, TransformId } from '../common';
+import { TransformId, TransformEndpointRequest, TransformEndpointResult } from '../../../common';
 
-import { EsIndex, TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
+import { useAppDependencies } from '../app_dependencies';
+import { PreviewRequestBody } from '../common';
+
+import { EsIndex } from './use_api_types';
 
 export const useApi = () => {
   const {

@@ -14,14 +14,14 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { useStartTransforms } from '../../../../hooks';
+import { TRANSFORM_STATE } from '../../../../../../common';
 
+import { useStartTransforms } from '../../../../hooks';
 import {
   createCapabilityFailureMessage,
   AuthorizationContext,
 } from '../../../../lib/authorization';
-
-import { TransformListRow, isCompletedBatchTransform, TRANSFORM_STATE } from '../../../../common';
+import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 interface StartActionProps {
   items: TransformListRow[];

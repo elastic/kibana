@@ -12,7 +12,7 @@ import { SavedSearchQuery } from '../hooks/use_search_items';
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define/step_define_form';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 import {
   getEsAggFromAggConfig,

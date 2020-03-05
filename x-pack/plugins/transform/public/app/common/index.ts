@@ -22,7 +22,6 @@ export {
   useRefreshTransformList,
   CreateRequestBody,
   PreviewRequestBody,
-  TransformId,
   TransformPivotConfig,
   IndexName,
   IndexPattern,
@@ -35,7 +34,6 @@ export {
   isTransformStats,
   TransformStats,
   TRANSFORM_MODE,
-  TRANSFORM_STATE,
 } from './transform_stats';
 export { getDiscoverUrl } from './navigation';
 export {
