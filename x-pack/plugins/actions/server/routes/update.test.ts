@@ -6,7 +6,7 @@
 import { updateActionRoute } from './update';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib';
+import { verifyApiAccess, ForbiddenError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
@@ -164,5 +164,28 @@ describe('updateActionRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the action type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router: RouterMock = mockRouter.create();
+
+    updateActionRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = {
+      update: jest.fn().mockRejectedValue(new ForbiddenError('Fail')),
+    };
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+      'badRequest',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });
