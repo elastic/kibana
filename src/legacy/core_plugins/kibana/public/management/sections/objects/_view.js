@@ -147,6 +147,7 @@ uiModules
 
         const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
         $scope.canEdit = canEdit;
+        $scope.canEditCheckbox = canEdit && service.type !== 'visualization';
         $scope.canDelete = canDelete;
         $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
 

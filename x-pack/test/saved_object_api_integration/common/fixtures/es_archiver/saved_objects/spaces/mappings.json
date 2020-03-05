@@ -309,6 +309,9 @@
             },
             "visState": {
               "type": "text"
+            },
+            "visible": {
+              "type": "boolean"
             }
           }
         }
