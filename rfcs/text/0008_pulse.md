@@ -115,7 +115,7 @@ In this phase, our efforts will focus on securing the communications and integri
     - **Integrity of the data in the channels**:  
     We need to ensure an external plugin cannot push data to channels to avoid malicious corruption of the data. We could achieve this by either making this plugin only available to Kibana-shipped plugins or storing the `pluginID` that is pushing the data to have better control of the source of the data (then an ingest pipeline can reject any source of data that should not be accepted).
 
-    All the suggestions in this phase can be further discussed at that point (maybe in another RFC?).
+    All the suggestions in this phase can be further discussed at that point (I will create another RFC to discuss those terms after this RFC is approved and merged).
 
 3. **Instruction handling**  
 This final phase we'll implement the instruction generation and handling at the same time we are adding more **channels**.  
