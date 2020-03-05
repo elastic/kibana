@@ -527,7 +527,7 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerAuth((req, res, t) => t.redirected({}));
+    registerAuth((req, res, t) => t.redirected({} as any));
     await server.start();
 
     await supertest(innerServer.listener)

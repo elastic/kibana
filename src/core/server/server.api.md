@@ -432,7 +432,9 @@ export interface AuthRedirected extends AuthRedirectedParams {
 
 // @public
 export interface AuthRedirectedParams {
-    headers: ResponseHeaders;
+    headers: {
+        location: string;
+    } & ResponseHeaders;
 }
 
 // @public (undocumented)
@@ -466,7 +468,9 @@ export enum AuthStatus {
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
     notHandled: () => AuthResult;
-    redirected: (headers: ResponseHeaders) => AuthResult;
+    redirected: (headers: {
+        location: string;
+    } & ResponseHeaders) => AuthResult;
 }
 
 // @public

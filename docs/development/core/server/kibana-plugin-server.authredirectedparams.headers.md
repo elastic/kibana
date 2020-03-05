@@ -9,5 +9,7 @@ Headers to attach for auth redirect. Must include "location" header
 <b>Signature:</b>
 
 ```typescript
-headers: ResponseHeaders;
+headers: {
+        location: string;
+    } & ResponseHeaders;
 ```

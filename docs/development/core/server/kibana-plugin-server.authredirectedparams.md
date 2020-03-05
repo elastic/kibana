@@ -16,5 +16,5 @@ export interface AuthRedirectedParams
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [headers](./kibana-plugin-server.authredirectedparams.headers.md) | <code>ResponseHeaders</code> | Headers to attach for auth redirect. Must include "location" header |
+|  [headers](./kibana-plugin-server.authredirectedparams.headers.md) | <code>{</code><br/><code>        location: string;</code><br/><code>    } &amp; ResponseHeaders</code> | Headers to attach for auth redirect. Must include "location" header |
 

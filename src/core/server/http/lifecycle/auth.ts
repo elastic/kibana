@@ -67,7 +67,7 @@ const authResult = {
       type: AuthResultType.notHandled,
     };
   },
-  redirected(headers: ResponseHeaders): AuthResult {
+  redirected(headers: { location: string } & ResponseHeaders): AuthResult {
     return {
       type: AuthResultType.redirected,
       headers,
@@ -121,7 +121,7 @@ export interface AuthRedirectedParams {
    * Headers to attach for auth redirect.
    * Must include "location" header
    */
-  headers: ResponseHeaders;
+  headers: { location: string } & ResponseHeaders;
 }
 
 /**
@@ -141,7 +141,7 @@ export interface AuthToolkit {
    * Redirect user to IdP when authRequired: true
    * Allows user to access a resource without redirection when authRequired: 'optional'
    * */
-  redirected: (headers: ResponseHeaders) => AuthResult;
+  redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {

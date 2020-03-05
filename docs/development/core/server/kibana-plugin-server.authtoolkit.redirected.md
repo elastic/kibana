@@ -9,5 +9,7 @@ Redirect user to IdP when authRequired: true Allows user to access a resource wi
 <b>Signature:</b>
 
 ```typescript
-redirected: (headers: ResponseHeaders) => AuthResult;
+redirected: (headers: {
+        location: string;
+    } & ResponseHeaders) => AuthResult;
 ```
