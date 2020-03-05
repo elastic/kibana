@@ -47,7 +47,15 @@ const jsonifyPagination = (p: any): string | null => {
 export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
   GetMonitorStatesResult
-> = async ({ callES, dynamicSettings, dateRangeStart, dateRangeEnd, pagination, filters, statusFilter }) => {
+> = async ({
+  callES,
+  dynamicSettings,
+  dateRangeStart,
+  dateRangeEnd,
+  pagination,
+  filters,
+  statusFilter,
+}) => {
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
   const size = 10;

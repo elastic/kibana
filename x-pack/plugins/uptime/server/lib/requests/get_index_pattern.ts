@@ -8,8 +8,10 @@ import { APICaller, CallAPIOptions } from 'src/core/server';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { IndexPatternsFetcher, IIndexPattern } from '../../../../../../src/plugins/data/server';
 
-
-export const getUptimeIndexPattern: UMElasticsearchQueryFn<{}, {}> = async ({callES, dynamicSettings}) => {
+export const getUptimeIndexPattern: UMElasticsearchQueryFn<{}, {}> = async ({
+  callES,
+  dynamicSettings,
+}) => {
   const callAsCurrentUser: APICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},

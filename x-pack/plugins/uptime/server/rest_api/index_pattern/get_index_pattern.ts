@@ -18,7 +18,7 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
     try {
       return response.ok({
         body: {
-          ...(await libs.requests.getIndexPattern({callES, dynamicSettings})),
+          ...(await libs.requests.getIndexPattern({ callES, dynamicSettings })),
         },
       });
     } catch (e) {

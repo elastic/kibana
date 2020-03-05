@@ -6,9 +6,7 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import {
-  CONTEXT_DEFAULTS,
-} from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { QueryContext } from './search';
 
 export interface GetSnapshotCountParams {
@@ -20,7 +18,7 @@ export interface GetSnapshotCountParams {
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
   callES,
-  dynamicSettings: {heartbeatIndices},
+  dynamicSettings: { heartbeatIndices },
   dateRangeStart,
   dateRangeEnd,
   filters,

@@ -5,9 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  UNNAMED_LOCATION,
-} from '../../../../../legacy/plugins/uptime/common/constants';
+import { UNNAMED_LOCATION } from '../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorLocations,
   MonitorLocation,

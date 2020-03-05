@@ -60,7 +60,11 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         const options = {
           graphQLOptions: (_req: any) => {
             return {
-              context: { ...context, APICaller: callAsCurrentUser, savedObjectsClient: context.core.savedObjects.client },
+              context: {
+                ...context,
+                APICaller: callAsCurrentUser,
+                savedObjectsClient: context.core.savedObjects.client,
+              },
               schema,
             };
           },
