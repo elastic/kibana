@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../lib/post_servicenow', () => ({
-  postServiceNow: jest.fn(),
-}));
-
 import { getActionType } from '.';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../../types';
 import { validateConfig, validateSecrets, validateParams } from '../../lib';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { postServiceNow } from '../lib/post_servicenow';
 import { createActionTypeRegistry } from '../index.test';
 import { configUtilsMock } from '../../actions_config.mock';
 
-import { ServiceNow } from '../lib/servicenow';
 import { ACTION_TYPE_ID } from './constants';
 import * as i18n from './translations';
 
-jest.mock('../lib/servicenow');
+import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
+import { responseIncident } from './mock';
 
-const postServiceNowMock = postServiceNow as jest.Mock;
+jest.mock('./action_handlers');
+
+const handleCreateIncidentMock = handleCreateIncident as jest.Mock;
+const handleUpdateIncidentMock = handleUpdateIncident as jest.Mock;
 
 const services: Services = {
   callCluster: async (path: string, opts: any) => {},
@@ -172,142 +170,132 @@ describe('validateParams()', () => {
 
 describe('execute()', () => {
   beforeEach(() => {
-    postServiceNowMock.mockReset();
-  });
-  const { config, params, secrets } = mockServiceNow;
-  test('should succeed with valid params', async () => {
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 201, data: 'data-here' };
-    });
-
-    const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
-    const actionResponse = await actionType.executor(executorOptions);
-    const { apiUrl, data, headers } = postServiceNowMock.mock.calls[0][0];
-    expect({ apiUrl, data, headers, secrets }).toMatchInlineSnapshot(`
-      Object {
-        "apiUrl": "www.servicenowisinkibanaactions.com",
-        "data": Object {
-          "comments": "hello cool service now incident",
-          "short_description": "this is a cool service now incident",
-        },
-        "headers": Object {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        "secrets": Object {
-          "password": "secret-password",
-          "username": "secret-username",
-        },
-      }
-    `);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "data": "data-here",
-        "status": "ok",
-      }
-    `);
+    handleCreateIncidentMock.mockReset();
+    handleUpdateIncidentMock.mockReset();
   });
 
-  test('should fail when postServiceNow throws', async () => {
-    postServiceNowMock.mockImplementation(() => {
-      throw new Error('doing some testing');
-    });
-
-    const actionId = 'some-action-id';
+  test('should create an incident', async () => {
+    const actionId = 'some-id';
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
-      config,
-      params,
-      secrets,
+      config: mockOptions.config,
+      params: { ...mockOptions.params, executorAction: 'newIncident' },
+      secrets: mockOptions.secrets,
       services,
     };
+
+    handleCreateIncidentMock.mockImplementation(() => responseIncident);
+
     const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "message": "error posting servicenow event",
-        "serviceMessage": "doing some testing",
-        "status": "error",
-      }
-    `);
+    expect(actionResponse).toEqual({ actionId, status: 'ok', data: responseIncident });
   });
 
-  test('should fail when postServiceNow returns 429', async () => {
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 429, data: 'data-here' };
-    });
+  test('should throw an error when failed to create incident', async () => {
+    expect.assertions(1);
 
-    const actionId = 'some-action-id';
+    const actionId = 'some-id';
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
-      config,
-      params,
-      secrets,
+      config: mockOptions.config,
+      params: { ...mockOptions.params, executorAction: 'newIncident' },
+      secrets: mockOptions.secrets,
       services,
     };
-    const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "message": "error posting servicenow event: http status 429, retry later",
-        "retry": true,
-        "status": "error",
-      }
-    `);
+    const errorMessage = 'Failed to create incident';
+
+    handleCreateIncidentMock.mockImplementation(() => {
+      throw new Error(errorMessage);
+    });
+
+    try {
+      await actionType.executor(executorOptions);
+    } catch (error) {
+      expect(error.message).toEqual(errorMessage);
+    }
   });
 
-  test('should fail when postServiceNow returns 501', async () => {
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 501, data: 'data-here' };
-    });
-
-    const actionId = 'some-action-id';
+  test('should update an incident', async () => {
+    const actionId = 'some-id';
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
-      config,
-      params,
-      secrets,
+      config: mockOptions.config,
+      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      secrets: mockOptions.secrets,
       services,
     };
+
     const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "message": "error posting servicenow event: http status 501, retry later",
-        "retry": true,
-        "status": "error",
-      }
-    `);
+    expect(actionResponse).toEqual({ actionId, status: 'ok' });
   });
 
-  test('should fail when postServiceNow returns 418', async () => {
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 418, data: 'data-here' };
-    });
+  test('should throw an error when failed to update an incident', async () => {
+    expect.assertions(1);
 
-    const actionId = 'some-action-id';
+    const actionId = 'some-id';
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
-      config,
-      params,
-      secrets,
+      config: mockOptions.config,
+      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      secrets: mockOptions.secrets,
       services,
     };
-    const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "message": "error posting servicenow event: unexpected status 418",
-        "status": "error",
-      }
-    `);
+    const errorMessage = 'Failed to update incident';
+
+    handleUpdateIncidentMock.mockImplementation(() => {
+      throw new Error(errorMessage);
+    });
+
+    try {
+      await actionType.executor(executorOptions);
+    } catch (error) {
+      expect(error.message).toEqual(errorMessage);
+    }
+  });
+
+  test('should throw an error when incidentId is missing', async () => {
+    expect.assertions(1);
+
+    const actionId = 'some-id';
+    const { incidentId, ...rest } = mockOptions.params;
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config: mockOptions.config,
+      params: { ...rest, executorAction: 'updateIncident' },
+      secrets: mockOptions.secrets,
+      services,
+    };
+
+    const errorMessage = '[Action][ServiceNow]: IncidentId is required.';
+
+    handleUpdateIncidentMock.mockImplementation(() => {
+      throw new Error(errorMessage);
+    });
+
+    try {
+      await actionType.executor(executorOptions);
+    } catch (error) {
+      expect(error.message).toEqual(errorMessage);
+    }
+  });
+
+  test('should throw an error for unsupported executor actions', async () => {
+    expect.assertions(1);
+
+    const actionId = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config: mockOptions.config,
+      params: { ...mockOptions.params, executorAction: 'unsupported' },
+      secrets: mockOptions.secrets,
+      services,
+    };
+
+    const errorMessage = '[Action][ServiceNow]: Unsupported executor action.';
+
+    try {
+      await actionType.executor(executorOptions);
+    } catch (error) {
+      expect(error.message).toEqual(errorMessage);
+    }
   });
 });
