@@ -57,6 +57,9 @@ export const createAlertRoute = (router: IRouter, licenseState: LicenseState) =>
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
 
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const alert = req.body;
       const alertRes: Alert = await alertsClient.create({ data: alert });

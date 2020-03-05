@@ -21,7 +21,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    alerting: {
+    alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
     };
