@@ -69,7 +69,7 @@ export class Plugin
     const canShowAlerts = hasShowAlertsCapability(capabilities);
 
     // Don't register routes when user doesn't have access to the application
-    if (!canShowActions && !canShowAlerts) {
+    if (canShowActions || canShowAlerts) {
       plugins.management.sections.getSection('kibana')!.registerApp({
         id: 'triggersActions',
         title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
