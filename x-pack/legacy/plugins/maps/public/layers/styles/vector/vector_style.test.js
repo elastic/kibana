@@ -280,7 +280,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       );
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.myDynamicField).toEqual({
+      expect(featuresMeta.fieldMeta.myDynamicField.range).toEqual({
         delta: 9,
         max: 10,
         min: 1,
