@@ -27,7 +27,7 @@ more detailed information.
 [float]
 [[snapshot-permissions]]
 === Required permissions
-The minimum required permissions to access *Snapshot and Restore* follow:
+The minimum required permissions to access *Snapshot and Restore* include:
 
 * Cluster privileges: `monitor`, `manage_slm`, `cluster:admin/snapshot`, and `cluster:admin/repository`
 * Index privileges: `all` on the `monitor` index if you want to access content in the *Restore Status* tab
