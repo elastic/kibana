@@ -5,12 +5,17 @@
  */
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
-import { RequestHandlerContext } from 'src/core/server';
-import { AlertEvent, AlertHits, Direction } from '../../../../../common/types';
+import {
+  AlertEvent,
+  AlertHits,
+  Direction,
+  EndpointAppConstants,
+} from '../../../../../common/types';
 import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
 import { BASE_ALERTS_ROUTE } from '../..';
+import { RequestHandlerContext } from '../../../../../../../../src/core/server';
 
 /**
  * Pagination class for alert details.
@@ -34,7 +39,7 @@ export class AlertDetailsPagination extends Pagination<
   ): Promise<SearchResponse<AlertEvent>> {
     const reqData: AlertSearchQuery = {
       pageSize: 1,
-      sort: '@timestamp',
+      sort: EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
       order: 'desc',
     };
 
