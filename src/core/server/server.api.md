@@ -425,7 +425,18 @@ export interface AuthNotHandled {
 }
 
 // @public (undocumented)
-export type AuthResult = Authenticated | AuthNotHandled;
+export interface AuthRedirected extends AuthRedirectedParams {
+    // (undocumented)
+    type: AuthResultType.redirected;
+}
+
+// @public
+export interface AuthRedirectedParams {
+    headers: ResponseHeaders;
+}
+
+// @public (undocumented)
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 // @public
 export interface AuthResultParams {
@@ -439,7 +450,9 @@ export enum AuthResultType {
     // (undocumented)
     authenticated = "authenticated",
     // (undocumented)
-    notHandled = "notHandled"
+    notHandled = "notHandled",
+    // (undocumented)
+    redirected = "redirected"
 }
 
 // @public
@@ -453,6 +466,7 @@ export enum AuthStatus {
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
     notHandled: () => AuthResult;
+    redirected: (headers: ResponseHeaders) => AuthResult;
 }
 
 // @public

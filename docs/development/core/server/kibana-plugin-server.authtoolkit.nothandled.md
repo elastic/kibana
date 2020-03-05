@@ -4,7 +4,7 @@
 
 ## AuthToolkit.notHandled property
 
-User has no credentials
+User has no credentials. Allows user to access a resource when authRequired: 'optional' Rejects a request when authRequired: true
 
 <b>Signature:</b>
 
