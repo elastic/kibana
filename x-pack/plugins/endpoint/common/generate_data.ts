@@ -10,7 +10,7 @@ import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
 export type Event = AlertEvent | EndpointEvent;
 
 interface EventOptions {
-  timestamp: number;
+  timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
   eventType?: string;
@@ -51,9 +51,6 @@ const Mac: OSFields[] = [];
 const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
-  // mapping name and ID as a sperate attribute makes query more complicated
-  // perhaps, combine them into a single field such that
-  // policy.namd_id = 'Default:C2A9093E-E289-4C0A-AA44-8C32A414FA7A'
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
@@ -80,8 +77,8 @@ function* randomNGenerator(max: number, count: number) {
   }
 }
 
-function randomArray<T>(lenghtLimit: number, generator: () => T): T[] {
-  const rand = randomN(lenghtLimit) + 1;
+function randomArray<T>(lengthLimit: number, generator: () => T): T[] {
+  const rand = randomN(lengthLimit) + 1;
   return [...Array(rand).keys()].map(generator);
 }
 
@@ -97,8 +94,8 @@ function randomVersion(): string {
   return [6, ...randomNGenerator(10, 2)].map(x => x.toString()).join('.');
 }
 
-function randomChoice<T>(arg: T[]): T {
-  return arg[randomN(arg.length)];
+function randomChoice<T>(choices: T[]): T {
+  return choices[randomN(choices.length)];
 }
 
 function randomString(length: number): string {
@@ -163,7 +160,11 @@ export class EndpointDocGenerator {
     };
   }
 
-  public generateAlert(ts: number, entityID?: string, parentEntityID?: string): AlertEvent {
+  public generateAlert(
+    ts = new Date().getTime(),
+    entityID = randomString(10),
+    parentEntityID?: string
+  ): AlertEvent {
     return {
       '@timestamp': ts,
       agent: {
@@ -222,7 +223,7 @@ export class EndpointDocGenerator {
         start: ts,
         uptime: 0,
         user: 'SYSTEM',
-        entity_id: entityID ? entityID : randomString(10),
+        entity_id: entityID,
         parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
         token: {
           domain: 'NT AUTHORITY',
@@ -279,9 +280,9 @@ export class EndpointDocGenerator {
     };
   }
 
-  public generateEvent(options: EventOptions): EndpointEvent {
+  public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
-      '@timestamp': options.timestamp,
+      '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: {
         id: this.agentId,
         version: this.agentVersion,
