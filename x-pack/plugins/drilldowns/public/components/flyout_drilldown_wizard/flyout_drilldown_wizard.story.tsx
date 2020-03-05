@@ -15,12 +15,12 @@ import { urlDrilldownActionFactory } from '../../../../advanced_ui_actions/publi
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
-    return <FlyoutDrilldownWizard context={{} as any} />;
+    return <FlyoutDrilldownWizard />;
   })
   .add('open in flyout - create', () => {
     return (
       <EuiFlyout onClose={() => {}}>
-        <FlyoutDrilldownWizard context={{} as any} onClose={() => {}} />
+        <FlyoutDrilldownWizard onClose={() => {}} />
       </EuiFlyout>
     );
   })
@@ -28,7 +28,6 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          context={{} as any}
           onClose={() => {}}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',

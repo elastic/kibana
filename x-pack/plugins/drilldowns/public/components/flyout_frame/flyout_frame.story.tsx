@@ -21,6 +21,13 @@ storiesOf('components/FlyoutFrame', module)
   .add('with onClose', () => {
     return <FlyoutFrame onClose={() => console.log('onClose')}>test</FlyoutFrame>;
   })
+  .add('with onBack', () => {
+    return (
+      <FlyoutFrame onBack={() => console.log('onClose')} title={'Title'}>
+        test
+      </FlyoutFrame>
+    );
+  })
   .add('custom footer', () => {
     return <FlyoutFrame footer={<button>click me!</button>}>test</FlyoutFrame>;
   })

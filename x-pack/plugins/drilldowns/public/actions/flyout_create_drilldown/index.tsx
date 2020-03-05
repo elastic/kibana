@@ -46,7 +46,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
     const handle = overlays.openFlyout(
-      toMountPoint(<FlyoutDrilldownWizard context={context} onClose={() => handle.close()} />)
+      toMountPoint(<FlyoutDrilldownWizard onClose={() => handle.close()} />)
     );
   }
 }

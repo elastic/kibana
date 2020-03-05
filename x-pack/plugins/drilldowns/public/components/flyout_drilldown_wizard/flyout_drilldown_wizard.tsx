@@ -15,8 +15,7 @@ import {
   txtEditDrilldownButtonLabel,
   txtEditDrilldownTitle,
 } from './i18n';
-import { FlyoutCreateDrilldownActionContext } from '../../actions';
-import { ActionFactory, ActionBaseConfig } from '../../../../advanced_ui_actions/public';
+import { ActionBaseConfig, ActionFactory } from '../../../../advanced_ui_actions/public';
 import {
   dashboardDrilldownActionFactory,
   urlDrilldownActionFactory,
@@ -32,10 +31,10 @@ export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = A
 export interface FlyoutDrilldownWizardProps<
   CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 > {
-  context: FlyoutCreateDrilldownActionContext;
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
   onDelete?: () => void;
   onClose?: () => void;
+  onBack?: () => void;
 
   mode?: 'create' | 'edit';
   initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionConfig>;
@@ -44,8 +43,8 @@ export interface FlyoutDrilldownWizardProps<
 export function FlyoutDrilldownWizard<
   CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 >({
-  context,
   onClose,
+  onBack,
   onSubmit = () => {},
   initialDrilldownWizardConfig,
   mode = 'create',
@@ -84,6 +83,7 @@ export function FlyoutDrilldownWizard<
       title={mode === 'edit' ? txtEditDrilldownTitle : txtCreateDrilldownTitle}
       footer={footer}
       onClose={onClose}
+      onBack={onBack}
     >
       <FormDrilldownWizard
         name={wizardConfig.name}
