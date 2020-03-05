@@ -38,6 +38,11 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   }, [search]);
 
   const href = useMemo(() => {
+    // When the logs / metrics apps are first mounted a history instance is setup with a 'basename' equal to the
+    // 'appBasePath' received from Core's 'AppMountParams', e.g. /BASE_PATH/s/SPACE_ID/app/APP_ID. With internal
+    // linking we are using 'createHref' and 'push' on top of this history instance. So a pathname of /inventory used within
+    // the metrics app will ultimatey end up as /BASE_PATH/s/SPACE_ID/app/metrics/inventory. React-router responds to this
+    // as it is instantiated with the same history instance.
     if (!app) {
       return history
         ? history.createHref({
