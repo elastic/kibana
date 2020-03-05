@@ -21,11 +21,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { NewAgentConfig } from '../../../types';
 
 interface ValidationResults {
   [key: string]: JSX.Element[];
 }
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .ingest-active-button {
+    color: ${props => props.theme.eui.euiColorPrimary}};
+  }
+`;
 
 export const agentConfigFormValidation = (
   agentConfig: Partial<NewAgentConfig>
@@ -154,7 +161,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
       </EuiFormRow>
       <EuiHorizontalRule />
       <EuiSpacer size="xs" />
-      <EuiAccordion
+      <StyledEuiAccordion
         id="advancedOptions"
         buttonContent={
           <FormattedMessage
@@ -162,6 +169,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             defaultMessage="Advanced options"
           />
         }
+        buttonClassName="ingest-active-button"
       >
         <EuiSpacer size="l" />
         <EuiFlexGroup>
@@ -232,7 +240,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiAccordion>
+      </StyledEuiAccordion>
     </EuiForm>
   );
 };
