@@ -26,7 +26,7 @@ export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
       {tabs.map(tab => {
-        return <Tab {...tab} />;
+        return <Tab key={`${tab.path}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>
   );
@@ -36,7 +36,6 @@ const Tab = ({ title, path }: TabConfiguration) => {
   const linkProps = useLinkProps({ pathname: path });
   return (
     <Route
-      key={`${path}-${title}`}
       path={path}
       children={({ match, history }) => {
         return (

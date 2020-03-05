@@ -44,12 +44,10 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
     // the metrics app will ultimatey end up as /BASE_PATH/s/SPACE_ID/app/metrics/inventory. React-router responds to this
     // as it is instantiated with the same history instance.
     if (!app) {
-      return history
-        ? history.createHref({
-            pathname: pathname ? formatPathname(pathname) : undefined,
-            search: encodedSearch,
-          })
-        : undefined;
+      return history?.createHref({
+        pathname: pathname ? formatPathname(pathname) : undefined,
+        search: encodedSearch,
+      })
     } else {
       // The URI spec defines that the query should appear before the fragment
       // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
