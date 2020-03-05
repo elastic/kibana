@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
-import { AppDeps } from '../../app';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
 const actionTypeRegistry = actionTypeRegistryMock.create();
