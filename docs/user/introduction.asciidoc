@@ -31,13 +31,15 @@ and processes the data, with {kib} sitting on top.
 
 From the home page, {kib} provides these options for getting data in:
 
-* <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
 * Set up a data flow to Elasticsearch using our built-in tutorials.
 (If a tutorial doesn’t exist for your data, go to the
 {beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
 in the {beats} family.)
-* Import static data using the file upload feature.
-* {ref}/getting-started-index.html[Index your data] into Elasticsearch with REST APIs or client libraries.
+* <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
+* Import static data using the
+https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[file upload feature].
+* Index your data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
+ or client libraries.
 +
 [role="screenshot"]
 image::images/intro-data-tutorial.png[Ways to get data in from the home page]
@@ -65,32 +67,34 @@ image::images/intro-discover.png[]
 === Visualize & analyze
 
 A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use <<lens, Lens>> to analyze your data
-with classic charts, tables, metrics, and more. If there
-is a better visualization for your data, Lens suggests it, allowing for quick
+many options for showcasing your data. Use <<lens, Lens>>,
+our drag-and-drop interface,
+to rapidly build
+charts, tables, metrics, and more. If there
+is a better visualization for your data, *Lens* suggests it, allowing for quick
 switching between visualization types.
 
 Once your visualizations are just the way you want,
 use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
-insights into your data from multiple perspectives, and you can watch the data
-change in real time.
+insights into your data from multiple perspectives.
 
 [role="screenshot"]
 image::images/intro-dashboard.png[]
 
-{kib} also offers these features that address specific visualization needs.
+{kib} also offers these visualization features:
 
 * <<visualize, Visualize>> allows you to display your data in
-classic line charts, bar graphs, pie charts, histograms, and tables
-(just to name a few). Visualize also supports the ability to add interactive
-controls to your dashboard, and filter dashboard content in real time. 
+line charts, bar graphs, pie charts, histograms, and tables
+(just to name a few). It's also home to *Lens*, mentioned above.
+*Visualize* supports the ability to add interactive
+controls to your dashboard, and filter dashboard content in real time.
 
 * <<canvas, Canvas>> gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
 needed to impress your CEO or to captivate people with a big-screen display.
 
 * <<maps, Elastic Maps>> enables you to ask (and answer) meaningful
-questions of your location-based data. Elastic Maps supports multiple
+questions of your location-based data. *Elastic Maps* supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
