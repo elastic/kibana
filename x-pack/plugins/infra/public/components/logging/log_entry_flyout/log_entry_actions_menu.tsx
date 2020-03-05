@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as rt from 'io-ts';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
@@ -11,6 +12,7 @@ import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { getTraceUrl } from '../../../../../../legacy/plugins/apm/public/components/shared/Links/apm/ExternalLinks';
 import { LogEntriesItem } from '../../../../common/http_api';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
