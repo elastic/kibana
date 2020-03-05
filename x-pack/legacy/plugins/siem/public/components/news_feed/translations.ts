@@ -11,6 +11,10 @@ export const NO_NEWS_MESSAGE = i18n.translate('xpack.siem.newsFeed.noNewsMessage
     'Your current news feed URL returned no recent news. You may update the URL or disable security news via',
 });
 
+export const NEWSFEED_FETCH_ERROR = i18n.translate('xpack.siem.newsFeed.fetchErrorMessage', {
+  defaultMessage: 'There was an error retrieving the news feed.',
+});
+
 export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
   'xpack.siem.newsFeed.advancedSettingsLinkTitle',
   {

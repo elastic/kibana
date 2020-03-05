@@ -9,8 +9,10 @@ import chrome from 'ui/chrome';
 
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
+import { errorToToaster, useStateToaster } from '../toasters';
 import { NewsFeed } from './news_feed';
 import { NewsItem } from './types';
+import * as i18n from './translations';
 
 export const StatefulNewsFeed = React.memo<{
   enableNewsFeedSetting: string;
@@ -20,6 +22,7 @@ export const StatefulNewsFeed = React.memo<{
   const [enableNewsFeed] = useUiSetting$<boolean>(enableNewsFeedSetting);
   const [newsFeedUrlSetting] = useUiSetting$<string>(newsFeedSetting);
   const [news, setNews] = useState<NewsItem[] | null>(null);
+  const [, dispatchToaster] = useStateToaster();
 
   // respect kibana's global newsfeed.enabled setting
   const newsfeedEnabled = kibanaNewsfeedEnabled && enableNewsFeed;
@@ -39,7 +42,8 @@ export const StatefulNewsFeed = React.memo<{
         if (!canceled) {
           setNews(getNewsItemsFromApiResponse(apiResponse));
         }
-      } catch {
+      } catch (error) {
+        errorToToaster({ title: i18n.NEWSFEED_FETCH_ERROR, error, dispatchToaster });
         if (!canceled) {
           setNews([]);
         }
