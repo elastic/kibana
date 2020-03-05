@@ -19,6 +19,7 @@
 
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
 
+import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
@@ -65,12 +66,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
 
     return {
+      aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+      },
       registerSearchStrategyProvider: this.registerSearchStrategyProvider,
     };
   }
 
   public start(core: CoreStart): ISearchStart {
     return {
+      aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+      },
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         const { search } = strategyProvider({

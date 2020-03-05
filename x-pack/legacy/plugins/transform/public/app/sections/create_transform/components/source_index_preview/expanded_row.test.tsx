@@ -39,6 +39,8 @@ describe('Transform: <ExpandedRow />', () => {
       },
     };
 
+    // Using a wrapping <div> element because shallow() would fail
+    // with the Provider being the outer most component.
     const wrapper = shallow(<ExpandedRow {...props} />);
 
     expect(wrapper).toMatchSnapshot();

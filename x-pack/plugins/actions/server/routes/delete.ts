@@ -41,6 +41,9 @@ export const deleteActionRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       await actionsClient.delete({ id });

@@ -54,7 +54,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param element element that wraps up option
      */
     private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
-      return isMouseClick ? await element.clickMouseButton() : await element.click();
+      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
+      return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
     }
 
     /**

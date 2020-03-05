@@ -17,6 +17,9 @@
  * under the License.
  */
 
-declare module 'ui/time_buckets' {
-  export const TimeBuckets: any;
-}
+/**
+ * This temporarily re-exports a static function from the data shim plugin until
+ * the final agg_types cutover is complete. It is needed for use in Lens; and they
+ * are not currently using the legacy data shim, so we are moving it here first.
+ */
+export { getCalculateAutoTimeExpression } from '../../../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_utils';

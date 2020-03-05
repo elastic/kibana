@@ -11,6 +11,7 @@ import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
+import { createSavedSearchesLoader } from '../../../../../src/plugins/discover/public';
 
 export class Plugin {
   public start(core: ShimCore, plugins: ShimPlugins): void {
@@ -26,7 +27,7 @@ export class Plugin {
       savedObjects,
       overlays,
     } = core;
-    const { data, management, uiMetric, xsrfToken } = plugins;
+    const { data, management, savedSearches: coreSavedSearches, uiMetric, xsrfToken } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const appDependencies = {
@@ -45,6 +46,7 @@ export class Plugin {
       plugins: {
         data,
         management,
+        savedSearches: coreSavedSearches,
         xsrfToken,
       },
     };
@@ -59,6 +61,14 @@ export class Plugin {
         }),
         order: 3,
         mount(params) {
+          const savedSearches = createSavedSearchesLoader({
+            savedObjectsClient: core.savedObjects.client,
+            indexPatterns: plugins.data.indexPatterns,
+            chrome: core.chrome,
+            overlays: core.overlays,
+          });
+          coreSavedSearches.setClient(savedSearches);
+
           breadcrumbService.setup(params.setBreadcrumbs);
           params.setBreadcrumbs([
             {
