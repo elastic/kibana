@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import seedrandom from 'seedrandom';
 import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
@@ -66,46 +67,6 @@ const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'd
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
 const OTHER_EVENT_CATEGORIES: string[] = ['driver', 'file', 'library', 'network', 'registry'];
 
-function randomN(n: number): number {
-  return Math.floor(Math.random() * n);
-}
-
-function* randomNGenerator(max: number, count: number) {
-  while (count > 0) {
-    yield randomN(max);
-    count--;
-  }
-}
-
-function randomArray<T>(lengthLimit: number, generator: () => T): T[] {
-  const rand = randomN(lengthLimit) + 1;
-  return [...Array(rand).keys()].map(generator);
-}
-
-function randomMac(): string {
-  return [...randomNGenerator(255, 6)].map(x => x.toString(16)).join('-');
-}
-
-function randomIP(): string {
-  return [10, ...randomNGenerator(255, 3)].map(x => x.toString()).join('.');
-}
-
-function randomVersion(): string {
-  return [6, ...randomNGenerator(10, 2)].map(x => x.toString()).join('.');
-}
-
-function randomChoice<T>(choices: T[]): T {
-  return choices[randomN(choices.length)];
-}
-
-function randomString(length: number): string {
-  return [...randomNGenerator(36, length)].map(x => x.toString(36)).join('');
-}
-
-function randomHostname(): string {
-  return `Host-${randomString(10)}`;
-}
-
 export class EndpointDocGenerator {
   agentId: string;
   hostId: string;
@@ -116,17 +77,19 @@ export class EndpointDocGenerator {
   agentVersion: string;
   os: OSFields;
   policy: { name: string; id: string };
+  random: seedrandom.prng;
 
-  constructor() {
+  constructor(seed = Math.random().toString()) {
+    this.random = seedrandom(seed);
     this.hostId = uuid.v4();
     this.agentId = uuid.v4();
-    this.hostname = randomHostname();
+    this.hostname = this.randomHostname();
     this.lastDHCPLeaseAt = new Date().getTime();
-    this.ip = randomArray(3, () => randomIP());
-    this.macAddress = randomArray(3, () => randomMac());
-    this.agentVersion = randomVersion();
-    this.os = randomChoice(OS);
-    this.policy = randomChoice(POLICIES);
+    this.ip = this.randomArray(3, () => this.randomIP());
+    this.macAddress = this.randomArray(3, () => this.randomMac());
+    this.agentVersion = this.randomVersion();
+    this.os = this.randomChoice(OS);
+    this.policy = this.randomChoice(POLICIES);
   }
 
   public generateEndpointMetadata(ts: number): EndpointMetadata {
@@ -134,7 +97,7 @@ export class EndpointDocGenerator {
     // change the IPs for the host
     if (Math.abs(ts - this.lastDHCPLeaseAt) > 3600 * 12 * 1000) {
       this.lastDHCPLeaseAt = ts;
-      this.ip = randomArray(3, () => randomIP());
+      this.ip = this.randomArray(3, () => this.randomIP());
     }
     return {
       '@timestamp': ts,
@@ -162,7 +125,7 @@ export class EndpointDocGenerator {
 
   public generateAlert(
     ts = new Date().getTime(),
-    entityID = randomString(10),
+    entityID = this.randomString(10),
     parentEntityID?: string
   ): AlertEvent {
     return {
@@ -172,7 +135,7 @@ export class EndpointDocGenerator {
         version: this.agentVersion,
       },
       event: {
-        action: randomChoice(FILE_OPERATIONS),
+        action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
         id: uuid.v4(),
@@ -305,7 +268,7 @@ export class EndpointDocGenerator {
         os: this.os,
       },
       process: {
-        entity_id: options.entityID ? options.entityID : randomString(10),
+        entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
       },
     };
@@ -386,7 +349,7 @@ export class EndpointDocGenerator {
     const terminationEvents: EndpointEvent[] = [];
     let relatedEvents: EndpointEvent[] = [];
     events.forEach(element => {
-      if (randomN(100) < percentChildrenTerminated) {
+      if (this.randomN(100) < percentChildrenTerminated) {
         timestamp = timestamp + 1000;
         terminationEvents.push(
           this.generateEvent({
@@ -398,7 +361,7 @@ export class EndpointDocGenerator {
           })
         );
       }
-      if (randomN(100) < percentNodesWithRelated) {
+      if (this.randomN(100) < percentNodesWithRelated) {
         relatedEvents = relatedEvents.concat(
           this.generateRelatedEvents(element, relatedEventsPerNode)
         );
@@ -418,10 +381,50 @@ export class EndpointDocGenerator {
           timestamp: ts,
           entityID: node.process.entity_id,
           parentEntityID: node.process.parent?.entity_id,
-          eventCategory: randomChoice(OTHER_EVENT_CATEGORIES),
+          eventCategory: this.randomChoice(OTHER_EVENT_CATEGORIES),
         })
       );
     }
     return relatedEvents;
+  }
+
+  private randomN(n: number): number {
+    return Math.floor(this.random() * n);
+  }
+
+  private *randomNGenerator(max: number, count: number) {
+    while (count > 0) {
+      yield this.randomN(max);
+      count--;
+    }
+  }
+
+  private randomArray<T>(lengthLimit: number, generator: () => T): T[] {
+    const rand = this.randomN(lengthLimit) + 1;
+    return [...Array(rand).keys()].map(generator);
+  }
+
+  private randomMac(): string {
+    return [...this.randomNGenerator(255, 6)].map(x => x.toString(16)).join('-');
+  }
+
+  private randomIP(): string {
+    return [10, ...this.randomNGenerator(255, 3)].map(x => x.toString()).join('.');
+  }
+
+  private randomVersion(): string {
+    return [6, ...this.randomNGenerator(10, 2)].map(x => x.toString()).join('.');
+  }
+
+  private randomChoice<T>(choices: T[]): T {
+    return choices[this.randomN(choices.length)];
+  }
+
+  private randomString(length: number): string {
+    return [...this.randomNGenerator(36, length)].map(x => x.toString(36)).join('');
+  }
+
+  private randomHostname(): string {
+    return `Host-${this.randomString(10)}`;
   }
 }

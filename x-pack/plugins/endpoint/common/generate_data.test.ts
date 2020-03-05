@@ -14,7 +14,25 @@ interface Node {
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
-    generator = new EndpointDocGenerator();
+    generator = new EndpointDocGenerator('seed');
+  });
+
+  it('creates the same documents with same random seed', () => {
+    const generator1 = new EndpointDocGenerator('seed');
+    const generator2 = new EndpointDocGenerator('seed');
+    const timestamp = new Date().getTime();
+    const metadata1 = generator1.generateEndpointMetadata(timestamp);
+    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    expect(metadata1).toEqual(metadata2);
+  });
+
+  it('creates different documents with different random seeds', () => {
+    const generator1 = new EndpointDocGenerator('seed');
+    const generator2 = new EndpointDocGenerator('different seed');
+    const timestamp = new Date().getTime();
+    const metadata1 = generator1.generateEndpointMetadata(timestamp);
+    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    expect(metadata1).not.toEqual(metadata2);
   });
 
   it('creates endpoint metadata documents', () => {
