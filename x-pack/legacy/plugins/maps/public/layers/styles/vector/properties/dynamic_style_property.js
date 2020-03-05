@@ -286,16 +286,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbValue(value) {
+  getMbFeatureStateValue(value) {
     if (!this.isOrdinal()) {
       return this.formatField(value);
     }
 
     const valueAsFloat = parseFloat(value);
-    if (isNaN(valueAsFloat)) {
-      return 0;
-    }
-    return valueAsFloat;
+    return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
   renderBreakedLegend() {

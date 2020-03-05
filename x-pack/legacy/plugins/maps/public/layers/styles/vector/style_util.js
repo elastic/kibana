@@ -62,9 +62,15 @@ export function makeMbClampedNumberExpression({
   maxValue,
   fallback,
 }) {
+  const clamp = ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue];
   return [
     'coalesce',
-    ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue],
+    [
+      'case',
+      ['==', [lookupFunction, fieldName], null],
+      minValue - 1, //== does a JS-y like check where returns true for null and undefined
+      clamp,
+    ],
     fallback,
   ];
 }

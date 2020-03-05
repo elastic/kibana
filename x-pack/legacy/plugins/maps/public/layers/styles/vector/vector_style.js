@@ -507,7 +507,7 @@ export class VectorStyle extends AbstractStyle {
         const dynamicStyleProp = dynamicStyleProps[j];
         const name = dynamicStyleProp.getField().getName();
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
-        const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
+        const styleValue = dynamicStyleProp.getMbFeatureStateValue(feature.properties[name]);
         if (dynamicStyleProp.supportsFeatureState()) {
           tmpFeatureState[computedName] = styleValue;
         } else {
