@@ -62,8 +62,30 @@ export interface RegistryPackage {
   internal?: boolean;
   format_version: string;
   datasets?: Dataset[];
+  datasources?: RegistryDatasource[];
   download: string;
   path: string;
+}
+
+export interface RegistryDatasource {
+  name: string;
+  title: string;
+  description: string;
+  inputs: RegistryInput[];
+}
+
+export interface RegistryInput {
+  type: string;
+  vars?: VarsEntry[];
+  description?: string;
+  streams: RegistryStream[];
+}
+
+export interface RegistryStream {
+  input: string;
+  vars?: VarsEntry[];
+  dataset?: string;
+  description?: string;
 }
 
 export type RequirementVersion = string;
@@ -136,14 +158,8 @@ export interface Dataset {
   ingest_pipeline: string;
   vars?: VarsEntry[];
   type: string;
-  streams?: Stream[];
+  streams?: RegistryStream[];
   package: string;
-}
-export interface Stream {
-  input: string;
-  vars?: VarsEntry[];
-  dataset?: string;
-  description?: string;
 }
 
 export type VarsEntry = Record<string, any>;
