@@ -14,6 +14,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { IEnhancedEsSearchRequest, EnhancedSearchParams } from '../../common';
 import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
+import { IAsyncSearchOptions } from './types';
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext
@@ -32,9 +33,12 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     };
     request.params = params;
 
-    return asyncSearch({ ...request, serverStrategy: ES_SEARCH_STRATEGY }, options) as Observable<
-      IEsSearchResponse
-    >;
+    const asyncOptions: IAsyncSearchOptions = { pollInterval: 0, ...options };
+
+    return asyncSearch(
+      { ...request, serverStrategy: ES_SEARCH_STRATEGY },
+      asyncOptions
+    ) as Observable<IEsSearchResponse>;
   };
 
   return { search };
