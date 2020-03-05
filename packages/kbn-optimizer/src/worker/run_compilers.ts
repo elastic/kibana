@@ -127,7 +127,7 @@ const observeCompiler = (
         );
       }
 
-      const files = Array.from(referencedFiles);
+      const files = Array.from(referencedFiles).sort(ascending(p => p));
       const mtimes = new Map(
         files.map((path): [string, number | undefined] => {
           try {
@@ -146,7 +146,7 @@ const observeCompiler = (
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModules.length,
-        files: files.sort(ascending(f => f)),
+        files,
       });
 
       return compilerMsgs.compilerSuccess({
