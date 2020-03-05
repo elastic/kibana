@@ -1,33 +1,4 @@
 {
-  "visualization": {
-    "properties": {
-      "description": {
-        "type": "text"
-      },
-      "kibanaSavedObjectMeta": {
-        "properties": {
-          "searchSourceJSON": {
-            "type": "text"
-          }
-        }
-      },
-      "savedSearchRefName": {
-        "type": "keyword"
-      },
-      "title": {
-        "type": "text"
-      },
-      "uiStateJSON": {
-        "type": "text"
-      },
-      "version": {
-        "type": "integer"
-      },
-      "visState": {
-        "type": "text"
-      }
-    }
-  },
   "dashboard": {
     "properties": {
       "description": {
