@@ -14,21 +14,18 @@ import {
   EuiLoadingContent,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useManagementListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { uiQueryParams, detailsData, detailsError } from './../../store/managing/selectors';
 
-const HostDetails = memo(() => {
-  const details = useManagementListSelector(detailsData);
-  if (details === undefined) {
-    return null;
-  }
-
+const HostDetails = memo(({ details }: { details: ManagementListState }) => {
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -41,7 +38,7 @@ const HostDetails = memo(() => {
         title: i18n.translate('xpack.endpoint.management.details.lastSeen', {
           defaultMessage: 'Last Seen',
         }),
-        description: details['@timestamp'],
+        description: <FormattedDate value={details['@timestamp']} />,
       },
       {
         title: i18n.translate('xpack.endpoint.management.details.alerts', {
@@ -70,7 +67,13 @@ const HostDetails = memo(() => {
         title: i18n.translate('xpack.endpoint.management.details.ipAddress', {
           defaultMessage: 'IP Address',
         }),
-        description: details.host.ip,
+        description: (
+          <EuiListGroup flush>
+            {details.host.ip.map((ip, index) => (
+              <EuiListGroupItem key={index} label={ip} />
+            ))}
+          </EuiListGroup>
+        ),
       },
       {
         title: i18n.translate('xpack.endpoint.management.details.hostname', {
@@ -86,7 +89,6 @@ const HostDetails = memo(() => {
       },
     ];
   }, [details.agent.version, details.endpoint.policy.id, details.host.hostname, details.host.ip]);
-
   return (
     <>
       <EuiDescriptionList
@@ -151,7 +153,7 @@ export const ManagementDetails = () => {
             <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
           </>
         ) : (
-          <HostDetails />
+          <HostDetails details={details} />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

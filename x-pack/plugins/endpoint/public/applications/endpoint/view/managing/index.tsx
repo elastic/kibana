@@ -165,11 +165,19 @@ export const ManagementList = () => {
                 </EuiTitle>
                 <h4>
                   <EuiTextColor color="subdued">
-                    <FormattedMessage
-                      id="xpack.endpoint.managementList.totalCount"
-                      defaultMessage="{totalItemCount} Hosts"
-                      values={{ totalItemCount }}
-                    />
+                    {totalItemCount === 1 ? (
+                      <FormattedMessage
+                        id="xpack.endpoint.managementList.totalCount"
+                        defaultMessage="{totalItemCount} Host"
+                        values={{ totalItemCount }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.endpoint.hostList.totalCounts"
+                        defaultMessage="{totalItemCount} Hosts"
+                        values={{ totalItemCount }}
+                      />
+                    )}
                   </EuiTextColor>
                 </h4>
               </EuiPageContentHeaderSection>
