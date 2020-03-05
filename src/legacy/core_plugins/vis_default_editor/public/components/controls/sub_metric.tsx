@@ -86,6 +86,7 @@ function SubMetricParamEditor({
         setValidity={setValidity}
         setTouched={setTouched}
         schemas={schemas}
+        hideCustomLabel={true}
       />
     </>
   );

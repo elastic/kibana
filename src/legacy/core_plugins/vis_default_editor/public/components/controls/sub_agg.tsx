@@ -74,6 +74,7 @@ function SubAggParamEditor({
         setValidity={setValidity}
         setTouched={setTouched}
         schemas={schemas}
+        hideCustomLabel={true}
       />
     </>
   );
