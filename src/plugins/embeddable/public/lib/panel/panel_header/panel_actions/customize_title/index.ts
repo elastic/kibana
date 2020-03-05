@@ -17,26 +17,4 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../core/server/mocks';
-import { EsSearchService } from './es_search_service';
-import { searchSetupMock } from '../mocks';
-
-describe('ES search strategy service', () => {
-  let service: EsSearchService;
-
-  const mockCoreSetup = coreMock.createSetup();
-  const context = coreMock.createPluginInitializerContext();
-
-  beforeEach(() => {
-    service = new EsSearchService(context);
-  });
-
-  describe('setup()', () => {
-    it('registers the ES search strategy', async () => {
-      service.setup(mockCoreSetup, {
-        search: searchSetupMock,
-      });
-      expect(searchSetupMock.registerSearchStrategyProvider).toBeCalled();
-    });
-  });
-});
+export * from './customize_panel_action';

@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 import {
-  Action,
+  ActionByType,
   createAction,
   IncompatibleActionError,
 } from '../../../../../plugins/ui_actions/public';
@@ -37,14 +37,14 @@ import {
   esFilters,
 } from '../../../../../plugins/data/public';
 
-export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
+export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
-interface ActionContext {
+export interface ValueClickActionContext {
   data: any;
   timeFieldName: string;
 }
 
-async function isCompatible(context: ActionContext) {
+async function isCompatible(context: ValueClickActionContext) {
   try {
     const filters: Filter[] =
       (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
@@ -58,17 +58,17 @@ async function isCompatible(context: ActionContext) {
 export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): Action<ActionContext> {
-  return createAction<ActionContext>({
-    type: VALUE_CLICK_ACTION,
-    id: VALUE_CLICK_ACTION,
+): ActionByType<typeof ACTION_VALUE_CLICK> {
+  return createAction<typeof ACTION_VALUE_CLICK>({
+    type: ACTION_VALUE_CLICK,
+    id: ACTION_VALUE_CLICK,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: ActionContext) => {
+    execute: async ({ timeFieldName, data }: ValueClickActionContext) => {
       if (!(await isCompatible({ timeFieldName, data }))) {
         throw new IncompatibleActionError();
       }
