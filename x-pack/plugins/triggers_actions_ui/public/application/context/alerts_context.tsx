@@ -12,8 +12,6 @@ import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
 export interface AlertsContextValue {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;

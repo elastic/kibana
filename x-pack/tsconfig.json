@@ -12,7 +12,7 @@
   "exclude": [
     "test/**/*",
     "legacy/plugins/siem/cypress/**/*",
-    "legacy/plugins/apm/cypress/**/*",
+    "legacy/plugins/apm/e2e/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {

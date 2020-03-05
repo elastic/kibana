@@ -39,9 +39,9 @@ describe('read_rules', () => {
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const alertsClient = alertsClientMock.create();
-      const { alertTypeId, ...rest } = getResult();
-      // @ts-ignore
-      alertsClient.get.mockImplementation(() => rest);
+      const result = getResult();
+      delete result.alertTypeId;
+      alertsClient.get.mockResolvedValue(result);
 
       const rule = await readRules({
         alertsClient,
@@ -109,8 +109,7 @@ describe('read_rules', () => {
     test('should return null if the output from alertsClient with ruleId set is empty', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
-      // @ts-ignore
-      alertsClient.find.mockResolvedValue({ data: [] });
+      alertsClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
 
       const rule = await readRules({
         alertsClient,

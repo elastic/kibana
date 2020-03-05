@@ -73,7 +73,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         const alert = await browser.getAlert();
         expect(alert).not.to.eql(undefined);
         alert!.accept();
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/core_plugin_legacy'));
+        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/core_legacy_compat'));
       });
     });
   });

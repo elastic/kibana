@@ -8,7 +8,7 @@ import { EndpointAppConstants } from '../../../../common/types';
 
 describe('related events query', () => {
   it('generates the correct legacy queries', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
     expect(
       new RelatedEventsQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
     ).toStrictEqual({
@@ -39,7 +39,7 @@ describe('related events query', () => {
             },
           },
         },
-        search_after: [timestamp.getTime(), 'foo'],
+        search_after: [timestamp, 'foo'],
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'endgame.serial_event_id': 'asc' }],
       },
@@ -48,7 +48,7 @@ describe('related events query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    const timestamp = new Date();
+    const timestamp = new Date().getTime();
 
     expect(
       new RelatedEventsQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
@@ -86,7 +86,7 @@ describe('related events query', () => {
             },
           },
         },
-        search_after: [timestamp.getTime(), 'bar'],
+        search_after: [timestamp, 'bar'],
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       },

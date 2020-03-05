@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions.objectLimit property
 
+The maximum number of object to import
+
 <b>Signature:</b>
 
 ```typescript

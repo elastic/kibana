@@ -19,7 +19,7 @@
 
 import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
   EmbeddableFactory,
@@ -43,7 +43,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   public isEditable: () => boolean;
 
   constructor(
-    private readonly executeTriggerActions: ExecuteTriggerActions,
+    private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     getInjector: () => Promise<auto.IInjectorService>,
     isEditable: () => boolean
   ) {

@@ -29,9 +29,9 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { AggConfigs, PersistedState } from '../../legacy_imports';
+import { PersistedState } from '../../../../../../../src/plugins/visualizations/public';
 import { updateVisualizationConfig } from './legacy/vis_update';
-import { getTypes } from './services';
+import { getTypes, getAggs } from './services';
 
 class VisImpl extends EventEmitter {
   constructor(indexPattern, visState) {
@@ -82,7 +82,7 @@ class VisImpl extends EventEmitter {
     updateVisualizationConfig(state.params, this.params);
 
     if (state.aggs || !this.aggs) {
-      this.aggs = new AggConfigs(
+      this.aggs = getAggs().createAggConfigs(
         this.indexPattern,
         state.aggs ? state.aggs.aggs || state.aggs : [],
         this.type.schemas.all
@@ -124,7 +124,7 @@ class VisImpl extends EventEmitter {
 
   copyCurrentState(includeDisabled = false) {
     const state = this.getCurrentState(includeDisabled);
-    state.aggs = new AggConfigs(
+    state.aggs = getAggs().createAggConfigs(
       this.indexPattern,
       state.aggs.aggs || state.aggs,
       this.type.schemas.all
