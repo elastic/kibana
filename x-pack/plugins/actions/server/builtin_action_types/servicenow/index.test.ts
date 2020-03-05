@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./lib/post_servicenow', () => ({
+jest.mock('../lib/post_servicenow', () => ({
   postServiceNow: jest.fn(),
 }));
 
@@ -16,9 +16,13 @@ import { postServiceNow } from '../lib/post_servicenow';
 import { createActionTypeRegistry } from '../index.test';
 import { configUtilsMock } from '../../actions_config.mock';
 
-const postServiceNowMock = postServiceNow as jest.Mock;
+import { ServiceNow } from '../lib/servicenow';
+import { ACTION_TYPE_ID } from './constants';
+import * as i18n from './translations';
 
-const ACTION_TYPE_ID = '.servicenow';
+jest.mock('../lib/servicenow');
+
+const postServiceNowMock = postServiceNow as jest.Mock;
 
 const services: Services = {
   callCluster: async (path: string, opts: any) => {},
@@ -27,17 +31,49 @@ const services: Services = {
 
 let actionType: ActionType;
 
-const mockServiceNow = {
-  config: {
-    apiUrl: 'www.servicenowisinkibanaactions.com',
-  },
+const mockOptions = {
+  name: 'servicenow-connector',
+  actionTypeId: '.servicenow',
   secrets: {
-    password: 'secret-password',
     username: 'secret-username',
+    password: 'secret-password',
+  },
+  config: {
+    apiUrl: 'https://service-now.com',
+    casesConfiguration: {
+      closure: 'manual',
+      mapping: [
+        {
+          source: 'title',
+          target: 'short_description',
+          onEditAndUpdate: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          onEditAndUpdate: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'work_notes',
+          onEditAndUpdate: 'append',
+        },
+      ],
+    },
   },
   params: {
-    comments: 'hello cool service now incident',
-    short_description: 'this is a cool service now incident',
+    executorAction: 'updateIncident',
+    id: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+    incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
+    title: 'Incident title',
+    description: 'Incident description',
+    comments: [
+      {
+        id: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'A comment',
+      },
+    ],
   },
 };
 
@@ -49,13 +85,13 @@ beforeAll(() => {
 describe('get()', () => {
   test('should return correct action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('ServiceNow');
+    expect(actionType.name).toEqual(i18n.NAME);
   });
 });
 
 describe('validateConfig()', () => {
   test('should validate and pass when config is valid', () => {
-    const { config } = mockServiceNow;
+    const { config } = mockOptions;
     expect(validateConfig(actionType, config)).toEqual(config);
   });
 
@@ -72,14 +108,12 @@ describe('validateConfig()', () => {
       configurationUtilities: {
         ...configUtilsMock,
         ensureWhitelistedUri: url => {
-          expect(url).toEqual('https://events.servicenow.com/v2/enqueue');
+          expect(url).toEqual(mockOptions.config.apiUrl);
         },
       },
     });
 
-    expect(
-      validateConfig(actionType, { apiUrl: 'https://events.servicenow.com/v2/enqueue' })
-    ).toEqual({ apiUrl: 'https://events.servicenow.com/v2/enqueue' });
+    expect(validateConfig(actionType, mockOptions.config)).toEqual(mockOptions.config);
   });
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
@@ -93,7 +127,7 @@ describe('validateConfig()', () => {
     });
 
     expect(() => {
-      validateConfig(actionType, { apiUrl: 'https://events.servicenow.com/v2/enqueue' });
+      validateConfig(actionType, mockOptions.config);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring servicenow action: target url is not whitelisted"`
     );
@@ -102,7 +136,7 @@ describe('validateConfig()', () => {
 
 describe('validateSecrets()', () => {
   test('should validate and pass when secrets is valid', () => {
-    const { secrets } = mockServiceNow;
+    const { secrets } = mockOptions;
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
@@ -123,15 +157,15 @@ describe('validateSecrets()', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    const { params } = mockServiceNow;
+    const { params } = mockOptions;
     expect(validateParams(actionType, params)).toEqual(params);
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, { eventAction: 'ackynollage' });
+      validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [short_description]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: [executorAction]: expected at least one defined value but got [undefined]"`
     );
   });
 });
