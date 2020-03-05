@@ -43,10 +43,10 @@ export const LAYER_TYPE = {
   HEATMAP: 'HEATMAP',
 };
 
-export const SORT_ORDER = {
-  ASC: 'asc',
-  DESC: 'desc',
-};
+export enum SORT_ORDER {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
@@ -117,15 +117,27 @@ export const DRAW_TYPE = {
   POLYGON: 'POLYGON',
 };
 
-export const AGG_TYPE = {
-  AVG: 'avg',
-  COUNT: 'count',
-  MAX: 'max',
-  MIN: 'min',
-  SUM: 'sum',
-  TERMS: 'terms',
-  UNIQUE_COUNT: 'cardinality',
-};
+export enum AGG_TYPE {
+  AVG = 'avg',
+  COUNT = 'count',
+  MAX = 'max',
+  MIN = 'min',
+  SUM = 'sum',
+  TERMS = 'terms',
+  UNIQUE_COUNT = 'cardinality',
+}
+
+export enum RENDER_AS {
+  HEATMAP = 'heatmap',
+  POINT = 'point',
+  GRID = 'grid',
+}
+
+export enum GRID_RESOLUTION {
+  COARSE = 'COARSE',
+  FINE = 'FINE',
+  MOST_FINE = 'MOST_FINE',
+}
 
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',

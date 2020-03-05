@@ -20,6 +20,7 @@
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
+import { kibanaLegacyPluginMock } from '../../kibana_legacy/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 
@@ -29,58 +30,40 @@ describe('HomePublicPlugin', () => {
     registryMock.start.mockClear();
     tutorialMock.setup.mockClear();
     environmentMock.setup.mockClear();
-    environmentMock.start.mockClear();
-    tutorialMock.start.mockClear();
   });
 
   describe('setup', () => {
     test('wires up and returns registry', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup();
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+        }
+      );
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
     });
 
     test('wires up and returns environment service', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup();
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+        }
+      );
       expect(setup).toHaveProperty('environment');
       expect(setup.environment).toHaveProperty('update');
     });
 
     test('wires up and returns tutorial service', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup();
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+        }
+      );
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
-    });
-  });
-
-  describe('start', () => {
-    test('wires up and returns registry', async () => {
-      const service = new HomePublicPlugin(mockInitializerContext);
-      await service.setup();
-      const core = { application: { capabilities: { catalogue: {} } } } as any;
-      const start = await service.start(core);
-      expect(registryMock.start).toHaveBeenCalledWith({
-        capabilities: core.application.capabilities,
-      });
-      expect(start.featureCatalogue.get).toBeDefined();
-    });
-
-    test('wires up and returns environment service', async () => {
-      const service = new HomePublicPlugin(mockInitializerContext);
-      await service.setup();
-      const start = await service.start({
-        application: { capabilities: { catalogue: {} } },
-      } as any);
-      expect(environmentMock.start).toHaveBeenCalled();
-      expect(start.environment.get).toBeDefined();
-    });
-
-    test('wires up and returns tutorial service', async () => {
-      const service = new HomePublicPlugin(mockInitializerContext);
-      await service.setup();
-      const start = await service.start(coreMock.createStart());
-      expect(tutorialMock.start).toHaveBeenCalled();
-      expect(start.tutorials.get).toBeDefined();
     });
   });
 });

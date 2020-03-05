@@ -101,6 +101,11 @@ export function createTheme(
       'editor.selectionBackground': selectionBackgroundColor,
       'editorWidget.border': euiTheme.euiColorLightShade,
       'editorWidget.background': euiTheme.euiColorLightestShade,
+      'editorCursor.foreground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.selectedBackground': euiTheme.euiColorLightShade,
+      'list.hoverBackground': euiTheme.euiColorLightShade,
+      'list.highlightForeground': euiTheme.euiColorPrimary,
+      'editor.lineHighlightBorder': euiTheme.euiColorLightestShade,
     },
   };
 }

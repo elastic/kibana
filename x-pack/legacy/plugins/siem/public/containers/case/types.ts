@@ -14,8 +14,31 @@ export interface NewCase extends FormData {
   title: string;
 }
 
+export interface NewComment extends FormData {
+  comment: string;
+}
+
+export interface CommentSnake {
+  comment_id: string;
+  created_at: string;
+  created_by: ElasticUserSnake;
+  comment: string;
+  updated_at: string;
+  version: string;
+}
+
+export interface Comment {
+  commentId: string;
+  createdAt: string;
+  createdBy: ElasticUser;
+  comment: string;
+  updatedAt: string;
+  version: string;
+}
+
 export interface CaseSnake {
   case_id: string;
+  comments: CommentSnake[];
   created_at: string;
   created_by: ElasticUserSnake;
   description: string;
@@ -23,11 +46,12 @@ export interface CaseSnake {
   tags: string[];
   title: string;
   updated_at: string;
-  version?: string;
+  version: string;
 }
 
 export interface Case {
   caseId: string;
+  comments: Comment[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
@@ -35,7 +59,7 @@ export interface Case {
   tags: string[];
   title: string;
   updatedAt: string;
-  version?: string;
+  version: string;
 }
 
 export interface QueryParams {

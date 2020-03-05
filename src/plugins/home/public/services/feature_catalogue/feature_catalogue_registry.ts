@@ -46,6 +46,7 @@ export interface FeatureCatalogueEntry {
 }
 
 export class FeatureCatalogueRegistry {
+  private capabilities: Capabilities | null = null;
   private readonly features = new Map<string, FeatureCatalogueEntry>();
 
   public setup() {
@@ -63,17 +64,21 @@ export class FeatureCatalogueRegistry {
   }
 
   public start({ capabilities }: { capabilities: Capabilities }) {
-    return {
-      get: (): readonly FeatureCatalogueEntry[] =>
-        [...this.features.values()]
-          .filter(entry => capabilities.catalogue[entry.id] !== false)
-          .sort(compareByKey('title')),
-    };
+    this.capabilities = capabilities;
+  }
+
+  public get(): readonly FeatureCatalogueEntry[] {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return [...this.features.values()]
+      .filter(entry => capabilities.catalogue[entry.id] !== false)
+      .sort(compareByKey('title'));
   }
 }
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;
-export type FeatureCatalogueRegistryStart = ReturnType<FeatureCatalogueRegistry['start']>;
 
 const compareByKey = <T>(key: keyof T) => (left: T, right: T) => {
   if (left[key] < right[key]) {
