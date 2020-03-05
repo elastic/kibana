@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'remote_clusters',
+  ID: 'remoteClusters',
 };
