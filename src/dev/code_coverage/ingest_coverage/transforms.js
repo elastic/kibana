@@ -19,7 +19,7 @@
 
 import { left, right } from './either';
 import { always, id } from './utils';
-import { XPACK, STATIC_SITE_URL_PROP_NAME } from './constants';
+import { STATIC_SITE_URL_PROP_NAME } from './constants';
 
 const maybeTotal = x =>
   x === 'total' ? left(x) : right(x);
@@ -52,17 +52,18 @@ export const addTimeStamp = ts => obj => ({
 });
 
 export const distro = obj => {
-  const { staticSiteUrl } = obj;
-  let distro;
-  if (process.env.DISTRO) {
-    distro = process.env.DISTRO;
-  } else {
-    distro = staticSiteUrl.includes(XPACK) ? XPACK : 'OSS';
-  }
+  const { jsonSummaryPath } = obj;
+  const contains = msg => x => x.includes(msg);
+  const combinedMsg = 'combined'
+  const containsCombined = contains(combinedMsg);
+
+  const jsonSummaryPathContainsCombined = containsCombined(jsonSummaryPath) ?
+    right(jsonSummaryPath) :
+    left(null);
 
   return {
     ...obj,
-    distro,
+    distro: jsonSummaryPathContainsCombined.fold(always('other'), always(combinedMsg))
   };
 };
 

@@ -41,8 +41,9 @@ const expectAllRegexesToPass = regexes => urlLine =>
         throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`)
     });
 const splitByNewLine = x => x.split('\n');
-const siteUrlLines = urlLinesOnly(includesSiteUrlPredicate)
+const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate)
 const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
+const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 
 describe('Ingesting Coverage to Cluster', () => {
   const chunks = [];
@@ -60,7 +61,7 @@ describe('Ingesting Coverage to Cluster', () => {
     const coverageSummaryPath = resolve(MOCKS_DIR, 'jest-combined/coverage-summary-NO-total.json');
     const args = [
       'scripts/ingest_coverage.js',
-      '--debug',
+      '--verbose',
       '--path',
       coverageSummaryPath,
     ];
@@ -72,11 +73,20 @@ describe('Ingesting Coverage to Cluster', () => {
   });
 
   it('should result in every posted item having a site url that meets all regex assertions',
-    F(siteUrlsSplitByNewLine(chunks)
+    F(siteUrlsSplitByNewLineWithoutBlanks(chunks)
       .forEach(expectAllRegexesToPass(regexes))));
 
+  describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
+    const combinedMsg = 'combined';
+
+    const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
+    it.skip(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
+      console.log(`\n### chunks: \n\t${chunks}`);
+      // expect(chunks.every(x => !x.includes('Actually sending...'))).to.be(true);
+    });
+  });
   describe('with NODE_ENV set to "integration_test"', () => {
-    describe(`and debugging turned on`, () => {
+    describe(`and debug || verbose turned on`, () => {
       it('should result in the "just logging" message being present in the log', () => {
         expect(chunks.some(x => x.includes('Just Logging'))).to.be(true);
       });
@@ -86,11 +96,12 @@ describe('Ingesting Coverage to Cluster', () => {
     });
   });
 });
-function urlLinesOnly(predicate) {
-  return splitByNewLine => xs => xs.filter(predicate)
-    .map(x => splitByNewLine(x).reduce(getUrlLine))
+function specificLinesOnly(predicate) {
+  return splitByNewLine => notBlankLines => xs =>
+    xs.filter(predicate)
+    .map(x => splitByNewLine(x).reduce(notBlankLines))
 }
-function getUrlLine(acc, item) {
+function notBlankLines(acc, item) {
   if (item != '') return item;
   return acc;
 }
