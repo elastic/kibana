@@ -10,15 +10,9 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 
 interface Props {
   children: any;
-  alertFlyoutVisible: boolean;
-  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const UptimeAlertsContextProvider = ({
-  children,
-  alertFlyoutVisible,
-  setAlertFlyoutVisibility,
-}: Props) => {
+export const UptimeAlertsContextProvider = ({ children }: Props) => {
   const {
     services: {
       data: { fieldFormats },
@@ -34,12 +28,10 @@ export const UptimeAlertsContextProvider = ({
     <AlertsContextProvider
       value={{
         actionTypeRegistry,
-        addFlyoutVisible: alertFlyoutVisible,
         alertTypeRegistry,
         charts,
         dataFieldsFormats: fieldFormats,
         http,
-        setAddFlyoutVisibility: setAlertFlyoutVisibility,
         toastNotifications: notifications?.toasts,
         uiSettings,
       }}

@@ -5,4 +5,6 @@
  */
 
 export { AlertMonitorStatus } from './alert_monitor_status';
+export { ToggleAlertFlyoutButton } from './toggle_alert_flyout_button';
 export { UptimeAlertsContextProvider } from './uptime_alerts_context_provider';
+export { UptimeAlertsFlyoutWrapper } from './uptime_alerts_flyout_wrapper';

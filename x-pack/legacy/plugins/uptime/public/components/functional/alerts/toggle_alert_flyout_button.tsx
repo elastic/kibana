@@ -7,12 +7,11 @@
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { setAlertFlyoutVisible } from '../../../state/actions';
 
-interface Props {
-  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export const ToggleAlertFlyoutButton = ({ setAlertFlyoutVisibility }: Props) => {
+export const ToggleAlertFlyoutButton = () => {
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <EuiPopover
@@ -30,7 +29,7 @@ export const ToggleAlertFlyoutButton = ({ setAlertFlyoutVisibility }: Props) => 
           <EuiContextMenuItem
             key="create-alert"
             icon="plusInCircle"
-            onClick={() => setAlertFlyoutVisibility(true)}
+            onClick={() => dispatch(setAlertFlyoutVisible(true))}
           >
             <FormattedMessage
               id="xpack.uptime.toggleAlertButton.content"

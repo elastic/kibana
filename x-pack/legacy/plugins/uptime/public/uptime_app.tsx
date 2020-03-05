@@ -13,7 +13,6 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { AlertAdd } from '../../../../plugins/triggers_actions_ui/public';
 import { UMGraphQLClient, UMUpdateBadge } from './lib/lib';
 import {
   UptimeRefreshContextProvider,
@@ -24,7 +23,11 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import { UptimeAlertContextContainer, ToggleAlertButton } from './components/connected';
+import {
+  ToggleAlertFlyoutButton,
+  UptimeAlertsContextProvider,
+  UptimeAlertsFlyoutWrapper,
+} from './components/functional/alerts';
 
 export interface UptimeAppColors {
   danger: string;
@@ -98,15 +101,15 @@ const Application = (props: UptimeAppProps) => {
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
-                      <UptimeAlertContextContainer>
+                      <UptimeAlertsContextProvider>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>
-                            <ToggleAlertButton />
-                            <AlertAdd consumer="uptime" />
+                            <ToggleAlertFlyoutButton />
+                            <UptimeAlertsFlyoutWrapper />
                             <PageRouter autocomplete={plugins.data.autocomplete} />
                           </main>
                         </EuiPage>
-                      </UptimeAlertContextContainer>
+                      </UptimeAlertsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>
