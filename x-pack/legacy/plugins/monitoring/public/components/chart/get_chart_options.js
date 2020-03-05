@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { CHART_LINE_COLOR, CHART_TEXT_COLOR } from '../../../common/constants';
 
 export async function getChartOptions(axisOptions) {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const $injector = chrome.dangerouslyGetActiveInjector();
   const timezone = $injector.get('config').get('dateFormat:tz');
   const opts = {
     legend: {

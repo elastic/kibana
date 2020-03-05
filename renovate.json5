@@ -914,6 +914,14 @@
         ],
       },
       {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
+        ],
+      },
+      {
         groupSlug: 'uuid',
         groupName: 'uuid related packages',
         packageNames: [

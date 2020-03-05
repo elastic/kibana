@@ -20,7 +20,8 @@
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { convertLegacyTypes, convertTypesToLegacySchema } from './utils';
 import { SavedObjectsLegacyUiExports, SavedObjectsType } from './types';
-import { LegacyConfig } from 'kibana/server';
+import { LegacyConfig, SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from './serialization';
 
 describe('convertLegacyTypes', () => {
   let legacyConfig: ReturnType<typeof legacyServiceMock.createLegacyConfig>;
@@ -61,6 +62,7 @@ describe('convertLegacyTypes', () => {
       savedObjectMigrations: {},
       savedObjectSchemas: {},
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -100,6 +102,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -134,6 +137,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -182,12 +186,53 @@ describe('convertLegacyTypes', () => {
       },
       savedObjectSchemas: {},
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
     expect(converted.length).toEqual(2);
-    expect(converted[0].migrations).toEqual(migrationsA);
-    expect(converted[1].migrations).toEqual(migrationsB);
+    expect(Object.keys(converted[0]!.migrations!)).toEqual(Object.keys(migrationsA));
+    expect(Object.keys(converted[1]!.migrations!)).toEqual(Object.keys(migrationsB));
+  });
+
+  it('converts the migration to the new format', () => {
+    const legacyMigration = jest.fn();
+    const migrationsA = {
+      '1.0.0': legacyMigration,
+    };
+
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectMigrations: {
+        typeA: migrationsA,
+      },
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+      savedObjectsManagement: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(Object.keys(converted[0]!.migrations!)).toEqual(['1.0.0']);
+
+    const migration = converted[0]!.migrations!['1.0.0']!;
+
+    const doc = {} as SavedObjectUnsanitizedDoc;
+    const context = { log: {} } as SavedObjectMigrationContext;
+    migration(doc, context);
+
+    expect(legacyMigration).toHaveBeenCalledTimes(1);
+    expect(legacyMigration).toHaveBeenCalledWith(doc, context.log);
   });
 
   it('merges everything when all are present', () => {
@@ -244,6 +289,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);

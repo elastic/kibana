@@ -5,11 +5,10 @@
  */
 
 import { IndicesDeleteTemplateParams } from 'elasticsearch';
-import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { CallWithRequest } from '../types';
 
 export const deleteTemplate = async (
-  callWithRequest: CallWithRequest<IndicesDeleteTemplateParams, CallClusterOptions, unknown>,
+  callWithRequest: CallWithRequest<IndicesDeleteTemplateParams, unknown>,
   name: string
 ): Promise<unknown> => {
   return callWithRequest('indices.deleteTemplate', {

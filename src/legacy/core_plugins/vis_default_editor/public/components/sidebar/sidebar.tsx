@@ -21,13 +21,13 @@ import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect 
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { PersistedState, AggGroupNames } from '../../legacy_imports';
+import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, useEditorReducer, useEditorFormState } from './state';
+import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
+import { PersistedState } from '../../../../../../plugins/visualizations/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -104,14 +104,25 @@ function DefaultEditorSideBar({
   );
 
   useEffect(() => {
-    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
+    const changeHandler = ({ isDirty: dirty }: { isDirty: boolean }) => {
       setDirty(dirty);
 
       if (!dirty) {
         resetValidity();
       }
-    });
+    };
+    vis.on('dirtyStateChange', changeHandler);
+
+    return () => vis.off('dirtyStateChange', changeHandler);
   }, [resetValidity, vis]);
+
+  // subscribe on external vis changes using browser history, for example press back button
+  useEffect(() => {
+    const resetHandler = () => dispatch(discardChanges(vis));
+    vis.on('updateEditor', resetHandler);
+
+    return () => vis.off('updateEditor', resetHandler);
+  }, [dispatch, vis]);
 
   const dataTabProps = {
     dispatch,

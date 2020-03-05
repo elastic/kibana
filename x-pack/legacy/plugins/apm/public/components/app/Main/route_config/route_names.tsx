@@ -22,5 +22,6 @@ export enum RouteName {
   AGENT_CONFIGURATION = 'agent_configuration',
   INDICES = 'indices',
   SERVICE_NODES = 'nodes',
-  LINK_TO_TRACE = 'link_to_trace'
+  LINK_TO_TRACE = 'link_to_trace',
+  CUSTOMIZE_UI = 'customize_ui'
 }

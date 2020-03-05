@@ -18,7 +18,12 @@
  */
 
 import { LegacyConfig } from '../legacy';
-import { SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
+import { SavedObjectMigrationMap } from './migrations';
+import {
+  SavedObjectsType,
+  SavedObjectsLegacyUiExports,
+  SavedObjectLegacyMigrationMap,
+} from './types';
 import { SavedObjectsSchemaDefinition } from './schema';
 
 /**
@@ -49,7 +54,7 @@ export const convertLegacyTypes = (
               ? schema.indexPattern(legacyConfig)
               : schema?.indexPattern,
           convertToAliasScript: schema?.convertToAliasScript,
-          migrations: migrations ?? {},
+          migrations: convertLegacyMigrations(migrations ?? {}),
         };
       }),
     ];
@@ -73,4 +78,15 @@ export const convertTypesToLegacySchema = (
       },
     };
   }, {} as SavedObjectsSchemaDefinition);
+};
+
+const convertLegacyMigrations = (
+  legacyMigrations: SavedObjectLegacyMigrationMap
+): SavedObjectMigrationMap => {
+  return Object.entries(legacyMigrations).reduce((migrated, [version, migrationFn]) => {
+    return {
+      ...migrated,
+      [version]: (doc, context) => migrationFn(doc, context.log),
+    };
+  }, {} as SavedObjectMigrationMap);
 };

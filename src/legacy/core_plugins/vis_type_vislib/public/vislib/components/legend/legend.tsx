@@ -22,14 +22,24 @@ import { compact, uniq, map } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
+import { IAggConfig } from '../../../../../data/public';
 
 // @ts-ignore
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
-import { getTableAggs } from '../../../legacy_imports';
+
+import { Vis } from '../../../../../visualizations/public';
+import { tabifyGetColumns } from '../../../legacy_imports';
+
+const getTableAggs = (vis: Vis): IAggConfig[] => {
+  if (!vis.aggs || !vis.aggs.getResponseAggs) {
+    return [];
+  }
+  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
+  return columns.map(c => c.aggConfig);
+};
 
 export interface VisLegendProps {
   vis: any;
@@ -43,6 +53,7 @@ export interface VisLegendState {
   open: boolean;
   labels: any[];
   tableAggs: any[];
+  filterableLabels: Set<string>;
   selectedLabel: string | null;
 }
 
@@ -58,6 +69,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       open,
       labels: [],
       tableAggs: [],
+      filterableLabels: new Set(),
       selectedLabel: null,
     };
   }
@@ -123,40 +135,43 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     }));
   };
 
-  // Most of these functions were moved directly from the old Legend class. Not a fan of this.
-  setLabels = (data: any, type: string): Promise<void> =>
+  setFilterableLabels = (items: LegendItem[]): Promise<void> =>
     new Promise(async resolve => {
-      let labels = [];
-      if (CUSTOM_LEGEND_VIS_TYPES.includes(type)) {
-        const legendLabels = this.props.vislibVis.getLegendLabels();
-        if (legendLabels) {
-          labels = map(legendLabels, label => {
-            return { label };
-          });
+      const filterableLabels = new Set<string>();
+      items.forEach(async item => {
+        const canFilter = await this.canFilter(item);
+        if (canFilter) {
+          filterableLabels.add(item.label);
         }
-      } else {
-        if (!data) return [];
-        data = data.columns || data.rows || [data];
+      });
 
-        labels = type === 'pie' ? getPieNames(data) : this.getSeriesLabels(data);
-      }
-
-      const labelsConfig = await Promise.all(
-        labels.map(async label => ({
-          ...label,
-          canFilter: await this.canFilter(label),
-        }))
-      );
-
-      this.setState(
-        {
-          labels: labelsConfig,
-        },
-        resolve
-      );
+      this.setState({ filterableLabels }, resolve);
     });
 
-  refresh = async () => {
+  setLabels = (data: any, type: string) => {
+    let labels = [];
+    if (CUSTOM_LEGEND_VIS_TYPES.includes(type)) {
+      const legendLabels = this.props.vislibVis.getLegendLabels();
+      if (legendLabels) {
+        labels = map(legendLabels, label => {
+          return { label };
+        });
+      }
+    } else {
+      if (!data) return [];
+      data = data.columns || data.rows || [data];
+
+      labels = type === 'pie' ? getPieNames(data) : this.getSeriesLabels(data);
+    }
+
+    this.setFilterableLabels(labels);
+
+    this.setState({
+      labels,
+    });
+  };
+
+  refresh = () => {
     const vislibVis = this.props.vislibVis;
     if (!vislibVis || !vislibVis.visConfig) {
       this.setState({
@@ -183,7 +198,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     }
 
     this.setState({ tableAggs: getTableAggs(this.props.vis) });
-    await this.setLabels(this.props.visData, vislibVis.visConfigArgs.type);
+    this.setLabels(this.props.visData, vislibVis.visConfigArgs.type);
   };
 
   highlight = (event: BaseSyntheticEvent) => {
@@ -231,7 +246,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           key={item.label}
           anchorPosition={anchorPosition}
           selected={this.state.selectedLabel === item.label}
-          canFilter={item.canFilter}
+          canFilter={this.state.filterableLabels.has(item.label)}
           onFilter={this.filter}
           onSelect={this.toggleDetails}
           legendId={this.legendId}

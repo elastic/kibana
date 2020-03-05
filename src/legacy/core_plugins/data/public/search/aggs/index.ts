@@ -50,3 +50,6 @@ export { isValidJson, isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
+
+// types
+export { IAggConfig, IAggConfigs } from './types';

@@ -20,15 +20,15 @@
 /** @public */
 export interface Environment {
   /**
-   * Flag whether the home app should advertize cloud features
+   * Flag whether the home app should advertise cloud features
    */
   readonly cloud: boolean;
   /**
-   * Flag whether the home app should advertize apm features
+   * Flag whether the home app should advertise apm features
    */
   readonly apmUi: boolean;
   /**
-   * Flag whether the home app should advertize ml features
+   * Flag whether the home app should advertise ml features
    */
   readonly ml: boolean;
 }

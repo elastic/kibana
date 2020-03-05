@@ -19,7 +19,7 @@ import { getLicenseExpiration } from './alerts/license_expiration';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
-  setup(_coreSetup, pluginsSetup, __LEGACY) {
+  async setup(_coreSetup, pluginsSetup, __LEGACY) {
     const {
       plugins,
       _kbnServer: kbnServer,
@@ -34,7 +34,7 @@ export class Plugin {
     } = __LEGACY;
     const config = monitoringConfig();
 
-    const { usageCollection, licensing } = pluginsSetup;
+    const { usageCollection, licensing, alerting } = pluginsSetup;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -59,6 +59,14 @@ export class Plugin {
      */
     const elasticsearchConfig = parseElasticsearchConfig(config);
 
+    // Create the dedicated client
+    await instantiateClient({
+      log,
+      events,
+      elasticsearchConfig,
+      elasticsearchPlugin: plugins.elasticsearch,
+    });
+
     xpackMainPlugin.status.once('green', async () => {
       // first time xpack_main turns green
       /*
@@ -67,12 +75,6 @@ export class Plugin {
       const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient({
-          log,
-          events,
-          elasticsearchConfig,
-          elasticsearchPlugin: plugins.elasticsearch,
-        }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
           log,
@@ -150,7 +152,7 @@ export class Plugin {
       };
     });
 
-    if (KIBANA_ALERTING_ENABLED && plugins.alerting) {
+    if (KIBANA_ALERTING_ENABLED && alerting) {
       // this is not ready right away but we need to register alerts right away
       async function getMonitoringCluster() {
         const configs = config.get('xpack.monitoring.elasticsearch');
@@ -172,7 +174,7 @@ export class Plugin {
       function getLogger(contexts) {
         return logger.get('plugins', LOGGING_TAG, ...contexts);
       }
-      plugins.alerting.setup.registerType(
+      alerting.registerType(
         getLicenseExpiration(
           hapiServer,
           getMonitoringCluster,

@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
 import {
   transformError,
   transformBulkError,
@@ -15,7 +17,9 @@ import {
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  convertToSnakeCase,
 } from './utils';
+import { createMockConfig } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -295,34 +299,45 @@ describe('utils', () => {
   });
 
   describe('getIndex', () => {
-    it('appends the space ID to the configured index if spaces are enabled', () => {
-      const mockGet = jest.fn();
-      const mockGetSpaceId = jest.fn();
-      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
-      const server = { plugins: { spaces: { getSpaceId: mockGetSpaceId } }, config };
+    let mockConfig = createMockConfig();
 
-      mockGet.mockReturnValue('mockSignalsIndex');
-      mockGetSpaceId.mockReturnValue('myspace');
-      // @ts-ignore-next-line TODO these dependencies are simplified on
-      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
-      // out what we need.
-      const index = getIndex(null, server);
+    beforeEach(() => {
+      mockConfig = () => ({
+        get: jest.fn(() => 'mockSignalsIndex'),
+        has: jest.fn(),
+      });
+    });
+
+    it('appends the space id to the configured index', () => {
+      const getSpaceId = jest.fn(() => 'myspace');
+      const index = getIndex(getSpaceId, mockConfig);
 
       expect(index).toEqual('mockSignalsIndex-myspace');
     });
+  });
 
-    it('appends the default space ID to the configured index if spaces are disabled', () => {
-      const mockGet = jest.fn();
-      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
-      const server = { plugins: {}, config };
-
-      mockGet.mockReturnValue('mockSignalsIndex');
-      // @ts-ignore-next-line TODO these dependencies are simplified on
-      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
-      // out what we need.
-      const index = getIndex(null, server);
-
-      expect(index).toEqual('mockSignalsIndex-default');
+  describe('convertToSnakeCase', () => {
+    it('converts camelCase to snakeCase', () => {
+      const values = { myTestCamelCaseKey: 'something' };
+      expect(convertToSnakeCase(values)).toEqual({ my_test_camel_case_key: 'something' });
+    });
+    it('returns empty object when object is empty', () => {
+      const values = {};
+      expect(convertToSnakeCase(values)).toEqual({});
+    });
+    it('returns null when passed in undefined', () => {
+      // Array accessors can result in undefined but
+      // this is not represented in typescript for some reason,
+      // https://github.com/Microsoft/TypeScript/issues/11122
+      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+        page: 0,
+        per_page: 5,
+        total: 0,
+        saved_objects: [],
+      };
+      expect(
+        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+      ).toEqual(null);
     });
   });
 });

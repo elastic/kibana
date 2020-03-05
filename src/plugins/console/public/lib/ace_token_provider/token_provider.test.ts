@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import '../../application/models/sense_editor/sense_editor.test.mocks';
 
 import $ from 'jquery';

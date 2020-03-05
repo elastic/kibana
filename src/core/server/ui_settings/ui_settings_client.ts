@@ -185,7 +185,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     autoCreateOrUpgradeIfMissing = true,
   }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
-      const resp = await this.savedObjectsClient.get(this.type, this.id);
+      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {

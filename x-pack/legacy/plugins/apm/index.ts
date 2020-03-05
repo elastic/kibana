@@ -11,7 +11,6 @@ import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import mappings from './mappings.json';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -108,11 +107,9 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      makeApmUsageCollector(usageCollection, server);
+
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
-
       apmPlugin.registerLegacyAPI({ server });
     }
   });

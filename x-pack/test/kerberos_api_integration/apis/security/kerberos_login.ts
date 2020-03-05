@@ -199,7 +199,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 

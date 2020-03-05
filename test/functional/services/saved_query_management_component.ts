@@ -24,6 +24,7 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const config = getService('config');
 
   class SavedQueryManagementComponent {
     public async getCurrentlyLoadedQueryID() {
@@ -177,7 +178,9 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
 
       await retry.try(async () => {
         await testSubjects.click('saved-query-management-save-button');
-        await testSubjects.existOrFail('saveQueryForm');
+        await testSubjects.existOrFail('saveQueryForm', {
+          timeout: config.get('timeouts.waitForExists'),
+        });
       });
     }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnHeader } from './body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
 import { QueryOperator } from './data_providers/data_provider';
@@ -85,7 +85,7 @@ export type OnRowSelected = ({
 export type OnSelectAll = ({ isSelected }: { isSelected: boolean }) => void;
 
 /** Invoked when columns are updated */
-export type OnUpdateColumns = (columns: ColumnHeader[]) => void;
+export type OnUpdateColumns = (columns: ColumnHeaderOptions[]) => void;
 
 /** Invoked when a user unpins an event */
 export type OnUnPinEvent = (eventId: string) => void;

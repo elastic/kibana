@@ -21,23 +21,24 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
-
-import { Conversion } from './conversions/type';
-import { ContextConversion } from './conversions/context';
-import { LevelConversion } from './conversions/level';
-import { MetaConversion } from './conversions/meta';
-import { MessageConversion } from './conversions/message';
-import { PidConversion } from './conversions/pid';
-import { TimestampConversion } from './conversions/timestamp';
+import {
+  Conversion,
+  LoggerConversion,
+  LevelConversion,
+  MetaConversion,
+  MessageConversion,
+  PidConversion,
+  DateConversion,
+} from './conversions';
 
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[{timestamp}][{level}][{context}]{meta} {message}`;
+const DEFAULT_PATTERN = `[%date][%level][%logger]%meta %message`;
 
 export const patternSchema = schema.string({
   validate: string => {
-    TimestampConversion.validate!(string);
+    DateConversion.validate!(string);
   },
 });
 
@@ -48,12 +49,12 @@ const patternLayoutSchema = schema.object({
 });
 
 const conversions: Conversion[] = [
-  ContextConversion,
+  LoggerConversion,
   MessageConversion,
   LevelConversion,
   MetaConversion,
   PidConversion,
-  TimestampConversion,
+  DateConversion,
 ];
 
 /** @internal */
@@ -77,7 +78,7 @@ export class PatternLayout implements Layout {
     for (const conversion of conversions) {
       recordString = recordString.replace(
         conversion.pattern,
-        conversion.formatter.bind(null, record, this.highlight)
+        conversion.convert.bind(null, record, this.highlight)
       );
     }
 

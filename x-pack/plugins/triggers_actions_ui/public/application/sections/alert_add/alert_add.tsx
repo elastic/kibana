@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiPortal,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
@@ -135,6 +136,16 @@ export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddPr
               <FormattedMessage
                 defaultMessage="Create Alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
+              />
+              &emsp;
+              <EuiBetaBadge
+                label="Beta"
+                tooltipContent={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
+                  {
+                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  }
+                )}
               />
             </h3>
           </EuiTitle>

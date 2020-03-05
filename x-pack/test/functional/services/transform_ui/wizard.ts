@@ -377,19 +377,75 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertCreateAndStartButtonExists() {
-      await testSubjects.existOrFail(`transformWizardCreateAndStartButton`);
+      await testSubjects.existOrFail('transformWizardCreateAndStartButton');
+      expect(await testSubjects.isDisplayed('transformWizardCreateAndStartButton')).to.eql(
+        true,
+        `Expected 'Create and start' button to be displayed`
+      );
+    },
+
+    async assertCreateAndStartButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('transformWizardCreateAndStartButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'Create and start' button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got ${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     },
 
     async assertCreateButtonExists() {
-      await testSubjects.existOrFail(`transformWizardCreateButton`);
+      await testSubjects.existOrFail('transformWizardCreateButton');
+      expect(await testSubjects.isDisplayed('transformWizardCreateButton')).to.eql(
+        true,
+        `Expected 'Create' button to be displayed`
+      );
+    },
+
+    async assertCreateButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('transformWizardCreateButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'Create' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
     },
 
     async assertCopyToClipboardButtonExists() {
-      await testSubjects.existOrFail(`transformWizardCopyToClipboardButton`);
+      await testSubjects.existOrFail('transformWizardCopyToClipboardButton');
+      expect(await testSubjects.isDisplayed('transformWizardCopyToClipboardButton')).to.eql(
+        true,
+        `Expected 'Copy to clipboard' button to be displayed`
+      );
+    },
+
+    async assertCopyToClipboardButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('transformWizardCopyToClipboardButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'Copy to clipboard' button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got ${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     },
 
     async assertStartButtonExists() {
-      await testSubjects.existOrFail(`transformWizardStartButton`);
+      await testSubjects.existOrFail('transformWizardStartButton');
+      expect(await testSubjects.isDisplayed('transformWizardStartButton')).to.eql(
+        true,
+        `Expected 'Start' button to be displayed`
+      );
+    },
+
+    async assertStartButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
     },
 
     async assertManagementCardExists() {
@@ -423,20 +479,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async createTransform() {
       await testSubjects.click('transformWizardCreateButton');
       await this.assertStartButtonExists();
+      await this.assertStartButtonEnabled(true);
       await this.assertManagementCardExists();
-      expect(await testSubjects.isEnabled('transformWizardCreateButton')).to.eql(
-        false,
-        'The create button should not be enabled any more'
-      );
+      await this.assertCreateButtonEnabled(false);
     },
 
     async startTransform() {
       await testSubjects.click('transformWizardStartButton');
       await this.assertDiscoverCardExists();
-      expect(await testSubjects.isEnabled('transformWizardStartButton')).to.eql(
-        false,
-        'The start button should not be enabled any more'
-      );
+      await this.assertStartButtonEnabled(false);
       await this.assertProgressbarExists();
     },
   };

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -13,7 +13,6 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
   EuiTitle,
   EuiLink,
   EuiIcon,
@@ -22,6 +21,7 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
+import { CollapsibleIndicesList } from '../../collapsible_indices_list';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -38,15 +38,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     ignoreUnavailable: undefined,
     partial: undefined,
   };
-
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = indices
-    ? typeof indices === 'string'
-      ? indices.split(',')
-      : indices
-    : undefined;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const serializedPolicy = serializePolicy(policy);
   const { retention: serializedRetention } = serializedPolicy;
@@ -164,52 +155,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {displayIndices ? (
-                <EuiText>
-                  <ul>
-                    {(isShowingFullIndicesList
-                      ? displayIndices
-                      : [...displayIndices].splice(0, 10)
-                    ).map(index => (
-                      <li key={index}>
-                        <EuiTitle size="xs">
-                          <span>{index}</span>
-                        </EuiTitle>
-                      </li>
-                    ))}
-                    {hiddenIndicesCount ? (
-                      <li key="hiddenIndicesCount">
-                        <EuiTitle size="xs">
-                          {isShowingFullIndicesList ? (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesCollapseAllLink"
-                                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowUp" />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesShowAllLink"
-                                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowDown" />
-                            </EuiLink>
-                          )}
-                        </EuiTitle>
-                      </li>
-                    ) : null}
-                  </ul>
-                </EuiText>
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.allIndicesValue"
-                  defaultMessage="All indices"
-                />
-              )}
+              <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

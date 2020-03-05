@@ -14,11 +14,10 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
-import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
@@ -71,10 +70,6 @@ export class AbstractESSource extends AbstractVectorSource {
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuid();
     return clonedDescriptor;
-  }
-
-  getMetricFields() {
-    return [];
   }
 
   async _runEsQuery({
@@ -151,27 +146,18 @@ export class AbstractESSource extends AbstractVectorSource {
       { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
       0
     );
-    const geoField = await this._getGeoField();
-    const indexPattern = await this.getIndexPattern();
-
-    const geoBoundsAgg = [
-      {
-        type: 'geo_bounds',
-        enabled: true,
-        params: {
-          field: geoField,
+    searchSource.setField('aggs', {
+      fitToBounds: {
+        geo_bounds: {
+          field: this._descriptor.geoField,
         },
-        schema: 'metric',
       },
-    ];
-
-    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
-    searchSource.setField('aggs', aggConfigs.toDsl());
+    });
 
     let esBounds;
     try {
       const esResp = await searchSource.fetch();
-      esBounds = _.get(esResp, 'aggregations.1.bounds');
+      esBounds = _.get(esResp, 'aggregations.fitToBounds.bounds');
     } catch (error) {
       esBounds = {
         top_left: {
@@ -264,23 +250,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-  async getFieldFormatter(fieldName) {
-    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
-
-    // Do not use field formatters for counting metrics
-    if (
-      metricField &&
-      (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)
-    ) {
-      return null;
-    }
-
-    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
-    if (!realFieldName) {
-      return null;
-    }
-
+  async createFieldFormatter(field) {
     let indexPattern;
     try {
       indexPattern = await this.getIndexPattern();
@@ -288,7 +258,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
+    const fieldFromIndexPattern = indexPattern.fields.getByName(field.getRootName());
     if (!fieldFromIndexPattern) {
       return null;
     }
@@ -346,22 +316,19 @@ export class AbstractESSource extends AbstractVectorSource {
     return resp.aggregations;
   }
 
-  getValueSuggestions = async (fieldName, query) => {
-    if (!fieldName) {
-      return [];
-    }
-
+  getValueSuggestions = async (field, query) => {
     try {
       const indexPattern = await this.getIndexPattern();
-      const field = indexPattern.fields.getByName(fieldName);
       return await autocompleteService.getValueSuggestions({
         indexPattern,
-        field,
+        field: indexPattern.fields.getByName(field.getRootName()),
         query,
       });
     } catch (error) {
       console.warn(
-        `Unable to fetch suggestions for field: ${fieldName}, query: ${query}, error: ${error.message}`
+        `Unable to fetch suggestions for field: ${field.getRootName()}, query: ${query}, error: ${
+          error.message
+        }`
       );
       return [];
     }

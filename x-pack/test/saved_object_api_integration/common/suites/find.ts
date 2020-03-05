@@ -89,12 +89,8 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   const expectTypeRequired = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Bad Request',
-      message: 'child "type" fails because ["type" is required]',
+      message: '[request query.type]: expected at least one defined value but got [undefined]',
       statusCode: 400,
-      validation: {
-        keys: ['type'],
-        source: 'query',
-      },
     });
   };
 

@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsApi } from 'src/plugins/ui_actions/public';
+import { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -44,7 +44,7 @@ import {
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 
-const actionRegistry = new Map<string, Action>();
+const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
 const triggerRegistry = new Map<string, Trigger>();
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
@@ -52,7 +52,6 @@ const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFac
 const editModeAction = createEditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
-  actionIds: [editModeAction.id],
 };
 const embeddableFactory = new ContactCardEmbeddableFactory(
   {} as any,
@@ -177,7 +176,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 
 const renderInEditModeAndOpenContextMenu = async (
   embeddableInputs: any,
-  getActions: UiActionsApi['getTriggerCompatibleActions'] = () => Promise.resolve([])
+  getActions: UiActionsStart['getTriggerCompatibleActions'] = () => Promise.resolve([])
 ) => {
   const inspector = inspectorPluginMock.createStartContract();
 

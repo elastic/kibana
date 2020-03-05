@@ -69,7 +69,7 @@ export function buildSrcUrl(svgString) {
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, fill, stroke, strokeWidth) {
+export async function styleSvg(svgString, fill, stroke) {
   const svgXml = await parseXmlString(svgString);
   let style = '';
   if (fill) {
@@ -77,9 +77,7 @@ export async function styleSvg(svgString, fill, stroke, strokeWidth) {
   }
   if (stroke) {
     style += `stroke:${stroke};`;
-  }
-  if (strokeWidth) {
-    style += `stroke-width:${strokeWidth};`;
+    style += `stroke-width:1;`;
   }
   if (style) svgXml.svg.$.style = style;
   const builder = new xml2js.Builder();
@@ -119,8 +117,6 @@ export function getIconPaletteOptions(isDarkMode) {
             className="mapIcon"
             symbolId={iconId}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-            stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-            strokeWidth={'1px'}
           />
         </div>
       );

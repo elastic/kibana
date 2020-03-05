@@ -12,7 +12,6 @@ import { shallowWithRouter } from '../../../../../lib';
 
 describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;
-  let loadMonitorDetails: any;
   let monitorDetails: MonitorDetails;
 
   beforeEach(() => {
@@ -47,16 +46,11 @@ describe('MonitorListDrawer component', () => {
           'Get https://expired.badssl.com: x509: certificate has expired or is not yet valid',
       },
     };
-    loadMonitorDetails = () => null;
   });
 
   it('renders nothing when no summary data is present', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent
-        loadMonitorDetails={loadMonitorDetails}
-        summary={summary}
-        monitorDetails={monitorDetails}
-      />
+      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
     );
     expect(component).toEqual({});
   });
@@ -64,22 +58,14 @@ describe('MonitorListDrawer component', () => {
   it('renders nothing when no check data is present', () => {
     delete summary.state.checks;
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
     );
     expect(component).toEqual({});
   });
 
   it('renders a MonitorListDrawer when there is only one check', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -110,11 +96,7 @@ describe('MonitorListDrawer component', () => {
     ];
     summary.state.checks = checks;
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
     );
     expect(component).toMatchSnapshot();
   });

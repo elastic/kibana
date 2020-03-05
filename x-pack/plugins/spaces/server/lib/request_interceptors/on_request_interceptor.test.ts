@@ -16,7 +16,6 @@ import {
 } from '../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
-import { LegacyAPI } from '../../plugin';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('onRequestInterceptor', () => {
@@ -110,10 +109,6 @@ describe('onRequestInterceptor', () => {
     elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     initSpacesOnRequestInterceptor({
-      getLegacyAPI: () =>
-        ({
-          legacyConfig: {},
-        } as LegacyAPI),
       http: (http as unknown) as CoreSetup['http'],
     });
 

@@ -17,17 +17,16 @@
  * under the License.
  */
 
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-
-import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
+import { expandLiteralStrings } from '../../../../../../../es_ui_shared/console_lang/lib';
 import {
-  useServicesContext,
   useEditorReadContext,
   useRequestReadContext,
+  useServicesContext,
 } from '../../../../contexts';
-
-import * as utils from '../../../../../lib/utils/utils';
-
+import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
@@ -44,18 +43,22 @@ function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const editorInstanceRef = useRef<null | CustomAceEditor>(null);
   const { services } = useServicesContext();
-
   const { settings: readOnlySettings } = useEditorReadContext();
   const {
     lastResult: { data, error },
   } = useRequestReadContext();
+  const inputId = 'ConAppOutputTextarea';
 
   useEffect(() => {
     editorInstanceRef.current = createReadOnlyAceEditor(editorRef.current!);
     const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
+    const textarea = editorRef.current!.querySelector('textarea')!;
+    textarea.setAttribute('id', inputId);
+    textarea.setAttribute('readonly', 'true');
 
     return () => {
       unsubscribe();
+      editorInstanceRef.current!.destroy();
     };
   }, [services.settings]);
 
@@ -67,7 +70,7 @@ function EditorOutputUI() {
       editor.update(
         data
           .map(d => d.response.value as string)
-          .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
+          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : a => a)
           .join('\n')
       );
     } else if (error) {
@@ -84,15 +87,15 @@ function EditorOutputUI() {
 
   return (
     <>
-      <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
-        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
-      automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
-      satisfy Axe. */}
-
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label className="conApp__textAreaLabelHack">
-          <div className="conApp__outputContent" id="ConAppOutput" />
+      <EuiScreenReaderOnly>
+        <label htmlFor={inputId}>
+          {i18n.translate('console.outputTextarea', {
+            defaultMessage: 'Dev Tools Console output',
+          })}
         </label>
+      </EuiScreenReaderOnly>
+      <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
+        <div className="conApp__outputContent" id="ConAppOutput" />
       </div>
     </>
   );

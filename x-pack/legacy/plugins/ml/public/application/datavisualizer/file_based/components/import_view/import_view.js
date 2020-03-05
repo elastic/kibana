@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { importerFactory } from './importer';
 import { ResultsLinks } from '../results_links';
+import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
@@ -64,6 +65,7 @@ const DEFAULT_STATE = {
   indexNameError: '',
   indexPatternNameError: '',
   timeFieldName: undefined,
+  isFilebeatFlyoutVisible: false,
 };
 
 export class ImportView extends Component {
@@ -325,9 +327,17 @@ export class ImportView extends Component {
 
   onIndexChange = e => {
     const name = e.target.value;
+    const { indexNames, indexPattern, indexPatternNames } = this.state;
+
     this.setState({
       index: name,
-      indexNameError: isIndexNameValid(name, this.state.indexNames),
+      indexNameError: isIndexNameValid(name, indexNames),
+      // if index pattern has been altered, check that it still matches the inputted index
+      ...(indexPattern === ''
+        ? {}
+        : {
+            indexPatternNameError: isIndexPatternNameValid(indexPattern, indexPatternNames, name),
+          }),
     });
   };
 
@@ -376,6 +386,16 @@ export class ImportView extends Component {
     });
   };
 
+  showFilebeatFlyout = () => {
+    this.setState({ isFilebeatFlyoutVisible: true });
+    this.props.hideBottomBar();
+  };
+
+  closeFilebeatFlyout = () => {
+    this.setState({ isFilebeatFlyoutVisible: false });
+    this.props.showBottomBar();
+  };
+
   async loadIndexNames() {
     const indices = await ml.getIndices();
     const indexNames = indices.map(i => i.name);
@@ -416,6 +436,7 @@ export class ImportView extends Component {
       indexNameError,
       indexPatternNameError,
       timeFieldName,
+      isFilebeatFlyoutVisible,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -541,7 +562,18 @@ export class ImportView extends Component {
                       indexPatternId={indexPatternId}
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
+                      showFilebeatFlyout={this.showFilebeatFlyout}
                     />
+
+                    {isFilebeatFlyoutVisible && (
+                      <FilebeatConfigFlyout
+                        index={index}
+                        results={this.props.results}
+                        indexPatternId={indexPatternId}
+                        ingestPipelineId={ingestPipelineId}
+                        closeFlyout={this.closeFilebeatFlyout}
+                      />
+                    )}
                   </React.Fragment>
                 )}
               </EuiPanel>

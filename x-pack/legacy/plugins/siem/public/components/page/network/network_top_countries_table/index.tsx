@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
@@ -39,23 +38,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopCountriesTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkTopTablesSortField;
-}
-
-interface NetworkTopCountriesTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkTopCountriesTableProps = OwnProps &
-  NetworkTopCountriesTableReduxProps &
-  NetworkTopCountriesTableDispatchProps;
+type NetworkTopCountriesTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -143,7 +126,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
             field: lastField as NetworkTopTablesFields,
             direction: newSortDirection as Direction,
           };
-          if (!isEqual(newTopCountriesSort, sort)) {
+          if (!deepEqual(newTopCountriesSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,
@@ -197,8 +180,12 @@ const makeMapStateToProps = () => {
     getTopCountriesSelector(state, type, flowTargeted);
 };
 
-export const NetworkTopCountriesTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(NetworkTopCountriesTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkTopCountriesTable = connector(NetworkTopCountriesTableComponent);

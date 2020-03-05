@@ -84,59 +84,19 @@ exports[`CalendarForm Renders calendar form 1`] = `
       value=""
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
+  <EuiSpacer
+    size="xl"
+  />
+  <EuiSwitch
     label={
       <FormattedMessage
-        defaultMessage="Jobs"
-        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+        defaultMessage="Apply calendar to all jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
         values={Object {}}
       />
     }
-    labelType="label"
-  >
-    <EuiComboBox
-      compressed={false}
-      fullWidth={false}
-      isClearable={true}
-      isDisabled={false}
-      onChange={[MockFunction]}
-      options={Array []}
-      selectedOptions={Array []}
-      singleSelection={false}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label={
-      <FormattedMessage
-        defaultMessage="Groups"
-        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-        values={Object {}}
-      />
-    }
-    labelType="label"
-  >
-    <EuiComboBox
-      compressed={false}
-      fullWidth={false}
-      isClearable={true}
-      isDisabled={false}
-      onChange={[MockFunction]}
-      onCreateOption={[MockFunction]}
-      options={Array []}
-      selectedOptions={Array []}
-      singleSelection={false}
-    />
-  </EuiFormRow>
+    name="switch"
+  />
   <EuiSpacer
     size="xl"
   />

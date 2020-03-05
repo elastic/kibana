@@ -34,16 +34,18 @@ export const EDIT_USER_ACTION = 'EDIT_USER_ACTION';
 export const PHONE_USER_ACTION = 'PHONE_USER_ACTION';
 export const SHOWCASE_PLUGGABILITY_ACTION = 'SHOWCASE_PLUGGABILITY_ACTION';
 
-export const showcasePluggability = createAction<{}>({
+export const showcasePluggability = createAction({
   type: SHOWCASE_PLUGGABILITY_ACTION,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
-  execute: async ({}) => alert("Isn't that cool?!"),
+  execute: async () => alert("Isn't that cool?!"),
 });
 
-export const makePhoneCallAction = createAction<{ phone: string }>({
+export type PhoneContext = string;
+
+export const makePhoneCallAction = createAction<PhoneContext>({
   type: CALL_PHONE_NUMBER_ACTION,
   getDisplayName: () => 'Call phone number',
-  execute: async ({ phone }) => alert(`Pretend calling ${phone}...`),
+  execute: async phone => alert(`Pretend calling ${phone}...`),
 });
 
 export const lookUpWeatherAction = createAction<{ country: string }>({
@@ -55,11 +57,13 @@ export const lookUpWeatherAction = createAction<{ country: string }>({
   },
 });
 
-export const viewInMapsAction = createAction<{ country: string }>({
+export type CountryContext = string;
+
+export const viewInMapsAction = createAction<CountryContext>({
   type: VIEW_IN_MAPS_ACTION,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
-  execute: async ({ country }) => {
+  execute: async country => {
     window.open(`https://www.google.com/maps/place/${country}`, '_blank');
   },
 });
@@ -110,11 +114,13 @@ export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['o
     },
   });
 
+export interface UserContext {
+  user: User;
+  update: (user: User) => void;
+}
+
 export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
-  createAction<{
-    user: User;
-    update: (user: User) => void;
-  }>({
+  createAction<UserContext>({
     type: PHONE_USER_ACTION,
     getDisplayName: () => 'Call phone number',
     isCompatible: async ({ user }) => user.phone !== undefined,
@@ -126,6 +132,8 @@ export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsSt
       // to the phone number trigger.
       // TODO: we need to figure out the best way to handle these nested actions however, since
       // we don't want multiple context menu's to pop up.
-      (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, { phone: user.phone });
+      if (user.phone !== undefined) {
+        (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, user.phone);
+      }
     },
   });

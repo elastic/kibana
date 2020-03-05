@@ -7,7 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction } from 'lodash/fp';
-import { exportRules, Rule } from '../../../../../containers/detection_engine/rules';
+import { exportRules } from '../../../../../containers/detection_engine/rules';
 import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
 
@@ -17,7 +17,7 @@ const InvisibleAnchor = styled.a`
 
 export interface RuleDownloaderProps {
   filename: string;
-  rules?: Rule[];
+  ruleIds?: string[];
   onExportComplete: (exportCount: number) => void;
 }
 
@@ -30,7 +30,7 @@ export interface RuleDownloaderProps {
  */
 export const RuleDownloaderComponent = ({
   filename,
-  rules,
+  ruleIds,
   onExportComplete,
 }: RuleDownloaderProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -41,10 +41,10 @@ export const RuleDownloaderComponent = ({
     const abortCtrl = new AbortController();
 
     async function exportData() {
-      if (anchorRef && anchorRef.current && rules != null) {
+      if (anchorRef && anchorRef.current && ruleIds != null && ruleIds.length > 0) {
         try {
           const exportResponse = await exportRules({
-            ruleIds: rules.map(r => r.rule_id),
+            ruleIds,
             signal: abortCtrl.signal,
           });
 
@@ -61,7 +61,7 @@ export const RuleDownloaderComponent = ({
               window.URL.revokeObjectURL(objectURL);
             }
 
-            onExportComplete(rules.length);
+            onExportComplete(ruleIds.length);
           }
         } catch (error) {
           if (isSubscribed) {
@@ -77,7 +77,7 @@ export const RuleDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rules]);
+  }, [ruleIds]);
 
   return <InvisibleAnchor ref={anchorRef} />;
 };

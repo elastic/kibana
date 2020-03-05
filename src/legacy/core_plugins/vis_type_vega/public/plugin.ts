@@ -31,6 +31,7 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 /** @internal */
 export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -45,6 +46,7 @@ export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
+  visTypeVega: VisTypeVegaSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -63,11 +65,11 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, visTypeVega, __LEGACY }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
+      enableExternalUrls: visTypeVega.config.enableExternalUrls,
       esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
-      enableExternalUrls: core.injectedMetadata.getInjectedVar('enableExternalUrls') as boolean,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);

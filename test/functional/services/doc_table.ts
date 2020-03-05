@@ -98,13 +98,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await table.parseDomContent();
       const rowLocator = options.isAnchorRow ? '~docTableAnchorRow' : '~docTableRow';
       const rows = $.findTestSubjects(rowLocator).toArray();
-      const fields = rows.map((row: any) =>
+      return rows.map((row: any) =>
         $(row)
           .find('[data-test-subj~="docTableField"]')
           .toArray()
           .map((field: any) => $(field).text())
       );
-      return fields;
     }
 
     public async getHeaderFields(): Promise<string[]> {
@@ -140,6 +139,22 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     ): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
+      await addInclusiveFilterButton.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async getAddExistsFilterButton(
+      tableDocViewRow: WebElementWrapper
+    ): Promise<WebElementWrapper> {
+      return await tableDocViewRow.findByCssSelector(`[data-test-subj~="addExistsFilterButton"]`);
+    }
+
+    public async addExistsFilter(
+      detailsRow: WebElementWrapper,
+      fieldName: WebElementWrapper
+    ): Promise<void> {
+      const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
+      const addInclusiveFilterButton = await this.getAddExistsFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }

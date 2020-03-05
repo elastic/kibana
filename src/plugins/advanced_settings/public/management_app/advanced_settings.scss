@@ -17,21 +17,27 @@
  * under the License.
  */
 
-.mgtAdvancedSettings__field {
+ .mgtAdvancedSettings__field {
   + * {
     margin-top: $euiSize;
   }
 
-  &Wrapper {
-    width: 640px;
 
-    @include internetExplorerOnly() {
-      min-height: 1px;
-    }
+  padding-left: $euiSizeS;
+  margin-left: -$euiSizeS;
+  &--unsaved {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorSecondary;
   }
-
-  &Actions {
-    padding-top: $euiSizeM;
+  &--invalid {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorDanger;
+  }
+  @include internetExplorerOnly() {
+    min-height: 1px;
+  }
+  &Row {
+    padding-left: $euiSizeS;
   }
 
   @include internetExplorerOnly {
@@ -39,4 +45,20 @@
       min-height: 1px;
     }
   }
+}
+
+.mgtAdvancedSettingsForm__unsavedCount {
+  @include euiBreakpoint('xs', 's') {
+    display: none;
+  }
+}
+
+.mgtAdvancedSettingsForm__unsavedCountMessage{
+  // Simulates a left side border without shifting content
+  box-shadow: -$euiSizeXS 0px $euiColorSecondary;
+  padding-left: $euiSizeS;
+}
+
+.mgtAdvancedSettingsForm__button {
+  width: 100%;
 }

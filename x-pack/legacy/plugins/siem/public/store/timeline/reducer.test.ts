@@ -6,7 +6,6 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import {
   IS_OPERATOR,
   DataProvider,
@@ -15,9 +14,9 @@ import {
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
-  getColumnWidthFromType,
   DEFAULT_TIMELINE_WIDTH,
-} from '../../components/timeline/body/helpers';
+} from '../../components/timeline/body/constants';
+import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
@@ -41,7 +40,8 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { timelineDefaults } from './model';
+import { ColumnHeaderOptions } from './model';
+import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 const timelineByIdMock: TimelineById = {
@@ -101,7 +101,11 @@ const timelineByIdMock: TimelineById = {
   },
 };
 
-const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
+const columnsMock: ColumnHeaderOptions[] = [
+  defaultHeaders[0],
+  defaultHeaders[1],
+  defaultHeaders[2],
+];
 
 describe('Timeline', () => {
   describe('#add saved object Timeline to store ', () => {
@@ -183,8 +187,8 @@ describe('Timeline', () => {
 
   describe('#upsertTimelineColumn', () => {
     let timelineById: TimelineById = {};
-    let columns: ColumnHeader[] = [];
-    let columnToAdd: ColumnHeader;
+    let columns: ColumnHeaderOptions[] = [];
+    let columnToAdd: ColumnHeaderOptions;
 
     beforeEach(() => {
       timelineById = cloneDeep(timelineByIdMock);

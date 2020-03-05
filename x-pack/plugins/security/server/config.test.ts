@@ -13,57 +13,78 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
@@ -101,15 +122,22 @@ describe('config schema', () => {
           authc: { providers: ['oidc'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+          ],
+        }
+      `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
@@ -126,16 +154,23 @@ describe('config schema', () => {
           authc: { providers: ['oidc', 'basic'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "oidc": Object {
-                                    "realm": "realm-1",
-                                  },
-                                  "providers": Array [
-                                    "oidc",
-                                    "basic",
-                                  ],
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "oidc": Object {
+            "realm": "realm-1",
+          },
+          "providers": Array [
+            "oidc",
+            "basic",
+          ],
+        }
+      `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
@@ -164,18 +199,25 @@ describe('config schema', () => {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-                                Object {
-                                  "providers": Array [
-                                    "saml",
-                                  ],
-                                  "saml": Object {
-                                    "maxRedirectURLSize": ByteSizeValue {
-                                      "valueInBytes": 2048,
-                                    },
-                                    "realm": "realm-1",
-                                  },
-                                }
-                        `);
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {
+            "maxRedirectURLSize": ByteSizeValue {
+              "valueInBytes": 2048,
+            },
+            "realm": "realm-1",
+          },
+        }
+      `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {

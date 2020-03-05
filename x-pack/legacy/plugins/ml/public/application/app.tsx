@@ -12,6 +12,7 @@ import 'ace';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { SecurityPluginSetup } from '../../../../../plugins/security/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
@@ -20,9 +21,9 @@ import { MlRouter } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
+  security: SecurityPluginSetup;
   __LEGACY: {
     XSRF: string;
-    APP_URL: string;
   };
 }
 
@@ -46,9 +47,9 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
     XSRF: deps.__LEGACY.XSRF,
-    APP_URL: deps.__LEGACY.APP_URL,
     application: coreStart.application,
     http: coreStart.http,
+    security: deps.security,
   });
   deps.onAppLeave(actions => {
     clearCache();
@@ -64,6 +65,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
   const services = {
     appName: 'ML',
     data: deps.data,
+    security: deps.security,
     ...coreStart,
   };
 

@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { Mark } from '.';
 
 // Extends Mark without adding new properties to it.

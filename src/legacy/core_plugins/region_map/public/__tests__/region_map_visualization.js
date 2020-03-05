@@ -38,8 +38,10 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
-import { Vis } from '../../../visualizations/public/np_ready/public/vis';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -158,7 +160,7 @@ describe('RegionMapsVisualizationTests', function() {
 
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, {
+      vis = new visualizationsStart.Vis(indexPattern, {
         type: 'region_map',
       });
 

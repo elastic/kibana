@@ -9,10 +9,7 @@ import React from 'react';
 
 import { TransformManagementSection } from './transform_management_section';
 
-jest.mock('ui/new_platform');
-jest.mock('ui/timefilter', () => {
-  return {};
-});
+jest.mock('../../../shared_imports');
 
 describe('Transform: <TransformManagementSection />', () => {
   test('Minimal initialization', () => {

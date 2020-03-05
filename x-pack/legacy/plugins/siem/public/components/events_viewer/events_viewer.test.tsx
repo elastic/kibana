@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
+import { act } from '@testing-library/react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { wait } from '../../lib/helpers';
@@ -27,6 +29,10 @@ mockUseFetchIndexPatterns.mockImplementation(() => [
   },
 ]);
 
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer/polyfilled');
+mockUseResizeObserver.mockImplementation(() => ({}));
+
 const from = 1566943856794;
 const to = 1566857456791;
 
@@ -47,7 +53,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -72,7 +78,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -97,7 +103,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -123,7 +129,7 @@ describe('EventsViewer', () => {
         </TestProviders>
       );
 
-      await wait();
+      await act(() => wait());
       wrapper.update();
 
       defaultHeaders.forEach(h =>

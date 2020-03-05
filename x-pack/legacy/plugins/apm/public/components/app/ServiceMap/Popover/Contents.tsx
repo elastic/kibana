@@ -14,7 +14,7 @@ import cytoscape from 'cytoscape';
 import React from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
-import { ServiceMetricList } from './ServiceMetricList';
+import { ServiceMetricFetcher } from './ServiceMetricFetcher';
 
 const popoverMinWidth = 280;
 
@@ -49,7 +49,7 @@ export function Contents({
       </EuiFlexItem>
       <EuiFlexItem>
         {isService ? (
-          <ServiceMetricList serviceName={selectedNodeServiceName} />
+          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
         ) : (
           <Info {...selectedNodeData} />
         )}

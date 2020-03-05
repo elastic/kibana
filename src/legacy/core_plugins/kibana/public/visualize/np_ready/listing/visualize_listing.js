@@ -36,7 +36,6 @@ export function VisualizeListingController($injector, $scope, createNewVis) {
   const {
     addBasePath,
     chrome,
-    legacyChrome,
     savedObjectsClient,
     savedVisualizations,
     data: {
@@ -100,17 +99,13 @@ export function VisualizeListingController($injector, $scope, createNewVis) {
       selectedItems.map(item => {
         return savedObjectsClient.delete(item.savedObjectType, item.id);
       })
-    )
-      .then(() => {
-        legacyChrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
-      })
-      .catch(error => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
-            defaultMessage: 'Error deleting visualization',
-          }),
-        });
+    ).catch(error => {
+      toastNotifications.addError(error, {
+        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+          defaultMessage: 'Error deleting visualization',
+        }),
       });
+    });
   };
 
   chrome.setBreadcrumbs([

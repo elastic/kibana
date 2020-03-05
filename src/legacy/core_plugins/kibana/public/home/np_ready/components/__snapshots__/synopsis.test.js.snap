@@ -9,6 +9,7 @@ exports[`props iconType 1`] = `
   href="link_to_item"
   icon={
     <EuiIcon
+      alt=""
       size="l"
       type="logoApache"
     />

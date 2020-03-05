@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
@@ -40,7 +41,11 @@ const RulesTableFiltersComponent = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
   const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
-  const [isLoadingTags, tags] = useTags();
+  const [isLoadingTags, tags, reFetchTags] = useTags();
+
+  useEffect(() => {
+    reFetchTags();
+  }, [rulesCustomInstalled, rulesInstalled]);
 
   // Propagate filter changes to parent
   useEffect(() => {
@@ -59,6 +64,15 @@ const RulesTableFiltersComponent = ({
     setShowElasticRules(false);
   }, [setShowElasticRules, showCustomRules, setShowCustomRules]);
 
+  const handleSelectedTags = useCallback(
+    newTags => {
+      if (!isEqual(newTags, selectedTags)) {
+        setSelectedTags(newTags);
+      }
+    },
+    [selectedTags]
+  );
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
@@ -74,9 +88,10 @@ const RulesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover
-            tags={tags}
-            onSelectedTagsChanged={setSelectedTags}
             isLoading={isLoadingTags}
+            onSelectedTagsChanged={handleSelectedTags}
+            selectedTags={selectedTags}
+            tags={tags}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

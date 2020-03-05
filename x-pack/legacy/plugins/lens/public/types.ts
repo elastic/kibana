@@ -47,12 +47,14 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
+  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
+  registerVisualization: <T, P>(
+    visualization: Visualization<T, P> | Promise<Visualization<T, P>>
+  ) => void;
 }
 
 export interface EditorFrameStart {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
+  createInstance: (options: EditorFrameOptions) => Promise<EditorFrameInstance>;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority

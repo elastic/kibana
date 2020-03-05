@@ -64,8 +64,8 @@ Array [
       },
     },
     "migrations": Object {
-      "1.0.0": [MockFunction],
-      "2.0.4": [MockFunction],
+      "1.0.0": [Function],
+      "2.0.4": [Function],
     },
     "name": "typeA",
     "namespaceAgnostic": true,
@@ -100,7 +100,7 @@ Array [
       },
     },
     "migrations": Object {
-      "1.5.3": [MockFunction],
+      "1.5.3": [Function],
     },
     "name": "typeC",
     "namespaceAgnostic": false,

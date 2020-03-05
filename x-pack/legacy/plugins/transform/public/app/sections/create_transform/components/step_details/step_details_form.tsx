@@ -7,8 +7,6 @@
 import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { metadata } from 'ui/metadata';
-import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
@@ -16,6 +14,7 @@ import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_r
 import { useKibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
+import { useDocumentationLinks, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
 
@@ -49,6 +48,22 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
   };
 }
 
+export function applyTransformConfigToDetailsState(
+  state: StepDetailsExposedState,
+  transformConfig?: TransformPivotConfig
+): StepDetailsExposedState {
+  // apply the transform configuration to wizard DETAILS state
+  if (transformConfig !== undefined) {
+    const time = transformConfig.sync?.time;
+    if (time !== undefined) {
+      state.continuousModeDateField = time.field;
+      state.continuousModeDelay = time.delay;
+      state.isContinuousModeEnabled = true;
+    }
+  }
+  return state;
+}
+
 interface Props {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
@@ -56,6 +71,8 @@ interface Props {
 
 export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const kibanaContext = useKibanaContext();
+  const toastNotifications = useToastNotifications();
+  const { esIndicesCreateIndex } = useDocumentationLinks();
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 
@@ -258,10 +275,7 @@ export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange
                   defaultMessage: 'Invalid destination index name.',
                 })}
                 <br />
-                <EuiLink
-                  href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
-                  target="_blank"
-                >
+                <EuiLink href={esIndicesCreateIndex} target="_blank">
                   {i18n.translate(
                     'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
                     {

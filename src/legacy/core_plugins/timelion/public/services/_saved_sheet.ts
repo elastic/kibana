@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { IUiSettingsClient } from 'kibana/public';
+import {
+  createSavedObjectClass,
+  SavedObjectKibanaServices,
+} from '../../../../../plugins/saved_objects/public';
 
 // Used only by the savedSheets service, usually no reason to change this
 export function createSavedSheetClass(

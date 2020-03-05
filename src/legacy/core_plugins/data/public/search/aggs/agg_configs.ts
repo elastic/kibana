@@ -27,7 +27,7 @@
  */
 
 import _ from 'lodash';
-import { AggConfig, AggConfigOptions } from './agg_config';
+import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
 import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
 import {
@@ -63,7 +63,7 @@ export class AggConfigs {
   public schemas: any;
   public timeRange?: TimeRange;
 
-  aggs: AggConfig[];
+  aggs: IAggConfig[];
 
   constructor(indexPattern: IndexPattern, configStates = [] as any, schemas?: any) {
     configStates = AggConfig.ensureIds(configStates);
@@ -74,7 +74,7 @@ export class AggConfigs {
 
     configStates.forEach((params: any) => this.createAggConfig(params));
 
-    if (this.schemas) {
+    if (schemas) {
       this.initializeDefaultsFromSchemas(schemas);
     }
   }

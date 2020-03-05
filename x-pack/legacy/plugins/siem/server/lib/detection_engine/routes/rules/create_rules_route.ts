@@ -5,21 +5,25 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import uuid from 'uuid';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { GetScopedClients } from '../../../../services';
+import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transform } from './utils';
-import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { transformValidate } from './validate';
 
-export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+import { getIndexExists } from '../../index/get_index_exists';
+import { getIndex, transformError } from '../utils';
+
+export const createCreateRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_RULES_URL,
@@ -59,21 +63,21 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         type,
         references,
       } = request.payload;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, finalIndex);
+        const {
+          alertsClient,
+          actionsClient,
+          clusterClient,
+          savedObjectsClient,
+          spacesClient,
+        } = await getClients(request);
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
           return headers
             .response({
@@ -133,16 +137,16 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
-        if (transformed == null) {
+        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        if (errors != null) {
           return headers
             .response({
-              message: 'Internal error transforming rules',
+              message: errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          return transformed;
+          return validated;
         }
       } catch (err) {
         const error = transformError(err);
@@ -157,6 +161,10 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createRulesRoute = (server: ServerFacade): void => {
-  server.route(createCreateRulesRoute(server));
+export const createRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createCreateRulesRoute(config, getClients));
 };

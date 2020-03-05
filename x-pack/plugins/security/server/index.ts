@@ -32,6 +32,17 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   deprecations: ({ rename, unused }) => [
     rename('sessionTimeout', 'session.idleTimeout'),
     unused('authorization.legacyFallback.enabled'),
+    (settings, fromPath, log) => {
+      const hasProvider = (provider: string) =>
+        settings?.xpack?.security?.authc?.providers?.includes(provider) ?? false;
+
+      if (hasProvider('basic') && hasProvider('token')) {
+        log(
+          'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.'
+        );
+      }
+      return settings;
+    },
   ],
 };
 export const plugin: PluginInitializer<

@@ -20,7 +20,14 @@ import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
-import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
+import { createBrowserHistory } from 'history';
+import {
+  LegacyCoreSetup,
+  LegacyCoreStart,
+  App,
+  AppMountDeprecated,
+  ScopedHistory,
+} from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
@@ -44,6 +51,7 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -61,6 +69,7 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
+  visTypeVega: VisTypeVegaSetup;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -124,7 +133,7 @@ let legacyAppRegistered = false;
  * Exported for testing only. Use `npSetup.core.application.register` in legacy apps.
  * @internal
  */
-export const legacyAppRegister = (app: App) => {
+export const legacyAppRegister = (app: App<any>) => {
   if (legacyAppRegistered) {
     throw new Error(`core.application.register may only be called once for legacy plugins.`);
   }
@@ -135,9 +144,15 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
+      const appRoute = app.appRoute || `/app/${app.id}`;
+      const appBasePath = npSetup.core.http.basePath.prepend(appRoute);
       const params = {
         element,
-        appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`),
+        appBasePath,
+        history: new ScopedHistory(
+          createBrowserHistory({ basename: npSetup.core.http.basePath.get() }),
+          appRoute
+        ),
         onAppLeave: () => undefined,
       };
       const unmount = isAppMountDeprecated(app.mount)

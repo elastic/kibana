@@ -6,11 +6,8 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { I18nProvider } from '@kbn/i18n/react';
-import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
 import React from 'react';
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider, ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
@@ -32,7 +29,7 @@ interface Props {
 }
 
 export const apolloClient = new ApolloClient({
-  cache: new Cache(),
+  cache: new InMemoryCache(),
   link: new ApolloLink((o, f) => (f ? f(o) : null)),
 });
 

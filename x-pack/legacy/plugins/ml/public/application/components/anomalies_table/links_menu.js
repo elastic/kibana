@@ -236,26 +236,26 @@ class LinksMenuUI extends Component {
     let i = 0;
     findFieldType(datafeedIndices[i]);
 
-    function findFieldType(index) {
-      getFieldTypeFromMapping(index, categorizationFieldName)
-        .then(resp => {
-          if (resp !== '') {
-            createAndOpenUrl(index, resp);
-          } else {
-            i++;
-            if (i < datafeedIndices.length) {
-              findFieldType(datafeedIndices[i]);
-            } else {
-              error();
-            }
-          }
+    const error = () => {
+      console.log(
+        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
+        datafeedIndices
+      );
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
+          defaultMessage:
+            'Unable to view examples of documents with mlcategory {categoryId} ' +
+            'as no mapping could be found for the categorization field {categorizationFieldName}',
+          values: {
+            categoryId,
+            categorizationFieldName,
+          },
         })
-        .catch(() => {
-          error();
-        });
-    }
+      );
+    };
 
-    function createAndOpenUrl(index, categorizationFieldType) {
+    const createAndOpenUrl = (index, categorizationFieldType) => {
       // Find the ID of the index pattern with a title attribute which matches the
       // index configured in the datafeed. If a Kibana index pattern has not been created
       // for this index, then the user will see a warning message on the Discover tab advising
@@ -340,25 +340,25 @@ class LinksMenuUI extends Component {
             })
           );
         });
-    }
+    };
 
-    function error() {
-      console.log(
-        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
-        datafeedIndices
-      );
-      const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
-        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
-          defaultMessage:
-            'Unable to view examples of documents with mlcategory {categoryId} ' +
-            'as no mapping could be found for the categorization field {categorizationFieldName}',
-          values: {
-            categoryId,
-            categorizationFieldName,
-          },
+    function findFieldType(index) {
+      getFieldTypeFromMapping(index, categorizationFieldName)
+        .then(resp => {
+          if (resp !== '') {
+            createAndOpenUrl(index, resp);
+          } else {
+            i++;
+            if (i < datafeedIndices.length) {
+              findFieldType(datafeedIndices[i]);
+            } else {
+              error();
+            }
+          }
         })
-      );
+        .catch(() => {
+          error();
+        });
     }
   };
 

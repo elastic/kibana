@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../../alerting';
-import { Alert } from '../../../../../alerting/server/types';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { createRules } from './create_rules';
 import { PrepackagedRules } from '../types';
 

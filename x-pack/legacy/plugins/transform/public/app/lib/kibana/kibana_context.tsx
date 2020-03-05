@@ -6,30 +6,25 @@
 
 import React, { createContext, useContext, FC } from 'react';
 
+import { IUiSettingsClient } from 'kibana/public';
+
 import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import {
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../../src/plugins/data/public';
-import { KibanaConfig } from '../../../../../../../../src/legacy/server/kbn_server';
-
-// set() method is missing in original d.ts
-interface KibanaConfigTypeFix extends KibanaConfig {
-  set(key: string, value: any): void;
-}
 
 interface UninitializedKibanaContextValue {
-  initialized: boolean;
+  initialized: false;
 }
 
 export interface InitializedKibanaContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPattern;
-  currentSavedSearch: SavedSearch;
   indexPatterns: IndexPatternsContract;
-  initialized: boolean;
-  kbnBaseUrl: string;
-  kibanaConfig: KibanaConfigTypeFix;
+  initialized: true;
+  kibanaConfig: IUiSettingsClient;
+  currentIndexPattern: IndexPattern;
+  currentSavedSearch?: SavedSearch;
 }
 
 export type KibanaContextValue = UninitializedKibanaContextValue | InitializedKibanaContextValue;

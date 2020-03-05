@@ -37,30 +37,17 @@ const localStorage = new Storage(window.localStorage);
 import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
-    if (nextId !== prevState.prevId) {
-      return {
-        displayName: '',
-        immutableSourceProps: [],
-        hasLoadedSourcePropsForLayer: false,
-        prevId: nextId,
-      };
-    }
-    return null;
-  }
-
-  state = {};
+  state = {
+    displayName: '',
+    immutableSourceProps: [],
+    leftJoinFields: null,
+  };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadDisplayName();
     this.loadImmutableSourceProperties();
-  }
-
-  componentDidUpdate() {
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
+    this.loadLeftJoinFields();
   }
 
   componentWillUnmount() {
@@ -73,26 +60,44 @@ export class LayerPanel extends React.Component {
     }
 
     const displayName = await this.props.selectedLayer.getDisplayName();
-    if (!this._isMounted || displayName === this.state.displayName) {
-      return;
+    if (this._isMounted) {
+      this.setState({ displayName });
     }
-
-    this.setState({ displayName });
   };
 
   loadImmutableSourceProperties = async () => {
-    if (this.state.hasLoadedSourcePropsForLayer || !this.props.selectedLayer) {
+    if (!this.props.selectedLayer) {
       return;
     }
 
     const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
     if (this._isMounted) {
-      this.setState({
-        immutableSourceProps,
-        hasLoadedSourcePropsForLayer: true,
-      });
+      this.setState({ immutableSourceProps });
     }
   };
+
+  async loadLeftJoinFields() {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
+      return;
+    }
+
+    let leftJoinFields;
+    try {
+      const leftFieldsInstances = await this.props.selectedLayer.getLeftJoinFields();
+      const leftFieldPromises = leftFieldsInstances.map(async field => {
+        return {
+          name: field.getName(),
+          label: await field.getLabel(),
+        };
+      });
+      leftJoinFields = await Promise.all(leftFieldPromises);
+    } catch (error) {
+      leftJoinFields = [];
+    }
+    if (this._isMounted) {
+      this.setState({ leftJoinFields });
+    }
+  }
 
   _onSourceChange = ({ propName, value }) => {
     this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
@@ -121,7 +126,10 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <JoinEditor />
+          <JoinEditor
+            leftJoinFields={this.state.leftJoinFields}
+            layerDisplayName={this.state.displayName}
+          />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>

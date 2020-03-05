@@ -61,7 +61,7 @@ export const checkForSavedObjects = async (objects: KibanaObjects): Promise<Kiba
   try {
     return await Object.keys(objects).reduce(async (prevPromise, type) => {
       const acc = await prevPromise;
-      const { savedObjects } = await savedObjectsClient.find({
+      const { savedObjects } = await savedObjectsClient.find<any>({
         type,
         perPage: 1000,
       });

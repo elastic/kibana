@@ -6,13 +6,13 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUncommonProcessesQuery,
+  GetUncommonProcessesQueryComponent,
   PageInfoPaginated,
   UncommonProcessesEdges,
 } from '../../graphql/types';
@@ -21,8 +21,6 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-
-import { uncommonProcessesQuery } from './index.gql_query';
 
 const ID = 'uncommonProcessesQuery';
 
@@ -39,17 +37,11 @@ export interface UncommonProcessesArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UncommonProcessesArgs) => React.ReactNode;
+  children: (args: UncommonProcessesArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 
-export interface UncommonProcessesComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-}
-
-type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps & WithKibanaProps;
+type UncommonProcessesProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
   UncommonProcessesProps,
@@ -83,8 +75,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
-        query={uncommonProcessesQuery}
+      <GetUncommonProcessesQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -126,7 +117,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
             uncommonProcesses,
           });
         }}
-      </Query>
+      </GetUncommonProcessesQueryComponent>
     );
   }
 }
@@ -144,7 +135,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const UncommonProcessesQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(UncommonProcessesComponentQuery);

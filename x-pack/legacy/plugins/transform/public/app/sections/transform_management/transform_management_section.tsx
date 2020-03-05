@@ -24,12 +24,12 @@ import {
 } from '@elastic/eui';
 
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { useDocumentationLinks } from '../../app_dependencies';
 import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { documentationLinksService } from '../../services/documentation';
 
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 import { SearchSelection } from './components/search_selection';
@@ -37,6 +37,8 @@ import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 
 export const TransformManagement: FC = () => {
+  const { esTransform } = useDocumentationLinks();
+
   const [transformsLoading, setTransformsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -98,7 +100,7 @@ export const TransformManagement: FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={documentationLinksService.getTransformsDocUrl()}
+                href={esTransform}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"

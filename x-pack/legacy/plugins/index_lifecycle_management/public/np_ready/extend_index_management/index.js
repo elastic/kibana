@@ -9,13 +9,6 @@ import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
-import {
-  addSummaryExtension,
-  addBannerExtension,
-  addActionExtension,
-  addFilterExtension,
-} from '../../../../index_management/public/index_management_extensions';
-
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -27,13 +20,17 @@ const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({
   indices,
-  createUiStatsReporter,
+  usageCollection,
   toasts,
   fatalErrors,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
-  initUiMetric(createUiStatsReporter);
+  const getLegacyReporter = appName => (type, name) => {
+    usageCollection.reportUiStats(appName, type, name);
+  };
+
+  initUiMetric(getLegacyReporter);
   initNotification(toasts, fatalErrors);
 
   const allHaveErrors = every(indices, index => {
@@ -202,16 +199,50 @@ export const ilmFilterExtension = indices => {
           },
         ],
       },
+      {
+        type: 'field_value_selection',
+        field: 'ilm.phase',
+        name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.lifecyclePhaseLabel', {
+          defaultMessage: 'Lifecycle phase',
+        }),
+        multiSelect: 'or',
+        options: [
+          {
+            value: 'hot',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
+              defaultMessage: 'Hot',
+            }),
+          },
+          {
+            value: 'warm',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
+              defaultMessage: 'Warm',
+            }),
+          },
+          {
+            value: 'cold',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
+              defaultMessage: 'Cold',
+            }),
+          },
+          {
+            value: 'delete',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
+              defaultMessage: 'Delete',
+            }),
+          },
+        ],
+      },
     ];
   }
 };
 
-export const addAllExtensions = () => {
-  addActionExtension(retryLifecycleActionExtension);
-  addActionExtension(removeLifecyclePolicyActionExtension);
-  addActionExtension(addLifecyclePolicyActionExtension);
+export const addAllExtensions = extensionsService => {
+  extensionsService.addAction(retryLifecycleActionExtension);
+  extensionsService.addAction(removeLifecyclePolicyActionExtension);
+  extensionsService.addAction(addLifecyclePolicyActionExtension);
 
-  addBannerExtension(ilmBannerExtension);
-  addSummaryExtension(ilmSummaryExtension);
-  addFilterExtension(ilmFilterExtension);
+  extensionsService.addBanner(ilmBannerExtension);
+  extensionsService.addSummary(ilmSummaryExtension);
+  extensionsService.addFilter(ilmFilterExtension);
 };

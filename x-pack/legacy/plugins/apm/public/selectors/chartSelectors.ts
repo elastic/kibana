@@ -9,13 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { difference, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
-import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TimeSeriesAPIResponse } from '../../../../../plugins/apm/server/lib/transactions/charts';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ApmTimeSeriesResponse } from '../../../../../plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   Coordinate,
   RectCoordinate,
   TimeSeries
-} from '../../typings/timeseries';
+} from '../../../../../plugins/apm/typings/timeseries';
 import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';

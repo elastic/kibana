@@ -158,6 +158,7 @@ describe('alert_form', () => {
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
 
       const initialAlert = ({
         name: 'test',

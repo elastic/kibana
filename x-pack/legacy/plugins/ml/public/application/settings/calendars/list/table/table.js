@@ -12,6 +12,8 @@ import { EuiButton, EuiLink, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
+
 export const CalendarsListTable = ({
   calendarsList,
   onDeleteClick,
@@ -52,6 +54,18 @@ export const CalendarsListTable = ({
       }),
       sortable: true,
       truncateText: true,
+      render: jobList => {
+        return jobList === GLOBAL_CALENDAR ? (
+          <span style={{ fontStyle: 'italic' }}>
+            <FormattedMessage
+              id="xpack.ml.calendarsList.table.allJobsLabel"
+              defaultMessage="Applies to all jobs"
+            />
+          </span>
+        ) : (
+          jobList
+        );
+      },
     },
     {
       field: 'events_length',

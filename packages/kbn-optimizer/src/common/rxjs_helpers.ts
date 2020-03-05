@@ -24,9 +24,9 @@ type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 type MapFn<T1, T2> = (item: T1, index: number) => T2;
 
 /**
- * Wrap an operator chain in a closure so that is can have some local
- * state. The `fn` is called each time the final observable is
- * subscribed so the pipeline/closure is setup for each subscription.
+ * Wrap an operator chain in a closure so that it can have some local
+ * state. The `fn` is called each time the returned observable is
+ * subscribed; the closure is recreated for each subscription.
  */
 export const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
   return (source: Rx.Observable<T1>) => {

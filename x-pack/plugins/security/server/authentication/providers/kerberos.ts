@@ -12,26 +12,14 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { Tokens, TokenPair } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
  */
 type ProviderState = TokenPair;
-
-/**
- * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
- * @param request Request instance to extract authentication scheme for.
- */
-function getRequestAuthenticationScheme(request: KibanaRequest) {
-  const authorization = request.headers.authorization;
-  if (!authorization || typeof authorization !== 'string') {
-    return '';
-  }
-
-  return authorization.split(/\s+/)[0].toLowerCase();
-}
 
 /**
  * Name of the `WWW-Authenticate` we parse out of Elasticsearch responses or/and return to the
@@ -56,24 +44,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getRequestAuthenticationScheme(request);
-    if (
-      authenticationScheme &&
-      authenticationScheme !== 'negotiate' &&
-      authenticationScheme !== 'bearer'
-    ) {
+    const authenticationScheme = getHTTPAuthenticationScheme(request);
+    if (authenticationScheme && authenticationScheme !== 'negotiate') {
       this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = AuthenticationResult.notHandled();
-    if (authenticationScheme) {
-      // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-      authenticationResult =
-        authenticationScheme === 'bearer'
-          ? await this.authenticateWithBearerScheme(request)
-          : await this.authenticateWithNegotiateScheme(request);
-    }
+    let authenticationResult = authenticationScheme
+      ? await this.authenticateWithNegotiateScheme(request)
+      : AuthenticationResult.notHandled();
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
@@ -113,6 +92,14 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
+  }
+
+  /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
@@ -197,26 +184,6 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       });
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
-  }
-
-  /**
-   * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
-   * @param request Request instance.
-   */
-  private async authenticateWithBearerScheme(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate request using "Bearer" authentication scheme.');
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated using "Bearer" authentication scheme.');
-      return AuthenticationResult.succeeded(user);
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
-      );
       return AuthenticationResult.failed(err);
     }
   }

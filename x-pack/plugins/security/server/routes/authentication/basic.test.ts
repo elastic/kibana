@@ -33,7 +33,9 @@ describe('Basic authentication routes', () => {
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     router = httpServiceMock.createRouter();
+
     authc = authenticationMock.create();
+    authc.isProviderEnabled.mockImplementation(provider => provider === 'basic');
 
     mockContext = ({
       licensing: {
@@ -163,6 +165,22 @@ describe('Basic authentication routes', () => {
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
           provider: 'basic',
+          value: { username: 'user', password: 'password' },
+        });
+      });
+
+      it('prefers `token` authentication provider if it is enabled', async () => {
+        authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
+        authc.isProviderEnabled.mockImplementation(
+          provider => provider === 'token' || provider === 'basic'
+        );
+
+        const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+        expect(response.status).toBe(204);
+        expect(response.payload).toBeUndefined();
+        expect(authc.login).toHaveBeenCalledWith(mockRequest, {
+          provider: 'token',
           value: { username: 'user', password: 'password' },
         });
       });

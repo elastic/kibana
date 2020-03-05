@@ -79,7 +79,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The URI address for HDFS."
           />
         }
-        idAria="hdfsRepositoryUriDescription"
         fullWidth
       >
         <EuiFormRow
@@ -90,7 +89,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryUriDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.uri)}
           error={settingErrors.uri}
         >
@@ -108,7 +106,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 uri: e.target.value ? `hdfs://${e.target.value}` : '',
               });
             }}
-            aria-describedby="hdfsRepositoryUriDescription hdfsRepositoryUriProtocolDescription"
+            aria-describedby="hdfsRepositoryUriProtocolDescription"
             data-test-subj="uriInput"
           />
         </EuiFormRow>
@@ -132,7 +130,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The file path where data is stored."
           />
         }
-        idAria="hdfsRepositoryPathDescription"
         fullWidth
       >
         <EuiFormRow
@@ -143,7 +140,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryPathDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.path)}
           error={settingErrors.path}
         >
@@ -178,13 +174,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Loads the default Hadoop configuration."
           />
         }
-        idAria="hdfsRepositoryLoadDefaultsDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['hdfsRepositoryLoadDefaultsDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.loadDefaults)}
           error={settingErrors.loadDefaults}
         >
@@ -224,13 +218,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
-        idAria="hdfsRepositoryCompressDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['hdfsRepositoryCompressDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
         >
@@ -270,7 +262,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
-        idAria="hdfsRepositoryChunkSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -281,7 +272,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -317,7 +307,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The Kerberos principal to use when connecting to a secured HDFS cluster."
           />
         }
-        idAria="hdfsRepositorySecurityPrincipalDescription"
         fullWidth
       >
         <EuiFormRow
@@ -328,7 +317,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositorySecurityPrincipalDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.securityPrincipal)}
           error={settingErrors.securityPrincipal}
         >
@@ -365,7 +353,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           </Fragment>
         }
-        idAria="hdfsRepositoryConfigurationDescription"
         fullWidth
       >
         <EuiFormRow
@@ -376,7 +363,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryConfigurationDescription']}
           isInvalid={isConfInvalid}
           error={
             <FormattedMessage
@@ -463,7 +449,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The rate for creating snapshots for each node."
           />
         }
-        idAria="hdfsRepositoryMaxSnapshotBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -474,7 +459,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -510,7 +494,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The snapshot restore rate for each node."
           />
         }
-        idAria="hdfsRepositoryMaxRestoreBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -521,7 +504,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -557,13 +539,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
-        idAria="hdfsRepositoryReadonlyDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['hdfsRepositoryReadonlyDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >

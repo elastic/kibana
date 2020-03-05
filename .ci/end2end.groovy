@@ -13,7 +13,7 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     APM_ITS = 'apm-integration-testing'
-    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
+    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {
@@ -25,7 +25,7 @@ pipeline {
     durabilityHint('PERFORMANCE_OPTIMIZED')
   }
   triggers {
-    issueCommentTrigger('(?i).*jenkins\\W+run\\W+(?:the\\W+)?e2e(?:\\W+please)?.*')
+    issueCommentTrigger('(?i)(retest|.*jenkins\\W+run\\W+(?:the\\W+)?e2e?.*)')
   }
   parameters {
     booleanParam(name: 'FORCE', defaultValue: false, description: 'Whether to force the run.')
@@ -60,8 +60,14 @@ pipeline {
         }
       }
       steps {
+        notifyStatus('Starting services', 'PENDING')
         dir("${APM_ITS}"){
-          sh './scripts/compose.py start master --no-kibana --no-xpack-secure'
+          sh './scripts/compose.py start master --no-kibana'
+        }
+      }
+      post {
+        unsuccessful {
+          notifyStatus('Environmental issue', 'FAILURE')
         }
       }
     }
@@ -77,8 +83,14 @@ pipeline {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
       steps {
+        notifyStatus('Preparing kibana', 'PENDING')
         dir("${BASE_DIR}"){
           sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
+        }
+      }
+      post {
+        unsuccessful {
+          notifyStatus('Kibana warm up failed', 'FAILURE')
         }
       }
     }
@@ -91,10 +103,11 @@ pipeline {
         }
       }
       steps{
+        notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
           sh '''
             jobs -l
-            docker build --tag cypress ${CYPRESS_DIR}/ci
+            docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) ${CYPRESS_DIR}/ci
             docker run --rm -t --user "$(id -u):$(id -g)" \
                     -v `pwd`:/app --network="host" \
                     --name cypress cypress'''
@@ -103,14 +116,20 @@ pipeline {
       post {
         always {
           dir("${BASE_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/screenshots/**,${CYPRESS_DIR}/videos/**,${CYPRESS_DIR}/*e2e-tests.xml")
-            junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/*e2e-tests.xml")
+            archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/**/screenshots/**,${CYPRESS_DIR}/**/videos/**,${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
+            junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
           }
           dir("${APM_ITS}"){
             sh 'docker-compose logs > apm-its.log || true'
             sh 'docker-compose down -v || true'
             archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.log')
           }
+        }
+        unsuccessful {
+          notifyStatus('Test failures', 'FAILURE')
+        }
+        success {
+          notifyStatus('Tests passed', 'SUCCESS')
         }
       }
     }
@@ -122,4 +141,8 @@ pipeline {
       }
     }
   }
+}
+
+def notifyStatus(String description, String status) {
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanDisplayURL())
 }

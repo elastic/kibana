@@ -22,8 +22,9 @@ import { createKibanaUtilsCore, createGetterSetter } from '../../kibana_utils/pu
 import { ExpressionInterpreter } from './types';
 import { Start as IInspector } from '../../inspector/public';
 import { ExpressionsSetup } from './plugin';
+import { ExpressionsService } from '../common';
 
-export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
+export const { getCoreStart, setCoreStart } = createKibanaUtilsCore();
 
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
 
@@ -37,3 +38,7 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
 export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
   ExpressionsSetup['__LEGACY']['renderers']
 >('Renderers registry');
+
+export const [getExpressionsService, setExpressionsService] = createGetterSetter<
+  ExpressionsService
+>('ExpressionsService');

@@ -42,8 +42,14 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new Source(sourceDescriptor, inspectorAdapters);
 }
 
-export const getTooltipState = ({ map }) => {
-  return map.tooltipState;
+export const getOpenTooltips = ({ map }) => {
+  return map && map.openTooltips ? map.openTooltips : [];
+};
+
+export const getHasLockedTooltips = state => {
+  return getOpenTooltips(state).some(({ isLocked }) => {
+    return isLocked;
+  });
 };
 
 export const getMapReady = ({ map }) => map && map.ready;
@@ -118,6 +124,21 @@ export const getRefreshConfig = ({ map }) => {
 };
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
+
+function getLayerDescriptor(state = {}, layerId) {
+  const layerListRaw = getLayerListRaw(state);
+  return layerListRaw.find(layer => layer.id === layerId);
+}
+
+export function getDataRequestDescriptor(state = {}, layerId, dataId) {
+  const layerDescriptor = getLayerDescriptor(state, layerId);
+  if (!layerDescriptor || !layerDescriptor.__dataRequests) {
+    return;
+  }
+  return _.get(layerDescriptor, '__dataRequests', []).find(dataRequest => {
+    return dataRequest.dataId === dataId;
+  });
+}
 
 export const getDataFilters = createSelector(
   getMapExtent,

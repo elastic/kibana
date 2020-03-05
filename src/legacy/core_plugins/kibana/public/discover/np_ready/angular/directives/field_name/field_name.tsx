@@ -18,7 +18,9 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { FieldIcon } from '../../../../../../../../../plugins/kibana_react/public';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+
+import { FieldIcon, FieldIconProps } from '../../../../../../../../../plugins/kibana_react/public';
 import { shortenDottedString } from '../../../../../../../../../plugins/data/common/utils';
 import { getFieldTypeName } from './field_type_name';
 
@@ -35,25 +37,42 @@ interface Props {
   fieldName?: string;
   fieldType?: string;
   useShortDots?: boolean;
+  fieldIconProps?: Omit<FieldIconProps, 'type'>;
 }
 
-export function FieldName({ field, fieldName, fieldType, useShortDots }: Props) {
+export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIconProps }: Props) {
   const type = field ? String(field.type) : String(fieldType);
   const typeName = getFieldTypeName(type);
 
   const name = field ? String(field.name) : String(fieldName);
   const displayName = useShortDots ? shortenDottedString(name) : name;
 
-  const className = classNames({
-    'dscField--noResults': field ? !field.rowCount && !field.scripted : false,
-    // this is currently not styled, should display an icon
-    scripted: field ? field.scripted : false,
+  const noResults = field ? !field.rowCount && !field.scripted : false;
+
+  const className = classNames('dscFieldName', {
+    'dscFieldName--noResults': noResults,
   });
 
   return (
-    <span className={className} title={typeName}>
-      <FieldIcon type={type} label={typeName} />
-      <span className="dscFieldName">{displayName}</span>
-    </span>
+    <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <FieldIcon
+          type={type}
+          label={typeName}
+          scripted={field ? field.scripted : false}
+          {...fieldIconProps}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem className="eui-textTruncate">
+        <EuiToolTip
+          position="top"
+          content={displayName}
+          delay="long"
+          anchorClassName="eui-textTruncate"
+        >
+          <span>{displayName}</span>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

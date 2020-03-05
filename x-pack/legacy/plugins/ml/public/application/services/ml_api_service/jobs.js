@@ -21,7 +21,7 @@ export const jobs = {
 
   jobsWithTimerange(dateFormatTz) {
     return http({
-      url: `${basePath()}/jobs/jobs_with_timerange`,
+      url: `${basePath()}/jobs/jobs_with_time_range`,
       method: 'POST',
       data: {
         dateFormatTz,

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { OptionalFieldLabel } from '../optional_field_label';
-import { FormSchema } from '../shared_imports';
+import { FormSchema } from '../../../../shared_imports';
 
 export const schema: FormSchema = {
   interval: {

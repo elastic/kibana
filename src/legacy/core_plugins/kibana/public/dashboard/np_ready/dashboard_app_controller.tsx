@@ -26,22 +26,23 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
-import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
+import { migrateLegacyQuery, subscribeWithScope } from '../legacy_imports';
 import {
+  connectToQueryState,
   esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
   SavedQuery,
-  syncAppFilters,
-  syncQuery,
+  syncQueryStateWithUrl,
 } from '../../../../../../plugins/data/public';
 import {
+  getSavedObjectFinder,
   SaveResult,
   showSaveModal,
-  getSavedObjectFinder,
 } from '../../../../../../plugins/saved_objects/public';
 
 import {
@@ -96,6 +97,7 @@ export class DashboardAppController {
   };
 
   constructor({
+    pluginInitializerContext,
     $scope,
     $route,
     $routeParams,
@@ -103,10 +105,11 @@ export class DashboardAppController {
     localStorage,
     indexPatterns,
     savedQueryService,
-    embeddables,
+    embeddable,
     share,
     dashboardCapabilities,
-    npDataStart: { query: queryService },
+    embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
+    data: { query: queryService },
     core: {
       notifications,
       overlays,
@@ -127,12 +130,11 @@ export class DashboardAppController {
     // starts syncing `_g` portion of url with query services
     // note: dashboard_state_manager.ts syncs `_a` portion of url
     const {
-      stop: stopSyncingGlobalStateWithUrl,
+      stop: stopSyncingQueryServiceStateWithUrl,
       hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQuery(queryService, kbnUrlStateStorage);
+    } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
-
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
       chrome.docTitle.change(dash.title);
@@ -141,16 +143,25 @@ export class DashboardAppController {
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kibanaVersion: pluginInitializerContext.env.packageInfo.version,
       kbnUrlStateStorage,
       history,
     });
 
-    const stopSyncingAppFilters = syncAppFilters(filterManager, {
-      set: filters => dashboardStateManager.setFilters(filters),
-      get: () => dashboardStateManager.appState.filters,
-      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
-    });
+    // sync initial app filters from state to filterManager
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    // setup syncing of app filters between appState and filterManager
+    const stopSyncingAppFilters = connectToQueryState(
+      queryService,
+      {
+        set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
+        get: () => ({ filters: dashboardStateManager.appState.filters }),
+        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+      },
+      {
+        filters: esFilters.FilterStateStore.APP_STATE,
+      }
+    );
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -169,11 +180,18 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
-    const getIsEmptyInReadonlyMode = () =>
-      !dashboardStateManager.getPanels().length &&
-      !getShouldShowEditHelp() &&
-      !getShouldShowViewHelp() &&
-      dashboardConfig.getHideWriteControls();
+    const shouldShowUnauthorizedEmptyState = () => {
+      const readonlyMode =
+        !dashboardStateManager.getPanels().length &&
+        !getShouldShowEditHelp() &&
+        !getShouldShowViewHelp() &&
+        dashboardConfig.getHideWriteControls();
+      const userHasNoPermissions =
+        !dashboardStateManager.getPanels().length &&
+        !visualizeCapabilities.save &&
+        !mapsCapabilities.save;
+      return readonlyMode || userHasNoPermissions;
+    };
 
     const addVisualization = () => {
       navActions[TopNavIds.VISUALIZE]();
@@ -186,9 +204,9 @@ export class DashboardAppController {
 
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach(id => {
-        const embeddable = container.getChild(id);
-        if (isErrorEmbeddable(embeddable)) return;
-        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
@@ -239,7 +257,7 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
-      const isEmptyInReadonlyMode = getIsEmptyInReadonlyMode();
+      const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -284,7 +302,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddables.getEmbeddableFactory(
+    const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -296,7 +314,7 @@ export class DashboardAppController {
           dashboardContainer.renderEmpty = () => {
             const shouldShowEditHelp = getShouldShowEditHelp();
             const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
+            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
               <DashboardEmptyScreen
@@ -818,8 +836,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: embeddables.getEmbeddableFactories,
-          getFactory: embeddables.getEmbeddableFactory,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
           notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
@@ -829,7 +847,7 @@ export class DashboardAppController {
 
     navActions[TopNavIds.VISUALIZE] = async () => {
       const type = 'visualization';
-      const factory = embeddables.getEmbeddableFactory(type);
+      const factory = embeddable.getEmbeddableFactory(type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
@@ -897,7 +915,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      stopSyncingGlobalStateWithUrl();
+      stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();

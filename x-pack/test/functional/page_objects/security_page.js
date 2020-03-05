@@ -30,6 +30,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const rawDataTabLocator = 'a[id=rawdata-tab]';
 
       await PageObjects.common.navigateToApp('login');
+
+      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+      // to use the yml setting, e.g. cloud
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');

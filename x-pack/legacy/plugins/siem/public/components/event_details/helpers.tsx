@@ -7,9 +7,12 @@
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { ToStringArray } from '../../graphql/types';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
+import {
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
+import { Scalars } from '../../graphql/types';
 
 import * as i18n from './translations';
 
@@ -37,7 +40,7 @@ export interface Item {
   field: JSX.Element;
   fieldId: string;
   type: string;
-  values: ToStringArray;
+  values: Scalars['ToStringArray'];
 }
 
 export const getColumnHeaderFromBrowserField = ({
@@ -46,7 +49,7 @@ export const getColumnHeaderFromBrowserField = ({
 }: {
   browserField: Partial<BrowserField>;
   width?: number;
-}): ColumnHeader => ({
+}): ColumnHeaderOptions => ({
   category: browserField.category,
   columnHeaderType: 'not-filtered',
   description: browserField.description != null ? browserField.description : undefined,
@@ -68,7 +71,7 @@ export const getColumnsWithTimestamp = ({
 }: {
   browserFields: BrowserFields;
   category: string;
-}): ColumnHeader[] => {
+}): ColumnHeaderOptions[] => {
   const emptyFields: Record<string, Partial<BrowserField>> = {};
   const timestamp = get('base.fields.@timestamp', browserFields);
   const categoryFields: Array<Partial<BrowserField>> = [

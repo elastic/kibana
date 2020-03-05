@@ -10,6 +10,7 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { Tokens, TokenPair } from '../tokens';
 import {
   AuthenticationProviderOptions,
@@ -130,16 +131,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-    let {
-      authenticationResult,
-      headerNotRecognized, // eslint-disable-line prefer-const
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return authenticationResult;
+    if (getHTTPAuthenticationScheme(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    if (state && authenticationResult.notHandled()) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -277,46 +275,6 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Bearer ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
-   */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return {
-        authenticationResult: AuthenticationResult.notHandled(),
-      };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return {
-        authenticationResult: AuthenticationResult.notHandled(),
-        headerNotRecognized: true,
-      };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-      return {
-        authenticationResult: AuthenticationResult.succeeded(user),
-      };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return {
-        authenticationResult: AuthenticationResult.failed(err),
-      };
-    }
-  }
-
-  /**
    * Tries to extract an elasticsearch access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
@@ -443,5 +401,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
+  }
+
+  /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 }

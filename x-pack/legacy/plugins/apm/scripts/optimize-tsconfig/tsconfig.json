@@ -7,6 +7,6 @@
   ],
   "exclude": [
     "**/__fixtures__/**/*",
-    "./cypress/**/*"
+    "./e2e/cypress/**/*"
   ]
 }

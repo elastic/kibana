@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
+
+import { PluginInitializerContext } from '../../../../../../core/public';
 
 import { plugin } from '.';
 

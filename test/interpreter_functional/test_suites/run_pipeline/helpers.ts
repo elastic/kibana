@@ -20,10 +20,8 @@
 import expect from '@kbn/expect';
 import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
-import { ExpressionDataHandler } from '../../plugins/kbn_tp_run_pipeline/public/np_ready/types';
 
-type UnWrapPromise<T> = T extends Promise<infer U> ? U : T;
-export type ExpressionResult = UnWrapPromise<ReturnType<ExpressionDataHandler['getData']>>;
+export type ExpressionResult = any;
 
 export type ExpectExpression = (
   name: string,
@@ -112,7 +110,7 @@ export function expectExpressionProvider({
             if (!_currentContext.type) _currentContext.type = 'null';
             return window
               .runPipeline(_expression, _currentContext, _initialContext)
-              .then(expressionResult => {
+              .then((expressionResult: any) => {
                 done(expressionResult);
                 return expressionResult;
               });

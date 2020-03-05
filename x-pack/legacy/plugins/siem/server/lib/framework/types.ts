@@ -6,9 +6,9 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { RequestAuth } from 'hapi';
+import * as runtimeTypes from 'io-ts';
 
-import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import {
@@ -18,15 +18,12 @@ import {
   SourceConfiguration,
   TimerangeInput,
   Maybe,
+  HistogramType,
 } from '../../graphql/types';
-import { RequestFacade } from '../../types';
-
-export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  version: string;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
@@ -46,22 +43,10 @@ export interface FrameworkAdapter {
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
 }
 
-export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {
-  [internalFrameworkRequest]: InternalRequest;
+export interface FrameworkRequest extends Pick<KibanaRequest, 'body'> {
+  [internalFrameworkRequest]: KibanaRequest;
   context: RequestHandlerContext;
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
-  auth: InternalRequest['auth'];
   user: AuthenticatedUser | null;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface WrappableRequest<Payload = any, Params = any, Query = any> {
-  payload: Payload;
-  params: Params;
-  query: Query;
-  auth: RequestAuth;
 }
 
 export interface DatabaseResponse {
@@ -132,7 +117,8 @@ export interface RequestBasicOptions {
 }
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField?: Maybe<string>;
+  stackByField: Maybe<string>;
+  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {
@@ -146,3 +132,6 @@ export interface RequestOptionsPaginated extends RequestBasicOptions {
   fields: readonly string[];
   sortField?: SortField;
 }
+
+export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
+  runtimeTypes.union([type, runtimeTypes.null]);

@@ -41,6 +41,7 @@ export { notificationServiceMock } from './notifications/notifications_service.m
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { scopedHistoryMock } from './application/scoped_history.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
   const mock = {

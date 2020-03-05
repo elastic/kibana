@@ -103,7 +103,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $route,
           $scope,
           $routeParams,
-          indexPatterns: deps.npDataStart.indexPatterns,
+          indexPatterns: deps.data.indexPatterns,
           kbnUrlStateStorage,
           history,
           ...deps,

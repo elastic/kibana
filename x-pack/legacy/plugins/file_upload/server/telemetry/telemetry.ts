@@ -5,7 +5,8 @@
  */
 
 import _ from 'lodash';
-import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
+// @ts-ignore
+import { getInternalRepository } from '../kibana_server_services';
 
 export const TELEMETRY_DOC_ID = 'file-upload-telemetry';
 
@@ -17,27 +18,14 @@ export interface TelemetrySavedObject {
   attributes: Telemetry;
 }
 
-export function getInternalRepository(
-  elasticsearchPlugin: any,
-  getSavedObjectsRepository: any
-): any {
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
-  return getSavedObjectsRepository(callWithInternalUser);
-}
-
 export function initTelemetry(): Telemetry {
   return {
     filesUploadedTotalCount: 0,
   };
 }
 
-export async function getTelemetry(
-  elasticsearchPlugin: any,
-  getSavedObjectsRepository: any,
-  internalRepo?: object
-): Promise<Telemetry> {
-  const internalRepository =
-    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
+export async function getTelemetry(internalRepo?: object): Promise<Telemetry> {
+  const internalRepository = internalRepo || getInternalRepository();
   let telemetrySavedObject;
 
   try {
@@ -49,22 +37,9 @@ export async function getTelemetry(
   return telemetrySavedObject ? telemetrySavedObject.attributes : null;
 }
 
-export async function updateTelemetry({
-  elasticsearchPlugin,
-  getSavedObjectsRepository,
-  internalRepo,
-}: {
-  elasticsearchPlugin: any;
-  getSavedObjectsRepository: any;
-  internalRepo?: any;
-}) {
-  const internalRepository =
-    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
-  let telemetry = await getTelemetry(
-    elasticsearchPlugin,
-    getSavedObjectsRepository,
-    internalRepository
-  );
+export async function updateTelemetry(internalRepo?: any) {
+  const internalRepository = internalRepo || getInternalRepository();
+  let telemetry = await getTelemetry(internalRepository);
   // Create if doesn't exist
   if (!telemetry || _.isEmpty(telemetry)) {
     const newTelemetrySavedObject = await internalRepository.create(

@@ -18,10 +18,17 @@
  */
 
 import { DataPublicPluginSetup } from '../../../src/plugins/data/public';
-import { Plugin, CoreSetup, PluginInitializerContext } from '../../../src/core/public';
-import { DEMO_SEARCH_STRATEGY } from '../common';
+import { Plugin, CoreSetup } from '../../../src/core/public';
+import {
+  DEMO_SEARCH_STRATEGY,
+  IDemoRequest,
+  IDemoResponse,
+  ASYNC_DEMO_SEARCH_STRATEGY,
+  IAsyncDemoRequest,
+  IAsyncDemoResponse,
+} from '../common';
 import { demoClientSearchStrategyProvider } from './demo_search_strategy';
-import { IDemoRequest, IDemoResponse } from '../common';
+import { asyncDemoClientSearchStrategyProvider } from './async_demo_search_strategy';
 
 interface DemoDataSearchSetupDependencies {
   data: DataPublicPluginSetup;
@@ -39,20 +46,24 @@ interface DemoDataSearchSetupDependencies {
 declare module '../../../src/plugins/data/public' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
+    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoRequest;
   }
 
   export interface IResponseTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoResponse;
+    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoResponse;
   }
 }
 
 export class DemoDataPlugin implements Plugin {
-  constructor(private initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup, deps: DemoDataSearchSetupDependencies) {
     deps.data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
       DEMO_SEARCH_STRATEGY,
       demoClientSearchStrategyProvider
+    );
+    deps.data.search.registerSearchStrategyProvider(
+      ASYNC_DEMO_SEARCH_STRATEGY,
+      asyncDemoClientSearchStrategyProvider
     );
   }
 

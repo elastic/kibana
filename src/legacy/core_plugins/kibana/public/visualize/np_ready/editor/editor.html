@@ -2,7 +2,7 @@
   <!-- Linked search. -->
   <div
       ng-show="isVisible"
-      ng-if="vis.type.requiresSearch && state.linked"
+      ng-if="vis.type.requiresSearch && linked"
       class="fullWidth visEditor__linkedMessage"
     >
     <div class="kuiVerticalRhythmSmall">
@@ -42,9 +42,9 @@
     show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
-    query="state.query"
+    query="query"
     saved-query="savedQuery"
-    screen-title="state.vis.title"
+    screen-title="vis.title"
     on-query-submit="updateQueryAndFetch"
     index-patterns="[indexPattern]"
     filters="filters"
@@ -97,7 +97,9 @@
     ui-state="uiState"
     time-range="timeRange"
     filters="filters"
-    query="query"/>
+    query="query"
+    app-state="appState"
+    />
 
   <h1
     class="euiScreenReaderOnly"
@@ -117,6 +119,7 @@
     filters="filters"
     query="query"
     class="visEditor__content"
+    app-state="appState"
   />
 
 </visualize-app>

@@ -77,6 +77,11 @@ export class MessageImporter extends Importer {
       if (this.multilineStartRegex === null || line.match(this.multilineStartRegex) !== null) {
         this.addMessage(data, message);
         message = '';
+      } else if (data.length === 0) {
+        // discard everything before the first line that is considered the first line of a message
+        // as it could be left over partial data from a spilt or rolled over log,
+        // or could be a blank line after the header in a csv file
+        return '';
       } else {
         message += '\n';
       }

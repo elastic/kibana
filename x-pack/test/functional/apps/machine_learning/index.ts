@@ -5,9 +5,21 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
+export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const ml = getService('ml');
+
   describe('machine learning', function() {
     this.tags('ciGroup3');
+
+    before(async () => {
+      await ml.securityCommon.createMlRoles();
+      await ml.securityCommon.createMlUsers();
+    });
+
+    after(async () => {
+      await ml.securityCommon.cleanMlUsers();
+      await ml.securityCommon.cleanMlRoles();
+    });
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pages'));

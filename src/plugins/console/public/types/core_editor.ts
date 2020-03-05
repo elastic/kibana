@@ -181,6 +181,10 @@ export interface CoreEditor {
 
   /**
    * Return the current line count in the buffer.
+   *
+   * @remark
+   * This function should be usable in a tight loop and must make used of a cached
+   * line count.
    */
   getLineCount(): number;
 

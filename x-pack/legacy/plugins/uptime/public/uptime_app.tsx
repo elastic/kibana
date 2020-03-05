@@ -85,6 +85,7 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
+  // @ts-ignore
   store.dispatch(setBasePath(basePath));
 
   return (
@@ -100,7 +101,6 @@ const Application = (props: UptimeAppProps) => {
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
                           <PageHeader setBreadcrumbs={setBreadcrumbs} />
-                          // @ts-ignore we need to update the type of this prop
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>

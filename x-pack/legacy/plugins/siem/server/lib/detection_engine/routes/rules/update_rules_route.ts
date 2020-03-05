@@ -5,18 +5,22 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { getIdError, transform } from './utils';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError, getIndex } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_RULES_URL,
@@ -59,19 +63,16 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         version,
       } = request.payload;
 
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
+        const { alertsClient, actionsClient, savedObjectsClient, spacesClient } = await getClients(
+          request
+        );
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
         const rule = await updateRules({
           alertsClient,
           actionsClient,
@@ -115,16 +116,16 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
             return headers
               .response({
-                message: 'Internal error transforming rules',
+                message: errors,
                 status_code: 500,
               })
               .code(500);
           } else {
-            return transformed;
+            return validated;
           }
         } else {
           const error = getIdError({ id, ruleId });
@@ -148,6 +149,10 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute(server));
+export const updateRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(createUpdateRulesRoute(config, getClients));
 };

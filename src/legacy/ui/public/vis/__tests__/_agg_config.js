@@ -20,8 +20,8 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { Vis } from '../../../../core_plugins/visualizations/public';
 import { AggType, AggConfig } from '../../agg_types';
+import { start as visualizationsStart } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -37,7 +37,7 @@ describe('AggConfig', function() {
 
   describe('#toDsl', function() {
     it('calls #write()', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -55,7 +55,7 @@ describe('AggConfig', function() {
     });
 
     it('uses the type name as the agg name', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -73,7 +73,7 @@ describe('AggConfig', function() {
     });
 
     it('uses the params from #write() output as the agg params', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -93,7 +93,7 @@ describe('AggConfig', function() {
     });
 
     it('includes subAggs from #write() output', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -219,8 +219,8 @@ describe('AggConfig', function() {
 
     testsIdentical.forEach((visConfig, index) => {
       it(`identical aggregations (${index})`, function() {
-        const vis1 = new Vis(indexPattern, visConfig);
-        const vis2 = new Vis(indexPattern, visConfig);
+        const vis1 = new visualizationsStart.Vis(indexPattern, visConfig);
+        const vis2 = new visualizationsStart.Vis(indexPattern, visConfig);
         expect(vis1.aggs.jsonDataEquals(vis2.aggs.aggs)).to.be(true);
       });
     });
@@ -258,8 +258,8 @@ describe('AggConfig', function() {
 
     testsIdenticalDifferentOrder.forEach((test, index) => {
       it(`identical aggregations (${index}) - init json is in different order`, function() {
-        const vis1 = new Vis(indexPattern, test.config1);
-        const vis2 = new Vis(indexPattern, test.config2);
+        const vis1 = new visualizationsStart.Vis(indexPattern, test.config1);
+        const vis2 = new visualizationsStart.Vis(indexPattern, test.config2);
         expect(vis1.aggs.jsonDataEquals(vis2.aggs.aggs)).to.be(true);
       });
     });
@@ -323,8 +323,8 @@ describe('AggConfig', function() {
 
     testsDifferent.forEach((test, index) => {
       it(`different aggregations (${index})`, function() {
-        const vis1 = new Vis(indexPattern, test.config1);
-        const vis2 = new Vis(indexPattern, test.config2);
+        const vis1 = new visualizationsStart.Vis(indexPattern, test.config1);
+        const vis2 = new visualizationsStart.Vis(indexPattern, test.config2);
         expect(vis1.aggs.jsonDataEquals(vis2.aggs.aggs)).to.be(false);
       });
     });
@@ -332,7 +332,7 @@ describe('AggConfig', function() {
 
   describe('#toJSON', function() {
     it('includes the aggs id, params, type and schema', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -360,7 +360,7 @@ describe('AggConfig', function() {
     });
 
     it('test serialization  order is identical (for visual consistency)', function() {
-      const vis1 = new Vis(indexPattern, {
+      const vis1 = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -369,7 +369,7 @@ describe('AggConfig', function() {
           },
         ],
       });
-      const vis2 = new Vis(indexPattern, {
+      const vis2 = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -387,26 +387,26 @@ describe('AggConfig', function() {
 
   describe('#makeLabel', function() {
     it('uses the custom label if it is defined', function() {
-      const vis = new Vis(indexPattern, {});
+      const vis = new visualizationsStart.Vis(indexPattern, {});
       const aggConfig = vis.aggs.aggs[0];
       aggConfig.params.customLabel = 'Custom label';
       const label = aggConfig.makeLabel();
       expect(label).to.be(aggConfig.params.customLabel);
     });
     it('default label should be "Count"', function() {
-      const vis = new Vis(indexPattern, {});
+      const vis = new visualizationsStart.Vis(indexPattern, {});
       const aggConfig = vis.aggs.aggs[0];
       const label = aggConfig.makeLabel();
       expect(label).to.be('Count');
     });
     it('default label should be "Percentage of Count" when percentageMode is set to true', function() {
-      const vis = new Vis(indexPattern, {});
+      const vis = new visualizationsStart.Vis(indexPattern, {});
       const aggConfig = vis.aggs.aggs[0];
       const label = aggConfig.makeLabel(true);
       expect(label).to.be('Percentage of Count');
     });
-    it('empty label if the Vis type is not defined', function() {
-      const vis = new Vis(indexPattern, {});
+    it('empty label if the visualizationsStart.Vis type is not defined', function() {
+      const vis = new visualizationsStart.Vis(indexPattern, {});
       const aggConfig = vis.aggs.aggs[0];
       aggConfig.type = undefined;
       const label = aggConfig.makeLabel();
@@ -416,7 +416,7 @@ describe('AggConfig', function() {
 
   describe('#fieldFormatter - custom getFormat handler', function() {
     it('returns formatter from getFormat handler', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'metric',
         aggs: [
           {
@@ -447,7 +447,7 @@ describe('AggConfig', function() {
     let vis;
 
     beforeEach(function() {
-      vis = new Vis(indexPattern, visStateAggWithoutCustomGetFormat);
+      vis = new visualizationsStart.Vis(indexPattern, visStateAggWithoutCustomGetFormat);
     });
 
     it("returns the field's formatter", function() {

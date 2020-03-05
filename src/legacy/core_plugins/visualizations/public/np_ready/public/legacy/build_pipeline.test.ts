@@ -26,16 +26,11 @@ import {
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
-import { Vis, VisState } from '..';
+import { Vis } from '..';
 import { IAggConfig } from '../../../legacy_imports';
 import { searchSourceMock } from '../../../legacy_mocks';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/agg_types', () => ({
-  setBounds: () => {},
-  dateHistogramBucketAgg: () => {},
-  isDateHistogramBucketAggConfig: () => true,
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -83,7 +78,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipelineVisFunction', () => {
-    let visStateDef: VisState;
+    let visStateDef: ReturnType<Vis['getCurrentState']>;
     let schemaConfig: SchemaConfig;
     let schemasDef: Schemas;
     let uiState: any;
@@ -94,7 +89,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         // @ts-ignore
         type: 'type',
         params: {},
-      };
+      } as ReturnType<Vis['getCurrentState']>;
 
       schemaConfig = {
         accessor: 0,
@@ -349,7 +344,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
   describe('buildPipeline', () => {
     it('calls toExpression on vis_type if it exists', async () => {
-      const vis: Vis = {
+      const vis = ({
         getCurrentState: () => {},
         getUiState: () => null,
         isHierarchical: () => false,
@@ -360,7 +355,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         type: {
           toExpression: () => 'testing custom expressions',
         },
-      };
+      } as unknown) as Vis;
       const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
       expect(expression).toMatchSnapshot();
     });

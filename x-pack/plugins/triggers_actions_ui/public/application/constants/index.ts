@@ -20,3 +20,5 @@ export enum SORT_ORDERS {
   ASCENDING = 'asc',
   DESCENDING = 'desc',
 }
+
+export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;

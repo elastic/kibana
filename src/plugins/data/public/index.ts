@@ -156,7 +156,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -168,12 +167,18 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
+
+import { DateFormat } from './field_formats';
+export { baseFormattersPublic } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -258,6 +263,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /*
@@ -288,11 +294,11 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  syncAppFilters,
-  syncQuery,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  QueryState,
   getTime,
   getQueryLog,
-  getQueryStateContainer,
   FilterManager,
   SavedQuery,
   SavedQueryService,
@@ -305,7 +311,6 @@ export {
   TimeHistoryContract,
 } from './query';
 export * from './ui';
-
 export {
   // kbn field types
   castEsToKbnFieldTypeName,

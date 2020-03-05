@@ -6,8 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -16,15 +15,13 @@ import {
   FlowTarget,
   PageInfoPaginated,
   UsersEdges,
-  UsersSortField,
+  GetUsersQueryComponent,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-
-import { usersQuery } from './index.gql_query';
 
 const ID = 'usersQuery';
 
@@ -41,20 +38,13 @@ export interface UsersArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UsersArgs) => React.ReactNode;
+  children: (args: UsersArgs) => React.ReactElement;
   flowTarget: FlowTarget;
   ip: string;
   type: networkModel.NetworkType;
 }
 
-export interface UsersComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-  sort: UsersSortField;
-}
-
-type UsersProps = OwnProps & UsersComponentReduxProps & WithKibanaProps;
+type UsersProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class UsersComponentQuery extends QueryTemplatePaginated<
   UsersProps,
@@ -94,8 +84,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
-        query={usersQuery}
+      <GetUsersQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -137,7 +126,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
             users,
           });
         }}
-      </Query>
+      </GetUsersQueryComponent>
     );
   }
 }
@@ -156,7 +145,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const UsersQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(UsersComponentQuery);

@@ -23,6 +23,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { ml } from '../../../../../../../../../services/ml_api_service';
 import { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 
 export const CalendarsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
@@ -35,7 +36,9 @@ export const CalendarsSelection: FC = () => {
 
   async function loadCalendars() {
     setIsLoading(true);
-    const calendars = await ml.calendars();
+    const calendars = (await ml.calendars()).filter(
+      c => c.job_ids.includes(GLOBAL_CALENDAR) === false
+    );
     setOptions(calendars.map(c => ({ label: c.calendar_id, value: c })));
     setSelectedOptions(selectedCalendars.map(c => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);

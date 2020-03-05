@@ -33,7 +33,7 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 };
 
 export function replaceTemplateStrings(text, params = {}) {
-  const { getInjected, metadata, docLinks } = getServices();
+  const { tutorialVariables, kibanaVersion, docLinks } = getServices();
 
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
@@ -41,9 +41,7 @@ export function replaceTemplateStrings(text, params = {}) {
     curlyOpen: '{',
     curlyClose: '}',
     config: {
-      cloud: {
-        id: getInjected('cloudId'),
-      },
+      ...tutorialVariables(),
       docs: {
         base_url: docLinks.ELASTIC_WEBSITE_URL,
         beats: {
@@ -58,7 +56,7 @@ export function replaceTemplateStrings(text, params = {}) {
         version: docLinks.DOC_LINK_VERSION,
       },
       kibana: {
-        version: metadata.version,
+        version: kibanaVersion,
       },
     },
     params: params,

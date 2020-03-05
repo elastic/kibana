@@ -9,11 +9,106 @@ exports[`HeaderGlobal it renders 1`] = `
     justifyContent="spaceBetween"
     wrap={true}
   >
-    <WithSource
-      sourceId="default"
+    <FlexItem>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+      >
+        <FlexItem
+          grow={false}
+        >
+          <EuiLink
+            href="#/link-to/overview"
+          >
+            <EuiIcon
+              aria-label="SIEM"
+              size="l"
+              type="securityAnalyticsApp"
+            />
+          </EuiLink>
+        </FlexItem>
+        <FlexItem
+          component="nav"
+        >
+          <SiemNavigationContainer
+            display="condensed"
+            navTabs={
+              Object {
+                "case": Object {
+                  "disabled": false,
+                  "href": "#/link-to/case",
+                  "id": "case",
+                  "name": "Case",
+                  "urlKey": "case",
+                },
+                "detections": Object {
+                  "disabled": false,
+                  "href": "#/link-to/detections",
+                  "id": "detections",
+                  "name": "Detections",
+                  "urlKey": "detections",
+                },
+                "hosts": Object {
+                  "disabled": false,
+                  "href": "#/link-to/hosts",
+                  "id": "hosts",
+                  "name": "Hosts",
+                  "urlKey": "host",
+                },
+                "network": Object {
+                  "disabled": false,
+                  "href": "#/link-to/network",
+                  "id": "network",
+                  "name": "Network",
+                  "urlKey": "network",
+                },
+                "overview": Object {
+                  "disabled": false,
+                  "href": "#/link-to/overview",
+                  "id": "overview",
+                  "name": "Overview",
+                  "urlKey": "overview",
+                },
+                "timelines": Object {
+                  "disabled": false,
+                  "href": "#/link-to/timelines",
+                  "id": "timelines",
+                  "name": "Timelines",
+                  "urlKey": "timeline",
+                },
+              }
+            }
+          />
+        </FlexItem>
+      </EuiFlexGroup>
+    </FlexItem>
+    <FlexItem
+      grow={false}
     >
-      <Component />
-    </WithSource>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={true}
+      >
+        <FlexItem
+          grow={false}
+        >
+          <MlPopover />
+        </FlexItem>
+        <FlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="add-data"
+            href="kibana#home/tutorial_directory/siem"
+            iconType="plusInCircle"
+          >
+            Add data
+          </EuiButtonEmpty>
+        </FlexItem>
+      </EuiFlexGroup>
+    </FlexItem>
   </EuiFlexGroup>
 </Wrapper>
 `;

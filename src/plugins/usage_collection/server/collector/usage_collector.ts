@@ -24,14 +24,14 @@ export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> ex
   T,
   U
 > {
-  protected defaultUsageFormatterForBulkUpload(result: T) {
+  protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: KIBANA_STATS_TYPE,
-      payload: {
+      payload: ({
         usage: {
           [this.type]: result,
         },
-      },
+      } as unknown) as U,
     };
   }
 }

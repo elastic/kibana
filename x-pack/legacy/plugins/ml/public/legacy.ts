@@ -6,18 +6,18 @@
 
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-
 import { PluginInitializerContext } from 'src/core/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
+
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {
   data: npStart.plugins.data,
+  security: ((npSetup.plugins as unknown) as { security: SecurityPluginSetup }).security, // security isn't in the PluginsSetup interface, but does exist
   __LEGACY: {
     XSRF: chrome.getXsrfToken(),
-    // @ts-ignore getAppUrl is missing from chrome's definition
-    APP_URL: chrome.getAppUrl(),
   },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

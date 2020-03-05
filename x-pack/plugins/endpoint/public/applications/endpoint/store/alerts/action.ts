@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Immutable } from '../../../../../common/types';
 import { AlertListData } from '../../types';
 
 interface ServerReturnedAlertsData {
-  type: 'serverReturnedAlertsData';
-  payload: AlertListData;
+  readonly type: 'serverReturnedAlertsData';
+  readonly payload: Immutable<AlertListData>;
 }
 
 export type AlertAction = ServerReturnedAlertsData;

@@ -5,21 +5,28 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { getIndex, transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import {
+  PrePackagedRulesSchema,
+  prePackagedRulesSchema,
+} from '../schemas/response/prepackaged_rules_schema';
+import { validate } from './validate';
 
-export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createAddPrepackedRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_PREPACKAGED_URL,
@@ -31,29 +38,32 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
         },
       },
     },
-    async handler(request: RequestFacade, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
+    async handler(request: LegacyRequest, headers) {
       try {
-        const callWithRequest = callWithRequestFactory(request, server);
+        const {
+          actionsClient,
+          alertsClient,
+          clusterClient,
+          savedObjectsClient,
+          spacesClient,
+        } = await getClients(request);
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
         const rulesFromFileSystem = getPrepackagedRules();
 
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const spaceIndex = getIndex(request, server);
+        const spaceIndex = getIndex(spacesClient.getSpaceId, config);
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
+          const spaceIndexExists = await getIndexExists(
+            clusterClient.callAsCurrentUser,
+            spaceIndex
+          );
           if (!spaceIndexExists) {
             return headers
               .response({
@@ -73,10 +83,21 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
           rulesToUpdate,
           spaceIndex
         );
-        return {
+        const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
         };
+        const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
+        if (errors != null) {
+          return headers
+            .response({
+              message: errors,
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return validated;
+        }
       } catch (err) {
         const error = transformError(err);
         return headers
@@ -90,6 +111,10 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
   };
 };
 
-export const addPrepackedRulesRoute = (server: ServerFacade): void => {
-  server.route(createAddPrepackedRulesRoute(server));
+export const addPrepackedRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createAddPrepackedRulesRoute(config, getClients));
 };

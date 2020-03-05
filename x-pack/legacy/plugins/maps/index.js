@@ -9,7 +9,6 @@ import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { migrations } from './migrations';
-import { initTelemetryCollection } from './server/maps_telemetry';
 import { getAppTitle } from './common/i18n_getters';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
@@ -92,12 +91,15 @@ export function maps(kibana) {
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-      const { usageCollection } = server.newPlatform.setup.plugins;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      initTelemetryCollection(usageCollection, server);
+
+      // Init saved objects client deps
+      const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+      const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+      const internalRepository = getSavedObjectsRepository(callCluster);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
@@ -105,6 +107,7 @@ export function maps(kibana) {
         featuresPlugin: newPlatformPlugins.features,
         licensing: newPlatformPlugins.licensing,
         home: newPlatformPlugins.home,
+        usageCollection: newPlatformPlugins.usageCollection,
       };
 
       // legacy dependencies
@@ -118,6 +121,7 @@ export function maps(kibana) {
           elasticsearch: server.plugins.elasticsearch,
         },
         savedObjects: {
+          savedObjectsClient: new SavedObjectsClient(internalRepository),
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
         injectUiAppVars: server.injectUiAppVars,

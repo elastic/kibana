@@ -26,7 +26,7 @@ import { displaySuccessToast, useStateToaster } from '../../../../components/toa
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
-import { FormHook, FormData } from '../components/shared_imports';
+import { FormHook, FormData } from '../../../shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';

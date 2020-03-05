@@ -6,44 +6,50 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue
-} from '../../../../context/ApmPluginContext';
-import { Contents } from './Contents';
+import { ServiceMetricList } from './ServiceMetricList';
 
-const selectedNodeData = {
-  id: 'opbeans-node',
-  label: 'opbeans-node',
-  href:
-    '#/services/opbeans-node/service-map?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-  agentName: 'nodejs',
-  type: 'service'
-};
-
-storiesOf('app/ServiceMap/Popover/Contents', module).add(
-  'example',
-  () => {
-    return (
-      <ApmPluginContext.Provider
-        value={
-          ({ core: { notifications: {} } } as unknown) as ApmPluginContextValue
-        }
-      >
-        <Contents
-          selectedNodeData={selectedNodeData}
-          isService={true}
-          label="opbeans-node"
-          onFocusClick={() => {}}
-          selectedNodeServiceName="opbeans-node"
-        />
-      </ApmPluginContext.Provider>
-    );
-  },
-  {
-    info: {
-      propTablesExclude: [ApmPluginContext.Provider],
-      source: false
-    }
-  }
-);
+storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
+  .add('example', () => (
+    <ServiceMetricList
+      avgErrorsPerMinute={15.738888706725826}
+      avgTransactionDuration={61634.38905590272}
+      avgRequestsPerMinute={164.47222031860858}
+      avgCpuUsage={0.32809666568309237}
+      avgMemoryUsage={0.5504868173242986}
+      numInstances={2}
+      isLoading={false}
+    />
+  ))
+  .add('loading', () => (
+    <ServiceMetricList
+      avgErrorsPerMinute={null}
+      avgTransactionDuration={null}
+      avgRequestsPerMinute={null}
+      avgCpuUsage={null}
+      avgMemoryUsage={null}
+      numInstances={1}
+      isLoading={true}
+    />
+  ))
+  .add('some null values', () => (
+    <ServiceMetricList
+      avgErrorsPerMinute={7.615972134074397}
+      avgTransactionDuration={238792.54809512055}
+      avgRequestsPerMinute={8.439583235652972}
+      avgCpuUsage={null}
+      avgMemoryUsage={null}
+      numInstances={1}
+      isLoading={false}
+    />
+  ))
+  .add('all null values', () => (
+    <ServiceMetricList
+      avgErrorsPerMinute={null}
+      avgTransactionDuration={null}
+      avgRequestsPerMinute={null}
+      avgCpuUsage={null}
+      avgMemoryUsage={null}
+      numInstances={1}
+      isLoading={false}
+    />
+  ));

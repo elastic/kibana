@@ -97,8 +97,10 @@ export class StylePropEditor extends Component {
         anchorClassName="mapStyleFormDisabledTooltip"
         content={getDisabledByMessage(this.props.disabledBy)}
       >
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+            {staticDynamicSelect}
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldText compressed disabled />
           </EuiFlexItem>

@@ -25,3 +25,4 @@ export * from './typed_json';
 export { createGetterSetter, Get, Set } from './create_getter_setter';
 export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
 export { url } from './url';
+export { now } from './now';

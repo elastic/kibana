@@ -40,6 +40,8 @@ export const ReactDom = require('react-dom');
 export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
+export const Monaco = require('./monaco.ts');
+export const MonacoBare = require('monaco-editor/esm/vs/editor/editor.api');
 
 // load timezone data into moment-timezone
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));

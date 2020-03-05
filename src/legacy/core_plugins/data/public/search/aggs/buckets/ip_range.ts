@@ -20,20 +20,18 @@
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
+import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
+export { IpRangeKey, convertIPRangeToString };
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
-
-export type IpRangeKey =
-  | { type: 'mask'; mask: string }
-  | { type: 'range'; from: string; to: string };
 
 export const ipRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.IP_RANGE,
@@ -97,13 +95,3 @@ export const ipRangeBucketAgg = new BucketAggType({
     },
   ],
 });
-
-export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
-  if (range.type === 'mask') {
-    return format(range.mask);
-  }
-  const from = range.from ? format(range.from) : '-Infinity';
-  const to = range.to ? format(range.to) : 'Infinity';
-
-  return `${from} to ${to}`;
-};

@@ -9,7 +9,7 @@ Retrieves a single object
 <b>Signature:</b>
 
 ```typescript
-get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
 ```
 
 ## Parameters

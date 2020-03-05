@@ -20,6 +20,6 @@ import { LogRecord } from 'kibana/server';
 
 export interface Conversion {
   pattern: RegExp;
-  formatter: (record: LogRecord, highlight: boolean) => string;
+  convert: (record: LogRecord, highlight: boolean) => string;
   validate?: (input: string) => void;
 }

@@ -57,6 +57,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
+  buildQueryFromFilters,
   getEsQueryConfig,
 } from '../common';
 
@@ -67,6 +68,7 @@ export const esKuery = {
 };
 
 export const esQuery = {
+  buildQueryFromFilters,
   getEsQueryConfig,
   buildEsQuery,
 };
@@ -83,7 +85,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -95,16 +96,16 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-
+  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -143,6 +144,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /**

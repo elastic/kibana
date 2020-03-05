@@ -15,14 +15,14 @@ import {
 } from '../components/functional';
 import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { useTrackPageview } from '../../../infra/public';
-import { DataPublicPluginStart, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
+import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 
 interface OverviewPageProps {
-  autocomplete: DataPublicPluginStart['autocomplete'];
+  autocomplete: DataPublicPluginSetup['autocomplete'];
   indexPattern: IIndexPattern;
   setEsKueryFilters: (esFilters: string) => void;
 }

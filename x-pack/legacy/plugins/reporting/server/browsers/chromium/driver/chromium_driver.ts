@@ -28,6 +28,15 @@ interface WaitForSelectorOpts {
   silent?: boolean;
 }
 
+interface EvaluateOpts {
+  fn: EvaluateFn;
+  args: SerializableOrJSHandle[];
+}
+
+interface EvaluateMetaOpts {
+  context: string;
+}
+
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
@@ -158,11 +167,15 @@ export class HeadlessChromiumDriver {
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: { fn: EvaluateFn; args: SerializableOrJSHandle[] }) {
+  public async evaluate(
+    { fn, args = [] }: EvaluateOpts,
+    meta: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
+    logger.debug(`evaluate ${meta.context}`);
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
-
   public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts = {},
@@ -179,10 +192,14 @@ export class HeadlessChromiumDriver {
         // Provide some troubleshooting info to see if we're on the login page,
         // "Kibana could not load correctly", etc
         logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
-        const pageText = await this.evaluate({
-          fn: () => document.querySelector('body')!.innerText,
-          args: [],
-        });
+        const pageText = await this.evaluate(
+          {
+            fn: () => document.querySelector('body')!.innerText,
+            args: [],
+          },
+          { context: `waitForSelector${selector}` },
+          logger
+        );
         logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
       }
       throw err;
@@ -192,17 +209,21 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor<T>({
-    fn,
-    args,
-    toEqual,
-  }: {
-    fn: EvaluateFn;
-    args: SerializableOrJSHandle[];
-    toEqual: T;
-  }) {
+  public async waitFor<T>(
+    {
+      fn,
+      args,
+      toEqual,
+    }: {
+      fn: EvaluateFn;
+      args: SerializableOrJSHandle[];
+      toEqual: T;
+    },
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
     while (true) {
-      const result = await this.evaluate({ fn, args });
+      const result = await this.evaluate({ fn, args }, context, logger);
       if (result === toEqual) {
         return;
       }

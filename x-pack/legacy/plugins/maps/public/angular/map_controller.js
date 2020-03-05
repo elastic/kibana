@@ -57,6 +57,8 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
+import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
+loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
 
 const savedQueryService = npStart.plugins.data.query.savedQueries;
 

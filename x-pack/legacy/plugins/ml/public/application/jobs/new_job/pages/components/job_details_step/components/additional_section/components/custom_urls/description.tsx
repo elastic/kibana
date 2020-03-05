@@ -26,7 +26,6 @@ export const Description: FC = memo(({ children }) => {
     <EuiDescribedFormGroup
       fullWidth
       className="ml-custom-urls-selection"
-      idAria="custom_urls_description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -45,7 +44,7 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow describedByIds={['custom_urls_description']} fullWidth>
+      <EuiFormRow fullWidth>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

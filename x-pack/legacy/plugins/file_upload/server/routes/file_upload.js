@@ -75,7 +75,7 @@ export const idConditionalValidation = (body, boolHasId) =>
     )
     .validate(body);
 
-const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepository) => {
+const finishValidationAndProcessReq = () => {
   return async (con, req, { ok, badRequest }) => {
     const {
       query: { id },
@@ -86,7 +86,7 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
     let resp;
     try {
       const validIdReqData = idConditionalValidation(body, boolHasId);
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, req);
+      const callWithRequest = callWithRequestFactory(req);
       const { importData: importDataFunc } = importDataProvider(callWithRequest);
 
       const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
@@ -103,7 +103,7 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
         resp = ok({ body: processedReq });
         // If no id's been established then this is a new index, update telemetry
         if (!boolHasId) {
-          await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
+          await updateTelemetry();
         }
       } else {
         resp = badRequest(`Error processing request 1: ${processedReq.error.message}`, ['body']);
@@ -115,7 +115,7 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
   };
 };
 
-export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
+export const initRoutes = router => {
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,
@@ -125,6 +125,6 @@ export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
       },
       options,
     },
-    finishValidationAndProcessReq(esPlugin, getSavedObjectsRepository)
+    finishValidationAndProcessReq()
   );
 };

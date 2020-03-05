@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHttpLink } from 'apollo-link-http';
-import { withClientState } from 'apollo-link-state';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { HttpLink } from '@apollo/client';
 
 import { errorLink, reTryOneTimeOnErrorLink } from '../../containers/errors';
 
-export const getLinks = (cache: InMemoryCache, basePath: string) => [
+export const getLinks = (basePath: string) => [
   errorLink,
   reTryOneTimeOnErrorLink,
-  withClientState({
-    cache,
-    resolvers: {},
-  }),
-  createHttpLink({
+  new HttpLink({
     credentials: 'same-origin',
     headers: { 'kbn-xsrf': 'true' },
     uri: `${basePath}/api/siem/graphql`,

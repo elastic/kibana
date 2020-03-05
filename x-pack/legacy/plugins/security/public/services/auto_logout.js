@@ -8,12 +8,26 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
 const module = uiModules.get('security');
+
+const getNextParameter = () => {
+  const { location } = window;
+  const next = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+  return `&next=${next}`;
+};
+
+const getProviderParameter = tenant => {
+  const key = `${tenant}/session_provider`;
+  const providerName = sessionStorage.getItem(key);
+  return providerName ? `&provider=${encodeURIComponent(providerName)}` : '';
+};
+
 module.service('autoLogout', ($window, Promise) => {
   return () => {
-    const next = chrome.removeBasePath(`${window.location.pathname}${window.location.hash}`);
-    $window.location.href = chrome.addBasePath(
-      `/logout?next=${encodeURIComponent(next)}&msg=SESSION_EXPIRED`
-    );
+    const logoutUrl = chrome.getInjected('logoutUrl');
+    const tenant = `${chrome.getInjected('session.tenant', '')}`;
+    const next = getNextParameter();
+    const provider = getProviderParameter(tenant);
+    $window.location.href = `${logoutUrl}?msg=SESSION_EXPIRED${next}${provider}`;
     return Promise.halt();
   };
 });

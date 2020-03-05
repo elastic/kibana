@@ -21,8 +21,7 @@ run(
     );
 
     const circularFound = result.circular();
-    // We can only care about SIEM code, we should not be penalyze for others
-    if (circularFound.filter(cf => cf.includes('siem')).length !== 0) {
+    if (circularFound.length !== 0) {
       throw createFailError(
         `SIEM circular dependencies of imports has been found:\n - ${circularFound.join('\n - ')}`
       );

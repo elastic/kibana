@@ -31,7 +31,7 @@ export interface PingHistogramComponentProps {
    */
   height?: string;
 
-  data?: HistogramResult;
+  data: HistogramResult | null;
 
   loading?: boolean;
 }

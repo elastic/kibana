@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public/embeddable';
+import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -46,6 +46,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          disableTriggers: true,
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.visualization,

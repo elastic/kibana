@@ -20,8 +20,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { EditorRenderProps } from '../../kibana/public/visualize/np_ready/types';
-import { VisualizeEmbeddable } from '../../visualizations/public/embeddable';
-import { VisualizeEmbeddableFactory } from '../../visualizations/public/embeddable/visualize_embeddable_factory';
+import {
+  VisualizeEmbeddableContract as VisualizeEmbeddable,
+  VisualizeEmbeddableFactoryContract as VisualizeEmbeddableFactory,
+} from '../../visualizations/public/';
 import { PanelsContainer, Panel } from '../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';
@@ -30,7 +32,7 @@ import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
-  embeddables,
+  embeddable,
   savedObj,
   uiState,
   timeRange,
@@ -56,7 +58,7 @@ function DefaultEditor({
       }
 
       if (!visHandler.current) {
-        const embeddableFactory = embeddables.getEmbeddableFactory(
+        const embeddableFactory = embeddable.getEmbeddableFactory(
           'visualization'
         ) as VisualizeEmbeddableFactory;
         setFactory(embeddableFactory);
@@ -82,7 +84,7 @@ function DefaultEditor({
     }
 
     visualize();
-  }, [uiState, savedObj, timeRange, filters, appState, query, factory, embeddables]);
+  }, [uiState, savedObj, timeRange, filters, appState, query, factory, embeddable]);
 
   useEffect(() => {
     return () => {

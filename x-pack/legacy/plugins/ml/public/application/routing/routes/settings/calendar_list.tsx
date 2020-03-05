@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
+import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
@@ -44,6 +45,8 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     checkGetJobsPrivilege,
     getMlNodeCount,
   });
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canCreateCalendar = checkPermission('canCreateCalendar');
   const canDeleteCalendar = checkPermission('canDeleteCalendar');

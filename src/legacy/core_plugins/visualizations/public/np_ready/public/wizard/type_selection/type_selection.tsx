@@ -40,7 +40,7 @@ import { VisTypeAlias } from '../../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { VisType, TypesStart } from '../../types';
+import { VisType, TypesStart } from '../../vis_types';
 
 export interface VisTypeListEntry extends VisType {
   highlighted: boolean;

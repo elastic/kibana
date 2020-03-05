@@ -7,7 +7,8 @@ import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
+import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
+import { MatrixOverTimeHistogramData } from '../../graphql/types';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {
@@ -15,40 +16,35 @@ interface GetBarchartConfigsProps {
   from: number;
   legendPosition?: Position;
   to: number;
-  scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
 }
 
 export const DEFAULT_CHART_HEIGHT = 174;
+export const DEFAULT_Y_TICK_FORMATTER = (value: string | number): string => value.toLocaleString();
 
 export const getBarchartConfigs = ({
   chartHeight,
   from,
   legendPosition,
   to,
-  scaleType,
   onBrushEnd,
   yTickFormatter,
   showLegend,
-}: GetBarchartConfigsProps) => ({
+}: GetBarchartConfigsProps): BarchartConfigs => ({
   series: {
-    xScaleType: scaleType || ScaleType.Time,
+    xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter:
-      scaleType === ScaleType.Time ? histogramDateTimeFormatter([from, to]) : undefined,
-    yTickFormatter:
-      yTickFormatter != null
-        ? yTickFormatter
-        : (value: string | number): string => value.toLocaleString(),
+    xTickFormatter: histogramDateTimeFormatter([from, to]),
+    yTickFormatter: yTickFormatter != null ? yTickFormatter : DEFAULT_Y_TICK_FORMATTER,
     tickSize: 8,
   },
   settings: {
-    legendPosition: legendPosition ?? Position.Bottom,
+    legendPosition: legendPosition ?? Position.Right,
     onBrushEnd,
     showLegend: showLegend ?? true,
     theme: {
@@ -74,14 +70,14 @@ export const getBarchartConfigs = ({
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixHistogramDataTypes[]
+  MatrixOverTimeHistogramData[]
 ]): ChartSeriesData => ({
   key,
   value,
 });
 
 export const getCustomChartData = (
-  data: MatrixHistogramDataTypes[] | null,
+  data: MatrixOverTimeHistogramData[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
   if (!data) return [];
@@ -92,7 +88,7 @@ export const getCustomChartData = (
   if (mapping)
     return map((item: ChartSeriesData) => {
       const mapItem = get(item.key, mapping);
-      return { ...item, color: mapItem.color };
+      return { ...item, color: mapItem?.color };
     }, formattedChartData);
   else return formattedChartData;
 };

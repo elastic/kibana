@@ -8,7 +8,8 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { GraphQLRequest } from '@apollo/client';
+import { MockedProvider } from '@apollo/client/testing';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
@@ -19,6 +20,7 @@ import { apolloClientObservable, mockGlobalState, TestProviders } from '../../..
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
+// import { useUiSetting$ } from '../../lib/kibana';
 
 import { IPDetailsComponent, IPDetails } from './index';
 
@@ -35,9 +37,47 @@ jest.mock('../../../components/search_bar', () => ({
 jest.mock('../../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../../containers/source', () => ({
+  useWithSource: () => ({
+    contentAvailable: true,
+  }),
+}));
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public/context/context', () => ({
+  ...jest.requireActual('../../../../../../../../src/plugins/kibana_react/public/context/context'),
+  useKibana: () => ({
+    services: {
+      http: {
+        basePath: {
+          get: () => '',
+        },
+      },
+      docLinks: {
+        links: {
+          siem: {
+            gettingStarted: '',
+          },
+        },
+      },
+      uiSettings: {
+        get: () => '',
+      },
+    },
+  }),
+}));
+
+jest.mock(
+  '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting',
+  () => ({
+    ...jest.requireActual(
+      '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting'
+    ),
+    useUiSetting$: () => [],
+  })
+);
 
 let localSource: Array<{
-  request: {};
+  request: GraphQLRequest;
   result: {
     data: {
       source: {
@@ -92,7 +132,7 @@ const getMockProps = (ip: string) => ({
     from: number;
     to: number;
   }>,
-  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<null>,
+  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<void>,
 });
 
 describe('Ip Details', () => {
@@ -122,16 +162,31 @@ describe('Ip Details', () => {
   });
 
   test('it renders', () => {
-    const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
+    const wrapper = shallow(
+      <MockedProvider mocks={localSource} addTypename={false}>
+        <IPDetailsComponent {...getMockProps('123.456.78.90')} />
+      </MockedProvider>
+    );
+
+    expect(
+      wrapper
+        .find('IPDetailsComponent')
+        .dive()
+        .find('[data-test-subj="ip-details-page"]')
+        .exists()
+    ).toBe(true);
   });
 
   test('it matches the snapshot', () => {
-    const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(wrapper).toMatchSnapshot();
+    const wrapper = shallow(
+      <MockedProvider mocks={localSource} addTypename={false}>
+        <IPDetailsComponent {...getMockProps('123.456.78.90')} />
+      </MockedProvider>
+    );
+    expect(wrapper.find('IPDetailsComponent')).toMatchSnapshot();
   });
 
-  test('it renders ipv6 headline', async () => {
+  test('it renders ipv6 headline', () => {
     localSource[0].result.data.source.status.indicesExist = true;
     const ip = 'fe80--24ce-f7ff-fede-a571';
     const wrapper = mount(
@@ -143,9 +198,6 @@ describe('Ip Details', () => {
         </MockedProvider>
       </TestProviders>
     );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
-    wrapper.update();
     expect(
       wrapper
         .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')

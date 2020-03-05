@@ -5,8 +5,8 @@
  */
 
 import React, { useContext, FC } from 'react';
-import { render } from 'react-dom';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -16,13 +16,13 @@ import { getAppProviders } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppDependencies } from '../shim';
 
+import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
 export const App: FC = () => {
   const { apiError } = useContext(AuthorizationContext);
-
-  if (apiError) {
+  if (apiError !== null) {
     return (
       <SectionError
         title={
@@ -38,29 +38,39 @@ export const App: FC = () => {
 
   return (
     <div data-test-subj="transformApp">
-      <Switch>
-        <Route
-          path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
-        />
-        <Route
-          exact
-          path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.HOME}`}
-          component={TransformManagementSection}
-        />
-        <Redirect from={`${CLIENT_BASE_PATH}`} to={`${CLIENT_BASE_PATH}/${SECTION_SLUG.HOME}`} />
-      </Switch>
+      <HashRouter>
+        <Switch>
+          <Route
+            path={`${CLIENT_BASE_PATH}${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+            component={CloneTransformSection}
+          />
+          <Route
+            path={`${CLIENT_BASE_PATH}${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+            component={CreateTransformSection}
+          />
+          <Route
+            exact
+            path={CLIENT_BASE_PATH + SECTION_SLUG.HOME}
+            component={TransformManagementSection}
+          />
+          <Redirect from={CLIENT_BASE_PATH} to={CLIENT_BASE_PATH + SECTION_SLUG.HOME} />
+        </Switch>
+      </HashRouter>
     </div>
   );
 };
 
-export const renderReact = (elem: Element, appDependencies: AppDependencies) => {
+export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
   const Providers = getAppProviders(appDependencies);
 
   render(
     <Providers>
       <App />
     </Providers>,
-    elem
+    element
   );
+
+  return () => {
+    unmountComponentAtNode(element);
+  };
 };

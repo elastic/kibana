@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { TRANSACTION_METADATA_SECTIONS } from './sections';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
 

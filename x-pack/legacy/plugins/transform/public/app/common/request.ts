@@ -53,6 +53,12 @@ export function isSimpleQuery(arg: any): arg is SimpleQuery {
   return arg.query_string !== undefined;
 }
 
+export const matchAllQuery = { match_all: {} };
+export function isMatchAllQuery(query: any): boolean {
+  return query.match_all !== undefined && Object.keys(query.match_all).length === 0;
+}
+
+export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
 export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }

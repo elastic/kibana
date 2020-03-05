@@ -8,9 +8,10 @@ import { mappings } from './mappings';
 
 export const fileUpload = kibana => {
   return new kibana.Plugin({
-    require: ['elasticsearch', 'xpack_main'],
+    require: ['elasticsearch'],
     name: 'file_upload',
     id: 'file_upload',
+    // TODO: uiExports and savedObjectSchemas to be removed on migration
     uiExports: {
       mappings,
     },
@@ -22,23 +23,14 @@ export const fileUpload = kibana => {
 
     init(server) {
       const coreSetup = server.newPlatform.setup.core;
+      const coreStart = server.newPlatform.start.core;
       const { usageCollection } = server.newPlatform.setup.plugins;
-      const pluginsSetup = {
+      const pluginsStart = {
         usageCollection,
       };
-
-      // legacy dependencies
-      const __LEGACY = {
-        route: server.route.bind(server),
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-        },
-        savedObjects: {
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
-        },
-      };
-
-      new FileUploadPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      const fileUploadPlugin = new FileUploadPlugin();
+      fileUploadPlugin.setup(coreSetup);
+      fileUploadPlugin.start(coreStart, pluginsStart);
     },
   });
 };

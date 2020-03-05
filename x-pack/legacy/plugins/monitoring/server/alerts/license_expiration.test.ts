@@ -11,9 +11,8 @@ import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../common/constants';
 import { Logger } from 'src/core/server';
-import { AlertServices } from '../../../alerting/server/types';
+import { AlertServices, AlertInstance } from '../../../../../plugins/alerting/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { AlertInstance } from '../../../alerting/server/alert_instance';
 import {
   AlertState,
   AlertClusterState,

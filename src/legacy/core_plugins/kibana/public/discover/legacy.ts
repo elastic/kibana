@@ -20,10 +20,18 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from './index';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 // Legacy compatibility part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
 export const setup = pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
+  visualizations: visualizationsSetup,
 });
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
+export const start = pluginInstance.start(npStart.core, {
+  ...npStart.plugins,
+  visualizations: visualizationsStart,
+});

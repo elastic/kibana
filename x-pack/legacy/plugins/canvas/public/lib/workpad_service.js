@@ -12,6 +12,35 @@ import {
 } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { getCoreStart } from '../legacy';
+/*
+  Remove any top level keys from the workpad which will be rejected by validation
+*/
+const validKeys = [
+  '@created',
+  '@timestamp',
+  'assets',
+  'colors',
+  'css',
+  'height',
+  'id',
+  'isWriteable',
+  'name',
+  'page',
+  'pages',
+  'width',
+];
+
+const sanitizeWorkpad = function(workpad) {
+  const workpadKeys = Object.keys(workpad);
+
+  for (const key of workpadKeys) {
+    if (!validKeys.includes(key)) {
+      delete workpad[key];
+    }
+  }
+
+  return workpad;
+};
 
 const getApiPath = function() {
   const basePath = getCoreStart().http.basePath.get();
@@ -29,7 +58,10 @@ const getApiPathAssets = function() {
 };
 
 export function create(workpad) {
-  return fetch.post(getApiPath(), { ...workpad, assets: workpad.assets || {} });
+  return fetch.post(getApiPath(), {
+    ...sanitizeWorkpad({ ...workpad }),
+    assets: workpad.assets || {},
+  });
 }
 
 export function get(workpadId) {
@@ -41,11 +73,11 @@ export function get(workpadId) {
 
 // TODO: I think this function is never used.  Look into and remove the corresponding route as well
 export function update(id, workpad) {
-  return fetch.put(`${getApiPath()}/${id}`, workpad);
+  return fetch.put(`${getApiPath()}/${id}`, sanitizeWorkpad({ ...workpad }));
 }
 
 export function updateWorkpad(id, workpad) {
-  return fetch.put(`${getApiPathStructures()}/${id}`, workpad);
+  return fetch.put(`${getApiPathStructures()}/${id}`, sanitizeWorkpad({ ...workpad }));
 }
 
 export function updateAssets(id, workpadAssets) {

@@ -5,12 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
+
+const bodySchema = schema.object({ pattern: schema.string() }, { allowUnknowns: true });
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(
@@ -26,67 +27,66 @@ function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   );
 }
 
-function getIndices(callWithRequest: any, pattern: string, limit = 10) {
-  return callWithRequest('indices.getAlias', {
-    index: pattern,
-    ignore: [404],
-  }).then((aliasResult: any) => {
-    if (aliasResult.status !== 404) {
-      const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
-      return indicesFromAliasResponse.slice(0, limit);
-    }
-
-    const params = {
+function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
+  return dataClient
+    .callAsCurrentUser('indices.getAlias', {
       index: pattern,
       ignore: [404],
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
+    })
+    .then((aliasResult: any) => {
+      if (aliasResult.status !== 404) {
+        const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
+        return indicesFromAliasResponse.slice(0, limit);
+      }
+
+      const params = {
+        index: pattern,
+        ignore: [404],
+        body: {
+          size: 0, // no hits
+          aggs: {
+            indices: {
+              terms: {
+                field: '_index',
+                size: limit,
+              },
             },
           },
         },
-      },
-    };
+      };
 
-    return callWithRequest('search', params).then((response: any) => {
-      if (response.status === 404 || !response.aggregations) {
-        return [];
-      }
-      return response.aggregations.indices.buckets.map((bucket: any) => bucket.key);
+      return dataClient.callAsCurrentUser('search', params).then((response: any) => {
+        if (response.status === 404 || !response.aggregations) {
+          return [];
+        }
+        return response.aggregations.indices.buckets.map((bucket: any) => bucket.key);
+      });
     });
-  });
 }
 
 export function registerGetRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-    const { pattern } = request.body;
-
-    try {
-      const indices = await getIndices(callWithRequest, pattern);
-      return response.ok({ body: { indices } });
-    } catch (e) {
-      // Case: Error from Elasticsearch JS client
-      if (isEsError(e)) {
-        return response.customError({ statusCode: e.statusCode, body: e });
-      }
-
-      // Case: default
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.post(
     {
       path: '/api/watcher/indices',
       validate: {
-        body: schema.object({}, { allowUnknowns: true }),
+        body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const { pattern } = request.body;
+
+      try {
+        const indices = await getIndices(ctx.watcher!.client, pattern);
+        return response.ok({ body: { indices } });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

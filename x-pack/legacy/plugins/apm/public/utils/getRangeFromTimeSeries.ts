@@ -5,7 +5,7 @@
  */
 
 import { flatten } from 'lodash';
-import { TimeSeries } from '../../typings/timeseries';
+import { TimeSeries } from '../../../../../plugins/apm/typings/timeseries';
 
 export const getRangeFromTimeSeries = (timeseries: TimeSeries[]) => {
   const dataPoints = flatten(timeseries.map(series => series.data));

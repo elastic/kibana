@@ -5,7 +5,7 @@
  */
 import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
+import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
@@ -206,6 +206,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
+        defaultActionGroupId: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -260,6 +261,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
+        defaultActionGroupId: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
           const group = 'default';
@@ -281,7 +283,13 @@ export default function(kibana: any) {
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -301,7 +309,13 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -319,7 +333,13 @@ export default function(kibana: any) {
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -378,7 +398,13 @@ export default function(kibana: any) {
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -390,15 +416,16 @@ export default function(kibana: any) {
         id: 'test.noop',
         name: 'Test: Noop',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.setup.registerType(cumulativeFiringAlertType);
-      server.plugins.alerting.setup.registerType(neverFiringAlertType);
-      server.plugins.alerting.setup.registerType(failingAlertType);
-      server.plugins.alerting.setup.registerType(validationAlertType);
-      server.plugins.alerting.setup.registerType(authorizationAlertType);
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(failingAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
     },
   });
 }

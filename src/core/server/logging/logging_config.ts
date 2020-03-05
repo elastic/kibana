@@ -140,13 +140,6 @@ export class LoggingConfig {
         layout: { kind: 'pattern', highlight: true },
       } as AppenderConfigType,
     ],
-    [
-      'file',
-      {
-        kind: 'file',
-        layout: { kind: 'pattern', highlight: false },
-      } as AppenderConfigType,
-    ],
   ]);
 
   /**

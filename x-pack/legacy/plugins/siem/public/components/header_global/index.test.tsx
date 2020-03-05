@@ -17,10 +17,15 @@ jest.mock('ui/new_platform');
 jest.mock('../search_bar', () => ({
   SiemSearchBar: () => null,
 }));
+jest.mock('../../containers/source', () => ({
+  useWithSource: () => ({
+    contentAvailable: true,
+  }),
+}));
 
 describe('HeaderGlobal', () => {
   test('it renders', () => {
-    const wrapper = shallow(<HeaderGlobal />);
+    const wrapper = shallow(<HeaderGlobal contentAvailable />);
 
     expect(wrapper).toMatchSnapshot();
   });

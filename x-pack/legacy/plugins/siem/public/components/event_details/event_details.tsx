@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -20,14 +20,14 @@ export type View = 'table-view' | 'json-view';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   data: DetailItem[];
   id: string;
   view: View;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 const Details = styled.div`

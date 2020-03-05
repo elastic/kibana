@@ -242,7 +242,7 @@ export default function({ getService }: FtrProviderContext) {
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 

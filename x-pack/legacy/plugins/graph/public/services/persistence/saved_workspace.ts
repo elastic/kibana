@@ -6,10 +6,10 @@
 import { i18n } from '@kbn/i18n';
 import { extractReferences, injectReferences } from './saved_workspace_references';
 import {
-  createSavedObjectClass,
   SavedObject,
+  createSavedObjectClass,
   SavedObjectKibanaServices,
-} from '../../legacy_imports';
+} from '../../../../../../../src/plugins/saved_objects/public';
 
 export interface SavedWorkspace extends SavedObject {
   wsState?: string;

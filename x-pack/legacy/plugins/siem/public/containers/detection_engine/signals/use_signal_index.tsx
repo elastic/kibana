@@ -60,7 +60,7 @@ export const useSignalIndex = (): Return => {
             signalIndexName: null,
             createDeSignalIndex: createIndex,
           });
-          if (error instanceof SignalIndexError && error.statusCode !== 404) {
+          if (error instanceof SignalIndexError && error.status_code !== 404) {
             errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
           }
         }

@@ -17,6 +17,7 @@ import {
   getDefaultSelectableFields,
   getFlattenedFields,
   isDefaultQuery,
+  matchAllQuery,
   EsDoc,
   EsDocSource,
   EsFieldName,
@@ -75,7 +76,7 @@ export const useSourceIndexData = (
         index: indexPattern.title,
         size: SEARCH_SIZE,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        body: { query: isDefaultQuery(query) ? { match_all: {} } : query },
+        body: { query: isDefaultQuery(query) ? matchAllQuery : query },
       });
 
       if (isErrorResponse(resp)) {

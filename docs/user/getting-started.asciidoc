@@ -43,9 +43,7 @@ your own visualizations and dashboard.
 Make sure you've <<install, installed Kibana>> and established
 a <<connect-to-elasticsearch, connection to Elasticsearch>>.
 
-If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
-on Elastic Cloud, you can access Kibana with a single click.
-
+If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
 
 --
 

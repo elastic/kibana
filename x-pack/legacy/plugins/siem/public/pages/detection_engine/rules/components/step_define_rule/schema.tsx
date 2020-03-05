@@ -17,7 +17,7 @@ import {
   fieldValidators,
   FormSchema,
   ValidationFunc,
-} from '../shared_imports';
+} from '../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
 
 const { emptyField } = fieldValidators;

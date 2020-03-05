@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -12,6 +13,7 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
   ClusterClient,
+  SharedGlobalConfig,
 } from 'src/core/server';
 
 import { IEventLogConfig, IEventLogService, IEventLogger, IEventLogConfig$ } from './types';
@@ -20,10 +22,8 @@ import { createEsContext, EsContext } from './es';
 
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
-// TODO - figure out how to get ${kibana.index} for `.kibana`
-const KIBANA_INDEX = '.kibana';
+const PROVIDER = 'eventLog';
 
-const PROVIDER = 'event_log';
 const ACTIONS = {
   starting: 'starting',
   stopping: 'stopping',
@@ -35,13 +35,18 @@ export class Plugin implements CorePlugin<IEventLogService> {
   private eventLogService?: IEventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
+  private globalConfig$: Observable<SharedGlobalConfig>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
+    this.globalConfig$ = this.context.config.legacy.globalConfig$;
   }
 
   async setup(core: CoreSetup): Promise<IEventLogService> {
+    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const kibanaIndex = globalConfig.kibana.index;
+
     this.systemLogger.debug('setting up plugin');
 
     const config = await this.config$.pipe(first()).toPromise();
@@ -49,7 +54,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     this.esContext = createEsContext({
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
-      indexNameRoot: KIBANA_INDEX,
+      indexNameRoot: kibanaIndex,
       clusterClient: core.elasticsearch.adminClient,
     });
 
@@ -84,7 +89,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
-      message: 'event_log starting',
+      message: 'eventLog starting',
     });
   }
 
@@ -97,7 +102,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // when Kibana is actuaelly stopping, as it's written asynchronously
     this.eventLogger.logEvent({
       event: { action: ACTIONS.stopping },
-      message: 'event_log stopping',
+      message: 'eventLog stopping',
     });
   }
 }

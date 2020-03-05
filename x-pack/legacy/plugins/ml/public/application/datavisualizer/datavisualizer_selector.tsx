@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license/check_license';
-import { useMlKibana } from '../contexts/kibana';
+import { useTimefilter } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -49,10 +49,7 @@ function startTrialDescription() {
 }
 
 export const DatavisualizerSelector: FC = () => {
-  const { services } = useMlKibana();
-  const { timefilter } = services.data.query.timefilter;
-  timefilter.disableTimeRangeSelector();
-  timefilter.disableAutoRefreshSelector();
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const startTrialVisible = isFullLicense() === false;
 
