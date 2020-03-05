@@ -21,10 +21,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfigs, IAggConfig, Schema } from '../legacy_imports';
+import { IAggConfigs, IAggConfig } from '../legacy_imports';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
+import { Schema } from '../schemas';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -75,7 +76,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'number',
             },
           },
-          schema: { group: 'metrics' },
+          schema: 'metrics',
         } as IAggConfig,
         {
           id: '3',
@@ -84,7 +85,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'string',
             },
           },
-          schema: { group: 'metrics' },
+          schema: 'metrics',
         } as IAggConfig,
         {
           id: '2',
@@ -93,7 +94,7 @@ describe('DefaultEditorAgg component', () => {
               type: 'number',
             },
           },
-          schema: { group: 'buckets' },
+          schema: 'buckets',
         } as IAggConfig,
       ],
     } as IAggConfigs;
@@ -107,9 +108,13 @@ describe('DefaultEditorAgg component', () => {
       } as VisState,
       schemas: [
         {
+          name: 'metrics',
+          group: 'metrics',
           max: 1,
         } as Schema,
         {
+          name: 'buckets',
+          group: 'buckets',
           max: 1,
         } as Schema,
       ],

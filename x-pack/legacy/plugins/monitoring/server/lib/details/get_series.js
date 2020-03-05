@@ -68,7 +68,7 @@ function createMetricAggs(metric) {
   return metric.aggs;
 }
 
-function fetchSeries(
+async function fetchSeries(
   req,
   indexPattern,
   metric,
@@ -142,7 +142,7 @@ function fetchSeries(
   }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params);
+  return await callWithRequest(req, 'search', params);
 }
 
 /**

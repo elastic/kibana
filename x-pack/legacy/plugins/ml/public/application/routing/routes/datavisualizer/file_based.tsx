@@ -16,11 +16,10 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
 
-import { getMlNodeCount } from '../../../ml_nodes_check';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
 const breadcrumbs = [
@@ -45,7 +44,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkFindFileStructurePrivilege,
-    getMlNodeCount,
   });
   return (
     <PageLoader context={context}>

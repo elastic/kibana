@@ -6,4 +6,4 @@
 
 export { SecurityLicenseService, SecurityLicense } from './license_service';
 
-export { SecurityLicenseFeatures } from './license_features';
+export { LoginLayout, SecurityLicenseFeatures } from './license_features';

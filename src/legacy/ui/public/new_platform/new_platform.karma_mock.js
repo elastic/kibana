@@ -213,6 +213,9 @@ export const npSetup = {
       config: {
         disableWelcomeScreen: false,
       },
+      tutorials: {
+        setVariable: sinon.fake(),
+      },
     },
     charts: {
       theme: {
@@ -380,18 +383,6 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
-    },
-    home: {
-      featureCatalogue: {
-        get: sinon.fake(),
-        register: sinon.fake(),
-      },
-      environment: {
-        get: sinon.fake(),
-      },
-      config: {
-        disableWelcomeScreen: false,
-      },
     },
     navigation: {
       ui: {
