@@ -4,134 +4,135 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { setSignalsStatusRoute } from './open_close_signals_route';
-import * as myUtils from '../utils';
-
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
   typicalSetStatusSignalByIdsPayload,
   typicalSetStatusSignalByQueryPayload,
   setStatusSignalMissingIdsAndQueryPayload,
+  getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { setSignalsStatusRoute } from './open_close_signals_route';
 
 describe('set signal status', () => {
-  let server = createMockServer();
-  let config = createMockConfig();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-    jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    config = createMockConfig();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getSuccessfulSignalUpdateResponse());
 
-    getClients.mockResolvedValue(clients);
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true);
-
-    setSignalsStatusRoute(server.route, config, getClients);
+    setSignalsStatusRoute(server.router);
   });
 
   describe('status on signal', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
-      const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
-      expect(statusCode).toBe(200);
-      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
+      const response = await server.inject(getSetSignalStatusByIdsRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
-      const { statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
-      expect(statusCode).toBe(200);
+      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
     test('catches error if callAsCurrentUser throws error', async () => {
       clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const { payload, statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 
-  describe('validation', () => {
-    test('returns 200 if signal_ids and status are present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: typicalSetStatusSignalByIdsPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+  describe('request validation', () => {
+    test('allows signal_ids and status', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
     });
 
-    test('returns 200 if query and status are present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: typicalSetStatusSignalByQueryPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+    test('allows query and status', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: typicalSetStatusSignalByQueryPayload(),
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
     });
 
-    test('returns 400 if signal_ids and query are not present', async () => {
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: setStatusSignalMissingIdsAndQueryPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+    test('rejects if neither signal_ids nor query', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body: setStatusSignalMissingIdsAndQueryPayload(),
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '"value" must contain at least one of [signal_ids, query]'
+      );
     });
 
-    test('returns 400 if signal_ids are present but status is not', async () => {
-      const { status, ...justIds } = typicalSetStatusSignalByIdsPayload();
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: justIds,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+    test('rejects if signal_ids but no status', async () => {
+      const { status, ...body } = typicalSetStatusSignalByIdsPayload();
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
 
-    test('returns 400 if query is present but status is not', async () => {
-      const { status, ...justTheQuery } = typicalSetStatusSignalByQueryPayload();
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: justTheQuery,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+    test('rejects if query but no status', async () => {
+      const { status, ...body } = typicalSetStatusSignalByIdsPayload();
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
 
-    test('returns 400 if query and signal_ids are present but status is not', async () => {
+    test('rejects if query and signal_ids but no status', async () => {
       const allTogether = {
         ...typicalSetStatusSignalByIdsPayload(),
         ...typicalSetStatusSignalByQueryPayload(),
       };
-      const { status, ...queryAndSignalIdsNoStatus } = allTogether;
-      const request: ServerInjectOptions = {
-        method: 'POST',
-        url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-        payload: queryAndSignalIdsNoStatus,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+      const { status, ...body } = allTogether;
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+        body,
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'child "status" fails because ["status" is required]'
+      );
     });
   });
 });

@@ -7,7 +7,12 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { COLOR_PALETTE_MAX_SIZE, STYLE_TYPE } from '../../../../../common/constants';
+import {
+  COLOR_PALETTE_MAX_SIZE,
+  STYLE_TYPE,
+  SOURCE_META_ID_ORIGIN,
+  FIELD_ORIGIN,
+} from '../../../../../common/constants';
 import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
@@ -17,10 +22,10 @@ import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
+  constructor(options, styleName, field, vectorLayer, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
-    this._getFieldMeta = getFieldMeta;
+    this._layer = vectorLayer;
     this._getFieldFormatter = getFieldFormatter;
   }
 
@@ -30,8 +35,57 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
-  getFieldMeta() {
-    return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
+  _getStyleMetaDataRequestId(fieldName) {
+    if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      return SOURCE_META_ID_ORIGIN;
+    }
+
+    const join = this._layer.getValidJoins().find(join => {
+      return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+    });
+    return join ? join.getSourceMetaDataRequestId() : null;
+  }
+
+  getRangeFieldMeta() {
+    const style = this._layer.getStyle();
+    const styleMeta = style.getStyleMeta();
+    const fieldName = this.getFieldName();
+    const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
+
+    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
+    if (!dataRequestId) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const data = styleMetaDataRequest.getData();
+    const rangeFieldMeta = this.pluckOrdinalStyleMetaFromFieldMetaData(data);
+    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
+  }
+
+  getCategoryFieldMeta() {
+    const style = this._layer.getStyle();
+    const styleMeta = style.getStyleMeta();
+    const fieldName = this.getFieldName();
+    const rangeFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+
+    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
+    if (!dataRequestId) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const data = styleMetaDataRequest.getData();
+    const rangeFieldMeta = this.pluckCategoricalStyleMetaFromFieldMetaData(data);
+    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
 
   getField() {
@@ -118,7 +172,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return _.get(this.getOptions(), 'fieldMetaOptions', {});
   }
 
-  _pluckOrdinalStyleMetaFromFeatures(features) {
+  pluckOrdinalStyleMetaFromFeatures(features) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const name = this.getField().getName();
     let min = Infinity;
     let max = -Infinity;
@@ -140,7 +198,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
         };
   }
 
-  _pluckCategoricalStyleMetaFromFeatures(features) {
+  pluckCategoricalStyleMetaFromFeatures(features) {
+    if (!this.isCategorical()) {
+      return null;
+    }
+
     const fieldName = this.getField().getName();
     const counts = new Map();
     for (let i = 0; i < features.length; i++) {
@@ -170,17 +232,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  pluckStyleMetaFromFeatures(features) {
-    if (this.isOrdinal()) {
-      return this._pluckOrdinalStyleMetaFromFeatures(features);
-    } else if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFeatures(features);
-    } else {
+  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isOrdinal()) {
       return null;
     }
-  }
 
-  _pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
     const stats = fieldMetaData[this._field.getRootName()];
     if (!stats) {
       return null;
@@ -200,7 +256,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isCategorical()) {
+      return null;
+    }
+
     const rootFieldName = this._field.getRootName();
     if (!fieldMetaData[rootFieldName] || !fieldMetaData[rootFieldName].buckets) {
       return null;
@@ -215,16 +275,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return {
       categories: ordered,
     };
-  }
-
-  pluckStyleMetaFromFieldMetaData(fieldMetaData) {
-    if (this.isOrdinal()) {
-      return this._pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData);
-    } else if (this.isCategorical()) {
-      return this._pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData);
-    } else {
-      return null;
-    }
   }
 
   formatField(value) {
@@ -244,7 +294,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
     const valueAsFloat = parseFloat(value);
     if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getFieldMeta());
+      return scaleValue(valueAsFloat, this.getRangeFieldMeta());
     }
     if (isNaN(valueAsFloat)) {
       return 0;
