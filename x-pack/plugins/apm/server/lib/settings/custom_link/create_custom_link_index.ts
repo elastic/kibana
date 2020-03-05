@@ -26,7 +26,6 @@ export const createApmCustomLinkIndex = async ({
 };
 
 const mappings: Mappings = {
-  dynamic: false,
   properties: {
     '@timestamp': {
       type: 'date'
@@ -37,9 +36,25 @@ const mappings: Mappings = {
     url: {
       type: 'keyword'
     },
-    filters: {
-      dynamic: true,
-      properties: {}
+    service: {
+      properties: {
+        name: {
+          type: 'keyword'
+        },
+        environment: {
+          type: 'keyword'
+        }
+      }
+    },
+    transaction: {
+      properties: {
+        name: {
+          type: 'keyword'
+        },
+        type: {
+          type: 'keyword'
+        }
+      }
     }
   }
 };

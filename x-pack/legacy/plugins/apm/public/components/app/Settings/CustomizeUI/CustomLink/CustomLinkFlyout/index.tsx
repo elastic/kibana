@@ -13,14 +13,14 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
-import { LinkSection } from './LinkSection';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
+import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
+import { convertFiltersToArray, convertFiltersToObject } from './helper';
 
 interface Props {
   onClose: () => void;
@@ -28,28 +28,6 @@ interface Props {
   onSave: () => void;
   onDelete: () => void;
 }
-
-export interface CustomLinkFormData extends Omit<CustomLink, 'filters'> {
-  filters: Array<[string, string]>;
-}
-
-const convertFiltersToArray = (filters: CustomLink['filters'] = {}) => {
-  const convertedFilters = Object.entries(filters);
-  // When convertedFilters is empty, initiate the filters filled with one item.
-  if (isEmpty(convertedFilters)) {
-    convertedFilters.push(['', '']);
-  }
-  return convertedFilters;
-};
-
-const convertFiltersToObject = (filters: CustomLinkFormData['filters']) => {
-  const convertedFilters = Object.fromEntries(
-    filters.filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
-  );
-  if (!isEmpty(convertedFilters)) {
-    return convertedFilters;
-  }
-};
 
 export const CustomLinkFlyout = ({
   onClose,
@@ -60,11 +38,10 @@ export const CustomLinkFlyout = ({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
-  // form fields
   const [label, setLabel] = useState(customLinkSelected?.label || '');
   const [url, setUrl] = useState(customLinkSelected?.url || '');
   const [filters, setFilters] = useState(
-    convertFiltersToArray(customLinkSelected?.filters)
+    convertFiltersToArray(customLinkSelected)
   );
 
   const isFormValid = !!label && !!url;

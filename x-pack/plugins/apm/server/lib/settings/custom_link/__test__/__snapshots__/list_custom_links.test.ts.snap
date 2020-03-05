@@ -26,7 +26,7 @@ Object {
               "should": Array [
                 Object {
                   "term": Object {
-                    "filters.service.name": "foo",
+                    "service.name": "foo",
                   },
                 },
                 Object {
@@ -34,7 +34,7 @@ Object {
                     "must_not": Array [
                       Object {
                         "exists": Object {
-                          "field": "filters.service.name",
+                          "field": "service.name",
                         },
                       },
                     ],
@@ -49,7 +49,7 @@ Object {
               "should": Array [
                 Object {
                   "term": Object {
-                    "filters.transaction.name": "bar",
+                    "transaction.name": "bar",
                   },
                 },
                 Object {
@@ -57,7 +57,7 @@ Object {
                     "must_not": Array [
                       Object {
                         "exists": Object {
-                          "field": "filters.transaction.name",
+                          "field": "transaction.name",
                         },
                       },
                     ],

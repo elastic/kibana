@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as t from 'io-ts';
+import { FilterOptions } from '../../../routes/settings/custom_link';
 
-export interface CustomLink {
+export type FilterOptionsType = t.TypeOf<typeof FilterOptions>;
+
+export type CustomLink = {
   id?: string;
   '@timestamp': number;
   label: string;
   url: string;
-  filters?: {
-    [key: string]: string;
-  };
-}
+} & FilterOptionsType;

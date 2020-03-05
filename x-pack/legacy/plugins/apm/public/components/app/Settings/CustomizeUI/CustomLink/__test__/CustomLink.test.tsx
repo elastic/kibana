@@ -21,17 +21,13 @@ const data = [
     id: '1',
     label: 'label 1',
     url: 'url 1',
-    filters: {
-      'service.name': 'opbeans-java'
-    }
+    'service.name': 'opbeans-java'
   },
   {
     id: '2',
     label: 'label 2',
     url: 'url 2',
-    filters: {
-      'transaction.type': 'request'
-    }
+    'transaction.type': 'request'
   }
 ];
 

@@ -16,59 +16,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/list_custom_links';
+import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE
-} from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { CustomLinkFormData } from '.';
-
-type FiltersType = CustomLinkFormData['filters'];
-
-interface FilterOption {
-  value: 'DEFAULT' | keyof FilterOptionsType;
-  text: string;
-}
-
-const DEFAULT_OPTION: FilterOption = {
-  value: 'DEFAULT',
-  text: i18n.translate(
-    'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption',
-    { defaultMessage: 'Select fields...' }
-  )
-};
-
-const filterOptions: FilterOption[] = [
+  getSelectOptions,
   DEFAULT_OPTION,
-  { value: SERVICE_NAME, text: SERVICE_NAME },
-  { value: SERVICE_ENVIRONMENT, text: SERVICE_ENVIRONMENT },
-  { value: TRANSACTION_TYPE, text: TRANSACTION_TYPE },
-  { value: TRANSACTION_NAME, text: TRANSACTION_NAME }
-];
-
-const getSelectOptions = (filters: FiltersType, idx: number) => {
-  return filterOptions.filter(option => {
-    const indexUsedFilter = filters.findIndex(
-      filter => filter[0] === option.value
-    );
-    // Filter out all items already added, besides the one selected in the current filter.
-    return indexUsedFilter === -1 || idx === indexUsedFilter;
-  });
-};
+  filterSelectOptions,
+  Filters
+} from './helper';
 
 export const FiltersSection = ({
   filters,
   onChangeFilters
 }: {
-  filters: FiltersType;
-  onChangeFilters: (filters: FiltersType) => void;
+  filters: Filters;
+  onChangeFilters: (filters: Filters) => void;
 }) => {
   const filterValueRefs = useRef<HTMLInputElement[]>([]);
 
-  const onChangeFilter = (filter: FiltersType[0], idx: number) => {
+  const onChangeFilter = (filter: Filters[0], idx: number) => {
     if (filterValueRefs.current[idx]) {
       filterValueRefs.current[idx].focus();
     }
@@ -137,7 +102,12 @@ export const FiltersSection = ({
                     defaultMessage: 'Field'
                   }
                 )}
-                onChange={e => onChangeFilter([e.target.value, value], idx)}
+                onChange={e =>
+                  onChangeFilter(
+                    [e.target.value as keyof FilterOptionsType, value],
+                    idx
+                  )
+                }
                 isInvalid={
                   !isEmpty(value) &&
                   (isEmpty(key) || key === DEFAULT_OPTION.value)
@@ -179,7 +149,7 @@ export const FiltersSection = ({
       <AddFilterButton
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
-        isDisabled={filters.length === filterOptions.length - 1}
+        isDisabled={filters.length === filterSelectOptions.length - 1}
       />
     </>
   );

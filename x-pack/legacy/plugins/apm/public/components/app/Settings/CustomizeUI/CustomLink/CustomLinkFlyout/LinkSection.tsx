@@ -12,10 +12,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CustomLinkFormData } from './';
+import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
 interface InputField {
-  name: keyof CustomLinkFormData;
+  name: keyof CustomLink;
   label: string;
   helpText: string;
   placeholder: string;
