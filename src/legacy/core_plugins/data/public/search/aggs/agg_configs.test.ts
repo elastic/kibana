@@ -36,6 +36,7 @@ describe('AggConfigs', () => {
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
+    mockDataServices();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
@@ -296,7 +297,6 @@ describe('AggConfigs', () => {
     ]);
 
     beforeEach(() => {
-      mockDataServices();
       indexPattern = stubIndexPattern as IndexPattern;
       indexPattern.fields.getByName = name => (name as unknown) as IndexPatternField;
     });

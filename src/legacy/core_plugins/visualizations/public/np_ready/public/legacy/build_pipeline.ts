@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { cloneDeep, get } from 'lodash';
+import { get } from 'lodash';
 import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
-import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
+import {
+  fieldFormats,
+  ISearchSource,
+  TimefilterContract,
+} from '../../../../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
-import { IAggConfig, isDateHistogramBucketAggConfig, setBounds } from '../../../../../data/public';
+import { IAggConfig, isDateHistogramBucketAggConfig } from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -78,11 +82,20 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
+const getSchemas = (
+  vis: Vis,
+  opts: {
+    timeRange?: any;
+    timefilter: TimefilterContract;
+  }
+): Schemas => {
+  const { timeRange, timefilter } = opts;
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
-      setBounds(agg, true);
+      const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+      agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+      agg.buckets.setInterval(agg.params.interval);
     }
 
     const hasSubAgg = [
@@ -427,9 +440,17 @@ const buildVisConfig: BuildVisConfigFunction = {
 
 export const buildVislibDimensions = async (
   vis: any,
-  params: { searchSource: any; timeRange?: any; abortSignal?: AbortSignal }
+  params: {
+    searchSource: any;
+    timefilter: TimefilterContract;
+    timeRange?: any;
+    abortSignal?: AbortSignal;
+  }
 ) => {
-  const schemas = getSchemas(vis, params.timeRange);
+  const schemas = getSchemas(vis, {
+    timeRange: params.timeRange,
+    timefilter: params.timefilter,
+  });
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -464,29 +485,11 @@ export const buildVislibDimensions = async (
   return dimensions;
 };
 
-// If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
-// take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const getVisParams = async (
-  vis: Vis,
-  params: { searchSource: ISearchSource; timeRange?: any; abortSignal?: AbortSignal }
-) => {
-  const schemas = getSchemas(vis, params.timeRange);
-  let visConfig = cloneDeep(vis.params);
-  if (buildVisConfig[vis.type.name]) {
-    visConfig = {
-      ...visConfig,
-      ...buildVisConfig[vis.type.name](schemas, visConfig),
-    };
-  } else if (vislibCharts.includes(vis.type.name)) {
-    visConfig.dimensions = await buildVislibDimensions(vis, params);
-  }
-  return visConfig;
-};
-
 export const buildPipeline = async (
   vis: Vis,
   params: {
     searchSource: ISearchSource;
+    timefilter: TimefilterContract;
     timeRange?: any;
     savedObjectId?: string;
   }
@@ -520,7 +523,10 @@ export const buildPipeline = async (
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
-  const schemas = getSchemas(vis, params.timeRange);
+  const schemas = getSchemas(vis, {
+    timeRange: params.timeRange,
+    timefilter: params.timefilter,
+  });
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState, {
       savedObjectId: params.savedObjectId,

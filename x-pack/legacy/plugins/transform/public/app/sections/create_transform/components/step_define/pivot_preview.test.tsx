@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
-import { KibanaContext } from '../../../../lib/kibana';
-
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import {
   getPivotQuery,
   PivotAggsConfig,
@@ -16,19 +17,16 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { PivotPreview } from './pivot_preview';
 
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
-
+jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {
   test('Minimal initialization', () => {
+    // Arrange
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -44,19 +42,22 @@ describe('Transform: <PivotPreview />', () => {
     const props = {
       aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
+      indexPattern: {
+        title: 'the-index-pattern-title',
+        fields: [] as any[],
+      } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
 
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
-    const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <PivotPreview {...props} />
-        </KibanaContext.Provider>
-      </div>
+    const Providers = getAppProviders(createPublicShim());
+    const { getByText } = render(
+      <Providers>
+        <PivotPreview {...props} />
+      </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByText('Transform pivot preview')).toBeInTheDocument();
   });
 });
