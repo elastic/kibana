@@ -45,6 +45,8 @@ export default function({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./embeddable'));
+      loadTestFile(require.resolve('./visualize_create_menu'));
+      loadTestFile(require.resolve('./discover'));
     });
   });
 }

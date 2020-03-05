@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useRef, useState } from 'react';
-import moment from 'moment-timezone';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,26 +13,23 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiCopy,
+  EuiDataGrid,
+  EuiDataGridSorting,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiProgress,
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  ColumnType,
-  mlInMemoryTableBasicFactory,
-  SORT_DIRECTION,
-} from '../../../../../shared_imports';
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
 import {
-  getFlattenedFields,
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
+  EsFieldName,
   PreviewRequestBody,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -41,8 +37,8 @@ import {
   PivotQuery,
 } from '../../../../common';
 
-import { getPivotPreviewDevConsoleStatement } from './common';
-import { PreviewItem, PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+import { getPivotPreviewDevConsoleStatement, multiColumnSortFactory } from './common';
+import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -58,14 +54,6 @@ function sortColumns(groupByArr: PivotGroupByConfig[]) {
     }
     return a.localeCompare(b);
   };
-}
-
-function usePrevious(value: any) {
-  const ref = useRef(null);
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
 }
 
 interface PreviewTitleProps {
@@ -118,51 +106,103 @@ interface PivotPreviewProps {
   query: PivotQuery;
 }
 
-export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
-  const [clearTable, setClearTable] = useState(false);
+const defaultPagination = { pageIndex: 0, pageSize: 5 };
 
+export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const indexPattern = useCurrentIndexPattern();
 
   const {
-    previewData,
+    previewData: data,
     previewMappings,
     errorMessage,
     previewRequest,
     status,
   } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
-
   const groupByArr = dictionaryToArray(groupBy);
 
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what the useEffect() part does.
-  // - After that the table gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  const firstColumnName =
-    previewData.length > 0
-      ? Object.keys(previewData[0]).sort(sortColumns(groupByArr))[0]
-      : undefined;
+  // Filters mapping properties of type `object`, which get returned for nested field parents.
+  const columnKeys = Object.keys(previewMappings.properties).filter(
+    key => previewMappings.properties[key].type !== 'object'
+  );
+  columnKeys.sort(sortColumns(groupByArr));
 
-  const firstColumnNameChanged = usePrevious(firstColumnName) !== firstColumnName;
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(columnKeys);
+
   useEffect(() => {
-    if (firstColumnNameChanged) {
-      setClearTable(true);
-    }
-    if (clearTable) {
-      setTimeout(() => setClearTable(false), 0);
-    }
-  }, [firstColumnNameChanged, clearTable]);
+    setVisibleColumns(columnKeys);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(columnKeys)]);
 
-  if (firstColumnNameChanged) {
-    return null;
+  const [pagination, setPagination] = useState(defaultPagination);
+
+  // Reset pagination if data changes. This is to avoid ending up with an empty table
+  // when for example the user selected a page that is not available with the updated data.
+  useEffect(() => {
+    setPagination(defaultPagination);
+  }, [data.length]);
+
+  // EuiDataGrid State
+  const dataGridColumns = columnKeys.map(id => ({ id }));
+
+  const onChangeItemsPerPage = useCallback(
+    pageSize => {
+      setPagination(p => {
+        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
+        return { pageIndex, pageSize };
+      });
+    },
+    [setPagination]
+  );
+
+  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+    setPagination,
+  ]);
+
+  // Sorting config
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
+
+  if (sortingColumns.length > 0) {
+    data.sort(multiColumnSortFactory(sortingColumns));
   }
+
+  const pageData = data.slice(
+    pagination.pageIndex * pagination.pageSize,
+    (pagination.pageIndex + 1) * pagination.pageSize
+  );
+
+  const renderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(pageData[adjustedRowIndex], columnId, null)
+        : null;
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (cellValue === undefined) {
+        return null;
+      }
+
+      return cellValue;
+    };
+  }, [pageData, pagination.pageIndex, pagination.pageSize]);
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false} data-test-subj="transformPivotPreview error">
+      <div data-test-subj="transformPivotPreview error">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
@@ -173,11 +213,11 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
         >
           <ErrorMessage message={errorMessage} />
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
-  if (previewData.length === 0) {
+  if (data.length === 0) {
     let noDataMessage = i18n.translate(
       'xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody',
       {
@@ -196,7 +236,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
       );
     }
     return (
-      <EuiPanel grow={false} data-test-subj="transformPivotPreview empty">
+      <div data-test-subj="transformPivotPreview empty">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
@@ -206,85 +246,41 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
         >
           <p>{noDataMessage}</p>
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
-  const columnKeys = getFlattenedFields(previewData[0]);
-  columnKeys.sort(sortColumns(groupByArr));
-
-  const columns = columnKeys.map(k => {
-    const column: ColumnType<PreviewItem> = {
-      field: k,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    };
-    if (typeof previewMappings.properties[k] !== 'undefined') {
-      const esFieldType = previewMappings.properties[k].type;
-      switch (esFieldType) {
-        case ES_FIELD_TYPES.BOOLEAN:
-          column.dataType = 'boolean';
-          break;
-        case ES_FIELD_TYPES.DATE:
-          column.align = 'right';
-          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-          break;
-        case ES_FIELD_TYPES.BYTE:
-        case ES_FIELD_TYPES.DOUBLE:
-        case ES_FIELD_TYPES.FLOAT:
-        case ES_FIELD_TYPES.HALF_FLOAT:
-        case ES_FIELD_TYPES.INTEGER:
-        case ES_FIELD_TYPES.LONG:
-        case ES_FIELD_TYPES.SCALED_FLOAT:
-        case ES_FIELD_TYPES.SHORT:
-          column.dataType = 'number';
-          break;
-        case ES_FIELD_TYPES.KEYWORD:
-        case ES_FIELD_TYPES.TEXT:
-          column.dataType = 'string';
-          break;
-      }
-    }
-    return column;
-  });
-
-  if (columns.length === 0) {
+  if (columnKeys.length === 0) {
     return null;
   }
 
-  const sorting = {
-    sort: {
-      field: columns[0].field as string,
-      direction: SORT_DIRECTION.ASC,
-    },
-  };
-
-  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<PreviewItem>();
-
   return (
-    <EuiPanel data-test-subj="transformPivotPreview loaded">
+    <div data-test-subj="transformPivotPreview loaded">
       <PreviewTitle previewRequest={previewRequest} />
-      {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== PIVOT_PREVIEW_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
-      {previewData.length > 0 && clearTable === false && columns.length > 0 && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          compressed
-          items={previewData}
-          columns={columns}
+      <div className="transform__progress">
+        {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+        {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+          <EuiProgress size="xs" color="accent" max={1} value={0} />
+        )}
+      </div>
+      {dataGridColumns.length > 0 && data.length > 0 && (
+        <EuiDataGrid
+          aria-label="Source index preview"
+          columns={dataGridColumns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          gridStyle={euiDataGridStyle}
+          rowCount={data.length}
+          renderCellValue={renderCellValue}
+          sorting={{ columns: sortingColumns, onSort }}
+          toolbarVisibility={euiDataGridToolbarSettings}
           pagination={{
-            initialPageSize: 5,
+            ...pagination,
             pageSizeOptions: [5, 10, 25],
+            onChangeItemsPerPage,
+            onChangePage,
           }}
-          rowProps={() => ({
-            'data-test-subj': 'transformPivotPreviewRow',
-          })}
-          sorting={sorting}
         />
       )}
-    </EuiPanel>
+    </div>
   );
 });

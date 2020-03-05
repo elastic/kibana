@@ -1,0 +1,15 @@
+{
+  "id": "transform",
+  "version": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
+  "configPath": ["xpack", "transform"]
+}

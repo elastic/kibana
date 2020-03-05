@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Readable } from 'stream';
+
 import { OutputRuleAlertRest } from '../../types';
-
-export const TEST_BOUNDARY = 'test_multipart_boundary';
-
-// Not parsable due to extra colon following `name` property - name::
-export const UNPARSABLE_LINE =
-  '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}';
+import { HapiReadableStream } from '../../rules/types';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
@@ -41,50 +38,42 @@ export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest>
 });
 
 /**
- * Given an array of rule_id strings this will return a ndjson buffer which is useful
- * for testing uploads.
- * @param ruleIds Array of strings of rule_ids
- * @param isNdjson Boolean to determine file extension
+ * Given an array of rules, builds an NDJSON string of rules
+ * as we might import/export
+ * @param rules Array of rule objects with which to generate rule JSON
  */
-export const getSimpleRuleAsMultipartContent = (ruleIds: string[], isNdjson = true): Buffer => {
-  const arrayOfRules = ruleIds.map(ruleId => {
-    const simpleRule = getSimpleRule(ruleId);
-    return JSON.stringify(simpleRule);
-  });
-  const stringOfRules = arrayOfRules.join('\r\n');
-
-  const resultingPayload =
-    `--${TEST_BOUNDARY}\r\n` +
-    `Content-Disposition: form-data; name="file"; filename="rules.${
-      isNdjson ? 'ndjson' : 'json'
-    }\r\n` +
-    'Content-Type: application/octet-stream\r\n' +
-    '\r\n' +
-    `${stringOfRules}\r\n` +
-    `--${TEST_BOUNDARY}--\r\n`;
-
-  return Buffer.from(resultingPayload);
+export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) => {
+  return rules.map(rule => JSON.stringify(rule)).join('\r\n');
 };
 
 /**
- * Given an array of rule_id strings this will return a ndjson buffer which is useful
- * for testing uploads.
- * @param count Number of rules to generate
- * @param isNdjson Boolean to determine file extension
+ * Given an array of rule IDs, builds an NDJSON string of rules
+ * as we might import/export
+ * @param ruleIds Array of ruleIds with which to generate rule JSON
  */
-export const getSimpleRuleAsMultipartContentNoRuleId = (count: number, isNdjson = true): Buffer => {
-  const arrayOfRules = Array(count).fill(JSON.stringify(getSimpleRuleWithId()));
-  const stringOfRules = arrayOfRules.join('\r\n');
+export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
+  const rules = ruleIds.map(ruleId => getSimpleRule(ruleId));
+  return rulesToNdJsonString(rules);
+};
 
-  const resultingPayload =
-    `--${TEST_BOUNDARY}\r\n` +
-    `Content-Disposition: form-data; name="file"; filename="rules.${
-      isNdjson ? 'ndjson' : 'json'
-    }\r\n` +
-    'Content-Type: application/octet-stream\r\n' +
-    '\r\n' +
-    `${stringOfRules}\r\n` +
-    `--${TEST_BOUNDARY}--\r\n`;
+/**
+ * Given a string, builds a hapi stream as our
+ * route handler would receive it.
+ * @param string contents of the stream
+ * @param filename String to declare file extension
+ */
+export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiReadableStream => {
+  const HapiStream = class extends Readable {
+    public readonly hapi: { filename: string };
+    constructor(fileName: string) {
+      super();
+      this.hapi = { filename: fileName };
+    }
+  };
 
-  return Buffer.from(resultingPayload);
+  const stream = new HapiStream(filename);
+  stream.push(string);
+  stream.push(null);
+
+  return stream;
 };

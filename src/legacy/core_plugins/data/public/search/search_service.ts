@@ -29,14 +29,15 @@ import {
   AggConfigs,
   CreateAggConfigParams,
   FieldParamType,
+  getCalculateAutoTimeExpression,
   MetricAggType,
   aggTypeFieldFilters,
-  setBounds,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
 
 interface AggsSetup {
+  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
 }
 
@@ -47,11 +48,11 @@ interface AggsStartLegacy {
   FieldParamType: typeof FieldParamType;
   MetricAggType: typeof MetricAggType;
   parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  setBounds: typeof setBounds;
   siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
 interface AggsStart {
+  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
@@ -85,6 +86,7 @@ export class SearchService {
 
     return {
       aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         types: aggTypesSetup,
       },
     };
@@ -94,6 +96,7 @@ export class SearchService {
     const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             schemas,
@@ -108,7 +111,6 @@ export class SearchService {
           FieldParamType,
           MetricAggType,
           parentPipelineAggHelper, // TODO make static
-          setBounds, // TODO make static
           siblingPipelineAggHelper, // TODO make static
         },
       },
