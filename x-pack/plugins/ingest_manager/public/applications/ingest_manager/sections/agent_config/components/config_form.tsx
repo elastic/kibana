@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiComboBox,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -127,13 +128,28 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         <EuiSwitch
           showLabel={true}
           label={
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigForm.systemMonitoringText"
-              defaultMessage="Enable system monitoring"
-            />
+            <>
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigForm.systemMonitoringText"
+                defaultMessage="Enable system monitoring"
+              />{' '}
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText',
+                  {
+                    defaultMessage:
+                      'Enables system monitoring on this configuration by adding default data sources to it',
+                  }
+                )}
+                position="right"
+                type="iInCircle"
+              />
+            </>
           }
           checked={true}
-          onChange={() => {}}
+          onChange={() => {
+            // FIXME: need to implement Enable System Monitoring when API is available
+          }}
         />
       </EuiFormRow>
       <EuiHorizontalRule />
@@ -220,25 +236,3 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
     </EuiForm>
   );
 };
-
-{
-  /* <EuiFieldText*/
-}
-{
-  /*  fullWidth*/
-}
-{
-  /*  value={agentConfig.namespace}*/
-}
-{
-  /*  onChange={e => updateAgentConfig({ namespace: e.target.value })}*/
-}
-{
-  /*  isInvalid={Boolean(touchedFields.namespace && validation.namespace)}*/
-}
-{
-  /*  onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}*/
-}
-{
-  /* />*/
-}
