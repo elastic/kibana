@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';
-export { ReplacePanelAction, REPLACE_PANEL_ACTION } from './replace_panel_action';
+export { ExpandPanelAction, ACTION_EXPAND_PANEL } from './expand_panel_action';
+export { ReplacePanelAction, ACTION_REPLACE_PANEL } from './replace_panel_action';

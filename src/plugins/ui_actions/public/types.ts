@@ -20,12 +20,24 @@
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
-export type TriggerRegistry = Map<string, TriggerInternal<any>>;
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal<any>>;
-export type TriggerToActionsRegistry = Map<string, string[]>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
-export type TriggerId = string;
+const DEFAULT_TRIGGER = '';
+
+export type TriggerId = keyof TriggerContextMapping;
+
+export type BaseContext = object;
+export type TriggerContext = BaseContext;
 
 export interface TriggerContextMapping {
-  [key: string]: object;
+  [DEFAULT_TRIGGER]: TriggerContext;
+}
+
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
 }

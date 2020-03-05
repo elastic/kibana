@@ -17,12 +17,30 @@
  * under the License.
  */
 
+/*
+<<<<<<< HEAD
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
 import { ActionDefinition, ActionInternal, AnyActionInternal } from '../actions';
+=======
+*/
+import {
+  TriggerRegistry,
+  ActionRegistry,
+  TriggerToActionsRegistry,
+  TriggerId,
+  TriggerContextMapping,
+  ActionType,
+} from '../types';
+import {
+  ActionDefinition,
+  ActionInternal,
+  AnyActionInternal,
+  Action,
+  ActionByType,
+} from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
-import { AnyActionContract } from '../actions/action_contract';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -61,7 +79,7 @@ export class UiActionsService {
   };
 
   public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
-    const trigger = this.triggers.get(triggerId as string);
+    const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
       throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
@@ -70,7 +88,7 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A): void => {
+  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A) => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
@@ -78,23 +96,48 @@ export class UiActionsService {
     this.actions.set(definition.id, new ActionInternal(definition));
   };
 
-  public readonly attachAction = (triggerId: string, actionId: string): void => {
+  public readonly getAction = <T extends ActionDefinition<any, any>>(
+    id: string
+  ): ActionInternal<T> => {
+    if (!this.actions.has(id)) {
+      throw new Error(`Action [action.id = ${id}] not registered.`);
+    }
+
+    return this.actions.get(id) as ActionInternal<T>;
+  };
+
+  public readonly attachAction = <TType extends TriggerId, AType extends ActionType>(
+    triggerId: TType,
+    // The action can accept partial or no context, but if it needs context not provided
+    // by this type of trigger, typescript will complain. yay!
+    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
+  ): void => {
+    if (!this.actions.has(action.id)) {
+      this.registerAction(action);
+    } else {
+      const registeredAction = this.actions.get(action.id);
+      // todo - verify this
+      if (registeredAction!.id !== action.id) {
+        throw new Error(`A different action instance with this id is already registered.`);
+      }
+    }
+
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
       throw new Error(
-        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
+        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${action.id}].`
       );
     }
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    if (!actionIds!.find(id => id === actionId)) {
-      this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
+    if (!actionIds!.find(id => id === action.id)) {
+      this.triggerToActions.set(triggerId, [...actionIds!, action.id]);
     }
   };
 
-  public readonly detachAction = (triggerId: string, actionId: string): void => {
+  public readonly detachAction = (triggerId: TriggerId, actionId: string) => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -111,19 +154,33 @@ export class UiActionsService {
     );
   };
 
+  /*
+<<<<<<< HEAD
   public readonly getTriggerActions = (triggerId: string): AnyActionContract[] => {
+=======
+*/
+  public readonly getTriggerActions = <T extends TriggerId>(
+    triggerId: T
+  ): Array<Action<TriggerContextMapping[T]>> => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
+
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId) as AnyActionInternal)
       .filter(Boolean)
-      .map(({ contract }) => contract);
+      .map(({ contract }) => contract) as Array<Action<TriggerContextMapping[T]>>;
 
-    return actions;
+    // const actionsd = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
+    //  Action<TriggerContextMapping[T]>
+    // >;
+
+    return actions as Array<Action<TriggerContext<T>>>;
   };
 
+  /*
+<<<<<<< HEAD
   public readonly getTriggerCompatibleActions = async <C>(
     triggerId: string,
     context: C
@@ -134,6 +191,19 @@ export class UiActionsService {
     );
     return contracts.reduce<AnyActionContract[]>(
       (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
+=======
+*/
+
+  // todo look at using AnyActionContract[]
+  public readonly getTriggerCompatibleActions = async <T extends TriggerId>(
+    triggerId: T,
+    context: TriggerContextMapping[T]
+  ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
+    const actions = this.getTriggerActions!(triggerId);
+    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+    return actions.reduce(
+      (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
+        isCompatibles[i] ? [...acc, action] : acc,
       []
     );
   };

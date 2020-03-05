@@ -23,7 +23,7 @@ import { ActionDefinition } from '../../actions';
 import { CollectConfigProps } from '../../util';
 import { reactToUiComponent } from '../../../../kibana_react/public';
 
-export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
+export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION' as ActionDefinition['type'];
 
 interface Config {
   url: string;
@@ -56,7 +56,7 @@ const CollectConfig: React.FC<CollectConfigProps<Config, object>> = ({ config, o
 export const createSampleGoToUrlAction = (): ActionDefinition<object, Config> => {
   return {
     type: SAMPLE_GO_TO_URL_ACTION,
-    id: SAMPLE_GO_TO_URL_ACTION,
+    id: SAMPLE_GO_TO_URL_ACTION as string,
     async execute() {},
     defaultConfig: {
       url: '',

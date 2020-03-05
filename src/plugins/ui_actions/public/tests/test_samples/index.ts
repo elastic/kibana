@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export { createRestrictedAction } from './restricted_action';
-export { createSayHelloAction } from './say_hello_action';
 export { createHelloWorldAction } from './hello_world_action';
 export * from './go_to_url_action';

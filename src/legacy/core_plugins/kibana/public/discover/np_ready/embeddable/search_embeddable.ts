@@ -20,7 +20,7 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
@@ -37,7 +37,6 @@ import {
   Embeddable,
 } from '../../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
-import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
@@ -51,6 +50,7 @@ import {
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearch } from '../../../../../../../plugins/discover/public';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -110,7 +110,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: ExecuteTriggerActions,
+    private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
     super(

@@ -19,6 +19,7 @@
 
 import { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
+import { ActionType } from '../types';
 
 const defaultActionDef: ActionDefinition = {
   id: 'test-action',
@@ -45,7 +46,7 @@ describe('ActionInternal', () => {
     test('can serialize action with modified state', () => {
       const action = new ActionInternal({
         ...defaultActionDef,
-        type: 'ACTION_TYPE',
+        type: 'ACTION_TYPE' as ActionType,
         order: 11,
       });
       action.state.transitions.setConfig({ foo: 'bar' });

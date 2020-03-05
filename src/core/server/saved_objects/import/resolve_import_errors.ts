@@ -27,7 +27,13 @@ import {
 } from './types';
 import { validateReferences } from './validate_references';
 
-export async function resolveImportErrors({
+/**
+ * Resolve and return saved object import errors.
+ * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed informations.
+ *
+ * @public
+ */
+export async function resolveSavedObjectsImportErrors({
   readStream,
   objectLimit,
   retries,

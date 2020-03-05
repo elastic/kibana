@@ -22,13 +22,14 @@ import { Presentable } from '../util/presentable';
 import { createActionStateContainer, ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionContract } from './action_contract';
+import { ActionType } from '../types';
 
 export class ActionInternal<A extends AnyActionDefinition>
   implements Action<ActionContext<A>>, Presentable<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
-  public readonly type: string = this.definition.type || '';
+  public readonly type: ActionType = this.definition.type || '';
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;

@@ -17,19 +17,30 @@
  * under the License.
  */
 
+import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { ActionType, ActionContextMapping } from '../types';
 import { Presentable } from '../util/presentable';
 import { Configurable } from '../util/configurable';
 
-/**
- * Legacy action interface, do not use. Use @type {ActionDefinition} and
- * @type {ActionInternal} instead.
- *
- * @deprecated
- */
-export interface Action<Context extends {} = {}> extends Partial<Presentable<Context>> {
+export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
+
+export interface Action<Context extends {} = {}, T = ActionType>
+  extends Partial<Presentable<Context>> {
+  /**
+   * Determined the order when there is more than one action matched to a trigger.
+   * Higher numbers are displayed first.
+   */
+  order?: number;
+
+  /**
+   * A unique identifier for this action instance.
+   */
   id: string;
 
-  readonly type: string;
+  /**
+   * The action type is what determines the context shape.
+   */
+  readonly type: T;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
@@ -41,6 +52,12 @@ export interface Action<Context extends {} = {}> extends Partial<Presentable<Con
    * @param context
    */
   getDisplayName(context: Context): string;
+
+  /**
+   * `UiComponent` to render when displaying this action as a context menu item.
+   * If not provided, `getDisplayName` will be used instead.
+   */
+  MenuItem?: UiComponent<{ context: Context }>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
@@ -74,7 +91,7 @@ export interface ActionDefinition<
   /**
    * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly type?: string;
+  readonly type?: ActionType;
 
   getHref?(context: Context): string | undefined;
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../ui_actions/public';
 import { Filter } from '../../data/public';
 import {
   applyFilterTrigger,
@@ -27,11 +27,19 @@ import {
   valueClickTrigger,
   EmbeddableVisTriggerContext,
   IEmbeddable,
+  EmbeddableContext,
   APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
+  ACTION_ADD_PANEL,
+  ACTION_CUSTOMIZE_PANEL,
+  ACTION_INSPECT_PANEL,
+  REMOVE_PANEL_ACTION,
+  ACTION_EDIT_PANEL,
+  FilterActionContext,
+  ACTION_APPLY_FILTER,
 } from './lib';
 
 declare module '../../ui_actions/public' {
@@ -42,8 +50,17 @@ declare module '../../ui_actions/public' {
       embeddable: IEmbeddable;
       filters: Filter[];
     };
-    [CONTEXT_MENU_TRIGGER]: object;
-    [PANEL_BADGE_TRIGGER]: object;
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+  }
+
+  export interface ActionContextMapping {
+    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
+    [ACTION_ADD_PANEL]: EmbeddableContext;
+    [ACTION_INSPECT_PANEL]: EmbeddableContext;
+    [REMOVE_PANEL_ACTION]: EmbeddableContext;
+    [ACTION_EDIT_PANEL]: EmbeddableContext;
+    [ACTION_APPLY_FILTER]: FilterActionContext;
   }
 }
 
