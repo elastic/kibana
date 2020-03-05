@@ -49,7 +49,7 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 
 export async function getAgentStatusForConfig(
   soClient: SavedObjectsClientContract,
-  configId: string
+  configId?: string
 ) {
   const [all, error, offline] = await Promise.all(
     [undefined, buildKueryForErrorAgents(), buildKueryForOfflineAgents()].map(kuery =>
@@ -57,15 +57,17 @@ export async function getAgentStatusForConfig(
         showInactive: true,
         perPage: 0,
         page: 1,
-        kuery: kuery
-          ? `(${kuery}) and (agents.config_id:"${configId}")`
-          : `agents.config_id:"${configId}"`,
+        kuery: configId
+          ? kuery
+            ? `(${kuery}) and (agents.config_id:"${configId}")`
+            : `agents.config_id:"${configId}"`
+          : kuery,
       })
     )
   );
 
   return {
-    events: await getEventsCountForPolicyId(soClient, configId),
+    events: await getEventsCount(soClient, configId),
     total: all.total,
     online: all.total - error.total - offline.total,
     error: error.total,
@@ -73,10 +75,10 @@ export async function getAgentStatusForConfig(
   };
 }
 
-async function getEventsCountForPolicyId(soClient: SavedObjectsClientContract, configId: string) {
+async function getEventsCount(soClient: SavedObjectsClientContract, configId?: string) {
   const { total } = await soClient.find({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    filter: `agent_events.attributes.config_id:"${configId}"`,
+    filter: configId ? `agent_events.attributes.config_id:"${configId}"` : undefined,
     perPage: 0,
     page: 1,
     sortField: 'timestamp',
@@ -89,7 +91,7 @@ async function getEventsCountForPolicyId(soClient: SavedObjectsClientContract, c
 
 function buildKueryForOfflineAgents(now: number = Date.now()) {
   return `agents.type:${AGENT_TYPE_TEMPORARY} AND agents.last_checkin < ${now -
-    3 * AGENT_POLLING_THRESHOLD_MS}`;
+    3 * AGENT_POLLING_THRESHOLD_MS} `;
 }
 
 function buildKueryForErrorAgents(now: number = Date.now()) {

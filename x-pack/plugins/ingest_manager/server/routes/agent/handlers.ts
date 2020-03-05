@@ -13,6 +13,7 @@ import {
   PostAgentCheckinResponse,
   PostAgentEnrollResponse,
   PostAgentUnenrollResponse,
+  GetAgentStatusResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -24,7 +25,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
-  GetAgentStatusForConfigSchema,
+  GetAgentStatusRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -402,14 +403,16 @@ export const postAgentsUnenrollHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForConfigHandler: RequestHandler<TypeOf<
-  typeof GetAgentStatusForConfigSchema.params
->> = async (context, request, response) => {
+export const getAgentStatusForConfigHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetAgentStatusRequestSchema.query>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const result = await AgentService.getAgentStatusForConfig(soClient, request.params.configId);
+    // TODO change path
+    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.configId);
 
-    const body = { result, success: true };
+    const body: GetAgentStatusResponse = { results, success: true };
 
     return response.ok({ body });
   } catch (e) {

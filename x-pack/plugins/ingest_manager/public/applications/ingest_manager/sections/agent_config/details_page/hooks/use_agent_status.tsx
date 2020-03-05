@@ -5,16 +5,20 @@
  */
 import React from 'react';
 import { useRequest } from '../../../../hooks';
+import { GetAgentStatusResponse } from '../../../../types';
 
-export function useGetAgentStatus(configId: string) {
-  const agentStatusRequest = useRequest({
-    path: `/api/ingest_manager/fleet/config/${configId}/agent-status`,
+export function useGetAgentStatus(configId?: string) {
+  const agentStatusRequest = useRequest<GetAgentStatusResponse>({
+    path: `/api/ingest_manager/fleet/agent-status`,
+    query: {
+      configId,
+    },
     method: 'get',
   });
 
   return {
     isLoading: agentStatusRequest.isLoading,
-    result: agentStatusRequest.data ? agentStatusRequest.data.result : {},
+    data: agentStatusRequest.data,
     error: agentStatusRequest.error,
     refreshAgentStatus: () => agentStatusRequest.sendRequest,
   };

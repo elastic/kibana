@@ -43,12 +43,13 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
   const [redirectToAgentConfigList, setRedirectToAgentConfigsList] = useState<boolean>(false);
+  const agentStatusRequest = useGetAgentStatus(configId);
   const {
-    result: agentStatus,
     isLoading: agentStatusIsLoading,
     error: agentStatusError,
     refreshAgentStatus,
-  } = useGetAgentStatus(configId);
+  } = agentStatusRequest;
+  const agentStatus = agentStatusRequest.data?.results;
 
   // Unassign data sources states
   const [isUnassignLoading, setIsUnassignLoading] = useState<boolean>(false);
@@ -247,7 +248,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             </h3>
           </EuiTitle>
           <EuiSpacer size="l" />
-          {agentStatusIsLoading ? (
+          {agentStatusIsLoading || !agentStatus ? (
             <Loading />
           ) : agentStatusError ? (
             <FormattedMessage
