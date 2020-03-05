@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export { ISearchSetup } from './i_search_setup';
+import { SharedGlobalConfig } from '../../../../../core/server';
 
-export { ISearchContext } from './i_search_context';
-
-export { ISearch, ICancel, ISearchOptions, IRequestTypesMap, IResponseTypesMap } from './i_search';
-
-export { TStrategyTypes } from './strategy_types';
-
-export { TSearchStrategyProvider } from './i_search_strategy';
-
-export { getDefaultSearchParams } from './es_search';
+export function getDefaultSearchParams(config: SharedGlobalConfig) {
+  return {
+    timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
+    ignoreUnavailable: true, // Don't fail if the index/indices don't exist
+    restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+  };
+}
