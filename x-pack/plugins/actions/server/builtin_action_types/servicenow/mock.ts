@@ -56,4 +56,9 @@ const params: ParamsType = {
   ],
 };
 
-export { mapping, maliciousMapping, finalMapping, params };
+const responseIncident = {
+  id: 'c816f79cc0a8016401c5a33be04be441',
+  number: 'INC0010001',
+};
+
+export { mapping, maliciousMapping, finalMapping, params, responseIncident };
