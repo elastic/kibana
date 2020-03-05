@@ -47,7 +47,7 @@ export const useLogSummaryHighlights = (
         setLogSummaryHighlights(response.data);
       },
     },
-    [sourceId, startTimestamp, endTimestamp, filterQuery, highlightTerms]
+    [sourceId, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
   );
 
   const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [

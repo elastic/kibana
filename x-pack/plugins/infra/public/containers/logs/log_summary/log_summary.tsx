@@ -40,7 +40,7 @@ export const useLogSummary = (
         }
       });
     },
-    [sourceId, filterQuery, startTimestamp, endTimestamp]
+    [sourceId, filterQuery, startTimestamp, endTimestamp, bucketSize]
   );
 
   return {
