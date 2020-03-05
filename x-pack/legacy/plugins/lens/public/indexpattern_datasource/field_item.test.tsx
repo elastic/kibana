@@ -16,7 +16,10 @@ import { IndexPattern } from './types';
 
 jest.mock('ui/new_platform');
 
-const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
+const waitForPromises = async () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve));
+  });
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
