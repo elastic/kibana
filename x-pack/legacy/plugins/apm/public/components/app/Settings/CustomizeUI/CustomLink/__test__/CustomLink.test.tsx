@@ -221,7 +221,7 @@ describe('CustomLink', () => {
         };
 
         addFieldAndCheck('filter-0', 'transaction.name', false, [
-          'Select fields...',
+          'Select field...',
           'service.name',
           'service.environment',
           'transaction.type',
@@ -229,20 +229,20 @@ describe('CustomLink', () => {
         ]);
 
         addFieldAndCheck('filter-1', 'service.name', true, [
-          'Select fields...',
+          'Select field...',
           'service.name',
           'service.environment',
           'transaction.type'
         ]);
 
         addFieldAndCheck('filter-2', 'transaction.type', true, [
-          'Select fields...',
+          'Select field...',
           'service.environment',
           'transaction.type'
         ]);
 
         addFieldAndCheck('filter-3', 'service.environment', true, [
-          'Select fields...',
+          'Select field...',
           'service.environment'
         ]);
       });

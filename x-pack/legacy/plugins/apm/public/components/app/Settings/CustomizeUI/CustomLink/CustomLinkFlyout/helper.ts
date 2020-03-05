@@ -67,7 +67,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
   text: i18n.translate(
     'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption',
-    { defaultMessage: 'Select fields...' }
+    { defaultMessage: 'Select field...' }
   )
 };
 

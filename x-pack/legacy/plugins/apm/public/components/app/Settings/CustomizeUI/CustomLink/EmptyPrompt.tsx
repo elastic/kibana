@@ -15,7 +15,7 @@ export const EmptyPrompt = ({
 }) => {
   return (
     <EuiEmptyPrompt
-      iconType="boxesHorizontal"
+      iconType="link"
       iconColor=""
       title={
         <h2>
@@ -34,7 +34,7 @@ export const EmptyPrompt = ({
               'xpack.apm.settings.customizeUI.customLink.emptyPromptText',
               {
                 defaultMessage:
-                  "Let's change that! You can add custom links to the Actions context menu by the trace and error details for each service. This could be linking to a Kibana dashboard or going to your organization's support portal"
+                  "Let's change that! You can add custom links to the Actions context menu by the transaction details for each service. Create a helpful link to your company's support portal or open a new bug report. Learn more about it in our docs."
               }
             )}
           </p>

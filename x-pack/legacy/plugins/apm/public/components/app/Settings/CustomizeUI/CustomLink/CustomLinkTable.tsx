@@ -61,11 +61,8 @@ export const CustomLinkTable = ({
       )
     },
     {
-      width: px(units.quadruple),
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.links',
-        { defaultMessage: 'Links' }
-      ),
+      width: px(units.triple),
+      name: '',
       actions: [
         {
           name: i18n.translate(
@@ -103,7 +100,7 @@ export const CustomLinkTable = ({
         placeholder={i18n.translate(
           'xpack.apm.settings.customizeUI.customLink.searchInput.filter',
           {
-            defaultMessage: 'Filter links by Name or URL...'
+            defaultMessage: 'Filter links by Name and URL...'
           }
         )}
       />
