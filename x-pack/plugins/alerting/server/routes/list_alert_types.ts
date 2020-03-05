@@ -29,9 +29,6 @@ export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState)
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
-      if (!context.alerting) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
-      }
       return res.ok({
         body: context.alerting.listTypes(),
       });
