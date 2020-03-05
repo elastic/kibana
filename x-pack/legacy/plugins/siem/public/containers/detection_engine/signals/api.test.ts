@@ -19,49 +19,24 @@ import {
   getUserPrivilege,
   createSignalIndex,
 } from './api';
-import { ToasterErrors } from '../../../components/ml/api/throw_if_not_ok';
-import { PostSignalError, SignalIndexError } from './types';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../lib/kibana');
 
-const mockServices = coreMock.createStart();
-mockKibanaServices.mockReturnValue(mockServices);
-const fetchMock = mockServices.http.fetch;
-
-const successResponse = (body: unknown) => ({
-  response: {
-    ok: true,
-    message: 'success',
-    text: 'success',
-  },
-  body,
-});
-
-const failResponse = () => ({
-  response: {
-    ok: false,
-    text: () =>
-      JSON.stringify({
-        message: 'super mega error, it is not that bad',
-      }),
-  },
-  body: null,
-});
+const fetchMock = jest.fn();
+mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Detections Signals API', () => {
   describe('fetchQuerySignals', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(successResponse(signalsMock));
+      fetchMock.mockResolvedValue(signalsMock);
     });
 
     test('check parameter url, body', async () => {
       await fetchQuerySignals({ query: mockSignalsQuery, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/search', {
-        asResponse: true,
         body:
           '{"aggs":{"signalsByGrouping":{"terms":{"field":"signal.rule.risk_score","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"signals":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}',
         method: 'POST',
@@ -76,24 +51,12 @@ describe('Detections Signals API', () => {
       });
       expect(signalsResp).toEqual(signalsMock);
     });
-
-    test('unhappy path', async () => {
-      fetchMock.mockResolvedValue(failResponse());
-      let error;
-      try {
-        await fetchQuerySignals({ query: mockSignalsQuery, signal: abortCtrl.signal });
-      } catch (exp) {
-        error = exp;
-      }
-      expect(error).toBeInstanceOf(ToasterErrors);
-      expect(error.message).toEqual('super mega error, it is not that bad');
-    });
   });
 
   describe('updateSignalStatus', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(successResponse({}));
+      fetchMock.mockResolvedValue({});
     });
 
     test('check parameter url, body when closing a signal', async () => {
@@ -103,7 +66,6 @@ describe('Detections Signals API', () => {
         status: 'closed',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        asResponse: true,
         body:
           '{"status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
@@ -118,7 +80,6 @@ describe('Detections Signals API', () => {
         status: 'open',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        asResponse: true,
         body:
           '{"status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
@@ -133,22 +94,6 @@ describe('Detections Signals API', () => {
         status: 'open',
       });
       expect(signalsResp).toEqual({});
-    });
-
-    test('unhappy path', async () => {
-      fetchMock.mockResolvedValue(failResponse());
-      let error;
-      try {
-        await updateSignalStatus({
-          query: mockStatusSignalQuery,
-          signal: abortCtrl.signal,
-          status: 'open',
-        });
-      } catch (exp) {
-        error = exp;
-      }
-      expect(error).toBeInstanceOf(ToasterErrors);
-      expect(error.message).toEqual('super mega error, it is not that bad');
     });
   });
 
@@ -172,30 +117,17 @@ describe('Detections Signals API', () => {
       });
       expect(signalsResp).toEqual(mockSignalIndex);
     });
-
-    test('unhappy path', async () => {
-      fetchMock.mockResolvedValue(failResponse());
-      let error;
-      try {
-        await getSignalIndex({ signal: abortCtrl.signal });
-      } catch (exp) {
-        error = exp;
-      }
-      expect(error).toBeInstanceOf(SignalIndexError);
-      expect(error.message).toEqual('super mega error, it is not that bad');
-    });
   });
 
   describe('getUserPrivilege', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(successResponse(mockUserPrivilege));
+      fetchMock.mockResolvedValue(mockUserPrivilege);
     });
 
     test('check parameter url', async () => {
       await getUserPrivilege({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/privileges', {
-        asResponse: true,
         method: 'GET',
         signal: abortCtrl.signal,
       });
@@ -206,19 +138,6 @@ describe('Detections Signals API', () => {
         signal: abortCtrl.signal,
       });
       expect(signalsResp).toEqual(mockUserPrivilege);
-    });
-
-    test('unhappy path', async () => {
-      fetchMock.mockResolvedValue(failResponse());
-      let error;
-      try {
-        await getUserPrivilege({ signal: abortCtrl.signal });
-      } catch (exp) {
-        error = exp;
-      }
-
-      expect(error).toBeInstanceOf(ToasterErrors);
-      expect(error.message).toEqual('super mega error, it is not that bad');
     });
   });
 
@@ -241,18 +160,6 @@ describe('Detections Signals API', () => {
         signal: abortCtrl.signal,
       });
       expect(signalsResp).toEqual(mockSignalIndex);
-    });
-
-    test('unhappy path', async () => {
-      fetchMock.mockResolvedValue(failResponse());
-      let error;
-      try {
-        await createSignalIndex({ signal: abortCtrl.signal });
-      } catch (exp) {
-        error = exp;
-      }
-      expect(error).toBeInstanceOf(PostSignalError);
-      expect(error.message).toEqual('super mega error, it is not that bad');
     });
   });
 });
