@@ -24,7 +24,7 @@ import introspectionQueryResultData from './graphql/introspection.json';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
@@ -41,7 +41,6 @@ export interface ClientPluginsSetup {
 }
 
 export interface ClientPluginsStart {
-  home: HomePublicPluginStart;
   data: DataPublicPluginStart;
   dataEnhanced: DataEnhancedStart;
 }
