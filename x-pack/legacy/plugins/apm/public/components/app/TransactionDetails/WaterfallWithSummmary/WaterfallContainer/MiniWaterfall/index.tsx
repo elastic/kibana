@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import {
   BrushEndListener,
   Chart,
@@ -27,18 +27,28 @@ const chartTheme: Partial<Theme> = {
 };
 
 interface Props {
-  onBrushEnd: BrushEndListener;
-  resetSelection: () => void;
   selection: WaterfallSelection;
+  setSelection: Dispatch<SetStateAction<WaterfallSelection>>;
   waterfall: IWaterfall;
 }
 
-export function MiniWaterfall({
-  onBrushEnd,
-  resetSelection,
-  selection,
-  waterfall
-}: Props) {
+export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
+  function resetSelection() {
+    setSelection([undefined, undefined]);
+  }
+
+  const onBrushEnd: BrushEndListener = (y1, y2) => {
+    // FIXME: Since brushing is broken, just pick some random numbers
+    const maxY = Math.max(
+      ...waterfall.items.map(item => item.offset + item.duration)
+    );
+    const start = Math.floor(Math.random() * maxY);
+    const end = Math.floor(Math.random() * (maxY - start)) + start;
+    console.log({ start, end, maxY });
+    // setSelection([y1, y2]);
+    setSelection([start, end]);
+  };
+
   const data = waterfall.items.map((item, index) => ({
     ...item,
     min: item.offset + item.skew,
@@ -46,6 +56,7 @@ export function MiniWaterfall({
     x: index
   }));
   const maxY = Math.max(...data.map(item => item.max));
+
   console.log({ data });
   return (
     <>

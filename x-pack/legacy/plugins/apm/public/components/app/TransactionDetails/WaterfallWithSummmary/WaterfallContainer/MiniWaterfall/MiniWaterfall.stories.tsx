@@ -25,28 +25,10 @@ function Example() {
     undefined
   ]);
 
-  const onBrushEnd: BrushEndListener = (y1, y2) => {
-    // FIXME: Since brushing is broken, just pick some random numbers
-    const maxY = Math.max(
-      ...waterfall.items.map(item => item.offset + item.duration)
-    );
-    const start = Math.floor(Math.random() * maxY);
-    const end = Math.floor(Math.random() * (maxY - start)) + start;
-    console.log({ start, end, maxY });
-
-    // setSelection([y1, y2]);
-    setSelection([start, end]);
-  };
-
-  function resetSelection() {
-    setSelection([undefined, undefined]);
-  }
-
   return (
     <MiniWaterfall
-      onBrushEnd={onBrushEnd}
-      resetSelection={resetSelection}
       selection={selection}
+      setSelection={setSelection}
       waterfall={waterfall}
     />
   );

@@ -6,7 +6,7 @@
 
 import { BrushEndListener } from '@elastic/charts';
 import { Location } from 'history';
-import React from 'react';
+import React, { useState } from 'react';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MiniWaterfall } from './MiniWaterfall';
 import { ServiceLegends } from './ServiceLegends';
@@ -28,26 +28,10 @@ export function WaterfallContainer({
   waterfall,
   exceedsMax
 }: Props) {
-  const [selection, setSelection] = React.useState<WaterfallSelection>([
+  const [selection, setSelection] = useState<WaterfallSelection>([
     undefined,
     undefined
   ]);
-
-  const onBrushEnd: BrushEndListener = (y1, y2) => {
-    // FIXME: Since brushing is broken, just pick some random numbers
-    const maxY = Math.max(
-      ...waterfall.items.map(item => item.offset + item.duration)
-    );
-    const start = Math.floor(Math.random() * maxY);
-    const end = Math.floor(Math.random() * (maxY - start)) + start;
-    console.log({ start, end, maxY });
-    // setSelection([y1, y2]);
-    setSelection([start, end]);
-  };
-
-  function resetSelection() {
-    setSelection([undefined, undefined]);
-  }
 
   if (!waterfall) {
     return null;
@@ -57,8 +41,7 @@ export function WaterfallContainer({
     <div>
       <ServiceLegends serviceColors={waterfall.serviceColors} />
       <MiniWaterfall
-        onBrushEnd={onBrushEnd}
-        resetSelection={resetSelection}
+        setSelection={setSelection}
         selection={selection}
         waterfall={waterfall}
       />
