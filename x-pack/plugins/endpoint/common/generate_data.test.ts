@@ -62,22 +62,32 @@ describe('data generator', () => {
     expect(processEvent.process.entity_id).not.toBeNull();
   });
 
-  it('creates alert ancestor tree', () => {
-    const events = generator.generateAlertEventAncestry(3);
-    for (let i = 1; i < events.length - 1; i++) {
-      expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
-      expect(events[i].event.kind).toEqual('event');
-      expect(events[i].event.category).toEqual('process');
-    }
-    // The alert should be last and have the same entity_id as the previous process event
-    expect(events[events.length - 1].process.entity_id).toEqual(
-      events[events.length - 2].process.entity_id
-    );
-    expect(events[events.length - 1].process.parent?.entity_id).toEqual(
-      events[events.length - 2].process.parent?.entity_id
-    );
-    expect(events[events.length - 1].event.kind).toEqual('alert');
-    expect(events[events.length - 1].event.category).toEqual('malware');
+  describe('creates alert ancestor tree', () => {
+    let events: Event[];
+
+    beforeEach(() => {
+      events = generator.generateAlertEventAncestry(3);
+    });
+
+    it('with n-1 process events', () => {
+      for (let i = 1; i < events.length - 1; i++) {
+        expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
+        expect(events[i].event.kind).toEqual('event');
+        expect(events[i].event.category).toEqual('process');
+      }
+    });
+
+    it('with a corresponding alert at the end', () => {
+      // The alert should be last and have the same entity_id as the previous process event
+      expect(events[events.length - 1].process.entity_id).toEqual(
+        events[events.length - 2].process.entity_id
+      );
+      expect(events[events.length - 1].process.parent?.entity_id).toEqual(
+        events[events.length - 2].process.parent?.entity_id
+      );
+      expect(events[events.length - 1].event.kind).toEqual('alert');
+      expect(events[events.length - 1].event.category).toEqual('malware');
+    });
   });
 
   function buildResolverTree(events: Event[]): Node {
