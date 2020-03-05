@@ -4,7 +4,7 @@
 
 A Canvas _workpad_ provides you with a workspace where you can build presentations of your live data.
 
-To create a workpad, you can:
+To create a workpad, choose one of the following options:
 
 * <<blank-canvas-workpad,Build fully customizable presentations of your own data>>
 
@@ -16,7 +16,7 @@ To create a workpad, you can:
 
 [float]
 [[blank-canvas-workpad]]
-=== Start with a blank page
+=== Start with a blank workpad
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
@@ -52,6 +52,16 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 . Add your own *Name* to the workpad.
 
 [float]
+[[sample-data-workpad]]
+=== Use a sample data workpad
+
+Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
+
+. Add a {kibana-ref}/add-sample-data.html[sample data set].
+
+. On the *Add Data* page, click the *View data* dropdown list, then select *Canvas*.
+
+[float]
 [[import-canvas-workpad]]
 === Import an existing workpad
 
@@ -62,28 +72,18 @@ When you want to use a workpad that someone else has already started, import the
 . On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
 
 [float]
-[[sample-data-workpad]]
-=== Use a sample data workpad
-
-Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
-
-. Add a {kibana-ref}/add-sample-data.html[sample data set].
-
-. On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
-+
-Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog].
-
-[float]
 [[apply-workpad-styles]]
 == Apply a set of styles to the entire workpad
 
-To make your workpad look exactly the way you want, use the editor on the right to apply CSS overrides.
+To make your workpad look exactly the way you want, use the editor to apply CSS overrides.
 
 . Expand *Global CSS overrides*.
 
-. Enter the CSS. For example, to change the background on every page, enter:
+. Enter the CSS.
 +
-[source,js]
+For example, to change the background on every page, enter:
++
+[source,text]
 --------------------------------------------------
 .canvasPage {
 background-color: #3990e6;
@@ -109,7 +109,7 @@ TIP: To manually refresh the data, click the *Refresh data* icon.
 
 [float]
 [[zoom-in-out]]
-=== Use the zoom options
+== Use the zoom options
 
 In the upper left corner, click the *Zoom controls* icon, then select one of the options.
 
@@ -118,9 +118,9 @@ image::images/canvas-zoom-controls.png[Zoom controls]
 
 [float]
 [[add-more-pages]]
-=== Add pages
+== Add pages
 
-Add more pages when you've run out of room, or if you'd like to separate your ideas across several pages.
+Add more pages when you've run out of room, or for when you'd like to separate your ideas across several pages.
 
 . Click *Page 1*, then click *+*.
 
@@ -128,3 +128,9 @@ Add more pages when you've run out of room, or if you'd like to separate your id
 +
 [role="screenshot"]
 image::images/canvas-add-pages.gif[Add pages]
+
+include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]

@@ -1,18 +1,14 @@
 [role="xpack"]
-[[element-intro]]
-== Design your workpad
-
-Create a story about your data by adding elements to your workpad that include images, text, charts, and more.
-
-[float]
 [[add-canvas-elements]]
 === Add elements
 
-You can create your own elements and connect them to your data sources, add saved objects that you created outside of Canvas, and add your own images.
+Create a story about your data by adding elements to your workpad that include images, text, charts, and more. You can create your own elements and connect them to your data sources, add saved objects that you created outside of Canvas, and add your own images.
 
 [float]
 [[create-canvas-element]]
 ==== Create an element
+
+Choose the type of element you want to use, then connect it to your own data.
 
 . Click *Add element*, then select the element you want to use.
 +
@@ -35,6 +31,8 @@ By default, most of the elements you create use demo data until you change the d
 [[canvas-add-object]]
 ==== Add a saved object
 
+Add an object that you created outside of Canvas, then customize it to fit your display needs.
+
 . Click *Embed object*.
 
 . Select the object you want to add.
@@ -56,14 +54,16 @@ image::images/canvas-map-embed.gif[]
 [[canvas-add-image]]
 ==== Add your own image
 
+To personalize your workpad, add your own logos and graphics.
+
 . Click *Manage assets*.
 
 . On the *Manage workpad assets* window, drag and drop your images.
 
 . To add the image to the workpad, click the *Create image element* icon.
-
-//[role="screenshot"]
-//image::images/canvas-add-asset.gif[]
++
+[role="screenshot"]
+image::images/canvas-add-image.gif[]
 
 [float]
 [[move-canvas-elements]]
@@ -95,11 +95,7 @@ Each element has its own display options to fit your design needs.
 
 To choose the display options, click *Display*, then make your changes.
 
-[float]
-[[element-display-container]]
-==== Style element containers
-
-Further define the appearance of the container and border.
+To define the appearance of the container and border:
 
 . Next to *Element style*, click *+*, then select *Container style*.
 
@@ -107,17 +103,13 @@ Further define the appearance of the container and border.
 
 . Change the *Appearance* and *Border* options.
 
-[float]
-[[apply-element-styles]]
-==== Style elements
-
-To make your elements, maps, and images look exactly the way you want, apply CSS overrides.
+To apply CSS overrides:
 
 . Next to *Element style*, click *+*, then select *CSS*.
 
 . Enter the *CSS*. For example, to center the Markdown element, enter:
 +
-[source,js]
+[source,text]
 --------------------------------------------------
 .canvasRenderEl h1 {
 text.align: center;
