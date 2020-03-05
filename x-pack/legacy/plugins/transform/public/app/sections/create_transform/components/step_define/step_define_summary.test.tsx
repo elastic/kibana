@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
@@ -18,16 +21,18 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
-
+jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
+    // Arrange
+    const searchItems = {
+      indexPattern: {
+        title: 'the-index-pattern-title',
+        fields: [] as any[],
+      } as SearchItems['indexPattern'],
+    };
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -51,10 +56,16 @@ describe('Transform: <DefinePivotSummary />', () => {
       valid: true,
     };
 
-    const wrapper = shallow(
-      <StepDefineSummary formState={formState} searchItems={{} as SearchItems} />
+    const Providers = getAppProviders(createPublicShim());
+    const { getByText } = render(
+      <Providers>
+        <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
+      </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByText('Group by')).toBeInTheDocument();
+    expect(getByText('Aggregations')).toBeInTheDocument();
   });
 });

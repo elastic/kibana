@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
 import { createPublicShim } from '../../../../../shim';
 import { getAppProviders } from '../../../../app_dependencies';
@@ -14,17 +15,12 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { SourceIndexPreview } from './source_index_preview';
 
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
-
 jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {
+    // Arrange
     const props = {
       indexPattern: {
         title: 'the-index-pattern-title',
@@ -32,14 +28,15 @@ describe('Transform: <SourceIndexPreview />', () => {
       } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
-
     const Providers = getAppProviders(createPublicShim());
-    const wrapper = shallow(
+    const { getByText } = render(
       <Providers>
         <SourceIndexPreview {...props} />
       </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByText(`Source index ${props.indexPattern.title}`)).toBeInTheDocument();
   });
 });
