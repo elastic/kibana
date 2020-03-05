@@ -35,6 +35,7 @@ function OrderAggParamEditor({
   setValue,
   setValidity,
   setTouched,
+  schemas,
 }: AggParamEditorProps<IAggConfig, AggParamType>) {
   const orderBy = agg.params.orderBy;
 
@@ -64,6 +65,8 @@ function OrderAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={value as IAggConfig}
+        allowedAggs={aggParam.allowedAggs}
+        hideCustomLabel={true}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}
@@ -74,6 +77,7 @@ function OrderAggParamEditor({
         onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
+        schemas={schemas}
       />
     </>
   );
