@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StepSelectPackage } from './select_package';
+export { PackageToConfigDatasourceInputs } from './package_to_config_datasource';

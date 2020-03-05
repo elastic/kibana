@@ -19,7 +19,7 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { AgentConfig, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../epm/components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from '../types';
-import { CreateDatasourceStepsNavigation } from './steps_navigation';
+import { CreateDatasourceStepsNavigation } from './navigation';
 
 export const CreateDatasourcePageLayout: React.FunctionComponent<{
   from: CreateDatasourceFrom;

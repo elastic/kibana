@@ -14,6 +14,8 @@ export {
   EnrollmentAPIKey,
   Datasource,
   NewDatasource,
+  DatasourceInput,
+  DatasourceInputStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,

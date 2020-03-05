@@ -15,19 +15,19 @@ import {
   EuiSelectable,
   EuiSpacer,
 } from '@elastic/eui';
-import { Error } from '../../../../components';
-import { AgentConfig, PackageInfo } from '../../../../types';
-import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../../hooks';
-import { PackageIcon } from '../../../epm/components';
+import { Error } from '../../../components';
+import { AgentConfig, PackageInfo } from '../../../types';
+import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../hooks';
+import { PackageIcon } from '../../epm/components';
 
 export const StepSelectPackage: React.FunctionComponent<{
   agentConfigId: string;
   packageInfo?: PackageInfo;
   setAgentConfig: (config: AgentConfig) => void;
-  setPackageInfo: (packageInfo: PackageInfo | undefined) => void;
+  updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   cancelUrl: string;
   onNext: () => void;
-}> = ({ agentConfigId, setAgentConfig, packageInfo, setPackageInfo, cancelUrl, onNext }) => {
+}> = ({ agentConfigId, setAgentConfig, packageInfo, updatePackageInfo, cancelUrl, onNext }) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
     packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
@@ -62,18 +62,20 @@ export const StepSelectPackage: React.FunctionComponent<{
         setSelectedPkgLoading(false);
         if (error) {
           setSelectedPkgError(error);
-          setPackageInfo(undefined);
+          updatePackageInfo(undefined);
         } else if (data && data.response) {
           setSelectedPkgError(undefined);
-          setPackageInfo(data.response);
+          updatePackageInfo(data.response);
         }
       } else {
         setSelectedPkgError(undefined);
-        setPackageInfo(undefined);
+        updatePackageInfo(undefined);
       }
     };
-    fetchPackageInfo();
-  }, [selectedPkgKey, setPackageInfo]);
+    if (!packageInfo || selectedPkgKey !== `${packageInfo.name}-${packageInfo.version}`) {
+      fetchPackageInfo();
+    }
+  }, [selectedPkgKey, packageInfo, updatePackageInfo]);
 
   // Display agent config error if there is one
   if (agentConfigError) {

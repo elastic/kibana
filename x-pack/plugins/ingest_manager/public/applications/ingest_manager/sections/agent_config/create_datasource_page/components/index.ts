@@ -4,3 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { CreateDatasourcePageLayout } from './layout';
+export { DatasourceInputPanel } from './datasource_input_panel';
