@@ -183,24 +183,29 @@ describe('isActionTypeEnabled', () => {
   });
 
   test('should call isActionTypeEnabled of the actions config', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
   });
 
   test('should call isLicenseValidForActionType of the license state', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType);
   });
 
   test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true', async () => {
     mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue(true);
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
   });
 
   test('should return false when isActionTypeEnabled is true and isLicenseValidForActionType is false', async () => {
     mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue(false);
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
+      isValid: false,
+      reason: 'invalid',
+    });
     expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
   });
 });

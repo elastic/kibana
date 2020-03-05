@@ -88,7 +88,7 @@ export class LicenseState {
           i18n.translate('xpack.actions.serverSideErrors.expirerdLicenseErrorMessage', {
             defaultMessage:
               'Action type {actionTypeId} is disabled because your {licenseType} license has expired.',
-            values: { actionTypeId: actionType.id, licenseType: this.license.type },
+            values: { actionTypeId: actionType.id, licenseType: this.license!.type },
           })
         );
       case 'invalid':
@@ -96,7 +96,7 @@ export class LicenseState {
           i18n.translate('xpack.actions.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
               'Action type {actionTypeId} is disabled because your {licenseType} license does not support it. Please upgrade your license.',
-            values: { actionTypeId: actionType.id, licenseType: this.license.type },
+            values: { actionTypeId: actionType.id, licenseType: this.license!.type },
           })
         );
       default:

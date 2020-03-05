@@ -226,6 +226,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return {
       execute: createExecuteFunction({
         taskManager: plugins.taskManager,
+        actionTypeRegistry: actionTypeRegistry!,
         getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
