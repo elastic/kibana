@@ -13,13 +13,21 @@ import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
 
 describe('AllCases', () => {
-  const setQueryParams = jest.fn();
   const setFilters = jest.fn();
+  const setQueryParams = jest.fn();
+  const setSelectedCases = jest.fn();
+  const getCaseCount = jest.fn();
+  const dispatchUpdateCaseProperty = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest
-      .spyOn(apiHook, 'useGetCases')
-      .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
+    jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
+      ...useGetCasesMockState,
+      dispatchUpdateCaseProperty,
+      getCaseCount,
+      setFilters,
+      setQueryParams,
+      setSelectedCases,
+    });
     moment.tz.setDefault('UTC');
   });
   it('should render AllCases', () => {
@@ -42,19 +50,13 @@ describe('AllCases', () => {
     ).toEqual(useGetCasesMockState.data.cases[0].title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-table-column-state"]`)
-        .first()
-        .text()
-    ).toEqual(useGetCasesMockState.data.cases[0].state);
-    expect(
-      wrapper
         .find(`span[data-test-subj="case-table-column-tags-0"]`)
         .first()
         .prop('title')
     ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
     expect(
       wrapper
-        .find(`[data-test-subj="case-table-column-username"]`)
+        .find(`[data-test-subj="case-table-column-createdBy"]`)
         .first()
         .text()
     ).toEqual(useGetCasesMockState.data.cases[0].createdBy.username);
@@ -64,13 +66,6 @@ describe('AllCases', () => {
         .first()
         .prop('value')
     ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-table-column-updatedAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(useGetCasesMockState.data.cases[0].updatedAt);
-
     expect(
       wrapper
         .find(`[data-test-subj="case-table-case-count"]`)
@@ -85,12 +80,13 @@ describe('AllCases', () => {
       </TestProviders>
     );
     wrapper
-      .find('[data-test-subj="tableHeaderCell_state_5"] [data-test-subj="tableHeaderSortButton"]')
+      .find('[data-test-subj="tableHeaderSortButton"]')
+      .first()
       .simulate('click');
     expect(setQueryParams).toBeCalledWith({
       page: 1,
       perPage: 5,
-      sortField: 'state',
+      sortField: 'createdAt',
       sortOrder: 'asc',
     });
   });

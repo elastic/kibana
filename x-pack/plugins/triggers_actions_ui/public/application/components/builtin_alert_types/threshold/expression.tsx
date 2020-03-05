@@ -17,7 +17,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
@@ -106,7 +106,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState<Record<string, any>>([]);
-  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionProps[]>([]);
+  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
@@ -145,7 +145,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
-    if (index.length > 0) {
+
+    if (index && index.length > 0) {
       const currentEsFields = await getFields(index);
       const timeFields = getTimeFieldOptions(currentEsFields as any);
 
@@ -258,7 +259,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                   value: anIndex,
                 };
               })}
-              onChange={async (selected: EuiComboBoxOptionProps[]) => {
+              onChange={async (selected: EuiComboBoxOptionOption[]) => {
                 setAlertParams(
                   'index',
                   selected.map(aSelected => aSelected.value)
