@@ -27,7 +27,7 @@ export interface ActionFactory<Config extends ActionBaseConfig = ActionBaseConfi
   iconType?: string;
   wizard: React.FC<ActionFactoryWizardProps<Config>>;
   createConfig: () => Config;
-  isValid: (name: string, config: Config) => boolean;
+  isValid: (config: Config) => boolean;
 }
 
 export interface ActionFactoryWizardProps<Config extends ActionBaseConfig> {
@@ -66,6 +66,7 @@ export interface ActionWizardProps {
    */
   onConfigChange: (config: ActionBaseConfig) => void;
 }
+
 export const ActionWizard: React.FC<ActionWizardProps> = ({
   currentActionFactory,
   actionFactories,
@@ -111,7 +112,9 @@ interface SelectedActionFactoryProps<Config extends ActionBaseConfig = ActionBas
   showDeselect: boolean;
   onDeselect: () => void;
 }
+
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
+
 const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   actionFactory,
   onDeselect,
@@ -149,9 +152,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       <div>
         {actionFactory.wizard({
           config,
-          onConfig: newConfig => {
-            onConfigChange(newConfig);
-          },
+          onConfig: onConfigChange,
         })}
       </div>
     </div>
@@ -162,7 +163,9 @@ interface ActionFactorySelectorProps {
   actionFactories: ActionFactory[];
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
+
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
+
 const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   actionFactories,
   onActionFactorySelected,
