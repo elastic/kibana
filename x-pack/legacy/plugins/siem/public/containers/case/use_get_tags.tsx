@@ -5,11 +5,10 @@
  */
 
 import { useEffect, useReducer } from 'react';
-import chrome from 'ui/chrome';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
-import { throwIfNotOk } from '../../hooks/api/api';
+import { KibanaServices } from '../../lib/kibana';
 
 interface TagsState {
   data: string[];
@@ -62,18 +61,11 @@ export const useGetTags = (): [TagsState] => {
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await fetch(`${chrome.getBasePath()}/api/cases/tags`, {
+        const response = await KibanaServices.get().http.fetch('/api/cases/tags', {
           method: 'GET',
-          credentials: 'same-origin',
-          headers: {
-            'content-type': 'application/json',
-            'kbn-system-api': 'true',
-          },
         });
         if (!didCancel) {
-          await throwIfNotOk(response);
-          const responseJson = await response.json();
-          dispatch({ type: FETCH_SUCCESS, payload: responseJson });
+          dispatch({ type: FETCH_SUCCESS, payload: response });
         }
       } catch (error) {
         if (!didCancel) {
