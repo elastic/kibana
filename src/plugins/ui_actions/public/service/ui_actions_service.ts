@@ -17,12 +17,6 @@
  * under the License.
  */
 
-/*
-<<<<<<< HEAD
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
-import { ActionDefinition, ActionInternal, AnyActionInternal } from '../actions';
-=======
-*/
 import {
   TriggerRegistry,
   ActionRegistry,
@@ -154,11 +148,6 @@ export class UiActionsService {
     );
   };
 
-  /*
-<<<<<<< HEAD
-  public readonly getTriggerActions = (triggerId: string): AnyActionContract[] => {
-=======
-*/
   public readonly getTriggerActions = <T extends TriggerId>(
     triggerId: T
   ): Array<Action<TriggerContextMapping[T]>> => {
@@ -172,29 +161,9 @@ export class UiActionsService {
       .filter(Boolean)
       .map(({ contract }) => contract) as Array<Action<TriggerContextMapping[T]>>;
 
-    // const actionsd = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
-    //  Action<TriggerContextMapping[T]>
-    // >;
-
     return actions as Array<Action<TriggerContext<T>>>;
   };
 
-  /*
-<<<<<<< HEAD
-  public readonly getTriggerCompatibleActions = async <C>(
-    triggerId: string,
-    context: C
-  ): Promise<AnyActionContract[]> => {
-    const contracts = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(
-      contracts.map(action => action.isCompatible(context as any))
-    );
-    return contracts.reduce<AnyActionContract[]>(
-      (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
-=======
-*/
-
-  // todo look at using AnyActionContract[]
   public readonly getTriggerCompatibleActions = async <T extends TriggerId>(
     triggerId: T,
     context: TriggerContextMapping[T]
