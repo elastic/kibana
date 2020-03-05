@@ -8,7 +8,7 @@ import { PluginInitializerContext } from 'src/core/public';
 import { Plugin } from './plugin';
 
 export { AlertsContextProvider } from './application/context/alerts_context';
-export { AlertAdd } from './application/sections/alert_add';
+export { AlertAdd } from './application/sections/alert_form';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new Plugin(ctx);
