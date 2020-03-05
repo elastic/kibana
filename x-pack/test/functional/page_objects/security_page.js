@@ -131,7 +131,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
         const alert = await browser.getAlert();
         if (alert && alert.accept) {
-          alert.accept();
+          await alert.accept();
         }
         return await find.existsByDisplayedByCssSelector('.login-form');
       });
