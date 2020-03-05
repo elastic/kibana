@@ -820,6 +820,7 @@ function discoverController(
       $scope.searchSource.rawResponse = resp;
       Promise.resolve(
         buildVislibDimensions($scope.vis, {
+          timefilter,
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })
