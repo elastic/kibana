@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, ReactElement } from 'react';
-import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiSwitch } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
