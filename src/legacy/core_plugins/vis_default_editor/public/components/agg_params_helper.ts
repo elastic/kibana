@@ -33,7 +33,6 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
-  propFilter,
 } from '../legacy_imports';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
@@ -136,20 +135,18 @@ function getAggParamsToRender({
   return params;
 }
 
-const filterByName = propFilter('name');
-
 function getAggTypeOptions(
   agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string,
-  allowedAggs: string[],
-  aggFilter: string[]
+  allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {
-  const aggTypeOptions = aggTypeFilters
-    .filter((aggTypes as any)[groupName], indexPattern, agg, aggFilter)
-    .filter(aggType => {
-      return filterByName([aggType], allowedAggs).length !== 0;
-    });
+  const aggTypeOptions = aggTypeFilters.filter(
+    (aggTypes as any)[groupName],
+    indexPattern,
+    agg,
+    allowedAggs
+  );
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
 

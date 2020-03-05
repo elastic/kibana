@@ -80,13 +80,13 @@ function DefaultEditorAggParams({
   setTouched,
   setValidity,
   schemas,
-  allowedAggs,
+  allowedAggs = [],
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = getSchemaByName(schemas, agg.schema);
   const { title, aggFilter } = schema;
   const groupedAggTypeOptions = useMemo(
-    () => getAggTypeOptions(agg, indexPattern, groupName, allowedAggs || [], aggFilter as string[]),
+    () => getAggTypeOptions(agg, indexPattern, groupName, [...allowedAggs, ...aggFilter]),
     [agg, indexPattern, groupName, allowedAggs, aggFilter]
   );
 

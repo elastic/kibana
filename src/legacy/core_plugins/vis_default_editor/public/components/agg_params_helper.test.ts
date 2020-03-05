@@ -172,7 +172,7 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
       const indexPattern = {} as IndexPattern;
-      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics', [], []);
+      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics', []);
 
       expect(aggs).toEqual(['indexedFields']);
     });
