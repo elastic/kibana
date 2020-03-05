@@ -47,7 +47,6 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = 'desc';
 }
 
 export interface AlertResultList {

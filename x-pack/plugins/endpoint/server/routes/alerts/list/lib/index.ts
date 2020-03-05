@@ -30,7 +30,7 @@ export const getRequestData = async (
     // Defaults not enforced by schema
     pageSize: request.query.page_size || EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
     sort: request.query.sort || EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
-    order: request.query.order || EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
+    order: request.query.order || 'desc',
     dateRange: ((request.query.date_range !== undefined
       ? decode(request.query.date_range)
       : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
