@@ -45,8 +45,8 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
       : (response as AsyncSearchResponse<any>).response;
 
     const id = (response as AsyncSearchResponse<any>).id;
-    const { total, failed, skipped, successful } = rawResponse._shards;
-    const loaded = failed + skipped + successful;
+    const { total, failed, successful } = rawResponse._shards;
+    const loaded = failed + successful;
     return { id, total, loaded, rawResponse };
   };
 
