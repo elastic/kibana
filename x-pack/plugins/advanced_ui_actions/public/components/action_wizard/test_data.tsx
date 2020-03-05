@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { ActionFactory, ActionFactoryBaseConfig } from './action_wizard';
+import { ActionFactory, ActionFactoryBaseConfig, ActionWizard } from './action_wizard';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -14,38 +14,31 @@ export const dashboards = [
 ];
 
 export const dashboardDrilldownActionFactory: ActionFactory<{
-  dashboardId: string;
+  dashboardId?: string;
   useCurrentDashboardFilters: boolean;
   useCurrentDashboardDataRange: boolean;
 }> = {
   type: 'Dashboard',
   displayName: 'Go to Dashboard',
   iconType: 'dashboardApp',
+  createConfig: () => {
+    return {
+      dashboardId: undefined,
+      useCurrentDashboardDataRange: true,
+      useCurrentDashboardFilters: true,
+    };
+  },
+  isValid: (name, config) => {
+    if (!name) return false;
+    if (!config.dashboardId) return false;
+    return true;
+  },
   wizard: props => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [config, setConfig] = useState(
-      props.config || {
-        dashboardId: undefined,
-        useCurrentDashboardDataRange: false,
-        useCurrentDashboardFilters: false,
-      }
-    );
-
-    function setAndSubmit(newConfig: {
-      dashboardId: string | undefined;
-      useCurrentDashboardFilters: boolean;
-      useCurrentDashboardDataRange: boolean;
-    }) {
-      // validate
-      if (newConfig.dashboardId) {
-        props.onConfig({ ...newConfig, dashboardId: newConfig.dashboardId });
-      } else {
-        props.onConfig(null);
-      }
-
-      setConfig(newConfig);
-    }
-
+    const config = props.config ?? {
+      dashboardId: undefined,
+      useCurrentDashboardDataRange: true,
+      useCurrentDashboardFilters: true,
+    };
     return (
       <>
         <EuiFormRow label="Choose destination dashboard:">
@@ -55,10 +48,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
             options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
             value={config.dashboardId}
             onChange={e => {
-              setAndSubmit({
-                ...config,
-                dashboardId: e.target.value,
-              });
+              props.onConfig({ ...config, dashboardId: e.target.value });
             }}
           />
         </EuiFormRow>
@@ -68,7 +58,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
             label="Use current dashboard's filters"
             checked={config.useCurrentDashboardFilters}
             onChange={() =>
-              setAndSubmit({
+              props.onConfig({
                 ...config,
                 useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
               })
@@ -81,7 +71,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
             label="Use current dashboard's date range"
             checked={config.useCurrentDashboardDataRange}
             onChange={() =>
-              setAndSubmit({
+              props.onConfig({
                 ...config,
                 useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
               })
@@ -97,21 +87,22 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
   type: 'Url',
   displayName: 'Go to URL',
   iconType: 'link',
+  createConfig: () => {
+    return {
+      url: '',
+      openInNewTab: false,
+    };
+  },
+  isValid: (name, config) => {
+    if (!name) return false;
+    if (!config.url) return false;
+    return true;
+  },
   wizard: props => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [config, setConfig] = useState(props.config || { url: '', openInNewTab: false });
-
-    function setAndSubmit(newConfig: { url: string; openInNewTab: boolean }) {
-      // validate
-      if (newConfig.url) {
-        props.onConfig(newConfig);
-      } else {
-        props.onConfig(null);
-      }
-
-      setConfig(newConfig);
-    }
-
+    const config = props.config ?? {
+      url: '',
+      openInNewTab: false,
+    };
     return (
       <>
         <EuiFormRow label="Enter target URL">
@@ -119,7 +110,7 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
             placeholder="Enter URL"
             name="url"
             value={config.url}
-            onChange={event => setAndSubmit({ ...config, url: event.target.value })}
+            onChange={event => props.onConfig({ ...config, url: event.target.value })}
           />
         </EuiFormRow>
         <EuiFormRow hasChildLabel={false}>
@@ -127,7 +118,7 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
             name="openInNewTab"
             label="Open in new tab?"
             checked={config.openInNewTab}
-            onChange={() => setAndSubmit({ ...config, openInNewTab: !config.openInNewTab })}
+            onChange={() => props.onConfig({ ...config, openInNewTab: !config.openInNewTab })}
           />
         </EuiFormRow>
       </>
@@ -135,7 +126,48 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
   },
 };
 
-export const ACTION_FACTORIES = ([
-  dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
-] as unknown) as Array<ActionFactory<ActionFactoryBaseConfig>>;
+export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
+  const [state, setState] = useState<{
+    currentActionFactory?: ActionFactory;
+    config?: ActionFactoryBaseConfig;
+  }>({});
+
+  function changeActionFactory(newActionFactory: ActionFactory | null) {
+    if (!newActionFactory) {
+      // removing action factory
+      return setState({});
+    }
+
+    setState({
+      currentActionFactory: newActionFactory,
+      config: newActionFactory.createConfig(),
+    });
+  }
+
+  return (
+    <>
+      <ActionWizard
+        actionFactories={actionFactories}
+        config={state.config}
+        onConfigChange={newConfig => {
+          setState({
+            ...state,
+            config: newConfig,
+          });
+        }}
+        onActionFactoryChange={newActionFactory => {
+          changeActionFactory(newActionFactory);
+        }}
+        currentActionFactory={state.currentActionFactory}
+      />
+      <div style={{ marginTop: '44px' }} />
+      <hr />
+      <div>Action Factory Type: {state.currentActionFactory?.type}</div>
+      <div>Action Factory Config: {JSON.stringify(state.config)}</div>
+      <div>
+        Is config valid:{' '}
+        {JSON.stringify(state.currentActionFactory?.isValid('fake name', state.config!) ?? false)}
+      </div>
+    </>
+  );
+}

@@ -5,19 +5,14 @@
  */
 
 import React from 'react';
-import { render, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
-import {
-  ActionFactory,
-  ActionFactoryBaseConfig,
-  ActionWizard,
-  TEST_SUBJ_ACTION_FACTORY_ITEM,
-  TEST_SUBJ_SELECTED_ACTION_FACTORY,
-} from './action_wizard';
+import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import {
   dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
   dashboards,
+  Demo,
+  urlDrilldownActionFactory,
 } from './test_data';
 
 // TODO: for some reason global cleanup from RTL doesn't work
@@ -25,17 +20,8 @@ import {
 afterEach(cleanup);
 
 test('Pick and configure action', () => {
-  const wizardChangeFn = jest.fn();
-
   const screen = render(
-    <ActionWizard
-      actionFactories={
-        ([dashboardDrilldownActionFactory, urlDrilldownActionFactory] as unknown) as Array<
-          ActionFactory<ActionFactoryBaseConfig>
-        >
-      }
-      onChange={wizardChangeFn}
-    />
+    <Demo actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]} />
   );
 
   // check that all factories are displayed to pick
@@ -44,51 +30,24 @@ test('Pick and configure action', () => {
   // select URL one
   fireEvent.click(screen.getByText(/Go to URL/i));
 
-  // check that wizard emitted change event. null means config is invalid. this is because URL is empty string yet
-  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, null);
-
   // Input url
   const URL = 'https://elastic.co';
   fireEvent.change(screen.getByLabelText(/url/i), {
     target: { value: URL },
   });
 
-  // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, {
-    url: URL,
-    openInNewTab: false,
-  });
-
   // change to dashboard
   fireEvent.click(screen.getByText(/change/i));
   fireEvent.click(screen.getByText(/Go to Dashboard/i));
-
-  // check that wizard emitted change event
-  // null config means it is invalid. This is because no dashboard selected yet
-  expect(wizardChangeFn).lastCalledWith(dashboardDrilldownActionFactory, null);
 
   // Select dashboard
   fireEvent.change(screen.getByLabelText(/Choose destination dashboard/i), {
     target: { value: dashboards[1].id },
   });
-
-  // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(dashboardDrilldownActionFactory, {
-    dashboardId: dashboards[1].id,
-    useCurrentDashboardDataRange: false,
-    useCurrentDashboardFilters: false,
-  });
 });
 
-test('If only one actions factory is available, then no selection step is rendered and no change button displayed', () => {
-  const wizardChangeFn = jest.fn();
-
-  const screen = render(
-    <ActionWizard
-      actionFactories={[urlDrilldownActionFactory] as Array<ActionFactory<any>>}
-      onChange={wizardChangeFn}
-    />
-  );
+test('If only one actions factory is available then actionFactory selection is emitted without user input', () => {
+  const screen = render(<Demo actionFactories={[urlDrilldownActionFactory]} />);
 
   // check that no factories are displayed to pick from
   expect(screen.queryByTestId(TEST_SUBJ_ACTION_FACTORY_ITEM)).not.toBeInTheDocument();
@@ -98,12 +57,6 @@ test('If only one actions factory is available, then no selection step is render
   const URL = 'https://elastic.co';
   fireEvent.change(screen.getByLabelText(/url/i), {
     target: { value: URL },
-  });
-
-  // check that wizard emitted change event
-  expect(wizardChangeFn).lastCalledWith(urlDrilldownActionFactory, {
-    url: URL,
-    openInNewTab: false,
   });
 
   // check that can't change to action factory type
