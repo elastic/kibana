@@ -32,7 +32,7 @@ export interface ISchemas {
 }
 
 export interface Schema {
-  aggFilter: string | string[];
+  aggFilter: string[];
   editor: boolean | string;
   group: AggGroupNames;
   max: number;

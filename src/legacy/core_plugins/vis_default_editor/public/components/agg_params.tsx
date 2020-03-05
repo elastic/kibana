@@ -84,10 +84,11 @@ function DefaultEditorAggParams({
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = getSchemaByName(schemas, agg.schema);
-  const { title, aggFilter } = schema;
+  const { title } = schema;
+  const aggFilter = [...allowedAggs, ...(schema.aggFilter || [])];
   const groupedAggTypeOptions = useMemo(
-    () => getAggTypeOptions(agg, indexPattern, groupName, [...allowedAggs, ...aggFilter]),
-    [agg, indexPattern, groupName, allowedAggs, aggFilter]
+    () => getAggTypeOptions(agg, indexPattern, groupName, aggFilter),
+    [agg, indexPattern, groupName, aggFilter]
   );
 
   const error = aggIsTooLow
