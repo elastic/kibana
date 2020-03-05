@@ -126,6 +126,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickLoadSavedSearchButton() {
+      await testSubjects.moveMouseTo('discoverOpenButton');
       await testSubjects.click('discoverOpenButton');
     }
 

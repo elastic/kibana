@@ -20,7 +20,7 @@
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
 import { Vis, VisState, VisParams, VisualizationController } from './vis';
 import { ISearchSource } from '../../../../../../plugins/data/public/';
-import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 export { Vis, VisState, VisParams, VisualizationController };
 

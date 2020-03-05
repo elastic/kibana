@@ -11,7 +11,6 @@ export { XPackFeature } from './lib/xpack_info';
 
 export interface XPackMainPlugin {
   info: XPackInfo;
-  createXPackInfo(options: XPackInfoOptions): XPackInfo;
   getFeatures(): Feature[];
   registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
 }

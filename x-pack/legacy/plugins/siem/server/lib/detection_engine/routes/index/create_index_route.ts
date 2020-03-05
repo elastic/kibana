@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { LegacyServices, LegacyRequest } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
-import { transformError, getIndex } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
@@ -19,35 +16,30 @@ import { getTemplateExists } from '../../index/get_template_exists';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import signalsPolicy from './signals_policy.json';
 
-export const createCreateIndexRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_INDEX_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const createIndexRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_INDEX_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: LegacyRequest, headers) {
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const { clusterClient, spacesClient } = await getClients(request);
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
         const callCluster = clusterClient.callAsCurrentUser;
 
-        const index = getIndex(spacesClient.getSpaceId, config);
+        const index = siemClient.signalsIndex;
         const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
-          return headers
-            .response({
-              message: `index: "${index}" already exists`,
-              status_code: 409,
-            })
-            .code(409);
+          return siemResponse.error({
+            statusCode: 409,
+            body: `index: "${index}" already exists`,
+          });
         } else {
           const policyExists = await getPolicyExists(callCluster, index);
           if (!policyExists) {
@@ -59,25 +51,15 @@ export const createCreateIndexRoute = (
             await setTemplate(callCluster, index, template);
           }
           await createBootstrapIndex(callCluster, index);
-          return { acknowledged: true };
+          return response.ok({ body: { acknowledged: true } });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const createIndexRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-) => {
-  route(createCreateIndexRoute(config, getClients));
+    }
+  );
 };

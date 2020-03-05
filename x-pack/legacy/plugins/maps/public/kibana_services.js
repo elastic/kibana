@@ -28,6 +28,12 @@ export const getInspector = () => {
   return inspector;
 };
 
+let fileUploadPlugin;
+export const setFileUpload = fileUpload => (fileUploadPlugin = fileUpload);
+export const getFileUploadComponent = () => {
+  return fileUploadPlugin.JsonUploadAndParse;
+};
+
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
   requestId,

@@ -21,18 +21,22 @@ import React from 'react';
 import { npStart, npSetup } from 'ui/new_platform';
 
 import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
-interface ActionContext {
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+export const SAMPLE_PANEL_ACTION = 'SAMPLE_PANEL_ACTION' as ActionType;
+
+export interface SamplePanelActionContext {
   embeddable: IEmbeddable;
 }
 
 function createSamplePanelAction() {
-  return createAction<ActionContext>({
-    type: 'samplePanelAction',
+  return createAction<typeof SAMPLE_PANEL_ACTION>({
+    type: SAMPLE_PANEL_ACTION,
     getDisplayName: () => 'Sample Panel Action',
-    execute: async ({ embeddable }) => {
+    execute: async ({ embeddable }: SamplePanelActionContext) => {
       if (!embeddable) {
         return;
       }
@@ -59,4 +63,4 @@ function createSamplePanelAction() {
 
 const action = createSamplePanelAction();
 npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
