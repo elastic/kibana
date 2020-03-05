@@ -236,3 +236,61 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     ],
   });
 });
+
+test('Should set the correct mapbox style', async () => {
+  const colorStyle = makeProperty({
+    color: 'Blues',
+    type: undefined,
+  });
+
+  const calls = [];
+
+  const mockMbMap = {
+    setPaintProperty(...args) {
+      calls.push(args);
+    },
+  };
+
+  colorStyle.syncCircleColorWithMb('foobarid', mockMbMap, 1);
+  expect(calls[0]).toEqual([
+    'foobarid',
+    'circle-color',
+    [
+      'interpolate',
+      ['linear'],
+      [
+        'coalesce',
+        [
+          'case',
+          ['==', ['feature-state', '__kbn__dynamic__foobar__lineColor'], null],
+          -1,
+          [
+            'max',
+            ['min', ['to-number', ['feature-state', '__kbn__dynamic__foobar__lineColor']], 100],
+            0,
+          ],
+        ],
+        -1,
+      ],
+      -1,
+      'rgba(0,0,0,0)',
+      0,
+      '#f7faff',
+      12.5,
+      '#ddeaf7',
+      25,
+      '#c5daee',
+      37.5,
+      '#9dc9e0',
+      50,
+      '#6aadd5',
+      62.5,
+      '#4191c5',
+      75,
+      '#2070b4',
+      87.5,
+      '#072f6b',
+    ],
+  ]);
+  expect(calls[1]).toEqual(['foobarid', 'circle-opacity', 1]);
+});

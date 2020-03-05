@@ -102,13 +102,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getMbColor() {
-    const isDynamicConfigComplete =
-      _.has(this._options, 'field.name') && _.has(this._options, 'color');
+    const isDynamicConfigComplete = this.getFieldName() && _.has(this._options, 'color');
     if (!isDynamicConfigComplete) {
       return null;
     }
 
-    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+    const targetName = getComputedFieldName(this._styleName, this.getFieldName());
     if (this.isCategorical()) {
       return this._getMbDataDrivenCategoricalColor({ targetName });
     } else {
