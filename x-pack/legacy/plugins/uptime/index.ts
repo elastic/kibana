@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-// @ts-ignore
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const uptime = (kibana: any) =>
