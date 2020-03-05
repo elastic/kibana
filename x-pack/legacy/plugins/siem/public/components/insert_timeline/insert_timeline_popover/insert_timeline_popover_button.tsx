@@ -6,20 +6,21 @@
 
 import { EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
+import * as i18n from '../translations';
 
-export interface InsertTimelineModalButtonProps {
+export interface InsertTimelinePopoverButtonProps {
   onClick: () => void;
 }
 
-export const InsertTimelineModalButton = React.memo<InsertTimelineModalButtonProps>(
+export const InsertTimelinePopoverButton = React.memo<InsertTimelinePopoverButtonProps>(
   ({ onClick }) => (
     <EuiButtonIcon
-      color="text"
-      data-test-subj="open-timeline-button"
+      aria-label={i18n.INSERT_TIMELINE}
+      data-test-subj="insert-timeline-button"
       iconType="timeline"
       onClick={onClick}
     />
   )
 );
 
-InsertTimelineModalButton.displayName = 'InsertTimelineModalButton';
+InsertTimelinePopoverButton.displayName = 'InsertTimelinePopoverButton';

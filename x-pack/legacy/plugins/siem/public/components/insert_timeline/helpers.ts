@@ -33,26 +33,7 @@ import {
 import { InsertTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 
-export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
-
-/** Returns a count of the pinned events in a timeline */
-export const getPinnedEventCount = ({ pinnedEventIds }: InsertTimelineResult): number =>
-  pinnedEventIds != null ? Object.keys(pinnedEventIds).length : 0;
-
-/** Returns the sum of all notes added to pinned events and notes applicable to the timeline */
-export const getNotesCount = ({ eventIdToNoteIds, noteIds }: InsertTimelineResult): number => {
-  const eventNoteCount =
-    eventIdToNoteIds != null
-      ? Object.keys(eventIdToNoteIds).reduce<number>(
-          (count, eventId) => count + eventIdToNoteIds[eventId].length,
-          0
-        )
-      : 0;
-
-  const globalNoteCount = noteIds != null ? noteIds.length : 0;
-
-  return eventNoteCount + globalNoteCount;
-};
+export const OPEN_TIMELINE_CLASS_NAME = 'insert-timeline';
 
 /** Returns true if the timeline is untitlied */
 export const isUntitled = ({ title }: InsertTimelineResult): boolean =>

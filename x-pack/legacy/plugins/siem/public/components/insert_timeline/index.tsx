@@ -9,11 +9,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
-import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
-import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
-import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
-import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
+import { AllTimelinesQuery } from '../../containers/timeline/all';
+import { SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -21,32 +18,22 @@ import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
-import { InsertTimeline } from './insert_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
-import { InsertTimelineModalBody } from './insert_timeline_modal/insert_timeline_modal_body';
+import { InsertTimelinePopoverBody } from './insert_timeline_popover/insert_timeline_popover_body';
 import {
   ActionTimelineToShow,
-  DeleteTimelines,
   EuiSearchBarQuery,
-  OnDeleteSelected,
   OnInsertTimeline,
   OnQueryChange,
-  OnSelectionChange,
   OnTableChange,
   OnTableChangeParams,
   InsertTimelineProps,
   OnToggleOnlyFavorites,
-  InsertTimelineResult,
-  OnToggleShowNotes,
-  OnDeleteOneTimeline,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
-  /** Displays open timeline in modal */
-  isModal: boolean;
-  closeModalTimeline?: () => void;
   hideActions?: ActionTimelineToShow[];
   onInsertTimeline?: (timeline: TimelineModel) => void;
 }
@@ -55,25 +42,13 @@ export type InsertTimelineOwnProps = OwnProps &
   Pick<InsertTimelineProps, 'defaultPageSize' | 'title'> &
   PropsFromRedux;
 
-/** Returns a collection of selected timeline ids */
-export const getSelectedTimelineIds = (selectedItems: InsertTimelineResult[]): string[] =>
-  selectedItems.reduce<string[]>(
-    (validSelections, timelineResult) =>
-      timelineResult.savedObjectId != null
-        ? [...validSelections, timelineResult.savedObjectId]
-        : validSelections,
-    []
-  );
-
 /** Manages the state (e.g table selection) of the (pure) `InsertTimeline` component */
 export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps>(
   ({
     apolloClient,
-    closeModalTimeline,
     createNewTimeline,
     defaultPageSize,
     hideActions = [],
-    isModal = false,
     onInsertTimeline,
     timeline,
     title,
@@ -81,9 +56,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
     updateIsLoading,
   }) => {
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
-    const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
-      Record<string, JSX.Element>
-    >({});
     /** Only query for favorite timelines when true */
     const [onlyFavorites, setOnlyFavorites] = useState(false);
     /** The requested page of results */
@@ -92,8 +64,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
     const [pageSize, setPageSize] = useState(defaultPageSize);
     /** The current search criteria */
     const [search, setSearch] = useState('');
-    /** The currently-selected timelines in the table */
-    const [selectedItems, setSelectedItems] = useState<InsertTimelineResult[]>([]);
     /** The requested sort direction of the query results */
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
@@ -113,69 +83,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
       }
     };
 
-    /* This feature will be implemented in the near future, so we are keeping it to know what to do */
-
-    /** Invoked when the user clicks the action to add the selected timelines to favorites */
-    // const onAddTimelinesToFavorites: OnAddTimelinesToFavorites = () => {
-    // const { addTimelinesToFavorites } = this.props;
-    // const { selectedItems } = this.state;
-    // if (addTimelinesToFavorites != null) {
-    //   addTimelinesToFavorites(getSelectedTimelineIds(selectedItems));
-    // TODO: it's not possible to clear the selection state of the newly-favorited
-    // items, because we can't pass the selection state as props to the table.
-    // See: https://github.com/elastic/eui/issues/1077
-    // TODO: the query must re-execute to show the results of the mutation
-    // }
-    // };
-
-    const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
-      (timelineIds: string[]) => {
-        deleteTimelines(timelineIds, {
-          search,
-          pageInfo: {
-            pageIndex: pageIndex + 1,
-            pageSize,
-          },
-          sort: {
-            sortField: sortField as SortFieldTimeline,
-            sortOrder: sortDirection as Direction,
-          },
-          onlyUserFavorite: onlyFavorites,
-        });
-      },
-      [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]
-    );
-
-    /** Invoked when the user clicks the action to delete the selected timelines */
-    const onDeleteSelected: OnDeleteSelected = useCallback(() => {
-      deleteTimelines(getSelectedTimelineIds(selectedItems), {
-        search,
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        sort: {
-          sortField: sortField as SortFieldTimeline,
-          sortOrder: sortDirection as Direction,
-        },
-        onlyUserFavorite: onlyFavorites,
-      });
-
-      // NOTE: we clear the selection state below, but if the server fails to
-      // delete a timeline, it will remain selected in the table:
-      resetSelectionState();
-
-      // TODO: the query must re-execute to show the results of the deletion
-    }, [selectedItems, search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]);
-
-    /** Invoked when the user selects (or de-selects) timelines */
-    const onSelectionChange: OnSelectionChange = useCallback(
-      (newSelectedItems: InsertTimelineResult[]) => {
-        setSelectedItems(newSelectedItems); // <-- this is NOT passed down as props to the table: https://github.com/elastic/eui/issues/1077
-      },
-      []
-    );
-
     /** Invoked by the EUI table implementation when the user interacts with the table (i.e. to update sorting) */
     const onTableChange: OnTableChange = useCallback(({ page, sort }: OnTableChangeParams) => {
       const { index, size } = page;
@@ -191,25 +98,8 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
       setOnlyFavorites(!onlyFavorites);
     }, [onlyFavorites]);
 
-    /** Invoked when the user toggles the expansion or collapse of inline notes in a table row */
-    const onToggleShowNotes: OnToggleShowNotes = useCallback(
-      (newItemIdToExpandedNotesRowMap: Record<string, JSX.Element>) => {
-        setItemIdToExpandedNotesRowMap(newItemIdToExpandedNotesRowMap);
-      },
-      []
-    );
-
-    /** Resets the selection state such that all timelines are unselected */
-    const resetSelectionState = useCallback(() => {
-      setSelectedItems([]);
-    }, []);
-
     const openTimeline: OnInsertTimeline = useCallback(
       ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
-        if (isModal && closeModalTimeline != null) {
-          closeModalTimeline();
-        }
-
         queryTimelineById({
           apolloClient,
           duplicate,
@@ -220,26 +110,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
         });
       },
       [apolloClient, updateIsLoading, updateTimeline]
-    );
-
-    const deleteTimelines: DeleteTimelines = useCallback(
-      (timelineIds: string[], variables?: AllTimelinesVariables) => {
-        if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
-        }
-        apolloClient.mutate<DeleteTimelineMutation.Mutation, DeleteTimelineMutation.Variables>({
-          mutation: deleteTimelineMutation,
-          fetchPolicy: 'no-cache',
-          variables: { id: timelineIds },
-          refetchQueries: [
-            {
-              query: allTimelinesQuery,
-              variables,
-            },
-          ],
-        });
-      },
-      [apolloClient, createNewTimeline, timeline]
     );
 
     useEffect(() => {
@@ -256,61 +126,27 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
-          return !isModal ? (
-            <InsertTimeline
-              data-test-subj={'open-timeline'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={onDeleteSelected}
-              onlyFavorites={onlyFavorites}
-              onInsertTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              searchResults={timelines}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          ) : (
-            <InsertTimelineModalBody
-              data-test-subj={'open-timeline-modal'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              hideActions={hideActions}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
-              onlyFavorites={onlyFavorites}
-              onInsertTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              searchResults={timelines}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          );
-        }}
+        {({ timelines, loading, totalCount }) => (
+          <InsertTimelinePopoverBody
+            data-test-subj={'insert-timeline-modal'}
+            defaultPageSize={defaultPageSize}
+            hideActions={hideActions}
+            isLoading={loading}
+            onlyFavorites={onlyFavorites}
+            onInsertTimeline={openTimeline}
+            onQueryChange={onQueryChange}
+            onTableChange={onTableChange}
+            onToggleOnlyFavorites={onToggleOnlyFavorites}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            query={search}
+            searchResults={timelines}
+            sortDirection={sortDirection}
+            sortField={sortField}
+            title={title}
+            totalSearchResultsCount={totalCount}
+          />
+        )}
       </AllTimelinesQuery>
     );
   }

@@ -5,25 +5,26 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { InsertTimelineModal } from '../../../../components/insert_timeline/insert_timeline_modal';
-import { InsertTimelineModalButton } from '../../../../components/insert_timeline/insert_timeline_modal/insert_timeline_modal_button';
+import { InsertTimelinePopover } from '../../../../components/insert_timeline/insert_timeline_popover';
+import { InsertTimelinePopoverButton } from '../../../../components/insert_timeline/insert_timeline_popover/insert_timeline_popover_button';
 
 const AddTimelineToTextAreaComp: React.FC = () => {
-  const [showTimelineModal, setShowTimelineModal] = useState(false);
+  const [showTimelinePopover, setShowTimelinePopover] = useState(false);
 
-  const onInsertTimelineModal = useCallback(() => {
-    setShowTimelineModal(true);
+  const onInsertTimelinePopover = useCallback(() => {
+    setShowTimelinePopover(true);
   }, []);
 
-  const onCloseTimelineModal = useCallback(() => {
-    setShowTimelineModal(false);
+  const onCloseTimelinePopover = useCallback(() => {
+    setShowTimelinePopover(false);
   }, []);
 
   return (
-    <>
-      <InsertTimelineModalButton onClick={onInsertTimelineModal} />
-      {showTimelineModal && <InsertTimelineModal onClose={onCloseTimelineModal} />}
-    </>
+    <InsertTimelinePopover
+      button={<InsertTimelinePopoverButton onClick={onInsertTimelinePopover} />}
+      isOpen={showTimelinePopover}
+      onClose={onCloseTimelinePopover}
+    />
   );
 };
 // <EuiButtonIcon
@@ -32,10 +33,10 @@ const AddTimelineToTextAreaComp: React.FC = () => {
 //   iconType="link"
 //   aria-label="This is a link"
 // />
-// <InsertTimelineModal
+// <InsertTimelinePopover
 //   hideActions={actionTimelineToHide}
 //   modalTitle={i18n.IMPORT_TIMELINE_MODAL}
-//   onClose={onCloseTimelineModal}
+//   onClose={onCloseTimelinePopover}
 //   onOpen={onInsertTimeline}
 // />
 

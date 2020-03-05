@@ -14,14 +14,14 @@ import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
 import { mockInsertTimelineQueryResults } from '../../../mock/timeline_results';
 
-import { InsertTimelineModal } from '.';
+import { InsertTimelinePopover } from '.';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../utils/apollo_context', () => ({
   useApolloClient: () => ({}),
 }));
 
-describe('InsertTimelineModal', () => {
+describe('InsertTimelinePopover', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   test('it renders the expected modal', async () => {
@@ -29,7 +29,7 @@ describe('InsertTimelineModal', () => {
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
           <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
-            <InsertTimelineModal onClose={jest.fn()} />
+            <InsertTimelinePopover onClose={jest.fn()} />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>
       </ThemeProvider>
@@ -39,6 +39,6 @@ describe('InsertTimelineModal', () => {
 
     wrapper.update();
 
-    expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
+    expect(wrapper.find('div[data-test-subj="insert-timeline-modal"].euiPopover').length).toEqual(1);
   });
 });

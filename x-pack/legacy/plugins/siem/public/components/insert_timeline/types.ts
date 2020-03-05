@@ -74,9 +74,6 @@ export type OnSelectionChange = (selectedItems: InsertTimelineResult[]) => void;
 /** Invoked when the user toggles the option to only view favorite timelines */
 export type OnToggleOnlyFavorites = () => void;
 
-/** Invoked when the user toggles the expansion or collapse of inline notes in a table row */
-export type OnToggleShowNotes = (itemIdToExpandedNotesRowMap: Record<string, JSX.Element>) => void;
-
 /** Parameters to the OnTableChange callback  */
 export interface OnTableChangeParams {
   page: {
@@ -95,32 +92,20 @@ export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 export type ActionTimelineToShow = 'duplicate' | 'delete' | 'selectable';
 
 export interface InsertTimelineProps {
-  /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
-  deleteTimelines?: DeleteTimelines;
   /** The default requested size of each page of search results */
   defaultPageSize: number;
   /** Displays an indicator that data is loading when true */
   isLoading: boolean;
-  /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
-  itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-  /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
-  onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
-  /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
-  onDeleteSelected?: OnDeleteSelected;
   /** Only show favorite timelines when true */
   onlyFavorites: boolean;
   /** Invoked when the user presses enter after typing in the search bar */
   onQueryChange: OnQueryChange;
-  /** Invoked when the user selects (or de-selects) timelines in the table */
-  onSelectionChange: OnSelectionChange;
   /** Invoked when the user clicks on the name of a timeline to open it */
   onInsertTimeline: OnInsertTimeline;
   /** Invoked by the EUI table implementation when the user interacts with the table */
   onTableChange: OnTableChange;
   /** Invoked when the user toggles the option to only show favorite timelines */
   onToggleOnlyFavorites: OnToggleOnlyFavorites;
-  /** Invoked when the user toggles the expansion or collapse of inline notes in a table row */
-  onToggleShowNotes: OnToggleShowNotes;
   /** the requested page of results */
   pageIndex: number;
   /** the requested size of each page of search results */
@@ -129,8 +114,6 @@ export interface InsertTimelineProps {
   query: string;
   /** The results of executing a search */
   searchResults: InsertTimelineResult[];
-  /** the currently-selected timelines in the table */
-  selectedItems: InsertTimelineResult[];
   /** the requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */

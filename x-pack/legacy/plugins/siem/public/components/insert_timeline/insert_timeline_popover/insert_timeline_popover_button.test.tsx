@@ -12,19 +12,19 @@ import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
-import { mockInsertTimelineQueryResults } from '../../../mock/timeline_results';
+import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 import * as i18n from '../translations';
 
-import { InsertTimelineModalButton } from './insert_timeline_modal_button';
+import { InsertTimelinePopoverButton } from './insert_timeline_popover_button';
 
-describe('InsertTimelineModalButton', () => {
+describe('InsertTimelinePopoverButton', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   test('it renders the expected button text', async () => {
     const wrapper = mount(
       <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
-          <InsertTimelineModalButton onClick={jest.fn()} />
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <InsertTimelinePopoverButton onClick={jest.fn()} />
         </MockedProvider>
       </TestProviderWithoutDragAndDrop>
     );
@@ -35,10 +35,10 @@ describe('InsertTimelineModalButton', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="open-timeline-button"]')
+        .find('[data-test-subj="insert-timeline-button"]')
         .first()
         .text()
-    ).toEqual(i18n.OPEN_TIMELINE);
+    ).toEqual(i18n.INSERT_TIMELINE);
   });
 
   describe('onClick prop', () => {
@@ -47,8 +47,8 @@ describe('InsertTimelineModalButton', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
-              <InsertTimelineModalButton onClick={onClick} />
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <InsertTimelinePopoverButton onClick={onClick} />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
@@ -57,7 +57,7 @@ describe('InsertTimelineModalButton', () => {
       await wait();
 
       wrapper
-        .find('[data-test-subj="open-timeline-button"]')
+        .find('[data-test-subj="insert-timeline-button"]')
         .first()
         .simulate('click');
 

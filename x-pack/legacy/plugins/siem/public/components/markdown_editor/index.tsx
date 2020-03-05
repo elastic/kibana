@@ -28,8 +28,24 @@ const Container = styled(EuiPanel)`
     padding: 0;
     background: ${theme.eui.euiColorLightestShade};
     position: relative;
+    .markdown-tabs-header {
+      position: absolute;
+      top: ${theme.eui.euiSizeS};
+      right: ${theme.eui.euiSizeS};
+      z-index: ${theme.eui.euiZContentMenu};
+    }
     .euiTab {
       padding: 10px;
+    }
+    .markdown-tabs {
+      width: 100%;
+    }
+    .markdown-tabs-footer {
+      height: 41px;
+      padding: 0 ${theme.eui.euiSizeM};
+      .euiLink {
+        font-size: ${theme.eui.euiSizeM};
+      }
     }
     .euiFormRow__labelWrapper {
       position: absolute;
@@ -37,20 +53,6 @@ const Container = styled(EuiPanel)`
     }
     .euiFormErrorText {
       padding: 0 ${theme.eui.euiSizeM};
-    }
-  `}
-`;
-
-const Tabs = styled(EuiTabbedContent)`
-  width: 100%;
-`;
-
-const Footer = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    height: 41px;
-    padding: 0 ${theme.eui.euiSizeM};
-    .euiLink {
-      font-size: ${theme.eui.euiSizeM};
     }
   `}
 `;
@@ -114,16 +116,27 @@ export const MarkdownEditor = React.memo<{
     );
     return (
       <Container>
-        {headerContentRight && <EuiFlexItem grow={false}>{headerContentRight}</EuiFlexItem>}
-        <Tabs data-test-subj={`markdown-tabs`} size="s" tabs={tabs} initialSelectedTab={tabs[0]} />
-        <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+        {headerContentRight && <div className={`markdown-tabs-header`}>{headerContentRight}</div>}
+        <EuiTabbedContent
+          className={`markdown-tabs`}
+          data-test-subj={`markdown-tabs`}
+          size="s"
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+        />
+        <EuiFlexGroup
+          className={`markdown-tabs-footer`}
+          alignItems="center"
+          gutterSize="none"
+          justifyContent="spaceBetween"
+        >
           <EuiFlexItem grow={false}>
             <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
               {i18n.MARKDOWN_SYNTAX_HELP}
             </EuiLink>
           </EuiFlexItem>
           {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
-        </Footer>
+        </EuiFlexGroup>
       </Container>
     );
   }

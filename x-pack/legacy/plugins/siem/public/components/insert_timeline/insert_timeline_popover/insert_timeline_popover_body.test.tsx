@@ -4,260 +4,290 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIconProps } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { cloneDeep, omit } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { mockTimelineResults } from '../../../mock/timeline_results';
 import { InsertTimelineResult } from '../types';
-import { TimelinesTable } from '.';
+import { TimelinesTableProps } from '../timelines_table';
+import { mockTimelineResults } from '../../../mock/timeline_results';
+import { InsertTimelinePopoverBody } from './insert_timeline_popover_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 jest.mock('../../../lib/kibana');
 
-describe('#getActionsColumns', () => {
+describe('InsertTimelinePopover', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const title = 'All Timelines / Open Timelines';
+
   let mockResults: InsertTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
 
-  test('it renders the delete timeline (trash icon) when actionTimelineToShow is including the action delete', () => {
+  test('it renders the title row', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['delete']}
+        <InsertTimelinePopoverBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
           onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
           onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
           onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
           searchResults={mockResults}
-          showExtendedColumns={true}
+          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
+          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(true);
+    expect(
+      wrapper
+        .find('[data-test-subj="title-row"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
-  test('it does NOT render the delete timeline (trash icon) when actionTimelineToShow is NOT including the action delete', () => {
+  test('it renders the search row', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={[]}
+        <InsertTimelinePopoverBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
           onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
           onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
           onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
           searchResults={mockResults}
-          showExtendedColumns={false}
+          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
+          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(false);
+    expect(
+      wrapper
+        .find('[data-test-subj="search-row"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
-  test('it renders the duplicate icon timeline when actionTimelineToShow is including the action duplicate', () => {
+  test('it renders the timelines table', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['duplicate']}
+        <InsertTimelinePopoverBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
           onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
           onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
           onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
           searchResults={mockResults}
-          showExtendedColumns={true}
+          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
+          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBe(true);
+    expect(
+      wrapper
+        .find('[data-test-subj="timelines-table"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
-  test('it does NOT render the duplicate timeline when actionTimelineToShow is NOT including the action duplicate)', () => {
+  test('it shows the delete action when onDeleteSelected and deleteTimelines are specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={[]}
+        <InsertTimelinePopoverBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
           onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
           onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
           onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
           searchResults={mockResults}
-          showExtendedColumns={false}
+          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render the delete timeline (trash icon) when deleteTimelines is not provided', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['delete']}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onInsertTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(false);
-  });
-
-  test('it renders a disabled the open duplicate button if the timeline does not have a saved object id', () => {
-    const missingSavedObjectId: InsertTimelineResult[] = [
-      omit('savedObjectId', { ...mockResults[0] }),
-    ];
-
-    const wrapper = mountWithIntl(
-      <TimelinesTable
-        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-        deleteTimelines={jest.fn()}
-        defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-        loading={false}
-        itemIdToExpandedNotesRowMap={{}}
-        onInsertTimeline={jest.fn()}
-        onSelectionChange={jest.fn()}
-        onTableChange={jest.fn()}
-        onToggleShowNotes={jest.fn()}
-        pageIndex={0}
-        pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-        searchResults={missingSavedObjectId}
-        showExtendedColumns={true}
-        sortDirection={DEFAULT_SORT_DIRECTION}
-        sortField={DEFAULT_SORT_FIELD}
-        totalSearchResultsCount={missingSavedObjectId.length}
-      />
-    );
-
-    const props = wrapper
-      .find('[data-test-subj="open-duplicate"]')
-      .first()
-      .props() as EuiButtonIconProps;
-
-    expect(props.isDisabled).toBe(true);
-  });
-
-  test('it renders an enabled the open duplicate button if the timeline has have a saved object id', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onInsertTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumns={false}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
+          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
     );
 
     const props = wrapper
-      .find('[data-test-subj="open-duplicate"]')
+      .find('[data-test-subj="timelines-table"]')
       .first()
-      .props() as EuiButtonIconProps;
+      .props() as TimelinesTableProps;
 
-    expect(props.isDisabled).toBe(false);
+    expect(props.actionTimelineToShow).toContain('delete');
   });
 
-  test('it invokes onInsertTimeline with the expected params when the button is clicked', () => {
-    const onInsertTimeline = jest.fn();
-
+  test('it does NOT show the delete when is onDeleteSelected undefined and deleteTimelines is specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
+        <InsertTimelinePopoverBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onInsertTimeline={onInsertTimeline}
+          onAddTimelinesToFavorites={jest.fn()}
+          onlyFavorites={false}
+          onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
           onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
           onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
           searchResults={mockResults}
-          showExtendedColumns={false}
+          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
+          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="open-duplicate"]')
+    const props = wrapper
+      .find('[data-test-subj="timelines-table"]')
       .first()
-      .simulate('click');
+      .props() as TimelinesTableProps;
 
-    expect(onInsertTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+    expect(props.actionTimelineToShow).not.toContain('delete');
+  });
+
+  test('it does NOT show the delete action when is onDeleteSelected provided and deleteTimelines is undefined', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <InsertTimelinePopoverBody
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    const props = wrapper
+      .find('[data-test-subj="timelines-table"]')
+      .first()
+      .props() as TimelinesTableProps;
+
+    expect(props.actionTimelineToShow).not.toContain('delete');
+  });
+
+  test('it does NOT show extended columns when both onDeleteSelected and deleteTimelines are undefined', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <InsertTimelinePopoverBody
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onlyFavorites={false}
+          onInsertTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    const props = wrapper
+      .find('[data-test-subj="timelines-table"]')
+      .first()
+      .props() as TimelinesTableProps;
+
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 });

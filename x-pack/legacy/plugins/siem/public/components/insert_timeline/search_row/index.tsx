@@ -11,9 +11,7 @@ import {
   EuiFlexItem,
   // @ts-ignore
   EuiSearchBar,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -69,24 +67,6 @@ export const SearchRow = React.memo<Props>(
           </EuiFilterGroup>
         </EuiFlexItem>
       </SearchRowFlexGroup>
-
-      <EuiText color="subdued" size="xs">
-        <p>
-          <FormattedMessage
-            data-test-subj="query-message"
-            id="xpack.siem.open.timeline.showingNTimelinesLabel"
-            defaultMessage="Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
-            values={{
-              totalSearchResultsCount,
-              with: (
-                <span data-test-subj="selectable-query-text">
-                  {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
-                </span>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
     </SearchRowContainer>
   )
 );
