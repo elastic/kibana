@@ -66,8 +66,8 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   const api = useApi();
 
   const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.core.savedObjects.client;
-  const indexPatterns = appDeps.plugins.data.indexPatterns;
+  const savedObjectsClient = appDeps.savedObjects.client;
+  const indexPatterns = appDeps.data.indexPatterns;
 
   const { esTransform } = useDocumentationLinks();
 

@@ -130,7 +130,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
         }
 
         try {
-          setIndexPatternTitles(await deps.plugins.data.indexPatterns.getTitles());
+          setIndexPatternTitles(await deps.data.indexPatterns.getTitles());
         } catch (e) {
           toastNotifications.addDanger({
             title: i18n.translate(
