@@ -6,10 +6,10 @@
 import { deleteActionRoute } from './delete';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

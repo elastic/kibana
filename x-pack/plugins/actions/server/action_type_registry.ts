@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
-import { ExecutorError, TaskRunnerFactory } from './lib';
+import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
 import { ActionType } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -16,6 +16,7 @@ export interface ActionTypeRegistryOpts {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
+  licenseState: ILicenseState;
 }
 
 export class ActionTypeRegistry {
@@ -23,11 +24,13 @@ export class ActionTypeRegistry {
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
+  private readonly licenseState: ILicenseState;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
+    this.licenseState = constructorParams.licenseState;
   }
 
   /**
@@ -42,6 +45,7 @@ export class ActionTypeRegistry {
    */
   public ensureActionTypeEnabled(id: string) {
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
+    this.licenseState.ensureLicenseForActionType(this.get(id));
   }
 
   /**

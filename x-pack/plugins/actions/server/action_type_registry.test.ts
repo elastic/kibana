@@ -6,17 +6,20 @@
 
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ExecutorType } from './types';
-import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
+import { ActionType, ExecutorType } from './types';
+import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
+import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
 
 const mockTaskManager = taskManagerMock.setup();
+let mockedLicenseState: jest.Mocked<ILicenseState>;
 let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  mockedLicenseState = licenseStateMock.create();
   mockedActionsConfig = actionsConfigMock.create();
   actionTypeRegistryParams = {
     taskManager: mockTaskManager,
@@ -24,6 +27,7 @@ beforeEach(() => {
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
     ),
     actionsConfigUtils: mockedActionsConfig,
+    licenseState: mockedLicenseState,
   };
 });
 
@@ -161,5 +165,48 @@ describe('has()', () => {
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
+  });
+});
+
+describe('ensureActionTypeEnabled', () => {
+  let actionTypeRegistry: ActionTypeRegistry;
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'basic',
+    executor: async () => {},
+  };
+
+  beforeEach(() => {
+    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(fooActionType);
+  });
+
+  test('should call ensureActionTypeEnabled of the action config', async () => {
+    actionTypeRegistry.ensureActionTypeEnabled('foo');
+    expect(mockedActionsConfig.ensureActionTypeEnabled).toHaveBeenCalledWith('foo');
+  });
+
+  test('should call ensureLicenseForActionType on the license state', async () => {
+    actionTypeRegistry.ensureActionTypeEnabled('foo');
+    expect(mockedLicenseState.ensureLicenseForActionType).toHaveBeenCalledWith(fooActionType);
+  });
+
+  test('should throw when ensureActionTypeEnabled throws', async () => {
+    mockedActionsConfig.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    expect(() =>
+      actionTypeRegistry.ensureActionTypeEnabled('foo')
+    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+
+  test('should throw when ensureLicenseForActionType throws', async () => {
+    mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    expect(() =>
+      actionTypeRegistry.ensureActionTypeEnabled('foo')
+    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

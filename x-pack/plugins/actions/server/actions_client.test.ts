@@ -6,13 +6,14 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
-import { ActionExecutor, TaskRunnerFactory } from './lib';
+import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
+import { licenseStateMock } from './lib/license_state.mock';
 
 import {
   elasticsearchServiceMock,
@@ -25,22 +26,25 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 
 const mockTaskManager = taskManagerMock.setup();
 
-const actionTypeRegistryParams = {
-  taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(
-    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-  ),
-  actionsConfigUtils: actionsConfigMock.create(),
-};
-
 let actionsClient: ActionsClient;
+let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
+let actionTypeRegistryParams: ActionTypeRegistryOpts;
 const executor: ExecutorType = async options => {
   return { status: 'ok', actionId: options.actionId };
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
+  mockedLicenseState = licenseStateMock.create();
+  actionTypeRegistryParams = {
+    taskManager: mockTaskManager,
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+    ),
+    actionsConfigUtils: actionsConfigMock.create(),
+    licenseState: mockedLicenseState,
+  };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
     actionTypeRegistry,
@@ -213,6 +217,7 @@ describe('create()', () => {
         new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
       ),
       actionsConfigUtils: localConfigUtils,
+      licenseState: licenseStateMock.create(),
     };
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
@@ -253,6 +258,39 @@ describe('create()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"action type \\"my-action-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
+  });
+
+  test('throws error when ensureActionTypeEnabled throws', async () => {
+    const savedObjectCreateResult = {
+      id: '1',
+      type: 'type',
+      attributes: {
+        name: 'my name',
+        actionTypeId: 'my-action-type',
+        config: {},
+      },
+      references: [],
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });
 
@@ -511,5 +549,46 @@ describe('update()', () => {
         },
       ]
     `);
+  });
+
+  test('throws an error when ensureActionTypeEnabled throws', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    await expect(
+      actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

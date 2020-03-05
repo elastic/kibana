@@ -11,6 +11,7 @@ import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 
 const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
 
@@ -25,6 +26,7 @@ export function createActionTypeRegistry(): {
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
     ),
     actionsConfigUtils: actionsConfigMock.create(),
+    licenseState: licenseStateMock.create(),
   });
   registerBuiltInActionTypes({
     logger,
