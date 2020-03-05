@@ -17,9 +17,40 @@
  * under the License.
  */
 
-/**
- * This temporarily re-exports a static function from the data shim plugin until
- * the final agg_types cutover is complete. It is needed for use in Lens; and they
- * are not currently using the legacy data shim, so we are moving it here first.
- */
-export { getCalculateAutoTimeExpression } from '../../../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_utils';
+import dateMath from '@elastic/datemath';
+import { TimeBuckets } from './time_buckets';
+import { TimeRange } from '../../../../../../../../plugins/data/public';
+import { IUiSettingsClient } from '../../../../../../../../core/public';
+
+export function toAbsoluteDates(range: TimeRange) {
+  const fromDate = dateMath.parse(range.from);
+  const toDate = dateMath.parse(range.to, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    from: fromDate.toDate(),
+    to: toDate.toDate(),
+  };
+}
+
+export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
+  return function calculateAutoTimeExpression(range: TimeRange) {
+    const dates = toAbsoluteDates(range);
+    if (!dates) {
+      return;
+    }
+
+    const buckets = new TimeBuckets({ uiSettings });
+
+    buckets.setInterval('auto');
+    buckets.setBounds({
+      min: dates.from,
+      max: dates.to,
+    });
+
+    return buckets.getInterval().expression;
+  };
+}
