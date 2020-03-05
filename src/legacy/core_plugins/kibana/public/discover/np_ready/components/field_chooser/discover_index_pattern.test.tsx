@@ -25,12 +25,12 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 const indexPattern = {
   id: 'test1',
   title: 'test1 title',
-} as IndexPattern;
+} as IIndexPattern;
 
 const indexPattern1 = {
   id: 'test1',
