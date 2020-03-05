@@ -61,6 +61,9 @@ export const createRulesRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
         const alertsClient = context.alerting.getAlertsClient();
         const actionsClient = context.actions.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
