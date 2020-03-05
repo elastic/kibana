@@ -5,17 +5,15 @@
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
+    index-patterns="[indexPattern]"
+    on-query-submit="updateQuery"
+    on-saved-query-id-change="updateSavedQueryId"
+    query="state.query"
+    saved-query-id="state.savedQuery"
     screen-title="screenTitle"
-    show-search-bar="true"
-    show-filter-bar="true"
-    show-save-query="showSaveQuery"
     show-date-picker="enableTimeRangeSelector"
     show-save-query="showSaveQuery"
-    index-patterns="[indexPattern]"
-    query="state.query"
-    on-query-submit="updateQuery"
-    saved-query-id="state.savedQuery"
-    on-saved-query-id-change="updateSavedQueryId"
+    show-search-bar="true"
     use-default-behaviors="true"
   >
   </kbn-top-nav>
