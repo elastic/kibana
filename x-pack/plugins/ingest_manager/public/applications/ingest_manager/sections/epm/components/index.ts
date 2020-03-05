@@ -3,6 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { Loading } from './loading';
-export { Error } from './error';
-export { Header, HeaderProps } from './header';
+
+export { PackageIcon } from './package_icon';
