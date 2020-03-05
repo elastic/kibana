@@ -13,6 +13,7 @@ export {
   AgentEvent,
   EnrollmentAPIKey,
   Datasource,
+  NewDatasource,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
