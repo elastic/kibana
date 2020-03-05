@@ -1,0 +1,482 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_expression XYChart component it renders area 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={0}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={0}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={90}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders line 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={0}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked area 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={0}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={0}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(spec)
+    legendPosition="top"
+    rotation={90}
+    showLegend={false}
+    showLegendDisplayValue={false}
+    theme={Object {}}
+  />
+  <Connect(spec)
+    id="x"
+    position="left"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(spec)
+    id="y"
+    position="bottom"
+    showGridLines={false}
+    tickFormat={[Function]}
+    title=""
+  />
+  <Connect(spec)
+    data={
+      Array [
+        Object {
+          "Label A": 1,
+          "Label B": 2,
+          "Label D": "Foo",
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "Label A": 1,
+          "Label B": 5,
+          "Label D": "Bar",
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "Label A",
+        "Label B",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;

@@ -6,12 +6,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Markdown from 'markdown-it';
 import { RendererStrings } from '../../../i18n';
+import { Markdown } from '../../../../../../../src/legacy/core_plugins/kibana_react/public';
 
 const { markdown: strings } = RendererStrings;
-
-const md = new Markdown();
 
 export const markdown = () => ({
   name: 'markdown',
@@ -19,20 +17,18 @@ export const markdown = () => ({
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const html = { __html: md.render(String(config.content)) };
     const fontStyle = config.font ? config.font.spec : {};
 
-    /* eslint-disable react/no-danger */
     ReactDOM.render(
-      <div
-        className="kbnMarkdown__body canvasMarkdown"
+      <Markdown
+        className="canvasMarkdown"
         style={fontStyle}
-        dangerouslySetInnerHTML={html}
+        markdown={config.content}
+        openLinksInNewTab={config.openLinksInNewTab}
       />,
       domNode,
       () => handlers.done()
     );
-    /* eslint-enable */
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

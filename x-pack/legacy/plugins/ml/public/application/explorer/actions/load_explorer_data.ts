@@ -61,8 +61,6 @@ const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 const memoizedLoadViewBySwimlane = memoize(loadViewBySwimlane);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
-const dateFormatTz = getDateFormatTz();
-
 export interface LoadExplorerDataConfig {
   bounds: TimeRangeBounds;
   influencersFilterQuery: any;
@@ -120,6 +118,8 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
     swimlaneBucketInterval.asSeconds(),
     bounds
   );
+
+  const dateFormatTz = getDateFormatTz();
 
   // First get the data where we have all necessary args at hand using forkJoin:
   // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues

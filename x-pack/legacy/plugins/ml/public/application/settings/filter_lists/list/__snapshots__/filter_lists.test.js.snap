@@ -14,7 +14,7 @@ exports[`Filter Lists renders a list of filters 1`] = `
         horizontalPosition="center"
         verticalPosition="center"
       >
-        <FilterListsHeader
+        <FilterListsHeaderUI
           refreshFilterLists={[Function]}
           totalCount={1}
         />

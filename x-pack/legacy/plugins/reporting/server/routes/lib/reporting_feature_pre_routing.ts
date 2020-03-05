@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { Logger, ServerFacade } from '../../../types';
-import { ReportingSetupDeps } from '../../plugin';
+import { ReportingSetupDeps } from '../../types';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 

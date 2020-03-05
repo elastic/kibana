@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
 import { FrontendLibs } from '../lib/types';
 import { RendererFunction } from '../utils/typed_react';
@@ -17,7 +17,7 @@ interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySuggestion[];
+    suggestions: QuerySuggestion[];
   }>;
 }
 
@@ -28,7 +28,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<

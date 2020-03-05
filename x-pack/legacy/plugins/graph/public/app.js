@@ -49,6 +49,7 @@ export function initGraphApp(angularModule, deps) {
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
+    overlays,
   } = deps;
 
   const app = angularModule;
@@ -131,14 +132,20 @@ export function initGraphApp(angularModule, deps) {
         template: appTemplate,
         badge: getReadonlyBadge,
         resolve: {
-          savedWorkspace: function($route) {
+          savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? savedWorkspaceLoader.get($route.current.params.id).catch(function() {
-                  toastNotifications.addDanger(
-                    i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
-                      defaultMessage: 'Missing workspace',
-                    })
-                  );
+              ? savedWorkspaceLoader.get($route.current.params.id).catch(function(e) {
+                  toastNotifications.addError(e, {
+                    title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
+                      defaultMessage: "Couldn't load graph with ID",
+                    }),
+                  });
+                  $rootScope.$eval(() => {
+                    $location.path('/home');
+                    $location.replace();
+                  });
+                  // return promise that never returns to prevent the controller from loading
+                  return new Promise();
                 })
               : savedWorkspaceLoader.get();
           },
@@ -162,7 +169,7 @@ export function initGraphApp(angularModule, deps) {
   });
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function($scope, $route, $location, confirmModal) {
+  app.controller('graphuiPlugin', function($scope, $route, $location) {
     function handleError(err) {
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
@@ -382,23 +389,29 @@ export function initGraphApp(angularModule, deps) {
         return;
       }
       const confirmModalOptions = {
-        onConfirm: callback,
-        onCancel: () => {},
         confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
           defaultMessage: 'Leave anyway',
         }),
         title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
           defaultMessage: 'Unsaved changes',
         }),
+        'data-test-subj': 'confirmModal',
         ...options,
       };
-      confirmModal(
-        text ||
-          i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
-            defaultMessage: 'If you leave now, you will lose unsaved changes.',
-          }),
-        confirmModalOptions
-      );
+
+      overlays
+        .openConfirm(
+          text ||
+            i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+              defaultMessage: 'If you leave now, you will lose unsaved changes.',
+            }),
+          confirmModalOptions
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            callback();
+          }
+        });
     }
     $scope.confirmWipeWorkspace = canWipeWorkspace;
 

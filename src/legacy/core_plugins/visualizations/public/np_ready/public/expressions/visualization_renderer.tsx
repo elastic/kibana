@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { legacyChrome } from '../../../legacy_imports';
 // @ts-ignore
 import { Vis } from './vis';
 import { Visualization } from '../components';
@@ -31,30 +30,15 @@ export const visualization = () => ({
   render: async (domNode: HTMLElement, config: any, handlers: any) => {
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
-    const $injector = await legacyChrome.dangerouslyGetActiveInjector();
-    const $rootScope = $injector.get('$rootScope') as any;
 
-    if (handlers.vis) {
-      // special case in visualize, we need to render first (without executing the expression), for maps to work
-      if (visConfig) {
-        $rootScope.$apply(() => {
-          handlers.vis.setCurrentState({
-            type: visType,
-            params: visConfig,
-            title: handlers.vis.title,
-          });
-        });
-      }
-    } else {
-      handlers.vis = new Vis({
-        type: visType,
-        params: visConfig,
-      });
-    }
+    const vis = new Vis({
+      type: visType,
+      params: visConfig,
+    });
 
-    handlers.vis.eventsSubject = { next: handlers.event };
+    vis.eventsSubject = { next: handlers.event };
 
-    const uiState = handlers.uiState || handlers.vis.getUiState();
+    const uiState = handlers.uiState || vis.getUiState();
 
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
@@ -63,9 +47,9 @@ export const visualization = () => ({
     const listenOnChange = params ? params.listenOnChange : false;
     render(
       <Visualization
-        vis={handlers.vis}
+        vis={vis}
         visData={visData}
-        visParams={handlers.vis.params}
+        visParams={vis.params}
         uiState={uiState}
         listenOnChange={listenOnChange}
         onInit={handlers.done}

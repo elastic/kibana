@@ -17,42 +17,27 @@
  * under the License.
  */
 
-import { Action } from './actions/action';
-import { Trigger } from './triggers/trigger';
+import { ActionByType } from './actions/action';
+import { TriggerInternal } from './triggers/trigger_internal';
 
-export { Action } from './actions';
-export { Trigger } from './triggers/trigger';
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
+export type ActionRegistry = Map<string, ActionByType<any>>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
-export type ExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
+const DEFAULT_TRIGGER = '';
 
-export type GetActionsCompatibleWithTrigger = <C>(
-  triggerId: string,
-  context: C
-) => Promise<Action[]>;
+export type TriggerId = keyof TriggerContextMapping;
 
-export interface UiActionsApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: ExecuteTriggerActions;
-  getTrigger: (id: string) => Trigger;
-  getTriggerActions: (id: string) => Action[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<Action<C>>>;
-  registerAction: (action: Action) => void;
-  registerTrigger: (trigger: Trigger) => void;
+export type BaseContext = object;
+export type TriggerContext = BaseContext;
+
+export interface TriggerContextMapping {
+  [DEFAULT_TRIGGER]: TriggerContext;
 }
 
-export interface UiActionsDependencies {
-  actions: ActionRegistry;
-  triggers: TriggerRegistry;
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
 }
-
-export interface UiActionsDependenciesInternal extends UiActionsDependencies {
-  api: Readonly<Partial<UiActionsApi>>;
-}
-
-export type UiActionsApiPure = {
-  [K in keyof UiActionsApi]: (deps: UiActionsDependenciesInternal) => UiActionsApi[K];
-};
-
-export type TriggerRegistry = Map<string, Trigger>;
-export type ActionRegistry = Map<string, Action>;

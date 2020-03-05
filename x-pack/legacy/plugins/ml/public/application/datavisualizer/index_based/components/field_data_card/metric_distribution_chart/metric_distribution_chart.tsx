@@ -23,7 +23,7 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
+import { useUiSettings } from '../../../../../contexts/kibana/use_ui_settings_context';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { ChartTooltipValue } from '../../../../../components/chart_tooltip/chart_tooltip_service';
 
@@ -52,9 +52,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
     defaultMessage: 'distribution',
   });
 
-  const IS_DARK_THEME = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode');
+  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
   const AREA_SERIES_COLOR = themeName.euiColorVis1;
 

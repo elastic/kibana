@@ -18,12 +18,13 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { esFilters } from '../../../../common';
+import { FilterMeta, Filter } from '../../../../common';
 
 export interface FilterCompareOptions {
   disabled?: boolean;
   negate?: boolean;
   state?: boolean;
+  alias?: boolean;
 }
 
 /**
@@ -33,44 +34,44 @@ export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   disabled: true,
   negate: true,
   state: true,
+  alias: true,
 };
 
 const mapFilter = (
-  filter: esFilters.Filter,
+  filter: Filter,
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  const cleaned: esFilters.FilterMeta = omit(filter, excludedAttributes);
+  const cleaned: FilterMeta = omit(filter, excludedAttributes);
 
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
   if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
+  if (comparators.disabled) cleaned.alias = filter.meta?.alias;
 
   return cleaned;
 };
 
 const mapFilterArray = (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  return map(filters, (filter: esFilters.Filter) =>
-    mapFilter(filter, comparators, excludedAttributes)
-  );
+  return map(filters, (filter: Filter) => mapFilter(filter, comparators, excludedAttributes));
 };
 
 /**
  * Compare two filters or filter arrays to see if they match.
  * For filter arrays, the assumption is they are sorted.
  *
- * @param {esFilters.Filter | esFilters.Filter[]} first The first filter or filter array to compare
- * @param {esFilters.Filter | esFilters.Filter[]} second The second filter or filter array to compare
+ * @param {Filter | Filter[]} first The first filter or filter array to compare
+ * @param {Filter | Filter[]} second The second filter or filter array to compare
  * @param {FilterCompareOptions} comparatorOptions Parameters to use for comparison
  *
  * @returns {bool} Filters are the same
  */
 export const compareFilters = (
-  first: esFilters.Filter | esFilters.Filter[],
-  second: esFilters.Filter | esFilters.Filter[],
+  first: Filter | Filter[],
+  second: Filter | Filter[],
   comparatorOptions: FilterCompareOptions = {}
 ) => {
   let comparators: FilterCompareOptions = {};
@@ -81,6 +82,7 @@ export const compareFilters = (
     state: false,
     negate: false,
     disabled: false,
+    alias: false,
   });
 
   if (!comparators.state) excludedAttributes.push('$state');

@@ -5,8 +5,7 @@
  */
 
 import { combineFiltersAndUserSearch, stringifyKueries } from '../lib/helper';
-import { esKuery } from '../../../../../../src/plugins/data/common/es_query';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/public';
 
 const getKueryString = (urlFilters: string): string => {
   let kueryString = '';

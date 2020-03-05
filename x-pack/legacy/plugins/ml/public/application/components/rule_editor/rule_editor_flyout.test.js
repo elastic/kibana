@@ -49,6 +49,12 @@ jest.mock('../../privilege/check_privilege', () => ({
   checkPermission: () => true,
 }));
 
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
+  },
+}));
+
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
@@ -77,9 +83,17 @@ function prepareTest() {
   const requiredProps = {
     setShowFunction,
     unsetShowFunction,
+    kibana: {
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        },
+      },
+    },
   };
 
-  const component = <RuleEditorFlyout.WrappedComponent {...requiredProps} />;
+  const component = <RuleEditorFlyout {...requiredProps} />;
 
   const wrapper = shallowWithIntl(component);
 

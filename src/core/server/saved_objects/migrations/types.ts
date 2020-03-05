@@ -21,13 +21,40 @@ import { SavedObjectUnsanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 /**
- * A migration function defined for a {@link SavedObjectsType | saved objects type}
- * used to migrate it's {@link SavedObjectUnsanitizedDoc | documents}
+ * A migration function for a {@link SavedObjectsType | saved object type}
+ * used to migrate it to a given version
+ *
+ * @example
+ * ```typescript
+ * const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
+ *   if(doc.attributes.someProp === null) {
+ *     log.warn('Skipping migration');
+ *   } else {
+ *     doc.attributes.someProp = migrateProperty(doc.attributes.someProp);
+ *   }
+ *
+ *   return doc;
+ * }
+ * ```
+ *
+ * @public
  */
 export type SavedObjectMigrationFn = (
   doc: SavedObjectUnsanitizedDoc,
-  log: SavedObjectsMigrationLogger
+  context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc;
+
+/**
+ * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}
+ *
+ * @public
+ */
+export interface SavedObjectMigrationContext {
+  /**
+   * logger instance to be used by the migration handler
+   */
+  log: SavedObjectsMigrationLogger;
+}
 
 /**
  * A map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.

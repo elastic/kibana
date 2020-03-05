@@ -11,7 +11,7 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiChromeContext } from '../../contexts/ui/use_ui_chrome_context';
+import { useUiSettings } from '../../contexts/kibana/use_ui_settings_context';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -150,11 +150,7 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const euiTheme = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode')
-    ? euiThemeDark
-    : euiThemeLight;
+  const euiTheme = useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight;
 
   const colorRanges = {
     [COLOR_RANGE.BLUE]: [d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)],

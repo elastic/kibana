@@ -56,15 +56,7 @@ const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
 };
 
 export class Build {
-  constructor({
-    log,
-    sourcePath,
-    targetPath,
-    urlImports,
-    theme,
-    sourceMap = true,
-    outputStyle = 'nested',
-  }) {
+  constructor({ log, sourcePath, targetPath, urlImports, theme }) {
     this.log = log;
     this.sourcePath = sourcePath;
     this.sourceDir = dirname(this.sourcePath);
@@ -73,8 +65,6 @@ export class Build {
     this.urlImports = urlImports;
     this.theme = theme;
     this.includedFiles = [sourcePath];
-    this.sourceMap = sourceMap;
-    this.outputStyle = outputStyle;
   }
 
   /**
@@ -97,11 +87,11 @@ export class Build {
     const rendered = await renderSass({
       file: this.sourcePath,
       outFile: this.targetPath,
-      sourceMap: this.sourceMap,
-      outputStyle: this.outputStyle,
-      sourceMapEmbed: this.sourceMap,
-      includePaths: [resolve(__dirname, '../../../../node_modules')],
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
+      sourceMap: true,
+      outputStyle: 'nested',
+      sourceMapEmbed: true,
+      includePaths: [resolve(__dirname, '../../../../node_modules')],
     });
 
     const processor = postcss([autoprefixer]);

@@ -11,9 +11,8 @@ import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../common/constants';
 import { Logger } from 'src/core/server';
-import { AlertServices } from '../../../alerting/server/types';
+import { AlertServices, AlertInstance } from '../../../../../plugins/alerting/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { AlertInstance } from '../../../alerting/server/alert_instance';
 import {
   AlertState,
   AlertClusterState,
@@ -63,6 +62,7 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
   spaceId: '',
   name: '',
   tags: [],
+  previousStartedAt: null,
   createdBy: null,
   updatedBy: null,
 };
@@ -101,7 +101,7 @@ describe('getLicenseExpiration', () => {
   it('should have the right id and actionGroups', () => {
     const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
-    expect(alert.actionGroups).toEqual(['default']);
+    expect(alert.actionGroups).toEqual([{ id: 'default', name: 'Default' }]);
   });
 
   it('should return the state if no license is provided', async () => {

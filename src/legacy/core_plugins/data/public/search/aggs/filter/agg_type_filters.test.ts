@@ -19,13 +19,12 @@
 
 import { IndexPattern } from '../../../../../../../plugins/data/public';
 import { AggTypeFilters } from './agg_type_filters';
-import { AggConfig } from '..';
-import { IAggType } from '../types';
+import { IAggConfig, IAggType } from '../types';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
   const indexPattern = ({ id: '1234', fields: [], title: 'foo' } as unknown) as IndexPattern;
-  const aggConfig = {} as AggConfig;
+  const aggConfig = {} as IAggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFilters();
@@ -33,7 +32,7 @@ describe('AggTypeFilters', () => {
 
   it('should filter nothing without registered filters', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }] as IAggType[];
-    const filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    const filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual(aggTypes);
   });
 
@@ -41,23 +40,23 @@ describe('AggTypeFilters', () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }] as IAggType[];
     const filter = jest.fn();
     registry.addFilter(filter);
-    registry.filter(aggTypes, indexPattern, aggConfig);
-    expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig);
-    expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig);
+    registry.filter(aggTypes, indexPattern, aggConfig, []);
+    expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig, []);
+    expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig, []);
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }] as IAggType[];
-    let filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    let filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual(aggTypes);
 
     registry.addFilter(() => true);
     registry.addFilter(aggType => aggType.name !== 'count');
-    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
     registry.addFilter(aggType => aggType.name !== 'avg');
-    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1]]);
   });
 });

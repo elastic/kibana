@@ -20,7 +20,15 @@
 import { generateFilters } from './generate_filters';
 import { FilterManager } from '../filter_manager';
 
-import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
+import {
+  Filter,
+  IFieldType,
+  IIndexPattern,
+  isExistsFilter,
+  buildExistsFilter,
+  PhraseFilter,
+  isPhraseFilter,
+} from '../../../../common';
 
 const INDEX_NAME = 'my-index';
 const EXISTS_FIELD_NAME = '_exists_';
@@ -31,7 +39,7 @@ const PHRASE_VALUE = 'my-value';
 
 describe('Generate filters', () => {
   let mockFilterManager: FilterManager;
-  let filtersArray: esFilters.Filter[];
+  let filtersArray: Filter[];
 
   beforeEach(() => {
     filtersArray = [];
@@ -53,7 +61,7 @@ describe('Generate filters', () => {
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeFalsy();
-    expect(esFilters.isExistsFilter(filters[0])).toBeTruthy();
+    expect(isExistsFilter(filters[0])).toBeTruthy();
   });
 
   it('should create negated exists filter', () => {
@@ -67,11 +75,11 @@ describe('Generate filters', () => {
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeTruthy();
-    expect(esFilters.isExistsFilter(filters[0])).toBeTruthy();
+    expect(isExistsFilter(filters[0])).toBeTruthy();
   });
 
   it('should update and re-enable EXISTING exists filter', () => {
-    const filter = esFilters.buildExistsFilter(FIELD, { id: INDEX_NAME } as IIndexPattern);
+    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as IIndexPattern);
     filter.meta.disabled = true;
     filtersArray.push(filter);
 
@@ -80,7 +88,7 @@ describe('Generate filters', () => {
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeTruthy();
     expect(filters[0].meta.disabled).toBeFalsy();
-    expect(esFilters.isExistsFilter(filters[0])).toBeTruthy();
+    expect(isExistsFilter(filters[0])).toBeTruthy();
   });
 
   it('should create phrase filter', () => {
@@ -88,8 +96,8 @@ describe('Generate filters', () => {
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeFalsy();
-    expect(esFilters.isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as esFilters.PhraseFilter).query.match_phrase).toEqual({
+    expect(isPhraseFilter(filters[0])).toBeTruthy();
+    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
@@ -99,8 +107,8 @@ describe('Generate filters', () => {
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeTruthy();
-    expect(esFilters.isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as esFilters.PhraseFilter).query.match_phrase).toEqual({
+    expect(isPhraseFilter(filters[0])).toBeTruthy();
+    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
@@ -119,12 +127,12 @@ describe('Generate filters', () => {
     expect(filters[0].meta.negate).toBeFalsy();
     expect(filters[1].meta.index === INDEX_NAME);
     expect(filters[1].meta.negate).toBeFalsy();
-    expect(esFilters.isPhraseFilter(filters[0])).toBeTruthy();
-    expect(esFilters.isPhraseFilter(filters[1])).toBeTruthy();
-    expect((filters[0] as esFilters.PhraseFilter).query.match_phrase).toEqual({
+    expect(isPhraseFilter(filters[0])).toBeTruthy();
+    expect(isPhraseFilter(filters[1])).toBeTruthy();
+    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
-    expect((filters[1] as esFilters.PhraseFilter).query.match_phrase).toEqual({
+    expect((filters[1] as PhraseFilter).query.match_phrase).toEqual({
       [FIELD.name]: ANOTHER_PHRASE,
     });
   });

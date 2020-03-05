@@ -8,11 +8,14 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
-import { metadata } from 'ui/metadata';
-
-const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-calendars.html`;
+import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
 export const Description: FC = memo(({ children }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-calendars.html`;
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.title',
     {
@@ -21,7 +24,6 @@ export const Description: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="calendars_description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -40,7 +42,7 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow describedByIds={['calendars_description']}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

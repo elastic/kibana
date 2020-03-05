@@ -1,0 +1,47 @@
+[role="xpack"]
+[[alert-action-settings-kb]]
+=== Alerting and action settings in Kibana
+++++
+<titleabbrev>Alerting and action settings</titleabbrev>
+++++
+
+Alerts and actions are enabled by default in {kib}, but require you configure the following in order to use them: 
+
+. <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
+. <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
+. <<general-alert-action-settings,Specify a value for `xpack.encrypted_saved_objects.encryptionKey`>>.
+
+You can configure the following settings in the `kibana.yml` file.
+
+
+[float]
+[[general-alert-action-settings]]
+==== General settings
+
+`xpack.encrypted_saved_objects.encryptionKey`::
+
+A string of 32 or more characters used to encrypt sensitive properties on alerts and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.  
++
+If not set, {kib} will generate a random key on startup, but all alert and action functions will be blocked. Generated keys are not allowed for alerts and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerts and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}.
++
+Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
+
+[float]
+[[alert-settings]]
+==== Action settings
+
+`xpack.actions.whitelistedHosts`::
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly whitelisted. An empty list `[]` can be used to block built-in actions from making any external connections.
++
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically whitelisted. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are whitelisted as well.
+
+`xpack.actions.enabledActionTypes`::
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types.
++
+Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.  
+
+[float]
+[[action-settings]]
+==== Alert settings
+
+You do not need to configure any additional settings to use alerting in {kib}.

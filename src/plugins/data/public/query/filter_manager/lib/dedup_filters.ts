@@ -19,7 +19,7 @@
 
 import { filter, find } from 'lodash';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
 /**
  * Combine 2 filter collections, removing duplicates
@@ -31,8 +31,8 @@ import { esFilters } from '../../../../common';
  * @returns {object} An array of filters that were not in existing
  */
 export const dedupFilters = (
-  existingFilters: esFilters.Filter[],
-  filters: esFilters.Filter[],
+  existingFilters: Filter[],
+  filters: Filter[],
   comparatorOptions: FilterCompareOptions = {}
 ) => {
   if (!Array.isArray(filters)) {
@@ -41,8 +41,8 @@ export const dedupFilters = (
 
   return filter(
     filters,
-    (f: esFilters.Filter) =>
-      !find(existingFilters, (existingFilter: esFilters.Filter) =>
+    (f: Filter) =>
+      !find(existingFilters, (existingFilter: Filter) =>
         compareFilters(existingFilter, f, comparatorOptions)
       )
   );

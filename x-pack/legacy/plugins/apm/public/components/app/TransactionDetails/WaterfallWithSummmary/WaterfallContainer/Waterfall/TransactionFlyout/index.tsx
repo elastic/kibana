@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';

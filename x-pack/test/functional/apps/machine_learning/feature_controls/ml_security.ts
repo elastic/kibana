@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security', 'settings']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('security', () => {
     before(async () => {
@@ -94,7 +94,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.security.login('machine_learning_user', 'machine_learning_user-password');
-        await PageObjects.settings.setNavType('individual');
       });
 
       after(async () => {

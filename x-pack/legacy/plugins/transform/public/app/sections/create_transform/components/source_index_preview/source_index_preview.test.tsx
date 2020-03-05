@@ -4,38 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
-import { KibanaContext } from '../../../../lib/kibana';
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import { getPivotQuery } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { SourceIndexPreview } from './source_index_preview';
 
 jest.mock('ui/new_platform');
-
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
+jest.mock('../../../../../shared_imports');
 
 describe('Transform: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {
+    // Arrange
     const props = {
+      indexPattern: {
+        title: 'the-index-pattern-title',
+        fields: [] as any[],
+      } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
-
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
-    const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <SourceIndexPreview {...props} />
-        </KibanaContext.Provider>
-      </div>
+    const Providers = getAppProviders(createPublicShim());
+    const { getByText } = render(
+      <Providers>
+        <SourceIndexPreview {...props} />
+      </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByText(`Source index ${props.indexPattern.title}`)).toBeInTheDocument();
   });
 });

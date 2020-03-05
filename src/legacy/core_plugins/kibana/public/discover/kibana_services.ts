@@ -58,8 +58,7 @@ export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-// @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { tabifyAggResponse } from '../../../data/public';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   migrateLegacyQuery,

@@ -8,13 +8,13 @@ import { MessageBody } from '../../../../components/ml/api/throw_if_not_ok';
 
 export class SignalIndexError extends Error {
   message: string = '';
-  statusCode: number = -1;
+  status_code: number = -1;
   error: string = '';
 
   constructor(errObj: MessageBody) {
     super(errObj.message);
     this.message = errObj.message ?? '';
-    this.statusCode = errObj.statusCode ?? -1;
+    this.status_code = errObj.status_code ?? -1;
     this.error = errObj.error ?? '';
     this.name = 'SignalIndexError';
 

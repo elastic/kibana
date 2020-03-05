@@ -6,38 +6,39 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { mlJobService } from '../../../../services/job_service';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { getBasePath } from '../../../../util/dependency_cache';
 
 export function getLink(location, jobs) {
+  const basePath = getBasePath();
   const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
-  return `${chrome.getBasePath()}/app/ml${resultsPageUrl}`;
+  return `${basePath.get()}/app/ml${resultsPageUrl}`;
 }
 
-function ResultLinksUI({ jobs, intl }) {
-  const openJobsInSingleMetricViewerText = intl.formatMessage(
+export function ResultLinks({ jobs }) {
+  const openJobsInSingleMetricViewerText = i18n.translate(
+    'xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText',
     {
-      id: 'xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText',
       defaultMessage:
         'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Single Metric Viewer',
-    },
-    {
-      jobsCount: jobs.length,
-      jobId: jobs[0].id,
+      values: {
+        jobsCount: jobs.length,
+        jobId: jobs[0].id,
+      },
     }
   );
-  const openJobsInAnomalyExplorerText = intl.formatMessage(
+  const openJobsInAnomalyExplorerText = i18n.translate(
+    'xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText',
     {
-      id: 'xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText',
       defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer',
-    },
-    {
-      jobsCount: jobs.length,
-      jobId: jobs[0].id,
+      values: {
+        jobsCount: jobs.length,
+        jobId: jobs[0].id,
+      },
     }
   );
   const singleMetricVisible = jobs.length < 2;
@@ -72,8 +73,6 @@ function ResultLinksUI({ jobs, intl }) {
     </React.Fragment>
   );
 }
-ResultLinksUI.propTypes = {
+ResultLinks.propTypes = {
   jobs: PropTypes.array.isRequired,
 };
-
-export const ResultLinks = injectI18n(ResultLinksUI);

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { ml } from '../../../services/ml_api_service';
 
@@ -68,6 +68,7 @@ export function addFilterList(filterId, description, items) {
               reject(error);
             });
         } else {
+          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(filterWithIdExistsErrorMessage);
           reject(new Error(filterWithIdExistsErrorMessage));
         }

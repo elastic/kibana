@@ -16,10 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { i18n } from '@kbn/i18n';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../../../../plugins/home/public';
 import { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
 
+interface SetupDependencies {
+  home: HomePublicPluginSetup;
+}
+
 export class SavedObjectsManagementService {
-  public setup() {
+  public setup({ home }: SetupDependencies) {
+    home.featureCatalogue.register({
+      id: 'saved_objects',
+      title: i18n.translate('management.objects.savedObjectsTitle', {
+        defaultMessage: 'Saved Objects',
+      }),
+      description: i18n.translate('management.objects.savedObjectsDescription', {
+        defaultMessage:
+          'Import, export, and manage your saved searches, visualizations, and dashboards.',
+      }),
+      icon: 'savedObjectsApp',
+      path: '/app/kibana#/management/kibana/objects',
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.ADMIN,
+    });
+
     return {
       registry: SavedObjectsManagementActionRegistry,
     };

@@ -25,7 +25,7 @@ import { DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 
 // let mockCoreSetup: MockedKeys<CoreSetup>;
 
-const mockDefaultSearch = jest.fn(() => Promise.resolve({ percentComplete: 0 }));
+const mockDefaultSearch = jest.fn(() => Promise.resolve({ total: 100, loaded: 0 }));
 const mockDefaultSearchStrategyProvider = jest.fn(() =>
   Promise.resolve({
     search: mockDefaultSearch,

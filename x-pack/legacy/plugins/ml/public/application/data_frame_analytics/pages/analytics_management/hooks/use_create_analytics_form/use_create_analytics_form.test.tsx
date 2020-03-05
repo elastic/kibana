@@ -7,8 +7,8 @@
 import React from 'react';
 import { mountHook } from 'test_utils/enzyme_helpers';
 
-import { KibanaContext } from '../../../../../contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+import { MlContext } from '../../../../../contexts/ml';
+import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
 import { getErrorMessage, useCreateAnalyticsForm } from './use_create_analytics_form';
 
@@ -16,7 +16,7 @@ const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
     ({ children }) => (
-      <KibanaContext.Provider value={kibanaContextValueMock}>{children}</KibanaContext.Provider>
+      <MlContext.Provider value={kibanaContextValueMock}>{children}</MlContext.Provider>
     )
   );
 

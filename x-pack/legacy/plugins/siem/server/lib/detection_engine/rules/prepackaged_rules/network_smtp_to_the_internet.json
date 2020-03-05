@@ -4,10 +4,7 @@
     "NATed servers that process email traffic may false and should be excluded from this rule as this is expected behavior for them. Consumer and  personal devices may send email traffic to remote Internet destinations. In this case, such devices or networks can be excluded from this rule if this is expected behavior."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

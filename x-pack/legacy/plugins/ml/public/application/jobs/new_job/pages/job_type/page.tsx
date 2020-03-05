@@ -18,7 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibanaContext } from '../../../../contexts/kibana';
+import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
@@ -27,10 +27,10 @@ import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { currentSavedSearch, currentIndexPattern } = kibanaContext;
+  const { currentSavedSearch, currentIndexPattern } = mlContext;
 
   const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
   const indexWarningTitle =

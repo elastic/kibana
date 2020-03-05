@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from 'src/es_archiver';
 import { SavedObject } from 'src/core/server';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -59,7 +59,9 @@ export function resolveCopyToSpaceConflictsSuite(
       .then((response: any) => response.body);
   };
 
-  const getObjectsAtSpace = async (spaceId: string): Promise<[SavedObject, SavedObject]> => {
+  const getObjectsAtSpace = async (
+    spaceId: string
+  ): Promise<[SavedObject<any>, SavedObject<any>]> => {
     const dashboard = await getDashboardAtSpace(spaceId);
     const visualization = await getVisualizationAtSpace(spaceId);
     return [dashboard, visualization];

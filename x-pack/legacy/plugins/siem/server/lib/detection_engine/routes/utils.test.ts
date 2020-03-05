@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
 import {
   transformError,
   transformBulkError,
@@ -14,55 +16,76 @@ import {
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  convertToSnakeCase,
+  SiemResponseFactory,
 } from './utils';
+import { responseMock } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
-    test('returns boom if it is a boom object', () => {
-      const boom = new Boom('');
+    test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
+      const boom = new Boom('some boom message');
       const transformed = transformError(boom);
-      expect(transformed).toBe(boom);
+      expect(transformed).toEqual({
+        message: 'An internal server error occurred',
+        statusCode: 500,
+      });
     });
 
-    test('returns a boom if it is some non boom object that has a statusCode', () => {
+    test('returns transformed output if it is some non boom object that has a statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(true);
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 403,
+      });
     });
 
-    test('returns a boom with the message set', () => {
+    test('returns a transformed message with the message set and statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(transformed.message).toBe('some message');
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 403,
+      });
     });
 
-    test('does not return a boom if it is some non boom object but it does not have a status Code.', () => {
+    test('transforms best it can if it is some non boom object but it does not have a status Code.', () => {
       const error: Error = {
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(false);
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 500,
+      });
     });
 
-    test('it detects a TypeError and returns a Boom', () => {
+    test('it detects a TypeError and returns a status code of 400 from that particular error type', () => {
       const error: TypeError = new TypeError('I have a type error');
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(true);
+      expect(transformed).toEqual({
+        message: 'I have a type error',
+        statusCode: 400,
+      });
     });
 
     test('it detects a TypeError and returns a Boom status of 400', () => {
       const error: TypeError = new TypeError('I have a type error');
-      const transformed = transformError(error) as Boom;
-      expect(transformed.output.statusCode).toBe(400);
+      const transformed = transformError(error);
+      expect(transformed).toEqual({
+        message: 'I have a type error',
+        statusCode: 400,
+      });
     });
   });
 
@@ -272,6 +295,58 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('convertToSnakeCase', () => {
+    it('converts camelCase to snakeCase', () => {
+      const values = { myTestCamelCaseKey: 'something' };
+      expect(convertToSnakeCase(values)).toEqual({ my_test_camel_case_key: 'something' });
+    });
+    it('returns empty object when object is empty', () => {
+      const values = {};
+      expect(convertToSnakeCase(values)).toEqual({});
+    });
+    it('returns null when passed in undefined', () => {
+      // Array accessors can result in undefined but
+      // this is not represented in typescript for some reason,
+      // https://github.com/Microsoft/TypeScript/issues/11122
+      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+        page: 0,
+        per_page: 5,
+        total: 0,
+        saved_objects: [],
+      };
+      expect(
+        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+      ).toEqual(null);
+    });
+  });
+
+  describe('SiemResponseFactory', () => {
+    it('builds a custom response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      expect(response.custom).toHaveBeenCalled();
+    });
+
+    it('generates a status_code key on the response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
+
+      expect(statusCode).toEqual(400);
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
+        expect.objectContaining({
+          message: 'Bad Request',
+          status_code: 400,
+        })
+      );
     });
   });
 });

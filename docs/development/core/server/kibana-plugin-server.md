@@ -19,6 +19,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [BasePath](./kibana-plugin-server.basepath.md) | Access or manipulate the Kibana base path |
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [CspConfig](./kibana-plugin-server.cspconfig.md) | CSP configuration for use in Kibana. |
+|  [ElasticsearchConfig](./kibana-plugin-server.elasticsearchconfig.md) | Wrapper of config schema. |
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [RouteValidationError](./kibana-plugin-server.routevalidationerror.md) | Error to return when the validation is not successful. |
@@ -26,6 +27,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-server.savedobjectsanitizeddoc.md) documents to the other kind. |
+|  [SavedObjectTypeRegistry](./kibana-plugin-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-server.savedobjectstype.md)<!-- -->. |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 
 ## Enumerations
@@ -34,6 +36,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AuthResultType](./kibana-plugin-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
+
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-server.savedobjectsexportoptions.md) for more detailed information. |
+|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
 
 ## Interfaces
 
@@ -86,11 +96,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
+|  [MetricsServiceSetup](./kibana-plugin-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-server.onpreresponseinfo.md) | Response status code. |
 |  [OnPreResponseToolkit](./kibana-plugin-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
+|  [OpsMetrics](./kibana-plugin-server.opsmetrics.md) | Regroups metrics gathered by all the collectors. This contains metrics about the os/runtime, the kibana process and the http server. |
+|  [OpsOsMetrics](./kibana-plugin-server.opsosmetrics.md) | OS related metrics |
+|  [OpsProcessMetrics](./kibana-plugin-server.opsprocessmetrics.md) | Process related metrics |
+|  [OpsServerMetrics](./kibana-plugin-server.opsservermetrics.md) | server related metrics |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
@@ -107,6 +122,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidatorOptions](./kibana-plugin-server.routevalidatoroptions.md) | Additional options for the RouteValidator class to modify its default behaviour. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
+|  [SavedObjectMigrationContext](./kibana-plugin-server.savedobjectmigrationcontext.md) | Migration context provided when invoking a [migration handler](./kibana-plugin-server.savedobjectmigrationfn.md) |
 |  [SavedObjectMigrationMap](./kibana-plugin-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-server.savedobjectsbaseoptions.md) |  |
@@ -142,7 +158,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsRawDoc](./kibana-plugin-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
 |  [SavedObjectsRepositoryFactory](./kibana-plugin-server.savedobjectsrepositoryfactory.md) | Factory provided when invoking a [client factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) See [SavedObjectsServiceSetup.setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) |
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
-|  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers. |
+|  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |
 |  [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
 |  [SavedObjectsType](./kibana-plugin-server.savedobjectstype.md) |  |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
@@ -180,6 +196,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationLogger](./kibana-plugin-server.configdeprecationlogger.md) | Logger interface used when invoking a [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) |
 |  [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
+|  [DestructiveRouteMethod](./kibana-plugin-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
@@ -194,6 +211,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ICustomClusterClient](./kibana-plugin-server.icustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Returns authentication status for a request. |
 |  [ISavedObjectsRepository](./kibana-plugin-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |
+|  [ISavedObjectTypeRegistry](./kibana-plugin-server.isavedobjecttyperegistry.md) | See [SavedObjectTypeRegistry](./kibana-plugin-server.savedobjecttyperegistry.md) for documentation. |
 |  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 |  [KibanaRequestRouteOptions](./kibana-plugin-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
@@ -223,9 +241,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements. |
 |  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) for custom validation. |
 |  [RouteValidatorFullConfig](./kibana-plugin-server.routevalidatorfullconfig.md) | Route validations config and options merged into one object |
+|  [SafeRouteMethod](./kibana-plugin-server.saferoutemethod.md) | Set of HTTP methods not changing the state of the server. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |
-|  [SavedObjectMigrationFn](./kibana-plugin-server.savedobjectmigrationfn.md) | A migration function defined for a [saved objects type](./kibana-plugin-server.savedobjectstype.md) used to migrate it's  |
+|  [SavedObjectMigrationFn](./kibana-plugin-server.savedobjectmigrationfn.md) | A migration function for a [saved object type](./kibana-plugin-server.savedobjectstype.md) used to migrate it to a given version |
 |  [SavedObjectSanitizedDoc](./kibana-plugin-server.savedobjectsanitizeddoc.md) |  |
 |  [SavedObjectsClientContract](./kibana-plugin-server.savedobjectsclientcontract.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state.<!-- -->\#\# SavedObjectsClient errors<!-- -->Since the SavedObjectsClient has its hands in everything we are a little paranoid about the way we present errors back to to application code. Ideally, all errors will be either:<!-- -->1. Caused by bad implementation (ie. undefined is not a function) and as such unpredictable 2. An error that has been classified and decorated appropriately by the decorators in [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md)<!-- -->Type 1 errors are inevitable, but since all expected/handle-able errors should be Type 2 the <code>isXYZError()</code> helpers exposed at <code>SavedObjectsErrorHelpers</code> should be used to understand and manage error responses from the <code>SavedObjectsClient</code>.<!-- -->Type 2 errors are decorated versions of the source error, so if the elasticsearch client threw an error it will be decorated based on its type. That means that rather than looking for <code>error.body.error.type</code> or doing substring checks on <code>error.body.error.reason</code>, just use the helpers to understand the meaning of the error:<!-- -->\`\`\`<!-- -->js if (SavedObjectsErrorHelpers.isNotFoundError(error)) { // handle 404 }<!-- -->if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) { // 401 handling should be automatic, but in case you wanted to know }<!-- -->// always rethrow the error unless you handle it throw error; \`\`\`<!-- -->\#\#\# 404s from missing index<!-- -->From the perspective of application code and APIs the SavedObjectsClient is a black box that persists objects. One of the internal details that users have no control over is that we use an elasticsearch index for persistance and that index might be missing.<!-- -->At the time of writing we are in the process of transitioning away from the operating assumption that the SavedObjects index is always available. Part of this transition is handling errors resulting from an index missing. These used to trigger a 500 error in most cases, and in others cause 404s with different error messages.<!-- -->From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The object the request/call was targeting could not be found. This is why \#14141 takes special care to ensure that 404 errors are generic and don't distinguish between index missing or document missing.<!-- -->\#\#\# 503s from missing index<!-- -->Unlike all other methods, create requests are supposed to succeed even when the Kibana index does not exist because it will be automatically created by elasticsearch. When that is not the case it is because Elasticsearch's <code>action.auto_create_index</code> setting prevents it from being created automatically so we throw a special 503 with the intention of informing the user that their Elasticsearch settings need to be updated.<!-- -->See [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) See [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |
 |  [SavedObjectsClientFactory](./kibana-plugin-server.savedobjectsclientfactory.md) | Describes the factory used to create instances of the Saved Objects Client. |

@@ -45,7 +45,7 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         expect(text).to.eql(['HELLO WORLD!', 'HELLO WORLD!']);
 
         const tasks = await testSubjects.getVisibleTextAll('multiTaskTodoTask');
-        expect(tasks).to.eql(['Go to school', 'Watch planet earth', 'Read the encylopedia']);
+        expect(tasks).to.eql(['Go to school', 'Watch planet earth', 'Read the encyclopedia']);
       });
     });
 

@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+
 import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';

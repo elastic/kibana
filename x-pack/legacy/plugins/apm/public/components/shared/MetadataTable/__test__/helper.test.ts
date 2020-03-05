@@ -6,7 +6,7 @@
 
 import { getSectionsWithRows, filterSectionsByTerm } from '../helper';
 import { LABELS, HTTP, SERVICE } from '../sections';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 describe('MetadataTable Helper', () => {
   const sections = [

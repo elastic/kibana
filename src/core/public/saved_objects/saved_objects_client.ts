@@ -22,7 +22,6 @@ import { resolve as resolveUrl } from 'url';
 
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
@@ -61,9 +60,7 @@ export interface SavedObjectsCreateOptions {
  *
  * @public
  */
-export interface SavedObjectsBulkCreateObject<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
   type: string;
   attributes: T;
 }
@@ -75,9 +72,7 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 /** @public */
-export interface SavedObjectsBulkUpdateObject<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
   type: string;
   id: string;
   attributes: T;
@@ -99,9 +94,7 @@ export interface SavedObjectsUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsBatchResponse<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> {
+export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
@@ -113,9 +106,7 @@ export interface SavedObjectsBatchResponse<
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -124,7 +115,7 @@ export interface SavedObjectsFindResponsePublic<
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
+  resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -207,7 +198,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T extends SavedObjectAttributes>(
+  public create = <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -300,7 +291,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T extends SavedObjectAttributes>(
+  public find = <T = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -348,10 +339,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns The saved object for the given type and id.
    */
-  public get = <T extends SavedObjectAttributes>(
-    type: string,
-    id: string
-  ): Promise<SimpleSavedObject<T>> => {
+  public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -402,7 +390,7 @@ export class SavedObjectsClient {
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns
    */
-  public update<T extends SavedObjectAttributes>(
+  public update<T = unknown>(
     type: string,
     id: string,
     attributes: T,
@@ -434,7 +422,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
+  public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
     return this.savedObjectsFetch(path, {
@@ -449,9 +437,7 @@ export class SavedObjectsClient {
     });
   }
 
-  private createSavedObject<T extends SavedObjectAttributes>(
-    options: SavedObject<T>
-  ): SimpleSavedObject<T> {
+  private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }
 

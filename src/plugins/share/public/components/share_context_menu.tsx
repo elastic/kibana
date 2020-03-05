@@ -21,8 +21,7 @@ import React, { Component } from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import { HttpStart } from 'kibana/public';
 

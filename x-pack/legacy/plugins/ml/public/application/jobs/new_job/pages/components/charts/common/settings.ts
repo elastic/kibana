@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import {
@@ -13,14 +12,18 @@ import {
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
 import { TimeBuckets } from '../../../../../../util/time_buckets';
+import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-
-export const LINE_COLOR = themeName.euiColorPrimary;
-export const MODEL_COLOR = themeName.euiColorPrimary;
-export const EVENT_RATE_COLOR = themeName.euiColorPrimary;
-export const EVENT_RATE_COLOR_WITH_ANOMALIES = themeName.euiColorLightShade;
+export function useChartColors() {
+  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
+  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  return {
+    LINE_COLOR: themeName.euiColorPrimary,
+    MODEL_COLOR: themeName.euiColorPrimary,
+    EVENT_RATE_COLOR: themeName.euiColorPrimary,
+    EVENT_RATE_COLOR_WITH_ANOMALIES: themeName.euiColorLightShade,
+  };
+}
 
 export interface ChartSettings {
   width: string;

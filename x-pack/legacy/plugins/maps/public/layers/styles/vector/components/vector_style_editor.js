@@ -146,14 +146,9 @@ export class VectorStyleEditor extends Component {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
-  _hasBorder() {
-    const width = this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH];
-    return width.isDynamic() ? width.isComplete() : width.getOptions().size !== 0;
-  }
-
   _hasMarkerOrIcon() {
     const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];
-    return !iconSize.isDynamic() && iconSize.getOptions().size > 0;
+    return iconSize.isDynamic() || iconSize.getOptions().size > 0;
   }
 
   _hasLabel() {
@@ -192,7 +187,7 @@ export class VectorStyleEditor extends Component {
     const disabledByIconSize = isPointBorderColor && !this._hasMarkerOrIcon();
     return (
       <VectorStyleColorEditor
-        disabled={disabledByIconSize || !this._hasBorder()}
+        disabled={disabledByIconSize || !this.props.hasBorder}
         disabledBy={disabledByIconSize ? VECTOR_STYLES.ICON_SIZE : VECTOR_STYLES.LINE_WIDTH}
         swatches={DEFAULT_LINE_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}

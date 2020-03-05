@@ -18,17 +18,18 @@
  */
 
 import moment from 'moment';
+import { dateRangeBucketAgg } from '../date_range';
 import { createFilterDateRange } from './date_range';
-import { fieldFormats } from '../../../../../../../../plugins/data/public';
+import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 
-jest.mock('ui/new_platform');
-
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
-    const getConfig = (() => {}) as fieldFormats.GetConfigFn;
+    const typesRegistry = mockAggTypesRegistry([dateRangeBucketAgg]);
+    const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
@@ -55,7 +56,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        null
+        { typesRegistry }
       );
     };
 

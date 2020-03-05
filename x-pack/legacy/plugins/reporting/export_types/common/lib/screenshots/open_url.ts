@@ -6,7 +6,7 @@
 
 import { ConditionalHeaders } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { WAITFOR_SELECTOR } from '../../constants';
 
 export const openUrl = async (

@@ -18,10 +18,20 @@ describe('projectionMatrix', () => {
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     compare = (worldPosition: [number, number], expectedRasterPosition: [number, number]) => {
-      const [rasterX, rasterY] = applyMatrix3(worldPosition, projectionMatrix(store.getState()));
+      // time isn't really relevant as we aren't testing animation
+      const time = 0;
+      const [rasterX, rasterY] = applyMatrix3(
+        worldPosition,
+        projectionMatrix(store.getState())(time)
+      );
       expect(rasterX).toBeCloseTo(expectedRasterPosition[0]);
       expect(rasterY).toBeCloseTo(expectedRasterPosition[1]);
     };
+  });
+  describe('when the raster size is 0 x 0 pixels (unpainted)', () => {
+    it('should convert 0,0 (center) in world space to 0,0 in raster space', () => {
+      compare([0, 0], [0, 0]);
+    });
   });
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
@@ -66,7 +76,7 @@ describe('projectionMatrix', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-50, -50] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [50, 50] };
         store.dispatch(action);
       });
       it('should convert 0,0 (center) in world space to 100,150 in raster space', () => {
@@ -83,7 +93,7 @@ describe('projectionMatrix', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userSetPositionOfCamera',
-          payload: [-350, -250],
+          payload: [350, 250],
         };
         store.dispatch(action);
       });

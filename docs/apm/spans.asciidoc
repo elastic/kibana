@@ -9,7 +9,7 @@ The span timeline visualization is a bird's-eye view of what your application wa
 This makes it useful for visualizing where the selected transaction spent most of its time.
 
 [role="screenshot"]
-image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
+image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in Kibana]
 
 View a span in detail by clicking on it in the timeline waterfall.
 For example, in the below screenshot we've clicked on an SQL Select database query.
@@ -35,6 +35,3 @@ These transactions can be expanded and viewed in detail by clicking on them.
 
 After exploring these traces,
 you can return to the full trace by clicking *View full trace* in the upper right hand corner of the page.
-
-[role="screenshot"]
-image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in Kibana]

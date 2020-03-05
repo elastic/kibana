@@ -5,10 +5,10 @@
  */
 
 import { difference } from 'lodash';
-import chrome from 'ui/chrome';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { mlJobService } from '../../../../services/job_service';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
+import { getSavedObjectsClient } from '../../../../util/dependency_cache';
 
 export function saveJob(job, newJobData, finish) {
   return new Promise((resolve, reject) => {
@@ -77,7 +77,7 @@ function saveDatafeed(datafeedData, job) {
 export function loadSavedDashboards(maxNumber) {
   // Loads the list of saved dashboards, as used in editing custom URLs.
   return new Promise((resolve, reject) => {
-    const savedObjectsClient = chrome.getSavedObjectsClient();
+    const savedObjectsClient = getSavedObjectsClient();
     savedObjectsClient
       .find({
         type: 'dashboard',
@@ -109,7 +109,7 @@ export function loadIndexPatterns(maxNumber) {
   // TODO - amend loadIndexPatterns in index_utils.js to do the request,
   // without needing an Angular Provider.
   return new Promise((resolve, reject) => {
-    const savedObjectsClient = chrome.getSavedObjectsClient();
+    const savedObjectsClient = getSavedObjectsClient();
     savedObjectsClient
       .find({
         type: 'index-pattern',

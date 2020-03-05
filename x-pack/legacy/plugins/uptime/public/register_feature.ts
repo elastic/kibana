@@ -5,12 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FeatureCatalogueCategory,
-  FeatureCatalogueRegistryProvider,
-} from 'ui/registry/feature_catalogue';
+import { npSetup } from 'ui/new_platform';
+import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 
-FeatureCatalogueRegistryProvider.register(() => ({
+const {
+  plugins: { home },
+} = npSetup;
+
+home.featureCatalogue.register({
   id: 'uptime',
   title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', { defaultMessage: 'Uptime' }),
   description: i18n.translate('xpack.uptime.featureCatalogueDescription', {
@@ -20,4 +22,4 @@ FeatureCatalogueRegistryProvider.register(() => ({
   path: `uptime#/`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
-}));
+});

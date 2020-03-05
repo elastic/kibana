@@ -20,10 +20,10 @@
 import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { IpRangeKey } from '../ip_range';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters, RangeFilterParams } from '../../../../../../../../plugins/data/public';
 
 export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
-  let range: esFilters.RangeFilterParams;
+  let range: RangeFilterParams;
 
   if (key.type === 'mask') {
     range = new CidrMask(key.mask).getRange();

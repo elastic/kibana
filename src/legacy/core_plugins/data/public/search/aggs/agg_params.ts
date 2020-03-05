@@ -76,7 +76,9 @@ export const writeParams = <
   aggs?: IAggConfigs,
   locals?: Record<string, any>
 ) => {
-  const output = { params: {} as Record<string, any> };
+  const output: Record<string, any> = {
+    params: {} as Record<string, any>,
+  };
   locals = locals || {};
 
   params.forEach(param => {

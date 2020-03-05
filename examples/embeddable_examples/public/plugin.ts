@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import { IEmbeddableSetup, IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import {
+  IEmbeddableSetup,
+  IEmbeddableStart,
+  EmbeddableFactory,
+} from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
-import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
+import {
+  MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactory,
+  MultiTaskTodoOutput,
+  MultiTaskTodoInput,
+} from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactory,
@@ -45,12 +54,9 @@ export class EmbeddableExamplesPlugin
       new HelloWorldEmbeddableFactory()
     );
 
-    deps.embeddable.registerEmbeddableFactory(TODO_EMBEDDABLE, new TodoEmbeddableFactory());
-
-    deps.embeddable.registerEmbeddableFactory(
-      MULTI_TASK_TODO_EMBEDDABLE,
-      new MultiTaskTodoEmbeddableFactory()
-    );
+    deps.embeddable.registerEmbeddableFactory<
+      EmbeddableFactory<MultiTaskTodoInput, MultiTaskTodoOutput>
+    >(MULTI_TASK_TODO_EMBEDDABLE, new MultiTaskTodoEmbeddableFactory());
   }
 
   public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
@@ -65,6 +71,11 @@ export class EmbeddableExamplesPlugin
     deps.embeddable.registerEmbeddableFactory(
       LIST_CONTAINER,
       new ListContainerFactory(deps.embeddable.getEmbeddableFactory)
+    );
+
+    deps.embeddable.registerEmbeddableFactory<EmbeddableFactory<TodoInput, TodoOutput>>(
+      TODO_EMBEDDABLE,
+      new TodoEmbeddableFactory(core.overlays.openModal)
     );
   }
 

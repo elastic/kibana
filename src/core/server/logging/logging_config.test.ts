@@ -59,7 +59,7 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
 test('correctly fills in default config.', () => {
   const configValue = new LoggingConfig(config.schema.validate({}));
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
     kind: 'console',
@@ -68,10 +68,6 @@ test('correctly fills in default config.', () => {
   expect(configValue.appenders.get('console')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern', highlight: true },
-  });
-  expect(configValue.appenders.get('file')).toEqual({
-    kind: 'file',
-    layout: { kind: 'pattern', highlight: false },
   });
 });
 
@@ -83,16 +79,11 @@ test('correctly fills in custom `appenders` config.', () => {
           kind: 'console',
           layout: { kind: 'pattern' },
         },
-        file: {
-          kind: 'file',
-          layout: { kind: 'pattern' },
-          path: 'path',
-        },
       },
     })
   );
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
     kind: 'console',
@@ -102,12 +93,6 @@ test('correctly fills in custom `appenders` config.', () => {
   expect(configValue.appenders.get('console')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern' },
-  });
-
-  expect(configValue.appenders.get('file')).toEqual({
-    kind: 'file',
-    layout: { kind: 'pattern' },
-    path: 'path',
   });
 });
 

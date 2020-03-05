@@ -94,8 +94,8 @@ export default function({ getService, getPageObjects }) {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
-
-          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.gotoDashboardEditMode('My PDF Dashboard');
           await PageObjects.reporting.setTimepickerInDataRange();
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
@@ -135,7 +135,8 @@ export default function({ getService, getPageObjects }) {
         it('matches baseline report', async function() {
           this.timeout(300000);
 
-          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.gotoDashboardEditMode('My PNG Dash');
           await PageObjects.reporting.setTimepickerInDataRange();
 
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();

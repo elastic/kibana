@@ -11,7 +11,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
       "entries": Array [
         Object {
           "hash": "",
-          "key": "test",
+          "key": "TestKeyForTesting",
           "pathname": "/",
           "search": "?g=%22%22&dateRangeStart=now-12&dateRangeEnd=now&pagination=foo",
           "state": undefined,
@@ -25,7 +25,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
       "listen": [Function],
       "location": Object {
         "hash": "",
-        "key": "test",
+        "key": "TestKeyForTesting",
         "pathname": "/",
         "search": "?g=%22%22&dateRangeStart=now-12&dateRangeEnd=now&pagination=foo",
         "state": undefined,

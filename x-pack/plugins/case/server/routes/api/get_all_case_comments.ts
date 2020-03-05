@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
+import { formatAllComments, wrapError } from './utils';
 
 export function initGetAllCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -24,7 +24,7 @@ export function initGetAllCaseCommentsApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: theComments });
+        return response.ok({ body: formatAllComments(theComments) });
       } catch (error) {
         return response.customError(wrapError(error));
       }

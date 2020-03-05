@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Alert, AlertType } from '../../../../types';
+import { Alert, AlertType, AlertTaskState } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -19,7 +19,10 @@ import {
   enableAlert,
   muteAlert,
   unmuteAlert,
+  muteAlertInstance,
+  unmuteAlertInstance,
   loadAlert,
+  loadAlertState,
   loadAlertTypes,
 } from '../../../lib/alert_api';
 
@@ -31,10 +34,13 @@ export interface ComponentOpts {
   deleteAlerts: (alerts: Alert[]) => Promise<void>;
   muteAlert: (alert: Alert) => Promise<void>;
   unmuteAlert: (alert: Alert) => Promise<void>;
+  muteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
+  unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
   deleteAlert: (alert: Alert) => Promise<void>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
+  loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertTypes: () => Promise<AlertType[]>;
 }
 
@@ -76,6 +82,16 @@ export function withBulkAlertOperations<T>(
             return unmuteAlert({ http, id: alert.id });
           }
         }}
+        muteAlertInstance={async (alert: Alert, instanceId: string) => {
+          if (!isAlertInstanceMuted(alert, instanceId)) {
+            return muteAlertInstance({ http, id: alert.id, instanceId });
+          }
+        }}
+        unmuteAlertInstance={async (alert: Alert, instanceId: string) => {
+          if (isAlertInstanceMuted(alert, instanceId)) {
+            return unmuteAlertInstance({ http, id: alert.id, instanceId });
+          }
+        }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
             return enableAlert({ http, id: alert.id });
@@ -88,6 +104,7 @@ export function withBulkAlertOperations<T>(
         }}
         deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
+        loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
       />
     );
@@ -100,4 +117,8 @@ function isAlertDisabled(alert: Alert) {
 
 function isAlertMuted(alert: Alert) {
   return alert.muteAll === true;
+}
+
+function isAlertInstanceMuted(alert: Alert, instanceId: string) {
+  return alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
 }

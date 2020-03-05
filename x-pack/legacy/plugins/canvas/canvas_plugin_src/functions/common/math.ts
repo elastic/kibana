@@ -8,26 +8,24 @@
 import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { Datatable, isDatatable, ExpressionFunction } from '../../../types';
+import { Datatable, isDatatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   expression: string;
 }
 
-type Context = number | Datatable;
+type Input = number | Datatable;
 
-export function math(): ExpressionFunction<'math', Context, Arguments, number> {
+export function math(): ExpressionFunctionDefinition<'math', Input, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().math;
   const errors = getFunctionErrors().math;
 
   return {
     name: 'math',
     type: 'number',
+    inputTypes: ['number', 'datatable'],
     help,
-    context: {
-      types: ['number', 'datatable'],
-    },
     args: {
       expression: {
         aliases: ['_'],
@@ -35,19 +33,19 @@ export function math(): ExpressionFunction<'math', Context, Arguments, number> {
         help: argHelp.expression,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { expression } = args;
 
       if (!expression || expression.trim() === '') {
         throw errors.emptyExpression();
       }
 
-      const mathContext = isDatatable(context)
+      const mathContext = isDatatable(input)
         ? pivotObjectArray(
-            context.rows,
-            context.columns.map(col => col.name)
+            input.rows,
+            input.columns.map(col => col.name)
           )
-        : { value: context };
+        : { value: input };
 
       try {
         const result = evaluate(expression, mathContext);
@@ -62,7 +60,7 @@ export function math(): ExpressionFunction<'math', Context, Arguments, number> {
         }
         return result;
       } catch (e) {
-        if (isDatatable(context) && context.rows.length === 0) {
+        if (isDatatable(input) && input.rows.length === 0) {
           throw errors.emptyDatatable();
         } else {
           throw e;

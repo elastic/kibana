@@ -24,7 +24,7 @@ import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from 'ui/notify';
+import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
@@ -50,7 +50,7 @@ function format(value: string, stringify: typeof compactStringify, options?: any
     return stringify(spec, options);
   } catch (err) {
     // This is a common case - user tries to format an invalid HJSON text
-    toastNotifications.addError(err, {
+    getNotifications().toasts.addError(err, {
       title: i18n.translate('visTypeVega.editor.formatError', {
         defaultMessage: 'Error formatting spec',
       }),

@@ -19,13 +19,20 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ComponentRegistry } from './component_registry';
-import { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { registerAdvSettingsMgmntApp } from './management_app';
 
 const component = new ComponentRegistry();
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart> {
-  public setup(core: CoreSetup) {
+  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
+  public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
+    registerAdvSettingsMgmntApp({
+      management,
+      getStartServices: core.getStartServices,
+      componentRegistry: component.start,
+    });
+
     return {
       component: component.setup,
     };

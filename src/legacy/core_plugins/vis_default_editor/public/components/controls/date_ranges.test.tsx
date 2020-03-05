@@ -20,10 +20,8 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DateRangesParamEditor } from './date_ranges';
-
-jest.mock('../../legacy_imports', () => ({
-  getDocLink: jest.fn(),
-}));
+import { KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
+import { docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 describe('DateRangesParamEditor component', () => {
   let setValue: jest.Mock;
@@ -50,14 +48,25 @@ describe('DateRangesParamEditor component', () => {
     };
   });
 
+  function DateRangesWrapped(props: any) {
+    const services = {
+      docLinks: docLinksServiceMock.createStartContract(),
+    };
+    return (
+      <KibanaContextProvider services={services}>
+        <DateRangesParamEditor {...props} />
+      </KibanaContextProvider>
+    );
+  }
+
   it('should add default range if there is an empty ininitial value', () => {
-    mountWithIntl(<DateRangesParamEditor {...defaultProps} />);
+    mountWithIntl(<DateRangesWrapped {...defaultProps} />);
 
     expect(setValue).toHaveBeenCalledWith([{}]);
   });
 
   it('should validate range values with date math', function() {
-    const component = mountWithIntl(<DateRangesParamEditor {...defaultProps} />);
+    const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);
 
     // should allow empty values
     expect(setValidity).toHaveBeenNthCalledWith(1, true);

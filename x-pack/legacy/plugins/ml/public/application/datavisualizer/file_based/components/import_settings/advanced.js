@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -16,10 +17,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { MLJobEditor, EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
-function AdvancedSettingsUi({
+export function AdvancedSettings({
   index,
   indexPattern,
   initialized,
@@ -35,7 +36,6 @@ function AdvancedSettingsUi({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
-  intl,
 }) {
   return (
     <React.Fragment>
@@ -50,18 +50,22 @@ function AdvancedSettingsUi({
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder={intl.formatMessage({
-            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
-            defaultMessage: 'index name',
-          })}
+          placeholder={i18n.translate(
+            'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
+            {
+              defaultMessage: 'index name',
+            }
+          )}
           value={index}
           disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
-          aria-label={intl.formatMessage({
-            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
-            defaultMessage: 'Index name, required field',
-          })}
+          aria-label={i18n.translate(
+            'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
+            {
+              defaultMessage: 'Index name, required field',
+            }
+          )}
         />
       </EuiFormRow>
 
@@ -131,8 +135,6 @@ function AdvancedSettingsUi({
   );
 }
 
-export const AdvancedSettings = injectI18n(AdvancedSettingsUi);
-
 function IndexSettings({ initialized, data, onChange }) {
   return (
     <React.Fragment>
@@ -147,7 +149,7 @@ function IndexSettings({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -173,7 +175,7 @@ function Mappings({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
@@ -199,7 +201,7 @@ function IngestPipeline({ initialized, data, onChange }) {
         fullWidth
       >
         <MLJobEditor
-          mode={EDITOR_MODE.JSON}
+          mode={ML_EDITOR_MODE.JSON}
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}

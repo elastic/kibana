@@ -6,13 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import {
-  ChromeStart,
-  DocLinksStart,
-  HttpSetup,
-  ToastsSetup,
-  IUiSettingsClient,
-} from 'kibana/public';
+import { DocLinksStart, HttpSetup, ToastsSetup, IUiSettingsClient } from 'kibana/public';
 
 import {
   HashRouter,
@@ -26,6 +20,8 @@ import {
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
 
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
@@ -42,7 +38,6 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
-  chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
@@ -50,7 +45,7 @@ export interface AppDeps {
   theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
-  MANAGEMENT_BREADCRUMB: any;
+  setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
 }
 
 export const App = (deps: AppDeps) => {

@@ -22,11 +22,15 @@ import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 import 'angular-sanitize';
 import 'angular-mocks';
-import '../table_vis.mock';
 
 import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
-import { npStart } from '../legacy_imports';
+import { coreMock } from '../../../../../core/public/mocks';
+
+jest.mock('ui/new_platform');
+jest.mock('../../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
+  configureAppAngularModule: () => {},
+}));
 
 interface Sort {
   columnIndex: number;
@@ -69,7 +73,7 @@ describe('Table Vis - Paginated table', () => {
   let paginatedTable: any;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getAngularModule('kibana/table_vis', coreMock.createStart());
     initTableVisLegacyModule(tableVisModule);
   };
 

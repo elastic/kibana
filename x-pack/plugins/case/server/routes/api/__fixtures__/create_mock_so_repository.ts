@@ -21,6 +21,8 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
       return {
+        page: 1,
+        per_page: 5,
         total: savedObject.length,
         saved_objects: savedObject,
       };

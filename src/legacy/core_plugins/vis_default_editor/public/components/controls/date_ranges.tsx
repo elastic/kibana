@@ -37,8 +37,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
-import { getDocLink } from '../../legacy_imports';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';
@@ -66,6 +66,7 @@ function DateRangesParamEditor({
   setValue,
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
+  const { services } = useKibana();
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
   const hasInvalidRange = value.some(
     ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
@@ -115,7 +116,7 @@ function DateRangesParamEditor({
     <EuiFormRow compressed fullWidth>
       <>
         <EuiText size="xs">
-          <EuiLink href={getDocLink('date.dateMath')} target="_blank">
+          <EuiLink href={services.docLinks.links.date.dateMath} target="_blank">
             <FormattedMessage
               id="visDefaultEditor.controls.dateRanges.acceptedDateFormatsLinkText"
               defaultMessage="Acceptable date formats"

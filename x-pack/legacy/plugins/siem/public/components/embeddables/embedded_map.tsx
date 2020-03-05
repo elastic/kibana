@@ -23,7 +23,7 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 
@@ -70,7 +70,7 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;

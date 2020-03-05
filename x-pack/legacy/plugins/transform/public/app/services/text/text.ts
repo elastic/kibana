@@ -14,6 +14,9 @@ class TextService {
       home: i18n.translate('xpack.transform.home.breadcrumbTitle', {
         defaultMessage: 'Transforms',
       }),
+      cloneTransform: i18n.translate('xpack.transform.cloneTransform.breadcrumbTitle', {
+        defaultMessage: 'Clone transform',
+      }),
       createTransform: i18n.translate('xpack.transform.createTransform.breadcrumbTitle', {
         defaultMessage: 'Create transform',
       }),

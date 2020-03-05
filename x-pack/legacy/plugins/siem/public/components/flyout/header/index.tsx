@@ -5,9 +5,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
 
 import { isEmpty, get } from 'lodash/fp';
 import { History } from '../../../lib/history';
@@ -19,14 +18,14 @@ import {
   State,
   timelineSelectors,
 } from '../../../store';
-import { UpdateNote } from '../../notes/helpers';
 import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
-import { appActions, appModel } from '../../../store/app';
+import { appActions } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
 import { timelineActions } from '../../../store/actions';
-import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
-import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
+import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/constants';
 import { InputsModelId } from '../../../store/inputs/constants';
 
 interface OwnProps {
@@ -34,41 +33,7 @@ interface OwnProps {
   usersViewing: string[];
 }
 
-interface StateReduxProps {
-  description: string;
-  notesById: appModel.NotesById;
-  isDataInTimeline: boolean;
-  isDatepickerLocked: boolean;
-  isFavorite: boolean;
-  noteIds: string[];
-  title: string;
-  width: number;
-}
-
-interface DispatchProps {
-  associateNote: (noteId: string) => void;
-  applyDeltaToWidth?: ({
-    id,
-    delta,
-    bodyClientWidthPixels,
-    maxWidthPercent,
-    minWidthPixels,
-  }: {
-    id: string;
-    delta: number;
-    bodyClientWidthPixels: number;
-    maxWidthPercent: number;
-    minWidthPixels: number;
-  }) => void;
-  createTimeline: ActionCreator<{ id: string; show?: boolean }>;
-  toggleLock: ActionCreator<{ linkToId: InputsModelId }>;
-  updateDescription: ActionCreator<{ id: string; description: string }>;
-  updateIsFavorite: ActionCreator<{ id: string; isFavorite: boolean }>;
-  updateNote: UpdateNote;
-  updateTitle: ActionCreator<{ id: string; title: string }>;
-}
-
-type Props = OwnProps & StateReduxProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const StatefulFlyoutHeader = React.memo<Props>(
   ({
@@ -160,9 +125,7 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  associateNote: (noteId: string) => {
-    dispatch(timelineActions.addNote({ id: timelineId, noteId }));
-  },
+  associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
   applyDeltaToWidth: ({
     id,
     delta,
@@ -175,7 +138,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     bodyClientWidthPixels: number;
     maxWidthPercent: number;
     minWidthPixels: number;
-  }) => {
+  }) =>
     dispatch(
       timelineActions.applyDeltaToWidth({
         id,
@@ -184,35 +147,30 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
         maxWidthPercent,
         minWidthPixels,
       })
-    );
-  },
-  createTimeline: ({ id, show }: { id: string; show?: boolean }) => {
+    ),
+  createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
     dispatch(
       timelineActions.createTimeline({
         id,
         columns: defaultHeaders,
         show,
       })
-    );
-  },
-  updateDescription: ({ id, description }: { id: string; description: string }) => {
-    dispatch(timelineActions.updateDescription({ id, description }));
-  },
-  updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => {
-    dispatch(timelineActions.updateIsFavorite({ id, isFavorite }));
-  },
-  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) => {
-    dispatch(timelineActions.updateIsLive({ id, isLive }));
-  },
-  updateNote: (note: Note) => {
-    dispatch(appActions.updateNote({ note }));
-  },
-  updateTitle: ({ id, title }: { id: string; title: string }) => {
-    dispatch(timelineActions.updateTitle({ id, title }));
-  },
-  toggleLock: ({ linkToId }: { linkToId: InputsModelId }) => {
-    dispatch(inputsActions.toggleTimelineLinkTo({ linkToId }));
-  },
+    ),
+  updateDescription: ({ id, description }: { id: string; description: string }) =>
+    dispatch(timelineActions.updateDescription({ id, description })),
+  updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
+    dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
+  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) =>
+    dispatch(timelineActions.updateIsLive({ id, isLive })),
+  updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
+  updateTitle: ({ id, title }: { id: string; title: string }) =>
+    dispatch(timelineActions.updateTitle({ id, title })),
+  toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
+    dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),
 });
 
-export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const FlyoutHeader = connector(StatefulFlyoutHeader);

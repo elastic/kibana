@@ -180,13 +180,13 @@ export class AutoFollowPatternTable extends PureComponent {
                 ? i18n.translate(
                     'xpack.crossClusterReplication.autoFollowPatternList.table.actionPauseDescription',
                     {
-                      defaultMessage: 'Pause auto-follow pattern',
+                      defaultMessage: 'Pause replication',
                     }
                   )
                 : i18n.translate(
                     'xpack.crossClusterReplication.autoFollowPatternList.table.actionResumeDescription',
                     {
-                      defaultMessage: 'Resume auto-follow pattern',
+                      defaultMessage: 'Resume replication',
                     }
                   );
 

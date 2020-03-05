@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { generateMappingChain } from './generate_mapping_chain';
-import { esFilters } from '../../../../common';
+import { buildEmptyFilter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   let mapping: any;
@@ -32,7 +32,7 @@ describe('filter manager utilities', () => {
 
   describe('generateMappingChain()', () => {
     test('should create a chaining function which calls the next function if the error is thrown', async () => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       mapping.throws(filter);
       next.returns('good');
@@ -45,7 +45,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should create a chaining function which DOES NOT call the next function if the result is returned', async () => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       mapping.returns('good');
       next.returns('bad');
@@ -57,7 +57,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should resolve result for the mapping function', async () => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       mapping.returns({ key: 'test', value: 'example' });
 
@@ -70,7 +70,7 @@ describe('filter manager utilities', () => {
 
     test('should call the mapping function with the argument to the chain', async () => {
       // @ts-ignore
-      const filter: esFilters.Filter = { test: 'example' };
+      const filter: Filter = { test: 'example' };
 
       mapping.returns({ key: 'test', value: 'example' });
 
@@ -84,7 +84,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should resolve result for the next function', async () => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       mapping.throws(filter);
       next.returns({ key: 'test', value: 'example' });
@@ -98,7 +98,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should throw an error if no functions match', async done => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       mapping.throws(filter);
 

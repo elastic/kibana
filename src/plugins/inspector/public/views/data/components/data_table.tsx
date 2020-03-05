@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
-import { TabularData } from '../../../adapters/data/types';
+import { TabularData } from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataTableFormatState {

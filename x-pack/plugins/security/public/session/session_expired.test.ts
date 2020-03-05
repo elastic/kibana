@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import { SessionExpired } from './session_expired';
 
-describe('Session Expiration', () => {
+describe('#logout', () => {
   const mockGetItem = jest.fn().mockReturnValue(null);
+  const CURRENT_URL = '/foo/bar?baz=quz#quuz';
+  const LOGOUT_URL = '/logout';
+  const TENANT = '/some-basepath';
+
+  let newUrlPromise: Promise<string>;
 
   beforeAll(() => {
     Object.defineProperty(window, 'sessionStorage', {
@@ -19,69 +23,42 @@ describe('Session Expiration', () => {
     });
   });
 
+  beforeEach(() => {
+    window.history.pushState({}, '', CURRENT_URL);
+    mockGetItem.mockReset();
+    newUrlPromise = new Promise<string>(resolve => {
+      jest.spyOn(window.location, 'assign').mockImplementation(url => {
+        resolve(url);
+      });
+    });
+  });
+
   afterAll(() => {
     delete (window as any).sessionStorage;
   });
 
-  describe('logout', () => {
-    const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
-    const tenant = '';
+  it(`redirects user to the logout URL with 'msg' and 'next' parameters`, async () => {
+    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
+    sessionExpired.logout();
 
-    it('redirects user to "/logout" when there is no basePath', async () => {
-      const { basePath } = coreMock.createSetup().http;
-      mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath, tenant);
-      const newUrlPromise = new Promise<string>(resolve => {
-        jest.spyOn(window.location, 'assign').mockImplementation(url => {
-          resolve(url);
-        });
-      });
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(newUrlPromise).resolves.toBe(`${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`);
+  });
 
-      sessionExpired.logout();
+  it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {
+    const providerName = 'basic';
+    mockGetItem.mockReturnValueOnce(providerName);
 
-      const url = await newUrlPromise;
-      expect(url).toBe(
-        `/logout?next=${encodeURIComponent('/foo/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
-      );
-    });
+    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
+    sessionExpired.logout();
 
-    it('adds a provider parameter when an auth provider is saved in sessionStorage', async () => {
-      const { basePath } = coreMock.createSetup().http;
-      mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath, tenant);
-      const newUrlPromise = new Promise<string>(resolve => {
-        jest.spyOn(window.location, 'assign').mockImplementation(url => {
-          resolve(url);
-        });
-      });
-      mockGetItem.mockReturnValueOnce('basic');
+    expect(mockGetItem).toHaveBeenCalledTimes(1);
+    expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);
 
-      sessionExpired.logout();
-
-      const url = await newUrlPromise;
-      expect(url).toBe(
-        `/logout?next=${encodeURIComponent(
-          '/foo/bar?baz=quz#quuz'
-        )}&msg=SESSION_EXPIRED&provider=basic`
-      );
-    });
-
-    it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
-      const { basePath } = coreMock.createSetup({ basePath: '/foo' }).http;
-      mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath, tenant);
-      const newUrlPromise = new Promise<string>(resolve => {
-        jest.spyOn(window.location, 'assign').mockImplementation(url => {
-          resolve(url);
-        });
-      });
-
-      sessionExpired.logout();
-
-      const url = await newUrlPromise;
-      expect(url).toBe(
-        `/foo/logout?next=${encodeURIComponent('/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
-      );
-    });
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    const provider = `&provider=${providerName}`;
+    await expect(newUrlPromise).resolves.toBe(
+      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`
+    );
   });
 });

@@ -17,48 +17,56 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export {
-  ADD_PANEL_ACTION_ID,
-  APPLY_FILTER_ACTION,
-  APPLY_FILTER_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   Adapters,
+  ACTION_ADD_PANEL,
   AddPanelAction,
-  CONTEXT_MENU_TRIGGER,
+  ACTION_APPLY_FILTER,
+  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
   Container,
   ContainerInput,
   ContainerOutput,
-  EDIT_PANEL_ACTION_ID,
+  CONTEXT_MENU_TRIGGER,
+  contextMenuTrigger,
+  ACTION_EDIT_PANEL,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
+  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePanel,
+  EmbeddableRoot,
+  EmbeddableVisTriggerContext,
   ErrorEmbeddable,
   GetEmbeddableFactories,
   GetEmbeddableFactory,
   IContainer,
   IEmbeddable,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
   OutputSpec,
+  PANEL_BADGE_TRIGGER,
+  panelBadgeTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
   ViewMode,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
   withEmbeddableSubscription,
-  EmbeddableFactoryRenderer,
-  EmbeddableRoot,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

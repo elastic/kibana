@@ -8,13 +8,14 @@ import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../commo
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
+import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 import { initRoutes } from './routes';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, home, licensing } = plugins;
+    const { featuresPlugin, home, licensing, usageCollection } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -51,6 +52,10 @@ export class MapPlugin {
         initRoutes(__LEGACY, license.uid);
       }
     });
+
+    // Init telemetry
+    const { savedObjectsClient } = __LEGACY.savedObjects;
+    registerMapsUsageCollector(usageCollection, savedObjectsClient, __LEGACY.config);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',

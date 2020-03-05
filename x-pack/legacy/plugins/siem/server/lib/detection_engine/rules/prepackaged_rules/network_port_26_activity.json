@@ -4,10 +4,7 @@
     "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -57,5 +54,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

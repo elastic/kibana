@@ -16,6 +16,44 @@ describe('toQuery', () => {
 });
 
 describe('fromQuery', () => {
+  it('should not encode the following characters', () => {
+    expect(
+      fromQuery({
+        a: true,
+        b: 5000,
+        c: ':'
+      })
+    ).toEqual('a=true&b=5000&c=:');
+  });
+
+  it('should encode the following characters', () => {
+    expect(
+      fromQuery({
+        a: '@',
+        b: '.',
+        c: ';',
+        d: ' '
+      })
+    ).toEqual('a=%40&b=.&c=%3B&d=%20');
+  });
+
+  it('should handle null and undefined', () => {
+    expect(
+      fromQuery({
+        a: undefined,
+        b: null
+      })
+    ).toEqual('a=&b=');
+  });
+
+  it('should handle arrays', () => {
+    expect(
+      fromQuery({
+        arr: ['a', 'b']
+      })
+    ).toEqual('arr=a%2Cb');
+  });
+
   it('should parse object to string', () => {
     expect(
       fromQuery({

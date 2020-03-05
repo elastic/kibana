@@ -25,10 +25,13 @@ import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -36,15 +39,18 @@ export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
-export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { uuidServiceMock } from './uuid/uuid_service.mock';
+export { metricsServiceMock } from './metrics/metrics_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: { index: '.kibana-tests' },
+    kibana: {
+      index: '.kibana-tests',
+      autocompleteTerminateAfter: duration(100000),
+      autocompleteTimeout: duration(1000),
+    },
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
@@ -114,20 +120,15 @@ function createCoreSetupMock() {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
 
-  const savedObjectsService = savedObjectsServiceMock.createSetupContract();
-  const savedObjectMock: jest.Mocked<CoreSetup['savedObjects']> = {
-    addClientWrapper: savedObjectsService.addClientWrapper,
-    setClientFactoryProvider: savedObjectsService.setClientFactoryProvider,
-  };
-
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
-    savedObjects: savedObjectMock,
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
       .mockResolvedValue([createCoreStartMock(), {}]),
@@ -155,6 +156,7 @@ function createInternalCoreSetupMock() {
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
@@ -168,10 +170,31 @@ function createInternalCoreStartMock() {
   return startDeps;
 }
 
+function createCoreRequestHandlerContextMock() {
+  return {
+    rendering: {
+      render: jest.fn(),
+    },
+    savedObjects: {
+      client: savedObjectsClientMock.create(),
+    },
+    elasticsearch: {
+      adminClient: elasticsearchServiceMock.createScopedClusterClient(),
+      dataClient: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    uiSettings: {
+      client: uiSettingsServiceMock.createClient(),
+    },
+  };
+}
+
 export const coreMock = {
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createInternalSetup: createInternalCoreSetupMock,
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
+
+export { savedObjectsClientMock };

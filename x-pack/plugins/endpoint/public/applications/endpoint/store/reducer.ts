@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { combineReducers, Reducer } from 'redux';
-import { endpointListReducer } from './endpoint_list';
+import { managementListReducer } from './managing';
 import { AppAction } from './action';
 import { alertListReducer } from './alerts';
 import { GlobalState } from '../types';
+import { policyListReducer } from './policy_list';
 
 export const appReducer: Reducer<GlobalState, AppAction> = combineReducers({
-  endpointList: endpointListReducer,
+  managementList: managementListReducer,
   alertList: alertListReducer,
+  policyList: policyListReducer,
 });

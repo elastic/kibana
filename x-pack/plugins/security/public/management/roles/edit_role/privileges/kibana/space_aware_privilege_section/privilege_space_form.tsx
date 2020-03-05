@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role, copyRole } from '../../../../../../../common/model';
 import {

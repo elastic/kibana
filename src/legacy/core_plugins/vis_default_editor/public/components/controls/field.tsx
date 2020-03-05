@@ -18,12 +18,12 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Field } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { AggParam, IAggConfig, IFieldParamType } from '../../legacy_imports';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -33,7 +33,7 @@ const label = i18n.translate('visDefaultEditor.controls.field.fieldLabel', {
   defaultMessage: 'Field',
 });
 
-export interface FieldParamEditorProps extends AggParamEditorProps<Field> {
+export interface FieldParamEditorProps extends AggParamEditorProps<IndexPatternField> {
   customError?: string;
   customLabel?: string;
 }
@@ -50,12 +50,13 @@ function FieldParamEditor({
   setValidity,
   setValue,
 }: FieldParamEditorProps) {
-  const selectedOptions: ComboBoxGroupedOptions<Field> = value
+  const [isDirty, setIsDirty] = useState(false);
+  const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
     ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
-    const selectedOption: Field = get(options, '0.target');
+    const selectedOption: IndexPatternField = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
@@ -79,7 +80,7 @@ function FieldParamEditor({
     );
   }
 
-  const isValid = !!value && !errors.length;
+  const isValid = !!value && !errors.length && !isDirty;
 
   useValidation(setValidity, isValid);
 
@@ -97,6 +98,8 @@ function FieldParamEditor({
       setValue(indexedField.options[0].target);
     }
   }, []);
+
+  const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
 
   return (
     <EuiFormRow
@@ -119,6 +122,7 @@ function FieldParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
+        onSearchChange={onSearchChange}
         data-test-subj="visDefaultEditorField"
         fullWidth={true}
       />

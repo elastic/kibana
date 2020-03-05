@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
-import { PluginsSetup } from '../../plugin';
+import { CoreSetup, SetupPlugins } from '../../plugin';
 
-import { Anomalies } from '../anomalies';
-import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
@@ -33,14 +30,14 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
-import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
+import { ElasticsearchMatrixHistogramAdapter, MatrixHistogram } from '../matrix_histogram';
 
 export function compose(
   core: CoreSetup,
-  plugins: PluginsSetup,
-  env: PluginInitializerContext['env']
+  plugins: SetupPlugins,
+  isProductionMode: boolean
 ): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, plugins, env);
+  const framework = new KibanaBackendFrameworkAdapter(core, plugins, isProductionMode);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
@@ -49,8 +46,6 @@ export function compose(
   const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
-    alerts: new Alerts(new ElasticsearchAlertsAdapter(framework)),
-    anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
@@ -59,6 +54,7 @@ export function compose(
     tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
+    matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),

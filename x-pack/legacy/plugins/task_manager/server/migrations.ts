@@ -7,7 +7,7 @@ import { SavedObject } from '../../../../../src/core/server';
 
 export const migrations = {
   task: {
-    '7.4.0': (doc: SavedObject) => ({
+    '7.4.0': (doc: SavedObject<Record<any, any>>) => ({
       ...doc,
       updated_at: new Date().toISOString(),
     }),
@@ -18,7 +18,7 @@ export const migrations = {
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObject) {
+}: SavedObject<Record<any, any>>) {
   return {
     ...doc,
     attributes: {

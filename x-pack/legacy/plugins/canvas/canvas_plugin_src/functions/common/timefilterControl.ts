@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -13,7 +13,7 @@ interface Arguments {
   compact: boolean;
   filterGroup: string;
 }
-export function timefilterControl(): ExpressionFunction<
+export function timefilterControl(): ExpressionFunctionDefinition<
   'timefilterControl',
   null,
   Arguments,
@@ -25,9 +25,7 @@ export function timefilterControl(): ExpressionFunction<
     name: 'timefilterControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
       column: {
@@ -47,7 +45,7 @@ export function timefilterControl(): ExpressionFunction<
         help: argHelp.filterGroup,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'time_filter',

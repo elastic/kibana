@@ -19,21 +19,21 @@
 
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
-// @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
+
+import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
+export { IpRangeKey, convertIPRangeToString }; // for BWC
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
-
-export type IpRangeKey =
-  | { type: 'mask'; mask: string }
-  | { type: 'range'; from: string; to: string };
 
 export const ipRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.IP_RANGE,
@@ -46,7 +46,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
   getFormat(agg) {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = getFieldFormats();
     const formatter = agg.fieldOwnFormatter(
       fieldFormats.TEXT_CONTEXT_TYPE,
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.IP)
@@ -97,13 +97,3 @@ export const ipRangeBucketAgg = new BucketAggType({
     },
   ],
 });
-
-export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
-  if (range.type === 'mask') {
-    return format(range.mask);
-  }
-  const from = range.from ? format(range.from) : '-Infinity';
-  const to = range.to ? format(range.to) : 'Infinity';
-
-  return `${from} to ${to}`;
-};

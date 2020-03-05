@@ -27,10 +27,6 @@ import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
 import { IndexPatternTable } from './index_pattern_table';
 import { npStart } from 'ui/new_platform';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
@@ -174,20 +170,4 @@ management.getSection('kibana').register('index_patterns', {
   }),
   order: 0,
   url: '#/management/kibana/index_patterns/',
-});
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'index_patterns',
-    title: i18n.translate('kbn.management.indexPatternHeader', {
-      defaultMessage: 'Index Patterns',
-    }),
-    description: i18n.translate('kbn.management.indexPatternLabel', {
-      defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
-    }),
-    icon: 'indexPatternApp',
-    path: '/app/kibana#/management/kibana/index_patterns',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN,
-  };
 });

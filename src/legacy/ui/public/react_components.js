@@ -19,13 +19,11 @@
 
 import 'ngreact';
 
-import { EuiConfirmModal, EuiIcon, EuiIconTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 
 import { uiModules } from './modules';
 
 const app = uiModules.get('app/kibana', ['react']);
-
-app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 
 app.directive('icon', reactDirective => reactDirective(EuiIcon));
 

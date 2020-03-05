@@ -34,12 +34,6 @@ describe('context app', function() {
     let searchSourceStub;
 
     beforeEach(
-      ngMock.module(function createServiceStubs($provide) {
-        $provide.value('indexPatterns', createIndexPatternsStub());
-      })
-    );
-
-    beforeEach(
       ngMock.inject(function createPrivateStubs() {
         searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
         fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);

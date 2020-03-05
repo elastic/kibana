@@ -47,28 +47,7 @@ it('builds light themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-    "/* 1 */
-    /* 1 */
-    /**
-     * 1. Extend beta badges to at least 40% of the container's width
-     * 2. Fix for IE to ensure badges are visible outside of a <button> tag
-     */
-    /**
-     * 1. Apply margin to all but last item in the flex.
-     * 2. Margin gets flipped because of the row-reverse.
-     */
-    /**
-     * 3. Must supply both values to background-size or some browsers apply the single value to both directions
-     */
-    /**
-     * 4. Override invalid state with focus state.
-     */
-    /**
-     *  Mixin for use in:
-     *  - EuiCard
-     *  - EuiPageContent
-    */
-    foo bar {
+    "foo bar {
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;
@@ -93,28 +72,7 @@ it('builds dark themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-    "/* 1 */
-    /* 1 */
-    /**
-     * 1. Extend beta badges to at least 40% of the container's width
-     * 2. Fix for IE to ensure badges are visible outside of a <button> tag
-     */
-    /**
-     * 1. Apply margin to all but last item in the flex.
-     * 2. Margin gets flipped because of the row-reverse.
-     */
-    /**
-     * 3. Must supply both values to background-size or some browsers apply the single value to both directions
-     */
-    /**
-     * 4. Override invalid state with focus state.
-     */
-    /**
-     *  Mixin for use in:
-     *  - EuiCard
-     *  - EuiPageContent
-    */
-    foo bar {
+    "foo bar {
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;
@@ -143,28 +101,7 @@ it('rewrites url imports', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-    "/* 1 */
-    /* 1 */
-    /**
-     * 1. Extend beta badges to at least 40% of the container's width
-     * 2. Fix for IE to ensure badges are visible outside of a <button> tag
-     */
-    /**
-     * 1. Apply margin to all but last item in the flex.
-     * 2. Margin gets flipped because of the row-reverse.
-     */
-    /**
-     * 3. Must supply both values to background-size or some browsers apply the single value to both directions
-     */
-    /**
-     * 4. Override invalid state with focus state.
-     */
-    /**
-     *  Mixin for use in:
-     *  - EuiCard
-     *  - EuiPageContent
-    */
-    foo bar {
+    "foo bar {
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;

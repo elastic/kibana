@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { find } from 'lodash';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';

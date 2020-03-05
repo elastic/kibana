@@ -19,18 +19,9 @@
 
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
-import MonacoEditor, { EditorDidMount, EditorWillMount } from 'react-monaco-editor';
+import MonacoEditor from 'react-monaco-editor';
 
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
-
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
-import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
-import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 
 import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
@@ -55,50 +46,50 @@ export interface Props {
    * Documentation of options can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
    */
-  options?: monacoEditor.editor.IEditorConstructionOptions;
+  options?: monaco.editor.IEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
    */
-  suggestionProvider?: monacoEditor.languages.CompletionItemProvider;
+  suggestionProvider?: monaco.languages.CompletionItemProvider;
 
   /**
    * Signature provider for function parameter info
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
    */
-  signatureProvider?: monacoEditor.languages.SignatureHelpProvider;
+  signatureProvider?: monaco.languages.SignatureHelpProvider;
 
   /**
    * Hover provider for hover documentation
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
    */
-  hoverProvider?: monacoEditor.languages.HoverProvider;
+  hoverProvider?: monaco.languages.HoverProvider;
 
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
    */
-  languageConfiguration?: monacoEditor.languages.LanguageConfiguration;
+  languageConfiguration?: monaco.languages.LanguageConfiguration;
 
   /**
    * Function called before the editor is mounted in the view
    */
-  editorWillMount?: EditorWillMount;
+  editorWillMount?: () => void;
   /**
    * Function called before the editor is mounted in the view
    * and completely replaces the setup behavior called by the component
    */
-  overrideEditorWillMount?: EditorWillMount;
+  overrideEditorWillMount?: () => void;
 
   /**
    * Function called after the editor is mounted in the view
    */
-  editorDidMount?: EditorDidMount;
+  editorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
   /**
    * Should the editor use the dark theme
@@ -107,16 +98,20 @@ export interface Props {
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
-  _editor: monacoEditor.editor.IStandaloneCodeEditor | null = null;
+  _editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
-  _editorWillMount = (monaco: typeof monacoEditor) => {
+  _editorWillMount = (__monaco: unknown) => {
+    if (__monaco !== monaco) {
+      throw new Error('react-monaco-editor is using a different version of monaco');
+    }
+
     if (this.props.overrideEditorWillMount) {
-      this.props.overrideEditorWillMount(monaco);
+      this.props.overrideEditorWillMount();
       return;
     }
 
     if (this.props.editorWillMount) {
-      this.props.editorWillMount(monaco);
+      this.props.editorWillMount();
     }
 
     monaco.languages.onLanguage(this.props.languageId, () => {
@@ -150,14 +145,15 @@ export class CodeEditor extends React.Component<Props, {}> {
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
 
-  _editorDidMount = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: typeof monacoEditor
-  ) => {
+  _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+    if (__monaco !== monaco) {
+      throw new Error('react-monaco-editor is using a different version of monaco');
+    }
+
     this._editor = editor;
 
     if (this.props.editorDidMount) {
-      this.props.editorDidMount(editor, monaco);
+      this.props.editorDidMount(editor);
     }
   };
 

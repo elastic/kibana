@@ -20,6 +20,7 @@
 import { cloneDeep } from 'lodash';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+jest.mock('../services');
 
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {

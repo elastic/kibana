@@ -11,16 +11,25 @@ export interface ModuleJob {
   config: Omit<Job, 'job_id'>;
 }
 
+export interface ModuleDataFeed {
+  id: string;
+  config: Omit<Datafeed, 'datafeed_id'>;
+}
+
 export interface KibanaObjectConfig extends SavedObjectAttributes {
   description: string;
   title: string;
   version: number;
+  kibanaSavedObjectMeta?: {
+    searchSourceJSON: string;
+  };
 }
 
 export interface KibanaObject {
   id: string;
   title: string;
   config: KibanaObjectConfig;
+  exists?: boolean;
 }
 
 export interface KibanaObjects {
@@ -39,14 +48,18 @@ export interface Module {
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
-  datafeeds: Datafeed[];
+  datafeeds: ModuleDataFeed[];
   kibana: KibanaObjects;
 }
 
-export interface KibanaObjectResponse {
-  exists?: boolean;
-  success?: boolean;
+export interface ResultItem {
   id: string;
+  success?: boolean;
+}
+
+export interface KibanaObjectResponse extends ResultItem {
+  exists?: boolean;
+  error?: any;
 }
 
 export interface SetupError {
@@ -58,16 +71,12 @@ export interface SetupError {
   statusCode: number;
 }
 
-export interface DatafeedResponse {
-  id: string;
-  success: boolean;
+export interface DatafeedResponse extends ResultItem {
   started: boolean;
   error?: SetupError;
 }
 
-export interface JobResponse {
-  id: string;
-  success: boolean;
+export interface JobResponse extends ResultItem {
   error?: SetupError;
 }
 
@@ -75,10 +84,14 @@ export interface DataRecognizerConfigResponse {
   datafeeds: DatafeedResponse[];
   jobs: JobResponse[];
   kibana: {
-    search: KibanaObjectResponse;
-    visualization: KibanaObjectResponse;
-    dashboard: KibanaObjectResponse;
+    search: KibanaObjectResponse[];
+    visualization: KibanaObjectResponse[];
+    dashboard: KibanaObjectResponse[];
   };
 }
 
+export type GeneralOverride = any;
+
 export type JobOverride = Partial<Job>;
+
+export type DatafeedOverride = Partial<Datafeed>;

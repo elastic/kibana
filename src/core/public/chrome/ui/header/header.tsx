@@ -42,7 +42,7 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
-import { NavSetting, OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from './';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
@@ -69,7 +69,6 @@ export interface HeaderProps {
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
-  navSetting$: Rx.Observable<NavSetting>;
   onIsLockedUpdate?: OnIsLockedUpdate;
 }
 
@@ -81,7 +80,6 @@ interface State {
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
-  navSetting: NavSetting;
   currentAppId: string | undefined;
 }
 
@@ -100,7 +98,6 @@ export class Header extends Component<HeaderProps, State> {
       forceNavigation: false,
       navControlsLeft: [],
       navControlsRight: [],
-      navSetting: 'grouped',
       currentAppId: '',
     };
   }
@@ -116,8 +113,7 @@ export class Header extends Component<HeaderProps, State> {
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
-        this.props.application.currentAppId$,
-        this.props.navSetting$
+        this.props.application.currentAppId$
       )
     ).subscribe({
       next: ([
@@ -126,7 +122,7 @@ export class Header extends Component<HeaderProps, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId, navSetting],
+        [navControlsLeft, navControlsRight, currentAppId],
       ]) => {
         this.setState({
           appTitle,
@@ -136,7 +132,6 @@ export class Header extends Component<HeaderProps, State> {
           recentlyAccessed,
           navControlsLeft,
           navControlsRight,
-          navSetting,
           currentAppId,
         });
       },
@@ -225,7 +220,6 @@ export class Header extends Component<HeaderProps, State> {
           </EuiHeaderSection>
         </EuiHeader>
         <NavDrawer
-          navSetting={this.state.navSetting}
           isLocked={this.props.isLocked}
           onIsLockedUpdate={this.props.onIsLockedUpdate}
           navLinks={navLinks}

@@ -17,7 +17,7 @@
  * under the License.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery } from '../../../../../../plugins/data/server';
+import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -96,7 +96,7 @@ interface QueryParams {
   searchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
-  kueryNode?: esKuery.KueryNode;
+  kueryNode?: KueryNode;
 }
 
 /**

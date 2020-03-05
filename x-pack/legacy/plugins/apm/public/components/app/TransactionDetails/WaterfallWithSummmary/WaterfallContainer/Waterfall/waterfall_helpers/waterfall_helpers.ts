@@ -15,10 +15,11 @@ import {
   uniq,
   zipObject
 } from 'lodash';
-import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TraceAPIResponse } from '../../../../../../../../../../../plugins/apm/server/lib/traces/get_trace';
+import { APMError } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallItem[];

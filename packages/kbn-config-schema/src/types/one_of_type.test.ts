@@ -138,7 +138,7 @@ test('fails if nested union type fail', () => {
  - [0]: expected value of type [boolean] but got [string]
 - [1]: types that failed validation:
  - [0]: types that failed validation:
-  - [0]: expected a plain object value, but found [string] instead.
+  - [0]: could not parse object value from [aaa]
   - [1]: expected value of type [number] but got [string]"
 `);
 });

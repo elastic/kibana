@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionAST } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { CanvasElement } from '.';
 
 export interface ElementSpec {
@@ -79,4 +79,4 @@ export interface ElementPosition {
   parent: string | null;
 }
 
-export type PositionedElement = CanvasElement & { ast: ExpressionAST };
+export type PositionedElement = CanvasElement & { ast: ExpressionAstExpression };

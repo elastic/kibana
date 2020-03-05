@@ -43,14 +43,13 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
 import {
-  SavedObjectAttributes,
   SimpleSavedObject,
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from '../../../../core/public';
+} from 'src/core/public';
 
-export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
+export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
@@ -59,12 +58,17 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   includeFields?: string[];
 }
 
+interface FinderAttributes {
+  title?: string;
+  type: string;
+}
+
 interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
-    id: SimpleSavedObject<SavedObjectAttributes>['id'];
-    type: SimpleSavedObject<SavedObjectAttributes>['type'];
-    savedObject: SimpleSavedObject<SavedObjectAttributes>;
+    id: SimpleSavedObject['id'];
+    type: SimpleSavedObject['type'];
+    savedObject: SimpleSavedObject<FinderAttributes>;
   }>;
   query: string;
   isFetchingItems: boolean;
@@ -78,13 +82,13 @@ interface SavedObjectFinderState {
 
 interface BaseSavedObjectFinder {
   onChoose?: (
-    id: SimpleSavedObject<SavedObjectAttributes>['id'],
-    type: SimpleSavedObject<SavedObjectAttributes>['type'],
+    id: SimpleSavedObject['id'],
+    type: SimpleSavedObject['type'],
     name: string,
-    savedObject: SimpleSavedObject<SavedObjectAttributes>
+    savedObject: SimpleSavedObject
   ) => void;
   noItemsMessage?: React.ReactNode;
-  savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectAttributes>>;
+  savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
 }
 
@@ -128,7 +132,7 @@ class SavedObjectFinderUi extends React.Component<
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
 
     const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
-    const resp = await this.props.savedObjects.client.find({
+    const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
@@ -163,6 +167,7 @@ class SavedObjectFinderUi extends React.Component<
             id,
             type,
           } = savedObject;
+
           return {
             title: typeof title === 'string' ? title : '',
             id,
@@ -208,7 +213,7 @@ class SavedObjectFinderUi extends React.Component<
     );
   }
 
-  private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData<SavedObjectAttributes>> {
+  private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
     return this.props.savedObjectMetaData.reduce(
       (map, metaData) => ({ ...map, [metaData.type]: metaData }),
       {}
@@ -438,6 +443,7 @@ class SavedObjectFinderUi extends React.Component<
             )}
           </EuiFilterGroup>
         </EuiFlexItem>
+        {this.props.children ? <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem> : null}
       </EuiFlexGroup>
     );
   }
@@ -469,7 +475,7 @@ class SavedObjectFinderUi extends React.Component<
                 currentSavedObjectMetaData ||
                 ({
                   getIconForSavedObject: () => 'document',
-                } as Pick<SavedObjectMetaData<SavedObjectAttributes>, 'getIconForSavedObject'>)
+                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
               ).getIconForSavedObject(item.savedObject);
               return (
                 <EuiListGroupItem

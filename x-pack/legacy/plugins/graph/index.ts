@@ -44,14 +44,6 @@ export const graph: LegacyPluginInitializer = kibana => {
     },
 
     init(server) {
-      server.injectUiAppVars('graph', () => {
-        const config = server.config();
-        return {
-          graphSavePolicy: config.get('xpack.graph.savePolicy'),
-          canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls'),
-        };
-      });
-
       server.plugins.xpack_main.registerFeature({
         id: 'graph',
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
@@ -61,6 +53,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
+        validLicenses: ['platinum', 'enterprise', 'trial'],
         privileges: {
           all: {
             savedObject: {

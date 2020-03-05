@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn(),
-}));
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ImportedEvents } from './imported_events';

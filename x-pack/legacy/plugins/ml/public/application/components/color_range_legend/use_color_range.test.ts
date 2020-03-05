@@ -6,8 +6,6 @@
 
 import { influencerColorScaleFactory } from './use_color_range';
 
-jest.mock('../../contexts/ui/use_ui_chrome_context');
-
 describe('useColorRange', () => {
   test('influencerColorScaleFactory(1)', () => {
     const influencerColorScale = influencerColorScaleFactory(1);

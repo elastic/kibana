@@ -50,7 +50,7 @@ export interface SavedObjectsRawDocSource {
  * scenario out of the box.
  */
 interface SavedObjectDoc {
-  attributes: object;
+  attributes: unknown;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;

@@ -6,15 +6,15 @@
 
 import { uniq } from 'lodash';
 // @ts-ignore Untyped Library
-import { parse, getByAlias as untypedGetByAlias } from '@kbn/interpreter/common';
+import { parse } from '@kbn/interpreter/common';
 import {
-  ExpressionAST,
-  ExpressionFunctionAST,
-  ExpressionArgAST,
-  CanvasFunction,
-  CanvasArg,
-  CanvasArgValue,
-} from '../../types';
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+  ExpressionAstArgument,
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  getByAlias,
+} from '../../../../../../src/plugins/expressions';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 
@@ -26,12 +26,12 @@ interface BaseSuggestion {
 
 export interface FunctionSuggestion extends BaseSuggestion {
   type: 'function';
-  fnDef: CanvasFunction;
+  fnDef: ExpressionFunction;
 }
 
-type ArgSuggestionValue = CanvasArgValue & {
+interface ArgSuggestionValue extends Omit<ExpressionFunctionParameter, 'accepts'> {
   name: string;
-};
+}
 
 interface ArgSuggestion extends BaseSuggestion {
   type: 'argument';
@@ -71,18 +71,18 @@ interface ASTMetaInformation<T> {
   node: T;
 }
 
-// Wraps ExpressionArg with meta or replace ExpressionAST with ExpressionASTWithMeta
-type WrapExpressionArgWithMeta<T> = T extends ExpressionAST
+// Wraps ExpressionArg with meta or replace ExpressionAstExpression with ExpressionASTWithMeta
+type WrapExpressionArgWithMeta<T> = T extends ExpressionAstExpression
   ? ExpressionASTWithMeta
   : ASTMetaInformation<T>;
 
-type ExpressionArgASTWithMeta = WrapExpressionArgWithMeta<ExpressionArgAST>;
+type ExpressionArgASTWithMeta = WrapExpressionArgWithMeta<ExpressionAstArgument>;
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 
 // Wrap ExpressionFunctionAST with meta and modify arguments to be wrapped with meta
 type ExpressionFunctionASTWithMeta = Modify<
-  ExpressionFunctionAST,
+  ExpressionAstFunction,
   {
     arguments: {
       [key: string]: ExpressionArgASTWithMeta[];
@@ -93,7 +93,7 @@ type ExpressionFunctionASTWithMeta = Modify<
 // Wrap ExpressionFunctionAST with meta and modify chain to be wrapped with meta
 type ExpressionASTWithMeta = ASTMetaInformation<
   Modify<
-    ExpressionAST,
+    ExpressionAstExpression,
     {
       chain: Array<ASTMetaInformation<ExpressionFunctionASTWithMeta>>;
     }
@@ -107,23 +107,12 @@ function isExpression(
   return typeof maybeExpression.node === 'object';
 }
 
-// Overloads to change return type based on specs
-function getByAlias(specs: CanvasFunction[], name: string): CanvasFunction;
-// eslint-disable-next-line @typescript-eslint/unified-signatures
-function getByAlias(specs: CanvasArg, name: string): CanvasArgValue;
-function getByAlias(
-  specs: CanvasFunction[] | CanvasArg,
-  name: string
-): CanvasFunction | CanvasArgValue {
-  return untypedGetByAlias(specs, name);
-}
-
 /**
  * Generates the AST with the given expression and then returns the function and argument definitions
  * at the given position in the expression, if there are any.
  */
 export function getFnArgDefAtPosition(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   expression: string,
   position: number
 ) {
@@ -155,7 +144,7 @@ export function getFnArgDefAtPosition(
  * an unnamed argument, we suggest argument names. If it turns into a value, we suggest values.
  */
 export function getAutocompleteSuggestions(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   expression: string,
   position: number
 ): AutocompleteSuggestion[] {
@@ -268,7 +257,7 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
 }
 
 function getFnNameSuggestions(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number
 ): FunctionSuggestion[] {
@@ -284,11 +273,11 @@ function getFnNameSuggestions(
   const prevFnType = prevFnDef && prevFnDef.type;
 
   const nextFnDef = nextFn && getByAlias(specs, nextFn.node.function);
-  const nextFnContext = nextFnDef && nextFnDef.context && nextFnDef.context.types;
+  const nextFnInputTypes = nextFnDef && nextFnDef.inputTypes;
 
-  const fnDefs = specs.sort((a: CanvasFunction, b: CanvasFunction): number => {
-    const aScore = getScore(a, prevFnType, nextFnContext, false);
-    const bScore = getScore(b, prevFnType, nextFnContext, false);
+  const fnDefs = specs.sort((a: ExpressionFunction, b: ExpressionFunction): number => {
+    const aScore = getScore(a, prevFnType, nextFnInputTypes, false);
+    const bScore = getScore(b, prevFnType, nextFnInputTypes, false);
 
     if (aScore === bScore) {
       return a.name < b.name ? -1 : 1;
@@ -302,7 +291,7 @@ function getFnNameSuggestions(
 }
 
 function getSubFnNameSuggestions(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number,
   parentFn: string,
@@ -315,7 +304,7 @@ function getSubFnNameSuggestions(
   const matchingFnDefs = specs.filter(({ name }) => textMatches(name, query));
 
   const parentFnDef = getByAlias(specs, parentFn);
-  const matchingArgDef = getByAlias(parentFnDef.args, parentFnArgName);
+  const matchingArgDef = getByAlias(parentFnDef!.args, parentFnArgName);
 
   if (!matchingArgDef) {
     return [];
@@ -326,7 +315,7 @@ function getSubFnNameSuggestions(
 
   const expectedReturnTypes = matchingArgDef.types;
 
-  const fnDefs = matchingFnDefs.sort((a: CanvasFunction, b: CanvasFunction) => {
+  const fnDefs = matchingFnDefs.sort((a: ExpressionFunction, b: ExpressionFunction) => {
     const aScore = getScore(a, contextFnType, expectedReturnTypes, true);
     const bScore = getScore(b, contextFnType, expectedReturnTypes, true);
 
@@ -342,7 +331,7 @@ function getSubFnNameSuggestions(
 }
 
 function getScore(
-  func: CanvasFunction,
+  func: ExpressionFunction,
   contextType: any,
   returnTypes?: any[] | null,
   isSubFunc?: boolean
@@ -352,10 +341,7 @@ function getScore(
     contextType = 'null';
   }
 
-  let funcContextTypes = [];
-  if (func.context && func.context.types && func.context.types.length) {
-    funcContextTypes = func.context.types;
-  }
+  const inputTypesNormalized = (func.inputTypes || []) as string[];
 
   if (isSubFunc) {
     if (returnTypes && func.type) {
@@ -364,21 +350,21 @@ function getScore(
       if (returnTypes.length && returnTypes.includes(func.type)) {
         score++;
 
-        if (funcContextTypes.includes(contextType)) {
+        if (inputTypesNormalized.includes(contextType)) {
           score++;
         }
       }
     }
   } else {
-    if (func.context && func.context.types) {
-      const expectsNull = (funcContextTypes as string[]).includes('null');
+    if (func.inputTypes) {
+      const expectsNull = inputTypesNormalized.includes('null');
 
       if (!expectsNull && contextType !== 'null') {
         // If not in a sub-expression and there's a preceding function,
         // favor functions that expect a context with top results matching the passed in context
         score++;
 
-        if (func.context.types.includes(contextType)) {
+        if (func.inputTypes.includes(contextType)) {
           score++;
         }
       } else if (expectsNull && contextType === 'null') {
@@ -397,7 +383,7 @@ function getScore(
 }
 
 function getArgNameSuggestions(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number,
   argName: string,
@@ -420,29 +406,35 @@ function getArgNameSuggestions(
     }
   );
 
-  const unusedArgDefs = Object.entries<CanvasArgValue>(fnDef.args).filter(
-    ([matchingArgName, matchingArgDef]) => {
-      if (matchingArgDef.multi) {
-        return true;
-      }
-      return !argEntries.some(([name, values]) => {
-        return (
-          values.length > 0 &&
-          (name === matchingArgName || (matchingArgDef.aliases || []).includes(name))
-        );
-      });
+  const unusedArgDefs = Object.entries(fnDef.args).filter(([matchingArgName, matchingArgDef]) => {
+    if (matchingArgDef.multi) {
+      return true;
     }
-  );
+    return !argEntries.some(([name, values]) => {
+      return (
+        values.length > 0 &&
+        (name === matchingArgName || (matchingArgDef.aliases || []).includes(name))
+      );
+    });
+  });
 
-  const argDefs = unusedArgDefs.map(([name, arg]) => ({ name, ...arg })).sort(unnamedArgComparator);
+  const argDefs: ArgSuggestionValue[] = unusedArgDefs
+    .map(([name, arg]) => ({ name, ...arg }))
+    .sort(unnamedArgComparator);
 
   return argDefs.map(argDef => {
-    return { type: 'argument', text: argDef.name + '=', start, end: end - MARKER.length, argDef };
+    return {
+      type: 'argument',
+      text: argDef.name + '=',
+      start,
+      end: end - MARKER.length,
+      argDef,
+    };
   });
 }
 
 function getArgValueSuggestions(
-  specs: CanvasFunction[],
+  specs: ExpressionFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number,
   argName: string,
@@ -492,7 +484,7 @@ function maybeQuote(value: any) {
   return value;
 }
 
-function unnamedArgComparator(a: CanvasArgValue, b: CanvasArgValue): number {
+function unnamedArgComparator(a: { aliases?: string[] }, b: { aliases?: string[] }): number {
   return (
     (b.aliases && b.aliases.includes('_') ? 1 : 0) - (a.aliases && a.aliases.includes('_') ? 1 : 0)
   );

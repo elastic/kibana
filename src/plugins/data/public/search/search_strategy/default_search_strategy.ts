@@ -18,7 +18,7 @@
  */
 
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
-import { indexPatterns } from '../../index_patterns';
+import { isDefault } from '../../index_patterns';
 import { getSearchParams, getMSearchParams, getPreference, getTimeout } from './get_search_params';
 
 export const defaultSearchStrategy: SearchStrategyProvider = {
@@ -29,7 +29,7 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 
   isViable: indexPattern => {
-    return indexPattern && indexPatterns.isDefault(indexPattern);
+    return indexPattern && isDefault(indexPattern);
   },
 };
 
@@ -74,24 +74,17 @@ function search({
 }: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
-  const es = searchService.__LEGACY.esClient;
   const promises = searchRequests.map(({ index, body }) => {
-    const searching = es.search({ index: index.title || index, body, ...searchParams });
-    abortController.signal.addEventListener('abort', searching.abort);
-    return searching.catch(({ response }: any) => JSON.parse(response));
-    /*
-     * Once #44302 is resolved, replace the old implementation with this one -
-     * const params = {
-     *   index: index.title || index,
-     *   body,
-     *   ...searchParams,
-     * };
-     * const { signal } = abortController;
-     * return searchService
-     *   .search({ params }, { signal })
-     *   .toPromise()
-     *   .then(({ rawResponse }) => rawResponse);
-     */
+    const params = {
+      index: index.title || index,
+      body,
+      ...searchParams,
+    };
+    const { signal } = abortController;
+    return searchService
+      .search({ params }, { signal })
+      .toPromise()
+      .then(({ rawResponse }) => rawResponse);
   });
   return {
     searching: Promise.all(promises),

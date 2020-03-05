@@ -6,7 +6,6 @@
 
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import chrome from 'ui/chrome';
 import { ml } from '../../services/ml_api_service';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -25,8 +24,6 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { Annotation } from '../../../../common/types/annotations';
-
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -81,21 +78,19 @@ export function getFocusData(
       MAX_SCHEDULED_EVENTS
     ),
     // Query 4 - load any annotations for the selected job.
-    mlAnnotationsEnabled
-      ? ml.annotations
-          .getAnnotations({
-            jobIds: [selectedJob.job_id],
-            earliestMs: searchBounds.min.valueOf(),
-            latestMs: searchBounds.max.valueOf(),
-            maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          })
-          .pipe(
-            catchError(() => {
-              // silent fail
-              return of({ annotations: {} as Record<string, Annotation[]> });
-            })
-          )
-      : of(null),
+    ml.annotations
+      .getAnnotations({
+        jobIds: [selectedJob.job_id],
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .pipe(
+        catchError(() => {
+          // silent fail
+          return of({ annotations: {} as Record<string, Annotation[]> });
+        })
+      ),
     // Plus query for forecast data if there is a forecastId stored in the appState.
     forecastId !== undefined
       ? (() => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../common';
+import { Filter, FilterStateStore } from '../../../../common';
 
 /**
  * Sort filters according to their store - global filters go first
@@ -27,15 +27,11 @@ import { esFilters } from '../../../../common';
  *
  * @returns {number} Sorting order of filters
  */
-export const sortFilters = (
-  { $state: a }: esFilters.Filter,
-  { $state: b }: esFilters.Filter
-): number => {
+export const sortFilters = ({ $state: a }: Filter, { $state: b }: Filter): number => {
   if (a!.store === b!.store) {
     return 0;
   } else {
-    return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
-      b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
+    return a!.store === FilterStateStore.GLOBAL_STATE && b!.store !== FilterStateStore.GLOBAL_STATE
       ? -1
       : 1;
   }

@@ -14,11 +14,11 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
         horizontalPosition="center"
         verticalPosition="center"
       >
-        <CalendarsListHeader
+        <CalendarsListHeaderUI
           refreshCalendars={[Function]}
           totalCount={2}
         />
-        <InjectIntl(CalendarsListTable)
+        <CalendarsListTable
           calendarsList={
             Array [
               Object {

@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { ControlSchema } from './action_schema';
@@ -31,7 +31,7 @@ export interface KueryBarProps {
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
   onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
 }
 

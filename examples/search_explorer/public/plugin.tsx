@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { ISearchAppMountContext } from '../../../src/plugins/data/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { AppPluginStartDependencies } from './types';
 
-declare module 'kibana/public' {
-  interface AppMountContext {
-    search?: ISearchAppMountContext;
-  }
-}
 export class SearchExplorerPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<AppPluginStartDependencies>) {
     core.application.register({
       id: 'searchExplorer',
       title: 'Search Explorer',
-      async mount(context, params) {
+      async mount(params: AppMountParameters) {
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(context, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
   }

@@ -21,13 +21,9 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
-import 'ui/angular-bootstrap';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
@@ -38,9 +34,7 @@ import { GlobalStateProvider } from 'ui/state_management/global_state';
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
@@ -71,6 +65,7 @@ import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll'
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
+  initAngularBootstrap,
   configureAppAngularModule,
   IPrivate,
   KbnAccessibleClickProvider,
@@ -78,6 +73,8 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
+  createTopNavDirective,
+  createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**
@@ -85,6 +82,7 @@ import {
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
  */
 export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
+  initAngularBootstrap();
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
@@ -118,13 +116,11 @@ export function initializeInnerAngularModule(
     createLocalPromiseModule();
     createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
-    createLocalPersistedStateModule();
     createLocalTopNavModule(navigation);
     createLocalGlobalStateModule();
     createLocalAppStateModule();
     createLocalStorageModule();
     createElasticSearchModule(data);
-    createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
     initialized = true;
@@ -140,7 +136,6 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
-        'discoverPersistedState',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
@@ -158,12 +153,10 @@ export function initializeInnerAngularModule(
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
-      'discoverPersistedState',
       'discoverTopNav',
       'discoverGlobalState',
       'discoverAppState',
       'discoverLocalStorageProvider',
-      'discoverIndexPatterns',
       'discoverEs',
       'discoverDocTable',
       'discoverPagerFactory',
@@ -195,19 +188,6 @@ export function createLocalGlobalStateModule() {
     ])
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('discoverPersistedState', ['discoverPrivate', 'discoverPromise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
     });
 }
 
@@ -296,10 +276,6 @@ function createElasticSearchModule(data: DataPublicPluginStart) {
     .service('es', () => {
       return data.search.__LEGACY.esClient;
     });
-}
-
-function createIndexPatternsModule() {
-  angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);
 }
 
 function createPagerFactoryModule() {

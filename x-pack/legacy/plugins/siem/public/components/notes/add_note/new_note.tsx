@@ -32,8 +32,6 @@ const TextArea = styled(EuiTextArea)<{ height: number }>`
 
 TextArea.displayName = 'TextArea';
 
-TextArea.displayName = 'TextArea';
-
 /** An input for entering a new note  */
 export const NewNote = React.memo<{
   noteInputHeight: number;

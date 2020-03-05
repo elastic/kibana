@@ -7,10 +7,9 @@
 import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Query } from 'src/plugins/data/public';
+import { Query, IndexPattern } from 'src/plugins/data/public';
 import { EuiButton } from '@elastic/eui';
 import { setFullTimeRange } from './full_time_range_selector_service';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPattern: IndexPattern;

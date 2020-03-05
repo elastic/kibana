@@ -14,6 +14,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('empty_kibana');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

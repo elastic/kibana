@@ -8,8 +8,8 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
+import { compose, Dispatch } from 'redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -26,6 +26,8 @@ import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { EventType } from '../../store/timeline/model';
 import { timelineQuery } from './index.gql_query';
+import { timelineActions } from '../../store/timeline';
+import { SIGNALS_PAGE_TIMELINE_ID } from '../../pages/detection_engine/components/signals';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -39,8 +41,8 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface TimelineQueryReduxProps {
-  isInspected: boolean;
+export interface CustomReduxProps {
+  clearSignalsState: ({ id }: { id?: string }) => void;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -53,7 +55,8 @@ export interface OwnProps extends QueryTemplateProps {
   sortField: SortField;
   fields: string[];
 }
-type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & WithKibanaProps;
+
+type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -71,6 +74,7 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
+      clearSignalsState,
       eventType = 'raw',
       id,
       indexPattern,
@@ -100,6 +104,7 @@ class TimelineQueryComponent extends QueryTemplate<
       defaultIndex,
       inspect: isInspected,
     };
+
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
         query={timelineQuery}
@@ -108,6 +113,10 @@ class TimelineQueryComponent extends QueryTemplate<
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
+          this.setRefetch(refetch);
+          this.setExecuteBeforeRefetch(clearSignalsState);
+          this.setExecuteBeforeFetchMore(clearSignalsState);
+
           const timelineEdges = getOr([], 'source.Timeline.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
@@ -141,7 +150,7 @@ class TimelineQueryComponent extends QueryTemplate<
           return children!({
             id,
             inspect: getOr(null, 'source.Timeline.inspect', data),
-            refetch,
+            refetch: this.wrappedRefetch,
             loading,
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
             pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
@@ -171,7 +180,20 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  clearSignalsState: ({ id }: { id?: string }) => {
+    if (id != null && id === SIGNALS_PAGE_TIMELINE_ID) {
+      dispatch(timelineActions.clearEventsLoading({ id }));
+      dispatch(timelineActions.clearEventsDeleted({ id }));
+    }
+  },
+});
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(TimelineQueryComponent);

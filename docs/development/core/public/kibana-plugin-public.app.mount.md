@@ -9,7 +9,7 @@ A mount function called when the user navigates to this app's route. May have si
 <b>Signature:</b>
 
 ```typescript
-mount: AppMount | AppMountDeprecated;
+mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 ```
 
 ## Remarks

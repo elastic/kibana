@@ -10,12 +10,13 @@ import { ActionCreator } from 'typescript-fsa';
 import {
   IIndexPattern,
   Query,
-  esFilters,
+  Filter,
   FilterManager,
   SavedQueryService,
 } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -60,9 +61,12 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timeline,
   ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  case: [],
 };
 
 export type LocationTypes =
+  | CONSTANTS.caseDetails
+  | CONSTANTS.casePage
   | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
@@ -72,17 +76,12 @@ export type LocationTypes =
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
 
-export interface Timeline {
-  id: string;
-  isOpen: boolean;
-}
-
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
-  [CONSTANTS.filters]?: esFilters.Filter[];
+  [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: Timeline;
+  [CONSTANTS.timeline]: TimelineUrl;
 }
 export type KeyUrlState = keyof UrlState;
 

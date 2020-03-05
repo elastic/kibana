@@ -21,6 +21,7 @@ export const taskManagerMock = {
       ensureScheduled: jest.fn(),
       schedule: jest.fn(),
       fetch: jest.fn(),
+      get: jest.fn(),
       runNow: jest.fn(),
       remove: jest.fn(),
       ...overrides,

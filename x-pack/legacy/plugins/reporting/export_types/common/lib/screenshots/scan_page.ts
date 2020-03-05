@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { HeadlessChromiumDriver } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { checkForToastMessage } from './check_for_toast';

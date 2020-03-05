@@ -6,19 +6,7 @@
 
 import { Ecs } from '../../../graphql/types';
 
-import {
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
-  eventHasNotes,
-  eventIsPinned,
-  getActionsColumnWidth,
-  getColumnWidthFromType,
-  getPinTooltip,
-  stringifyEvent,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
-} from './helpers';
+import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {
@@ -235,38 +223,6 @@ describe('helpers', () => {
       const pinnedEventIds = { 'thumb-tack': true };
 
       expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(false);
-    });
-  });
-
-  describe('getColumnWidthFromType', () => {
-    test('it returns the expected width for a non-date column', () => {
-      expect(getColumnWidthFromType('keyword')).toEqual(DEFAULT_COLUMN_MIN_WIDTH);
-    });
-
-    test('it returns the expected width for a date column', () => {
-      expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
-    });
-  });
-
-  describe('getActionsColumnWidth', () => {
-    test('returns the default actions column width when isEventViewer is false', () => {
-      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(false, true)).toEqual(
-        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
-    });
-
-    test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(true, true)).toEqual(
-        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
     });
   });
 });

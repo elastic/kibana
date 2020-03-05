@@ -18,27 +18,22 @@
  */
 
 import expect from '@kbn/expect';
+import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
-import {
-  ExpressionDataHandler,
-  Context,
-  RenderId,
-} from '../../plugins/kbn_tp_run_pipeline/public/np_ready/types';
 
-type UnWrapPromise<T> = T extends Promise<infer U> ? U : T;
-export type ExpressionResult = UnWrapPromise<ReturnType<ExpressionDataHandler['getData']>>;
+export type ExpressionResult = any;
 
 export type ExpectExpression = (
   name: string,
   expression: string,
-  context?: Context,
-  initialContext?: Context
+  context?: ExpressionValue,
+  initialContext?: ExpressionValue
 ) => ExpectExpressionHandler;
 
 export interface ExpectExpressionHandler {
   toReturn: (expectedResult: ExpressionResult) => Promise<void>;
   getResponse: () => Promise<ExpressionResult>;
-  runExpression: (step?: string, stepContext?: Context) => Promise<ExpressionResult>;
+  runExpression: (step?: string, stepContext?: ExpressionValue) => Promise<ExpressionResult>;
   steps: {
     toMatchSnapshot: () => Promise<ExpectExpressionHandler>;
   };
@@ -68,8 +63,8 @@ export function expectExpressionProvider({
   return (
     name: string,
     expression: string,
-    context: Context = {},
-    initialContext: Context = {}
+    context: ExpressionValue = {},
+    initialContext: ExpressionValue = {}
   ): ExpectExpressionHandler => {
     log.debug(`executing expression ${expression}`);
     const steps = expression.split('|'); // todo: we should actually use interpreter parser and get the ast
@@ -101,21 +96,21 @@ export function expectExpressionProvider({
        */
       runExpression: async (
         step: string = expression,
-        stepContext: Context = context
+        stepContext: ExpressionValue = context
       ): Promise<ExpressionResult> => {
         log.debug(`running expression ${step || expression}`);
         return browser.executeAsync<ExpressionResult>(
           (
             _expression: string,
-            _currentContext: Context & { type: string },
-            _initialContext: Context,
+            _currentContext: ExpressionValue & { type: string },
+            _initialContext: ExpressionValue,
             done: (expressionResult: ExpressionResult) => void
           ) => {
             if (!_currentContext) _currentContext = { type: 'null' };
             if (!_currentContext.type) _currentContext.type = 'null';
             return window
               .runPipeline(_expression, _currentContext, _initialContext)
-              .then(expressionResult => {
+              .then((expressionResult: any) => {
                 done(expressionResult);
                 return expressionResult;
               });
@@ -168,8 +163,8 @@ export function expectExpressionProvider({
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
         log.debug('starting to render');
-        const result = await browser.executeAsync<RenderId>(
-          (_context: ExpressionResult, done: (renderResult: RenderId) => void) =>
+        const result = await browser.executeAsync<any>(
+          (_context: ExpressionResult, done: (renderResult: any) => void) =>
             window.renderPipelineResponse(_context).then(renderResult => {
               done(renderResult);
               return renderResult;

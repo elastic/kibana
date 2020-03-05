@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { config as reportingConfig } from './config';
 import { legacyInit } from './server/legacy';
-import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
+import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);

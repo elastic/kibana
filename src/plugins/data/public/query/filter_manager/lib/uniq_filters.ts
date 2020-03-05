@@ -18,7 +18,7 @@
  */
 import { each, union } from 'lodash';
 import { dedupFilters } from './dedup_filters';
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
 /**
  * Remove duplicate filters from an array of filters
@@ -28,10 +28,10 @@ import { esFilters } from '../../../../common';
 
  * @returns {object} The original filters array with duplicates removed
  */
-export const uniqFilters = (filters: esFilters.Filter[], comparatorOptions: any = {}) => {
-  let results: esFilters.Filter[] = [];
+export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
+  let results: Filter[] = [];
 
-  each(filters, (filter: esFilters.Filter) => {
+  each(filters, (filter: Filter) => {
     results = union(results, dedupFilters(results, [filter]), comparatorOptions);
   });
 

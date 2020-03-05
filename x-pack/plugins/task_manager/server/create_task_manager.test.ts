@@ -42,20 +42,21 @@ describe('createTaskManager', () => {
     const mockLegacyDeps = getMockLegacyDeps();
     const setupResult = createTaskManager(mockCoreSetup, mockLegacyDeps);
     expect(setupResult).toMatchInlineSnapshot(`
-          TaskManager {
-            "addMiddleware": [MockFunction],
-            "assertUninitialized": [MockFunction],
-            "attemptToRun": [MockFunction],
-            "ensureScheduled": [MockFunction],
-            "fetch": [MockFunction],
-            "registerTaskDefinitions": [MockFunction],
-            "remove": [MockFunction],
-            "runNow": [MockFunction],
-            "schedule": [MockFunction],
-            "start": [MockFunction],
-            "stop": [MockFunction],
-            "waitUntilStarted": [MockFunction],
-          }
-        `);
+      TaskManager {
+        "addMiddleware": [MockFunction],
+        "assertUninitialized": [MockFunction],
+        "attemptToRun": [MockFunction],
+        "ensureScheduled": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "registerTaskDefinitions": [MockFunction],
+        "remove": [MockFunction],
+        "runNow": [MockFunction],
+        "schedule": [MockFunction],
+        "start": [MockFunction],
+        "stop": [MockFunction],
+        "waitUntilStarted": [MockFunction],
+      }
+    `);
   });
 });

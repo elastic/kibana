@@ -35,7 +35,9 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
     public async clickMapButton(zoomSelector: string, waitForLoading?: boolean) {
       await retry.try(async () => {
         const zooms = await this.getZoomSelectors(zoomSelector);
-        await Promise.all(zooms.map(async zoom => await zoom.click()));
+        for (let i = 0; i < zooms.length; i++) {
+          await zooms[i].click();
+        }
         if (waitForLoading) {
           await header.waitUntilLoadingHasFinished();
         }

@@ -4,14 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from 'src/core/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 
-import { PluginInitializerContext } from '../../../../../src/core/public';
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
+type PluginsSetupExtended = typeof npSetup.plugins & {
+  // adds plugins which aren't in the PluginsSetup interface, but do exist
+  security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
+};
+
+const setupDependencies = npSetup.plugins as PluginsSetupExtended;
+
 export const setup = pluginInstance.setup(npSetup.core, {
-  npData: npStart.plugins.data,
+  data: npStart.plugins.data,
+  security: setupDependencies.security,
+  licensing: setupDependencies.licensing,
+  __LEGACY: {
+    XSRF: chrome.getXsrfToken(),
+  },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

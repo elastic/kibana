@@ -67,7 +67,7 @@ export const WatchStatus = ({
     };
   };
 }) => {
-  const { chrome, MANAGEMENT_BREADCRUMB, toasts } = useAppContext();
+  const { setBreadcrumbs, toasts } = useAppContext();
   const {
     error: watchDetailError,
     data: watchDetail,
@@ -80,8 +80,8 @@ export const WatchStatus = ({
   const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
-  }, [id, chrome, MANAGEMENT_BREADCRUMB]);
+    setBreadcrumbs([listBreadcrumb, statusBreadcrumb]);
+  }, [id, setBreadcrumbs]);
 
   const errorCode = getPageErrorCode(watchDetailError);
 

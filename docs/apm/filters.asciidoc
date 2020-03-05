@@ -45,20 +45,18 @@ Service environments are defined when configuring your APM agents.
 It's very important to be consistent when naming environments in your agents.
 See the documentation for each agent you're using to learn how to configure service environments:
 
-|===
-|*Environment configuration*
-v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
-*Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
-*Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]
-*Python:* {apm-py-ref}/configuration.html#config-environment[`environment`]
-*Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
-*Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
-|===
+* *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
+* *Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
+* *.NET* {apm-dotnet-ref}/config-core.html#config-environment[`Environment`]
+* *Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]
+* *Python:* {apm-py-ref}/configuration.html#config-environment[`environment`]
+* *Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
+* *Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
 
 [[contextual-filters]]
 ==== Contextual filters
 
-Local filters are ways you can filter your specific APM data on each individual page.
+Contextual filters are ways you can filter your specific APM data on each individual page.
 The filters shown are relevant to your data, and will persist between pages,
 but only where they are applicable -- they are typically most useful in their original context.
 As an example, if you select a host on the Services overview, then select a transaction group,

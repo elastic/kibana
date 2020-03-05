@@ -39,7 +39,7 @@ import {
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { Field } from '../../../../../../../common/types/fields';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import {
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,

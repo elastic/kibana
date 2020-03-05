@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { FindOptions } from '../../../../legacy/plugins/alerting/server/alerts_client';
+import { FindOptions } from '../../../alerting/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 
@@ -57,6 +57,9 @@ export const findActionRoute = (router: IRouter, licenseState: LicenseState) => 
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const query = req.query;
       const options: FindOptions['options'] = {

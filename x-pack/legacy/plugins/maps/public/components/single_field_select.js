@@ -8,7 +8,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiComboBox, EuiHighlight } from '@elastic/eui';
+import { EuiComboBox, EuiHighlight, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(fields) {
@@ -30,11 +30,14 @@ function fieldsToOptions(fields) {
 
 function renderOption(option, searchValue, contentClassName) {
   return (
-    <span className={contentClassName}>
-      <FieldIcon type={option.value.type} size="m" useColor />
-      &nbsp;
-      <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-    </span>
+    <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={null}>
+        <FieldIcon type={option.value.type} fill="none" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

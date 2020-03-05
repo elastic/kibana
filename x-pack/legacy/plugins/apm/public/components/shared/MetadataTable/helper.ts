@@ -6,9 +6,9 @@
 
 import { get, pick, isEmpty } from 'lodash';
 import { Section } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/APMError';
-import { Span } from '../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { APMError } from '../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
 
 export type SectionsWithRows = ReturnType<typeof getSectionsWithRows>;

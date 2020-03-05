@@ -17,7 +17,10 @@
  * under the License.
  */
 
+// TODO remove this file as soon as serviceSettings is exposed in the new platform
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import chrome from 'ui/chrome';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import 'ui/vis/map/service_settings';
 import { CoreStart, Plugin } from 'kibana/public';
 

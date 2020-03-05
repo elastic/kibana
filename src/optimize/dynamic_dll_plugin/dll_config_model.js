@@ -214,16 +214,20 @@ function common(config) {
   return webpackMerge(generateDLL(config));
 }
 
-function optimized(config) {
+function optimized() {
   return webpackMerge({
     mode: 'production',
     optimization: {
       minimizer: [
         new TerserPlugin({
-          // Apply the same logic used to calculate the
-          // threadLoaderPool workers number to spawn
-          // the parallel processes on terser
-          parallel: config.threadLoaderPoolConfig.workers,
+          // NOTE: we should not enable that option for now
+          // Since 2.0.0 terser-webpack-plugin is using jest-worker
+          // to run tasks in a pool of workers. Currently it looks like
+          // is requiring too much memory and break on large entry points
+          // compilations (like this) one. Also the gain we have enabling
+          // that option was barely noticed.
+          // https://github.com/webpack-contrib/terser-webpack-plugin/issues/143
+          parallel: false,
           sourceMap: false,
           cache: false,
           extractComments: false,
@@ -250,5 +254,5 @@ export function configModel(rawConfig = {}) {
     return webpackMerge(common(config), unoptimized());
   }
 
-  return webpackMerge(common(config), optimized(config));
+  return webpackMerge(common(config), optimized());
 }

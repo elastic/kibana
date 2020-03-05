@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats, getUiSettings } from '../../../../../../../plugins/data/public/services';
+
+import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
+export { convertDateRangeToString, DateRangeKey }; // for BWC
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
 });
-
-export interface DateRangeKey {
-  from: number;
-  to: number;
-}
 
 export const dateRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.DATE_RANGE,
@@ -43,7 +43,7 @@ export const dateRangeBucketAgg = new BucketAggType({
     return { from, to };
   },
   getFormat(agg) {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = getFieldFormats();
 
     const formatter = agg.fieldOwnFormatter(
       fieldFormats.TEXT_CONTEXT_TYPE,
@@ -94,7 +94,7 @@ export const dateRangeBucketAgg = new BucketAggType({
           ]);
         }
         if (!tz) {
-          const config = npStart.core.uiSettings;
+          const config = getUiSettings();
           const detectedTimezone = moment.tz.guess();
           const tzOffset = moment().format('Z');
           const isDefaultTimezone = config.isDefault('dateFormat:tz');
@@ -106,16 +106,3 @@ export const dateRangeBucketAgg = new BucketAggType({
     },
   ],
 });
-
-export const convertDateRangeToString = (
-  { from, to }: DateRangeKey,
-  format: (val: any) => string
-) => {
-  if (!from) {
-    return 'Before ' + format(to);
-  } else if (!to) {
-    return 'After ' + format(from);
-  } else {
-    return format(from) + ' to ' + format(to);
-  }
-};

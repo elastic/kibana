@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { rangeBucketAgg } from './range';
 import { AggConfigs } from '../agg_configs';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { fieldFormats } from '../../../../../../../plugins/data/public';
-
-jest.mock('ui/new_platform');
+import { FieldFormatsGetConfigFn, fieldFormats } from '../../../../../../../plugins/data/public';
 
 const buckets = [
   {
@@ -44,7 +44,13 @@ const buckets = [
 ];
 
 describe('Range Agg', () => {
-  const getConfig = (() => {}) as fieldFormats.GetConfigFn;
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry([rangeBucketAgg]);
+
+  const getConfig = (() => {}) as FieldFormatsGetConfigFn;
   const getAggConfigs = () => {
     const field = {
       name: 'bytes',
@@ -80,7 +86,7 @@ describe('Range Agg', () => {
           },
         },
       ],
-      null
+      { typesRegistry }
     );
   };
 

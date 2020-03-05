@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MetricsChartsByAgentAPIResponse } from '../../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';

@@ -74,7 +74,7 @@ export const loadPluginBundle: LoadPluginBundle = <
       const coreWindow = (window as unknown) as CoreWindow;
 
       // Assumes that all plugin bundles get put into the bundles/plugins subdirectory
-      const bundlePath = addBasePath(`/bundles/plugin/${pluginName}.bundle.js`);
+      const bundlePath = addBasePath(`/bundles/plugin/${pluginName}/${pluginName}.plugin.js`);
       script.setAttribute('src', bundlePath);
       script.setAttribute('id', `kbn-plugin-${pluginName}`);
       script.setAttribute('async', '');

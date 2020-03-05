@@ -18,13 +18,8 @@
  */
 
 export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
-// @ts-ignore
-export { SimpleEmitter } from 'ui/utils/simple_emitter';
-// @ts-ignore
-export { Binder } from 'ui/binder';
-export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
-// @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
 // @ts-ignore
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore

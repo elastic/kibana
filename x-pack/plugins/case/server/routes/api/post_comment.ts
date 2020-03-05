@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { formatNewComment, wrapError } from './utils';
+import { flattenCommentSavedObject, formatNewComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
 import { CASE_SAVED_OBJECT } from '../../constants';
@@ -53,7 +53,7 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           ],
         });
 
-        return response.ok({ body: newComment });
+        return response.ok({ body: flattenCommentSavedObject(newComment) });
       } catch (error) {
         return response.customError(wrapError(error));
       }

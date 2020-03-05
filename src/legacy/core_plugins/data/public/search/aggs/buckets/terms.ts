@@ -30,7 +30,8 @@ import { IAggConfigs } from '../agg_configs';
 import { Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   ISearchSource,
-  fieldFormats,
+  IFieldFormat,
+  FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../../plugins/data/public';
 
@@ -38,10 +39,7 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
-  // @ts-ignore
 } from './_terms_other_bucket_helper';
-import { Schemas } from '../schemas';
-import { AggGroupNames } from '../agg_groups';
 
 export const termsAggFilter = [
   '!top_hits',
@@ -58,17 +56,6 @@ export const termsAggFilter = [
   '!sum_bucket',
 ];
 
-const [orderAggSchema] = new Schemas([
-  {
-    group: AggGroupNames.None,
-    name: 'orderAgg',
-    // This string is never visible to the user so it doesn't need to be translated
-    title: 'Order Agg',
-    hideCustomLabel: true,
-    aggFilter: termsAggFilter,
-  },
-]).all;
-
 const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
 });
@@ -80,9 +67,9 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket): fieldFormats.FieldFormat {
+  getFormat(bucket): IFieldFormat {
     return {
-      getConverterFor: (type: fieldFormats.ContentType) => {
+      getConverterFor: (type: FieldFormatsContentType) => {
         return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
@@ -94,7 +81,7 @@ export const termsBucketAgg = new BucketAggType({
           return bucket.params.field.format.convert(val, type);
         };
       },
-    } as fieldFormats.FieldFormat;
+    } as IFieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (
@@ -158,10 +145,11 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'orderAgg',
       type: 'agg',
+      allowedAggs: termsAggFilter,
       default: null,
       makeAgg(termsAgg, state) {
         state = state || {};
-        state.schema = orderAggSchema;
+        state.schema = 'orderAgg';
         const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
           addToAggConfigs: false,
         });

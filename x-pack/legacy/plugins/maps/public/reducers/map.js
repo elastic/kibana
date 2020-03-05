@@ -37,7 +37,7 @@ import {
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
-  SET_TOOLTIP_STATE,
+  SET_OPEN_TOOLTIPS,
   SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
@@ -97,7 +97,7 @@ const INITIAL_STATE = {
   ready: false,
   mapInitError: null,
   goto: null,
-  tooltipState: null,
+  openTooltips: [],
   mapState: {
     zoom: null, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
     center: null, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
@@ -138,10 +138,10 @@ export function map(state = INITIAL_STATE, action) {
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);
-    case SET_TOOLTIP_STATE:
+    case SET_OPEN_TOOLTIPS:
       return {
         ...state,
-        tooltipState: action.tooltipState,
+        openTooltips: action.openTooltips,
       };
     case SET_MOUSE_COORDINATES:
       return {

@@ -31,7 +31,7 @@ import $ from 'jquery';
 import { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -79,34 +79,53 @@ function isDummyRoute($route: any, isLocalAngular: boolean) {
 
 export const configureAppAngularModule = (
   angularModule: IModule,
-  newPlatform: LegacyCoreStart,
+  newPlatform:
+    | LegacyCoreStart
+    | {
+        core: CoreStart;
+        readonly env: {
+          mode: Readonly<EnvironmentMode>;
+          packageInfo: Readonly<PackageInfo>;
+        };
+      },
   isLocalAngular: boolean
 ) => {
-  const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
+  const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
+  const packageInfo =
+    'injectedMetadata' in newPlatform
+      ? newPlatform.injectedMetadata.getLegacyMetadata()
+      : newPlatform.env.packageInfo;
 
-  forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
-    if (name !== undefined) {
-      // The legacy platform modifies some of these values, clone to an unfrozen object.
-      angularModule.value(name, cloneDeep(val));
-    }
-  });
+  if ('injectedMetadata' in newPlatform) {
+    forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
+      if (name !== undefined) {
+        // The legacy platform modifies some of these values, clone to an unfrozen object.
+        angularModule.value(name, cloneDeep(val));
+      }
+    });
+  }
 
   angularModule
-    .value('kbnVersion', newPlatform.injectedMetadata.getKibanaVersion())
-    .value('buildNum', legacyMetadata.buildNum)
-    .value('buildSha', legacyMetadata.buildSha)
-    .value('serverName', legacyMetadata.serverName)
-    .value('esUrl', getEsUrl(newPlatform))
-    .value('uiCapabilities', newPlatform.application.capabilities)
-    .config(setupCompileProvider(newPlatform))
+    .value('kbnVersion', packageInfo.version)
+    .value('buildNum', packageInfo.buildNum)
+    .value('buildSha', packageInfo.buildSha)
+    .value('esUrl', getEsUrl(core))
+    .value('uiCapabilities', core.application.capabilities)
+    .config(
+      setupCompileProvider(
+        'injectedMetadata' in newPlatform
+          ? newPlatform.injectedMetadata.getLegacyMetadata().devMode
+          : newPlatform.env.mode.dev
+      )
+    )
     .config(setupLocationProvider())
-    .config($setupXsrfRequestInterceptor(newPlatform))
-    .run(capture$httpLoadingCount(newPlatform))
-    .run($setupBreadcrumbsAutoClear(newPlatform, isLocalAngular))
-    .run($setupBadgeAutoClear(newPlatform, isLocalAngular))
-    .run($setupHelpExtensionAutoClear(newPlatform, isLocalAngular))
-    .run($setupUrlOverflowHandling(newPlatform, isLocalAngular))
-    .run($setupUICapabilityRedirect(newPlatform));
+    .config($setupXsrfRequestInterceptor(packageInfo.version))
+    .run(capture$httpLoadingCount(core))
+    .run($setupBreadcrumbsAutoClear(core, isLocalAngular))
+    .run($setupBadgeAutoClear(core, isLocalAngular))
+    .run($setupHelpExtensionAutoClear(core, isLocalAngular))
+    .run($setupUrlOverflowHandling(core, isLocalAngular))
+    .run($setupUICapabilityRedirect(core));
 };
 
 const getEsUrl = (newPlatform: CoreStart) => {
@@ -122,10 +141,8 @@ const getEsUrl = (newPlatform: CoreStart) => {
   };
 };
 
-const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
-  $compileProvider: ICompileProvider
-) => {
-  if (!newPlatform.injectedMetadata.getLegacyMetadata().devMode) {
+const setupCompileProvider = (devMode: boolean) => ($compileProvider: ICompileProvider) => {
+  if (!devMode) {
     $compileProvider.debugInfoEnabled(false);
   }
 };
@@ -140,9 +157,7 @@ const setupLocationProvider = () => ($locationProvider: ILocationProvider) => {
   $locationProvider.hashPrefix('');
 };
 
-export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
-  const version = newPlatform.injectedMetadata.getLegacyMetadata().version;
-
+export const $setupXsrfRequestInterceptor = (version: string) => {
   // Configure jQuery prefilter
   $.ajaxPrefilter(({ kbnXsrfToken = true }: any, originalOptions, jqXHR) => {
     if (kbnXsrfToken) {

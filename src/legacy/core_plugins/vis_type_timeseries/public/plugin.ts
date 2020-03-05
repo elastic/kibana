@@ -16,29 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-} from '../../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
-import { setSavedObjectsClient, setUISettings, setI18n } from './services';
+import {
+  setSavedObjectsClient,
+  setUISettings,
+  setI18n,
+  setFieldFormats,
+  setCoreStart,
+  setDataStart,
+} from './services';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
-export interface MetricsVisualizationDependencies {
-  uiSettings: IUiSettingsClient;
-  savedObjectsClient: SavedObjectsClientContract;
+
+/** @internal */
+export interface MetricsPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -58,9 +60,11 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     visualizations.types.createReactVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
     setSavedObjectsClient(core.savedObjects);
     setI18n(core.i18n);
+    setFieldFormats(data.fieldFormats);
+    setDataStart(data);
+    setCoreStart(core);
   }
 }

@@ -193,7 +193,6 @@ export class ChromeService {
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
-            navSetting$={uiSettings.get$('pageNavigation')}
           />
         </React.Fragment>
       ),

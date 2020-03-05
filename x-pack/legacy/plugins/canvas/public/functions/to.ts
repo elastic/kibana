@@ -6,16 +6,15 @@
 
 // @ts-ignore untyped Elastic library
 import { castProvider } from '@kbn/interpreter/common';
-import { ExpressionFunction } from 'src/plugins/expressions/public';
-// @ts-ignore untyped Elastic library
-import { registries } from 'plugins/interpreter/registries';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
+import { npStart } from 'ui/new_platform';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 
 interface Arguments {
   type: string[];
 }
 
-export function to(): ExpressionFunction<'to', any, Arguments, any> {
+export function to(): ExpressionFunctionDefinition<'to', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().to;
   const errors = getFunctionErrors().to;
 
@@ -31,12 +30,12 @@ export function to(): ExpressionFunction<'to', any, Arguments, any> {
         multi: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.type) {
         throw errors.missingType();
       }
 
-      return castProvider(registries.types.toJS())(context, args.type);
+      return castProvider(npStart.plugins.expressions.getTypes())(input, args.type);
     },
   };
 }
