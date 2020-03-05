@@ -419,11 +419,13 @@ export function initGraphApp(angularModule, deps) {
       while (found) {
         found = false;
         for (const i in $scope.detail.mergeCandidates) {
-          const mc = $scope.detail.mergeCandidates[i];
-          if (mc.id1 === childId || mc.id2 === childId) {
-            $scope.detail.mergeCandidates.splice(i, 1);
-            found = true;
-            break;
+          if ($scope.detail.mergeCandidates.hasOwnProperty(i)) {
+            const mc = $scope.detail.mergeCandidates[i];
+            if (mc.id1 === childId || mc.id2 === childId) {
+              $scope.detail.mergeCandidates.splice(i, 1);
+              found = true;
+              break;
+            }
           }
         }
       }
@@ -434,16 +436,18 @@ export function initGraphApp(angularModule, deps) {
     $scope.handleMergeCandidatesCallback = function(termIntersects) {
       const mergeCandidates = [];
       for (const i in termIntersects) {
-        const ti = termIntersects[i];
-        mergeCandidates.push({
-          id1: ti.id1,
-          id2: ti.id2,
-          term1: ti.term1,
-          term2: ti.term2,
-          v1: ti.v1,
-          v2: ti.v2,
-          overlap: ti.overlap,
-        });
+        if (termIntersects.hasOwnProperty(i)) {
+          const ti = termIntersects[i];
+          mergeCandidates.push({
+            id1: ti.id1,
+            id2: ti.id2,
+            term1: ti.term1,
+            term2: ti.term2,
+            v1: ti.v1,
+            v2: ti.v2,
+            overlap: ti.overlap,
+          });
+        }
       }
       $scope.detail = { mergeCandidates };
     };
