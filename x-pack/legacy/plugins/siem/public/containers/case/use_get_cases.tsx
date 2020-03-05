@@ -4,57 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useReducer, useState } from 'react';
 import { isEqual } from 'lodash/fp';
-import {
-  DEFAULT_TABLE_ACTIVE_PAGE,
-  DEFAULT_TABLE_LIMIT,
-  FETCH_FAILURE,
-  FETCH_INIT,
-  FETCH_SUCCESS,
-  UPDATE_QUERY_PARAMS,
-  UPDATE_FILTER_OPTIONS,
-} from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
-import { getTypedPayload } from './utils';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
-import { getCases } from './api';
+import { UpdateByKey } from './use_update_case';
+import { getCases, updateCaseProperty } from './api';
 
 export interface UseGetCasesState {
+  caseCount: CaseCount;
   data: AllCases;
-  isLoading: boolean;
-  isError: boolean;
-  queryParams: QueryParams;
   filterOptions: FilterOptions;
+  isError: boolean;
+  loading: string[];
+  queryParams: QueryParams;
+  selectedCases: Case[];
 }
 
-export interface Action {
-  type: string;
-  payload?: AllCases | Partial<QueryParams> | FilterOptions;
+export interface CaseCount {
+  open: number;
+  closed: number;
 }
+
+export interface UpdateCase extends UpdateByKey {
+  caseId: string;
+  version: string;
+}
+
+export type Action =
+  | { type: 'FETCH_INIT'; payload: string }
+  | { type: 'FETCH_CASE_COUNT_SUCCESS'; payload: Partial<CaseCount> }
+  | { type: 'FETCH_CASES_SUCCESS'; payload: AllCases }
+  | { type: 'FETCH_FAILURE'; payload: string }
+  | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
+  | { type: 'UPDATE_FILTER_OPTIONS'; payload: FilterOptions }
+  | { type: 'UPDATE_QUERY_PARAMS'; payload: Partial<QueryParams> }
+  | { type: 'UPDATE_TABLE_SELECTIONS'; payload: Case[] };
+
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
-        isLoading: true,
         isError: false,
+        loading: [...state.loading.filter(e => e !== action.payload), action.payload],
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_UPDATE_CASE_SUCCESS':
       return {
         ...state,
-        isLoading: false,
+        loading: state.loading.filter(e => e !== 'caseUpdate'),
+      };
+    case 'FETCH_CASE_COUNT_SUCCESS':
+      return {
+        ...state,
+        caseCount: {
+          ...state.caseCount,
+          ...action.payload,
+        },
+        loading: state.loading.filter(e => e !== 'caseCount'),
+      };
+    case 'FETCH_CASES_SUCCESS':
+      return {
+        ...state,
         isError: false,
-        data: getTypedPayload<AllCases>(action.payload),
+        data: action.payload,
+        loading: state.loading.filter(e => e !== 'cases'),
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoading: false,
         isError: true,
+        loading: state.loading.filter(e => e !== action.payload),
       };
-    case UPDATE_QUERY_PARAMS:
+    case 'UPDATE_FILTER_OPTIONS':
+      return {
+        ...state,
+        filterOptions: action.payload,
+      };
+    case 'UPDATE_QUERY_PARAMS':
       return {
         ...state,
         queryParams: {
@@ -62,10 +91,10 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
           ...action.payload,
         },
       };
-    case UPDATE_FILTER_OPTIONS:
+    case 'UPDATE_TABLE_SELECTIONS':
       return {
         ...state,
-        filterOptions: getTypedPayload<FilterOptions>(action.payload),
+        selectedCases: action.payload,
       };
     default:
       throw new Error();
@@ -73,51 +102,64 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 };
 
 const initialData: AllCases = {
+  cases: [],
   page: 0,
   perPage: 0,
   total: 0,
-  cases: [],
 };
-export const useGetCases = (): [
-  UseGetCasesState,
-  Dispatch<SetStateAction<Partial<QueryParams>>>,
-  Dispatch<SetStateAction<FilterOptions>>
-] => {
+interface UseGetCases extends UseGetCasesState {
+  dispatchUpdateCaseProperty: Dispatch<UpdateCase>;
+  getCaseCount: Dispatch<keyof CaseCount>;
+  setFilters: Dispatch<SetStateAction<FilterOptions>>;
+  setQueryParams: Dispatch<SetStateAction<Partial<QueryParams>>>;
+  setSelectedCases: Dispatch<Case[]>;
+}
+export const useGetCases = (): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
+    caseCount: {
+      open: 0,
+      closed: 0,
+    },
     data: initialData,
     filterOptions: {
       search: '',
+      state: 'open',
       tags: [],
     },
+    isError: false,
+    loading: [],
     queryParams: {
       page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
       sortField: SortFieldCase.createdAt,
       sortOrder: 'desc',
     },
+    selectedCases: [],
   });
-  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
-  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
   const [, dispatchToaster] = useStateToaster();
+  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
+  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
+
+  const setSelectedCases = useCallback((mySelectedCases: Case[]) => {
+    dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
+  }, []);
 
   useEffect(() => {
     if (!isEqual(queryParams, state.queryParams)) {
-      dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
+      dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: queryParams });
     }
   }, [queryParams, state.queryParams]);
 
   useEffect(() => {
     if (!isEqual(filterQuery, state.filterOptions)) {
-      dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
+      dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: filterQuery });
     }
   }, [filterQuery, state.filterOptions]);
 
-  useEffect(() => {
+  const fetchCases = useCallback(() => {
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT', payload: 'cases' });
       try {
         const response = await getCases({
           filterOptions: state.filterOptions,
@@ -125,14 +167,14 @@ export const useGetCases = (): [
         });
         if (!didCancel) {
           dispatch({
-            type: FETCH_SUCCESS,
+            type: 'FETCH_CASES_SUCCESS',
             payload: response,
           });
         }
       } catch (error) {
         if (!didCancel) {
           errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-          dispatch({ type: FETCH_FAILURE });
+          dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
         }
       }
     };
@@ -141,5 +183,73 @@ export const useGetCases = (): [
       didCancel = true;
     };
   }, [state.queryParams, state.filterOptions]);
-  return [state, setQueryParams, setFilters];
+  useEffect(() => fetchCases(), [state.queryParams, state.filterOptions]);
+
+  const getCaseCount = useCallback((caseState: keyof CaseCount) => {
+    let didCancel = false;
+    const fetchData = async () => {
+      dispatch({ type: 'FETCH_INIT', payload: 'caseCount' });
+      try {
+        const response = await getCases({
+          filterOptions: { search: '', state: caseState, tags: [] },
+        });
+        if (!didCancel) {
+          dispatch({
+            type: 'FETCH_CASE_COUNT_SUCCESS',
+            payload: { [caseState]: response.total },
+          });
+        }
+      } catch (error) {
+        if (!didCancel) {
+          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          dispatch({ type: 'FETCH_FAILURE', payload: 'caseCount' });
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      didCancel = true;
+    };
+  }, []);
+
+  const dispatchUpdateCaseProperty = useCallback(
+    ({ updateKey, updateValue, caseId, version }: UpdateCase) => {
+      let didCancel = false;
+      const fetchData = async () => {
+        dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
+        try {
+          await updateCaseProperty(
+            caseId,
+            { [updateKey]: updateValue },
+            version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+          );
+          if (!didCancel) {
+            dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
+            fetchCases();
+            getCaseCount('open');
+            getCaseCount('closed');
+          }
+        } catch (error) {
+          if (!didCancel) {
+            errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+            dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });
+          }
+        }
+      };
+      fetchData();
+      return () => {
+        didCancel = true;
+      };
+    },
+    [filterQuery, state.filterOptions]
+  );
+
+  return {
+    ...state,
+    dispatchUpdateCaseProperty,
+    getCaseCount,
+    setFilters,
+    setQueryParams,
+    setSelectedCases,
+  };
 };

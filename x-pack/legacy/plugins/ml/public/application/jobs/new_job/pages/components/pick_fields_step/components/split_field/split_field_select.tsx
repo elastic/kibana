@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { Field, SplitField } from '../../../../../../../../../common/types/fields';
 
@@ -31,7 +31,7 @@ export const SplitFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
-  const options: EuiComboBoxOptionProps[] = fields.map(
+  const options: EuiComboBoxOptionOption[] = fields.map(
     f =>
       ({
         label: f.name,
@@ -39,12 +39,12 @@ export const SplitFieldSelect: FC<Props> = ({
       } as DropDownLabel)
   );
 
-  const selection: EuiComboBoxOptionProps[] = [];
+  const selection: EuiComboBoxOptionOption[] = [];
   if (selectedField !== null) {
     selection.push({ label: selectedField.name, field: selectedField } as DropDownLabel);
   }
 
-  function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
+  function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
     const option = selectedOptions[0] as DropDownLabel;
     if (typeof option !== 'undefined') {
       changeHandler(option.field);
