@@ -142,10 +142,7 @@ const getSchemas = (
   const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: IAggConfig) => {
     let skipMetrics = false;
-    let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
-    if (typeof schemaName === 'object') {
-      schemaName = null;
-    }
+    let schemaName = agg.schema;
     if (!schemaName) {
       if (agg.type.name === 'geo_centroid') {
         schemaName = 'geo_centroid';
@@ -155,7 +152,7 @@ const getSchemas = (
       }
     }
     if (schemaName === 'split') {
-      schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
+      schemaName = `split_${vis.params.row ? 'row' : 'column'}`;
       skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
