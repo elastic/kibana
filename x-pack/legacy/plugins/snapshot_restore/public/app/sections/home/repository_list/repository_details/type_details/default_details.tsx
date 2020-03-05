@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
@@ -54,15 +54,15 @@ export const DefaultDetails: React.FunctionComponent<Props> = ({
         }}
         showGutter={false}
         minLines={6}
-        aria-label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryDetails.genericSettingsDescription"
-            defaultMessage="Readonly settings for repository '{name}'"
-            values={{
+        aria-label={i18n.translate(
+          'xpack.snapshotRestore.repositoryDetails.genericSettingsDescription',
+          {
+            defaultMessage: `Readonly settings for repository '{name}'`,
+            values: {
               name,
-            }}
-          />
-        }
+            },
+          }
+        )}
       />
     </Fragment>
   );

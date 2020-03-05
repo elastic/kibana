@@ -185,12 +185,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                     showGutter={false}
                     minLines={6}
                     maxLines={15}
-                    aria-label={
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel"
-                        defaultMessage="Index settings to modify"
-                      />
-                    }
+                    aria-label={i18n.translate(
+                      'xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel',
+                      { defaultMessage: 'Index settings to modify' }
+                    )}
                     onChange={(value: string) => {
                       updateRestoreSettings({
                         indexSettings: value,

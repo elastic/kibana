@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiComboBox,
 } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
 import { documentationLinksService } from '../../../services/documentation';
 import { useAppDependencies } from '../../../index';
@@ -50,9 +50,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(restoreIndices));
-  const [indicesOptions, setIndicesOptions] = useState<Option[]>(
+  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(
     snapshotIndices.map(
-      (index): Option => ({
+      (index): EuiSelectableOption => ({
         label: index,
         checked:
           isAllIndices ||
@@ -232,7 +232,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = undefined;
                                   });
                                   updateRestoreSettings({ indices: [] });
@@ -251,7 +251,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = 'on';
                                   });
                                   updateRestoreSettings({ indices: [...snapshotIndices] });
