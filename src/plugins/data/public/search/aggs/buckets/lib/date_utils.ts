@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { Action, createAction } from '../../actions';
-
-export const RESTRICTED_ACTION = 'RESTRICTED_ACTION';
-
-export function createRestrictedAction<C>(isCompatibleIn: (context: C) => boolean): Action<C> {
-  return createAction<C>({
-    type: RESTRICTED_ACTION,
-    isCompatible: async context => isCompatibleIn(context),
-    execute: async () => {},
-  });
-}
+/**
+ * This temporarily re-exports a static function from the data shim plugin until
+ * the final agg_types cutover is complete. It is needed for use in Lens; and they
+ * are not currently using the legacy data shim, so we are moving it here first.
+ */
+export { getCalculateAutoTimeExpression } from '../../../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_utils';

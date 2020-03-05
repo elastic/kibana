@@ -17,6 +17,4 @@
  * under the License.
  */
 
-declare module 'ui/time_buckets' {
-  export const TimeBuckets: any;
-}
+export * from './customize_panel_action';

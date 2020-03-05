@@ -34,7 +34,7 @@ import {
 } from './actions';
 import { Action } from './reducer';
 
-const getActions = (
+export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
@@ -53,9 +53,9 @@ const getActions = (
     type: 'icon',
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: Rule) => {
-      duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      reFetchRules(true);
+    onClick: async (rowItem: Rule) => {
+      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
+      await reFetchRules(true);
     },
   },
   {
@@ -71,9 +71,9 @@ const getActions = (
     type: 'icon',
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: Rule) => {
-      deleteRulesAction([rowItem.id], dispatch, dispatchToaster);
-      reFetchRules(true);
+    onClick: async (rowItem: Rule) => {
+      await deleteRulesAction([rowItem.id], dispatch, dispatchToaster);
+      await reFetchRules(true);
     },
   },
 ];
