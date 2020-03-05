@@ -14,6 +14,7 @@ import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
+import { mockHostResultList } from './mock_host_result_list';
 
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
@@ -32,12 +33,7 @@ describe('endpoint list saga', () => {
 
   let history: History<never>;
   const getEndpointListApiResponse = (): EndpointResultList => {
-    return {
-      endpoints: [generateEndpoint()],
-      request_page_size: 1,
-      request_page_index: 1,
-      total: 10,
-    };
+    return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });

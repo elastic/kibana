@@ -10,6 +10,7 @@ import { EndpointMetadata } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { listData } from './selectors';
+import { mockHostResultList } from './mock_host_result_list';
 
 describe('endpoint_list store concerns', () => {
   let store: Store<ManagementListState>;
@@ -25,12 +26,7 @@ describe('endpoint_list store concerns', () => {
   const loadDataToStore = () => {
     dispatch({
       type: 'serverReturnedManagementList',
-      payload: {
-        endpoints: [generateEndpoint()],
-        request_page_size: 1,
-        request_page_index: 1,
-        total: 10,
-      },
+      payload: mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
     });
   };
 
@@ -50,12 +46,11 @@ describe('endpoint_list store concerns', () => {
     });
 
     test('it handles `serverReturnedManagementList', () => {
-      const payload = {
-        endpoints: [generateEndpoint()],
+      const payload = mockHostResultList({
         request_page_size: 1,
         request_page_index: 1,
         total: 10,
-      };
+      });
       dispatch({
         type: 'serverReturnedManagementList',
         payload,
