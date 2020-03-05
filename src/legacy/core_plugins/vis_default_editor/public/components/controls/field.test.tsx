@@ -29,7 +29,7 @@ import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { IAggConfig } from '../../legacy_imports';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
-  const comboBoxProps: EuiComboBoxProps<string> = comp.find(EuiComboBox).props();
+  const comboBoxProps = comp.find(EuiComboBox).props() as EuiComboBoxProps<any>;
   if (comboBoxProps.onChange) {
     comboBoxProps.onChange(value);
   }
@@ -81,6 +81,7 @@ describe('FieldParamEditor component', () => {
       setTouched,
       state: {} as VisState,
       metricAggs: [] as IAggConfig[],
+      schemas: [],
     };
   });
 

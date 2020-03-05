@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { IAggConfig } from '../agg_config';
-import { IMetricAggConfig } from '../metrics/metric_agg_type';
-import { Schema } from '../schemas';
 
 describe('Field', () => {
   const indexPattern = {
@@ -100,44 +97,6 @@ describe('Field', () => {
       });
 
       indexPattern.fields[1].aggregatable = true;
-
-      const fields = aggParam.getAvailableFields(agg);
-
-      expect(fields.length).toBe(2);
-    });
-
-    it('should return only numeric fields if filterFieldTypes was specified as a function', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-        filterFieldTypes: (aggConfig: IMetricAggConfig) =>
-          get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
-            ? '*'
-            : KBN_FIELD_TYPES.NUMBER,
-      });
-      const fields = aggParam.getAvailableFields(agg);
-
-      expect(fields.length).toBe(1);
-      expect(fields[0].type).toBe(KBN_FIELD_TYPES.NUMBER);
-    });
-
-    it('should return all fields if filterFieldTypes was specified as a function and aggSettings allow string type fields', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-        filterFieldTypes: (aggConfig: IMetricAggConfig) =>
-          get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
-            ? '*'
-            : KBN_FIELD_TYPES.NUMBER,
-      });
-
-      agg.schema = {
-        aggSettings: {
-          top_hits: {
-            allowStrings: true,
-          },
-        },
-      } as Schema;
 
       const fields = aggParam.getAvailableFields(agg);
 
