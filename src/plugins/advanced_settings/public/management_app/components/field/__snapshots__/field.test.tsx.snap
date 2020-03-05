@@ -1350,7 +1350,6 @@ exports[`Field for json setting should render as read only if saving is disabled
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -1456,7 +1455,6 @@ exports[`Field for json setting should render as read only with help text if ove
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -1538,7 +1536,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1651,7 +1648,6 @@ exports[`Field for json setting should render default value if there is no user 
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1740,7 +1736,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1864,7 +1859,6 @@ exports[`Field for json setting should render user value if there is user value 
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1935,7 +1929,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -2038,7 +2031,6 @@ exports[`Field for markdown setting should render as read only with help text if
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -2120,7 +2112,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2191,7 +2182,6 @@ exports[`Field for markdown setting should render default value if there is no u
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2280,7 +2270,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2397,7 +2386,6 @@ exports[`Field for markdown setting should render user value if there is user va
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
