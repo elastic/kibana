@@ -93,7 +93,7 @@ describe('VegaVisualizations', () => {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
+        visualizationsSetup.createBaseVisualization(
           createVegaTypeDefinition(vegaVisualizationDependencies)
         );
       }
