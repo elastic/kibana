@@ -1,3 +1,8 @@
 .globalFilterEditor__fieldInput {
   max-width: $euiSize * 13;
 }
+
+.filterError .filterValue {
+  color: $euiColorDanger;
+  font-weight: bold;
+}

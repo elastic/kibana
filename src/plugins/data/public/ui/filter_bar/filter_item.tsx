@@ -22,8 +22,6 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component, MouseEvent } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { IIndexPattern } from '../..';
@@ -67,17 +65,7 @@ class FilterItemUI extends Component<Props, State> {
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
-    const filterViewOptions: any = {};
-
-    const classes = classNames(
-      'globalFilterItem',
-      {
-        'globalFilterItem-isDisabled': disabled,
-        'globalFilterItem-isPinned': isFilterPinned(filter),
-        'globalFilterItem-isExcluded': negate,
-      },
-      this.props.className
-    );
+    let hasError: boolean = false;
 
     let valueLabel;
     try {
@@ -93,16 +81,24 @@ class FilterItemUI extends Component<Props, State> {
         id: 'data.filter.filterBar.labelErrorText',
         defaultMessage: 'Error',
       });
-      const isDarkMode = this.props.uiSettings.get('theme:darkMode');
-      filterViewOptions.color = isDarkMode
-        ? darkEuiTheme.euiColorDanger
-        : lightEuiTheme.euiColorDanger;
+      hasError = true;
     }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
+
+    const classes = classNames(
+      'globalFilterItem',
+      {
+        'globalFilterItem-isDisabled': disabled,
+        'globalFilterItem-isPinned': isFilterPinned(filter),
+        'globalFilterItem-isExcluded': negate,
+      },
+      this.props.className,
+      hasError ? 'filterError' : ''
+    );
 
     const badge = (
       <FilterView
@@ -112,7 +108,6 @@ class FilterItemUI extends Component<Props, State> {
         iconOnClick={() => this.props.onRemove()}
         onClick={this.handleBadgeClick}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
-        {...filterViewOptions}
       />
     );
 
