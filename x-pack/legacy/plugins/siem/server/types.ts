@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { SiemClient } from './client';
 
 export { LegacyRequest } from '../../../../../src/core/server';
 
@@ -12,4 +13,16 @@ export interface LegacyServices {
   alerting?: Legacy.Server['plugins']['alerting'];
   config: Legacy.Server['config'];
   route: Legacy.Server['route'];
+}
+
+export { SiemClient };
+
+export interface SiemRequestContext {
+  getSiemClient: () => SiemClient;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    siem: SiemRequestContext;
+  }
 }

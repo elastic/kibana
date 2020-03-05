@@ -140,9 +140,6 @@ describe('when on the alerting page', () => {
     it('should show the flyout', async () => {
       await render().findByTestId('alertDetailFlyout');
     });
-    it('should render resolver', async () => {
-      await render().findByTestId('alertResolver');
-    });
     describe('when the user clicks the close button on the flyout', () => {
       let renderResult: reactTestingLibrary.RenderResult;
       beforeEach(async () => {

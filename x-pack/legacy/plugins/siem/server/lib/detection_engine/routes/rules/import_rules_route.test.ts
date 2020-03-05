@@ -4,35 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
 import {
-  getSimpleRuleAsMultipartContent,
-  getSimpleRuleAsMultipartContentNoRuleId,
-  TEST_BOUNDARY,
-  UNPARSABLE_LINE,
-  getSimpleRule,
+  buildHapiStream,
+  ruleIdsToNdJsonString,
+  rulesToNdJsonString,
+  getSimpleRuleWithId,
 } from '../__mocks__/utils';
-import { ImportSuccessError } from '../utils';
 import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
-  getFindResult,
+  getEmptyFindResult,
   getResult,
   getEmptyIndex,
   getFindResultWithSingleHit,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
+import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 
 describe('import_rules_route', () => {
-  let server = createMockServer();
   let config = createMockConfig();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let request: ReturnType<typeof requestMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     // jest carries state between mocked implementations when using
@@ -41,8 +37,12 @@ describe('import_rules_route', () => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.clearAllMocks();
-    server = createMockServer();
-    config = createMockConfig();
+
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
+    const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
+    request = getImportRulesRequest(hapiStream);
+
     config = () => ({
       get: jest.fn(value => {
         switch (value) {
@@ -63,76 +63,57 @@ describe('import_rules_route', () => {
       }),
       has: jest.fn(),
     });
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
 
-    getClients.mockResolvedValue(clients);
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.spacesClient.getSpaceId.mockReturnValue('default');
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
+    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
-    importRulesRoute(server.route, config, getClients);
+    importRulesRoute(server.router, config);
   });
 
   describe('status codes with actionsClient and alertClient', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await server.inject(getImportRulesRequest(requestPayload));
-      expect(statusCode).toEqual(200);
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
-      importRulesRoute(route, config, getClients);
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await inject(getImportRulesRequest(requestPayload));
-      expect(statusCode).toEqual(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns 404 if actionsClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('actionsClient', clients));
-      const { route, inject } = createMockServer();
-      importRulesRoute(route, config, getClients);
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await inject(getImportRulesRequest(requestPayload));
-      expect(statusCode).toEqual(404);
+      context.actions.getActionsClient = jest.fn();
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
+  });
 
+  describe('unhappy paths', () => {
     test('returns error if createPromiseFromStreams throws error', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
       jest
         .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
         .mockImplementation(() => {
           throw new Error('Test error');
         });
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { payload, statusCode } = await server.inject(getImportRulesRequest(requestPayload));
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
     });
-  });
 
-  describe('validation', () => {
-    test('returns reported error if index does not exist', async () => {
+    test('returns an error if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [
           {
             error: {
               message:
-                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+                'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
               status_code: 409,
             },
             rule_id: 'rule-1',
@@ -141,29 +122,20 @@ describe('import_rules_route', () => {
         success: false,
         success_count: 0,
       });
-      expect(statusCode).toEqual(200);
     });
 
-    test('returns 400 when a thrown error is caught', async () => {
-      const mockFn = jest.fn();
-      const mockThrowError = (): Error => {
-        throw new Error();
-      };
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(
-        mockFn.mockImplementation(mockThrowError)
-      );
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
+    test('returns an error when cluster throws error', async () => {
+      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
 
-      expect(parsed).toEqual({
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [
           {
             error: {
-              message: "Cannot read property 'total' of undefined",
+              message: 'Test error',
               status_code: 400,
             },
             rule_id: 'rule-1',
@@ -172,63 +144,41 @@ describe('import_rules_route', () => {
         success: false,
         success_count: 0,
       });
-      expect(statusCode).toEqual(200);
     });
 
     test('returns 400 if file extension type is not .ndjson', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1'], false);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
+      const requestPayload = buildHapiStream(ruleIdsToNdJsonString(['rule-1']), 'wrong.html');
+      const badRequest = getImportRulesRequest(requestPayload);
+      const response = await server.inject(badRequest, context);
 
-      expect(parsed).toEqual({
-        message: 'Invalid file extension .json',
-        status_code: 400,
-      });
-      expect(statusCode).toEqual(400);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
     });
   });
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
       clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [],
         success: true,
         success_count: 1,
       });
-      expect(statusCode).toEqual(200);
     });
 
     test('returns reported conflict if error parsing rule', async () => {
-      const multipartPayload =
-        `--${TEST_BOUNDARY}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
-        'Content-Type: application/octet-stream\r\n' +
-        '\r\n' +
-        `${UNPARSABLE_LINE}\r\n` +
-        `--${TEST_BOUNDARY}--\r\n`;
+      const requestPayload = buildHapiStream('this is not a valid ndjson string!');
+      const badRequest = getImportRulesRequest(requestPayload);
+      const response = await server.inject(badRequest, context);
 
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = Buffer.from(multipartPayload);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [
           {
             error: {
-              message: 'Unexpected token : in JSON at position 8',
+              message: 'Unexpected token h in JSON at position 1',
               status_code: 400,
             },
             rule_id: '(unknown id)',
@@ -237,33 +187,15 @@ describe('import_rules_route', () => {
         success: false,
         success_count: 0,
       });
-      expect(statusCode).toEqual(200);
     });
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        const response = await server.inject(request, context);
 
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-        const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-        const parsed: ImportSuccessError = JSON.parse(payload);
-
-        expect(parsed).toEqual({
-          errors: [],
-          success: true,
-          success_count: 1,
-        });
-        expect(statusCode).toEqual(200);
-
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
-
-        const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
-          getImportRulesRequest(requestPayload)
-        );
-        const parsedRequest2: ImportSuccessError = JSON.parse(payloadRequest2);
-
-        expect(parsedRequest2).toEqual({
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [
             {
               error: {
@@ -276,114 +208,79 @@ describe('import_rules_route', () => {
           success: false,
           success_count: 0,
         });
-        expect(statusCodeRequest2).toEqual(200);
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-        const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-        const parsed: ImportSuccessError = JSON.parse(payload);
-
-        expect(parsed).toEqual({
-          errors: [],
-          success: true,
-          success_count: 1,
-        });
-        expect(statusCode).toEqual(200);
-
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
-
-        const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
-          getImportRulesRequestOverwriteTrue(requestPayload)
+        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        const overwriteRequest = getImportRulesRequestOverwriteTrue(
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
-        const parsedRequest2: ImportSuccessError = JSON.parse(payloadRequest2);
+        const response = await server.inject(overwriteRequest, context);
 
-        expect(parsedRequest2).toEqual({
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [],
           success: true,
           success_count: 1,
         });
-        expect(statusCodeRequest2).toEqual(200);
       });
     });
   });
 
   describe('multi rule import', () => {
     test('returns 200 if all rules imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      const multiRequest = getImportRulesRequest(
+        buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2']))
+      );
+      const response = await server.inject(multiRequest, context);
 
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2']);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [],
         success: true,
         success_count: 2,
       });
-      expect(statusCode).toEqual(200);
     });
 
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map(ruleId => getSimpleRuleWithId(ruleId));
+      const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
+      const badRequest = getImportRulesRequest(badPayload);
 
-      const requestPayload = getSimpleRuleAsMultipartContentNoRuleId(2);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
+      const response = await server.inject(badRequest, context);
 
-      expect(parsed.success).toEqual(false);
-      expect(parsed.errors[0].error.message).toEqual(
-        'child "rule_id" fails because ["rule_id" is required]'
-      );
-      expect(parsed.errors[0].error.status_code).toEqual(400);
-      expect(statusCode).toEqual(200);
-    });
-
-    test('returns 200 with reported conflict if error parsing rule', async () => {
-      const multipartPayload =
-        `--${TEST_BOUNDARY}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
-        'Content-Type: application/octet-stream\r\n' +
-        '\r\n' +
-        `${UNPARSABLE_LINE}\r\n` +
-        `${JSON.stringify(getSimpleRule('rule-2'))}\r\n` +
-        `--${TEST_BOUNDARY}--\r\n`;
-
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-
-      const requestPayload = Buffer.from(multipartPayload);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
         errors: [
           {
             error: {
-              message: 'Unexpected token : in JSON at position 8',
+              message: 'child "rule_id" fails because ["rule_id" is required]',
+              status_code: 400,
+            },
+            rule_id: '(unknown id)',
+          },
+          {
+            error: {
+              message: 'child "rule_id" fails because ["rule_id" is required]',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
         ],
         success: false,
-        success_count: 1,
+        success_count: 0,
       });
-      expect(statusCode).toEqual(200);
     });
 
-    describe('rules with matching rule_id', () => {
-      test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+    describe('importing duplicated rule_ids', () => {
+      test('reports a conflict if `overwrite` is set to `false`', async () => {
+        const multiRequest = getImportRulesRequest(
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
+        );
+        const response = await server.inject(multiRequest, context);
 
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
-        const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-        const parsed: ImportSuccessError = JSON.parse(payload);
-
-        expect(parsed).toEqual({
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [
             {
               error: {
@@ -396,53 +293,35 @@ describe('import_rules_route', () => {
           success: false,
           success_count: 1,
         });
-        expect(statusCode).toEqual(200);
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-        clients.alertsClient.get.mockResolvedValue(getResult());
-
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
-        const { statusCode, payload } = await server.inject(
-          getImportRulesRequestOverwriteTrue(requestPayload)
+        const multiRequest = getImportRulesRequestOverwriteTrue(
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
         );
-        const parsed: ImportSuccessError = JSON.parse(payload);
 
-        expect(parsed).toEqual({
+        const response = await server.inject(multiRequest, context);
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [],
           success: true,
           success_count: 1,
         });
-        expect(statusCode).toEqual(200);
       });
     });
 
     describe('rules with existing rule_id', () => {
+      beforeEach(() => {
+        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
+      });
+
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-        const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-        const parsedResult: ImportSuccessError = JSON.parse(payload);
-
-        expect(parsedResult).toEqual({
-          errors: [],
-          success: true,
-          success_count: 1,
-        });
-        expect(statusCode).toEqual(200);
-
-        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
-
-        const requestPayload2 = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3']);
-        const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
-          getImportRulesRequest(requestPayload2)
+        const multiRequest = getImportRulesRequest(
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
-        const parsed: ImportSuccessError = JSON.parse(payloadRequest2);
-
-        expect(parsed).toEqual({
+        const response = await server.inject(multiRequest, context);
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [
             {
               error: {
@@ -455,38 +334,19 @@ describe('import_rules_route', () => {
           success: false,
           success_count: 2,
         });
-        expect(statusCodeRequest2).toEqual(200);
       });
 
       test('returns 200 with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-
-        const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-        const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-        const parsedResult: ImportSuccessError = JSON.parse(payload);
-
-        expect(parsedResult).toEqual({
-          errors: [],
-          success: true,
-          success_count: 1,
-        });
-        expect(statusCode).toEqual(200);
-
-        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
-
-        const requestPayload2 = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3']);
-        const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
-          getImportRulesRequestOverwriteTrue(requestPayload2)
+        const multiRequest = getImportRulesRequestOverwriteTrue(
+          buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
-        const parsed: ImportSuccessError = JSON.parse(payloadRequest2);
-
-        expect(parsed).toEqual({
+        const response = await server.inject(multiRequest, context);
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
           errors: [],
           success: true,
           success_count: 3,
         });
-        expect(statusCodeRequest2).toEqual(200);
       });
     });
   });

@@ -11,9 +11,9 @@ import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 import { TRANSFORM_DOC_PATHS } from './app/constants';
+import { SavedSearchLoader } from '../../../../../src/plugins/discover/public';
 
 export type NpCore = typeof npStart.core;
 export type NpPlugins = typeof npStart.plugins;
