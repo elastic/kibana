@@ -35,9 +35,15 @@ interface SavedObjectRegistryEntry {
   title: string;
 }
 
+export interface ISavedObjectsManagementRegistry {
+  register(service: SavedObjectRegistryEntry): void;
+  all(): SavedObjectRegistryEntry[];
+  get(id: string): SavedObjectRegistryEntry | undefined;
+}
+
 const registry: SavedObjectRegistryEntry[] = [];
 
-export const savedObjectManagementRegistry = {
+export const savedObjectManagementRegistry: ISavedObjectsManagementRegistry = {
   register: (service: SavedObjectRegistryEntry) => {
     registry.push(service);
   },
