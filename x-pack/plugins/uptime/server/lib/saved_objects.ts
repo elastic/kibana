@@ -42,16 +42,12 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj.attributes;
     } catch (e) {
-      try {
-        return (
-          await client.create(umDynamicSettings.name, defaultDynamicSettings, {
-            id: settingsObjectId,
-            overwrite: false,
-          })
-        ).attributes;
-      } catch (otherE) {
-        return otherE;
-      }
+      return (
+        await client.create(umDynamicSettings.name, defaultDynamicSettings, {
+          id: settingsObjectId,
+          overwrite: false,
+        })
+      ).attributes;
     }
   },
   setUptimeDynamicSettings: async (client, settings) => {
