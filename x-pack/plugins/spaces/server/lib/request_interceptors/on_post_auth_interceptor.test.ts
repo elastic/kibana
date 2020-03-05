@@ -41,11 +41,18 @@ describe.skip('onPostAuthInterceptor', () => {
     ).toString('base64')}`,
   };
 
+  /**
+   *
+   * commented out due to hooks being called regardless of skip
+   * https://github.com/facebook/jest/issues/8379
+
   beforeEach(async () => {
     root = kbnTestServer.createRoot();
   });
 
   afterEach(async () => await root.shutdown());
+
+  */
 
   function initKbnServer(router: IRouter, basePath: IBasePath, routes: 'legacy' | 'new-platform') {
     const kbnServer = kbnTestServer.getKbnServer(root);

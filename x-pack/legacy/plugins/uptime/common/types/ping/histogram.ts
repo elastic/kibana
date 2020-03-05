@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type UnsignedInteger = any;
-
 export interface HistogramDataPoint {
   upCount?: number | null;
 
   downCount?: number | null;
 
-  x?: UnsignedInteger | null;
+  x?: number | null;
 
-  x0?: UnsignedInteger | null;
+  x0?: number | null;
 
-  y?: UnsignedInteger | null;
+  y?: number | null;
 }
 
 export interface GetPingHistogramParams {

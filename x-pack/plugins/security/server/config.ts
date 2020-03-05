@@ -24,41 +24,41 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
-export const ConfigSchema = schema.object(
-  {
-    loginAssistanceMessage: schema.string({ defaultValue: '' }),
-    cookieName: schema.string({ defaultValue: 'sid' }),
-    encryptionKey: schema.conditional(
-      schema.contextRef('dist'),
-      true,
-      schema.maybe(schema.string({ minLength: 32 })),
-      schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  cookieName: schema.string({ defaultValue: 'sid' }),
+  encryptionKey: schema.conditional(
+    schema.contextRef('dist'),
+    true,
+    schema.maybe(schema.string({ minLength: 32 })),
+    schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+  ),
+  session: schema.object({
+    idleTimeout: schema.nullable(schema.duration()),
+    lifespan: schema.nullable(schema.duration()),
+  }),
+  secureCookies: schema.boolean({ defaultValue: false }),
+  authc: schema.object({
+    providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
+    oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
+    saml: providerOptionsSchema(
+      'saml',
+      schema.object({
+        realm: schema.string(),
+        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+      })
     ),
-    session: schema.object({
-      idleTimeout: schema.nullable(schema.duration()),
-      lifespan: schema.nullable(schema.duration()),
+    http: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
-    secureCookies: schema.boolean({ defaultValue: false }),
-    authc: schema.object({
-      providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
-      saml: providerOptionsSchema(
-        'saml',
-        schema.object({
-          realm: schema.string(),
-          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
-        })
-      ),
-      http: schema.object({
-        enabled: schema.boolean({ defaultValue: true }),
-        autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-        schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
-      }),
-    }),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
-  { allowUnknowns: true }
-);
+  }),
+  audit: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+});
 
 export function createConfig$(context: PluginInitializerContext, isTLSEnabled: boolean) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(

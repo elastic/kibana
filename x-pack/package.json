@@ -222,7 +222,6 @@
     "copy-to-clipboard": "^3.0.8",
     "cronstrue": "^1.51.0",
     "cytoscape": "^3.10.0",
-    "cytoscape-dagre": "^2.2.2",
     "d3": "3.5.17",
     "d3-scale": "1.0.7",
     "dedent": "^0.7.0",
