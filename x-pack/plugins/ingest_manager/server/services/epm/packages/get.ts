@@ -102,6 +102,21 @@ export async function getInstallation(options: {
   return savedObject?.attributes;
 }
 
+export async function findInstalledPackageByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<Installation | undefined> {
+  const { savedObjectsClient, pkgName } = options;
+
+  const res = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    search: pkgName,
+    searchFields: ['name'],
+  });
+  if (res.saved_objects.length) return res.saved_objects[0].attributes;
+  return undefined;
+}
+
 function sortByName(a: { name: string }, b: { name: string }) {
   if (a.name > b.name) {
     return 1;
