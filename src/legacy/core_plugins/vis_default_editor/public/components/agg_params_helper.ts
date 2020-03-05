@@ -86,7 +86,7 @@ function getAggParamsToRender({
       let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
-      if (agg.type.name === 'top_hits') {
+      if (agg.type.name === 'top_hits' && param.name === 'field') {
         const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
         if (!allowStrings) {
           availableFields = availableFields.filter(field => field.type === 'number');
@@ -139,10 +139,11 @@ function getAggTypeOptions(
   agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string,
-  allowedAggs: string[]
+  allowedAggs: string[],
+  aggFilter: string[]
 ): ComboBoxGroupedOptions<IAggType> {
   const aggTypeOptions = aggTypeFilters
-    .filter((aggTypes as any)[groupName], indexPattern, agg)
+    .filter((aggTypes as any)[groupName], indexPattern, agg, aggFilter)
     .filter(aggType => {
       return filterByName([aggType], allowedAggs).length !== 0;
     });

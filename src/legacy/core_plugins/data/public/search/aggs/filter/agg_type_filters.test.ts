@@ -32,7 +32,7 @@ describe('AggTypeFilters', () => {
 
   it('should filter nothing without registered filters', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }] as IAggType[];
-    const filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    const filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual(aggTypes);
   });
 
@@ -40,23 +40,23 @@ describe('AggTypeFilters', () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }] as IAggType[];
     const filter = jest.fn();
     registry.addFilter(filter);
-    registry.filter(aggTypes, indexPattern, aggConfig);
-    expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig);
-    expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig);
+    registry.filter(aggTypes, indexPattern, aggConfig, []);
+    expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig, []);
+    expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig, []);
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }] as IAggType[];
-    let filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    let filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual(aggTypes);
 
     registry.addFilter(() => true);
     registry.addFilter(aggType => aggType.name !== 'count');
-    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
     registry.addFilter(aggType => aggType.name !== 'avg');
-    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1]]);
   });
 });

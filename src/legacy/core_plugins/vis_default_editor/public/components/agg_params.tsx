@@ -81,11 +81,13 @@ function DefaultEditorAggParams({
   schemas,
   allowedAggs,
 }: DefaultEditorAggParamsProps) {
+  const schema = getSchemaByName(schemas, agg.schema);
+  const { title, aggFilter } = schema;
   const groupedAggTypeOptions = useMemo(
-    () => getAggTypeOptions(agg, indexPattern, groupName, allowedAggs || []),
-    [agg, indexPattern, groupName, allowedAggs]
+    () => getAggTypeOptions(agg, indexPattern, groupName, allowedAggs || [], aggFilter as string[]),
+    [agg, indexPattern, groupName, allowedAggs, aggFilter]
   );
-  const { title } = getSchemaByName(schemas, agg.schema);
+
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
