@@ -638,7 +638,6 @@ export const AlertForm = ({
           alertsContext={alertsContext}
         />
       ) : null}
-      <EuiSpacer size="xl" />
       {selectedGroupActions}
       {isAddActionPanelOpen ? (
         <Fragment>

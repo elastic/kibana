@@ -20,6 +20,8 @@ import {
   EuiComboBoxOptionProps,
   EuiFormRow,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
@@ -450,6 +452,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
             errors={errors}
+            popupPosition={'upLeft'}
             onChangeSelectedThreshold={selectedThresholds =>
               setAlertParams('threshold', selectedThresholds)
             }
@@ -460,6 +463,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForLastExpression
+            popupPosition={'upLeft'}
             timeWindowSize={timeWindowSize || 1}
             timeWindowUnit={timeWindowUnit || ''}
             errors={errors}
@@ -472,16 +476,34 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization ? null : (
-        <Fragment>
-          <ThresholdVisualization
-            alertParams={alertParams}
-            aggregationTypes={builtInAggregationTypes}
-            comparators={builtInComparators}
-            alertsContext={alertsContext}
-          />
-        </Fragment>
-      )}
+      <EuiSpacer size="l" />
+      <div className="alertVisualizationChart">
+        {canShowVizualization ? (
+          <div>
+            <EuiSpacer size="xl" />
+            <EuiEmptyPrompt
+              iconType="visBarVertical"
+              body={
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.loadingAlertVisualizationDescription"
+                    defaultMessage="Preview alert visualization here"
+                  />
+                </EuiText>
+              }
+            />
+          </div>
+        ) : (
+          <Fragment>
+            <ThresholdVisualization
+              alertParams={alertParams}
+              aggregationTypes={builtInAggregationTypes}
+              comparators={builtInComparators}
+              alertsContext={alertsContext}
+            />
+          </Fragment>
+        )}
+      </div>
     </Fragment>
   );
 };
