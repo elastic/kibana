@@ -25,104 +25,144 @@ type DatemathExtension =
       diffUnit: Unit;
       diffAmount: number;
     }
-  | { value: 'now' }
-  | undefined;
+  | { value: 'now' };
 
 const datemathNowExpression = /(\+|\-)(\d+)(ms|s|m|h|d|w|M|y)$/;
 
+/**
+ * Extend a datemath value
+ * @param value The value to extend
+ * @param {'before' | 'after'} direction Should the value move before or after in time
+ * @param oppositeEdge For absolute values, the value of the other edge of the range
+ */
 export function extendDatemath(
   value: string,
-  direction: 'before' | 'after' = 'before'
-): DatemathExtension {
+  direction: 'before' | 'after' = 'before',
+  oppositeEdge?: string
+): DatemathExtension | undefined {
   if (!isValidDatemath(value)) {
     return undefined;
   }
 
+  // `now` cannot be extended
   if (value === 'now') {
     return { value: 'now' };
   }
 
+  // The unit is relative
   if (value.startsWith('now')) {
-    const [, operator, amount, unit] = datemathNowExpression.exec(value) || [];
-    if (!operator || !amount || !unit) {
-      return undefined;
-    }
-
-    const mustIncreaseAmount = operator === '-' && direction === 'before';
-    const parsedAmount = parseInt(amount, 10);
-    let newUnit: Unit = unit as Unit;
-    let newAmount: number;
-
-    // Extend the amount
-    switch (unit) {
-      // For small units, always double or halve the amount
-      case 'ms':
-      case 's':
-        newAmount = mustIncreaseAmount ? parsedAmount * 2 : Math.floor(parsedAmount / 2);
-        break;
-      // For minutes, increase or decrease in doubles or halves, depending on
-      // the amount of minutes
-      case 'm':
-        let ratio;
-        const MINUTES_LARGE = 10;
-        if (mustIncreaseAmount) {
-          ratio = parsedAmount >= MINUTES_LARGE ? 0.5 : 1;
-          newAmount = parsedAmount + Math.floor(parsedAmount * ratio);
-        } else {
-          newAmount =
-            parsedAmount >= MINUTES_LARGE
-              ? Math.floor(parsedAmount / 1.5)
-              : parsedAmount - Math.floor(parsedAmount * 0.5);
-        }
-        break;
-
-      // For hours, increase or decrease half an hour for 1 hour. Otherwise
-      // increase full hours
-      case 'h':
-        if (parsedAmount === 1) {
-          newAmount = mustIncreaseAmount ? 90 : 30;
-          newUnit = 'm';
-        } else {
-          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
-        }
-        break;
-
-      // For the rest of units, increase or decrease one smaller unit for
-      // amounts of 1. Otherwise increase or decrease the unit
-      case 'd':
-      case 'w':
-      case 'M':
-      case 'y':
-        if (parsedAmount === 1) {
-          newUnit = dateMath.unitsDesc[dateMath.unitsDesc.indexOf(unit) + 1];
-          newAmount = mustIncreaseAmount
-            ? convertDate(1, unit, newUnit) + 1
-            : convertDate(1, unit, newUnit) - 1;
-        } else {
-          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
-        }
-        break;
-
-      default:
-        throw new TypeError('Unhandled datemath unit');
-    }
-
-    // normalize amount and unit (i.e. 120s -> 2m)
-    const { unit: normalizedUnit, amount: normalizedAmount } = normalizeDate(newAmount, newUnit);
-
-    // How much have we changed the time?
-    const diffAmount = Math.abs(normalizedAmount - convertDate(parsedAmount, unit, normalizedUnit));
-    // if `diffAmount` is not an integer after normalization, express the difference in the original unit
-    const shouldKeepDiffUnit = diffAmount % 1 !== 0;
-
-    return {
-      value: `now${operator}${normalizedAmount}${normalizedUnit}`,
-      diffUnit: shouldKeepDiffUnit ? unit : newUnit,
-      diffAmount: shouldKeepDiffUnit ? Math.abs(newAmount - parsedAmount) : diffAmount,
-    };
+    return extendRelativeDatemath(value, direction);
+  } else if (oppositeEdge && isValidDatemath(oppositeEdge)) {
+    return extendAbsoluteDatemath(value, direction, oppositeEdge);
   }
 
   return undefined;
+}
+
+function extendRelativeDatemath(
+  value: string,
+  direction: 'before' | 'after'
+): DatemathExtension | undefined {
+  const [, operator, amount, unit] = datemathNowExpression.exec(value) || [];
+  if (!operator || !amount || !unit) {
+    return undefined;
+  }
+
+  const mustIncreaseAmount = operator === '-' && direction === 'before';
+  const parsedAmount = parseInt(amount, 10);
+  let newUnit: Unit = unit as Unit;
+  let newAmount: number;
+
+  // Extend the amount
+  switch (unit) {
+    // For small units, always double or halve the amount
+    case 'ms':
+    case 's':
+      newAmount = mustIncreaseAmount ? parsedAmount * 2 : Math.floor(parsedAmount / 2);
+      break;
+    // For minutes, increase or decrease in doubles or halves, depending on
+    // the amount of minutes
+    case 'm':
+      let ratio;
+      const MINUTES_LARGE = 10;
+      if (mustIncreaseAmount) {
+        ratio = parsedAmount >= MINUTES_LARGE ? 0.5 : 1;
+        newAmount = parsedAmount + Math.floor(parsedAmount * ratio);
+      } else {
+        newAmount =
+          parsedAmount >= MINUTES_LARGE
+            ? Math.floor(parsedAmount / 1.5)
+            : parsedAmount - Math.floor(parsedAmount * 0.5);
+      }
+      break;
+
+    // For hours, increase or decrease half an hour for 1 hour. Otherwise
+    // increase full hours
+    case 'h':
+      if (parsedAmount === 1) {
+        newAmount = mustIncreaseAmount ? 90 : 30;
+        newUnit = 'm';
+      } else {
+        newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
+      }
+      break;
+
+    // For the rest of units, increase or decrease one smaller unit for
+    // amounts of 1. Otherwise increase or decrease the unit
+    case 'd':
+    case 'w':
+    case 'M':
+    case 'y':
+      if (parsedAmount === 1) {
+        newUnit = dateMath.unitsDesc[dateMath.unitsDesc.indexOf(unit) + 1];
+        newAmount = mustIncreaseAmount
+          ? convertDate(1, unit, newUnit) + 1
+          : convertDate(1, unit, newUnit) - 1;
+      } else {
+        newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
+      }
+      break;
+
+    default:
+      throw new TypeError('Unhandled datemath unit');
+  }
+
+  // normalize amount and unit (i.e. 120s -> 2m)
+  const { unit: normalizedUnit, amount: normalizedAmount } = normalizeDate(newAmount, newUnit);
+
+  // How much have we changed the time?
+  const diffAmount = Math.abs(normalizedAmount - convertDate(parsedAmount, unit, normalizedUnit));
+  // if `diffAmount` is not an integer after normalization, express the difference in the original unit
+  const shouldKeepDiffUnit = diffAmount % 1 !== 0;
+
+  return {
+    value: `now${operator}${normalizedAmount}${normalizedUnit}`,
+    diffUnit: shouldKeepDiffUnit ? unit : newUnit,
+    diffAmount: shouldKeepDiffUnit ? Math.abs(newAmount - parsedAmount) : diffAmount,
+  };
+}
+
+function extendAbsoluteDatemath(
+  value: string,
+  direction: 'before' | 'after',
+  oppositeEdge: string
+): DatemathExtension {
+  const valueTimestamp = datemathToEpochMillis(value)!;
+  const oppositeEdgeTimestamp = datemathToEpochMillis(oppositeEdge)!;
+  const actualTimestampDiff = Math.abs(valueTimestamp - oppositeEdgeTimestamp);
+  const normalizedDiff = normalizeDate(actualTimestampDiff, 'ms');
+  const normalizedTimestampDiff = convertDate(normalizedDiff.amount, normalizedDiff.unit, 'ms');
+
+  const newValue =
+    direction === 'before'
+      ? valueTimestamp - normalizedTimestampDiff
+      : valueTimestamp + normalizedTimestampDiff;
+
+  return {
+    value: new Date(newValue).toISOString(),
+    diffUnit: normalizedDiff.unit,
+    diffAmount: normalizedDiff.amount,
+  };
 }
 
 const CONVERSION_RATIOS: Record<string, Array<[Unit, number]>> = {

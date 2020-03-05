@@ -29,7 +29,8 @@ interface LogTextStreamLoadingItemViewProps {
   /** topCursor.time || bottomCursor.time */
   timestamp?: number;
   /** startDateExpression || endDateExpression */
-  rangeEdge?: string;
+  startDateExpression: string;
+  endDateExpression: string;
   className?: string;
   hasMore: boolean;
   isLoading: boolean;
@@ -55,7 +56,8 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     const {
       position,
       timestamp,
-      rangeEdge,
+      startDateExpression,
+      endDateExpression,
       className,
       hasMore,
       isLoading,
@@ -75,7 +77,8 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
             position={position}
             onStreamStart={onStreamStart}
             onExtendRange={onExtendRange}
-            rangeEdge={rangeEdge}
+            startDateExpression={startDateExpression}
+            endDateExpression={endDateExpression}
           />
         ) : null}
       </EuiFlexGroup>
@@ -159,14 +162,17 @@ const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) 
 
 type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
-  'position' | 'rangeEdge' | 'onExtendRange' | 'onStreamStart'
+  'position' | 'startDateExpression' | 'endDateExpression' | 'onExtendRange' | 'onStreamStart'
 >;
 const ProgressCta: React.FC<ProgressCtaProps> = ({
   position,
-  rangeEdge,
+  startDateExpression,
+  endDateExpression,
   onExtendRange,
   onStreamStart,
 }) => {
+  const rangeEdge = position === 'start' ? startDateExpression : endDateExpression;
+
   if (rangeEdge === 'now' && position === 'end') {
     return (
       <EuiButton onClick={onStreamStart} size="s">
@@ -176,13 +182,10 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
   }
 
   const iconType = position === 'start' ? 'arrowUp' : 'arrowDown';
-
-  if (!rangeEdge) {
-    return null;
-  }
-
-  const extendedRange = extendDatemath(rangeEdge, position === 'start' ? 'before' : 'after');
-
+  const extendedRange =
+    position === 'start'
+      ? extendDatemath(startDateExpression, 'before', endDateExpression)
+      : extendDatemath(endDateExpression, 'after', startDateExpression);
   if (!extendedRange || !('diffUnit' in extendedRange)) {
     return null;
   }
