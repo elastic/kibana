@@ -85,10 +85,10 @@ export const syncQueryStateWithUrl = (
     stateContainer: {
       ...globalQueryStateContainer,
       set: state => {
-        if (typeof state !== 'object' || state === null) {
-          return;
+        if (state) {
+          // syncState utils requires to handle incoming "null" value
+          globalQueryStateContainer.set(state);
         }
-        globalQueryStateContainer.set(state);
       },
     },
     storageKey: GLOBAL_STATE_STORAGE_KEY,
