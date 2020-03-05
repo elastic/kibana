@@ -18,7 +18,6 @@ import {
   StopDatafeedResponse,
 } from './types';
 import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
-import { throwIfNotOk } from '../../hooks/api/api';
 import { KibanaServices } from '../../lib/kibana';
 
 /**
@@ -31,18 +30,14 @@ export const checkRecognizer = async ({
   indexPatternName,
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> => {
-  const response = await KibanaServices.get().http.fetch<RecognizerModule[]>(
+  return KibanaServices.get().http.fetch<RecognizerModule[]>(
     `/api/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
-      asResponse: true,
       asSystemRequest: true,
       signal,
     }
   );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
@@ -52,18 +47,11 @@ export const checkRecognizer = async ({
  * @param signal to cancel request
  */
 export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
-  const response = await KibanaServices.get().http.fetch<Module[]>(
-    `/api/ml/modules/get_module/${moduleId}`,
-    {
-      method: 'GET',
-      asResponse: true,
-      asSystemRequest: true,
-      signal,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<Module[]>(`/api/ml/modules/get_module/${moduleId}`, {
+    method: 'GET',
+    asSystemRequest: true,
+    signal,
+  });
 };
 
 /**
@@ -93,16 +81,12 @@ export const setupMlJob = async ({
         startDatafeed: false,
         useDedicatedIndex: true,
       }),
-      asResponse: true,
       asSystemRequest: true,
     }
   );
 
-  await throwIfNotOk(response.response);
-  const json = response.body!;
-  throwIfErrorAttachedToSetup(json, jobIdErrorFilter);
-
-  return json;
+  throwIfErrorAttachedToSetup(response, jobIdErrorFilter);
+  return response;
 };
 
 /**
@@ -126,16 +110,12 @@ export const startDatafeeds = async ({
         datafeedIds,
         ...(start !== 0 && { start }),
       }),
-      asResponse: true,
       asSystemRequest: true,
     }
   );
 
-  await throwIfNotOk(response.response);
-  const json = response.body!;
-  throwIfErrorAttached(json, datafeedIds);
-
-  return json;
+  throwIfErrorAttached(response, datafeedIds);
+  return response;
 };
 
 /**
@@ -155,13 +135,9 @@ export const stopDatafeeds = async ({
       body: JSON.stringify({
         datafeedIds,
       }),
-      asResponse: true,
       asSystemRequest: true,
     }
   );
-
-  await throwIfNotOk(stopDatafeedsResponse.response);
-  const stopDatafeedsResponseJson = stopDatafeedsResponse.body!;
 
   const datafeedPrefix = 'datafeed-';
   const closeJobsResponse = await KibanaServices.get().http.fetch<CloseJobsResponse>(
@@ -175,13 +151,11 @@ export const stopDatafeeds = async ({
             : dataFeedId
         ),
       }),
-      asResponse: true,
       asSystemRequest: true,
     }
   );
 
-  await throwIfNotOk(closeJobsResponse.response);
-  return [stopDatafeedsResponseJson, closeJobsResponse.body!];
+  return [stopDatafeedsResponse, closeJobsResponse];
 };
 
 /**
@@ -193,17 +167,10 @@ export const stopDatafeeds = async ({
  * @param signal to cancel request
  */
 export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
-  const response = await KibanaServices.get().http.fetch<JobSummary[]>(
-    '/api/ml/jobs/jobs_summary',
-    {
-      method: 'POST',
-      body: JSON.stringify({}),
-      asResponse: true,
-      asSystemRequest: true,
-      signal,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
+    method: 'POST',
+    body: JSON.stringify({}),
+    asSystemRequest: true,
+    signal,
+  });
 };
