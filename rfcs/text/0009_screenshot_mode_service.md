@@ -188,7 +188,6 @@ cases such as the Dashboard application's "print layout" mode.
 Why should we *not* do this? Please consider:
 
 - Adds extra code that application teams have to maintain and account for in their tests.
-- Hard for application teams to decide what the end result should be when rendering for screenshot mode.
 - Hard for application teams to create an environment to test against to check the screenshot mode rendering of their work.
 
 As a solution to the drawbacks of extra maintenance and tests needed, the
