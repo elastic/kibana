@@ -17,9 +17,9 @@
  * under the License.
  */
 import { IndexPatternField } from 'src/plugins/data/public';
-import { AggConfig } from '../../agg_config';
+import { IAggConfig } from '../../agg_config';
 
-type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: AggConfig) => boolean;
+type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: IAggConfig) => boolean;
 
 /**
  * A registry to store {@link AggTypeFieldFilter} which are used to filter down
@@ -41,11 +41,11 @@ class AggTypeFieldFilters {
   /**
    * Returns the {@link any|fields} filtered by all registered filters.
    *
-   * @param fields An IndexedArray of fields that will be filtered down by this registry.
+   * @param fields An array of fields that will be filtered down by this registry.
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(fields: IndexPatternField[], aggConfig: AggConfig) {
+  public filter(fields: IndexPatternField[], aggConfig: IAggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter => filter(field, aggConfig));

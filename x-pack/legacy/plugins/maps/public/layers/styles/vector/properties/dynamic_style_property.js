@@ -17,17 +17,17 @@ import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, source) {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
     this._getFieldMeta = getFieldMeta;
     this._getFieldFormatter = getFieldFormatter;
-    this._source = source;
   }
 
   getValueSuggestions = query => {
-    const fieldName = this.getFieldName();
-    return this._source && fieldName ? this._source.getValueSuggestions(fieldName, query) : [];
+    const field = this.getField();
+    const fieldSource = this.getFieldSource();
+    return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
   getFieldMeta() {
@@ -36,6 +36,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getField() {
     return this._field;
+  }
+
+  getFieldSource() {
+    return this._field ? this._field.getSource() : null;
   }
 
   getFieldName() {
@@ -180,10 +184,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
-    const realFieldName = this._field.getESDocFieldName
-      ? this._field.getESDocFieldName()
-      : this._field.getName();
-    const stats = fieldMetaData[realFieldName];
+    const stats = fieldMetaData[this._field.getRootName()];
     if (!stats) {
       return null;
     }
@@ -203,12 +204,12 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   _pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
-    const name = this.getField().getName();
-    if (!fieldMetaData[name] || !fieldMetaData[name].buckets) {
+    const rootFieldName = this._field.getRootName();
+    if (!fieldMetaData[rootFieldName] || !fieldMetaData[rootFieldName].buckets) {
       return null;
     }
 
-    const ordered = fieldMetaData[name].buckets.map(bucket => {
+    const ordered = fieldMetaData[rootFieldName].buckets.map(bucket => {
       return {
         key: bucket.key,
         count: bucket.doc_count,

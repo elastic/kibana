@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from '.';
@@ -21,6 +22,7 @@ const defaultProps = {
   uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
+  data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
 };
 

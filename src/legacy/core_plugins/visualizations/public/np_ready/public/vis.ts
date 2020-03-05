@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { VisType } from './types';
-import { IAggConfigs } from '../../legacy_imports';
+import { VisType } from './vis_types';
 import { Status } from './legacy/update_status';
+import { IAggConfigs } from '../../../../data/public';
 
 export interface Vis {
   type: VisType;

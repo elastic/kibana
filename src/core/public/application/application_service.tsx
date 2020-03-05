@@ -76,10 +76,19 @@ function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
 }
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
-const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') =>
-  `/${mounters.get(appId)?.appRoute ?? `/app/${appId}`}/${path}`
+
+const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') => {
+  const appBasePath = mounters.get(appId)?.appRoute
+    ? `/${mounters.get(appId)!.appRoute}`
+    : `/app/${appId}`;
+
+  // Only preppend slash if not a hash or query path
+  path = path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
+
+  return `${appBasePath}${path}`
     .replace(/\/{2,}/g, '/') // Remove duplicate slashes
     .replace(/\/$/, ''); // Remove trailing slash
+};
 
 const allApplicationsFilter = '__ALL__';
 
@@ -93,7 +102,7 @@ interface AppUpdaterWrapper {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App | LegacyApp>();
+  private readonly apps = new Map<string, App<any> | LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
@@ -143,7 +152,7 @@ export class ApplicationService {
 
     return {
       registerMountContext: this.mountContext!.registerContext,
-      register: (plugin, app) => {
+      register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
         if (this.registrationClosed) {

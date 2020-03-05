@@ -19,6 +19,7 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { KibanaRequest } from '../../../http';
 
 /**
@@ -27,6 +28,7 @@ import { KibanaRequest } from '../../../http';
  */
 export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
+  typeRegistry: ISavedObjectTypeRegistry;
   request: KibanaRequest;
 }
 
@@ -84,9 +86,17 @@ export class SavedObjectsClientProvider {
   }>();
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
+  private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
-  constructor({ defaultClientFactory }: { defaultClientFactory: SavedObjectsClientFactory }) {
+  constructor({
+    defaultClientFactory,
+    typeRegistry,
+  }: {
+    defaultClientFactory: SavedObjectsClientFactory;
+    typeRegistry: ISavedObjectTypeRegistry;
+  }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
+    this._typeRegistry = typeRegistry;
   }
 
   addClientWrapperFactory(
@@ -129,6 +139,7 @@ export class SavedObjectsClientProvider {
         return factory({
           request,
           client: clientToWrap,
+          typeRegistry: this._typeRegistry,
         });
       }, client);
   }

@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
+import { clampToLatBounds } from '../../../elasticsearch_geo_utils';
 
 const ZOOM_TILE_KEY_INDEX = 0;
 const X_TILE_KEY_INDEX = 1;
@@ -87,7 +88,7 @@ function sec(value) {
 }
 
 function latitudeToTile(lat, tileCount) {
-  const radians = (lat * Math.PI) / 180;
+  const radians = (clampToLatBounds(lat) * Math.PI) / 180;
   const y = ((1 - Math.log(Math.tan(radians) + sec(radians)) / Math.PI) / 2) * tileCount;
   return Math.floor(y);
 }

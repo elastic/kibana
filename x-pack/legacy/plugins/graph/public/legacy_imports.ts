@@ -6,6 +6,4 @@
 
 import 'ace';
 
-// @ts-ignore
-export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 export { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';

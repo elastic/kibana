@@ -5,17 +5,18 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { OpenFlyoutAddDrilldown } from '../actions/open_flyout_add_drilldown';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
+import { FlyoutCreateDrilldownAction } from '../actions';
 import { DrilldownsSetupDependencies } from '../plugin';
 
 export class DrilldownService {
   bootstrap(core: CoreSetup, { uiActions }: DrilldownsSetupDependencies) {
-    const actionOpenFlyoutAddDrilldown = new OpenFlyoutAddDrilldown({
+    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({
       overlays: async () => (await core.getStartServices())[0].overlays,
     });
 
-    uiActions.registerAction(actionOpenFlyoutAddDrilldown);
-    uiActions.attachAction('CONTEXT_MENU_TRIGGER', actionOpenFlyoutAddDrilldown.id);
+    uiActions.registerAction(actionFlyoutCreateDrilldown);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
   }
 
   /**

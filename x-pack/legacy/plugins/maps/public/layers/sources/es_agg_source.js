@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AbstractESSource } from './es_source';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
 import {
-  METRIC_TYPE,
-  COUNT_AGG_TYPE,
+  AGG_TYPE,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
@@ -18,23 +18,6 @@ import {
 export const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
-  static METRIC_SCHEMA_CONFIG = {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT,
-    ],
-    defaults: [{ schema: 'metric', type: METRIC_TYPE.COUNT }],
-  };
-
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = this._descriptor.metrics
@@ -81,7 +64,7 @@ export class AbstractESAggSource extends AbstractESSource {
     if (metrics.length === 0) {
       metrics.push(
         new ESAggMetricField({
-          aggType: COUNT_AGG_TYPE,
+          aggType: AGG_TYPE.COUNT,
           source: this,
           origin: this.getOriginForField(),
         })
@@ -90,16 +73,34 @@ export class AbstractESAggSource extends AbstractESSource {
     return metrics;
   }
 
-  formatMetricKey(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
+  getAggKey(aggType, fieldName) {
+    return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }
 
-  formatMetricLabel(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
+  getAggLabel(aggType, fieldName) {
+    switch (aggType) {
+      case AGG_TYPE.COUNT:
+        return COUNT_PROP_LABEL;
+      case AGG_TYPE.TERMS:
+        return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
+          defaultMessage: `Top {fieldName}`,
+          values: { fieldName },
+        });
+      default:
+        return `${aggType} ${fieldName}`;
+    }
   }
 
-  createMetricAggConfigs() {
-    return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+  getValueAggsDsl(indexPattern) {
+    const valueAggsDsl = {};
+    this.getMetricFields()
+      .filter(esAggMetric => {
+        return esAggMetric.getAggType() !== AGG_TYPE.COUNT;
+      })
+      .forEach(esAggMetric => {
+        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
+      });
+    return valueAggsDsl;
   }
 
   async getNumberFields() {

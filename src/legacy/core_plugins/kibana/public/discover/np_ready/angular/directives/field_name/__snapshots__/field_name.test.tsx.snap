@@ -28,9 +28,11 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      t.t.test
+      <span>
+        t.t.test
+      </span>
     </span>
   </div>
 </div>
@@ -64,9 +66,11 @@ exports[`FieldName renders a number field by providing a field record, useShortD
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      test.test.test
+      <span>
+        test.test.test
+      </span>
     </span>
   </div>
 </div>
@@ -100,9 +104,11 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      test
+      <span>
+        test
+      </span>
     </span>
   </div>
 </div>

@@ -6,8 +6,6 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import { npStart } from 'ui/new_platform';
-
 import { useAppDependencies } from '../../app_dependencies';
 
 import {
@@ -19,15 +17,14 @@ import {
 
 import { InitializedKibanaContextValue, KibanaContext, KibanaContextValue } from './kibana_context';
 
-const indexPatterns = npStart.plugins.data.indexPatterns;
-const savedObjectsClient = npStart.core.savedObjects.client;
-
 interface Props {
   savedObjectId: string;
 }
 
 export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
   const appDeps = useAppDependencies();
+  const indexPatterns = appDeps.plugins.data.indexPatterns;
+  const savedObjectsClient = appDeps.core.savedObjects.client;
   const savedSearches = appDeps.plugins.savedSearches.getClient();
 
   const [contextValue, setContextValue] = useState<KibanaContextValue>({ initialized: false });
@@ -50,7 +47,7 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    const kibanaConfig = npStart.core.uiSettings;
+    const kibanaConfig = appDeps.core.uiSettings;
 
     const {
       indexPattern: currentIndexPattern,
@@ -61,7 +58,6 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
     const kibanaContext: InitializedKibanaContextValue = {
       indexPatterns,
       initialized: true,
-      kbnBaseUrl: npStart.core.injectedMetadata.getBasePath(),
       kibanaConfig,
       combinedQuery,
       currentIndexPattern,

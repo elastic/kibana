@@ -78,7 +78,7 @@ function optionValueToThreshold(value: number) {
   return threshold;
 }
 
-const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
+export const DEFAULT_WATCH_SEVERITY = SEVERITY_OPTIONS[3];
 
 const getSeverityOptions = () =>
   SEVERITY_OPTIONS.map(({ color, display, val }) => ({
@@ -114,7 +114,7 @@ interface Props {
 }
 
 export const SelectSeverity: FC<Props> = ({ onChange }) => {
-  const [severity, setSeverity] = useState(TABLE_SEVERITY_DEFAULT);
+  const [severity, setSeverity] = useState(DEFAULT_WATCH_SEVERITY);
 
   const onSeverityChange = (valueDisplay: string) => {
     const option = optionValueToThreshold(optionsMap[valueDisplay]);

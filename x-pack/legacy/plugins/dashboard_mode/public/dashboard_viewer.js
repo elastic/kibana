@@ -15,9 +15,7 @@ import { uiModules } from 'ui/modules';
 
 // import the uiExports that we want to "use"
 import 'uiExports/contextMenuActions';
-import 'uiExports/visTypes';
-import 'uiExports/visResponseHandlers';
-import 'uiExports/visRequestHandlers';
+
 import 'uiExports/inspectorViews';
 import 'uiExports/interpreter';
 import 'uiExports/savedObjectTypes';
@@ -29,7 +27,6 @@ import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';

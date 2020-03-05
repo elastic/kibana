@@ -102,7 +102,7 @@ const inputId = 'ConAppInputTextarea';
 export const Editor: FunctionComponent<EditorProps> = memo(
   ({ textObject }) => {
     const {
-      services: { history, notifications },
+      services: { history, notifications, settings: settingsService },
       docLinkVersion,
       elasticsearchUrl,
     } = useServicesContext();
@@ -219,7 +219,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       setTextArea(textareaElement);
 
       // Start autocomplete polling
-      mappings.retrieveAutoCompleteInfo();
+      mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
       const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
       setupAutosave();

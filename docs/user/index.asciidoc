@@ -1,12 +1,12 @@
 include::introduction.asciidoc[]
 
+include::getting-started.asciidoc[]
+
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
-
-include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
 
