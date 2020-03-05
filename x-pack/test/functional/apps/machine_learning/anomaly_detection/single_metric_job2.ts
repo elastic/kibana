@@ -19,6 +19,7 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('ml/farequote_data_only');
       await ml.testResources.createIndexPatternIfNeeded('farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar('wizard-test-calendar');
       await ml.securityUI.loginAsMlPowerUser();

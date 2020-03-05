@@ -25,10 +25,17 @@ export enum SavedObjectType {
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
 
 export function MachineLearningTestResourcesProvider({ getService }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
 
   return {
+    async setKibanaTimeZoneToUTC() {
+      await kibanaServer.uiSettings.update({
+        'dateFormat:tz': 'UTC',
+      });
+    },
+
     async savedObjectExists(id: string, objectType: SavedObjectType): Promise<boolean> {
       const response = await supertest.get(`/api/saved_objects/${objectType}/${id}`);
       return response.statusCode === 200;
