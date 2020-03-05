@@ -43,6 +43,11 @@ export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = 
     if (_.has(bucket[key], 'value')) {
       properties[key] = bucket[key].value;
     } else if (_.has(bucket[key], 'buckets')) {
+      if (bucket[key].buckets.length === 0) {
+        // No top term
+        continue;
+      }
+
       properties[key] = _.get(bucket[key], 'buckets[0].key');
       const topBucketCount = bucket[key].buckets[0].doc_count;
       const totalCount = bucket.doc_count;

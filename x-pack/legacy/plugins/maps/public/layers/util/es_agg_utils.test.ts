@@ -37,4 +37,16 @@ describe('extractPropertiesFromBucket', () => {
       'terms_of_machine.os.keyword__percentage': 33,
     });
   });
+
+  test('Should handle empty top bucket aggregation', () => {
+    const properties = extractPropertiesFromBucket({
+      doc_count: 3,
+      'terms_of_machine.os.keyword': {
+        buckets: [],
+      },
+    });
+    expect(properties).toEqual({
+      doc_count: 3,
+    });
+  });
 });
