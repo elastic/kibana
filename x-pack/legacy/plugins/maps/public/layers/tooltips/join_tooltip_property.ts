@@ -8,7 +8,6 @@ import { ITooltipProperty } from './tooltip_property';
 import { IJoin } from '../joins/join';
 
 export class JoinTooltipProperty implements ITooltipProperty {
-
   private _tooltipProperty: ITooltipProperty;
   private _leftInnerJoins: IJoin[];
 
@@ -37,7 +36,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getHtmlDisplayValue();
   }
 
-  async getESFilters(): Promise<Filter[]> {
+  async getESFilters(): Promise<unknown[]> {
     const esFilters = [];
     if (this._tooltipProperty.isFilterable()) {
       esFilters.push(...(await this._tooltipProperty.getESFilters()));
@@ -54,6 +53,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
           esFilters.push(...(await esTooltipProperty.getESFilters()));
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error('Cannot create joined filter', e);
       }
     }

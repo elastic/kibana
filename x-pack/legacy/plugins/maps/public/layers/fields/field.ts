@@ -6,6 +6,7 @@
 
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
+import { ITooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;
@@ -13,6 +14,7 @@ export interface IField {
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
+  createTooltipProperty(value: string): Promise<ITooltipProperty>;
 }
 
 export class AbstractField implements IField {
@@ -62,7 +64,7 @@ export class AbstractField implements IField {
     return this._fieldName;
   }
 
-  async createTooltipProperty(): Promise<unknown> {
+  async createTooltipProperty(value: string): Promise<ITooltipProperty> {
     throw new Error('must implement Field#createTooltipProperty');
   }
 
