@@ -239,10 +239,6 @@ export const AlertForm = ({
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
           toastNotifications={toastNotifications}
-          actionTypes={[
-            { id: '.email', name: 'Email', enabled: true },
-            { id: '.index', name: 'Index', enabled: true },
-          ]}
         />
       ) : null}
     </Fragment>

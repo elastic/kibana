@@ -7,32 +7,9 @@
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { PluginInitializerContext } from '../../../../../src/core/public';
-import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../plugins/triggers_actions_ui/public';
 import { plugin } from './';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-type PluginsSetupExtended = typeof npSetup.plugins & {
-  // adds plugins which aren't in the PluginsSetup interface, but do exist
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
-};
-
-type PluginsStartExtended = typeof npStart.plugins & {
-  // adds plugins which aren't in the PluginsSetup interface, but do exist
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
-};
-
-const setupDependencies = npSetup.plugins as PluginsSetupExtended;
-const startDependencies = npStart.plugins as PluginsStartExtended;
-
-pluginInstance.setup(npSetup.core, {
-  ...npSetup.plugins,
-  triggers_actions_ui: setupDependencies.triggers_actions_ui,
-});
-pluginInstance.start(npStart.core, {
-  ...npStart.plugins,
-  triggers_actions_ui: startDependencies.triggers_actions_ui,
-});
+pluginInstance.setup(npSetup.core, npSetup.plugins);
+pluginInstance.start(npStart.core, npStart.plugins);

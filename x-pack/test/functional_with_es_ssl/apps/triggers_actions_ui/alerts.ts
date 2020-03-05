@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const find = getService('find');
+  const retry = getService('retry');
 
   async function createAlert(alertTypeId?: string, name?: string, params?: any) {
     const { body: createdAlert } = await supertest
@@ -61,7 +62,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
       await nameInput.click();
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await find.clickByCssSelector('[data-test-subj="intervalInput"]');
+      // await load action types to complete
+      await retry.try(async () => {
+        await testSubjects.click('.slack-ActionTypeSelectOption');
+      });
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
       await connectorNameInput.click();
