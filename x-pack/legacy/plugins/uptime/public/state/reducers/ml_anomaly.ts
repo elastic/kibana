@@ -13,6 +13,7 @@ import {
 } from '../actions';
 import { IReducerState } from './types';
 import { handleAsyncAction } from './utils';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 export interface MLJobState extends IReducerState {
   mlJob: any;
@@ -26,12 +27,14 @@ const initialState: MLJobState = {
   errors: [],
 };
 
+type Payload = IHttpFetchError;
+
 export const mlJobsReducer = handleActions<MLJobState>(
   {
-    ...handleAsyncAction<MLJobState>('mlJob', getMLJobAction),
-    ...handleAsyncAction<MLJobState>('mlJob', createMLJobAction),
-    ...handleAsyncAction<MLJobState>('mlJob', deleteMLJobAction),
-    ...handleAsyncAction<MLJobState>('anomalies', anomalyRecordsAction),
+    ...handleAsyncAction<MLJobState, Payload>('mlJob', getMLJobAction),
+    ...handleAsyncAction<MLJobState, Payload>('mlJob', createMLJobAction),
+    ...handleAsyncAction<MLJobState, Payload>('mlJob', deleteMLJobAction),
+    ...handleAsyncAction<MLJobState, Payload>('anomalies', anomalyRecordsAction),
   },
   initialState
 );

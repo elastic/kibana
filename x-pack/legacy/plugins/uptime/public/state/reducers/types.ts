@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+
 export interface IReducerState {
-  errors: any[];
+  errors: IHttpFetchError[];
   loading: boolean;
 }

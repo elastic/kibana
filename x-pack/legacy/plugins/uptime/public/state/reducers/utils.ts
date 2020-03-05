@@ -6,21 +6,25 @@
 
 import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
+import { IReducerState } from './types';
 
-export function handleAsyncAction<ST>(storeKey: string, asyncAction: AsyncAction) {
+export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
+  storeKey: string,
+  asyncAction: AsyncAction
+) {
   return {
-    [String(asyncAction.get)]: (state: ST) => ({
+    [String(asyncAction.get)]: (state: ReducerState) => ({
       ...state,
       loading: true,
     }),
 
-    [String(asyncAction.success)]: (state: ST, action: Action<any>) => ({
+    [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
       loading: false,
       [storeKey]: action.payload === null ? action.payload : { ...action.payload },
     }),
 
-    [String(asyncAction.fail)]: (state: ST, action: Action<any>) => ({
+    [String(asyncAction.fail)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,
