@@ -233,7 +233,7 @@ describe('reindex API', () => {
         kibanaResponseFactory
       );
       // It called resume correctly
-      expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex');
+      expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
       expect(mockReindexService.createReindexOperation).not.toHaveBeenCalled();
 
       // It returned the right results
