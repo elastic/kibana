@@ -35,6 +35,7 @@ import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection
 import { ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
+import { DataStart as LegacyDataStart } from '../../../../data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -71,3 +72,7 @@ export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('
 export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
   SavedVisualizationsLoader
 >('SavedVisualisationsLoader');
+
+export const [getAggs, setAggs] = createGetterSetter<LegacyDataStart['search']['aggs']>(
+  'AggConfigs'
+);

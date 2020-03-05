@@ -30,7 +30,10 @@ import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/leg
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
-function modeForContentType(contentType: string) {
+function modeForContentType(contentType?: string) {
+  if (!contentType) {
+    return 'ace/mode/text';
+  }
   if (contentType.indexOf('application/json') >= 0) {
     return 'ace/mode/json';
   } else if (contentType.indexOf('application/yaml') >= 0) {
