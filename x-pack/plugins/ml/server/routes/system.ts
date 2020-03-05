@@ -19,7 +19,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
-  { spacesPlugin, cloud }: SystemRouteDeps
+  { spaces, cloud }: SystemRouteDeps
 ) {
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
@@ -120,8 +120,8 @@ export function systemRoutes(
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
-          spacesPlugin !== undefined
-            ? spacesUtilsProvider(spacesPlugin, (request as unknown) as Request)
+          spaces !== undefined
+            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
             : { isMlEnabledInSpace: async () => true };
 
         const { getPrivileges } = privilegesProvider(

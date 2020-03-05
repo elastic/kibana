@@ -1,5 +1,5 @@
 {
-  "id": "remote_clusters",
+  "id": "remoteClusters",
   "version": "kibana",
   "configPath": [
     "xpack",

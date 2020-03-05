@@ -21,7 +21,7 @@ import { identity } from 'lodash';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
-import { AggType } from './agg_types';
+import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
@@ -343,8 +343,7 @@ describe('AggConfig', () => {
       expect(typeof aggConfig.params).toBe('object');
       expect(aggConfig.type).toBeInstanceOf(AggType);
       expect(aggConfig.type).toHaveProperty('name', 'date_histogram');
-      expect(typeof aggConfig.schema).toBe('object');
-      expect(aggConfig.schema).toHaveProperty('name', 'segment');
+      expect(typeof aggConfig.schema).toBe('string');
 
       const state = aggConfig.toJSON();
       expect(state).toHaveProperty('id', '1');
