@@ -20,20 +20,12 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'share',
-    'timePicker',
-    'home',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const docTable = getService('docTable');
   const TEST_COLUMN_NAMES = ['@message'];
   const TEST_FILTER_COLUMN_NAMES = [
     ['extension', 'jpg'],
@@ -107,7 +99,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // unable to validate on EUI pop-over
     it('click share button', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
