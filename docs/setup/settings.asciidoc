@@ -330,10 +330,6 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
 This setting may not be used when `server.compression.enabled` is set to `false`.
 
-[[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
-
-`server.cors.origin:`:: *Default: none* Specifies origins. “origin” must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
-
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the Kibana server.
 
