@@ -85,6 +85,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private savedVisualization: VisSavedObject;
   private appState: { save(): void } | undefined;
   private uiState: PersistedState;
+  private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
@@ -122,6 +123,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       parent
     );
+    this.timefilter = timefilter;
     this.appState = appState;
     this.savedVisualization = savedVisualization;
     this.vis = this.savedVisualization.vis;
@@ -364,6 +366,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     };
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
+      timefilter: this.timefilter,
       timeRange: this.timeRange,
       savedObjectId: this.savedVisualization.id,
     });
