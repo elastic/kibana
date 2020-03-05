@@ -195,7 +195,7 @@ test('throws an error when failing to load action through savedObjectsClient', a
   );
 });
 
-test('returns an error if actionType is not enabled', async () => {
+test('throws an error if actionType is not enabled', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -216,17 +216,11 @@ test('returns an error if actionType is not enabled', async () => {
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
   });
-  const result = await actionExecutor.execute(executeParams);
+  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"not enabled for test"`
+  );
 
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
-  expect(result).toMatchInlineSnapshot(`
-    Object {
-      "actionId": "1",
-      "message": "not enabled for test",
-      "retry": false,
-      "status": "error",
-    }
-  `);
 });
 
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {

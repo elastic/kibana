@@ -11,7 +11,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
+import { ILicenseState, verifyApiAccess, ForbiddenError } from '../lib';
 
 import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
@@ -48,16 +48,23 @@ export const executeActionRoute = (
       verifyApiAccess(licenseState);
       const { params } = req.body;
       const { id } = req.params;
-      const body: ActionTypeExecutorResult = await actionExecutor.execute({
-        params,
-        request: req,
-        actionId: id,
-      });
-      return body
-        ? res.ok({
-            body,
-          })
-        : res.noContent();
+      try {
+        const body: ActionTypeExecutorResult = await actionExecutor.execute({
+          params,
+          request: req,
+          actionId: id,
+        });
+        return body
+          ? res.ok({
+              body,
+            })
+          : res.noContent();
+      } catch (e) {
+        if (e instanceof ForbiddenError) {
+          return res.forbidden({ body: { message: e.message } });
+        }
+        throw e;
+      }
     })
   );
 };
