@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-import { isEqual } from 'lodash/fp';
+import { useEffect, useReducer, useCallback } from 'react';
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
   DEFAULT_TABLE_LIMIT,
@@ -79,11 +78,12 @@ const initialData: AllCases = {
   total: 0,
   cases: [],
 };
-export const useGetCases = (): [
-  UseGetCasesState,
-  Dispatch<SetStateAction<Partial<QueryParams>>>,
-  Dispatch<SetStateAction<FilterOptions>>
-] => {
+
+interface UseGetCases extends UseGetCasesState {
+  setQueryParams: (newQueryParams: QueryParams) => void;
+  setFilters: (newFilters: FilterOptions) => void;
+}
+export const useGetCases = (): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -99,21 +99,14 @@ export const useGetCases = (): [
       sortOrder: 'desc',
     },
   });
-  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
-  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    if (!isEqual(queryParams, state.queryParams)) {
-      dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
-    }
-  }, [queryParams, state.queryParams]);
-
-  useEffect(() => {
-    if (!isEqual(filterQuery, state.filterOptions)) {
-      dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
-    }
-  }, [filterQuery, state.filterOptions]);
+  const setQueryParams = useCallback((newQueryParams: QueryParams) => {
+    dispatch({ type: UPDATE_QUERY_PARAMS, payload: newQueryParams });
+  }, []);
+  const setFilters = useCallback((newFilters: FilterOptions) => {
+    dispatch({ type: UPDATE_QUERY_PARAMS, payload: newFilters });
+  }, []);
 
   useEffect(() => {
     let didCancel = false;
@@ -146,5 +139,5 @@ export const useGetCases = (): [
       didCancel = true;
     };
   }, [state.queryParams, state.filterOptions]);
-  return [state, setQueryParams, setFilters];
+  return { ...state, setQueryParams, setFilters };
 };

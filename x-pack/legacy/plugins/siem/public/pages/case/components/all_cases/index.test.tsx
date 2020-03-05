@@ -19,7 +19,7 @@ describe('AllCases', () => {
     jest.resetAllMocks();
     jest
       .spyOn(apiHook, 'useGetCases')
-      .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
+      .mockReturnValue({ ...useGetCasesMockState, setQueryParams, setFilters });
     moment.tz.setDefault('UTC');
   });
   it('should render AllCases', () => {

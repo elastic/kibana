@@ -42,11 +42,7 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
-  const [
-    { data, isLoading, queryParams, filterOptions },
-    setQueryParams,
-    setFilters,
-  ] = useGetCases();
+  const { data, isLoading, queryParams, filterOptions, setQueryParams, setFilters } = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
