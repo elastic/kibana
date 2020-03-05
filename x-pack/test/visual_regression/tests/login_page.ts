@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const visualTesting = getService('visualTesting');
   const testSubjects = getService('testSubjects');

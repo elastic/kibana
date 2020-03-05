@@ -18,12 +18,12 @@
  */
 
 import { DEFAULT_OPTIONS } from '../../services/visual_testing/visual_testing';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // Width must be the same as visual_testing or canvas image widths will get skewed
 const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
 
-export default function({ getService, loadTestFile }) {
-  const esArchiver = getService('esArchiver');
+export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover app', function() {
@@ -31,10 +31,6 @@ export default function({ getService, loadTestFile }) {
 
     before(function() {
       return browser.setWindowSize(SCREEN_WIDTH, 1000);
-    });
-
-    after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
     });
 
     loadTestFile(require.resolve('./chart_visualization'));
