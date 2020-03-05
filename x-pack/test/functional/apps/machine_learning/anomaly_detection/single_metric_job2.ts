@@ -110,7 +110,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.api.assertDetectorResultsExist(testData.jobId, 0);
         });
 
-        it('can be created using the wizard', async () => {
+        it('can be cloned using the wizard', async () => {
           // start the cloning process
           await ml.jobTable.clickCloneJobAction(testData.jobId);
           await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
@@ -186,7 +186,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.api.assertDetectorResultsExist(testData.jobId, 0);
         });
 
-        it('can be created using the wizard', async () => {
+        it('can be deleted from the job list', async () => {
           await ml.api.assertJobResultsExist(testData.jobIdClone);
 
           await ml.jobTable.clickDeleteJobAction(testData.jobIdClone);
