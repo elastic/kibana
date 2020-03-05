@@ -5,7 +5,7 @@
  */
 
 import { createGetOverviewFilters } from './overview_filters';
-import { createGetPingsRoute } from './pings';
+import { createGetPingHistogramRoute, createGetPingsRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
@@ -16,7 +16,6 @@ import {
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
-import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';

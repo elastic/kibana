@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingResults, Ping } from '../../../../../common/graphql/types';
-import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
+import { PingList, AllLocationOption, toggleDetails } from '../ping_list';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { ExpandedRowMap } from '../../monitor_list/types';
 
@@ -201,8 +201,7 @@ describe('PingList component', () => {
   it('renders sorted list without errors', () => {
     const { allPings } = pingList;
     const component = shallowWithIntl(
-      <PingListComponent
-        loading={false}
+      <PingList
         data={{ allPings }}
         onPageCountChange={jest.fn()}
         onSelectedLocationChange={(loc: EuiComboBoxOptionProps[]) => {}}

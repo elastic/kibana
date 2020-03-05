@@ -9,27 +9,19 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
 import { APIFn } from './types';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
-import { GetPingsParams } from '../../../server/lib/requests';
-import { PingsResponseType, PingsResponse } from '../../../common/types/ping/ping';
+import { PingsResponseType, PingsResponse, GetPingsParams } from '../../../common/types/ping/ping';
 
-export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
-  dateRangeStart,
-  dateRangeEnd,
-  location,
-  monitorId,
-  size,
-  sort,
-  status,
-}) => {
+export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async pp => {
+  const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = pp;
   const apiPath = '/api/uptime/pings';
   const params = {
     dateRangeStart,
     dateRangeEnd,
-    location,
     monitorId,
-    size,
-    sort,
-    status,
+    ...(location && { location }),
+    ...(size && { size }),
+    ...(sort && { sort }),
+    ...(status && { status }),
   };
   const urlParams = new URLSearchParams(params).toString();
   const response = await fetch(`${apiPath}?${urlParams}`);

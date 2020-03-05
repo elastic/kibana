@@ -6,8 +6,7 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { PingsResponse } from '../../../common/types/ping/ping';
-import { getPings } from '../../../server/lib/requests';
-import { getPingsSuccess, getPingsFail } from '../actions';
+import { getPings, getPingsSuccess, getPingsFail } from '../actions';
 
 export interface PingListState {
   pingList: PingsResponse;

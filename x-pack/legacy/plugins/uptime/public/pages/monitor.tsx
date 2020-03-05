@@ -9,7 +9,6 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
-import { PingList } from '../components/connected';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
@@ -20,6 +19,7 @@ import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitor } from '../state/actions';
 import { PageHeader } from './page_header';
 import { MonitorCharts } from '../components/functional';
+import { PingList } from '../components/functional/ping_list';
 
 interface StateProps {
   selectedMonitor: Ping | null;
@@ -86,11 +86,9 @@ export const MonitorPageComponent: React.FC<Props> = ({
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
-        variables={{
-          ...sharedVariables,
-          size: pingListPageCount,
-          status: selectedPingStatus,
-        }}
+        monitorId={monitorId}
+        size={pingListPageCount}
+        status={selectedPingStatus}
       />
     </>
   );
