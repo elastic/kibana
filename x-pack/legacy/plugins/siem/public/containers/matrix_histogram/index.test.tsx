@@ -41,7 +41,10 @@ jest.mock('./index.gql_query', () => {
   };
 });
 
-jest.mock('../../components/ml/api/error_to_toaster');
+jest.mock('../../components/toasters/', () => ({
+  useStateToaster: () => [jest.fn(), jest.fn()],
+  errorToToaster: jest.fn(),
+}));
 
 describe('useQuery', () => {
   let result: {

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { KibanaServices } from '../../lib/kibana';
 import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../common/constants';
 import { rawNewsApiResponse } from '../../mock/news';
 import { rawNewsJSON } from '../../mock/raw_news';
@@ -18,7 +20,7 @@ import {
 } from './helpers';
 import { NewsItem, RawNewsApiResponse } from './types';
 
-type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
+jest.mock('../../lib/kibana');
 
 describe('helpers', () => {
   describe('removeSnapshotFromVersion', () => {
@@ -390,36 +392,19 @@ describe('helpers', () => {
   });
 
   describe('fetchNews', () => {
-    const newsFeedUrl = 'https://feeds.elastic.co/security-solution/v8.0.0.json';
+    const mockKibanaServices = KibanaServices.get as jest.Mock;
+    const mockServices = coreMock.createStart();
+    mockKibanaServices.mockReturnValue(mockServices);
+    const fetchMock = mockServices.http.fetch;
 
-    afterAll(() => {
-      delete (global as GlobalWithFetch).fetch;
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(rawNewsApiResponse);
     });
 
     test('it returns the raw API response from the news feed', async () => {
-      (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => {
-            return rawNewsApiResponse;
-          },
-        })
-      );
-
+      const newsFeedUrl = 'https://feeds.elastic.co/security-solution/v8.0.0.json';
       expect(await fetchNews({ newsFeedUrl })).toEqual(rawNewsApiResponse);
-    });
-
-    test('it throws if the response from the news feed is not ok', async () => {
-      (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => {
-            return rawNewsApiResponse;
-          },
-        })
-      );
-
-      await expect(fetchNews({ newsFeedUrl })).rejects.toThrow('Network Error: undefined');
     });
   });
 
