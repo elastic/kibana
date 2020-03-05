@@ -21,7 +21,7 @@ import { identity } from 'lodash';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
-import { AggType } from './agg_types';
+import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';

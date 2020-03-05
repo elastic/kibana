@@ -362,7 +362,6 @@ export class AggConfig {
   fieldIsTimeField() {
     const indexPattern = this.getIndexPattern();
     if (!indexPattern) return false;
-    // @ts-ignore
     const timeFieldName = indexPattern.timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
   }
