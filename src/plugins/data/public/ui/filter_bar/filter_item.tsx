@@ -22,6 +22,8 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component, MouseEvent } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
+import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
+import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { IIndexPattern } from '../..';
@@ -65,6 +67,7 @@ class FilterItemUI extends Component<Props, State> {
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
+    const filterViewOptions: any = {};
 
     const classes = classNames(
       'globalFilterItem',
@@ -82,11 +85,18 @@ class FilterItemUI extends Component<Props, State> {
     } catch (e) {
       getNotifications().toasts.addError(e, {
         title: this.props.intl.formatMessage({
-          id: 'data.filter.filterBar.labelError',
+          id: 'data.filter.filterBar.labelErrorMessage',
           defaultMessage: 'Failed to render filter',
         }),
       });
-      return null;
+      valueLabel = this.props.intl.formatMessage({
+        id: 'data.filter.filterBar.labelErrorText',
+        defaultMessage: 'Error',
+      });
+      const isDarkMode = this.props.uiSettings.get('theme:darkMode');
+      filterViewOptions.color = isDarkMode
+        ? darkEuiTheme.euiColorDanger
+        : lightEuiTheme.euiColorDanger;
     }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
@@ -102,6 +112,7 @@ class FilterItemUI extends Component<Props, State> {
         iconOnClick={() => this.props.onRemove()}
         onClick={this.handleBadgeClick}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
+        {...filterViewOptions}
       />
     );
 

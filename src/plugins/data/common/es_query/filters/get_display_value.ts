@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { IIndexPattern, IFieldType } from '../..';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 import { Filter } from '../filters';
@@ -29,9 +30,14 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
     // TODO: Why is indexPatterns sometimes a map and sometimes an array?
     const field: IFieldType = (indexPattern.fields as any).getByName(key);
     if (!field) {
-      throw new Error(`Field ${key} not found`);
+      throw new Error(
+        i18n.translate('data.filter.filterBar.fieldNotFound', {
+          defaultMessage: 'Field {key} not found',
+          values: { key },
+        })
+      );
     }
-    format = field?.format;
+    format = field.format;
   }
   return format;
 }
