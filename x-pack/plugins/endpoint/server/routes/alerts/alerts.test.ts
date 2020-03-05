@@ -11,7 +11,7 @@ import {
 } from '../../../../../../src/core/server/mocks';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
-import { alertingIndexGetQuerySchema } from '../../../common/types';
+import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;

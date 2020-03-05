@@ -5,11 +5,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { decode } from 'rison-node';
+import { TypeOf } from '@kbn/config-schema';
 import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
-import { fromKueryExpression } from '../../../../src/plugins/data/common';
+import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -337,116 +335,6 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
-
-/**
- * Used to validate GET requests against the index of the alerting APIs.
- */
-export const alertingIndexGetQuerySchema = schema.object(
-  {
-    page_size: schema.maybe(
-      schema.number({
-        min: 1,
-        max: 100,
-      })
-    ),
-    page_index: schema.maybe(
-      schema.number({
-        min: 0,
-      })
-    ),
-    after: schema.maybe(
-      schema.arrayOf(schema.string(), {
-        minSize: 2,
-        maxSize: 2,
-      }) as kbnConfigSchemaTypes.Type<[string, string]>
-    ),
-    before: schema.maybe(
-      schema.arrayOf(schema.string(), {
-        minSize: 2,
-        maxSize: 2,
-      }) as kbnConfigSchemaTypes.Type<[string, string]>
-    ),
-    sort: schema.maybe(schema.string()),
-    order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-    query: schema.maybe(
-      schema.string({
-        validate(value) {
-          try {
-            fromKueryExpression(value);
-          } catch (err) {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
-              defaultMessage: 'must be valid KQL',
-            });
-          }
-        },
-      })
-    ),
-
-    // rison-encoded string
-    filters: schema.maybe(
-      schema.string({
-        validate(value) {
-          try {
-            decode(value);
-          } catch (err) {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
-              defaultMessage: 'must be a valid rison-encoded string',
-            });
-          }
-        },
-      })
-    ),
-
-    // rison-encoded string
-    date_range: schema.maybe(
-      schema.string({
-        validate(value) {
-          try {
-            decode(value);
-          } catch (err) {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
-              defaultMessage: 'must be a valid rison-encoded string',
-            });
-          }
-        },
-      })
-    ),
-  },
-  {
-    validate(value) {
-      if (value.after !== undefined && value.page_index !== undefined) {
-        return i18n.translate('xpack.endpoint.alerts.errors.page_index_cannot_be_used_with_after', {
-          defaultMessage: '[page_index] cannot be used with [after]',
-        });
-      }
-      if (value.before !== undefined && value.page_index !== undefined) {
-        return i18n.translate(
-          'xpack.endpoint.alerts.errors.page_index_cannot_be_used_with_before',
-          {
-            defaultMessage: '[page_index] cannot be used with [before]',
-          }
-        );
-      }
-      if (value.before !== undefined && value.after !== undefined) {
-        return i18n.translate('xpack.endpoint.alerts.errors.before_cannot_be_used_with_after', {
-          defaultMessage: '[before] cannot be used with [after]',
-        });
-      }
-      if (
-        value.before !== undefined &&
-        value.sort !== undefined &&
-        value.sort !== EndpointAppConstants.ALERT_LIST_DEFAULT_SORT
-      ) {
-        return i18n.translate(
-          'xpack.endpoint.alerts.errors.before_cannot_be_used_with_custom_sort',
-          {
-            defaultMessage: '[before] cannot be used with custom sort',
-          }
-        );
-      }
-    },
-  }
-);
 
 /**
  * Like TypeOf, but provides a type for creating the value that will match.
