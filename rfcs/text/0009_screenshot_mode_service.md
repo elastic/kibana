@@ -4,6 +4,19 @@
 
 # Summary
 
+The Kibana Reporting team has been chasing ways of improving performance of
+loading Kibana pages and capturing screenshots of the visualizations. We think
+that performance is a barrier to adding more integrations in Kibana, however we
+want to add more integrations and have Reporting be a factor of growth for
+Kibana. However, it looks like there are too many constraints to streamlining
+performance for Reporting if we only look for ways to change the Reporting code
+to do it. In other words, it will take a cross-team effort to improve the main
+performance issues. This RFC proposes one way to make cross-team efforts work
+smoothly, which is to have a new core service in Kibana that helps UIs and
+visualizations work nicely when loaded for screenshot capture.
+
+**Screenshot mode service**
+
 Applications in Kibana should be aware of when their rendering is for a human
 user using the page interactively, and when it's not. Sometimes the page is
 loaded for display-purposes: there is no user in control of the
@@ -24,6 +37,9 @@ application which UI components should **not** be loaded, as applications will
 use the service response for skipping components that aren't needed for
 presenting the data in a screenshot, and thus work towards better performance
 for the display-only purpose.
+
+More background on how Reporting currently works, including the lifecycle of
+creating a PNG report, is here: https://github.com/elastic/kibana/issues/59396
 
 # Basic example
 
