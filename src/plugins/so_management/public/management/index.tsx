@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { HashRouter, Switch, Route, useParams, useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup, CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { ManagementSetup } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { StartDependencies } from '../plugin';
 import { ISavedObjectsManagementRegistry } from '../management_registry';
 import { SavedObjectsTable } from './saved_objects_table';
+import { SavedObjectEdition } from './saved_objects_view';
 import { getAllowedTypes } from './lib';
 
 interface RegisterOptions {
@@ -58,12 +60,20 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
         <I18nProvider>
           <HashRouter basename={basePath}>
             <Switch>
-              <Route path={['/']}>
+              <Route path={'/:service/:id'} exact={true}>
+                <SavedObjectsEditionPage
+                  coreStart={coreStart}
+                  serviceRegistry={serviceRegistry}
+                  setBreadcrumbs={setBreadcrumbs}
+                />
+              </Route>
+              <Route path={'/'} exact={false}>
                 <SavedObjectsTablePage
                   coreStart={coreStart}
                   dataStart={data}
                   serviceRegistry={serviceRegistry}
                   allowedTypes={allowedTypes}
+                  setBreadcrumbs={setBreadcrumbs}
                 />
               </Route>
             </Switch>
@@ -79,19 +89,66 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
   });
 };
 
+const SavedObjectsEditionPage = ({
+  coreStart,
+  serviceRegistry,
+  setBreadcrumbs,
+}: {
+  coreStart: CoreStart;
+  serviceRegistry: ISavedObjectsManagementRegistry;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+}) => {
+  const { service: serviceName, id } = useParams<{ service: string; id: string }>();
+  const capabilities = coreStart.application.capabilities;
+
+  const { search } = useLocation();
+  const query = parse(search);
+
+  useEffect(() => {
+    setBreadcrumbs([]); // TODO: proper breadcrumb
+  }, [setBreadcrumbs]);
+
+  return (
+    <SavedObjectEdition
+      id={id}
+      serviceName={serviceName}
+      serviceRegistry={serviceRegistry}
+      savedObjectsClient={coreStart.savedObjects.client}
+      overlays={coreStart.overlays}
+      notifications={coreStart.notifications}
+      capabilities={capabilities}
+      notFoundType={query.notFound as string}
+    />
+  );
+};
+
 const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
   allowedTypes,
   serviceRegistry,
+  setBreadcrumbs,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementRegistry;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      {
+        text: i18n.translate('kbn.management.savedObjects.indexBreadcrumb', {
+          defaultMessage: 'Saved objects',
+        }),
+        href: '#/management/kibana/objects',
+      },
+    ]);
+  }, [setBreadcrumbs]);
+
   return (
     <SavedObjectsTable
       allowedTypes={allowedTypes}
@@ -106,9 +163,12 @@ const SavedObjectsTablePage = ({
       goInspectObject={savedObject => {
         const { editUrl } = savedObject.meta;
         if (editUrl) {
-          // TODO: fix, this doesnt work. find solution to change hashbang
-          // kbnUrl.change(object.meta.editUrl);
-          window.location.href = editUrl;
+          // TODO: it seems only editable objects are done from without the management page.
+          // previously, kbnUrl.change(object.meta.editUrl); was used.
+          // using direct access to location.hash seems the only option for now.
+
+          // TODO: remove redirect hack
+          window.location.hash = editUrl.replace('/objects', '/toto');
         }
       }}
       canGoInApp={savedObject => {

@@ -1,0 +1,157 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  Capabilities,
+  SavedObjectsClientContract,
+  OverlayStart,
+  NotificationsStart,
+  SimpleSavedObject,
+} from '../../../../core/public';
+import { ISavedObjectsManagementRegistry } from '../management_registry';
+import { Header, NotFoundErrors, Intro, Form } from './components/edition';
+import { canViewInApp } from './lib';
+import { SubmittedFormData } from './types';
+
+interface SavedObjectEditionProps {
+  id: string;
+  serviceName: string;
+  serviceRegistry: ISavedObjectsManagementRegistry;
+  capabilities: Capabilities;
+  overlays: OverlayStart;
+  notifications: NotificationsStart;
+  notFoundType?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+interface SavedObjectEditionState {
+  type: string;
+  object?: SimpleSavedObject<any>;
+}
+
+export class SavedObjectEdition extends Component<
+  SavedObjectEditionProps,
+  SavedObjectEditionState
+> {
+  constructor(props: SavedObjectEditionProps) {
+    super(props);
+
+    const { serviceRegistry, serviceName } = props;
+    const type = serviceRegistry.get(serviceName)!.service.type;
+
+    this.state = {
+      object: undefined,
+      type,
+    };
+  }
+
+  componentDidMount() {
+    const { id, savedObjectsClient } = this.props;
+    const { type } = this.state;
+    savedObjectsClient.get(type, id).then(object => {
+      this.setState({
+        object,
+      });
+    });
+  }
+
+  render() {
+    const {
+      capabilities,
+      notFoundType,
+      serviceRegistry,
+      id,
+      serviceName,
+      savedObjectsClient,
+    } = this.props;
+    const { type } = this.state;
+    const { object } = this.state;
+    const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<
+      string,
+      boolean
+    >;
+    const canView = canViewInApp(capabilities, type);
+    const service = serviceRegistry.get(serviceName)!.service;
+
+    return (
+      <div
+        className="kuiViewContent kuiViewContent--constrainedWidth"
+        data-test-subj="savedObjectsEdit"
+      >
+        <Header
+          canEdit={canEdit}
+          canDelete={canDelete}
+          canViewInApp={canView}
+          type={type}
+          onDeleteClick={() => this.delete()}
+          viewUrl={service.urlFor(id)}
+        />
+        {notFoundType && <NotFoundErrors type={notFoundType} />}
+        {canEdit && <Intro />}
+        {object && (
+          <Form
+            object={object}
+            savedObjectsClient={savedObjectsClient}
+            service={service}
+            editionEnabled={canEdit}
+            onSave={this.saveChanges}
+          />
+        )}
+      </div>
+    );
+  }
+
+  async delete() {
+    const { id, savedObjectsClient, overlays, notifications } = this.props;
+    const { type, object } = this.state;
+
+    const confirmed = await overlays.openConfirm(
+      i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+        defaultMessage: "You can't recover deleted objects",
+      }),
+      {
+        confirmButtonText: i18n.translate(
+          'kbn.management.objects.confirmModalOptions.deleteButtonLabel',
+          {
+            defaultMessage: 'Delete',
+          }
+        ),
+        title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
+          defaultMessage: 'Delete saved Kibana object?',
+        }),
+      }
+    );
+    if (confirmed) {
+      await savedObjectsClient.delete(type, id);
+      notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
+      window.location.hash = '/management/kibana/objects';
+    }
+  }
+
+  saveChanges = async ({ attributes, references }: SubmittedFormData) => {
+    const { savedObjectsClient, notifications } = this.props;
+    const { object, type } = this.state;
+
+    await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
+    notifications.toasts.addSuccess(`Updated '${attributes.title}' ${type} object`);
+    window.location.hash = '/management/kibana/objects';
+  };
+}

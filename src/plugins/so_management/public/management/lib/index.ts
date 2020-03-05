@@ -32,3 +32,4 @@ export { importLegacyFile } from './import_legacy_file';
 export { logLegacyImport } from './log_legacy_import';
 export { processImportResponse, ProcessedImportResponse } from './process_import_response';
 export { resolveImportErrors } from './resolve_import_errors';
+export { canViewInApp } from './in_app_url';

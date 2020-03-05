@@ -17,31 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/core/public';
-import { SavedObjectWithMetadata } from '../types';
-
-// TODO: same as in `src/plugins/so_management/server/lib/find_relationships.ts`, create common folder
-export interface SavedObjectRelation {
-  id: string;
-  type: string;
-  relationship: 'child' | 'parent';
-  meta: SavedObjectWithMetadata['meta'];
-}
-
-export interface ObjectField {
-  type: FieldType;
-  name: string;
-  value: any;
-}
-
-export type FieldType = 'text' | 'number' | 'boolean' | 'array' | 'json';
-
-export interface FieldState {
-  value?: any;
-  invalid?: boolean;
-}
-
-export interface SubmittedFormData {
-  attributes: any;
-  references: SavedObjectReference[];
-}
+export { Header } from './header';
+export { NotFoundErrors } from './not_found_errors';
+export { Intro } from './intro';
+export { Form } from './form';

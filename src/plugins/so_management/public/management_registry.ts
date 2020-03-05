@@ -38,7 +38,7 @@ export class SavedObjectsManagementRegistry {
   }
 
   public all(): SavedObjectsManagementRegistryEntry[] {
-    return Object.values(this.registry);
+    return [...this.registry.values()];
   }
 
   public get(id: string): SavedObjectsManagementRegistryEntry | undefined {

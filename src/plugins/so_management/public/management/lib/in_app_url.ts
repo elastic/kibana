@@ -17,31 +17,24 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/core/public';
-import { SavedObjectWithMetadata } from '../types';
+import { Capabilities } from 'src/core/public';
 
-// TODO: same as in `src/plugins/so_management/server/lib/find_relationships.ts`, create common folder
-export interface SavedObjectRelation {
-  id: string;
-  type: string;
-  relationship: 'child' | 'parent';
-  meta: SavedObjectWithMetadata['meta'];
-}
-
-export interface ObjectField {
-  type: FieldType;
-  name: string;
-  value: any;
-}
-
-export type FieldType = 'text' | 'number' | 'boolean' | 'array' | 'json';
-
-export interface FieldState {
-  value?: any;
-  invalid?: boolean;
-}
-
-export interface SubmittedFormData {
-  attributes: any;
-  references: SavedObjectReference[];
+export function canViewInApp(uiCapabilities: Capabilities, type: string) {
+  switch (type) {
+    case 'search':
+    case 'searches':
+      return uiCapabilities.discover.show as boolean;
+    case 'visualization':
+    case 'visualizations':
+      return uiCapabilities.visualize.show as boolean;
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return uiCapabilities.management.kibana.index_patterns as boolean;
+    case 'dashboard':
+    case 'dashboards':
+      return uiCapabilities.dashboard.show as boolean;
+    default:
+      return uiCapabilities[type].show as boolean;
+  }
 }
