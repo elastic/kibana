@@ -96,10 +96,6 @@ export interface GetStateReturn {
    */
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
   /**
-   * Get global filters
-   */
-  getAppFilters: () => Filter[];
-  /**
    * Sync state to URL, used for testing
    */
   flushToUrl: () => void;
@@ -166,7 +162,6 @@ export function getState({
       const state = { ...appStateContainer.getState(), ...newPartial };
       await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     },
-    getAppFilters: () => getFilters(appStateContainer.getState()),
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
@@ -226,13 +221,3 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
-
-/**
- * Helper function to return array of filter object of a given state
- */
-const getFilters = (state: AppState): Filter[] => {
-  if (!state || !Array.isArray(state.filters)) {
-    return [];
-  }
-  return state.filters;
-};
