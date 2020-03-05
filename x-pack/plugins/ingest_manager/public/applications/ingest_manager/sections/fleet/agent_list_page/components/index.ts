@@ -3,4 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { AgentEnrollmentFlyout } from './agent_enrollment';
+export { AgentEnrollmentFlyout } from './agent_enrollment_flyout';

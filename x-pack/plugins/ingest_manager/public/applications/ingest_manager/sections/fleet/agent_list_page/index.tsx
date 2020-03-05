@@ -248,7 +248,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ]}
     >
       {isEnrollmentFlyoutOpen ? (
-        <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
+        <AgentEnrollmentFlyout
+          agentConfigs={agentConfigs}
+          onClose={() => setIsEnrollmentFlyoutOpen(false)}
+        />
       ) : null}
       <EuiTitle size="l">
         <h1>
