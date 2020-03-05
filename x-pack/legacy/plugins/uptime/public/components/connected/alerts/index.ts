@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './alert_monitor_status';
 export { ToggleAlertButton, UptimeAlertContextContainer } from './alert_context_container';

@@ -45,3 +45,9 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };
+
+export const selectAlertStatus = ({ indexPattern, overviewFilters, ui }: AppState) => ({
+  filters: ui.esKuery,
+  indexPattern: indexPattern.index_pattern,
+  locations: overviewFilters.filters.locations,
+});

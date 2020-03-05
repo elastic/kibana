@@ -16,7 +16,7 @@ import {
 } from '../../../../../../plugins/triggers_actions_ui/public/types';
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
-import { AlertMonitorStatus } from '../../components/connected/alerts';
+import { AlertMonitorStatus } from '../../components/functional/alerts';
 
 /**
  * Check if params have properties.

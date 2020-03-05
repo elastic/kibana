@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useSelector } from 'react-redux';
 import { KueryBar } from '../../connected';
+import { selectAlertStatus } from '../../../state/selectors';
 
 interface AlertMonitorStatusProps {
   autocomplete: any;
   enabled: boolean;
-  filters?: string;
-  locations: string[];
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
   timerange: {
@@ -101,13 +101,14 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   );
 };
 
-export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
+export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
+  const { filters, locations } = useSelector(selectAlertStatus);
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);
   // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
-  const [locations, setLocations] = useState<any[]>(
-    props.locations.map(location => ({
+  const [selectedLocations, setSelectedLocations] = useState<any[]>(
+    locations.map(location => ({
       disabled: allLabels,
       label: location,
     }))
@@ -140,7 +141,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     },
   ]);
 
-  const { filters, setAlertParams } = props;
+  const { setAlertParams } = props;
 
   useEffect(() => {
     setAlertParams('numTimes', numTimes);
@@ -157,10 +158,10 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     } else {
       setAlertParams(
         'locations',
-        locations.filter(l => l.checked === 'on').map(l => l.label)
+        selectedLocations.filter(l => l.checked === 'on').map(l => l.label)
       );
     }
-  }, [locations, setAlertParams, allLabels]);
+  }, [selectedLocations, setAlertParams, allLabels]);
 
   useEffect(() => {
     setAlertParams('filters', filters);
@@ -236,18 +237,18 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {locations.length === 0 && (
+      {selectedLocations.length === 0 && (
         <EuiExpression color="secondary" description="in" isActive={false} value="all locations" />
       )}
-      {locations.length > 0 && (
+      {selectedLocations.length > 0 && (
         <AlertExpressionPopover
           id="locations"
           description="from"
           value={
-            locations.length === 0 || allLabels
+            selectedLocations.length === 0 || allLabels
               ? 'any location'
               : // create a nicely-formatted description string for all `on` locations
-                locations
+                selectedLocations
                   .filter(({ checked }) => checked === 'on')
                   .map(({ label }) => label)
                   .sort()
@@ -266,12 +267,14 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                   checked={allLabels}
                   onChange={() => {
                     setAllLabels(!allLabels);
-                    setLocations(locations.map((l: any) => ({ ...l, disabled: !allLabels })));
+                    setSelectedLocations(
+                      selectedLocations.map((l: any) => ({ ...l, disabled: !allLabels }))
+                    );
                   }}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiSelectable options={locations} onChange={e => setLocations(e)}>
+                <EuiSelectable options={selectedLocations} onChange={e => setSelectedLocations(e)}>
                   {location => location}
                 </EuiSelectable>
               </EuiFlexItem>
