@@ -124,9 +124,6 @@ async function serviceNowExecutor(
         ...res,
       };
     default:
-      return {
-        ...res,
-        serviceMessage: '[Action][ServiceNow]: Unimplemented executor action.',
-      };
+      throw new Error('[Action][ServiceNow]: Unsupported executor action.');
   }
 }
