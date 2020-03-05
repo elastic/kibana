@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 
 import { TransformListRow } from '../../../../common';
 import { StartAction } from './action_start';
@@ -19,8 +19,6 @@ jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List Actions <StartAction />', () => {
   test('Minimal initialization', () => {
-    const Providers = getAppProviders({});
-
     const item: TransformListRow = transformListRow;
     const props = {
       disabled: false,

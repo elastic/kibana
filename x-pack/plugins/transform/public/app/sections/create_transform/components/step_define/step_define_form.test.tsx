@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
@@ -23,7 +23,8 @@ jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotForm />', () => {
-  test('Minimal initialization', () => {
+  // Using the async/await wait()/done() pattern to avoid act() errors.
+  test('Minimal initialization', async done => {
     // Arrange
     const searchItems = {
       indexPattern: {
@@ -31,7 +32,6 @@ describe('Transform: <DefinePivotForm />', () => {
         fields: [] as any[],
       } as SearchItems['indexPattern'],
     };
-    const Providers = getAppProviders({});
     const { getByLabelText } = render(
       <Providers>
         <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
@@ -41,6 +41,8 @@ describe('Transform: <DefinePivotForm />', () => {
     // Act
     // Assert
     expect(getByLabelText('Index pattern')).toBeInTheDocument();
+    await wait();
+    done();
   });
 });
 

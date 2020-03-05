@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 import {
   getPivotQuery,
   PivotAggsConfig,
@@ -24,7 +24,8 @@ jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {
-  test('Minimal initialization', () => {
+  // Using the async/await wait()/done() pattern to avoid act() errors.
+  test('Minimal initialization', async done => {
     // Arrange
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -48,7 +49,6 @@ describe('Transform: <PivotPreview />', () => {
       query: getPivotQuery('the-query'),
     };
 
-    const Providers = getAppProviders({});
     const { getByText } = render(
       <Providers>
         <PivotPreview {...props} />
@@ -58,5 +58,7 @@ describe('Transform: <PivotPreview />', () => {
     // Act
     // Assert
     expect(getByText('Transform pivot preview')).toBeInTheDocument();
+    await wait();
+    done();
   });
 });

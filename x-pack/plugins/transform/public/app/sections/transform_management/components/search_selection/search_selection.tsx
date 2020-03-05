@@ -18,9 +18,8 @@ interface SearchSelectionProps {
 const fixedPageSize: number = 8;
 
 export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const {
-    core: { uiSettings, savedObjects },
-  } = useAppDependencies();
+  const { uiSettings, savedObjects } = useAppDependencies();
+
   return (
     <>
       <EuiModalHeader>

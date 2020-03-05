@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
-import { act } from 'react-dom/test-utils';
+import { renderHook } from '@testing-library/react-hooks';
+import '@testing-library/jest-dom/extend-expect';
 
 import { SimpleQuery } from '../../../../common';
 import {
@@ -17,24 +16,6 @@ import {
 
 jest.mock('../../../../hooks/use_api');
 
-type Callback = () => void;
-interface TestHookProps {
-  callback: Callback;
-}
-
-const TestHook: FC<TestHookProps> = ({ callback }) => {
-  callback();
-  return null;
-};
-
-const testHook = (callback: Callback) => {
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  act(() => {
-    ReactDOM.render(<TestHook callback={callback} />, container);
-  });
-};
-
 const query: SimpleQuery = {
   query_string: {
     query: '*',
@@ -42,25 +23,24 @@ const query: SimpleQuery = {
   },
 };
 
-let sourceIndexObj: UseSourceIndexDataReturnType;
-
 describe('useSourceIndexData', () => {
-  test('indexPattern set triggers loading', () => {
-    testHook(() => {
-      act(() => {
-        sourceIndexObj = useSourceIndexData(
-          { id: 'the-id', title: 'the-title', fields: [] },
-          query,
-          { pageIndex: 0, pageSize: 10 }
-        );
-      });
-    });
+  test('indexPattern set triggers loading', async done => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useSourceIndexData({ id: 'the-id', title: 'the-title', fields: [] }, query, {
+        pageIndex: 0,
+        pageSize: 10,
+      })
+    );
+    const sourceIndexObj: UseSourceIndexDataReturnType = result.current;
+
+    await waitForNextUpdate();
 
     expect(sourceIndexObj.errorMessage).toBe('');
     expect(sourceIndexObj.status).toBe(SOURCE_INDEX_STATUS.LOADING);
     expect(sourceIndexObj.tableItems).toEqual([]);
+    done();
   });
 
   // TODO add more tests to check data retrieved via `api.esSearch()`.
-  // This needs more investigation in regards to jest/enzyme's React Hooks support.
+  // This needs more investigation in regards to jest's React Hooks support.
 });

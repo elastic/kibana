@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 import { getPivotQuery } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
@@ -18,7 +18,8 @@ jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <SourceIndexPreview />', () => {
-  test('Minimal initialization', () => {
+  // Using the async/await wait()/done() pattern to avoid act() errors.
+  test('Minimal initialization', async done => {
     // Arrange
     const props = {
       indexPattern: {
@@ -27,7 +28,6 @@ describe('Transform: <SourceIndexPreview />', () => {
       } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
-    const Providers = getAppProviders({});
     const { getByText } = render(
       <Providers>
         <SourceIndexPreview {...props} />
@@ -37,5 +37,7 @@ describe('Transform: <SourceIndexPreview />', () => {
     // Act
     // Assert
     expect(getByText(`Source index ${props.indexPattern.title}`)).toBeInTheDocument();
+    await wait();
+    done();
   });
 });

@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 
 import { StepCreateForm } from './step_create_form';
 
@@ -26,7 +26,6 @@ describe('Transform: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const Providers = getAppProviders({});
     const { getByText } = render(
       <Providers>
         <StepCreateForm {...props} />

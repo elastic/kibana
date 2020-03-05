@@ -25,9 +25,7 @@ import { useAppDependencies } from '../app_dependencies';
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
 export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
-  const {
-    core: { overlays },
-  } = useAppDependencies();
+  const { overlays } = useAppDependencies();
 
   if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;

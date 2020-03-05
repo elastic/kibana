@@ -10,7 +10,7 @@ import { TRANSFORM_DOC_PATHS } from '../constants';
 
 export const useDocumentationLinks = () => {
   const deps = useAppDependencies();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = deps.core.docLinks;
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = deps.docLinks;
   return {
     esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
     esIndicesCreateIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`,

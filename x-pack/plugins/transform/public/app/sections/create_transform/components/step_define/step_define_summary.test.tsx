@@ -5,11 +5,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { createPublicShim } from '../../../../../shim';
-import { getAppProviders } from '../../../../app_dependencies';
+import { Providers } from '../../../../app_dependencies.mock';
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
@@ -25,7 +24,8 @@ jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotSummary />', () => {
-  test('Minimal initialization', () => {
+  // Using the async/await wait()/done() pattern to avoid act() errors.
+  test('Minimal initialization', async done => {
     // Arrange
     const searchItems = {
       indexPattern: {
@@ -56,7 +56,6 @@ describe('Transform: <DefinePivotSummary />', () => {
       valid: true,
     };
 
-    const Providers = getAppProviders(createPublicShim());
     const { getByText } = render(
       <Providers>
         <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
@@ -67,5 +66,7 @@ describe('Transform: <DefinePivotSummary />', () => {
     // Assert
     expect(getByText('Group by')).toBeInTheDocument();
     expect(getByText('Aggregations')).toBeInTheDocument();
+    await wait();
+    done();
   });
 });

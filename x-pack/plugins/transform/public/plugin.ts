@@ -9,6 +9,7 @@ import { CoreSetup } from '../../../../src/core/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { renderApp } from './app/app';
+import { AppDependencies } from './app/app_dependencies';
 import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
@@ -35,7 +36,7 @@ export class TransformUiPlugin {
           const { http, notifications, getStartServices } = coreSetup;
           const startServices = await getStartServices();
           const [core, plugins] = startServices;
-          const { chrome, docLinks, injectedMetadata, uiSettings, savedObjects, overlays } = core;
+          const { chrome, docLinks, uiSettings, savedObjects, overlays } = core;
           const { data } = plugins as PluginsDependencies;
           const { docTitle } = chrome;
 
@@ -45,22 +46,16 @@ export class TransformUiPlugin {
           breadcrumbService.setup(setBreadcrumbs);
 
           // AppCore/AppPlugins to be passed on as React context
-          const appDependencies = {
-            core: {
-              chrome,
-              docLinks,
-              http,
-              i18n: core.i18n,
-              injectedMetadata,
-              notifications,
-              uiSettings,
-              savedObjects,
-              overlays,
-            },
-            plugins: {
-              data,
-              management,
-            },
+          const appDependencies: AppDependencies = {
+            chrome,
+            docLinks,
+            http,
+            i18n: core.i18n,
+            notifications,
+            uiSettings,
+            savedObjects,
+            overlays,
+            data,
           };
 
           return renderApp(element, appDependencies);

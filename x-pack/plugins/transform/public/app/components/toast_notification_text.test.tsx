@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { getAppProviders } from '../app_dependencies';
+import { Providers } from '../app_dependencies.mock';
 
 import { ToastNotificationText } from './toast_notification_text';
 
@@ -16,7 +16,6 @@ jest.mock('ui/new_platform');
 
 describe('ToastNotificationText', () => {
   test('should render the text as plain text', () => {
-    const Providers = getAppProviders({});
     const props = {
       text: 'a short text message',
     };
@@ -29,7 +28,6 @@ describe('ToastNotificationText', () => {
   });
 
   test('should render the text within a modal', () => {
-    const Providers = getAppProviders({});
     const props = {
       text:
         'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 characters. ',

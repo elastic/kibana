@@ -12,9 +12,7 @@ import { PreviewRequestBody } from '../common';
 import { EsIndex } from './use_api_types';
 
 export const useApi = () => {
-  const {
-    core: { http },
-  } = useAppDependencies();
+  const { http } = useAppDependencies();
 
   const basePath = http.basePath.prepend('/api/transform');
   const indicesBasePath = http.basePath.prepend('/api');

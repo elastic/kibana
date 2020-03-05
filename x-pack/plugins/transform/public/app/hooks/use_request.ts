@@ -9,8 +9,6 @@ import { UseRequestConfig, useRequest as _useRequest } from '../../shared_import
 import { useAppDependencies } from '../app_dependencies';
 
 export const useRequest = (config: UseRequestConfig) => {
-  const {
-    core: { http },
-  } = useAppDependencies();
+  const { http } = useAppDependencies();
   return _useRequest(http, config);
 };

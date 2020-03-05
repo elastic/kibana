@@ -75,8 +75,8 @@ export const StepCreateForm: FC<Props> = React.memo(
     );
 
     const deps = useAppDependencies();
-    const indexPatterns = deps.plugins.data.indexPatterns;
-    const uiSettings = deps.core.uiSettings;
+    const indexPatterns = deps.data.indexPatterns;
+    const uiSettings = deps.uiSettings;
     const toastNotifications = useToastNotifications();
 
     useEffect(() => {
@@ -464,7 +464,7 @@ export const StepCreateForm: FC<Props> = React.memo(
                           defaultMessage: 'Use Discover to explore the transform.',
                         }
                       )}
-                      href={getDiscoverUrl(indexPatternId, deps.core.http.basePath.get())}
+                      href={getDiscoverUrl(indexPatternId, deps.http.basePath.get())}
                       data-test-subj="transformWizardCardDiscover"
                     />
                   </EuiFlexItem>

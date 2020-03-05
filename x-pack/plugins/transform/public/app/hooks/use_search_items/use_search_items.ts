@@ -23,14 +23,14 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const [savedObjectId, setSavedObjectId] = useState(defaultSavedObjectId);
 
   const appDeps = useAppDependencies();
-  const indexPatterns = appDeps.plugins.data.indexPatterns;
-  const uiSettings = appDeps.core.uiSettings;
-  const savedObjectsClient = appDeps.core.savedObjects.client;
+  const indexPatterns = appDeps.data.indexPatterns;
+  const uiSettings = appDeps.uiSettings;
+  const savedObjectsClient = appDeps.savedObjects.client;
   const savedSearches = createSavedSearchesLoader({
     savedObjectsClient,
     indexPatterns,
-    chrome: appDeps.core.chrome,
-    overlays: appDeps.core.overlays,
+    chrome: appDeps.chrome,
+    overlays: appDeps.overlays,
   });
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
