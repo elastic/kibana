@@ -36,12 +36,7 @@ export const getBulkItems = ({
         disabled={true} // TO DO
         onClick={async () => {
           closePopover();
-          // await duplicateCasesAction(
-          //   cases.filter(c => selectedCases.includes(c.caseId)),
-          //   selectedCases,
-          //   dispatch,
-          //   dispatchToaster
-          // );
+          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
           // reFetchCases(true);
         }}
       >
@@ -54,12 +49,7 @@ export const getBulkItems = ({
         disabled={true} // TO DO
         onClick={async () => {
           closePopover();
-          // await duplicateCasesAction(
-          //   cases.filter(c => selectedCases.includes(c.caseId)),
-          //   selectedCases,
-          //   dispatch,
-          //   dispatchToaster
-          // );
+          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
           // reFetchCases(true);
         }}
       >
