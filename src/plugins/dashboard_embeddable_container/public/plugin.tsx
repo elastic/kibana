@@ -21,6 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
@@ -33,10 +34,22 @@ import {
 } from '../../../plugins/kibana_react/public';
 import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
 import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
+import {
+  DashboardAppLinkGeneratorState,
+  DASHBOARD_APP_URL_GENERATOR,
+  createDirectAccessDashboardLinkGenerator,
+} from './url_generator';
+
+declare module '../../share/public' {
+  export interface UrlGeneratorStateMapping {
+    [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
+  }
+}
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   uiActions: UiActionsSetup;
+  share?: SharePluginSetup;
 }
 
 interface StartDependencies {
@@ -59,10 +72,20 @@ export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
+  public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
+    const startServices = core.getStartServices();
+
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createDirectAccessDashboardLinkGenerator(async () => ({
+          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
+          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+        }))
+      );
+    }
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
