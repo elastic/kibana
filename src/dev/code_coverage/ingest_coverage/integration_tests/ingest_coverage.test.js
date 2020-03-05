@@ -20,6 +20,9 @@
 import expect from '@kbn/expect';
 import { spawn } from 'child_process';
 import { resolve } from 'path';
+import { green, always as F } from '../utils';
+
+import { STATIC_SITE_URL_PROP_NAME } from '../constants';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -30,6 +33,16 @@ const regexes = {
   folderStructureIncluded: /live_cc_app\/coverage_data/,
   endsInDotHtml: /.html$/,
 };
+const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
+const expectAllRegexesToPass = regexes => urlLine =>
+  Object.entries(regexes)
+    .forEach(regexTuple => {
+      if (!regexTuple[1].test(urlLine))
+        throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`)
+    });
+const splitByNewLine = x => x.split('\n');
+const siteUrlLines = urlLinesOnly(includesSiteUrlPredicate)
+const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 
 describe('Ingesting Coverage to Cluster', () => {
   const chunks = [];
@@ -39,7 +52,7 @@ describe('Ingesting Coverage to Cluster', () => {
     CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
     STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
     TIME_STAMP: '2020-03-02T21:11:47Z',
-    ES_HOST: 'https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243',
+    ES_HOST: 'https://super:changeme@some.fake.host:9243',
     NODE_ENV: 'integration_test',
   };
 
@@ -58,31 +71,26 @@ describe('Ingesting Coverage to Cluster', () => {
     create.on('close', done);
   });
 
-  it('should result in every posted item having a static site url that meets certain requirements, tested via regex', () => {
-    const includesSiteUrlPredicate = x => x.includes('staticSiteUrl');
-    const expectAllRegexesToPass = urlLine =>
-      Object.entries(regexes).forEach(reList => expect(reList[1].test(urlLine)).to.be(true));
+  it('should result in every posted item having a site url that meets all regex assertions',
+    F(siteUrlsSplitByNewLine(chunks)
+      .forEach(expectAllRegexesToPass(regexes))));
 
-    chunks
-      .filter(includesSiteUrlPredicate)
-      .map(x => x.split('\n').reduce(getUrlLine))
-      .forEach(expectAllRegexesToPass);
-  });
   describe('with NODE_ENV set to "integration_test"', () => {
     describe(`and debugging turned on`, () => {
       it('should result in the "just logging" message being present in the log', () => {
-        chunks.some(x => x.includes('Just Logging'));
+        expect(chunks.some(x => x.includes('Just Logging'))).to.be(true);
       });
       it('should result in the "actually sending" message NOT being present in the log', () => {
-        chunks.some(x => !x.includes('Actually sending...'));
+        expect(chunks.every(x => !x.includes('Actually sending...'))).to.be(true);
       });
     });
   });
 });
-
+function urlLinesOnly(predicate) {
+  return splitByNewLine => xs => xs.filter(predicate)
+    .map(x => splitByNewLine(x).reduce(getUrlLine))
+}
 function getUrlLine(acc, item) {
-  if (item != '') {
-    return item;
-  }
+  if (item != '') return item;
   return acc;
 }
