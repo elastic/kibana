@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../lib/kibana';
 import {
   addRule,
@@ -26,9 +25,8 @@ const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../lib/kibana');
 
-const mockServices = coreMock.createStart();
-mockKibanaServices.mockReturnValue(mockServices);
-const fetchMock = mockServices.http.fetch;
+const fetchMock = jest.fn();
+mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Detections Rules API', () => {
   describe('addRule', () => {

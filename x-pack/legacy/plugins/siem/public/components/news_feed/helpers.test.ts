@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../lib/kibana';
 import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../common/constants';
 import { rawNewsApiResponse } from '../../mock/news';
@@ -393,9 +392,8 @@ describe('helpers', () => {
 
   describe('fetchNews', () => {
     const mockKibanaServices = KibanaServices.get as jest.Mock;
-    const mockServices = coreMock.createStart();
-    mockKibanaServices.mockReturnValue(mockServices);
-    const fetchMock = mockServices.http.fetch;
+    const fetchMock = jest.fn();
+    mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
     beforeEach(() => {
       fetchMock.mockClear();
