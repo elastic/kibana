@@ -74,8 +74,8 @@ export interface Context {
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
   const { log, callCluster, index: alias } = opts;
 
-  const indexInfo = await fetchInfo(callCluster, opts.index);
-  const source = createSourceContext(indexInfo, opts.index);
+  const indexInfo = await fetchInfo(callCluster, alias);
+  const source = createSourceContext(indexInfo, alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
 
   return {

@@ -108,6 +108,21 @@ describe('ElasticIndex', () => {
       await Index.createIndex(callCluster as any, '.abcd', { foo: 'bar' } as any);
       expect(callCluster).toHaveBeenCalled();
     });
+
+    test('calls indices.create with alias', async () => {
+      const callCluster = jest.fn(async (path: string, { body, index }: any) => {
+        expect(path).toEqual('indices.create');
+        expect(body).toEqual({
+          mappings: { foo: 'bar' },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+          aliases: { testalias: {} },
+        });
+        expect(index).toEqual('.abcd');
+      });
+
+      await Index.createIndex(callCluster as any, '.abcd', { foo: 'bar' } as any, 'testalias');
+      expect(callCluster).toHaveBeenCalled();
+    });
   });
 
   describe('deleteIndex', () => {

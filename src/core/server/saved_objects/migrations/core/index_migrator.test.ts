@@ -30,6 +30,7 @@ describe('IndexMigrator', () => {
     testOpts = {
       batchSize: 10,
       callCluster: jest.fn(),
+      dryRun: false,
       index: '.kibana',
       log: loggingServiceMock.create().get(),
       mappingProperties: {},
@@ -46,9 +47,9 @@ describe('IndexMigrator', () => {
   test('creates the index if it does not exist', async () => {
     const { callCluster } = testOpts;
 
-    testOpts.mappingProperties = { foo: { type: 'long' } };
+    testOpts.mappingProperties = { foo: { properties: { title: { type: 'long' } } } };
 
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
+    withIndex(callCluster as jest.Mock, { index: { status: 404 }, alias: { status: 404 } });
 
     await new IndexMigrator(testOpts).migrate();
 
@@ -100,10 +101,12 @@ describe('IndexMigrator', () => {
 
     const result = await new IndexMigrator(testOpts).migrate();
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
+      alias: '.kibana',
       destIndex: '.kibana_1',
       sourceIndex: '.kibana',
       status: 'migrated',
+      elapsedMs: 0,
     });
   });
 
@@ -311,6 +314,63 @@ describe('IndexMigrator', () => {
         ],
       },
     ]);
+  });
+
+  describe('with dryRun=true', () => {
+    beforeEach(() => {
+      testOpts.dryRun = true;
+    });
+
+    test('skips dry run if an index does not exist', async () => {
+      const { callCluster } = testOpts;
+
+      withIndex(callCluster as jest.Mock, { index: { status: 404 }, alias: { status: 404 } });
+
+      const result = await new IndexMigrator(testOpts).migrate();
+
+      expect(result).toEqual({
+        alias: '.kibana',
+        reason: "nothing to migrate, index .kibana doesn't exist.",
+        status: 'skipped',
+      });
+
+      expect(callCluster).toHaveBeenCalledTimes(1);
+      expect(callCluster).toHaveBeenLastCalledWith('indices.get', {
+        ignore: [404],
+        index: '.kibana',
+      });
+    });
+    test('skips dry run if an index, instead of an alias is found', async () => {
+      const { callCluster } = testOpts;
+
+      const index = {
+        '.kibana': {
+          aliases: {},
+          mappings: {
+            dynamic: 'strict',
+            properties: {
+              migrationVersion: { dynamic: 'true', type: 'object' },
+            },
+          },
+        },
+      };
+
+      withIndex(callCluster as jest.Mock, { index, alias: { status: 404 } });
+      (callCluster as jest.Mock).mockClear();
+      const result = await new IndexMigrator(testOpts).migrate();
+
+      expect(result).toEqual({
+        alias: '.kibana',
+        reason: 'expected an alias but found an index: .kibana.',
+        status: 'skipped',
+      });
+
+      expect(callCluster).toHaveBeenCalledTimes(1);
+      expect(callCluster).toHaveBeenLastCalledWith('indices.get', {
+        ignore: [404],
+        index: '.kibana',
+      });
+    });
   });
 });
 

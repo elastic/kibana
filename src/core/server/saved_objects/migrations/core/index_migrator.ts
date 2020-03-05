@@ -164,7 +164,7 @@ async function migrateIndex(context: Context, dryRun: boolean): Promise<Migratio
 
   await Index.createIndex(callCluster, dest.indexName, dest.mappings);
 
-  await migrateSourceToDest(context);
+  await migrateSourceToDest(context, dryRun);
 
   log.info(`Pointing alias ${alias} to ${dest.indexName}.`);
   await Index.claimAlias(callCluster, dest.indexName, alias);
@@ -212,7 +212,7 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
  * This moves documents from the concrete index, rather than the alias, to prevent
  * a situation where the alias moves out from under us as we're migrating docs.
  */
-async function migrateSourceToDest(context: Context) {
+async function migrateSourceToDest(context: Context, dryRun: boolean) {
   const { callCluster, alias, dest, source, batchSize } = context;
   const { scrollDuration, documentMigrator, log, serializer } = context;
 
@@ -220,7 +220,7 @@ async function migrateSourceToDest(context: Context) {
     return;
   }
 
-  if (!source.aliases[alias]) {
+  if (!source.aliases[alias] && !dryRun) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
     await Index.convertToAlias(callCluster, source, alias, batchSize, context.convertToAliasScript);
