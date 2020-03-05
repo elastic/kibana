@@ -26,24 +26,3 @@ export const getIndexPatterns = async (
 
   return response.savedObjects;
 };
-
-export const throwIfNotOk = async (response?: Response): Promise<void> => {
-  if (!response) {
-    throw new ToasterError([i18n.NETWORK_ERROR]);
-  }
-
-  if (!response.ok) {
-    const body = await parseJsonFromBody(response);
-    if (body != null && body.message) {
-      if (body.statusCode != null) {
-        throw new ToasterError([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
-      } else if (body.status_code != null) {
-        throw new ToasterError([body.message, `${i18n.STATUS_CODE} ${body.status_code}`]);
-      } else {
-        throw new ToasterError([body.message]);
-      }
-    } else {
-      throw new ToasterError([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
-    }
-  }
-};
