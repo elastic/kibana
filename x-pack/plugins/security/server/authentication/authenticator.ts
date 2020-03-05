@@ -192,7 +192,6 @@ export class Authenticator {
         client: this.options.clusterClient,
         logger: this.options.loggers.get('tokens'),
       }),
-      isProviderEnabled: this.isProviderEnabled.bind(this),
     };
 
     const authProviders = this.options.config.authc.providers;
