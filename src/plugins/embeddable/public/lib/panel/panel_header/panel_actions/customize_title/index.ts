@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { Action, createAction } from '../../actions';
-
-export const RESTRICTED_ACTION = 'RESTRICTED_ACTION';
-
-export function createRestrictedAction<C>(isCompatibleIn: (context: C) => boolean): Action<C> {
-  return createAction<C>({
-    type: RESTRICTED_ACTION,
-    isCompatible: async context => isCompatibleIn(context),
-    execute: async () => {},
-  });
-}
+export * from './customize_panel_action';
