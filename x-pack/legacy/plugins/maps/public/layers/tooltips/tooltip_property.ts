@@ -18,9 +18,9 @@ export interface ITooltipProperty {
 export class TooltipProperty implements ITooltipProperty {
   private _propertyKey: string;
   private _propertyName: string;
-  private _rawValue: string;
+  private _rawValue: string | undefined;
 
-  constructor(propertyKey: string, propertyName: string, rawValue: string) {
+  constructor(propertyKey: string, propertyName: string, rawValue: string | undefined) {
     this._propertyKey = propertyKey;
     this._propertyName = propertyName;
     this._rawValue = rawValue;
@@ -38,7 +38,7 @@ export class TooltipProperty implements ITooltipProperty {
     return _.escape(this._rawValue);
   }
 
-  getRawValue(): string {
+  getRawValue(): string | undefined {
     return this._rawValue;
   }
 

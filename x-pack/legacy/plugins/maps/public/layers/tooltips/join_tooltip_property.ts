@@ -28,7 +28,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getPropertyName();
   }
 
-  getRawValue(): string {
+  getRawValue(): string | undefined {
     return this._tooltipProperty.getRawValue();
   }
 
