@@ -17,10 +17,3 @@ export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
 // End temporary redundancy
-
-export function exitFullScreen() {
-  return {
-    type: SET_FULL_SCREEN,
-    isFullScreen: false,
-  };
-}
