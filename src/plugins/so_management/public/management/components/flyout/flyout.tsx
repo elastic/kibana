@@ -298,13 +298,13 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       overlays
     );
 
-    const byId = {};
+    const byId: Record<string, any[]> = {};
     conflictedIndexPatterns
       .map(({ doc, obj }) => {
         return { doc, obj: obj._serialize() };
       })
       .forEach(({ doc, obj }) =>
-        obj.references.forEach(ref => {
+        obj.references.forEach((ref: Record<string, any>) => {
           byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
         })
       );
@@ -321,7 +321,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         return accum;
       },
-      []
+      [] as any[]
     );
 
     this.setState({
@@ -387,7 +387,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         if (resolutions.length) {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
-            conflictedIndexPatterns,
+            conflictedIndexPatterns!,
             isOverwriteAllChecked
           );
         }
@@ -398,7 +398,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           ),
         });
         importCount += await saveObjects(
-          conflictedSavedObjectsLinkedToSavedSearches,
+          conflictedSavedObjectsLinkedToSavedSearches!,
           isOverwriteAllChecked
         );
         this.setState({
@@ -408,7 +408,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           ),
         });
         importCount += await resolveSavedSearches(
-          conflictedSearchDocs,
+          conflictedSearchDocs!,
           serviceRegistry.all().map(e => e.service),
           indexPatterns,
           isOverwriteAllChecked
@@ -420,7 +420,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           ),
         });
         importCount += await saveObjects(
-          failedImports.map(({ obj }) => obj),
+          failedImports!.map(({ obj }) => obj) as any[],
           isOverwriteAllChecked
         );
       } catch (e) {
@@ -439,23 +439,23 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   onIndexChanged = (id: string, e: any) => {
     const value = e.target.value;
     this.setState(state => {
-      const conflictIndex = state.unmatchedReferences.findIndex(
+      const conflictIndex = state.unmatchedReferences?.findIndex(
         conflict => conflict.existingIndexPatternId === id
       );
-      if (conflictIndex === -1) {
+      if (conflictIndex === undefined || conflictIndex === -1) {
         return state;
       }
 
       return {
         unmatchedReferences: [
-          ...state.unmatchedReferences.slice(0, conflictIndex),
+          ...state.unmatchedReferences!.slice(0, conflictIndex),
           {
-            ...state.unmatchedReferences[conflictIndex],
+            ...state.unmatchedReferences![conflictIndex],
             newIndexPatternId: value,
           },
-          ...state.unmatchedReferences.slice(conflictIndex + 1),
+          ...state.unmatchedReferences!.slice(conflictIndex + 1),
         ],
-      };
+      } as any;
     });
   };
 
@@ -489,7 +489,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
           { defaultMessage: 'How many affected objects' }
         ),
-        render: list => {
+        render: (list: any[]) => {
           return <Fragment>{list.length}</Fragment>;
         },
       },
@@ -503,7 +503,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
           { defaultMessage: 'Sample of affected objects' }
         ),
-        render: list => {
+        render: (list: any[]) => {
           return (
             <ul style={{ listStyle: 'none' }}>
               {take(list, 3).map((obj, key) => (
@@ -529,7 +529,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           options.unshift({
             text: '-- Skip Import --',
             value: '',
-          });
+          } as any);
 
           return (
             <EuiSelect
@@ -900,11 +900,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   overwriteConfirmed() {
-    this.state.conflictingRecord.done(true);
+    this.state.conflictingRecord!.done(true);
   }
 
   overwriteSkipped() {
-    this.state.conflictingRecord.done(false);
+    this.state.conflictingRecord!.done(false);
   }
 
   render() {
