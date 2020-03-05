@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -192,10 +193,21 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                   }
                   isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
                 >
-                  <EuiFieldText
+                  <EuiComboBox
                     fullWidth
-                    value={agentConfig.namespace}
-                    onChange={e => updateAgentConfig({ namespace: e.target.value })}
+                    singleSelection
+                    noSuggestions
+                    selectedOptions={
+                      agentConfig.namespace ? [{ label: agentConfig.namespace }] : []
+                    }
+                    onCreateOption={(value: string) => {
+                      updateAgentConfig({ namespace: value });
+                    }}
+                    onChange={selectedOptions => {
+                      updateAgentConfig({
+                        namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
+                      });
+                    }}
                     isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
                     onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
                   />
@@ -208,3 +220,25 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
     </EuiForm>
   );
 };
+
+{
+  /* <EuiFieldText*/
+}
+{
+  /*  fullWidth*/
+}
+{
+  /*  value={agentConfig.namespace}*/
+}
+{
+  /*  onChange={e => updateAgentConfig({ namespace: e.target.value })}*/
+}
+{
+  /*  isInvalid={Boolean(touchedFields.namespace && validation.namespace)}*/
+}
+{
+  /*  onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}*/
+}
+{
+  /* />*/
+}
