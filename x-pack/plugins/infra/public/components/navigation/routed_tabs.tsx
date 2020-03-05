@@ -36,7 +36,6 @@ const Tab = ({ title, path }: TabConfiguration) => {
   const linkProps = useLinkProps({ pathname: path });
   return (
     <Route
-      key={`${path}-${title}`}
       path={path}
       children={({ match, history }) => {
         return (
