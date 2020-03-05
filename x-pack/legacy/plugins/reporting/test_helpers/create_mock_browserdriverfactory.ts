@@ -10,7 +10,7 @@ import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { BrowserConfig, Logger, NetworkPolicy } from '../types';
+import { BrowserConfig, CaptureConfig, Logger } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
@@ -102,19 +102,20 @@ export const createMockBrowserDriverFactory = async (
   } as BrowserConfig;
 
   const binaryPath = '/usr/local/share/common/secure/';
-  const queueTimeout = 55;
-  const networkPolicy = {} as NetworkPolicy;
+  const captureConfig = { networkPolicy: {}, timeouts: {} } as CaptureConfig;
 
   const mockBrowserDriverFactory = await createDriverFactory(
     binaryPath,
     logger,
     browserConfig,
-    queueTimeout,
-    networkPolicy
+    captureConfig
   );
 
   const mockPage = {} as Page;
-  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, { inspect: true, networkPolicy });
+  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
+    inspect: true,
+    networkPolicy: captureConfig.networkPolicy,
+  });
 
   // mock the driver methods as either default mocks or passed-in
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore

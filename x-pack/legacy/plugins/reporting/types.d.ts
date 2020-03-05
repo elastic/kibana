@@ -122,6 +122,11 @@ export interface CaptureConfig {
   maxAttempts: number;
   networkPolicy: NetworkPolicy;
   loadDelay: number;
+  timeouts: {
+    openUrl: number;
+    waitForElements: number;
+    renderComplet: number;
+  };
 }
 
 export interface BrowserConfig {
