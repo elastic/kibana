@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
+import { ForbiddenError, ILicenseState, verifyApiAccess } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -48,12 +48,20 @@ export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) 
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       const { name, config, secrets } = req.body;
-      return res.ok({
-        body: await actionsClient.update({
-          id,
-          action: { name, config, secrets },
-        }),
-      });
+
+      try {
+        return res.ok({
+          body: await actionsClient.update({
+            id,
+            action: { name, config, secrets },
+          }),
+        });
+      } catch (e) {
+        if (e instanceof ForbiddenError) {
+          return res.forbidden({ body: { message: e.message } });
+        }
+        return res.badRequest({ body: { message: e.message } });
+      }
     })
   );
 };
