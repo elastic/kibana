@@ -11,7 +11,7 @@ import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
   ActionFactory,
-  ActionFactoryBaseConfig,
+  ActionBaseConfig,
   ActionWizard,
 } from '../../../../advanced_ui_actions/public';
 // TODO: this should be actual input to the component and should not be using test data
@@ -26,8 +26,8 @@ export interface FormDrilldownWizardProps {
   currentActionFactory?: ActionFactory;
   onActionFactoryChange?: (actionFactory: ActionFactory | null) => void;
 
-  actionConfig?: ActionFactoryBaseConfig;
-  onActionConfigChange?: (config: ActionFactoryBaseConfig) => void;
+  actionConfig?: ActionBaseConfig;
+  onActionConfigChange?: (config: ActionBaseConfig) => void;
 
   actionFactories?: Array<ActionFactory<any>>;
 }

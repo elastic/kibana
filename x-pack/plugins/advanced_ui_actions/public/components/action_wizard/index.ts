@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ActionFactory, ActionWizard, ActionFactoryBaseConfig } from './action_wizard';
+export { ActionFactory, ActionWizard, ActionBaseConfig } from './action_wizard';

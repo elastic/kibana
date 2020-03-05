@@ -16,23 +16,21 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { FlyoutCreateDrilldownActionContext } from '../../actions';
-import { ActionFactory, ActionFactoryBaseConfig } from '../../../../advanced_ui_actions/public';
+import { ActionFactory, ActionBaseConfig } from '../../../../advanced_ui_actions/public';
 import {
   dashboardDrilldownActionFactory,
   urlDrilldownActionFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
-export interface DrilldownWizardConfig<
-  ActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
-> {
+export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = ActionBaseConfig> {
   name: string;
-  actionFactory?: ActionFactory<ActionFactoryConfig>;
-  actionConfig?: ActionFactoryConfig;
+  actionFactory?: ActionFactory<ActionConfig>;
+  actionConfig?: ActionConfig;
 }
 
 export interface FlyoutDrilldownWizardProps<
-  CurrentActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
+  CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 > {
   context: FlyoutCreateDrilldownActionContext;
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
@@ -40,11 +38,11 @@ export interface FlyoutDrilldownWizardProps<
   onClose?: () => void;
 
   mode?: 'create' | 'edit';
-  initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionFactoryConfig>;
+  initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionConfig>;
 }
 
 export function FlyoutDrilldownWizard<
-  CurrentActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
+  CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 >({
   context,
   onClose,
@@ -52,7 +50,7 @@ export function FlyoutDrilldownWizard<
   initialDrilldownWizardConfig,
   mode = 'create',
   onDelete = () => {},
-}: FlyoutDrilldownWizardProps<CurrentActionFactoryConfig>) {
+}: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
       initialDrilldownWizardConfig ?? {
