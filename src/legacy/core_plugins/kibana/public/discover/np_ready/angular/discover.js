@@ -74,6 +74,7 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
+  getDefaultQuery,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
@@ -182,6 +183,7 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
+  const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
   let inspectorRequest;
@@ -190,9 +192,7 @@ function discoverController(
   $scope.indexPattern = resolveIndexPatternLoading();
 
   const getTimeField = () => {
-    return indexPatternsUtils.isDefault($scope.indexPattern)
-      ? $scope.indexPattern.timeFieldName
-      : undefined;
+    return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
   };
 
   const {
@@ -471,7 +471,7 @@ function discoverController(
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
 
-  if (indexPatternsUtils.isDefault($scope.indexPattern)) {
+  if (isDefaultType($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -574,16 +574,14 @@ function discoverController(
     };
   };
 
-  function getDefaultQuery() {
-    return {
-      query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
-    };
-  }
-
   function getStateDefaults() {
+    const query =
+      $scope.searchSource.getField('query') ||
+      getDefaultQuery(
+        localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      );
     return {
-      query: $scope.searchSource.getField('query') || getDefaultQuery(),
+      query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
@@ -653,7 +651,7 @@ function discoverController(
           },
         })
       );
-
+      //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
         if (newInterval !== oldInterval) {
           setAppState({ interval: newInterval });
@@ -825,7 +823,9 @@ function discoverController(
       //reset filters and query string, remove savedQuery from state
       const state = {
         ...appStateContainer.getState(),
-        query: getDefaultQuery(),
+        query: getDefaultQuery(
+          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        ),
         filters: [],
       };
       delete state.savedQuery;
@@ -970,7 +970,8 @@ function discoverController(
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!$scope.opts.timefield) return;
+    if (!getTimeField()) return;
+    const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [
       {
@@ -981,8 +982,8 @@ function discoverController(
         type: 'date_histogram',
         schema: 'segment',
         params: {
-          field: $scope.opts.timefield,
-          interval: $scope.state.interval,
+          field: getTimeField(),
+          interval: histogramInterval,
           timeRange: timefilter.getTime(),
         },
       },
@@ -1085,7 +1086,7 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern =
-    !indexPatternsUtils.isDefault($route.current.locals.savedObjects.ip.loaded) &&
+    !isDefaultType($route.current.locals.savedObjects.ip.loaded) &&
     !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
 
   if ($scope.isUnsupportedIndexPattern) {
