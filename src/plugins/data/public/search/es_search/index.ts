@@ -17,26 +17,5 @@
  * under the License.
  */
 
-import { DEFAULT_OPTIONS } from '../../services/visual_testing/visual_testing';
-
-// Width must be the same as visual_testing or canvas image widths will get skewed
-const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
-
-export default function({ getService, loadTestFile }) {
-  const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
-
-  describe('discover app', function() {
-    this.tags('ciGroup6');
-
-    before(function() {
-      return browser.setWindowSize(SCREEN_WIDTH, 1000);
-    });
-
-    after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
-    });
-
-    loadTestFile(require.resolve('./chart_visualization'));
-  });
-}
+export { esSearchStrategyProvider } from './es_search_strategy';
+export { getEsPreference } from './get_es_preference';

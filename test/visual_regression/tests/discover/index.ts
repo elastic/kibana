@@ -17,14 +17,22 @@
  * under the License.
  */
 
-export { ISearchSetup } from './i_search_setup';
+import { DEFAULT_OPTIONS } from '../../services/visual_testing/visual_testing';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export { ISearchContext } from './i_search_context';
+// Width must be the same as visual_testing or canvas image widths will get skewed
+const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
 
-export { ISearch, ICancel, ISearchOptions, IRequestTypesMap, IResponseTypesMap } from './i_search';
+export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const browser = getService('browser');
 
-export { TStrategyTypes } from './strategy_types';
+  describe('discover app', function() {
+    this.tags('ciGroup6');
 
-export { TSearchStrategyProvider } from './i_search_strategy';
+    before(function() {
+      return browser.setWindowSize(SCREEN_WIDTH, 1000);
+    });
 
-export { getDefaultSearchParams } from './es_search';
+    loadTestFile(require.resolve('./chart_visualization'));
+  });
+}
