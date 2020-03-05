@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { darken, saturate, lighten } from 'polished';
+import { saturate, lighten } from 'polished';
 
 import {
   htmlIdGenerator,
@@ -61,7 +61,7 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   full: euiColorFullShade,
   strokeBehindEmpty: euiColor85Shade,
   warning: resolverPalette.statii[3],
-  resolverBackground: euiColor85Shade,
+  resolverBackground: euiColorFullShade,
   runningProcessStart: '#006BB4',
   runningProcessEnd: '#017D73',
   runningTriggerStart: '#BD281E',
