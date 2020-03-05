@@ -37,7 +37,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query as string);
         }
-        const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+        const reEncoded = urlUtils.stringifyWithoutEncoding(queryStringDecoded);
         return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
@@ -55,7 +55,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(hostName)) {
-          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+          const reEncoded = urlUtils.stringifyWithoutEncoding(queryStringDecoded);
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
@@ -67,13 +67,13 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             hosts,
             queryStringDecoded.query || ''
           );
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+          const reEncoded = urlUtils.stringifyWithoutEncoding(queryStringDecoded);
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
           );
         } else {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded));
+          const reEncoded = urlUtils.stringifyWithoutEncoding(queryStringDecoded);
 
           return (
             <Redirect

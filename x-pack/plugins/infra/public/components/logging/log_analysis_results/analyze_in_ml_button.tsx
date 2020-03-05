@@ -61,7 +61,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${urlUtils.makeUrlFromQuery({ _g })}`;
+  const hash = `/explorer?${urlUtils.stringifyWithEncoding({ _g })}`;
 
   return url.format({
     pathname,
@@ -94,7 +94,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?${urlUtils.makeUrlFromQuery({ _g, _a })}`;
+  const hash = `/timeseriesexplorer?${urlUtils.stringifyWithEncoding({ _g, _a })}`;
 
   return url.format({
     pathname,

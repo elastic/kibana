@@ -159,7 +159,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return url.makeUrlFromQuery({
+  return url.stringifyWithEncoding({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,
   });

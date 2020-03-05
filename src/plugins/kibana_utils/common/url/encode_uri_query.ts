@@ -56,5 +56,8 @@ export const encodeQuery = (
     }
   });
 
-export const makeUrlFromQuery = (query: ParsedUrlQuery | {}) =>
+export const stringifyWithEncoding = (query: ParsedUrlQuery | {}) =>
   stringify(query, undefined, undefined, { encodeURIComponent: encodeUriQuery });
+
+export const stringifyWithoutEncoding = (query: ParsedUrlQuery | {}) =>
+  stringify(query, undefined, undefined, { encodeURIComponent: (c: unknown) => c });

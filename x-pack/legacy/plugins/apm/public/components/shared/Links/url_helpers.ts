@@ -18,9 +18,7 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, undefined, undefined, {
-    encodeURIComponent: (c: unknown) => c
-  });
+  return url.stringifyWithEncoding(encodedQuery);
 }
 
 export type APMQueryParams = {

@@ -243,11 +243,11 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
 
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
-    search: urlUtils.makeUrlFromQuery(parsedUrl.query),
+    search: urlUtils.stringifyWithEncoding(parsedUrl.query),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
-          search: urlUtils.makeUrlFromQuery(parsedHash.query),
+          search: urlUtils.stringifyWithEncoding(parsedHash.query),
         })
       : parsedUrl.hash,
   });

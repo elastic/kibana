@@ -84,7 +84,7 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = url.makeUrlFromQuery(parsedQueryString);
+        const oldLocationSearch = url.stringifyWithoutEncoding(parsedQueryString);
 
         Object.keys(urlState).forEach(a => {
           if (isRisonSerializationRequired(a)) {
@@ -93,11 +93,11 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = url.makeUrlFromQuery(parsedQueryString);
+        const newLocationSearch = url.stringifyWithoutEncoding(parsedQueryString);
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({
-            search: url.makeUrlFromQuery(parsedQueryString),
+            search: url.stringifyWithEncoding(parsedQueryString),
           });
         }
       } catch (error) {

@@ -37,7 +37,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
 
-        const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+        const reEncoded = urlUtils.stringifyWithEncoding(queryStringDecoded);
 
         return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
@@ -57,7 +57,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         }
 
         if (emptyEntity(ip)) {
-          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+          const reEncoded = urlUtils.stringifyWithEncoding(queryStringDecoded);
 
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
@@ -67,10 +67,10 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             ips,
             queryStringDecoded.query || ''
           );
-          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+          const reEncoded = urlUtils.stringifyWithEncoding(queryStringDecoded);
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
-          const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
+          const reEncoded = urlUtils.stringifyWithEncoding(queryStringDecoded);
           return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}

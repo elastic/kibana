@@ -28,7 +28,7 @@ export function removeQueryParam(history: History, param: string, replace: boole
 
   delete query[param];
 
-  const newSearch = url.makeUrlFromQuery(query);
+  const newSearch = url.stringifyWithEncoding(query);
   const newLocation: Location<any> = {
     ...oldLocation,
     search: newSearch,
