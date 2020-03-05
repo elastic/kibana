@@ -42,6 +42,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
     }
   );
 
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
