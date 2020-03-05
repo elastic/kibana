@@ -20,16 +20,14 @@ describe('AllCases', () => {
   const dispatchUpdateCaseProperty = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest
-      .spyOn(apiHook, 'useGetCases')
-      .mockReturnValue([
-        useGetCasesMockState,
-        setFilters,
-        setQueryParams,
-        setSelectedCases,
-        getCaseCount,
-        dispatchUpdateCaseProperty,
-      ]);
+    jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
+      ...useGetCasesMockState,
+      dispatchUpdateCaseProperty,
+      getCaseCount,
+      setFilters,
+      setQueryParams,
+      setSelectedCases,
+    });
     moment.tz.setDefault('UTC');
   });
   it('should render AllCases', () => {

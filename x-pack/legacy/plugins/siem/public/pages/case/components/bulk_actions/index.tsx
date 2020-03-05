@@ -16,34 +16,56 @@ interface GetBulkItems {
   // dispatchToaster: Dispatch<ActionToaster>;
   // reFetchCases: (refreshPrePackagedCase?: boolean) => void;
   selectedCases: Case[];
+  caseStatus: string;
 }
 
 export const getBulkItems = ({
   // cases,
   closePopover,
+  caseStatus,
   // dispatch,
   // dispatchToaster,
   // reFetchCases,
   selectedCases,
 }: GetBulkItems) => {
   return [
-    <EuiContextMenuItem
-      key={i18n.BULK_ACTION_DUPLICATE_SELECTED}
-      icon="copy"
-      disabled={true} // TO DO
-      onClick={async () => {
-        closePopover();
-        // await duplicateCasesAction(
-        //   cases.filter(c => selectedCases.includes(c.caseId)),
-        //   selectedCases,
-        //   dispatch,
-        //   dispatchToaster
-        // );
-        // reFetchCases(true);
-      }}
-    >
-      {i18n.BULK_ACTION_DUPLICATE_SELECTED}
-    </EuiContextMenuItem>,
+    caseStatus === 'open' ? (
+      <EuiContextMenuItem
+        key={i18n.BULK_ACTION_CLOSE_SELECTED}
+        icon="magnet"
+        disabled={true} // TO DO
+        onClick={async () => {
+          closePopover();
+          // await duplicateCasesAction(
+          //   cases.filter(c => selectedCases.includes(c.caseId)),
+          //   selectedCases,
+          //   dispatch,
+          //   dispatchToaster
+          // );
+          // reFetchCases(true);
+        }}
+      >
+        {i18n.BULK_ACTION_CLOSE_SELECTED}
+      </EuiContextMenuItem>
+    ) : (
+      <EuiContextMenuItem
+        key={i18n.BULK_ACTION_OPEN_SELECTED}
+        icon="magnet"
+        disabled={true} // TO DO
+        onClick={async () => {
+          closePopover();
+          // await duplicateCasesAction(
+          //   cases.filter(c => selectedCases.includes(c.caseId)),
+          //   selectedCases,
+          //   dispatch,
+          //   dispatchToaster
+          // );
+          // reFetchCases(true);
+        }}
+      >
+        {i18n.BULK_ACTION_OPEN_SELECTED}
+      </EuiContextMenuItem>
+    ),
     <EuiContextMenuItem
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"

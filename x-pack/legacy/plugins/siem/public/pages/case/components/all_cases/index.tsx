@@ -14,9 +14,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
+  EuiProgress,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
@@ -54,6 +54,17 @@ const FlexItemDivider = styled(EuiFlexItem)`
     }
   `}
 `;
+
+const ProgressLoader = styled(EuiProgress)`
+  ${({ theme }) => css`
+    .euiFlexGroup--gutterMedium > &.euiFlexItem {
+      top: 2px;
+      border-radius: ${theme.eui.euiBorderRadius};
+      z-index: ${theme.eui.euiZHeader};
+    }
+  `}
+`;
+
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
@@ -63,14 +74,19 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
-  const [
-    { caseCount, data, isLoading, loading, queryParams, filterOptions, selectedCases },
+  const {
+    caseCount,
+    data,
+    dispatchUpdateCaseProperty,
+    filterOptions,
+    getCaseCount,
+    loading,
+    queryParams,
+    selectedCases,
     setFilters,
     setQueryParams,
     setSelectedCases,
-    getCaseCount,
-    dispatchUpdateCaseProperty,
-  ] = useGetCases();
+  } = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -101,15 +117,11 @@ export const AllCases = React.memo(() => {
     [filterOptions, setFilters]
   );
 
-  const updateTheState = useCallback(
-    ({ caseId, version }: Case, updateValue: 'open' | 'closed') => {
-      dispatchUpdateCaseProperty({ updateKey: 'state', updateValue, caseId, version });
-    },
-    []
+  const actions = useMemo(
+    () =>
+      getActions({ caseStatus: filterOptions.state, dispatchUpdate: dispatchUpdateCaseProperty }),
+    [filterOptions.state, dispatchUpdateCaseProperty]
   );
-  const actions = useMemo(() => getActions(filterOptions.state, updateTheState), [
-    filterOptions.state,
-  ]);
 
   const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
   const memoizedPagination = useMemo(
@@ -128,10 +140,11 @@ export const AllCases = React.memo(() => {
         items={getBulkItems({
           closePopover,
           selectedCases,
+          caseStatus: filterOptions.state,
         })}
       />
     ),
-    [selectedCases]
+    [selectedCases, filterOptions.state]
   );
 
   const sorting: EuiTableSortingType<Case> = {
@@ -145,18 +158,10 @@ export const AllCases = React.memo(() => {
     [selectedCases]
   );
   const isCasesLoading = useMemo(
-    () =>
-      (isLoading && (loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1)) ||
-      (isLoading && isEmpty(data.cases)),
-    [isLoading, loading, data]
+    () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
+    [loading]
   );
-  const isCasesReady = useMemo(
-    () =>
-      !isLoading &&
-      !isEmpty(data.cases) &&
-      !(loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1),
-    [isLoading, loading, data]
-  );
+  const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
   return (
     <>
@@ -167,8 +172,7 @@ export const AllCases = React.memo(() => {
               caseCount={caseCount}
               caseState={'open'}
               getCaseCount={getCaseCount}
-              isLoading={isLoading}
-              loading={loading}
+              isLoading={loading.indexOf('caseCount') > -1}
             />
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
@@ -176,8 +180,7 @@ export const AllCases = React.memo(() => {
               caseCount={caseCount}
               caseState={'closed'}
               getCaseCount={getCaseCount}
-              isLoading={isLoading}
-              loading={loading}
+              isLoading={loading.indexOf('caseCount') > -1}
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
@@ -194,6 +197,7 @@ export const AllCases = React.memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
+      {isCasesLoading && !isDataEmpty && <ProgressLoader size="xs" color="accent" />}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters
           onFilterChanged={onFilterChangedCallback}
@@ -203,12 +207,11 @@ export const AllCases = React.memo(() => {
             state: filterOptions.state,
           }}
         />
-        {isCasesLoading && (
+        {isCasesLoading && isDataEmpty ? (
           <Div>
             <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
           </Div>
-        )}
-        {isCasesReady && (
+        ) : (
           <Div>
             <UtilityBar border>
               <UtilityBarSection>

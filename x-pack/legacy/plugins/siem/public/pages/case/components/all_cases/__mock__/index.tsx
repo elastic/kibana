@@ -81,7 +81,6 @@ export const useGetCasesMockState: UseGetCasesState = {
   },
   loading: [],
   selectedCases: [],
-  isLoading: false,
   isError: false,
   queryParams: {
     page: 1,

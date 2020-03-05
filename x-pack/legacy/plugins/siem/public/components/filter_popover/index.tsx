@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -60,7 +60,13 @@ export const FilterPopoverComponent = ({
   optionsEmptyLabel,
   selectedOptions,
 }: FilterPopoverProps) => {
-  const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const setIsPopoverOpenCb = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const toggleSelectedGroupCb = useCallback(
+    option => toggleSelectedGroup(option, selectedOptions, onSelectedOptionsChanged),
+    [selectedOptions, onSelectedOptionsChanged]
+  );
 
   return (
     <EuiPopover
@@ -69,8 +75,8 @@ export const FilterPopoverComponent = ({
         <EuiFilterButton
           data-test-subj={`options-filter-popover-button-${buttonLabel}`}
           iconType="arrowDown"
-          onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
-          isSelected={isTagPopoverOpen}
+          onClick={setIsPopoverOpenCb}
+          isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}
           numActiveFilters={selectedOptions.length}
@@ -78,18 +84,18 @@ export const FilterPopoverComponent = ({
           {buttonLabel}
         </EuiFilterButton>
       }
-      isOpen={isTagPopoverOpen}
-      closePopover={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
+      isOpen={isPopoverOpen}
+      closePopover={setIsPopoverOpenCb}
       panelPaddingSize="none"
     >
       <ScrollableDiv>
-        {options.map((tag, index) => (
+        {options.map((option, index) => (
           <EuiFilterSelectItem
-            checked={selectedOptions.includes(tag) ? 'on' : undefined}
-            key={`${index}-${tag}`}
-            onClick={() => toggleSelectedGroup(tag, selectedOptions, onSelectedOptionsChanged)}
+            checked={selectedOptions.includes(option) ? 'on' : undefined}
+            key={`${index}-${option}`}
+            onClick={toggleSelectedGroupCb.bind(null, option)}
           >
-            {`${tag}`}
+            {option}
           </EuiFilterSelectItem>
         ))}
       </ScrollableDiv>

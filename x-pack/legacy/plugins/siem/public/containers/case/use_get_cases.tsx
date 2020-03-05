@@ -19,7 +19,6 @@ export interface UseGetCasesState {
   data: AllCases;
   filterOptions: FilterOptions;
   isError: boolean;
-  isLoading: boolean;
   loading: string[];
   queryParams: QueryParams;
   selectedCases: Case[];
@@ -30,7 +29,7 @@ export interface CaseCount {
   closed: number;
 }
 
-interface UpdateCase extends UpdateByKey {
+export interface UpdateCase extends UpdateByKey {
   caseId: string;
   version: string;
 }
@@ -50,7 +49,6 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
     case 'FETCH_INIT':
       return {
         ...state,
-        isLoading: true,
         isError: false,
         loading: [...state.loading.filter(e => e !== action.payload), action.payload],
       };
@@ -71,7 +69,6 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
     case 'FETCH_CASES_SUCCESS':
       return {
         ...state,
-        isLoading: false,
         isError: false,
         data: action.payload,
         loading: state.loading.filter(e => e !== 'cases'),
@@ -79,7 +76,6 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
     case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoading: false,
         isError: true,
         loading: state.loading.filter(e => e !== action.payload),
       };
@@ -112,14 +108,14 @@ const initialData: AllCases = {
   perPage: 0,
   total: 0,
 };
-export const useGetCases = (): [
-  UseGetCasesState,
-  Dispatch<SetStateAction<FilterOptions>>,
-  Dispatch<SetStateAction<Partial<QueryParams>>>,
-  Dispatch<SetStateAction<Case[]>>,
-  Dispatch<keyof CaseCount>,
-  Dispatch<UpdateCase>
-] => {
+interface UseGetCases extends UseGetCasesState {
+  dispatchUpdateCaseProperty: Dispatch<UpdateCase>;
+  getCaseCount: Dispatch<keyof CaseCount>;
+  setFilters: Dispatch<SetStateAction<FilterOptions>>;
+  setQueryParams: Dispatch<SetStateAction<Partial<QueryParams>>>;
+  setSelectedCases: Dispatch<Case[]>;
+}
+export const useGetCases = (): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     caseCount: {
       open: 0,
@@ -132,7 +128,6 @@ export const useGetCases = (): [
       tags: [],
     },
     isError: false,
-    isLoading: false,
     loading: [],
     queryParams: {
       page: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -145,12 +140,10 @@ export const useGetCases = (): [
   const [, dispatchToaster] = useStateToaster();
   const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
   const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
-  const [selectedCases, setSelectedCases] = useState<Case[]>(state.selectedCases);
-  const [doUpdate, setDoUpdate] = useState(false);
 
-  useEffect(() => {
-    dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: selectedCases });
-  }, [selectedCases]);
+  const setSelectedCases = useCallback((mySelectedCases: Case[]) => {
+    dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
+  }, []);
 
   useEffect(() => {
     if (!isEqual(queryParams, state.queryParams)) {
@@ -192,54 +185,72 @@ export const useGetCases = (): [
     };
   }, [state.queryParams, state.filterOptions]);
   useEffect(() => fetchCases(), [state.queryParams, state.filterOptions]);
-  useEffect(() => {
-    if (doUpdate) {
-      fetchCases();
-      getCaseCount('open');
-      getCaseCount('closed');
-      setDoUpdate(false);
-    }
-  }, [doUpdate]);
 
-  const getCaseCount = async (caseState: keyof CaseCount) => {
-    dispatch({ type: 'FETCH_INIT', payload: 'caseCount' });
-    try {
-      const response = await getCases({
-        filterOptions: { search: '', state: caseState, tags: [] },
-      });
-      dispatch({ type: 'FETCH_CASE_COUNT_SUCCESS', payload: { [caseState]: response.total } });
-    } catch (error) {
-      errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-      dispatch({ type: 'FETCH_FAILURE', payload: 'caseCount' });
-    }
-  };
+  const getCaseCount = useCallback((caseState: keyof CaseCount) => {
+    let didCancel = false;
+    const fetchData = async () => {
+      dispatch({ type: 'FETCH_INIT', payload: 'caseCount' });
+      try {
+        const response = await getCases({
+          filterOptions: { search: '', state: caseState, tags: [] },
+        });
+        if (!didCancel) {
+          dispatch({
+            type: 'FETCH_CASE_COUNT_SUCCESS',
+            payload: { [caseState]: response.total },
+          });
+        }
+      } catch (error) {
+        if (!didCancel) {
+          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          dispatch({ type: 'FETCH_FAILURE', payload: 'caseCount' });
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      didCancel = true;
+    };
+  }, []);
 
-  const dispatchUpdateCaseProperty = async ({
-    updateKey,
-    updateValue,
-    caseId,
-    version,
-  }: UpdateCase) => {
-    dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
-    try {
-      await updateCaseProperty(
-        caseId,
-        { [updateKey]: updateValue },
-        version ?? '' // saved object versions are typed as string | undefined, hope that's not true
-      );
-      setDoUpdate(true);
-      dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
-    } catch (error) {
-      errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-      dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });
-    }
-  };
-  return [
-    state,
+  const dispatchUpdateCaseProperty = useCallback(
+    ({ updateKey, updateValue, caseId, version }: UpdateCase) => {
+      let didCancel = false;
+      const fetchData = async () => {
+        dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
+        try {
+          await updateCaseProperty(
+            caseId,
+            { [updateKey]: updateValue },
+            version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+          );
+          if (!didCancel) {
+            dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
+            fetchCases();
+            getCaseCount('open');
+            getCaseCount('closed');
+          }
+        } catch (error) {
+          if (!didCancel) {
+            errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+            dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });
+          }
+        }
+      };
+      fetchData();
+      return () => {
+        didCancel = true;
+      };
+    },
+    [filterQuery, state.filterOptions]
+  );
+
+  return {
+    ...state,
+    dispatchUpdateCaseProperty,
+    getCaseCount,
     setFilters,
     setQueryParams,
     setSelectedCases,
-    getCaseCount,
-    dispatchUpdateCaseProperty,
-  ];
+  };
 };

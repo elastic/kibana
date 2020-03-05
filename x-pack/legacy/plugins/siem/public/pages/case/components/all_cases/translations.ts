@@ -61,7 +61,7 @@ export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
   defaultMessage: 'Delete',
 });
 export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseTable.reopenCase', {
-  defaultMessage: 'Open cases',
+  defaultMessage: 'Reopen case',
 });
 export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseTable.closeCase', {
   defaultMessage: 'Close case',
