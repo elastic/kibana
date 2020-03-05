@@ -51,7 +51,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toContain('/app/uptime#/?search=host.ip:HOST_IP');
+      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=host.ip:HOST_IP');
     });
 
     it('renders with a container id filter when present in log entry', () => {
@@ -81,7 +81,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toContain('/app/uptime#/?search=container.id:CONTAINER_ID');
+      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=container.id:CONTAINER_ID');
     });
 
     it('renders with a pod uid filter when present in log entry', () => {
@@ -111,7 +111,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toContain('/app/uptime#/?search=kubernetes.pod.uid:POD_UID');
+      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=kubernetes.pod.uid:POD_UID');
     });
 
     it('renders with a disjunction of filters when multiple present in log entry', () => {
@@ -145,8 +145,8 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toContain(
-        '/app/uptime#/?search=container.id:CONTAINER_ID%20or%20host.ip:HOST_IP%20or%20kubernetes.pod.uid:POD_UID'
+      ).toBe(
+        '/test-basepath/s/test-space/app/uptime#/?search=container.id:CONTAINER_ID%20or%20host.ip:HOST_IP%20or%20kubernetes.pod.uid:POD_UID'
       );
     });
 
