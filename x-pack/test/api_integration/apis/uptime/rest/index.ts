@@ -5,23 +5,27 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  settingsObjectId,
+  settingsObjectType,
+} from '../../../../../plugins/uptime/server/lib/saved_objects';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const server = getService('kibanaServer');
 
   describe('uptime REST endpoints', () => {
     beforeEach('clear settings', async () => {
       try {
-        const res = await es.delete({
-          index: '.kibana',
-          id: 'uptime-dynamic-settings:uptime-dynamic-settings-singleton',
+        server.savedObjects.delete({
+          type: settingsObjectType,
+          id: settingsObjectId,
         });
       } catch (e) {
         // a 404 just means the doc is already missing
         if (e.statuscode !== 404) {
           throw new Error(
-            `error attempting to delete settings (${e.statuscode}): ${json.stringify(e)}`
+            `error attempting to delete settings (${e.statuscode}): ${JSON.stringify(e)}`
           );
         }
       }
