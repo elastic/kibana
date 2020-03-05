@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldownAction } from '../actions';
 import { DrilldownsSetupDependencies } from '../plugin';
 
@@ -15,7 +16,7 @@ export class DrilldownService {
     });
 
     uiActions.registerAction(actionFlyoutCreateDrilldown);
-    uiActions.attachAction('CONTEXT_MENU_TRIGGER', actionFlyoutCreateDrilldown.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
   }
 
   /**
