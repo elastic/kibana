@@ -78,6 +78,3 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
     </Provider>
   )
 );
-
-const random = seedrandom('hi');
-console.log('rando', random());
