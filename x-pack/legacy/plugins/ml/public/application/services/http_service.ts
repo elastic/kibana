@@ -10,7 +10,7 @@ import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit): HeadersInit {
   return {
-    asSystemRequest: false,
+    asSystemRequest: true,
     'Content-Type': 'application/json',
     ...headers,
   } as HeadersInit;

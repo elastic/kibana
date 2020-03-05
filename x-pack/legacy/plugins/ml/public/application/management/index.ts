@@ -53,7 +53,6 @@ function initManagementSection() {
   setDependencyCache({
     docLinks: legacyDocLinks as any,
     basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
   });
 
   management.register('ml', {
