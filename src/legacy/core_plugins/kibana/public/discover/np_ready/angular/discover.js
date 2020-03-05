@@ -188,7 +188,6 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  $scope.timeRangeObj = timefilter.getTime();
 
   const getTimeField = () => {
     return indexPatternsUtils.isDefault($scope.indexPattern)
@@ -889,7 +888,6 @@ function discoverController(
   }
 
   $scope.updateTime = function() {
-    $scope.timeRangeObj = timefilter.getTime();
     //this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
       from: dateMath.parse(timefilter.getTime().from),
