@@ -61,6 +61,7 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
+  isActionTypeEnabled(id: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 }
@@ -229,6 +230,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
       }),
+      isActionTypeEnabled: id => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id);
+      },
       // Ability to get an actions client from legacy code
       async getActionsClientWithRequest(request: KibanaRequest) {
         if (isESOUsingEphemeralEncryptionKey === true) {

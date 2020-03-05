@@ -49,6 +49,16 @@ export class ActionTypeRegistry {
   }
 
   /**
+   * Returns true if action type is enabled in the config and a valid license is used.
+   */
+  public isActionTypeEnabled(id: string) {
+    return (
+      this.actionsConfigUtils.isActionTypeEnabled(id) &&
+      this.licenseState.isLicenseValidForActionType(this.get(id))
+    );
+  }
+
+  /**
    * Registers an action type to the action type registry
    */
   public register(actionType: ActionType) {

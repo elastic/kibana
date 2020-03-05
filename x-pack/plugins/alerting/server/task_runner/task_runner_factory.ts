@@ -18,7 +18,7 @@ import { TaskRunner } from './task_runner';
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
-  executeAction: ActionsPluginStartContract['execute'];
+  actionsPlugin: ActionsPluginStartContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;

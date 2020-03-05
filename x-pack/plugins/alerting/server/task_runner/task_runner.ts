@@ -115,7 +115,7 @@ export class TaskRunner {
     return createExecutionHandler({
       alertId,
       logger: this.logger,
-      executeAction: this.context.executeAction,
+      actionsPlugin: this.context.actionsPlugin,
       apiKey,
       actions: actionsWithIds,
       spaceId,

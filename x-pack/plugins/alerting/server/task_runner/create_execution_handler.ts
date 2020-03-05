@@ -12,7 +12,7 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../../p
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
-  executeAction: ActionsPluginStartContract['execute'];
+  actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
   apiKey: string | null;
@@ -30,7 +30,7 @@ interface ExecutionHandlerOptions {
 export function createExecutionHandler({
   logger,
   alertId,
-  executeAction,
+  actionsPlugin,
   actions: alertActions,
   spaceId,
   apiKey,
@@ -57,12 +57,14 @@ export function createExecutionHandler({
         };
       });
     for (const action of actions) {
-      await executeAction({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey,
-      });
+      if (actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
+        await actionsPlugin.execute({
+          id: action.id,
+          params: action.params,
+          spaceId,
+          apiKey,
+        });
+      }
     }
   };
 }

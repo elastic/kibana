@@ -7,6 +7,7 @@
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { actionsMock } from '../../../actions/server/mocks';
 
 const alertType: AlertType = {
   id: 'test',
@@ -20,7 +21,7 @@ const alertType: AlertType = {
 };
 
 const createExecutionHandlerParams = {
-  executeAction: jest.fn(),
+  actionsPlugin: actionsMock.createStart(),
   spaceId: 'default',
   alertId: '1',
   apiKey: 'MTIzOmFiYw==',
@@ -42,9 +43,12 @@ const createExecutionHandlerParams = {
   ],
 };
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+});
 
-test('calls executeAction per selected action', async () => {
+test('calls actionsPlugin.execute per selected action', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   await executionHandler({
     actionGroup: 'default',
@@ -52,8 +56,8 @@ test('calls executeAction per selected action', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",
@@ -69,7 +73,45 @@ test('calls executeAction per selected action', async () => {
     `);
 });
 
-test('limits executeAction per action group', async () => {
+test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
+  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
+  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
+  const executionHandler = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [
+      ...createExecutionHandlerParams.actions,
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+    ],
+  });
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledWith({
+    id: '2',
+    params: {
+      foo: true,
+      contextVal: 'My other  goes here',
+      stateVal: 'My other  goes here',
+    },
+    spaceId: 'default',
+    apiKey: createExecutionHandlerParams.apiKey,
+  });
+});
+
+test('limits actionsPlugin.execute per action group', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   await executionHandler({
     actionGroup: 'other-group',
@@ -77,7 +119,9 @@ test('limits executeAction per action group', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toMatchInlineSnapshot(
+    `[MockFunction]`
+  );
 });
 
 test('context attribute gets parameterized', async () => {
@@ -88,8 +132,8 @@ test('context attribute gets parameterized', async () => {
     state: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",
@@ -113,8 +157,8 @@ test('state attribute gets parameterized', async () => {
     state: { value: 'state-val' },
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",
