@@ -52,7 +52,6 @@ export interface VisTypeTimeseriesSetup {
     fakeRequest: FakeRequest,
     options: GetVisDataOptions
   ) => ReturnType<GetVisData>;
-  addSearchStrategy: SearchStrategyRegistry['addStrategy'];
 }
 
 export interface Framework {
@@ -110,7 +109,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       ) => {
         return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
       },
-      addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };
   }
 

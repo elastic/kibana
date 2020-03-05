@@ -37,7 +37,6 @@ export interface RollupPluginSetupDependencies {
   __LEGACY: {
     aggTypeFilters: AggTypeFilters;
     aggTypeFieldFilters: AggTypeFieldFilters;
-    addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
   };
   home?: HomePublicPluginSetup;
@@ -49,7 +48,7 @@ export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, addSearchStrategy, managementLegacy },
+      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, managementLegacy },
       home,
       management,
       indexManagement,
@@ -67,7 +66,6 @@ export class RollupPlugin implements Plugin {
     if (isRollupIndexPatternsEnabled) {
       managementLegacy.indexPattern.creation.add(RollupIndexPatternCreationConfig);
       managementLegacy.indexPattern.list.add(RollupIndexPatternListConfig);
-      addSearchStrategy(getRollupSearchStrategy(core.http.fetch));
       initAggTypeFilter(aggTypeFilters);
       initAggTypeFieldFilter(aggTypeFieldFilters);
     }

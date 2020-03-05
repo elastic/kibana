@@ -43,9 +43,7 @@ export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search
 export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
 
 export {
-  addSearchStrategy,
   hasSearchStategyForIndexPattern,
-  defaultSearchStrategy,
   SearchError,
   SearchStrategyProvider,
   getSearchErrorType,
