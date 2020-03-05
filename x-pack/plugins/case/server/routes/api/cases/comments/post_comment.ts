@@ -23,7 +23,7 @@ import { RouteDeps } from '../../types';
 export function initPostCommentApi({ caseService, router }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/comment',
+      path: '/api/cases/{case_id}/comments',
       validate: {
         params: schema.object({
           case_id: schema.string(),

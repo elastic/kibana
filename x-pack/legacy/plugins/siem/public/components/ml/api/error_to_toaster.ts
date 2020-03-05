@@ -7,7 +7,7 @@
 import { isError } from 'lodash/fp';
 import uuid from 'uuid';
 import { ActionToaster, AppToast } from '../../toasters';
-import { ToasterErrorsType, ToasterErrors } from './throw_if_not_ok';
+import { ToasterErrorsType, ToasterErrors } from '../../../hooks/api/throw_if_not_ok';
 
 export type ErrorToToasterArgs = Partial<AppToast> & {
   error: unknown;

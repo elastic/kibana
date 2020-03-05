@@ -6,11 +6,11 @@
 
 import { has } from 'lodash/fp';
 
-import * as i18n from './translations';
-import { MlError } from '../types';
-import { SetupMlResponse } from '../../ml_popover/types';
+import * as i18n from '../../components/ml/api/translations';
+import { MlError } from '../../components/ml/types';
+import { SetupMlResponse } from '../../components/ml_popover/types';
 
-export { MessageBody, parseJsonFromBody } from '../../../utils/api';
+export { MessageBody, parseJsonFromBody } from '../../utils/api';
 
 export interface MlStartJobError {
   error: MlError;

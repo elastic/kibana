@@ -14,7 +14,7 @@ import {
   ToasterErrors,
   tryParseResponse,
 } from './throw_if_not_ok';
-import { SetupMlResponse } from '../../ml_popover/types';
+import { SetupMlResponse } from '../../components/ml_popover/types';
 
 describe('throw_if_not_ok', () => {
   afterEach(() => {

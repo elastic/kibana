@@ -18,7 +18,7 @@ import { escapeHatch, wrapError, flattenCommentSavedObject } from '../../utils';
 export function initPatchCommentApi({ caseService, router }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/{case_id}/comment',
+      path: '/api/cases/{case_id}/comments',
       validate: {
         params: schema.object({
           case_id: schema.string(),

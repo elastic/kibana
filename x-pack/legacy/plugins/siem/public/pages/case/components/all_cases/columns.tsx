@@ -21,8 +21,8 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     name: i18n.NAME,
     render: (theCase: Case) => {
-      if (theCase.caseId != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>;
+      if (theCase.id != null && theCase.title != null) {
+        return <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>;
       }
       return getEmptyTagValue();
     },

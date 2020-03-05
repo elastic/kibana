@@ -38,8 +38,8 @@ export const transformNewCase = ({
   comment_ids: [],
   created_at: createdDate,
   created_by: { full_name, username },
-  updated_at: '',
-  updated_by: { full_name: null, username: null },
+  updated_at: null,
+  updated_by: null,
   ...newCase,
 });
 
@@ -58,8 +58,8 @@ export const transformNewComment = ({
   comment,
   created_at: createdDate,
   created_by: { full_name, username },
-  updated_at: '',
-  updated_by: { full_name: null, username: null },
+  updated_at: null,
+  updated_by: null,
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

@@ -23,7 +23,7 @@ export const CaseAttributesRt = rt.intersection([
     created_at: rt.string,
     created_by: UserRT,
     updated_at: rt.union([rt.string, rt.null]),
-    updated_by: UserRT,
+    updated_by: rt.union([UserRT, rt.null]),
   }),
 ]);
 

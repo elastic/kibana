@@ -7,7 +7,8 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { Form, useForm, UseField } from '../../../../shared_imports';
-import { NewComment } from '../../../../containers/case/types';
+
+import { CommentRequest } from '../../../../../../../../plugins/case/common/api';
 import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
@@ -19,24 +20,26 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
 `;
 
+const initialCommentValue: CommentRequest = {
+  comment: '',
+};
+
 export const AddComment = React.memo<{
   caseId: string;
 }>(({ caseId }) => {
-  const [{ data, isLoading, newComment }, setFormData] = usePostComment(caseId);
-  const { form } = useForm({
-    defaultValue: data,
+  const { commentData, isLoading, postComment } = usePostComment(caseId);
+  const { form } = useForm<CommentRequest>({
+    defaultValue: initialCommentValue,
     options: { stripEmptyFields: false },
     schema,
   });
 
   const onSubmit = useCallback(async () => {
-    const { isValid, data: newData } = await form.submit();
-    if (isValid && newData.comment) {
-      setFormData({ ...newData, isNew: true } as NewComment);
-    } else if (isValid && data.comment) {
-      setFormData({ ...data, ...newData, isNew: true } as NewComment);
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      await postComment(data);
     }
-  }, [form, data]);
+  }, [form]);
 
   return (
     <>
@@ -64,7 +67,7 @@ export const AddComment = React.memo<{
           }}
         />
       </Form>
-      {newComment &&
+      {commentData != null &&
         'TO DO new comment got added but we didnt update the UI yet. Refresh the page to see your comment ;)'}
     </>
   );

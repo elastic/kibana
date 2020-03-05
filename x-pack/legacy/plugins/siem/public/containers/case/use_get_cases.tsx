@@ -132,7 +132,11 @@ export const useGetCases = (): [
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
           dispatch({ type: FETCH_FAILURE });
         }
       }

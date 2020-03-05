@@ -6,12 +6,25 @@
 
 import * as rt from 'io-ts';
 
+import { either } from 'fp-ts/lib/Either';
+
+const NumberFromString = new rt.Type<number, string, unknown>(
+  'NumberFromString',
+  rt.number.is,
+  (u, c) =>
+    either.chain(rt.string.validate(u, c), s => {
+      const n = +s;
+      return isNaN(n) ? rt.failure(u, c, 'cannot parse to a number') : rt.success(n);
+    }),
+  String
+);
+
 export const SavedObjectFindOptionsRt = rt.partial({
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   fields: rt.array(rt.string),
   filter: rt.string,
-  page: rt.number,
-  perPage: rt.number,
+  page: NumberFromString,
+  perPage: NumberFromString,
   search: rt.string,
   searchFields: rt.array(rt.string),
   sortField: rt.string,

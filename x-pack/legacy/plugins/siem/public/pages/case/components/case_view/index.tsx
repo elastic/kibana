@@ -60,10 +60,7 @@ export interface CaseProps {
 }
 
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
-  const [{ data, isLoading, updateKey }, dispatchUpdateCaseProperty] = useUpdateCase(
-    caseId,
-    initialData
-  );
+  const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
 
   const onUpdateField = useCallback(
     (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
@@ -71,7 +68,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         case 'title':
           const titleUpdate = getTypedPayload<string>(updateValue);
           if (titleUpdate.length > 0) {
-            dispatchUpdateCaseProperty({
+            updateCaseProperty({
               updateKey: 'title',
               updateValue: titleUpdate,
             });
@@ -80,7 +77,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         case 'description':
           const descriptionUpdate = getTypedPayload<string>(updateValue);
           if (descriptionUpdate.length > 0) {
-            dispatchUpdateCaseProperty({
+            updateCaseProperty({
               updateKey: 'description',
               updateValue: descriptionUpdate,
             });
@@ -88,15 +85,15 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           break;
         case 'tags':
           const tagsUpdate = getTypedPayload<string[]>(updateValue);
-          dispatchUpdateCaseProperty({
+          updateCaseProperty({
             updateKey: 'tags',
             updateValue: tagsUpdate,
           });
           break;
         case 'state':
           const stateUpdate = getTypedPayload<string>(updateValue);
-          if (data.state !== updateValue) {
-            dispatchUpdateCaseProperty({
+          if (caseData.state !== updateValue) {
+            updateCaseProperty({
               updateKey: 'state',
               updateValue: stateUpdate,
             });
@@ -105,7 +102,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           return null;
       }
     },
-    [dispatchUpdateCaseProperty, data.state]
+    [updateCaseProperty, caseData.state]
   );
 
   // TO DO refactor each of these const's into their own components
@@ -146,11 +143,11 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           titleNode={
             <EditableTitle
               isLoading={isLoading && updateKey === 'title'}
-              title={data.title}
+              title={caseData.title}
               onSubmit={onSubmit}
             />
           }
-          title={data.title}
+          title={caseData.title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -160,10 +157,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       <EuiBadge
-                        color={data.state === 'open' ? 'secondary' : 'danger'}
+                        color={caseData.state === 'open' ? 'secondary' : 'danger'}
                         data-test-subj="case-view-state"
                       >
-                        {data.state}
+                        {caseData.state}
                       </EuiBadge>
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -172,7 +169,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     <EuiDescriptionListDescription>
                       <FormattedRelativePreferenceDate
                         data-test-subj="case-view-createdAt"
-                        value={data.createdAt}
+                        value={caseData.createdAt}
                       />
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -184,10 +181,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                 <EuiFlexItem>
                   <EuiButtonToggle
                     data-test-subj="toggle-case-state"
-                    iconType={data.state === 'open' ? 'checkInCircleFilled' : 'magnet'}
+                    iconType={caseData.state === 'open' ? 'checkInCircleFilled' : 'magnet'}
                     isLoading={isLoading && updateKey === 'state'}
-                    isSelected={data.state === 'open'}
-                    label={data.state === 'open' ? 'Close case' : 'Reopen case'}
+                    isSelected={caseData.state === 'open'}
+                    label={caseData.state === 'open' ? 'Close case' : 'Reopen case'}
                     onChange={toggleStateCase}
                   />
                 </EuiFlexItem>
@@ -204,7 +201,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
               <UserActionTree
-                data={data}
+                data={caseData}
                 isLoadingDescription={isLoading && updateKey === 'description'}
                 onUpdateField={onUpdateField}
               />
@@ -213,11 +210,11 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
               <UserList
                 data-test-subj="case-view-user-list"
                 headline={i18n.REPORTER}
-                users={[data.createdBy]}
+                users={[caseData.createdBy]}
               />
               <TagList
                 data-test-subj="case-view-tag-list"
-                tags={data.tags}
+                tags={caseData.tags}
                 onSubmit={onSubmitTags}
                 isLoading={isLoading && updateKey === 'tags'}
               />
