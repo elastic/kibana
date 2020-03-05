@@ -41,6 +41,9 @@ export const createActionRoute = (router: IRouter, licenseState: LicenseState) =
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
 
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const action = req.body;
       const actionRes: ActionResult = await actionsClient.create({ action });
