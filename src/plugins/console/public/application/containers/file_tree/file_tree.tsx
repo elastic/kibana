@@ -51,8 +51,6 @@ export const FileTree: FunctionComponent = () => {
   const { textObjects, currentTextObjectId } = useEditorReadContext();
   const dispatch = useEditorActionContext();
 
-  const currentTextObject = textObjects[currentTextObjectId];
-
   const filteredTextObjects = prepareData(searchFilter, textObjects);
 
   return (
@@ -147,7 +145,7 @@ export const FileTree: FunctionComponent = () => {
           onDeleteConfirmation={() => {
             setIsFileActionInProgress(true);
             setIdToDelete(undefined);
-            textObjectsCRUD.delete(currentTextObject).finally(() => {
+            textObjectsCRUD.delete(textObjects[idToDelete]!).finally(() => {
               setIsFileActionInProgress(false);
             });
           }}
