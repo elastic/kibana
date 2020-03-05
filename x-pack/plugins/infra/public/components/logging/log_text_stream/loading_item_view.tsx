@@ -157,10 +157,16 @@ const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) 
   </>
 );
 
-const ProgressCta: React.FC<Pick<
+type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'position' | 'rangeEdge' | 'onExtendRange' | 'onStreamStart'
->> = ({ position, rangeEdge, onExtendRange, onStreamStart }) => {
+>;
+const ProgressCta: React.FC<ProgressCtaProps> = ({
+  position,
+  rangeEdge,
+  onExtendRange,
+  onStreamStart,
+}) => {
   if (rangeEdge === 'now' && position === 'end') {
     return (
       <EuiButton onClick={onStreamStart} size="s">
