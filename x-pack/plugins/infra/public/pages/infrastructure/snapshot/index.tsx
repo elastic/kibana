@@ -19,8 +19,6 @@ import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
-import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
-import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Layout } from '../../../components/inventory/layout';
@@ -28,7 +26,6 @@ import { Layout } from '../../../components/inventory/layout';
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
-    createDerivedIndexPattern,
     hasFailedLoadingSource,
     isLoading,
     loadSourceFailureMessage,

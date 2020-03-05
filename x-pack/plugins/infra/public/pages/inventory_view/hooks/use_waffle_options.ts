@@ -20,7 +20,7 @@ import {
 import { useUrlState } from '../../../utils/use_url_state';
 import { InventoryItemType, ItemTypeRT } from '../../../../common/inventory_models/types';
 
-const DEFAULT_STATE: WaffleOptionsState = {
+export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   metric: { type: 'cpu' },
   groupBy: [],
   nodeType: 'host',
@@ -35,7 +35,7 @@ const DEFAULT_STATE: WaffleOptionsState = {
 
 export const useWaffleOptions = () => {
   const [state, setState] = useUrlState<WaffleOptionsState>({
-    defaultState: DEFAULT_STATE,
+    defaultState: DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',

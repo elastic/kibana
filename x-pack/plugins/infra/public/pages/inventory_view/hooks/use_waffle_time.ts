@@ -10,14 +10,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState } from '../../../utils/use_url_state';
 
-const INITIAL_STATE: WaffleTimeState = {
+export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,
 };
 
 export const useWaffleTime = () => {
   const [state, setState] = useUrlState<WaffleTimeState>({
-    defaultState: INITIAL_STATE,
+    defaultState: DEFAULT_WAFFLE_TIME_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',

@@ -16,12 +16,10 @@ import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { InfraGroupByOptions } from '../../../lib/lib';
-import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
-import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
-import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { WaffleOptionsState } from '../../../pages/inventory_view/hooks/use_waffle_options';
+import { SavedViews } from './save_views';
 
 export interface ToolbarProps
   extends Omit<WaffleOptionsState, 'view' | 'boundsOverride' | 'autoBounds'> {
@@ -48,16 +46,7 @@ const wrapToolbarItems = (
           <ToolbarItems {...props} accounts={accounts} regions={regions} />
           <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
-            <WithWaffleViewState indexPattern={props.createDerivedIndexPattern('metrics')}>
-              {({ defaultViewState, viewState, onViewChange }) => (
-                <SavedViewsToolbarControls
-                  defaultViewState={defaultViewState}
-                  viewState={viewState}
-                  onViewChange={onViewChange}
-                  viewType={inventoryViewSavedObjectType}
-                />
-              )}
-            </WithWaffleViewState>
+            <SavedViews />
           </EuiFlexItem>
         </>
       )}

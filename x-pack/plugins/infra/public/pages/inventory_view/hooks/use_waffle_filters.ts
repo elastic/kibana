@@ -23,12 +23,14 @@ const validateKuery = (expression: string) => {
   return true;
 };
 
+export const DEFAULT_WAFFLE_FILTERS_STATE: WaffleFiltersState = { kind: 'kuery', expression: '' };
+
 export const useWaffleFilters = () => {
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern('metrics');
 
   const [filterQuery, setFilterQuery] = useUrlState<WaffleFiltersState>({
-    defaultState: { kind: 'kuery', expression: '' },
+    defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',
