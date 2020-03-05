@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
+import { SearchResponse } from 'elasticsearch';
 import { APICaller } from '../../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
@@ -45,17 +45,15 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 function rollupSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
-  options: ISearchOptions
+  options?: ISearchOptions
 ) {
-  const { body, ...query } = request.params;
-  return caller(
-    'transport.request',
-    {
-      method: 'POST',
-      path: `${request.params.index}/_rollup_search`,
-      body,
-      query: mapKeys(query, (value, key) => snakeCase(key)),
-    },
-    options
-  ) as SearchResponse<any>;
+  const method = 'POST';
+  const path = `${request.params.index}/_rollup_search`;
+  const { body, ...params } = request.params;
+  const query = toSnakeCase(params);
+  return caller('transport.request', { method, path, body, query }, options);
+}
+
+function toSnakeCase(obj: Record<string, any>) {
+  return mapKeys(obj, (value, key) => snakeCase(key));
 }

@@ -13,7 +13,7 @@ import {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
 } from '../../../../../src/plugins/data/public';
-import { IEnhancedEsSearchRequest } from '../../common';
+import { IEnhancedEsSearchRequest, EnhancedSearchParams } from '../../common';
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext
@@ -25,20 +25,16 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     request: IEnhancedEsSearchRequest,
     options
   ) => {
-    const params = {
+    const params: EnhancedSearchParams = {
       ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
       preference: getEsPreference(context.core.uiSettings),
       ...request.params,
     };
+    request.params = params;
 
-    return syncSearch(
-      {
-        ...request,
-        params,
-        serverStrategy: ES_SEARCH_STRATEGY,
-      },
-      options
-    ) as Observable<IEsSearchResponse>;
+    return syncSearch({ ...request, serverStrategy: ES_SEARCH_STRATEGY }, options) as Observable<
+      IEsSearchResponse
+    >;
   };
 
   return { search };

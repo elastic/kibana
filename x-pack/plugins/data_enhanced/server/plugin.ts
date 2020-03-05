@@ -11,14 +11,14 @@ import {
   Plugin,
 } from '../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
-import { DataPluginSetup } from '../../../../src/plugins/data/server';
+import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
 
 interface SetupDependencies {
   data: DataPluginSetup;
 }
 
-export class EnhancedDataServerPlugin implements Plugin<DataPluginSetup> {
+export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
