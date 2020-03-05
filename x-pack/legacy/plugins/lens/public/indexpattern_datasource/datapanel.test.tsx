@@ -272,17 +272,15 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    function waitForPromises() {
-      return Promise.resolve()
-        .catch(() => {})
-        .then(() => {})
-        .then(() => {});
-    }
+    const waitForPromises = async () =>
+      act(async () => {
+        await new Promise(resolve => setTimeout(resolve));
+      });
 
     function testProps() {
       const setState = jest.fn();
-      core.http.post.mockImplementation(async path => {
-        const parts = path.split && path.split('/');
+      core.http.post.mockImplementation(async (path) => {
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -497,7 +495,7 @@ describe('IndexPattern Data Panel', () => {
         }
         ++queryCount;
 
-        const parts = path.split && path.split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
