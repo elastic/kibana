@@ -5,7 +5,7 @@
  */
 import { updateActionRoute } from './update';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
@@ -19,7 +19,7 @@ beforeEach(() => {
 
 describe('updateActionRoute', () => {
   it('updates an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     updateActionRoute(router, licenseState);
@@ -85,7 +85,7 @@ describe('updateActionRoute', () => {
   });
 
   it('ensures the license allows deleting actions', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     updateActionRoute(router, licenseState);
@@ -124,7 +124,7 @@ describe('updateActionRoute', () => {
   });
 
   it('ensures the license check prevents deleting actions', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {

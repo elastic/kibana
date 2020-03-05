@@ -48,7 +48,7 @@ import {
   listActionTypesRoute,
   executeActionRoute,
 } from './routes';
-import { LicenseState } from './lib/license_state';
+import { LicenseState, ILicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 
 const EVENT_LOG_PROVIDER = 'actions';
@@ -88,7 +88,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
-  private licenseState: LicenseState | null = null;
+  private licenseState: ILicenseState | null = null;
   private spaces?: SpacesServiceSetup;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;

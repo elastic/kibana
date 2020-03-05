@@ -14,7 +14,7 @@ import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { postServiceNow } from './lib/post_servicenow';
 import { createActionTypeRegistry } from './index.test';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const postServiceNowMock = postServiceNow as jest.Mock;
 
@@ -70,7 +70,7 @@ describe('validateConfig()', () => {
   test('should validate and pass when the servicenow url is whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: url => {
           expect(url).toEqual('https://events.servicenow.com/v2/enqueue');
         },
@@ -85,7 +85,7 @@ describe('validateConfig()', () => {
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },

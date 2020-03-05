@@ -10,7 +10,7 @@ import { taskManagerMock } from '../../../task_manager/server/task_manager.mock'
 import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
 
@@ -24,12 +24,12 @@ export function createActionTypeRegistry(): {
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
     ),
-    actionsConfigUtils: configUtilsMock,
+    actionsConfigUtils: actionsConfigMock.create(),
   });
   registerBuiltInActionTypes({
     logger,
     actionTypeRegistry,
-    actionsConfigUtils: configUtilsMock,
+    actionsConfigUtils: actionsConfigMock.create(),
   });
   return { logger, actionTypeRegistry };
 }

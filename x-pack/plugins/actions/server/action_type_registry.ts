@@ -12,7 +12,7 @@ import { ActionType } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
-interface ConstructorOptions {
+export interface ActionTypeRegistryOpts {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
@@ -24,7 +24,7 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
 
-  constructor(constructorParams: ConstructorOptions) {
+  constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;

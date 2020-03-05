@@ -6,7 +6,7 @@
 
 import { executeActionRoute } from './execute';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { ActionExecutorContract } from '../lib';
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('executeActionRoute', () => {
   it('executes an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     const [context, req, res] = mockHandlerArguments(
@@ -77,7 +77,7 @@ describe('executeActionRoute', () => {
   });
 
   it('returns a "204 NO CONTENT" when the executor returns a nullish value', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     const [context, req, res] = mockHandlerArguments(
@@ -115,7 +115,7 @@ describe('executeActionRoute', () => {
   });
 
   it('ensures the license allows action execution', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     const [context, req, res] = mockHandlerArguments(
@@ -147,7 +147,7 @@ describe('executeActionRoute', () => {
   });
 
   it('ensures the license check prevents action execution', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
