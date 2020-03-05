@@ -315,9 +315,9 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
     dir('../kibana-oss') {
 
       // Allocate a few workers in the middle of the pack for Firefox
-      if (workerNumber >= 12 && workerNumber <= 15) {
-        processOssQueue(queue.ossFirefox, finishedSuites.ossFirefox, workerNumber)
-      }
+      // if (workerNumber >= 12 && workerNumber <= 15) {
+      //   processOssQueue(queue.ossFirefox, finishedSuites.ossFirefox, workerNumber)
+      // }
 
       processOssQueue(queue.oss, finishedSuites.oss, workerNumber)
     }
@@ -328,9 +328,9 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
     }
 
     dir('../kibana-xpack') {
-      if (workerNumber >= 12 && workerNumber <= 15) {
-        processXpackQueue(queue.xpackFirefox, finishedSuites.xpackFirefox, workerNumber)
-      }
+      // if (workerNumber >= 12 && workerNumber <= 15) {
+      //   processXpackQueue(queue.xpackFirefox, finishedSuites.xpackFirefox, workerNumber)
+      // }
 
       processXpackQueue(queue.xpack, finishedSuites.xpack, workerNumber)
     }
