@@ -22,16 +22,17 @@ import _ from 'lodash';
 import { Optional } from '@kbn/utility-types';
 
 import { IndexedArray } from 'ui/indexed_array';
-import { AggGroupNames } from './agg_groups';
-import { AggParam } from './agg_params';
+import { AggGroupNames } from '../../data/public/search/aggs/agg_groups';
+import { AggParam } from '../../data/public/search/aggs/agg_params';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
   [AggGroupNames.Metrics]: Schema[];
+  all: Schema[];
 }
 
 export interface Schema {
-  aggFilter: string | string[];
+  aggFilter: string[];
   editor: boolean | string;
   group: AggGroupNames;
   max: number;
@@ -103,3 +104,11 @@ export class Schemas {
       .commit();
   }
 }
+
+export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
+  return schemas.find(s => s.name === schemaName) || ({} as Schema);
+};
+
+export const getSchemasByGroup = (schemas: Schema[], schemaGroup?: string) => {
+  return schemas.filter(s => s.group === schemaGroup);
+};

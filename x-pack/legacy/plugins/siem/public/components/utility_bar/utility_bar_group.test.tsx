@@ -7,17 +7,19 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../mock';
-import { UtilityBarText } from './index';
+import { TestProviders } from '../../mock';
+import { UtilityBarGroup, UtilityBarText } from './index';
 
-describe('UtilityBarText', () => {
+describe('UtilityBarGroup', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <UtilityBarText>{'Test text'}</UtilityBarText>
+        <UtilityBarGroup>
+          <UtilityBarText>{'Test text'}</UtilityBarText>
+        </UtilityBarGroup>
       </TestProviders>
     );
 
-    expect(wrapper.find('UtilityBarText')).toMatchSnapshot();
+    expect(wrapper.find('UtilityBarGroup')).toMatchSnapshot();
   });
 });
