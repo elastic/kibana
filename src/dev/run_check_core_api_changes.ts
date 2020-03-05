@@ -264,9 +264,9 @@ async function run(
   }
 
   const folderMapping: { [key: string]: string } = {
-    'core/public': 'core/public',
-    'core/server': 'core/server',
-    'plugins/data/server': 'data/server',
+    // 'core/public': 'core/public',
+    // 'core/server': 'core/server',
+    // 'plugins/data/server': 'data/server',
     'plugins/data/public': 'data/public',
   };
 
