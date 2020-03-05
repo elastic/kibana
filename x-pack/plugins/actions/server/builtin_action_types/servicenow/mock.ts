@@ -5,6 +5,7 @@
  */
 
 import { MapsType, FinalMapping, ParamsType } from './types';
+import { Incident } from '../lib/servicenow/types';
 
 const mapping: MapsType[] = [
   { source: 'title', target: 'short_description', onEditAndUpdate: 'nothing' },
@@ -53,12 +54,57 @@ const params: ParamsType = {
       version: 'WzU3LDFd',
       comment: 'A comment',
     },
+    {
+      id: 'e3db587f-ca27-4ae9-ad2e-31f2dcc9bd0d',
+      version: 'WlK3LDFd',
+      comment: 'Another comment',
+    },
   ],
 };
 
-const responseIncident = {
+const incidentResponse = {
   id: 'c816f79cc0a8016401c5a33be04be441',
   number: 'INC0010001',
 };
 
-export { mapping, maliciousMapping, finalMapping, params, responseIncident };
+const userId = '2e9a0a5e2f79001016ab51172799b670';
+
+const axiosResponse = {
+  status: 200,
+  headers: {
+    'content-type': 'application/json',
+  },
+};
+const userIdResponse = {
+  result: [{ sys_id: userId }],
+};
+
+const incidentAxiosResponse = {
+  result: { sys_id: incidentResponse.id, number: incidentResponse.number },
+};
+
+const instance = {
+  url: 'https://instance.service-now.com',
+  username: 'username',
+  password: 'password',
+};
+
+const incident: Incident = {
+  short_description: params.title,
+  description: params.description,
+  caller_id: userId,
+};
+
+export {
+  mapping,
+  maliciousMapping,
+  finalMapping,
+  params,
+  incidentResponse,
+  incidentAxiosResponse,
+  userId,
+  userIdResponse,
+  axiosResponse,
+  instance,
+  incident,
+};

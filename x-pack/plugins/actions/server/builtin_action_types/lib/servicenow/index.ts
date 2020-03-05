@@ -6,11 +6,8 @@
 
 import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 
+import { INCIDENT_URL, USER_URL } from './constants';
 import { Instance, Incident, IncidentResponse, UpdateIncident } from './types';
-
-const API_VERSION = 'v1';
-const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
-const USER_URL = `api/now/${API_VERSION}/table/sys_user?user_name=`;
 
 const validStatusCodes = [200, 201];
 

@@ -15,7 +15,7 @@ import { ACTION_TYPE_ID } from './constants';
 import * as i18n from './translations';
 
 import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
-import { responseIncident } from './mock';
+import { incidentResponse } from './mock';
 
 jest.mock('./action_handlers');
 
@@ -184,10 +184,10 @@ describe('execute()', () => {
       services,
     };
 
-    handleCreateIncidentMock.mockImplementation(() => responseIncident);
+    handleCreateIncidentMock.mockImplementation(() => incidentResponse);
 
     const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toEqual({ actionId, status: 'ok', data: responseIncident });
+    expect(actionResponse).toEqual({ actionId, status: 'ok', data: incidentResponse });
   });
 
   test('should throw an error when failed to create incident', async () => {
