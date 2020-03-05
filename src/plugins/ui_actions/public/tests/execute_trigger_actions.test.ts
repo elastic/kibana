@@ -21,7 +21,7 @@ import { Action, createAction } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
-import { TriggerId } from '../types';
+import { TriggerId, ActionType } from '../types';
 
 jest.mock('../context_menu');
 
@@ -30,11 +30,18 @@ const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
 const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
-function createTestAction<A>(id: string, checkCompatibility: (context: A) => boolean): Action<A> {
-  return createAction<A>({
-    type: 'testAction',
-    id,
-    isCompatible: context => Promise.resolve(checkCompatibility(context)),
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionType;
+
+function createTestAction<C extends object>(
+  type: string,
+  checkCompatibility: (context: C) => boolean
+): Action<object> {
+  return createAction<typeof TEST_ACTION_TYPE>({
+    type: type as ActionType,
+    id: type,
+    isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: context => executeFn(context),
   });
 }
@@ -46,7 +53,7 @@ const reset = () => {
   uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
   });
-  uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'SEND_MESSAGE_ACTION');
+  // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'ACTION_SEND_MESSAGE');
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
@@ -62,8 +69,7 @@ test('executes a single action mapped to a trigger', async () => {
   const action = createTestAction('test1', () => true);
 
   setup.registerTrigger(trigger);
-  setup.registerAction(action);
-  setup.attachAction(trigger.id, 'test1');
+  setup.attachAction(trigger.id, action);
 
   const context = {};
   const start = doStart();
@@ -81,7 +87,6 @@ test('throws an error if there are no compatible actions to execute', async () =
   };
 
   setup.registerTrigger(trigger);
-  setup.attachAction(trigger.id, 'testaction');
 
   const context = {};
   const start = doStart();
@@ -98,11 +103,13 @@ test('does not execute an incompatible action', async () => {
     id: 'MY-TRIGGER' as TriggerId,
     title: 'My trigger',
   };
-  const action = createTestAction<{ name: string }>('test1', ({ name }) => name === 'executeme');
+  const action = createTestAction<{ name: string }>(
+    'test1',
+    ({ name }: { name: string }) => name === 'executeme'
+  );
 
   setup.registerTrigger(trigger);
-  setup.registerAction(action);
-  setup.attachAction(trigger.id, 'test1');
+  setup.attachAction(trigger.id, action);
 
   const start = doStart();
   const context = {
@@ -123,10 +130,8 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action2 = createTestAction('test2', () => true);
 
   setup.registerTrigger(trigger);
-  setup.registerAction(action1);
-  setup.registerAction(action2);
-  setup.attachAction(trigger.id, 'test1');
-  setup.attachAction(trigger.id, 'test2');
+  setup.attachAction(trigger.id, action1);
+  setup.attachAction(trigger.id, action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -150,8 +155,7 @@ test('passes whole action context to isCompatible()', async () => {
   });
 
   setup.registerTrigger(trigger);
-  setup.registerAction(action);
-  setup.attachAction(trigger.id, 'test');
+  setup.attachAction(trigger.id, action);
 
   const start = doStart();
 

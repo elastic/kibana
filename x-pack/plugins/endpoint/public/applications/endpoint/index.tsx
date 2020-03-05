@@ -38,10 +38,10 @@ interface RouterProps {
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ basename, store, coreStart: { http } }) => (
+  ({ basename, store, coreStart: { http, notifications } }) => (
     <Provider store={store}>
-      <KibanaContextProvider services={{ http }}>
-        <I18nProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={{ http, notifications }}>
           <BrowserRouter basename={basename}>
             <RouteCapture>
               <HeaderNavigation basename={basename} />
@@ -72,8 +72,8 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
               </Switch>
             </RouteCapture>
           </BrowserRouter>
-        </I18nProvider>
-      </KibanaContextProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
     </Provider>
   )
 );
