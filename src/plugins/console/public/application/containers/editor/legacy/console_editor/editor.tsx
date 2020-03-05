@@ -40,6 +40,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ConsoleInstruction } from 'src/core/server/pulse/collectors/console';
 import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
 
@@ -174,51 +175,11 @@ function EditorUI({ initialTextValue, pulseInstructions }: EditorProps) {
       const saveDelay = 500;
 
       editor.getCoreEditor().on('change', () => {
-        updatePulse();
         if (timer) {
           clearTimeout(timer);
         }
         timer = window.setTimeout(saveCurrentState, saveDelay);
       });
-    }
-
-    window.setInterval(() => {
-      updatePulse();
-    }, 300);
-    let updating = false;
-    function updatePulse() {
-      if (updating) {
-        return;
-      }
-      updating = true;
-      const coreEditor = editor.getCoreEditor();
-      const endpointDescription = getEndpointFromPosition(
-        coreEditor,
-        coreEditor.getCurrentPosition(),
-        editor.parser
-      );
-      if (endpointDescription) {
-        const instruction = pulseInstructions.find(instruction => {
-          return instruction.endpoint_id === endpointDescription.id;
-        });
-        if (instruction) {
-          if (pulseInstruction?.endpoint_id === instruction?.endpoint_id) {
-            return;
-          }
-          if (!pulseNotificationShowBell) {
-            setPulseNotificationShowBell(true);
-          }
-          setPulseInstruction({
-            docLink: endpointDescription.documentation,
-            takeMeThereHref: `http://localhost:5601/app/kibana#${instruction.action?.href}`,
-            ...instruction,
-          });
-        } else {
-          setPulseInstruction(undefined);
-          setPulseNotificationShowBell(false);
-        }
-      }
-      updating = false;
     }
 
     function saveCurrentState() {
@@ -250,10 +211,50 @@ function EditorUI({ initialTextValue, pulseInstructions }: EditorProps) {
     initialTextValue,
     history,
     setInputEditor,
-    pulseInstructions,
-    pulseInstruction,
-    pulseNotificationShowBell,
+    // pulseInstructions,
+    // pulseInstruction,
+    // pulseNotificationShowBell,
   ]);
+
+  window.setInterval(updatePulse, 3000);
+  let updating = false;
+
+  function updatePulse() {
+    if (updating) {
+      return;
+    }
+    updating = true;
+    editorInstanceRef.current = senseEditor.create(editorRef.current!);
+    const editor = editorInstanceRef.current;
+    const coreEditor = editor.getCoreEditor();
+    const endpointDescription = getEndpointFromPosition(
+      coreEditor,
+      coreEditor.getCurrentPosition(),
+      editor.parser
+    );
+    if (endpointDescription) {
+      const instruction = pulseInstructions.find(pulseInstructionPayload => {
+        return pulseInstructionPayload.endpoint_id === endpointDescription.id;
+      });
+      if (instruction) {
+        if (pulseInstruction?.endpoint_id === instruction?.endpoint_id) {
+          return;
+        }
+        if (!pulseNotificationShowBell) {
+          setPulseNotificationShowBell(true);
+        }
+        setPulseInstruction({
+          docLink: endpointDescription.documentation,
+          takeMeThereHref: `http://localhost:5601/app/kibana#${instruction.action?.href}`,
+          ...instruction,
+        });
+      } else {
+        setPulseInstruction(undefined);
+        setPulseNotificationShowBell(false);
+      }
+    }
+    updating = false;
+  }
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

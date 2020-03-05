@@ -33,11 +33,9 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
   private errorsChannel?: PulseChannel<ErrorInstruction>;
 
   public async setup(core: CoreSetup) {
-    this.errorsChannel = core.pulse.getChannel('errors');
-    errorChannelPayloads.forEach(element => {
-      // tmp disable errors channel
-      // core.pulse.getChannel('errors').sendPulse(element)
-    });
+    const errorsChannel = core.pulse.getChannel<ErrorInstruction>('errors');
+    this.errorsChannel = errorsChannel;
+    errorChannelPayloads.forEach(element => errorsChannel.sendPulse(element));
   }
 
   public start(core: CoreStart) {
