@@ -147,9 +147,6 @@ monitor performance, and address your business needs. Get alerted if a key
 metric spikes. Detect anomalous behavior or forecast future spikes. Root out
 bottlenecks in your application code. Kibana doesn’t limit or dictate how you explore your data.
 
-[role="screenshot"]
-image::siem/images/detections-ui.png[]
-
 [float]
 [[try-kibana]]
 === Give {kib} a try
