@@ -17,10 +17,10 @@ import {
   BasicFetchProps,
   ImportRulesProps,
   ExportRulesProps,
-  RuleError,
   RuleStatusResponse,
   ImportRulesResponse,
   PrePackagedRulesStatusResponse,
+  BulkRuleResponse,
 } from './types';
 import { KibanaServices } from '../../../lib/kibana';
 import {
@@ -126,11 +126,17 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  *
  * @throws An error if response is not OK
  */
-export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
-    method: 'PATCH',
-    body: JSON.stringify(ids.map(id => ({ id, enabled }))),
-  });
+export const enableRules = async ({
+  ids,
+  enabled,
+}: EnableRulesProps): Promise<BulkRuleResponse> => {
+  return KibanaServices.get().http.fetch<BulkRuleResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+    }
+  );
 };
 
 /**
@@ -140,7 +146,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
  *
  * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> => {
   return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
     method: 'DELETE',
     body: JSON.stringify(ids.map(id => ({ id }))),
@@ -154,7 +160,7 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
  *
  * @throws An error if response is not OK
  */
-export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
+export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> => {
   return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
     method: 'POST',
     body: JSON.stringify(
