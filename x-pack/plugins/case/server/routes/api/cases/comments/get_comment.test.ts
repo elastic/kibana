@@ -43,7 +43,7 @@ describe('GET comment', () => {
     const myPayload = mockCaseComments.find(s => s.id === 'mock-comment-1');
     expect(myPayload).not.toBeUndefined();
     if (myPayload != null) {
-      expect(response.payload).toEqual(flattenCommentSavedObject(myPayload));
+      expect(response.payload).toEqual([flattenCommentSavedObject(myPayload)]);
     }
   });
   it(`returns an error when getComment throws`, async () => {

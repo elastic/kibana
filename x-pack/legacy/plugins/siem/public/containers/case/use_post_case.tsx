@@ -10,7 +10,7 @@ import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 
-import { createCase } from './api';
+import { postCase } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Case } from './types';
@@ -62,11 +62,11 @@ export const usePostCase = (): UsePostCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const postCase = useCallback(async (data: CaseRequest) => {
+  const postMyCase = useCallback(async (data: CaseRequest) => {
     let cancel = false;
     try {
       dispatch({ type: FETCH_INIT });
-      const response = await createCase({ ...data, state: 'open' });
+      const response = await postCase({ ...data, state: 'open' });
       if (!cancel) {
         dispatch({
           type: FETCH_SUCCESS,
@@ -88,5 +88,5 @@ export const usePostCase = (): UsePostCase => {
     };
   }, []);
 
-  return { ...state, postCase };
+  return { ...state, postCase: postMyCase };
 };

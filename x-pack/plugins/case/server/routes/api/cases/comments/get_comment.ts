@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AllCommentsResponseRt, CommentResponseRt } from '../../../../../common/api';
+import { AllCommentsResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObject, flattenCommentSavedObjects, wrapError } from '../../utils';
 
@@ -31,7 +31,7 @@ export function initGetCommentApi({ caseService, router }: RouteDeps) {
             commentId: request.query.id,
           });
           return response.ok({
-            body: CommentResponseRt.encode(flattenCommentSavedObject(comment)),
+            body: AllCommentsResponseRt.encode([flattenCommentSavedObject(comment)]),
           });
         } else {
           const comments = await caseService.getAllCaseComments({

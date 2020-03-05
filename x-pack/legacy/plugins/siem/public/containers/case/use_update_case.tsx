@@ -10,7 +10,7 @@ import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 
-import { updateCaseProperty } from './api';
+import { patchCase } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Case } from './types';
@@ -82,7 +82,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
       let cancel = false;
       try {
         dispatch({ type: FETCH_INIT, payload: updateKey });
-        const response = await updateCaseProperty(
+        const response = await patchCase(
           caseId,
           { [updateKey]: updateValue },
           state.caseData.version

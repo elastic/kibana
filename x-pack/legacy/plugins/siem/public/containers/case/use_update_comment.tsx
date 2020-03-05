@@ -5,12 +5,14 @@
  */
 
 import { useReducer, useCallback } from 'react';
+
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-import * as i18n from './translations';
+
+import { patchComment } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
+import * as i18n from './translations';
 import { Comment } from './types';
-import { updateComment } from './api';
 import { getTypedPayload } from './utils';
 
 interface CommentUpdateState {
@@ -87,7 +89,7 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
         const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
           version: '',
         };
-        const response = await updateComment(commentId, commentUpdate, currentComment.version);
+        const response = await patchComment(commentId, commentUpdate, currentComment.version);
         if (!cancel) {
           dispatch({ type: FETCH_SUCCESS, payload: { update: response, commentId } });
         }

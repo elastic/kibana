@@ -10,7 +10,7 @@ import { CommentRequest } from '../../../../../../plugins/case/common/api';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 
-import { createComment } from './api';
+import { postComment } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Comment } from './types';
@@ -65,11 +65,11 @@ export const usePostComment = (caseId: string): UsePostComment => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const postComment = useCallback(async (data: CommentRequest) => {
+  const postMyComment = useCallback(async (data: CommentRequest) => {
     let cancel = false;
     try {
       dispatch({ type: FETCH_INIT });
-      const response = await createComment(data, state.caseId);
+      const response = await postComment(data, state.caseId);
       if (!cancel) {
         dispatch({ type: FETCH_SUCCESS, payload: response });
       }
@@ -88,5 +88,5 @@ export const usePostComment = (caseId: string): UsePostComment => {
     };
   }, []);
 
-  return { ...state, postComment };
+  return { ...state, postComment: postMyComment };
 };

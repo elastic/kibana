@@ -3,16 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { Form, useForm, UseField } from '../../../../shared_imports';
 
 import { CommentRequest } from '../../../../../../../../plugins/case/common/api';
 import { usePostComment } from '../../../../containers/case/use_post_comment';
-import { schema } from './schema';
-import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
+import { Form, useForm, UseField } from '../../../../shared_imports';
+import * as i18n from '../../translations';
+import { schema } from './schema';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
