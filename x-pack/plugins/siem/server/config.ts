@@ -12,6 +12,8 @@ import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
+  maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 });
 

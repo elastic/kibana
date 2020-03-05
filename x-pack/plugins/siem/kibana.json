@@ -3,6 +3,15 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "siem"],
+  "requiredPlugins": [
+    "actions",
+    "alerting",
+    "features",
+    "encryptedSavedObjects",
+    "security",
+    "spaces"
+  ],
+  "optionalPlugins": [],
   "server": true,
   "ui": false
 }

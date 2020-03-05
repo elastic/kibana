@@ -11,7 +11,9 @@ import { responseMock } from './response_factory';
 
 export { requestMock, requestContextMock, responseMock, serverMock };
 
-export const createMockConfig = () => () => ({
-  get: jest.fn(),
-  has: jest.fn(),
+export const createMockConfig = () => ({
+  signalsIndex: 'mock-signals-index',
+  enabled: true,
+  maxRuleImportPayloadBytes: 10485760,
+  maxRuleImportExportSize: 10000,
 });

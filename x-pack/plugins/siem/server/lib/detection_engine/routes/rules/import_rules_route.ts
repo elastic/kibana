@@ -9,8 +9,8 @@ import { extname } from 'path';
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { ConfigType } from '../../../..';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
@@ -37,7 +37,7 @@ type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const importRulesRoute = (router: IRouter, config: LegacyServices['config']) => {
+export const importRulesRoute = (router: IRouter, config: ConfigType) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
@@ -48,7 +48,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
       options: {
         tags: ['access:siem'],
         body: {
-          maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
+          maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
         },
       },
@@ -78,7 +78,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
         });
       }
 
-      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
+      const objectLimit = config.maxRuleImportExportSize;
       try {
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([

@@ -10,11 +10,8 @@ import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 describe('SiemClient', () => {
   describe('#signalsIndex', () => {
     it('returns the index scoped to the specified spaceId', () => {
-      let mockConfig = createMockConfig();
-      mockConfig = () => ({
-        get: jest.fn(() => 'mockSignalsIndex'),
-        has: jest.fn(),
-      });
+      const mockConfig = createMockConfig();
+      mockConfig.signalsIndex = 'mockSignalsIndex';
       const spaceId = 'fooSpace';
       const client = new SiemClient(spaceId, mockConfig);
 

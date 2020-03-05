@@ -5,7 +5,6 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { LegacyServices } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -29,10 +28,11 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
+import { ConfigType } from '..';
 
 export const initRoutes = (
   router: IRouter,
-  config: LegacyServices['config'],
+  config: ConfigType,
   usingEphemeralEncryptionKey: boolean
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules

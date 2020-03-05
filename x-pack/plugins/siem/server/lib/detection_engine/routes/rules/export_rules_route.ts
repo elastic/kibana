@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyServices } from '../../../../types';
+import { ConfigType } from '../../../..';
 import { ExportRulesRequestParams } from '../../rules/types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
@@ -14,7 +14,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
-export const exportRulesRoute = (router: IRouter, config: LegacyServices['config']) => {
+export const exportRulesRoute = (router: IRouter, config: ConfigType) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -38,7 +38,7 @@ export const exportRulesRoute = (router: IRouter, config: LegacyServices['config
       }
 
       try {
-        const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
+        const exportSizeLimit = config.maxRuleImportExportSize;
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,
