@@ -13,6 +13,7 @@ import { monitorStatusReducer } from './monitor_status';
 import { dynamicSettingsReducer } from './dynamic_settings';
 import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
+import { monitorDurationReducer } from './monitor_duration';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -23,4 +24,5 @@ export const rootReducer = combineReducers({
   dynamicSettings: dynamicSettingsReducer,
   indexPattern: indexPatternReducer,
   ping: pingReducer,
+  monitorDuration: monitorDurationReducer,
 });

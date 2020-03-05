@@ -11,3 +11,4 @@ export * from './monitor_status';
 export * from './dynamic_settings';
 export * from './index_pattern';
 export * from './ping';
+export * from './monitor_duration';

@@ -17,6 +17,29 @@ Array [
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
+      <a
+        href="/settings"
+      >
+        <button
+          class="euiButton euiButton--primary"
+          data-test-subj="settings-page-link"
+          type="button"
+        >
+          <span
+            class="euiButton__content"
+          >
+            <span
+              class="euiButton__text"
+            >
+              Settings
+            </span>
+          </span>
+        </button>
+      </a>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
       >
@@ -146,6 +169,29 @@ Array [
       >
         TestingHeading
       </h1>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <a
+        href="/settings"
+      >
+        <button
+          class="euiButton euiButton--primary"
+          data-test-subj="settings-page-link"
+          type="button"
+        >
+          <span
+            class="euiButton__content"
+          >
+            <span
+              class="euiButton__text"
+            >
+              Settings
+            </span>
+          </span>
+        </button>
+      </a>
     </div>
   </div>,
   <div

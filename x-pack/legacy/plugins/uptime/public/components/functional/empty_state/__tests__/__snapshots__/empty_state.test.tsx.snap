@@ -120,10 +120,12 @@ exports[`EmptyState component does not render empty state with appropriate base 
     headingMessage="No uptime data found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}
@@ -585,10 +587,12 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     headingMessage="Uptime index not found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}

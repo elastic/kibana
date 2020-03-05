@@ -12,6 +12,7 @@ import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 import { fetchIndexPatternEffect } from './index_pattern';
 import { fetchPingHistogramEffect } from './ping';
+import { fetchMonitorDurationEffect } from './monitor_duration';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -22,4 +23,5 @@ export function* rootEffect() {
   yield fork(setDynamicSettingsEffect);
   yield fork(fetchIndexPatternEffect);
   yield fork(fetchPingHistogramEffect);
+  yield fork(fetchMonitorDurationEffect);
 }
