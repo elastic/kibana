@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'src/core/server';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -28,12 +27,11 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
   async function hasPermissionToCreateJobs(
     callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
   ) {
-    const { isSecurityDisabled } = getLicenseCheckResults();
-    if (isSecurityDisabled === true) {
+    if (mlLicense.isSecurityEnabled() === false) {
       return true;
     }
 
@@ -63,7 +61,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(forceStartDatafeedSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { forceStartDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { datafeedIds, start, end } = request.body;
@@ -92,7 +90,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(datafeedIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { stopDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { datafeedIds } = request.body;
@@ -121,7 +119,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { deleteJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -150,7 +148,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { closeJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -179,7 +177,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobsSummary } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -208,7 +206,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobsWithTimerangeSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobsWithTimerange } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { dateFormatTz } = request.body;
@@ -237,7 +235,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { createFullJobsList } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -264,7 +262,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
       path: '/api/ml/jobs/groups',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { getAllGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await getAllGroups();
@@ -292,7 +290,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(updateGroupsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { updateGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobs } = request.body;
@@ -319,7 +317,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
       path: '/api/ml/jobs/deleting_jobs_tasks',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { deletingJobTasks } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await deletingJobTasks();
@@ -347,7 +345,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobsExist } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -377,7 +375,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { indexPattern } = request.params;
         const isRollup = request.query.rollup === 'true';
@@ -408,7 +406,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(chartSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           indexPatternTitle,
@@ -461,7 +459,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(chartSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           indexPatternTitle,
@@ -509,7 +507,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
       path: '/api/ml/jobs/all_jobs_and_group_ids',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { getAllJobAndGroupIds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await getAllJobAndGroupIds();
@@ -537,7 +535,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(lookBackProgressSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { getLookBackProgress } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, start, end } = request.body;
@@ -566,7 +564,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(categorizationFieldExamplesSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         // due to the use of the _analyze endpoint which is called by the kibana user,
         // basic job creation privileges are required to use this endpoint
@@ -625,7 +623,7 @@ export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitia
         body: schema.object(topCategoriesSchema),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { topCategories } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, count } = request.body;

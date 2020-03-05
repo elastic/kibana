@@ -9,7 +9,7 @@ import { Plugin } from './plugin';
 
 export { AlertsContextProvider } from './application/context/alerts_context';
 export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
-export { AlertAdd } from './application/sections/alert_add';
+export { AlertAdd } from './application/sections/alert_form';
 export {
   ConnectorAddFlyout,
   ConnectorEditFlyout,
