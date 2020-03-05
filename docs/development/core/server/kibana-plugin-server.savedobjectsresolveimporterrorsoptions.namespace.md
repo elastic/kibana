@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions.namespace property
 
+if specified, will import in given namespace
+
 <b>Signature:</b>
 
 ```typescript

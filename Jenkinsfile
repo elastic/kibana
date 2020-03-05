@@ -40,6 +40,7 @@ kibanaPipeline(timeoutMinutes: 135) {
           'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
           'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
           'xpack-accessibility': kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'),
+          'xpack-siemCypress': kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'),
           // 'xpack-visualRegression': kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'),
         ]),
       ])

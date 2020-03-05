@@ -67,6 +67,7 @@ export interface State {
     maxDistinctValuesError: string | undefined;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
+    modelMemoryLimitValidationResult: any;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
@@ -88,6 +89,7 @@ export interface State {
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
+  estimatedModelMemoryLimit: string;
 }
 
 export const getInitialState = (): State => ({
@@ -118,6 +120,7 @@ export const getInitialState = (): State => ({
     maxDistinctValuesError: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
+    modelMemoryLimitValidationResult: null,
     previousJobType: null,
     previousSourceIndex: undefined,
     sourceIndex: '',
@@ -142,6 +145,7 @@ export const getInitialState = (): State => ({
   isValid: false,
   jobIds: [],
   requestMessages: [],
+  estimatedModelMemoryLimit: '',
 });
 
 export const getJobConfigFromFormState = (
