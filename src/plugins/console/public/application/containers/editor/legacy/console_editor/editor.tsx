@@ -50,6 +50,7 @@ import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import { setupAutosave } from './auto_save';
 
 export interface EditorProps {
   textObject: TextObjectWithId;
@@ -110,7 +111,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
     const { settings } = useEditorReadContext();
     const setInputEditor = useSetInputEditor();
     const sendCurrentRequestToES = useSendCurrentRequestToES();
-    const saveTextObject = useSequencedSaveTextObject();
+    const saveTextObject = useSequencedSaveTextObject(textObject);
 
     const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
 
@@ -192,27 +193,6 @@ export const Editor: FunctionComponent<EditorProps> = memo(
         editor.update(textObject.text || DEFAULT_INPUT_VALUE);
       }
 
-      function setupAutosave() {
-        let timer: number;
-        const saveDelay = 500;
-
-        editor.getCoreEditor().on('change', () => {
-          if (timer) {
-            clearTimeout(timer);
-          }
-          timer = window.setTimeout(saveCurrentState, saveDelay);
-        });
-      }
-
-      function saveCurrentState() {
-        try {
-          const content = editor.getCoreEditor().getValue();
-          saveTextObject(textObject.id, content);
-        } catch (e) {
-          // Ignoring saving error
-        }
-      }
-
       // Update component state
       setEditorInstance(editor);
       setInputEditor(editor);
@@ -222,7 +202,6 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
       const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-      setupAutosave();
 
       editor.init();
 
@@ -262,6 +241,16 @@ export const Editor: FunctionComponent<EditorProps> = memo(
         });
       }
     }, [sendCurrentRequestToES, openDocumentation, editorInstance]);
+
+    // Effect #4
+    // Autosave
+    useEffect(() => {
+      if (editorInstance) {
+        const unsubscribe = setupAutosave(editorInstance, saveTextObject);
+        return () => unsubscribe();
+      }
+      return () => {};
+    }, [editorInstance, saveTextObject]);
 
     return (
       <div style={abs} className="conApp">
