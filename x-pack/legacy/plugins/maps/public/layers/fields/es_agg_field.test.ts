@@ -61,12 +61,20 @@ describe('supportsFieldMeta', () => {
 
 describe('esAggFieldsFactory', () => {
   test('Should only create top terms field when term field is not provided', () => {
-    const fields = esAggFieldsFactory({ type: AGG_TYPE.TERMS });
+    const fields = esAggFieldsFactory(
+      { type: AGG_TYPE.TERMS },
+      mockEsAggSource,
+      FIELD_ORIGIN.SOURCE
+    );
     expect(fields.length).toBe(1);
   });
 
   test('Should create top terms and top terms percentage fields', () => {
-    const fields = esAggFieldsFactory({ type: AGG_TYPE.TERMS, field: 'myField' });
+    const fields = esAggFieldsFactory(
+      { type: AGG_TYPE.TERMS, field: 'myField' },
+      mockEsAggSource,
+      FIELD_ORIGIN.SOURCE
+    );
     expect(fields.length).toBe(2);
   });
 });
