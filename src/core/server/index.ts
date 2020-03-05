@@ -99,6 +99,8 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthResult,
   AuthResultType,
   Authenticated,

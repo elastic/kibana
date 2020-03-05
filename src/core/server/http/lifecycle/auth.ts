@@ -25,12 +25,14 @@ import {
   lifecycleResponseFactory,
   LifecycleResponseFactory,
   isKibanaResponse,
+  ResponseHeaders,
 } from '../router';
 
 /** @public */
 export enum AuthResultType {
   authenticated = 'authenticated',
   notHandled = 'notHandled',
+  redirected = 'redirected',
 }
 
 /** @public */
@@ -44,7 +46,12 @@ export interface AuthNotHandled {
 }
 
 /** @public */
-export type AuthResult = Authenticated | AuthNotHandled;
+export interface AuthRedirected extends AuthRedirectedParams {
+  type: AuthResultType.redirected;
+}
+
+/** @public */
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {
@@ -60,11 +67,20 @@ const authResult = {
       type: AuthResultType.notHandled,
     };
   },
+  redirected(headers: ResponseHeaders): AuthResult {
+    return {
+      type: AuthResultType.redirected,
+      headers,
+    };
+  },
   isAuthenticated(result: AuthResult): result is Authenticated {
     return result?.type === AuthResultType.authenticated;
   },
   isNotHandled(result: AuthResult): result is AuthNotHandled {
     return result?.type === AuthResultType.notHandled;
+  },
+  isRedirected(result: AuthResult): result is AuthRedirected {
+    return result?.type === AuthResultType.redirected;
   },
 };
 
@@ -97,19 +113,41 @@ export interface AuthResultParams {
 }
 
 /**
+ * Result of auth redirection.
+ * @public
+ */
+export interface AuthRedirectedParams {
+  /**
+   * Headers to attach for auth redirect.
+   * Must include "location" header
+   */
+  headers: ResponseHeaders;
+}
+
+/**
  * @public
  * A tool set defining an outcome of Auth interceptor for incoming request.
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
   authenticated: (data?: AuthResultParams) => AuthResult;
-  /** User has no credentials */
+  /**
+   * User has no credentials.
+   * Allows user to access a resource when authRequired: 'optional'
+   * Rejects a request when authRequired: true
+   * */
   notHandled: () => AuthResult;
+  /**
+   * Redirect user to IdP when authRequired: true
+   * Allows user to access a resource without redirection when authRequired: 'optional'
+   * */
+  redirected: (headers: ResponseHeaders) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
   notHandled: authResult.notHandled,
+  redirected: authResult.redirected,
 };
 
 /**
@@ -141,6 +179,7 @@ export function adoptToHapiAuthFormat(
       if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
+
       if (authResult.isAuthenticated(result)) {
         onAuth(request, {
           state: result.state,
@@ -150,16 +189,25 @@ export function adoptToHapiAuthFormat(
         return responseToolkit.authenticated({ credentials: result.state || {} });
       }
 
+      if (authResult.isRedirected(result)) {
+        // we cannot redirect a user when resources with optional auth requested
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+
+        return hapiResponseAdapter.handle(
+          lifecycleResponseFactory.redirected({
+            // hapi doesn't accept string[] as a valid header
+            headers: result.headers as any,
+          })
+        );
+      }
+
       if (authResult.isNotHandled(result)) {
         if (kibanaRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
-        if (kibanaRequest.route.options.authRequired) {
-          return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
-        }
-        throw new Error(
-          `Unexpected route.options.authRequired value in AuthenticationHandler. Expected 'optional' or true, but given: ${result}.`
-        );
+        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`

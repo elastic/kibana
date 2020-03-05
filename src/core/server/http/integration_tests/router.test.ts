@@ -115,6 +115,27 @@ describe('Options', () => {
           .get('/')
           .expect(401);
       });
+
+      it('does not redirect user and allows access to a resource', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) =>
+          toolkit.redirected({
+            location: '/redirect-to',
+          })
+        );
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, 'ok');
+      });
     });
 
     describe('true', () => {
@@ -151,6 +172,7 @@ describe('Options', () => {
           .get('/')
           .expect(401);
       });
+
       it('User with invalid credentials cannot access a route', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -166,6 +188,30 @@ describe('Options', () => {
         await supertest(innerServer.listener)
           .get('/')
           .expect(401);
+      });
+
+      it('allows redirecting an user', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        const redirectUrl = '/redirect-to';
+
+        registerAuth((req, res, toolkit) =>
+          toolkit.redirected({
+            location: redirectUrl,
+          })
+        );
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        const result = await supertest(innerServer.listener)
+          .get('/')
+          .expect(302);
+
+        expect(result.header.location).toBe(redirectUrl);
       });
     });
   });

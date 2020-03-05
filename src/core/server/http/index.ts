@@ -67,6 +67,8 @@ export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthToolkit,
   AuthResult,
   Authenticated,

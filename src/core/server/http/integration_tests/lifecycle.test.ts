@@ -57,7 +57,7 @@ interface StorageData {
 }
 
 describe('OnPreAuth', () => {
-  it('supports registering request inceptors', async () => {
+  it('supports registering a request interceptor', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -509,11 +509,9 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     const redirectTo = '/redirect-url';
-    registerAuth((req, res) =>
-      res.redirected({
-        headers: {
-          location: redirectTo,
-        },
+    registerAuth((req, res, t) =>
+      t.redirected({
+        location: redirectTo,
       })
     );
     await server.start();
@@ -522,6 +520,19 @@ describe('Auth', () => {
       .get('/')
       .expect(302);
     expect(response.header.location).toBe(redirectTo);
+  });
+
+  it('throws if redirection url is not provided', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    registerAuth((req, res, t) => t.redirected({}));
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
   });
 
   it(`doesn't expose internal error details`, async () => {
