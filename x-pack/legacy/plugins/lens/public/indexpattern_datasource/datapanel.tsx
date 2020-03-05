@@ -114,13 +114,11 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
-  const dslQuery = JSON.stringify(
-    esQuery.buildEsQuery(
-      indexPatterns[currentIndexPatternId] as IIndexPattern,
-      query,
-      filters,
-      esQuery.getEsQueryConfig(core.uiSettings)
-    )
+  const dslQuery = esQuery.buildEsQuery(
+    indexPatterns[currentIndexPatternId] as IIndexPattern,
+    query,
+    filters,
+    esQuery.getEsQueryConfig(core.uiSettings)
   );
 
   return (
@@ -131,7 +129,7 @@ export function IndexPatternDataPanel({
             dateRange,
             setState,
             indexPatterns: indexPatternList,
-            fetchJson: core.http.get,
+            fetchJson: core.http.post,
             dslQuery,
           })
         }

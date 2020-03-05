@@ -207,7 +207,7 @@ const initialState: IndexPatternPrivateState = {
   },
 };
 
-const dslQuery = '{"bool":{"must":[{"match_all":{}}],"filter":[],"should":[],"must_not":[]}}';
+const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
@@ -281,8 +281,8 @@ describe('IndexPattern Data Panel', () => {
 
     function testProps() {
       const setState = jest.fn();
-      core.http.get.mockImplementation(async ({ path }) => {
-        const parts = path.split('/');
+      core.http.post.mockImplementation(async path => {
+        const parts = path.split && path.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -398,26 +398,24 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(2);
-      expect(core.http.get).toHaveBeenCalledTimes(2);
+      expect(core.http.post).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
           dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
           dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
       const nextState = setState.mock.calls[1][0]({
@@ -443,24 +441,22 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
           dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/b',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
+        body: JSON.stringify({
           dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'btime',
-        },
+        }),
       });
 
       const nextState = setState.mock.calls[1][0]({
@@ -495,13 +491,13 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.get.mockImplementation(({ path }) => {
+      core.http.post.mockImplementation(path => {
         if (queryCount) {
           ++overlapCount;
         }
         ++queryCount;
 
-        const parts = path.split('/');
+        const parts = path.split && path.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
@@ -537,7 +533,7 @@ describe('IndexPattern Data Panel', () => {
 
       await waitForPromises();
 
-      expect(core.http.get).toHaveBeenCalledTimes(2);
+      expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
     });
   });

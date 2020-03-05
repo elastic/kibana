@@ -535,18 +535,18 @@ describe('loader', () => {
   });
 
   describe('syncExistingFields', () => {
-    const dslQuery = JSON.stringify({
+    const dslQuery = {
       bool: {
         must: [],
         filter: [{ match_all: {} }],
         should: [],
         must_not: [],
       },
-    });
+    };
 
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = jest.fn(({ path }: { path: string }) => {
+      const fetchJson = jest.fn((path: string) => {
         const indexPatternTitle = _.last(path.split('/'));
         return {
           indexPatternTitle,

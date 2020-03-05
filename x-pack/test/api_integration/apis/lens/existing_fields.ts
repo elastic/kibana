@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const TEST_START_TIME = encodeURIComponent('2015-09-19T06:31:44.000');
-const TEST_END_TIME = encodeURIComponent('2015-09-23T18:31:44.000');
-const DSL_QUERY = JSON.stringify({ match_all: {} });
+const TEST_START_TIME = '2015-09-19T06:31:44.000';
+const TEST_END_TIME = '2015-09-23T18:31:44.000';
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
@@ -148,12 +147,17 @@ export default ({ getService }: FtrProviderContext) => {
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .get(
-            `/api/lens/existing_fields/${encodeURIComponent(
-              'logstash-*'
-            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}&dslQuery=${DSL_QUERY}`
-          )
+          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match_all: {} }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('logstash-*');
@@ -162,12 +166,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should succeed for thousands of fields', async () => {
         const { body } = await supertest
-          .get(
-            `/api/lens/existing_fields/${encodeURIComponent(
-              'metricbeat-*'
-            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}&dslQuery=${DSL_QUERY}`
-          )
+          .post(`/api/lens/existing_fields/${encodeURIComponent('metricbeat-*')}`)
           .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('metricbeat-*');
@@ -208,18 +213,18 @@ export default ({ getService }: FtrProviderContext) => {
           'xss.raw',
         ];
 
-        const dslQueryFiltered = JSON.stringify({
-          bool: {
-            filter: [{ match: { referer: 'https://www.taylorswift.com/' } }],
-          },
-        });
         const { body } = await supertest
-          .get(
-            `/api/lens/existing_fields/${encodeURIComponent(
-              'logstash-*'
-            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}&dslQuery=${dslQueryFiltered}`
-          )
+          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match: { referer: 'https://www.taylorswift.com/' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
           .expect(200);
         expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
       });

@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body).to.have.property('totalDocuments', 4633);
+        expect(body).to.have.property('totalDocuments', 4634);
       });
 
       it('should return an auto histogram for numbers and top values', async () => {
@@ -82,9 +82,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
-          sampledDocuments: 4633,
-          sampledValues: 4633,
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
           histogram: {
             buckets: [
               {
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
+          totalDocuments: 4634,
           histogram: {
             buckets: [
               {
@@ -230,9 +230,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
-          sampledDocuments: 4633,
-          sampledValues: 4633,
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
           topValues: {
             buckets: [
               {
