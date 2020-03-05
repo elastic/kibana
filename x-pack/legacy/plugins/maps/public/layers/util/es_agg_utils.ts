@@ -47,8 +47,9 @@ export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = 
       const topBucketCount = bucket[key].buckets[0].doc_count;
       const totalCount = bucket.doc_count;
       if (totalCount && topBucketCount) {
-        properties[`${key}${TOP_TERM_PERCENTAGE_SUFFIX}`] =
-          _.round(topBucketCount / totalCount, 4) * 100;
+        properties[`${key}${TOP_TERM_PERCENTAGE_SUFFIX}`] = Math.round(
+          (topBucketCount / totalCount) * 100
+        );
       }
     } else {
       properties[key] = bucket[key];

@@ -34,7 +34,7 @@ describe('extractPropertiesFromBucket', () => {
     expect(properties).toEqual({
       doc_count: 3,
       'terms_of_machine.os.keyword': 'win xp',
-      'terms_of_machine.os.keyword__percentage': 33.33,
+      'terms_of_machine.os.keyword__percentage': 33,
     });
   });
 });
