@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { createHashHistory, History } from 'history';
 import {
   createStateContainer,
@@ -224,7 +224,7 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   }
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
-  return _.isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
+  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
 /**
