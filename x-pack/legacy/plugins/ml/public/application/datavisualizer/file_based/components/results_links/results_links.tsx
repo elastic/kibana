@@ -9,7 +9,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { ml } from '../../../../services/ml_api_service';
-import { isFullLicense } from '../../../../license/check_license';
+import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlKibana } from '../../../../contexts/kibana';
