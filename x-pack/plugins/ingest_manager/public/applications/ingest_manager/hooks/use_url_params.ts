@@ -13,10 +13,10 @@ import { useEffect, useState } from 'react';
  * every time `search` changes.
  */
 export function useUrlParams() {
-  const location = useLocation();
-  const [urlParams, setUrlParams] = useState(() => parse(location.search));
+  const { search } = useLocation();
+  const [urlParams, setUrlParams] = useState(() => parse(search));
   useEffect(() => {
-    setUrlParams(parse(location.search));
-  }, [location.search]);
+    setUrlParams(parse(search));
+  }, [search]);
   return urlParams;
 }
