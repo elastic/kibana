@@ -29,9 +29,6 @@ function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ConfigType
 ) {
-  if (configObject.apiUrl == null) {
-    return i18n.API_URL_REQUIRED;
-  }
   try {
     configurationUtilities.ensureWhitelistedUri(configObject.apiUrl);
   } catch (whitelistError) {
