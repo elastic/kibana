@@ -18,40 +18,34 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function DiscoverPageProvider({ getService, getPageObjects }) {
+export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const flyout = getService('flyout');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
   const elasticChart = getService('elasticChart');
+  const docTable = getService('docTable');
 
   class DiscoverPage {
-    async getQueryField() {
-      return await find.byCssSelector("input[ng-model='state.query']");
-    }
-
-    async getQuerySearchButton() {
-      return await find.byCssSelector("button[aria-label='Search']");
-    }
-
-    async getChartTimespan() {
+    public async getChartTimespan() {
       const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
-    async saveSearch(searchName) {
+    public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
       await testSubjects.setValue('savedObjectTitle', searchName);
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
       // that the next action wouldn't have to retry.  But it doesn't really solve
@@ -63,30 +57,29 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async inputSavedSearchTitle(searchName) {
+    public async inputSavedSearchTitle(searchName: string) {
       await testSubjects.setValue('savedObjectTitle', searchName);
     }
 
-    async clickConfirmSavedSearch() {
+    public async clickConfirmSavedSearch() {
       await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
-    async openAddFilterPanel() {
+    public async openAddFilterPanel() {
       await testSubjects.click('addFilter');
     }
 
-    async waitUntilSearchingHasFinished() {
+    public async waitUntilSearchingHasFinished() {
       const spinner = await testSubjects.find('loadingSpinner');
       await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
-    async getColumnHeaders() {
-      const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(async el => await el.getVisibleText()));
+    public async getColumnHeaders() {
+      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
     }
 
-    async openLoadSavedSearchPanel() {
-      const isOpen = await testSubjects.exists('loadSearchForm');
+    public async openLoadSavedSearchPanel() {
+      let isOpen = await testSubjects.exists('loadSearchForm');
       if (isOpen) {
         return;
       }
@@ -95,54 +88,46 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
       await retry.try(async () => {
         await this.clickLoadSavedSearchButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOpen = await testSubjects.exists('loadSearchForm');
+        await header.waitUntilLoadingHasFinished();
+        isOpen = await testSubjects.exists('loadSearchForm');
         expect(isOpen).to.be(true);
       });
     }
 
-    async closeLoadSaveSearchPanel() {
+    public async closeLoadSaveSearchPanel() {
       await flyout.ensureClosed('loadSearchForm');
     }
 
-    async hasSavedSearch(searchName) {
+    public async hasSavedSearch(searchName: string) {
       const searchLink = await find.byButtonText(searchName);
-      return searchLink.isDisplayed();
+      return await searchLink.isDisplayed();
     }
 
-    async loadSavedSearch(searchName) {
+    public async loadSavedSearch(searchName: string) {
       await this.openLoadSavedSearchPanel();
       const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     }
 
-    async clickNewSearchButton() {
+    public async clickNewSearchButton() {
       await testSubjects.click('discoverNewButton');
     }
 
-    async clickSaveSearchButton() {
+    public async clickSaveSearchButton() {
       await testSubjects.click('discoverSaveButton');
     }
 
-    async clickLoadSavedSearchButton() {
+    public async clickLoadSavedSearchButton() {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async closeLoadSavedSearchPanel() {
+    public async closeLoadSavedSearchPanel() {
       await testSubjects.click('euiFlyoutCloseButton');
     }
 
-    async getChartCanvas() {
-      return await find.byCssSelector('.echChart canvas:last-of-type');
-    }
-
-    async chartCanvasExist() {
-      return await find.existsByCssSelector('.echChart canvas:last-of-type');
-    }
-
-    async clickHistogramBar() {
-      const el = await this.getChartCanvas();
+    public async clickHistogramBar() {
+      const el = await elasticChart.getCanvas();
 
       await browser
         .getActions()
@@ -151,8 +136,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .perform();
     }
 
-    async brushHistogram() {
-      const el = await this.getChartCanvas();
+    public async brushHistogram() {
+      const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
         { location: el, offset: { x: 200, y: 20 } },
@@ -160,171 +145,150 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       );
     }
 
-    async getCurrentQueryName() {
+    public async getCurrentQueryName() {
       return await globalNav.getLastBreadcrumb();
     }
 
-    async getBarChartData() {
-      let yAxisLabel = 0;
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const y = await find.byCssSelector(
-        'div.visAxis__splitAxes--y > div > svg > g > g:last-of-type'
-      );
-      const yLabel = await y.getVisibleText();
-      yAxisLabel = yLabel.replace(',', '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
-      // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-      const svg = await find.byCssSelector('div.chart > svg');
-      const $ = await svg.parseDomContent();
-      const yAxisHeight = $('rect.background').attr('height');
-      log.debug('theHeight = ' + yAxisHeight);
-      const bars = $('g > g.series > rect')
-        .toArray()
-        .map(chart => {
-          const barHeight = $(chart).attr('height');
-          return Math.round((barHeight / yAxisHeight) * yAxisLabel);
-        });
-
-      return bars;
-    }
-
-    async getChartInterval() {
+    public async getChartInterval() {
       const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
-      const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
+      const selectedOption = await find.byCssSelector(`option[value="${selectedValue}"]`);
       return selectedOption.getVisibleText();
     }
 
-    async setChartInterval(interval) {
-      const optionElement = await find.byCssSelector('option[label="' + interval + '"]', 5000);
+    public async setChartInterval(interval: string) {
+      const optionElement = await find.byCssSelector(`option[label="${interval}"]`, 5000);
       await optionElement.click();
-      return await PageObjects.header.waitUntilLoadingHasFinished();
+      return await header.waitUntilLoadingHasFinished();
     }
 
-    async getHitCount() {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    public async getHitCount() {
+      await header.waitUntilLoadingHasFinished();
       return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
-    async query(queryString) {
-      await find.setValue('input[aria-label="Search input"]', queryString);
-      await find.clickByCssSelector('button[aria-label="Search"]');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    public async getDocHeader() {
+      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
+      return await docHeader.getVisibleText();
     }
 
-    async getDocHeader() {
-      const header = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await header.getVisibleText();
-    }
-
-    async getDocTableIndex(index) {
-      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + index + ')');
+    public async getDocTableIndex(index: number) {
+      const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
     }
 
-    async getDocTableField(index) {
+    public async getDocTableField(index: number) {
       const field = await find.byCssSelector(
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
     }
 
-    async clickDocSortDown() {
+    public async clickDocSortDown() {
       await find.clickByCssSelector('.fa-sort-down');
     }
 
-    async clickDocSortUp() {
+    public async clickDocSortUp() {
       await find.clickByCssSelector('.fa-sort-up');
     }
 
-    async getMarks() {
-      const marks = await find.allByCssSelector('mark');
-      return await Promise.all(marks.map(mark => mark.getVisibleText()));
+    public async getMarks() {
+      const table = await docTable.getTable();
+      const $ = await table.parseDomContent();
+      return $('mark')
+        .toArray()
+        .map(mark => $(mark).text());
     }
 
-    async toggleSidebarCollapse() {
+    public async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }
 
-    async getAllFieldNames() {
-      const items = await find.allByCssSelector('.sidebar-item');
-      return await Promise.all(items.map(item => item.getVisibleText()));
+    public async getAllFieldNames() {
+      const sidebar = await testSubjects.find('discover-sidebar');
+      const $ = await sidebar.parseDomContent();
+      return $('.sidebar-item[attr-field]')
+        .toArray()
+        .map(field =>
+          $(field)
+            .find('span.eui-textTruncate')
+            .text()
+        );
     }
 
-    async getSidebarWidth() {
+    public async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
       return await sidebar.getAttribute('clientWidth');
     }
 
-    async hasNoResults() {
+    public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }
 
-    async hasNoResultsTimepicker() {
+    public async hasNoResultsTimepicker() {
       return await testSubjects.exists('discoverNoResultsTimefilter');
     }
 
-    async clickFieldListItem(field) {
+    public async clickFieldListItem(field: string) {
       return await testSubjects.click(`field-${field}`);
     }
 
-    async clickFieldListItemAdd(field) {
+    public async clickFieldListItemAdd(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
-    async clickFieldListItemVisualize(field) {
+    public async clickFieldListItemVisualize(field: string) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
     }
 
-    async expectFieldListItemVisualize(field) {
+    public async expectFieldListItemVisualize(field: string) {
       await testSubjects.existOrFail(`fieldVisualize-${field}`);
     }
 
-    async expectMissingFieldListItemVisualize(field) {
+    public async expectMissingFieldListItemVisualize(field: string) {
       await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
-    async clickFieldListPlusFilter(field, value) {
+    public async clickFieldListPlusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     }
 
-    async clickFieldListMinusFilter(field, value) {
+    public async clickFieldListMinusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     }
 
-    async selectIndexPattern(indexPattern) {
+    public async selectIndexPattern(indexPattern: string) {
       await testSubjects.click('indexPattern-switch-link');
       await find.clickByCssSelector(
         `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     }
 
-    async removeHeaderColumn(name) {
+    public async removeHeaderColumn(name: string) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
     }
 
-    async openSidebarFieldFilter() {
+    public async openSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
       await testSubjects.existOrFail('filterSelectionPanel');
     }
 
-    async closeSidebarFieldFilter() {
+    public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
       await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
-    async waitForChartLoadingComplete(renderCount) {
+    public async waitForChartLoadingComplete(renderCount: number) {
       await elasticChart.waitForRenderingCount('discoverChart', renderCount);
     }
   }

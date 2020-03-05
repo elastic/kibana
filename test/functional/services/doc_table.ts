@@ -30,8 +30,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
   }
 
   class DocTable {
-    public async getTable() {
-      return await testSubjects.find('docTable');
+    public async getTable(selector?: string) {
+      return await testSubjects.find(selector ? selector : 'docTable');
     }
 
     public async getRowsText() {
@@ -107,8 +107,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return fields;
     }
 
-    public async getHeaderFields(): Promise<string[]> {
-      const table = await this.getTable();
+    public async getHeaderFields(selector?: string): Promise<string[]> {
+      const table = await this.getTable(selector);
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableHeaderField')
         .toArray()
