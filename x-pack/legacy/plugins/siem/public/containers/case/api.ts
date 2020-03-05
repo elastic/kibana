@@ -16,20 +16,17 @@ import {
   NewComment,
   SortFieldCase,
 } from './types';
-import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 import { convertToCamelCase, convertAllCasesToCamel } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'GET',
-    asResponse: true,
     query: {
       includeComments,
     },
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseSnake, Case>(response.body!);
+  return convertToCamelCase<CaseSnake, Case>(response);
 };
 
 export const getCases = async ({
@@ -53,20 +50,16 @@ export const getCases = async ({
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'GET',
     query,
-    asResponse: true,
   });
-  await throwIfNotOk(response.response);
-  return convertAllCasesToCamel(response.body!);
+  return convertAllCasesToCamel(response);
 };
 
 export const createCase = async (newCase: NewCase): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'POST',
-    asResponse: true,
     body: JSON.stringify(newCase),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseSnake, Case>(response.body!);
+  return convertToCamelCase<CaseSnake, Case>(response);
 };
 
 export const updateCaseProperty = async (
@@ -76,21 +69,17 @@ export const updateCaseProperty = async (
 ): Promise<Partial<Case>> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'PATCH',
-    asResponse: true,
     body: JSON.stringify({ case: updatedCase, version }),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<Partial<CaseSnake>, Partial<Case>>(response.body!);
+  return convertToCamelCase<Partial<CaseSnake>, Partial<Case>>(response);
 };
 
 export const createComment = async (newComment: NewComment, caseId: string): Promise<Comment> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}/comment`, {
     method: 'POST',
-    asResponse: true,
     body: JSON.stringify(newComment),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CommentSnake, Comment>(response.body!);
+  return convertToCamelCase<CommentSnake, Comment>(response);
 };
 
 export const updateComment = async (
@@ -100,9 +89,7 @@ export const updateComment = async (
 ): Promise<Partial<Comment>> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/comment/${commentId}`, {
     method: 'PATCH',
-    asResponse: true,
     body: JSON.stringify({ comment: commentUpdate, version }),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<Partial<CommentSnake>, Partial<Comment>>(response.body!);
+  return convertToCamelCase<Partial<CommentSnake>, Partial<Comment>>(response);
 };
