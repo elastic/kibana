@@ -44,6 +44,7 @@ interface ParamInstanceBase {
   metricAggs: IAggConfig[];
   state: VisState;
   schemas: Schema[];
+  hideCustomLabel?: boolean;
 }
 
 export interface ParamInstance extends ParamInstanceBase {
@@ -59,6 +60,7 @@ function getAggParamsToRender({
   metricAggs,
   state,
   schemas,
+  hideCustomLabel,
 }: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
@@ -78,7 +80,7 @@ function getAggParamsToRender({
     let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
     let fields: IndexPatternField[];
 
-    if (!schema || (schema.hideCustomLabel && param.name === 'customLabel')) {
+    if (hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
@@ -126,6 +128,7 @@ function getAggParamsToRender({
         state,
         value: agg.params[param.name],
         schemas,
+        hideCustomLabel,
       });
     }
   });

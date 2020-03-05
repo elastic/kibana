@@ -60,6 +60,7 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   setTouched: (isTouched: boolean) => void;
   schemas: Schema[];
   allowedAggs?: string[];
+  hideCustomLabel?: boolean;
 }
 
 function DefaultEditorAggParams({
@@ -80,6 +81,7 @@ function DefaultEditorAggParams({
   setValidity,
   schemas,
   allowedAggs,
+  hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = getSchemaByName(schemas, agg.schema);
   const { title, aggFilter } = schema;
@@ -102,8 +104,8 @@ function DefaultEditorAggParams({
     fieldName,
   ]);
   const params = useMemo(
-    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas }),
-    [agg, editorConfig, metricAggs, state, schemas]
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
+    [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
   );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(

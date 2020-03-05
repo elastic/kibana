@@ -66,6 +66,7 @@ function OrderAggParamEditor({
       <DefaultEditorAggParams
         agg={value as IAggConfig}
         allowedAggs={aggParam.allowedAggs}
+        hideCustomLabel={true}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}
