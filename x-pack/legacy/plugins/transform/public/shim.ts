@@ -6,77 +6,69 @@
 
 import { npStart } from 'ui/new_platform';
 
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import routes from 'ui/routes';
+import chrome from 'ui/chrome';
 import { docTitle } from 'ui/doc_title/doc_title';
-import { CoreStart } from 'kibana/public';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-export type npCore = typeof npStart.core;
+import { TRANSFORM_DOC_PATHS } from './app/constants';
+import { SavedSearchLoader } from '../../../../../src/plugins/discover/public';
+
+export type NpCore = typeof npStart.core;
+export type NpPlugins = typeof npStart.plugins;
 
 // AppCore/AppPlugins is the set of core features/plugins
 // we pass on via context/hooks to the app and its components.
 export type AppCore = Pick<
-  CoreStart,
-  'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings' | 'overlays'
+  ShimCore,
+  | 'chrome'
+  | 'documentation'
+  | 'docLinks'
+  | 'http'
+  | 'i18n'
+  | 'injectedMetadata'
+  | 'savedObjects'
+  | 'uiSettings'
+  | 'overlays'
+  | 'notifications'
 >;
-
-export interface AppPlugins {
-  data: DataPublicPluginStart;
-  management: {
-    sections: typeof management;
-  };
-  savedSearches: {
-    getClient(): any;
-    setClient(client: any): void;
-  };
-}
+export type AppPlugins = Pick<ShimPlugins, 'data' | 'management' | 'savedSearches' | 'xsrfToken'>;
 
 export interface AppDependencies {
   core: AppCore;
   plugins: AppPlugins;
 }
 
-export interface Core extends npCore {
-  legacyHttp: {
-    getClient(): any;
-    setClient(client: any): void;
-  };
-  routing: {
-    registerAngularRoute(path: string, config: object): void;
-  };
-  documentation: {
-    esDocBasePath: string;
-    esPluginDocBasePath: string;
-    esStackOverviewDocBasePath: string;
-    esMLDocBasePath: string;
-  };
+export interface ShimCore extends NpCore {
+  documentation: Record<
+    | 'esDocBasePath'
+    | 'esIndicesCreateIndex'
+    | 'esPluginDocBasePath'
+    | 'esQueryDsl'
+    | 'esStackOverviewDocBasePath'
+    | 'esTransform'
+    | 'esTransformPivot'
+    | 'mlDocBasePath',
+    string
+  >;
   docTitle: {
     change: typeof docTitle.change;
   };
 }
 
-export interface Plugins extends AppPlugins {
-  management: {
-    sections: typeof management;
-    constants: {
-      BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
-    };
-  };
+export interface ShimPlugins extends NpPlugins {
   uiMetric: {
     createUiStatsReporter: typeof createUiStatsReporter;
   };
-  data: DataPublicPluginStart;
+  savedSearches: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
+  xsrfToken: string;
 }
 
-export function createPublicShim(): { core: Core; plugins: Plugins } {
-  // This is an Angular service, which is why we use this provider pattern
-  // to access it within our React app.
-  let httpClient: ng.IHttpService;
+export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let savedSearches: SavedSearchLoader;
@@ -86,35 +78,22 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
   return {
     core: {
       ...npStart.core,
-      routing: {
-        registerAngularRoute: (path: string, config: object): void => {
-          routes.when(path, config);
-        },
-      },
-      legacyHttp: {
-        setClient: (client: any): void => {
-          httpClient = client;
-        },
-        getClient: (): any => httpClient,
-      },
       documentation: {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
+        esIndicesCreateIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`,
         esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
+        esQueryDsl: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/query-dsl.html`,
         esStackOverviewDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/`,
-        esMLDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`,
+        esTransform: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/${TRANSFORM_DOC_PATHS.transforms}`,
+        esTransformPivot: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/put-transform.html#put-transform-request-body`,
+        mlDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`,
       },
       docTitle: {
         change: docTitle.change,
       },
     },
     plugins: {
-      data: npStart.plugins.data,
-      management: {
-        sections: management,
-        constants: {
-          BREADCRUMB: MANAGEMENT_BREADCRUMB,
-        },
-      },
+      ...npStart.plugins,
       savedSearches: {
         setClient: (client: any): void => {
           savedSearches = client;
@@ -124,6 +103,7 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
       uiMetric: {
         createUiStatsReporter,
       },
+      xsrfToken: chrome.getXsrfToken(),
     },
   };
 }

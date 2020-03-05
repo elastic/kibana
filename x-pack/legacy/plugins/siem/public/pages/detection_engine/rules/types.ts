@@ -5,9 +5,8 @@
  */
 
 import { Filter } from '../../../../../../../../src/plugins/data/common';
-import { Rule } from '../../../containers/detection_engine/rules';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from '../../shared_imports';
+import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
@@ -21,24 +20,6 @@ export interface EuiBasicTableOnChange {
     size: number;
   };
   sort?: EuiBasicTableSortTypes;
-}
-
-export interface TableData {
-  id: string;
-  immutable: boolean;
-  rule_id: string;
-  rule: {
-    href: string;
-    name: string;
-  };
-  risk_score: number;
-  severity: string;
-  tags: string[];
-  activate: boolean;
-  isLoading: boolean;
-  sourceRule: Rule;
-  status?: string | null;
-  statusDate?: string | null;
 }
 
 export enum RuleStep {

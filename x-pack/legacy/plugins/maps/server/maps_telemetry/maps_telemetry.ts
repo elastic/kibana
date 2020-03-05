@@ -18,7 +18,7 @@ import {
   TELEMETRY_TYPE,
   // @ts-ignore
 } from '../../common/constants';
-import { ILayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 interface IStats {
   [key: string]: {
@@ -83,7 +83,11 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
 }
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
-  const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
+  const fieldLists = indexPatterns.map(indexPattern =>
+    indexPattern.attributes && indexPattern.attributes.fields
+      ? JSON.parse(indexPattern.attributes.fields)
+      : []
+  );
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
       (field: IFieldType) =>
@@ -110,7 +114,7 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
-    const sourceIdList = lList.map((layer: ILayerDescriptor) => layer.sourceDescriptor.id);
+    const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -120,7 +124,7 @@ export function buildMapsTelemetry({
   // Count of EMS Vector layers used
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
-      .countBy((layer: ILayerDescriptor) => {
+      .countBy((layer: LayerDescriptor) => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })

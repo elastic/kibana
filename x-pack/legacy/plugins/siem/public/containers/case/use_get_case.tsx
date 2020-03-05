@@ -50,16 +50,18 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   }
 };
 const initialData: Case = {
-  case_id: '',
-  created_at: '',
-  created_by: {
+  caseId: '',
+  createdAt: '',
+  comments: [],
+  createdBy: {
     username: '',
   },
   description: '',
   state: '',
   tags: [],
   title: '',
-  updated_at: '',
+  updatedAt: '',
+  version: '',
 };
 
 export const useGetCase = (caseId: string): [CaseState] => {
@@ -75,7 +77,7 @@ export const useGetCase = (caseId: string): [CaseState] => {
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await getCase(caseId, false);
+        const response = await getCase(caseId);
         if (!didCancel) {
           dispatch({ type: FETCH_SUCCESS, payload: response });
         }

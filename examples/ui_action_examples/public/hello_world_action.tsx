@@ -22,13 +22,18 @@ import { OverlayStart } from '../../../src/core/public';
 import { createAction } from '../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../src/plugins/kibana_react/public';
 
-export const HELLO_WORLD_ACTION_TYPE = 'HELLO_WORLD_ACTION_TYPE';
+export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-export const createHelloWorldAction = (openModal: OverlayStart['openModal']) =>
-  createAction<{}>({
-    type: HELLO_WORLD_ACTION_TYPE,
+interface StartServices {
+  openModal: OverlayStart['openModal'];
+}
+
+export const createHelloWorldAction = (getStartServices: () => Promise<StartServices>) =>
+  createAction({
+    type: ACTION_HELLO_WORLD,
     getDisplayName: () => 'Hello World!',
     execute: async () => {
+      const { openModal } = await getStartServices();
       const overlay = openModal(
         toMountPoint(
           <EuiModalBody>

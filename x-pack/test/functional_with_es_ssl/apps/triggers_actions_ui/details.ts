@@ -18,7 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const alerting = getService('alerting');
   const retry = getService('retry');
 
-  describe('Alert Details', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/57426
+  describe.skip('Alert Details', function() {
     describe('Header', function() {
       const testRunUuid = uuid.v4();
       before(async () => {

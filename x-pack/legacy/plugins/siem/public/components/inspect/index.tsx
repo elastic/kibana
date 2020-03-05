@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -162,7 +162,11 @@ const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { inputId = 'global', queryId }: OwnProps) => {
-    return inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    const props =
+      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    // refetch caused unnecessary component rerender and it was even not used
+    const propsWithoutRefetch = omit('refetch', props);
+    return propsWithoutRefetch;
   };
   return mapStateToProps;
 };

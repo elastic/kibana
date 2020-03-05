@@ -15,7 +15,7 @@ export function crossClusterReplication(kibana) {
     id: PLUGIN.ID,
     configPrefix: 'xpack.ccr',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'remote_clusters', 'index_management'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'remoteClusters', 'index_management'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/cross_cluster_replication'],
@@ -49,13 +49,12 @@ export function crossClusterReplication(kibana) {
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);
-
       if (
         server.config().get('xpack.ccr.ui.enabled') &&
-        server.plugins.index_management &&
-        server.plugins.index_management.addIndexManagementDataEnricher
+        server.newPlatform.setup.plugins.indexManagement &&
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher
       ) {
-        server.plugins.index_management.addIndexManagementDataEnricher(ccrDataEnricher);
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher.add(ccrDataEnricher);
       }
     },
   });
