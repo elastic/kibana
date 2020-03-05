@@ -52,7 +52,6 @@ export {
   BUCKET_TYPES,
   DateRangeKey,
   IpRangeKey,
-  ISchemas,
   METRIC_TYPES,
   OptionedParamEditorProps,
   OptionedValueProp,
@@ -78,8 +77,8 @@ export {
   OptionedParamType,
   parentPipelineType,
   propFilter,
-  Schema,
-  Schemas,
   siblingPipelineType,
   termsAggFilter,
 } from '../../../core_plugins/data/public';
+
+export { ISchemas, Schemas, Schema } from '../../../core_plugins/vis_default_editor/public/schemas';
