@@ -5,7 +5,8 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink, FilterOptionsType } from './custom_link_types';
+import { CustomLink } from './custom_link_types';
+import { FilterOptionsType } from '../../../routes/settings/custom_link';
 
 export async function listCustomLinks({
   setup,

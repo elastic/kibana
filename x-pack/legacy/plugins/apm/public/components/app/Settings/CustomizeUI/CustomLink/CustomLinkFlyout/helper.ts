@@ -7,14 +7,10 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty, pick } from 'lodash';
 import {
   FilterOptionsType,
-  CustomLink
-} from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE
-} from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+  filterOptions
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
 export type Filters = Array<[keyof FilterOptionsType | '', string]>;
 
@@ -22,13 +18,6 @@ interface FilterSelectOption {
   value: 'DEFAULT' | keyof FilterOptionsType;
   text: string;
 }
-
-export const filterOptions: Array<keyof FilterOptionsType> = [
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME
-];
 
 /**
  * Converts available filters from the Custom Link to Array of filters.

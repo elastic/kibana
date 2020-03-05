@@ -25,7 +25,7 @@ export async function saveCustomLink({
     const customLink = {
       label,
       url,
-      filters
+      ...filters
     };
     if (id) {
       await callApmApi({

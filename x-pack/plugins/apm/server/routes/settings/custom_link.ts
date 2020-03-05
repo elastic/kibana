@@ -16,12 +16,21 @@ import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 
-export const FilterOptions = t.partial({
+const FilterOptions = t.partial({
   [SERVICE_NAME]: t.string,
   [SERVICE_ENVIRONMENT]: t.string,
   [TRANSACTION_NAME]: t.string,
   [TRANSACTION_TYPE]: t.string
 });
+
+export type FilterOptionsType = t.TypeOf<typeof FilterOptions>;
+
+export const filterOptions: Array<keyof FilterOptionsType> = [
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME
+];
 
 export const listCustomLinksRoute = createRoute(core => ({
   path: '/api/apm/settings/custom-links',
