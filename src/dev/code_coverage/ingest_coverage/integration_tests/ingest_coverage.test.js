@@ -68,6 +68,16 @@ describe('Ingesting Coverage to Cluster', () => {
       .map(x => x.split('\n').reduce(getUrlLine))
       .forEach(expectAllRegexesToPass);
   });
+  describe('with NODE_ENV set to "integration_test"', () => {
+    describe(`and debugging turned on`, () => {
+      it('should result in the "just logging" message being present in the log', () => {
+        chunks.some(x => x.includes('Just Logging'));
+      });
+      it('should result in the "actually sending" message NOT being present in the log', () => {
+        chunks.some(x => !x.includes('Actually sending...'));
+      });
+    });
+  });
 });
 
 function getUrlLine(acc, item) {
