@@ -11,7 +11,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   echo " -> Running jest tests"
   cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=2048 scripts/jest --ci --verbose --detectOpenHandles
+  checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=8000 scripts/jest --ci --verbose --detectOpenHandles
   echo ""
   echo ""
 
