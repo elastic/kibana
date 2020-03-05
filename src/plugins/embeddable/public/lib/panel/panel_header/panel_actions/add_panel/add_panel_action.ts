@@ -23,15 +23,15 @@ import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../..
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';
 
-export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
+export const ACTION_ADD_PANEL = 'ACTION_ADD_PANEL';
 
 interface ActionContext {
   embeddable: IContainer;
 }
 
 export class AddPanelAction implements Action<ActionContext> {
-  public readonly type = ADD_PANEL_ACTION_ID;
-  public readonly id = ADD_PANEL_ACTION_ID;
+  public readonly type = ACTION_ADD_PANEL;
+  public readonly id = ACTION_ADD_PANEL;
 
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
