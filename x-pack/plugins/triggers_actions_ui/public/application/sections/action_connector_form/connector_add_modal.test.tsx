@@ -9,32 +9,22 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
-import { AppDeps } from '../../app';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_modal', () => {
-  let deps: AppDeps | null;
+  let deps: ActionsConnectorsContextValue;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
       toastNotifications: mocks.notifications.toasts,
-      injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
-      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
@@ -43,9 +33,7 @@ describe('connector_add_modal', () => {
           show: true,
         },
       },
-      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
@@ -80,7 +68,7 @@ describe('connector_add_modal', () => {
             actionType={actionType}
             http={deps.http}
             actionTypeRegistry={deps.actionTypeRegistry}
-            alertTypeRegistry={deps.alertTypeRegistry}
+            alertTypeRegistry={{} as any}
             toastNotifications={deps.toastNotifications}
           />
         )

@@ -12,7 +12,7 @@ import { TypeRegistry } from '../type_registry';
 export interface ActionsConnectorsContextValue {
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;

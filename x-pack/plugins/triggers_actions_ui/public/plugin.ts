@@ -35,10 +35,7 @@ interface PluginsStart {
 
 export class Plugin
   implements
-    CorePlugin<
-      TriggersAndActionsUIPublicPluginSetup,
-      TriggersAndActionsUIPublicPluginStart | undefined
-    > {
+    CorePlugin<TriggersAndActionsUIPublicPluginSetup, TriggersAndActionsUIPublicPluginStart> {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
