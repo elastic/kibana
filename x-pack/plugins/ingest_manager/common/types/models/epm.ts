@@ -162,7 +162,22 @@ export interface Dataset {
   package: string;
 }
 
-export type VarsEntry = Record<string, any>;
+// EPR types this as `[]map[string]interface{}`
+// which means the official/possible type is Record<string, any>
+// but we effectively only see this shape
+export interface VarsEntry {
+  name: string;
+  description?: string;
+  type: string;
+  required?: boolean;
+  multi?: boolean;
+  default?: string | string[];
+  os?: {
+    [key: string]: {
+      default: string | string[];
+    };
+  };
+}
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
