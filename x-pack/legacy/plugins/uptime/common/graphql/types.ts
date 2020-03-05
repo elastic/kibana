@@ -8,7 +8,6 @@
 // Scalars
 // ====================================================
 
-import { MonitorChart } from '../types';
 
 export type UnsignedInteger = any;
 
@@ -19,14 +18,6 @@ export type UnsignedInteger = any;
 export interface Query {
   /** Get a list of all recorded pings for all monitors */
   allPings: PingResults;
-
-  getMonitors?: LatestMonitorsResult | null;
-
-  getSnapshot?: Snapshot | null;
-
-  getMonitorChartsData?: MonitorChart | null;
-  /** Fetch the most recent event data for a monitor ID, date range, location. */
-  getLatestMonitors: Ping[];
 
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
@@ -378,32 +369,6 @@ export interface DocCount {
   count: UnsignedInteger;
 }
 
-export interface LatestMonitorsResult {
-  monitors?: LatestMonitor[] | null;
-}
-/** Represents the latest recorded information about a monitor. */
-export interface LatestMonitor {
-  /** The ID of the monitor represented by this data. */
-  id: MonitorKey;
-  /** Information from the latest document. */
-  ping?: Ping | null;
-  /** Buckets of recent up count status data. */
-  upSeries?: MonitorSeriesPoint[] | null;
-  /** Buckets of recent down count status data. */
-  downSeries?: MonitorSeriesPoint[] | null;
-}
-
-export interface MonitorKey {
-  key: string;
-
-  url?: string | null;
-}
-
-export interface MonitorSeriesPoint {
-  x?: UnsignedInteger | null;
-
-  y?: number | null;
-}
 
 export interface Snapshot {
   counts: SnapshotCount;

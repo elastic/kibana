@@ -7,7 +7,7 @@
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { DurationChartComponent } from '../duration_chart';
-import { MonitorChart } from '../../../../../common/types';
+import { MonitorDurationResult } from '../../../../../common/types';
 import { shallowWithRouter } from '../../../../lib';
 
 describe('MonitorCharts component', () => {
@@ -23,7 +23,7 @@ describe('MonitorCharts component', () => {
     jest.clearAllMocks();
   });
 
-  const chartResponse: { monitorChartsData: MonitorChart } = {
+  const chartResponse: { monitorChartsData: MonitorDurationResult } = {
     monitorChartsData: {
       locationDurationLines: [
         {

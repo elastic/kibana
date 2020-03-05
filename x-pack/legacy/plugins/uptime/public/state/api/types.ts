@@ -11,7 +11,6 @@ export interface BaseParams {
   filters?: string;
   statusFilter?: string;
   location?: string;
-  monitorId?: string;
 }
 
 export interface DateRange {

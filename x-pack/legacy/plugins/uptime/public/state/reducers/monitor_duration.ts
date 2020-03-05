@@ -10,10 +10,10 @@ import {
   getMonitorDurationActionSuccess,
   getMonitorDurationActionFail,
 } from '../actions';
-import { MonitorChart } from '../../../common/types';
+import { MonitorDurationResult } from '../../../common/types';
 
 export interface MonitorDuration {
-  monitor_duration: MonitorChart | null;
+  monitor_duration: MonitorDurationResult | null;
   errors: any[];
   loading: boolean;
 }
@@ -24,20 +24,25 @@ const initialState: MonitorDuration = {
   errors: [],
 };
 
-export const monitorDurationReducer = handleActions<MonitorDuration>(
+type PayLoad = MonitorDurationResult & Error;
+
+export const monitorDurationReducer = handleActions<MonitorDuration, PayLoad>(
   {
-    [String(getMonitorDurationAction)]: state => ({
+    [String(getMonitorDurationAction)]: (state: MonitorDuration) => ({
       ...state,
       loading: true,
     }),
 
-    [String(getMonitorDurationActionSuccess)]: (state, action: Action<any>) => ({
+    [String(getMonitorDurationActionSuccess)]: (
+      state: MonitorDuration,
+      action: Action<MonitorDurationResult>
+    ) => ({
       ...state,
       loading: false,
       monitor_duration: { ...action.payload },
     }),
 
-    [String(getMonitorDurationActionFail)]: (state, action: Action<any>) => ({
+    [String(getMonitorDurationActionFail)]: (state: MonitorDuration, action: Action<Error>) => ({
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,

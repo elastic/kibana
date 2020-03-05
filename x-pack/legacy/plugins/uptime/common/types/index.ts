@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type UnsignedInteger = any;
-
 /** Represents a bucket of monitor status information. */
 export interface StatusData {
   /** The timeseries point for this status data. */
-  x: UnsignedInteger;
+  x: number;
   /** The value of up counts for this point. */
   up?: number | null;
   /** The value for down counts for this point. */
@@ -21,7 +19,7 @@ export interface StatusData {
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
   /** The timeseries value for this point. */
-  x: UnsignedInteger;
+  x: number;
   /** The average duration ms for the monitor. */
   y?: number | null;
 }
@@ -33,7 +31,7 @@ export interface LocationDurationLine {
 }
 
 /** The data used to populate the monitor charts. */
-export interface MonitorChart {
+export interface MonitorDurationResult {
   /** The average values for the monitor duration. */
   locationDurationLines: LocationDurationLine[];
   /** The counts of up/down checks for the monitor. */

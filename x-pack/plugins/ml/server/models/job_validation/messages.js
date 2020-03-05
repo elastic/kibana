@@ -495,7 +495,7 @@ export const getMessages = () => {
     time_field_invalid: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.timeFieldInvalidMessage', {
-        defaultMessage: `{timeField} cannot be used as the time-field because it's not a valid field of type 'date'.`,
+        defaultMessage: `{timeField} cannot be used as the time field because it is not a field of type 'date' or 'date_nanos'.`,
         values: {
           timeField: `'{{timeField}}'`,
         },

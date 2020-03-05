@@ -9,7 +9,7 @@ import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constan
 import { getHistogramIntervalFormatted } from '../helper';
 import {
   LocationDurationLine,
-  MonitorChart,
+  MonitorDurationResult,
 } from '../../../../../legacy/plugins/uptime/common/types';
 
 export interface GetMonitorChartsParams {
@@ -46,7 +46,7 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
  */
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
-  MonitorChart
+  MonitorDurationResult
 > = async ({ callES, dateStart, dateEnd, monitorId }) => {
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
@@ -100,7 +100,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
    * Additionally, we supply the maximum value for duration and status, so the corresponding charts know
    * what the domain size should be.
    */
-  const monitorChartsData: MonitorChart = {
+  const monitorChartsData: MonitorDurationResult = {
     locationDurationLines: [],
     status: [],
     durationMaxValue: 0,
