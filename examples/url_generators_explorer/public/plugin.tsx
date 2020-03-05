@@ -17,26 +17,32 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../core/server/mocks';
-import { EsSearchService } from './es_search_service';
-import { searchSetupMock } from '../mocks';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
 
-describe('ES search strategy service', () => {
-  let service: EsSearchService;
+interface StartDeps {
+  share: SharePluginStart;
+}
 
-  const mockCoreSetup = coreMock.createSetup();
-  const context = coreMock.createPluginInitializerContext();
-
-  beforeEach(() => {
-    service = new EsSearchService(context);
-  });
-
-  describe('setup()', () => {
-    it('registers the ES search strategy', async () => {
-      service.setup(mockCoreSetup, {
-        search: searchSetupMock,
-      });
-      expect(searchSetupMock.registerSearchStrategyProvider).toBeCalled();
+export class AccessLinksExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>) {
+    core.application.register({
+      id: 'urlGeneratorsExplorer',
+      title: 'Access links explorer',
+      async mount(params: AppMountParameters) {
+        const depsStart = (await core.getStartServices())[1];
+        const { renderApp } = await import('./app');
+        return renderApp(
+          {
+            getLinkGenerator: depsStart.share.urlGenerators.getUrlGenerator,
+          },
+          params
+        );
+      },
     });
-  });
-});
+  }
+
+  public start() {}
+
+  public stop() {}
+}
