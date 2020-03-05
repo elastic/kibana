@@ -6,7 +6,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSelect, EuiTextArea, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiAccordion,
+  EuiSelect,
+  EuiTextArea,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
@@ -74,30 +81,12 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
-        <p>{strings.getWarning()}</p>
-      </EuiCallOut>
-
-      <EuiSpacer size="m" />
-
       <EuiFormRow
         label={strings.getIndexTitle()}
         helpText={strings.getIndexLabel()}
         display="rowCompressed"
       >
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={strings.getQueryTitle()}
-        helpText={strings.getQueryLabel()}
-        display="rowCompressed"
-      >
-        <EuiTextArea
-          value={getQuery()}
-          onChange={e => setArg(getArgName(), e.target.value)}
-          compressed
-        />
       </EuiFormRow>
 
       <EuiFormRow
@@ -112,30 +101,54 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={strings.getSortFieldTitle()}
-        helpText={strings.getSortFieldLabel()}
-        display="columnCompressed"
+      <EuiAccordion
+        id="accordionAdvancedSettings"
+        buttonContent="Advanced Options"
+        arrowDisplay="right"
       >
-        <ESFieldSelect
-          index={index}
-          value={sortField}
-          onChange={field => setArg('sort', [field, sortOrder].join(', '))}
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          label={strings.getQueryTitle()}
+          helpText={strings.getQueryLabel()}
+          display="rowCompressed"
+        >
+          <EuiTextArea
+            value={getQuery()}
+            onChange={e => setArg(getArgName(), e.target.value)}
+            compressed
+          />
+        </EuiFormRow>
 
-      <EuiFormRow
-        label={strings.getSortOrderTitle()}
-        helpText={strings.getSortOrderLabel()}
-        display="columnCompressed"
-      >
-        <EuiSelect
-          value={sortOrder.toLowerCase()}
-          onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
-          options={sortOptions}
-          compressed
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          label={strings.getSortFieldTitle()}
+          helpText={strings.getSortFieldLabel()}
+          display="columnCompressed"
+        >
+          <ESFieldSelect
+            index={index}
+            value={sortField}
+            onChange={field => setArg('sort', [field, sortOrder].join(', '))}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={strings.getSortOrderTitle()}
+          helpText={strings.getSortOrderLabel()}
+          display="columnCompressed"
+        >
+          <EuiSelect
+            value={sortOrder.toLowerCase()}
+            onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
+            options={sortOptions}
+            compressed
+          />
+        </EuiFormRow>
+      </EuiAccordion>
+
+      <EuiSpacer size="m" />
+
+      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
+        <p>{strings.getWarning()}</p>
+      </EuiCallOut>
     </div>
   );
 };
@@ -150,6 +163,6 @@ export const esdocs = () => ({
   name: 'esdocs',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  image: 'logoElasticsearch',
+  image: 'filebeatApp',
   template: templateFromReactComponent(EsdocsDatasource),
 });

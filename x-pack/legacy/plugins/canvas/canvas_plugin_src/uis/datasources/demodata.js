@@ -21,6 +21,6 @@ export const demodata = () => ({
   name: 'demodata',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  image: 'logoElasticStack',
+  image: 'visualizeApp',
   template: templateFromReactComponent(DemodataDatasource),
 });
