@@ -26,10 +26,12 @@ describe('GET case', () => {
   });
   it(`returns the case with empty case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: '/api/cases/{case_id}',
       method: 'get',
+      params: {
+        case_id: 'mock-id-1',
+      },
       query: {
-        id: 'mock-id-1',
         includeComments: false,
       },
     });
@@ -53,10 +55,12 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getCase`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: '/api/cases/{case_id}',
       method: 'get',
+      params: {
+        case_id: 'abcdefg',
+      },
       query: {
-        id: 'abcdefg',
         includeComments: false,
       },
     });
@@ -74,10 +78,12 @@ describe('GET case', () => {
   });
   it(`returns the case with case comments when includeComments is true`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: '/api/cases/{case_id}',
       method: 'get',
+      params: {
+        case_id: 'mock-id-1',
+      },
       query: {
-        id: 'mock-id-1',
         includeComments: true,
       },
     });
@@ -96,10 +102,12 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: '/api/cases/{case_id}',
       method: 'get',
+      params: {
+        case_id: 'bad-guy',
+      },
       query: {
-        id: 'bad-guy',
         includeComments: true,
       },
     });

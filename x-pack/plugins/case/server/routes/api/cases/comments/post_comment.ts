@@ -71,8 +71,6 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           caseId: request.params.case_id,
           updatedAttributes: {
             ...updateCase,
-            updated_at: myCase.attributes.updated_at,
-            updated_by: myCase.attributes.updated_by,
           },
         });
 

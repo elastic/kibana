@@ -11,6 +11,7 @@ import {
   createRoute,
   createRouteContext,
   mockCaseComments,
+  mockCases,
 } from '../../__fixtures__';
 import { flattenCommentSavedObject } from '../../utils';
 import { initGetCommentApi } from './get_comment';
@@ -22,18 +23,17 @@ describe('GET comment', () => {
   });
   it(`returns the comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: '/api/cases/{case_id}/comments/{comment_id}',
       method: 'get',
       params: {
-        case_id: 'mock-case-1',
-      },
-      query: {
-        id: 'mock-comment-1',
+        case_id: 'mock-id-1',
+        comment_id: 'mock-comment-1',
       },
     });
 
     const theContext = createRouteContext(
       createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
@@ -43,18 +43,16 @@ describe('GET comment', () => {
     const myPayload = mockCaseComments.find(s => s.id === 'mock-comment-1');
     expect(myPayload).not.toBeUndefined();
     if (myPayload != null) {
-      expect(response.payload).toEqual([flattenCommentSavedObject(myPayload)]);
+      expect(response.payload).toEqual(flattenCommentSavedObject(myPayload));
     }
   });
   it(`returns an error when getComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: '/api/cases/{case_id}/comments/{comment_id}',
       method: 'get',
       params: {
-        case_id: 'mock-case-1',
-      },
-      query: {
-        id: 'not-real',
+        case_id: 'mock-id-1',
+        comment_id: 'not-real',
       },
     });
 

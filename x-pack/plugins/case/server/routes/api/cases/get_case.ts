@@ -13,10 +13,12 @@ import { flattenCaseSavedObject, wrapError } from '../utils';
 export function initGetCaseApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases',
+      path: '/api/cases/{case_id}',
       validate: {
+        params: schema.object({
+          case_id: schema.string(),
+        }),
         query: schema.object({
-          id: schema.string(),
           includeComments: schema.string({ defaultValue: 'true' }),
         }),
       },
@@ -27,7 +29,7 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
 
         const theCase = await caseService.getCase({
           client: context.core.savedObjects.client,
-          caseId: request.query.id,
+          caseId: request.params.case_id,
         });
 
         if (!includeComments) {
@@ -36,7 +38,7 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
 
         const theComments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
-          caseId: request.query.id,
+          caseId: request.params.case_id,
         });
 
         return response.ok({

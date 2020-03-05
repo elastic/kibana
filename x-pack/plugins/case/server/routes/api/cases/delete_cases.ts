@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 
-export function initDeleteCaseApi({ caseService, router }: RouteDeps) {
+export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
   router.delete(
     {
       path: '/api/cases',

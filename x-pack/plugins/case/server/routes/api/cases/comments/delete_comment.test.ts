@@ -23,13 +23,11 @@ describe('DELETE comment', () => {
   });
   it(`deletes the comment. responds with 200`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: '/api/cases/{case_id}/comments/{comment_id}',
       method: 'delete',
       params: {
         case_id: 'mock-id-1',
-      },
-      query: {
-        ids: ['mock-comment-1'],
+        comment_id: 'mock-comment-1',
       },
     });
 
@@ -45,13 +43,11 @@ describe('DELETE comment', () => {
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: '/api/cases/{case_id}/comments/{comment_id}',
       method: 'delete',
       params: {
         case_id: 'mock-id-1',
-      },
-      query: {
-        ids: ['bad-guy'],
+        comment_id: 'bad-guy',
       },
     });
 
@@ -63,6 +59,6 @@ describe('DELETE comment', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(400);
+    expect(response.status).toEqual(404);
   });
 });

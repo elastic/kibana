@@ -10,7 +10,7 @@ import { wrapError } from '../../utils';
 export function initGetTagsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/all/tags',
+      path: '/api/cases/tags',
       validate: {},
     },
     async (context, request, response) => {

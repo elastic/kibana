@@ -15,12 +15,12 @@ import {
   mockCasesErrorTriggerData,
   mockCaseComments,
 } from '../__fixtures__';
-import { initDeleteCaseApi } from './delete_case';
+import { initDeleteCasesApi } from './delete_cases';
 
 describe('DELETE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initDeleteCaseApi, 'delete');
+    routeHandler = await createRoute(initDeleteCasesApi, 'delete');
   });
   it(`deletes the case. responds with 200`, async () => {
     const request = httpServerMock.createKibanaRequest({

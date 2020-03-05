@@ -24,11 +24,10 @@ import {
 } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
     asResponse: true,
     query: {
-      id: caseId,
       includeComments,
     },
   });
@@ -37,7 +36,7 @@ export const getCase = async (caseId: string, includeComments: boolean = true): 
 };
 
 export const getTags = async (): Promise<string[]> => {
-  const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/all/tags`, {
+  const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/tags`, {
     method: 'GET',
     asResponse: true,
   });
@@ -87,7 +86,7 @@ export const patchCase = async (
   updatedCase: Partial<CaseRequest>,
   version: string
 ): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'PATCH',
     asResponse: true,
     body: JSON.stringify({ ...updatedCase, id: caseId, version }),

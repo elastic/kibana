@@ -19,7 +19,7 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 
-export function initGetAllCaseCommentsApi({ caseService, router }: RouteDeps) {
+export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases/{case_id}/comments/_find',

@@ -32,6 +32,18 @@ export function initPatchCommentApi({ caseService, router }: RouteDeps) {
           CommentPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
+        const myCase = await caseService.getCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.case_id,
+        });
+
+        if (!myCase.attributes.comment_ids.includes(query.id)) {
+          throw Boom.notFound(
+            `This comment ${query.id} does not exist in ${myCase.attributes.title} (id: ${request.params.case_id}).`
+          );
+        }
+
         const myComment = await caseService.getComment({
           client: context.core.savedObjects.client,
           commentId: query.id,

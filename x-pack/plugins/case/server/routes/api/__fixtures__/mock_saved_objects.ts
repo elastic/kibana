@@ -12,7 +12,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-1',
     attributes: {
-      comment_ids: [],
+      comment_ids: ['mock-comment-1'],
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
