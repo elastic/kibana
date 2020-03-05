@@ -10,6 +10,8 @@ import { assertNever } from '../../../../../src/core/utils';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 
+export type ILicenseState = PublicMethodsOf<LicenseState>;
+
 export interface ActionsLicenseInformation {
   showAppLink: boolean;
   enableAppLink: boolean;

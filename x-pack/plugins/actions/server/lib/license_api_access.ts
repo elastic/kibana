@@ -5,9 +5,9 @@
  */
 
 import Boom from 'boom';
-import { LicenseState } from './license_state';
+import { ILicenseState } from './license_state';
 
-export function verifyApiAccess(licenseState: LicenseState) {
+export function verifyApiAccess(licenseState: ILicenseState) {
   const licenseCheckResults = licenseState.getLicenseInformation();
 
   if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
