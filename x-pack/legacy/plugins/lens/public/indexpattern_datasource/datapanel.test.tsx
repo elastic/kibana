@@ -279,8 +279,8 @@ describe('IndexPattern Data Panel', () => {
 
     function testProps() {
       const setState = jest.fn();
-      core.http.post.mockImplementation(async (path) => {
-        const parts = (path as unknown as string).split('/');
+      core.http.post.mockImplementation(async path => {
+        const parts = ((path as unknown) as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -495,7 +495,7 @@ describe('IndexPattern Data Panel', () => {
         }
         ++queryCount;
 
-        const parts = (path as unknown as string).split('/');
+        const parts = ((path as unknown) as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
