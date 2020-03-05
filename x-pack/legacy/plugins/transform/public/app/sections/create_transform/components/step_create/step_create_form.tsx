@@ -34,7 +34,6 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
-import { useKibanaContext } from '../../../../lib/kibana';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
@@ -67,6 +66,7 @@ export const StepCreateForm: FC<Props> = React.memo(
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
 
+    const [loading, setLoading] = useState(false);
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
@@ -75,7 +75,8 @@ export const StepCreateForm: FC<Props> = React.memo(
     );
 
     const deps = useAppDependencies();
-    const kibanaContext = useKibanaContext();
+    const indexPatterns = deps.plugins.data.indexPatterns;
+    const uiSettings = deps.core.uiSettings;
     const toastNotifications = useToastNotifications();
 
     useEffect(() => {
@@ -87,7 +88,7 @@ export const StepCreateForm: FC<Props> = React.memo(
     const api = useApi();
 
     async function createTransform() {
-      setCreated(true);
+      setLoading(true);
 
       try {
         const resp = await api.createTransform(transformId, transformConfig);
@@ -107,8 +108,9 @@ export const StepCreateForm: FC<Props> = React.memo(
             values: { transformId },
           })
         );
+        setCreated(true);
+        setLoading(false);
       } catch (e) {
-        setCreated(false);
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
             defaultMessage: 'An error occurred creating the transform {transformId}:',
@@ -116,6 +118,8 @@ export const StepCreateForm: FC<Props> = React.memo(
           }),
           text: toMountPoint(<ToastNotificationText text={e} />),
         });
+        setCreated(false);
+        setLoading(false);
         return false;
       }
 
@@ -127,18 +131,27 @@ export const StepCreateForm: FC<Props> = React.memo(
     }
 
     async function startTransform() {
-      setStarted(true);
+      setLoading(true);
 
       try {
-        await api.startTransforms([{ id: transformId }]);
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
-            defaultMessage: 'Request to start transform {transformId} acknowledged.',
-            values: { transformId },
-          })
-        );
+        const resp = await api.startTransforms([{ id: transformId }]);
+        if (typeof resp === 'object' && resp !== null && resp[transformId]?.success === true) {
+          toastNotifications.addSuccess(
+            i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
+              defaultMessage: 'Request to start transform {transformId} acknowledged.',
+              values: { transformId },
+            })
+          );
+          setStarted(true);
+          setLoading(false);
+        } else {
+          const errorMessage =
+            typeof resp === 'object' && resp !== null && resp[transformId]?.success === false
+              ? resp[transformId].error
+              : resp;
+          throw new Error(errorMessage);
+        }
       } catch (e) {
-        setStarted(false);
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
             defaultMessage: 'An error occurred starting the transform {transformId}:',
@@ -146,6 +159,8 @@ export const StepCreateForm: FC<Props> = React.memo(
           }),
           text: toMountPoint(<ToastNotificationText text={e} />),
         });
+        setStarted(false);
+        setLoading(false);
       }
     }
 
@@ -157,10 +172,11 @@ export const StepCreateForm: FC<Props> = React.memo(
     }
 
     const createKibanaIndexPattern = async () => {
+      setLoading(true);
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await kibanaContext.indexPatterns.make();
+        const newIndexPattern = await indexPatterns.make();
 
         Object.assign(newIndexPattern, {
           id: '',
@@ -178,13 +194,14 @@ export const StepCreateForm: FC<Props> = React.memo(
               values: { indexPatternName },
             })
           );
+          setLoading(false);
           return;
         }
 
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
-        if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
-          await kibanaContext.kibanaConfig.set('defaultIndex', id);
+        if (!uiSettings.get('defaultIndex')) {
+          await uiSettings.set('defaultIndex', id);
         }
 
         toastNotifications.addSuccess(
@@ -195,6 +212,7 @@ export const StepCreateForm: FC<Props> = React.memo(
         );
 
         setIndexPatternId(id);
+        setLoading(false);
         return true;
       } catch (e) {
         toastNotifications.addDanger({
@@ -205,13 +223,19 @@ export const StepCreateForm: FC<Props> = React.memo(
           }),
           text: toMountPoint(<ToastNotificationText text={e} />),
         });
+        setLoading(false);
         return false;
       }
     };
 
     const isBatchTransform = typeof transformConfig.sync === 'undefined';
 
-    if (started === true && progressPercentComplete === undefined && isBatchTransform) {
+    if (
+      loading === false &&
+      started === true &&
+      progressPercentComplete === undefined &&
+      isBatchTransform
+    ) {
       // wrapping in function so we can keep the interval id in local scope
       function startProgressBar() {
         const interval = setInterval(async () => {
@@ -266,7 +290,7 @@ export const StepCreateForm: FC<Props> = React.memo(
               <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
                 <EuiButton
                   fill
-                  isDisabled={created && started}
+                  isDisabled={loading || (created && started)}
                   onClick={createAndStartTransform}
                   data-test-subj="transformWizardCreateAndStartButton"
                 >
@@ -293,7 +317,7 @@ export const StepCreateForm: FC<Props> = React.memo(
               <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
                 <EuiButton
                   fill
-                  isDisabled={created && started}
+                  isDisabled={loading || (created && started)}
                   onClick={startTransform}
                   data-test-subj="transformWizardStartButton"
                 >
@@ -315,7 +339,7 @@ export const StepCreateForm: FC<Props> = React.memo(
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
-                isDisabled={created}
+                isDisabled={loading || created}
                 onClick={createTransform}
                 data-test-subj="transformWizardCreateButton"
               >

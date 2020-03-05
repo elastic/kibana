@@ -21,13 +21,9 @@ import { PluginInitializerContext } from 'kibana/public';
 
 export {
   FeatureCatalogueSetup,
-  FeatureCatalogueStart,
   EnvironmentSetup,
-  EnvironmentStart,
   TutorialSetup,
-  TutorialStart,
   HomePublicPluginSetup,
-  HomePublicPluginStart,
 } from './plugin';
 export {
   FeatureCatalogueEntry,

@@ -76,6 +76,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.XSRF = deps.XSRF || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
+  cache.security = deps.security || null;
 }
 
 export function getTimefilter() {

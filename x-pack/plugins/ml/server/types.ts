@@ -12,6 +12,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { MlServerLicense } from './lib/license';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -24,7 +25,7 @@ export interface LicenseCheckResult {
 
 export interface SystemRouteDeps {
   cloud: CloudSetup;
-  spacesPlugin: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface PluginsSetup {
@@ -32,12 +33,12 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  security: SecurityPluginSetup;
-  spaces: SpacesPluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
 export interface RouteInitialization {
   router: IRouter;
-  getLicenseCheckResults: () => LicenseCheckResult;
+  mlLicense: MlServerLicense;
 }

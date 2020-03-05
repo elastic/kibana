@@ -23,7 +23,7 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 // @ts-ignore
 import mappings from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
-import { DevToolsSettings } from '../../services';
+import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
   return Object.keys(newSettings.autocomplete).filter(key => {
@@ -32,11 +32,12 @@ const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToo
   });
 };
 
-const refreshAutocompleteSettings = (selectedSettings: any) => {
-  mappings.retrieveAutoCompleteInfo(selectedSettings);
+const refreshAutocompleteSettings = (settings: SettingsService, selectedSettings: any) => {
+  mappings.retrieveAutoCompleteInfo(settings, selectedSettings);
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
+  settings: SettingsService,
   newSettings: DevToolsSettings,
   prevSettings: DevToolsSettings
 ) => {
@@ -60,10 +61,10 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      mappings.retrieveAutoCompleteInfo(changedSettings.autocomplete);
-    } else if (isPollingChanged) {
+      mappings.retrieveAutoCompleteInfo(settings, changedSettings);
+    } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      mappings.retrieveAutoCompleteInfo();
+      mappings.retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
     }
   }
 };
@@ -81,7 +82,7 @@ export function Settings({ onClose }: Props) {
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
-    fetchAutocompleteSettingsIfNeeded(newSettings, prevSettings);
+    fetchAutocompleteSettingsIfNeeded(settings, newSettings, prevSettings);
 
     // Update the new settings in localStorage
     settings.updateSettings(newSettings);
@@ -98,7 +99,9 @@ export function Settings({ onClose }: Props) {
     <DevToolsSettingsModal
       onClose={onClose}
       onSaveSettings={onSaveSettings}
-      refreshAutocompleteSettings={refreshAutocompleteSettings}
+      refreshAutocompleteSettings={(selectedSettings: any) =>
+        refreshAutocompleteSettings(settings, selectedSettings)
+      }
       settings={settings.toJSON()}
     />
   );
