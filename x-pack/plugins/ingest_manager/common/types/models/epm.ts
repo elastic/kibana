@@ -62,6 +62,7 @@ export interface RegistryPackage {
   internal?: boolean;
   format_version: string;
   datasets?: Dataset[];
+  datasources?: any[];
   download: string;
   path: string;
 }
