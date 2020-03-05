@@ -78,9 +78,13 @@ describe('get()', () => {
     `);
   });
 
-  test(`return null when action type doesn't exist`, () => {
+  test(`throw error when action type doesn't exist`, () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    expect(actionTypeRegistry.get('not-exist-action-type')).toBeNull();
+    expect(() =>
+      actionTypeRegistry.get('not-exist-action-type')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Object type \\"not-exist-action-type\\" is not registered."`
+    );
   });
 });
 

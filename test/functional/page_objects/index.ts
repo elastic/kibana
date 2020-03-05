@@ -23,13 +23,11 @@ import { ConsolePageProvider } from './console_page';
 // @ts-ignore not TS yet
 import { ContextPageProvider } from './context_page';
 import { DashboardPageProvider } from './dashboard_page';
-// @ts-ignore not TS yet
 import { DiscoverPageProvider } from './discover_page';
 // @ts-ignore not TS yet
 import { ErrorPageProvider } from './error_page';
 // @ts-ignore not TS yet
 import { HeaderPageProvider } from './header_page';
-// @ts-ignore not TS yet
 import { HomePageProvider } from './home_page';
 // @ts-ignore not TS yet
 import { MonitoringPageProvider } from './monitoring_page';

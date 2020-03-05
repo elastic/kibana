@@ -450,9 +450,24 @@ export class Field extends PureComponent<FieldProps> {
   }
 
   renderTitle(setting: FieldSetting) {
+    const { unsavedChanges } = this.props;
+    const isInvalid = unsavedChanges?.isInvalid;
+
+    const unsavedIconLabel = unsavedChanges
+      ? isInvalid
+        ? i18n.translate('advancedSettings.field.invalidIconLabel', {
+            defaultMessage: 'Invalid',
+          })
+        : i18n.translate('advancedSettings.field.unsavedIconLabel', {
+            defaultMessage: 'Unsaved',
+          })
+      : undefined;
+
     return (
       <h3>
-        {setting.displayName || setting.name}
+        <span className="mgtAdvancedSettings__fieldTitle">
+          {setting.displayName || setting.name}
+        </span>
         {setting.isCustom ? (
           <EuiIconTip
             type="asterisk"
@@ -466,6 +481,18 @@ export class Field extends PureComponent<FieldProps> {
                 defaultMessage="Custom setting"
               />
             }
+          />
+        ) : (
+          ''
+        )}
+
+        {unsavedChanges ? (
+          <EuiIconTip
+            anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+            type={isInvalid ? 'alert' : 'dot'}
+            color={isInvalid ? 'danger' : 'warning'}
+            aria-label={unsavedIconLabel}
+            content={unsavedIconLabel}
           />
         ) : (
           ''

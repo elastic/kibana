@@ -23,7 +23,7 @@ export enum AlertStates {
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd';
 
-export interface MetricThresholdAlertTypeParams {
+export interface MetricExpressionParams {
   aggType: MetricsExplorerAggregation;
   metric: string;
   timeSize: number;

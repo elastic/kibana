@@ -453,7 +453,7 @@ describe('Plugin', () => {
     const [coreStartMock, startDepsMock] = await coreSetup.getStartServices();
     const unmountMock = jest.fn();
     renderAppMock.mockReturnValue(unmountMock);
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
 
     new Plugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
     // Grab registered mount function
@@ -478,7 +478,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParams, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
 
-export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
+export const renderApp = ({ element, history }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
   // Hide the chrome while this app is mounted for a full screen experience
   core.chrome.setIsVisible(false);
 
@@ -491,7 +491,7 @@ export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreSt
 
   // Render app
   ReactDOM.render(
-    <AppRoot routerBasePath={appBasePath} core={core} plugins={plugins} />,
+    <AppRoot routerHistory={history} core={core} plugins={plugins} />,
     element
   );
 
@@ -512,12 +512,14 @@ In testing `renderApp` you should be verifying that:
 
 ```typescript
 /** public/application.test.ts */
+import { createMemoryHistory } from 'history';
+import { ScopedHistory } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { renderApp } from './application';
 
 describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify some expected DOM element is rendered into the element
@@ -529,7 +531,7 @@ describe('renderApp', () => {
   });
 
   it('unsubscribes from uiSettings', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
     // Create a fake Subject you can use to monitor observers
     const settings$ = new Subject();
@@ -544,7 +546,7 @@ describe('renderApp', () => {
   });
 
   it('resets chrome visibility', () => {
-    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const params = coreMock.createAppMountParamters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify stateful Core API was called on mount

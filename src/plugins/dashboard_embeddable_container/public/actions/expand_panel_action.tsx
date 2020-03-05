@@ -19,10 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../embeddable_plugin';
-import { Action, IncompatibleActionError } from '../ui_actions_plugin';
+import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
-export const EXPAND_PANEL_ACTION = 'togglePanel';
+export const ACTION_EXPAND_PANEL = 'togglePanel';
 
 function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
@@ -36,18 +36,18 @@ function isExpanded(embeddable: IEmbeddable) {
   return embeddable.id === embeddable.parent.getInput().expandedPanelId;
 }
 
-interface ActionContext {
+export interface ExpandPanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction implements Action<ActionContext> {
-  public readonly type = EXPAND_PANEL_ACTION;
-  public readonly id = EXPAND_PANEL_ACTION;
+export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANEL> {
+  public readonly type = ACTION_EXPAND_PANEL;
+  public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;
 
   constructor() {}
 
-  public getDisplayName({ embeddable }: ActionContext) {
+  public getDisplayName({ embeddable }: ExpandPanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
@@ -67,7 +67,7 @@ export class ExpandPanelAction implements Action<ActionContext> {
         );
   }
 
-  public getIconType({ embeddable }: ActionContext) {
+  public getIconType({ embeddable }: ExpandPanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
@@ -75,11 +75,11 @@ export class ExpandPanelAction implements Action<ActionContext> {
     return isExpanded(embeddable) ? 'expand' : 'expand';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: ExpandPanelActionContext) {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public async execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: ExpandPanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

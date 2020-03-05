@@ -80,8 +80,7 @@ export const usePostCase = (): [NewCaseState, Dispatch<SetStateAction<NewCase>>]
     const postCase = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const dataWithoutIsNew = state.data;
-        delete dataWithoutIsNew.isNew;
+        const { isNew, ...dataWithoutIsNew } = state.data;
         const response = await createCase(dataWithoutIsNew);
         dispatch({ type: FETCH_SUCCESS, payload: response });
       } catch (error) {

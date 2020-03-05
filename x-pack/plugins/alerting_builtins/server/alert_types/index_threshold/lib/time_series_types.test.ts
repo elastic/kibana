@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeSeriesQuerySchema } from './time_series_types';
+import { TimeSeriesQuerySchema, TimeSeriesQuery } from './time_series_types';
 import { runTests } from './core_query_types.test';
 
-const DefaultParams = {
+const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
   index: 'index-name',
   timeField: 'time-field',
   aggType: 'count',
-  window: '5m',
+  groupBy: 'all',
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
 };
 
 describe('TimeSeriesParams validate()', () => {
@@ -27,10 +29,11 @@ describe('TimeSeriesParams validate()', () => {
   });
 
   it('passes for maximal valid input', async () => {
-    params.aggType = 'average';
+    params.aggType = 'avg';
     params.aggField = 'agg-field';
-    params.groupField = 'group-field';
-    params.groupLimit = 100;
+    params.groupBy = 'top';
+    params.termField = 'group-field';
+    params.termSize = 100;
     params.dateStart = new Date().toISOString();
     params.dateEnd = new Date().toISOString();
     params.interval = '1s';

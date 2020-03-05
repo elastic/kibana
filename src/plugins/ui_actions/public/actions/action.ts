@@ -18,17 +18,26 @@
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { ActionType, ActionContextMapping } from '../types';
 
-export interface Action<Context = undefined> {
+export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
+
+export interface Action<Context = {}, T = ActionType> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
    */
   order?: number;
 
+  /**
+   * A unique identifier for this action instance.
+   */
   id: string;
 
-  readonly type: string;
+  /**
+   * The action type is what determines the context shape.
+   */
+  readonly type: T;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.

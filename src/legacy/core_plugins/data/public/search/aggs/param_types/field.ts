@@ -18,30 +18,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isFunction } from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { IAggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
-import { IMetricAggConfig } from '../metrics/metric_agg_type';
 import {
   IndexPatternField,
   indexPatterns,
   KBN_FIELD_TYPES,
 } from '../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getNotifications } from '../../../../../../../plugins/data/public/services';
 
 const filterByType = propFilter('type');
 
-type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
-export type FilterFieldTypes = ((aggConfig: IMetricAggConfig) => FieldTypes) | FieldTypes;
+export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;
-  filterFieldTypes: FilterFieldTypes;
+  filterFieldTypes: FieldTypes;
   onlyAggregatable: boolean;
 
   constructor(config: Record<string, any>) {
@@ -93,7 +91,7 @@ export class FieldParamType extends BaseParamType {
       // @ts-ignore
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
-        npStart.core.notifications.toasts.addDanger(
+        getNotifications().toasts.addDanger(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
@@ -124,12 +122,6 @@ export class FieldParamType extends BaseParamType {
         (!scriptable && field.scripted)
       ) {
         return false;
-      }
-
-      if (isFunction(filterFieldTypes)) {
-        const filter = filterFieldTypes(aggConfig as IMetricAggConfig);
-
-        return filterByType([field], filter).length !== 0;
       }
 
       return filterByType([field], filterFieldTypes).length !== 0;
