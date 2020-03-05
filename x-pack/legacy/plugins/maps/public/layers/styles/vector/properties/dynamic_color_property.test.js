@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { DynamicColorProperty } from './dynamic_color_property';
-import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, FIELD_ORIGIN } from '../../../../../common/constants';
 
 const mockField = {
   async getLabel() {
@@ -28,35 +28,56 @@ const mockField = {
   getRootName() {
     return 'foobar';
   },
+  getOrigin() {
+    return FIELD_ORIGIN.SOURCE;
+  },
   supportsFieldMeta() {
     return true;
   },
 };
 
-const getOrdinalFieldMeta = () => {
-  return { min: 0, max: 100 };
-};
+class MockStyleMeta {
+  getRangeFieldMetaDescriptor() {
+    return { min: 0, max: 100 };
+  }
+  getCategoryFieldMetaDescriptor() {
+    return {
+      categories: [
+        {
+          key: 'US',
+          count: 10,
+        },
+        {
+          key: 'CN',
+          count: 8,
+        },
+      ],
+    };
+  }
+}
 
-const getCategoricalFieldMeta = () => {
-  return {
-    categories: [
-      {
-        key: 'US',
-        count: 10,
-      },
-      {
-        key: 'CN',
-        count: 8,
-      },
-    ],
-  };
-};
-const makeProperty = (options, getFieldMeta) => {
+class MockStyle {
+  getStyleMeta() {
+    return new MockStyleMeta();
+  }
+}
+
+class MockLayer {
+  getStyle() {
+    return new MockStyle();
+  }
+
+  findDataRequestById() {
+    return null;
+  }
+}
+
+const makeProperty = options => {
   return new DynamicColorProperty(
     options,
     VECTOR_STYLES.LINE_COLOR,
     mockField,
-    getFieldMeta,
+    new MockLayer(),
     () => {
       return x => x + '_format';
     }
@@ -69,13 +90,10 @@ const defaultLegendParams = {
 };
 
 test('Should render ordinal legend', async () => {
-  const colorStyle = makeProperty(
-    {
-      color: 'Blues',
-      type: undefined,
-    },
-    getOrdinalFieldMeta
-  );
+  const colorStyle = makeProperty({
+    color: 'Blues',
+    type: undefined,
+  });
 
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
@@ -85,23 +103,20 @@ test('Should render ordinal legend', async () => {
 });
 
 test('Should render ordinal legend with breaks', async () => {
-  const colorStyle = makeProperty(
-    {
-      type: COLOR_MAP_TYPE.ORDINAL,
-      useCustomColorRamp: true,
-      customColorRamp: [
-        {
-          stop: 0,
-          color: '#FF0000',
-        },
-        {
-          stop: 10,
-          color: '#00FF00',
-        },
-      ],
-    },
-    getOrdinalFieldMeta
-  );
+  const colorStyle = makeProperty({
+    type: COLOR_MAP_TYPE.ORDINAL,
+    useCustomColorRamp: true,
+    customColorRamp: [
+      {
+        stop: 0,
+        color: '#FF0000',
+      },
+      {
+        stop: 10,
+        color: '#00FF00',
+      },
+    ],
+  });
 
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
@@ -116,14 +131,11 @@ test('Should render ordinal legend with breaks', async () => {
 });
 
 test('Should render categorical legend with breaks from default', async () => {
-  const colorStyle = makeProperty(
-    {
-      type: COLOR_MAP_TYPE.CATEGORICAL,
-      useCustomColorPalette: false,
-      colorCategory: 'palette_0',
-    },
-    getCategoricalFieldMeta
-  );
+  const colorStyle = makeProperty({
+    type: COLOR_MAP_TYPE.CATEGORICAL,
+    useCustomColorPalette: false,
+    colorCategory: 'palette_0',
+  });
 
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
@@ -138,27 +150,24 @@ test('Should render categorical legend with breaks from default', async () => {
 });
 
 test('Should render categorical legend with breaks from custom', async () => {
-  const colorStyle = makeProperty(
-    {
-      type: COLOR_MAP_TYPE.CATEGORICAL,
-      useCustomColorPalette: true,
-      customColorPalette: [
-        {
-          stop: null, //should include the default stop
-          color: '#FFFF00',
-        },
-        {
-          stop: 'US_STOP',
-          color: '#FF0000',
-        },
-        {
-          stop: 'CN_STOP',
-          color: '#00FF00',
-        },
-      ],
-    },
-    getCategoricalFieldMeta
-  );
+  const colorStyle = makeProperty({
+    type: COLOR_MAP_TYPE.CATEGORICAL,
+    useCustomColorPalette: true,
+    customColorPalette: [
+      {
+        stop: null, //should include the default stop
+        color: '#FFFF00',
+      },
+      {
+        stop: 'US_STOP',
+        color: '#FF0000',
+      },
+      {
+        stop: 'CN_STOP',
+        color: '#00FF00',
+      },
+    ],
+  });
 
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
@@ -182,11 +191,10 @@ test('Should pluck the categorical style-meta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
     colorCategory: 'palette_0',
-    getCategoricalFieldMeta,
   });
 
   const features = makeFeatures(['CN', 'CN', 'US', 'CN', 'US', 'IN']);
-  const meta = colorStyle.pluckStyleMetaFromFeatures(features);
+  const meta = colorStyle.pluckCategoricalStyleMetaFromFeatures(features);
 
   expect(meta).toEqual({
     categories: [
@@ -201,10 +209,9 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
     colorCategory: 'palette_0',
-    getCategoricalFieldMeta,
   });
 
-  const meta = colorStyle.pluckStyleMetaFromFieldMetaData({
+  const meta = colorStyle.pluckCategoricalStyleMetaFromFieldMetaData({
     foobar: {
       buckets: [
         {
