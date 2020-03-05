@@ -15,8 +15,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Uptime app', function() {
     this.tags('ciGroup6');
     describe('with generated data', () => {
-      before('load heartbeat data', async () => await esArchiver.load('uptime/blank'));
-      after('unload', async () => await esArchiver.unload('uptime/blank'));
+      beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/blank'));
+      afterEach('unload', async () => await esArchiver.unload('uptime/blank'));
 
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));

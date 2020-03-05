@@ -20,10 +20,11 @@ export interface UMSavedObjectsAdapter {
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }
 
-const settingsId = 'uptime-dynamic-settings-singleton';
+export const settingsObjectType = 'uptime-dynamic-settings';
+export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 
 export const umDynamicSettings: SavedObjectsType = {
-  name: 'uptime-dynamic-settings',
+  name: settingsObjectType,
   hidden: false,
   namespaceAgnostic: false,
   mappings: {
@@ -38,13 +39,13 @@ export const umDynamicSettings: SavedObjectsType = {
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
-      const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsId);
+      const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj.attributes;
     } catch (e) {
       try {
         return (
           await client.create(umDynamicSettings.name, defaultDynamicSettings, {
-            id: settingsId,
+            id: settingsObjectId,
             overwrite: false,
           })
         ).attributes;
@@ -54,6 +55,6 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
     }
   },
   setUptimeDynamicSettings: async (client, settings) => {
-    client.update(umDynamicSettings.name, settingsId, settings);
+    client.update(umDynamicSettings.name, settingsObjectId, settings);
   },
 };

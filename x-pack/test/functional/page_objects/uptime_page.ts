@@ -13,19 +13,22 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
+    public settings: typeof uptimeService.settings;
+
+    constructor() {
+      this.settings = uptimeService.settings;
+    }
+
+    public async goToRoot() {
+      await pageObjects.common.navigateToApp('uptime');
+    }
+
     public async goToUptimePageAndSetDateRange(
       datePickerStartValue: string,
       datePickerEndValue: string
     ) {
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-    }
-
-    public async goToUptimeSettingsAndLoadData() {
-      await pageObjects.common.navigateToApp('uptime');
-      await uptimeService.navigateToSettings();
-      const settingsFields = await uptimeService.loadSettingsFields();
-      expect(settingsFields.heartbeatIndices).to.eql('FOO');
     }
 
     public async goToUptimeOverviewAndLoadData(
@@ -57,6 +60,10 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async inputFilterQuery(filterQuery: string) {
       await uptimeService.setFilterText(filterQuery);
+    }
+
+    public async pageHasDataMissing() {
+      return await uptimeService.pageHasDataMissing();
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]) {

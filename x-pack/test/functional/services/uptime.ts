@@ -11,7 +11,31 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
+  const settings = {
+    go: async () => {
+      await testSubjects.click('settings-page-link', 5000);
+    },
+    changeHeartbeatIndicesInput: async (text: string) => {
+      const input = await testSubjects.find('heartbeat-indices-input', 5000);
+      await input.clearValueWithKeyboard();
+      await input.type(text);
+    },
+    loadFields: async () => {
+      const heartbeatIndices = await (
+        await testSubjects.find('heartbeat-indices-input', 5000)
+      ).getAttribute('value');
+      return { heartbeatIndices };
+    },
+    applyButtonIsDisabled: async () => {
+      return !!(await (await testSubjects.find('apply-settings-button')).getAttribute('disabled'));
+    },
+    apply: async () => {
+      await (await testSubjects.find('apply-settings-button')).click();
+    },
+  };
+
   return {
+    settings,
     async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
         throw new Error(`Couldn't find expected element with key "${key}".`);
@@ -29,19 +53,14 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       const url = await browser.getCurrentUrl();
       return url.indexOf(expected) >= 0;
     },
-    async navigateToSettings() {
-      await testSubjects.existOrFail('settings-page-link');
-      await testSubjects.click('settings-page-link', 5000);
-    },
-    async loadSettingsFields() {
-      const heartbeatIndices = await testSubjects.find('heartbeat-indices-input', 5000);
-      return { heartbeatIndices };
-    },
     async navigateToMonitorWithId(monitorId: string) {
       await testSubjects.click(`monitor-page-link-${monitorId}`, 5000);
     },
     async getMonitorNameDisplayedOnPageTitle() {
       return await testSubjects.getVisibleText('monitor-page-title');
+    },
+    async pageHasDataMissing() {
+      return await testSubjects.find('data-missing', 5000);
     },
     async setFilterText(filterQuery: string) {
       await testSubjects.click('xpack.uptime.filterBar');

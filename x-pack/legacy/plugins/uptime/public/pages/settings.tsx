@@ -123,8 +123,8 @@ export const SettingsPageComponent = ({
               fullWidth
               helpText={
                 <FormattedMessage
-                  id="xpack.uptime.sourceConfiguration.heartbeatIndicesRecommendedValue"
-                  defaultMessage="The recommended value is {defaultValue}"
+                  id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+                  defaultMessage="The default value is {defaultValue}"
                   values={{
                     defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
                   }}
@@ -166,14 +166,14 @@ export const SettingsPageComponent = ({
               }}
             >
               <FormattedMessage
-                id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
                 defaultMessage="Discard"
               />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="applySettingsButton"
+              data-test-subj="apply-settings-button"
               type="submit"
               color="primary"
               isDisabled={!isFormDirty || !isFormValid || dss.loading}
@@ -181,7 +181,7 @@ export const SettingsPageComponent = ({
               onClick={onApply}
             >
               <FormattedMessage
-                id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
                 defaultMessage="Apply"
               />
             </EuiButton>

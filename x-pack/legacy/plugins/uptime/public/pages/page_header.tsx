@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Link } from 'react-router-dom';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
@@ -66,9 +67,9 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton href={`#${SETTINGS_ROUTE}`} data-test-subj="settings-page-link">
-            {settingsLinkText}
-          </EuiButton>
+          <Link to={`${SETTINGS_ROUTE}`}>
+            <EuiButton data-test-subj="settings-page-link">{settingsLinkText}</EuiButton>
+          </Link>
         </EuiFlexItem>
         {datePickerComponent}
       </EuiFlexGroup>
