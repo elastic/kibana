@@ -34,8 +34,8 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
       ? rollupSearch(caller, { ...request, params }, options)
       : caller('search', params, options))) as SearchResponse<any>;
 
-    const { total, failed, skipped, successful } = rawResponse._shards;
-    const loaded = failed + skipped + successful;
+    const { total, failed, successful } = rawResponse._shards;
+    const loaded = failed + successful;
     return { total, loaded, rawResponse };
   };
 

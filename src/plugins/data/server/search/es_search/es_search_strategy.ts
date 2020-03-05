@@ -39,8 +39,8 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.
-      const { total, failed, skipped, successful } = rawResponse._shards;
-      const loaded = failed + skipped + successful;
+      const { total, failed, successful } = rawResponse._shards;
+      const loaded = failed + successful;
       return { total, loaded, rawResponse };
     },
   };
