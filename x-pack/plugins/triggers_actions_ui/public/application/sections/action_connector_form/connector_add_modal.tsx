@@ -65,14 +65,10 @@ export const ConnectorAddModal = ({
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   const closeModal = useCallback(() => {
     setAddModalVisibility(false);
     setConnector(initialConnector);
-    setServerError(null);
   }, [initialConnector, setAddModalVisibility]);
 
   if (!addModalVisible) {
@@ -104,7 +100,19 @@ export const ConnectorAddModal = ({
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        if (toastNotifications) {
+          toastNotifications.addDanger(
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addModalConnectorForm.createErrorNotificationText',
+              {
+                defaultMessage: 'Failed to create connector: {message}',
+                values: {
+                  message: errorRes.body?.message ?? '',
+                },
+              }
+            )
+          );
+        }
         return undefined;
       });
 
@@ -152,7 +160,6 @@ export const ConnectorAddModal = ({
             connector={connector}
             actionTypeName={actionType.name}
             dispatch={dispatch}
-            serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
           />

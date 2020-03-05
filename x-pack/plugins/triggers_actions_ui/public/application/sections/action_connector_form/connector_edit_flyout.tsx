@@ -45,9 +45,6 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!editFlyoutVisible) {
     return null;
@@ -77,7 +74,17 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        toastNotifications.addDanger(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
+            {
+              defaultMessage: 'Failed to update connector: {message}',
+              values: {
+                message: errorRes.body?.message ?? '',
+              },
+            }
+          )
+        );
         return undefined;
       });
 
@@ -116,7 +123,6 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
       <EuiFlyoutBody>
         <ActionConnectorForm
           connector={connector}
-          serverError={serverError}
           errors={errors}
           actionTypeName={connector.actionType}
           dispatch={dispatch}

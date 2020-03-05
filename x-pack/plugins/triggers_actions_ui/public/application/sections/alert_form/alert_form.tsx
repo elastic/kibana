@@ -83,9 +83,6 @@ interface AlertFormProps {
   alert: Alert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
-  serverError: {
-    body: { message: string; error: string };
-  } | null;
   canChangeTrigger?: boolean; // to hide Change trigger button
 }
 
@@ -94,13 +91,7 @@ interface ActiveActionConnectorState {
   index: number;
 }
 
-export const AlertForm = ({
-  alert,
-  canChangeTrigger = true,
-  dispatch,
-  errors,
-  serverError,
-}: AlertFormProps) => {
+export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
@@ -701,7 +692,7 @@ export const AlertForm = ({
   );
 
   return (
-    <EuiForm isInvalid={serverError !== null} error={serverError?.body.message}>
+    <EuiForm>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFormRow
@@ -718,6 +709,7 @@ export const AlertForm = ({
           >
             <EuiFieldText
               fullWidth
+              autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
               compressed
               name="name"

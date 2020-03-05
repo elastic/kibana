@@ -114,12 +114,7 @@ describe('alert_form', () => {
                 uiSettings: deps.uiSettings,
               }}
             >
-              <AlertForm
-                alert={initialAlert}
-                dispatch={() => {}}
-                errors={{ name: [] }}
-                serverError={null}
-              />
+              <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
             </AlertsContextProvider>
           );
         }
@@ -188,12 +183,7 @@ describe('alert_form', () => {
                 uiSettings: deps.uiSettings,
               }}
             >
-              <AlertForm
-                alert={initialAlert}
-                dispatch={() => {}}
-                errors={{ name: [] }}
-                serverError={null}
-              />
+              <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
             </AlertsContextProvider>
           );
         }
