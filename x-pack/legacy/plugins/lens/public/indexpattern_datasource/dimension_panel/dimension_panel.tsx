@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -15,7 +15,6 @@ import {
   DatasourceDimensionDropHandlerProps,
 } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-// import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor, PopoverTrigger } from './popover_editor';
@@ -53,44 +52,44 @@ type Props = Pick<
   DatasourceDimensionDropProps<IndexPatternPrivateState>,
   'layerId' | 'columnId' | 'state' | 'filterOperations'
 >;
-const getOperationFieldSupportMatrix = _.memoize(
-  (props: Props): OperationFieldSupportMatrix => {
-    const layerId = props.layerId;
-    const currentIndexPattern =
-      props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
+const getOperationFieldSupportMatrix = /* _.memoize( */ (
+  props: Props
+): OperationFieldSupportMatrix => {
+  const layerId = props.layerId;
+  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
-    const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
-      currentIndexPattern
-    ).filter(operation => props.filterOperations(operation.operationMetaData));
+  const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
+    currentIndexPattern
+  ).filter(operation => props.filterOperations(operation.operationMetaData));
 
-    const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
-    const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
+  const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+  const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
-    filteredOperationsByMetadata.forEach(({ operations }) => {
-      operations.forEach(operation => {
-        if (supportedOperationsByField[operation.field]) {
-          supportedOperationsByField[operation.field]!.push(operation.operationType);
-        } else {
-          supportedOperationsByField[operation.field] = [operation.operationType];
-        }
+  filteredOperationsByMetadata.forEach(({ operations }) => {
+    operations.forEach(operation => {
+      if (supportedOperationsByField[operation.field]) {
+        supportedOperationsByField[operation.field]!.push(operation.operationType);
+      } else {
+        supportedOperationsByField[operation.field] = [operation.operationType];
+      }
 
-        if (supportedFieldsByOperation[operation.operationType]) {
-          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-        } else {
-          supportedFieldsByOperation[operation.operationType] = [operation.field];
-        }
-      });
+      if (supportedFieldsByOperation[operation.operationType]) {
+        supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+      } else {
+        supportedFieldsByOperation[operation.operationType] = [operation.field];
+      }
     });
-    return {
-      operationByField: _.mapValues(supportedOperationsByField, _.uniq),
-      fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
-    };
-  },
+  });
+  return {
+    operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+    fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
+  };
+}; /* ,
 
   (props: Props) => {
     return props.layerId + ' ' + props.columnId;
   }
-);
+);*/
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);

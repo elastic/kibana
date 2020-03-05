@@ -366,6 +366,7 @@ export interface FrameDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+
   onRemove?: (accessor: string) => void;
 
   // Some dimension editors will allow users to change the operation grouping

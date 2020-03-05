@@ -123,7 +123,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": "aaa",
+          "splitAccessor": undefined,
           "x": "date",
           "y": Array [
             "bytes",
@@ -472,17 +472,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "seriesType": "bar_stacked",
-                            "splitAccessor": "ddd",
-                            "x": "quantity",
-                            "y": Array [
-                              "price",
-                            ],
-                          },
-                        ]
-                `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": undefined,
+          "x": "quantity",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles ip', () => {
@@ -509,17 +509,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "bar_stacked",
-                "splitAccessor": "ddd",
-                "x": "myip",
-                "y": Array [
-                  "quantity",
-                ],
-              },
-            ]
-        `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": undefined,
+          "x": "myip",
+          "y": Array [
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -545,16 +545,16 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "bar_stacked",
-                      "splitAccessor": "eee",
-                      "x": "mybool",
-                      "y": Array [
-                        "num votes",
-                      ],
-                    },
-                  ]
-            `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": undefined,
+          "x": "mybool",
+          "y": Array [
+            "num votes",
+          ],
+        },
+      ]
+    `);
   });
 });
