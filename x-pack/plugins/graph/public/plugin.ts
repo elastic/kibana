@@ -25,11 +25,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { ConfigSchema } from '../config';
 
 import './index.scss';
-// import '../../../../src/legacy/ui/public/styles/_styling_constants.scss';
-import '../../../../src/legacy/ui/public/styles/_legacy/_index.scss';
 
 export interface GraphPluginSetupDependencies {
-  graph: GraphSetup;
   licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
 }
@@ -40,7 +37,7 @@ export interface GraphPluginStartDependencies {
 }
 
 export class GraphPlugin
-  implements Plugin<{ config: Readonly<ConfigSchema> }, void, {}, GraphPluginStartDependencies> {
+  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
   private licensing: LicensingPluginSetup | null = null;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -73,7 +70,6 @@ export class GraphPlugin
       title: 'Graph',
       order: 9000,
       appRoute: '/app/graph',
-      icon: 'plugins/graph/icon.png',
       euiIconType: 'graphApp',
       category: DEFAULT_APP_CATEGORIES.analyze,
       mount: async (params: AppMountParameters) => {
@@ -102,16 +98,6 @@ export class GraphPlugin
         });
       },
     });
-
-    return {
-      /**
-       * The configuration is temporarily exposed to allow the legacy graph plugin to consume
-       * the setting. Once the graph plugin is migrated completely, this will become an implementation
-       * detail.
-       * @deprecated
-       */
-      config,
-    };
   }
 
   start(core: CoreStart) {
@@ -125,5 +111,3 @@ export class GraphPlugin
 
   stop() {}
 }
-
-export type GraphSetup = ReturnType<GraphPlugin['setup']>;

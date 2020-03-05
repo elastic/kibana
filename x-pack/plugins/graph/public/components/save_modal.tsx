@@ -46,6 +46,7 @@ export function SaveModal({
       objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
         defaultMessage: 'graph',
       })}
+      showDescription={false}
       options={
         <>
           <EuiFormRow

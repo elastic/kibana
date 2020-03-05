@@ -22,20 +22,20 @@ import {
   IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
+// @ts-ignore
+import { initGraphApp } from './app';
+import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { LicensingPluginSetup } from '../../licensing/public';
+import { checkLicense } from '../common/check_license';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
+import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   addAppRedirectMessageToUrl,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../src/plugins/kibana_legacy/public';
-import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-// @ts-ignore
-import { initGraphApp } from './app';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { checkLicense } from '../common/check_license';
-import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
