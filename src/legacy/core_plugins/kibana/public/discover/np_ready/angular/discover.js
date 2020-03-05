@@ -31,8 +31,7 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../../plugins/saved_objects/public';
-import { getSortArray } from './doc_table/lib/get_sort';
-import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
+import { getSortArray, getSortForSearchSource } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 
 import indexTemplate from './discover.html';
