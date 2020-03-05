@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as ossVisualRegressionServices } from '../../../test/visual_regression/services';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }) {
+import { services } from './services';
+
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
@@ -19,10 +21,7 @@ export default async function({ readConfigFile }) {
       require.resolve('./tests/infra'),
     ],
 
-    services: {
-      ...functionalConfig.get('services'),
-      visualTesting: ossVisualRegressionServices.visualTesting,
-    },
+    services,
 
     junit: {
       reportName: 'X-Pack Visual Regression Tests',
