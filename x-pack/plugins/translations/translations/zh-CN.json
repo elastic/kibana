@@ -12670,7 +12670,6 @@
     "xpack.uptime.locationName.helpLinkAnnotation": "添加位置",
     "xpack.uptime.monitorCharts.durationChart.bottomAxis.title": "鏃堕棿鎴",
     "xpack.uptime.monitorCharts.durationChart.leftAxis.title": "持续时间 (ms)",
-    "xpack.uptime.monitorCharts.loadingMessage": "正在加载……",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间（毫秒）",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
     "xpack.uptime.monitorList.expandDrawerButton.ariaLabel": "展开 ID {id} 的监测行",
