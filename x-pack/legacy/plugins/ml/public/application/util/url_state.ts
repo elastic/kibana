@@ -38,7 +38,7 @@ export function getUrlState(search: string): Dictionary<any> {
   try {
     Object.keys(parsedQueryString).forEach(a => {
       if (isRisonSerializationRequired(a)) {
-        urlState[a] = decode(parsedQueryString[a]);
+        urlState[a] = decode(parsedQueryString[a] as string);
       } else {
         urlState[a] = parsedQueryString[a];
       }

@@ -31,7 +31,7 @@ export const jobTypeRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search.substring(1));
   const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>

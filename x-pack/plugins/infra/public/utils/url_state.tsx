@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify, ParsedUrlQuery } from 'querystring';
+import { parse } from 'querystring';
 import { History, Location } from 'history';
 import { throttle } from 'lodash';
 import React from 'react';

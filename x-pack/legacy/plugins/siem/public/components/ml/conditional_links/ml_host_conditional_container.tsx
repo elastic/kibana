@@ -35,7 +35,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
         const queryStringDecoded = parse(location.search.substring(1));
 
         if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query as string);
         }
         const reEncoded = urlUtils.makeUrlFromQuery(queryStringDecoded);
         return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;

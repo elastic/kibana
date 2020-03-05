@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { stringify } from 'query-string';
+import { stringify } from 'querystring';
 
 import { getApiPath } from '../../lib/helper';
 import { BaseParams } from './types';

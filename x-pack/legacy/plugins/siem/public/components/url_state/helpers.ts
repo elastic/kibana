@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 // eslint-disable-next-line import/no-nodejs-modules
-import { parse, stringify } from 'querystring';
+import { parse } from 'querystring';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 

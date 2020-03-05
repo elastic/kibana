@@ -112,7 +112,7 @@ export const categorizationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search.substring(1));
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,
