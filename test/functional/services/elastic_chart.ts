@@ -51,11 +51,11 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
       return Number(renderingCount);
     }
 
-    public async waitForRenderingCount(dataTestSubj: string, previousCount = 1) {
-      await retry.waitFor(`rendering count to be equal to [${previousCount + 1}]`, async () => {
+    public async waitForRenderingCount(dataTestSubj: string, minimumCount: number) {
+      await retry.waitFor(`rendering count to be equal to [${minimumCount}]`, async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount(dataTestSubj);
         log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
-        return currentRenderingCount === previousCount + 1;
+        return currentRenderingCount >= minimumCount;
       });
     }
   }
