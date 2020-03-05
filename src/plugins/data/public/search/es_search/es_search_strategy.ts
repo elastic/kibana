@@ -30,14 +30,13 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
   const { search } = syncStrategyProvider(context);
   return {
     search: (request, options) => {
-      const params = {
+      request.params = {
         preference: getEsPreference(context.core.uiSettings),
         ...request.params,
       };
-      return search(
-        { ...request, params, serverStrategy: ES_SEARCH_STRATEGY },
-        options
-      ) as Observable<IEsSearchResponse>;
+      return search({ ...request, serverStrategy: ES_SEARCH_STRATEGY }, options) as Observable<
+        IEsSearchResponse
+      >;
     },
   };
 };

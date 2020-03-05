@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+
 export { SharePluginSetup, SharePluginStart } from './plugin';
 export {
   ShareContext,
@@ -25,6 +27,15 @@ export {
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
 } from './types';
+
+export {
+  UrlGeneratorId,
+  UrlGeneratorState,
+  UrlGeneratorsDefinition,
+  UrlGeneratorContract,
+  UrlGeneratorsService,
+} from './url_generators';
+
 import { SharePlugin } from './plugin';
 
 export const plugin = () => new SharePlugin();

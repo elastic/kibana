@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchRequest } from '../../../../../src/plugins/data/common/search/es_search';
+import { SearchParams } from 'elasticsearch';
+import { IEsSearchRequest } from '../../../../../src/plugins/data/common';
+
+export interface EnhancedSearchParams extends SearchParams {
+  ignoreThrottled: boolean;
+}
 
 export interface IEnhancedEsSearchRequest extends IEsSearchRequest {
   /**
