@@ -16,13 +16,3 @@ export class ToasterError extends Error {
 
 export const isToasterError = (error: unknown): error is ToasterError =>
   error instanceof ToasterError;
-
-export interface KibanaApiError {
-  body: {
-    message: string;
-    status_code: number;
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isApiError = (error: any): error is KibanaApiError => error?.body?.message;

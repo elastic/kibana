@@ -8,7 +8,8 @@ import uuid from 'uuid';
 import { isError } from 'lodash/fp';
 
 import { AppToast, ActionToaster } from './';
-import { isToasterError, isApiError } from './errors';
+import { isToasterError } from './errors';
+import { isApiError } from '../../utils/api';
 
 /**
  * Displays an error toast for the provided title and message

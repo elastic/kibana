@@ -13,10 +13,8 @@ import {
 } from '../../../../common/constants';
 import {
   BasicSignals,
-  PostSignalError,
   Privilege,
   QuerySignals,
-  SignalIndexError,
   SignalSearchResponse,
   SignalsIndex,
   UpdateSignalStatusProps,
@@ -73,17 +71,10 @@ export const updateSignalStatus = async ({
  * @throws An error if response is not OK
  */
 export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
-  try {
-    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
-      method: 'GET',
-      signal,
-    });
-  } catch (e) {
-    if (e.body) {
-      throw new SignalIndexError(e.body);
-    }
-    throw e;
-  }
+  return KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    method: 'GET',
+    signal,
+  });
 };
 
 /**
@@ -108,15 +99,8 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
  * @throws An error if response is not OK
  */
 export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
-  try {
-    return await KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
-      method: 'POST',
-      signal,
-    });
-  } catch (e) {
-    if (e.body) {
-      throw new PostSignalError(e.body);
-    }
-    throw e;
-  }
+  return KibanaServices.get().http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    method: 'POST',
+    signal,
+  });
 };

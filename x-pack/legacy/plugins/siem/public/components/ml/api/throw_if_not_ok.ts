@@ -9,8 +9,6 @@ import { ToasterError } from '../../toasters';
 import { SetupMlResponse } from '../../ml_popover/types';
 import { isMlStartJobError } from './errors';
 
-export { MessageBody, parseJsonFromBody } from '../../../utils/api';
-
 export const tryParseResponse = (response: string): string => {
   try {
     return JSON.stringify(JSON.parse(response), null, 2);

@@ -10,8 +10,6 @@ import { ToasterError } from '../../toasters';
 import { SetupMlResponse } from '../../ml_popover/types';
 import { isMlStartJobError } from './errors';
 import {
-  MessageBody,
-  parseJsonFromBody,
   throwIfErrorAttached,
   throwIfErrorAttachedToSetup,
   tryParseResponse,
@@ -20,32 +18,6 @@ import {
 describe('throw_if_not_ok', () => {
   afterEach(() => {
     fetchMock.reset();
-  });
-
-  describe('#parseJsonFromBody', () => {
-    test('parses a json from the body correctly', async () => {
-      fetchMock.mock('http://example.com', {
-        status: 500,
-        body: {
-          error: 'some error',
-          statusCode: 500,
-          message: 'I am a custom message',
-        },
-      });
-      const response = await fetch('http://example.com');
-      const expected: MessageBody = {
-        error: 'some error',
-        statusCode: 500,
-        message: 'I am a custom message',
-      };
-      await expect(parseJsonFromBody(response)).resolves.toEqual(expected);
-    });
-
-    test('returns null if the body does not exist', async () => {
-      fetchMock.mock('http://example.com', { status: 500, body: 'some text' });
-      const response = await fetch('http://example.com');
-      await expect(parseJsonFromBody(response)).resolves.toEqual(null);
-    });
   });
 
   describe('#tryParseResponse', () => {

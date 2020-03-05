@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as i18n from '../translations';
 import { StartServices } from '../../plugin';
-import { parseJsonFromBody } from '../../components/ml/api/throw_if_not_ok';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
-import { ToasterError } from '../../components/toasters';
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API
