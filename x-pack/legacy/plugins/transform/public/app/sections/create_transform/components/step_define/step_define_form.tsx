@@ -26,6 +26,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
 import { useDocumentationLinks, useToastNotifications } from '../../../../app_dependencies';
 import { TransformPivotConfig } from '../../../../common';
@@ -37,12 +38,6 @@ import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
 import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
-
-import {
-  useKibanaContext,
-  InitializedKibanaContextValue,
-  SavedSearchQuery,
-} from '../../../../lib/kibana';
 
 import {
   getPivotQuery,
@@ -78,18 +73,14 @@ export interface StepDefineExposedState {
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultStepDefineState(
-  kibanaContext: InitializedKibanaContextValue
-): StepDefineExposedState {
+export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
-    searchString:
-      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
-    searchQuery:
-      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
+    searchString: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
+    searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
   };
@@ -242,14 +233,14 @@ export function getAggNameConflictToastMessages(
 interface Props {
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
+  searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useKibanaContext();
+export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange, searchItems }) => {
   const toastNotifications = useToastNotifications();
   const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
-  const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
+  const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
 
   // The search filter
   const [searchString, setSearchString] = useState(defaults.searchString);
@@ -267,7 +258,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
 
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const { indexPattern } = searchItems;
 
   const {
     groupByOptions,
@@ -568,7 +559,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       <EuiFlexItem grow={false} className="transform__stepDefineFormLeftColumn">
         <div data-test-subj="transformStepDefineForm">
           <EuiForm>
-            {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
+            {searchItems.savedSearch === undefined && typeof searchString === 'string' && (
               <Fragment>
                 <EuiFormRow
                   label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
@@ -669,7 +660,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 </EuiFormRow>
               </Fragment>
             )}
-            {kibanaContext.currentSavedSearch === undefined && (
+            {searchItems.savedSearch === undefined && (
               <EuiFormRow>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem>
@@ -720,16 +711,15 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 </EuiFlexGroup>
               </EuiFormRow>
             )}
-            {kibanaContext.currentSavedSearch !== undefined &&
-              kibanaContext.currentSavedSearch.id !== undefined && (
-                <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-                    defaultMessage: 'Saved search',
-                  })}
-                >
-                  <span>{kibanaContext.currentSavedSearch.title}</span>
-                </EuiFormRow>
-              )}
+            {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })}
+              >
+                <span>{searchItems.savedSearch.title}</span>
+              </EuiFormRow>
+            )}
 
             {!isAdvancedPivotEditorEnabled && (
               <Fragment>
@@ -903,9 +893,14 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
-        <SourceIndexPreview query={pivotQuery} />
+        <SourceIndexPreview indexPattern={searchItems.indexPattern} query={pivotQuery} />
         <EuiHorizontalRule />
-        <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
+        <PivotPreview
+          aggs={aggList}
+          groupBy={groupByList}
+          indexPattern={searchItems.indexPattern}
+          query={pivotQuery}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

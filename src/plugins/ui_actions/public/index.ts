@@ -29,4 +29,5 @@ export { UiActionsServiceParams, UiActionsService } from './service';
 export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext } from './triggers';
-export { TriggerContextMapping, TriggerId } from './types';
+export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
+export { ActionByType } from './actions';
