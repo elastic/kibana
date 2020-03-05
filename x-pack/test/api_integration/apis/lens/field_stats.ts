@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
                 key: 1999,
               },
               {
-                count: 885,
+                count: 886,
                 key: 3998,
               },
               {
@@ -141,6 +141,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 count: 5,
+                key: 5846,
+              },
+              {
+                count: 5,
                 key: 6497,
               },
               {
@@ -158,10 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
               {
                 count: 4,
                 key: 4669,
-              },
-              {
-                count: 4,
-                key: 5846,
               },
               {
                 count: 4,
