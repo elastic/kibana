@@ -33,29 +33,28 @@ const regexes = {
   folderStructureIncluded: /live_cc_app\/coverage_data/,
   endsInDotHtml: /.html$/,
 };
-const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
+const env = {
+  BUILD_ID: 407,
+  CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
+  STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
+  TIME_STAMP: '2020-03-02T21:11:47Z',
+  ES_HOST: 'https://super:changeme@some.fake.host:9243',
+  NODE_ENV: 'integration_test',
+};
 const expectAllRegexesToPass = regexes => urlLine =>
   Object.entries(regexes)
     .forEach(regexTuple => {
       if (!regexTuple[1].test(urlLine))
         throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`)
     });
-const splitByNewLine = x => x.split('\n');
+const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
 const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate)
+const splitByNewLine = x => x.split('\n');
 const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 
 describe('Ingesting Coverage to Cluster', () => {
   const chunks = [];
-
-  const env = {
-    BUILD_ID: 407,
-    CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
-    STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
-    TIME_STAMP: '2020-03-02T21:11:47Z',
-    ES_HOST: 'https://super:changeme@some.fake.host:9243',
-    NODE_ENV: 'integration_test',
-  };
 
   beforeAll(done => {
     const coverageSummaryPath = resolve(MOCKS_DIR, 'jest-combined/coverage-summary-NO-total.json');
@@ -80,9 +79,15 @@ describe('Ingesting Coverage to Cluster', () => {
     const combinedMsg = 'combined';
 
     const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
-    it.skip(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
-      console.log(`\n### chunks: \n\t${chunks}`);
-      // expect(chunks.every(x => !x.includes('Actually sending...'))).to.be(true);
+    it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
+      const includesDistroPredicate = x => x.includes('distro');
+      const distroLines = specificLinesOnly(includesDistroPredicate);
+      const distroLinesSplitByNewLine = distroLines(splitByNewLine);
+      const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
+
+      distroLinesSplitByNewLineWithoutBlanks(chunks)
+        .filter(includesDistroPredicate)
+        .forEach(x => expect(x).to.contain(combinedMsg));
     });
   });
   describe('with NODE_ENV set to "integration_test"', () => {
