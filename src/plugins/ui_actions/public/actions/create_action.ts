@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Action } from './action';
+import { ActionByType } from './action';
+import { ActionType } from '../types';
+import { ActionDefinition } from './action_definition';
 
-export function createAction<Context = undefined>(
-  action: { type: string; execute: Action<Context>['execute'] } & Partial<Action<Context>>
-): Action<Context> {
+export function createAction<T extends ActionType>(action: ActionDefinition<T>): ActionByType<T> {
   return {
     getIconType: () => undefined,
     order: 0,
