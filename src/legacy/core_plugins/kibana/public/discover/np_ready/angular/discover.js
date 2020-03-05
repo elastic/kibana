@@ -190,7 +190,6 @@ function discoverController(
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.timeRangeObj = timefilter.getTime();
-  $scope.refreshInterval = timefilter.getRefreshInterval();
 
   const getTimeField = () => {
     return indexPatternsUtils.isDefault($scope.indexPattern)
@@ -460,7 +459,6 @@ function discoverController(
       inspectSearch,
     ];
   };
-
   $scope.topNavMenu = getTopNavLinks();
 
   $scope.searchSource
@@ -654,13 +652,6 @@ function discoverController(
         subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
           next: () => {
             $scope.updateTime();
-          },
-        })
-      );
-      subscriptions.add(
-        subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-          next: () => {
-            $scope.refreshInterval = timefilter.getRefreshInterval();
           },
         })
       );
