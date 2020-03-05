@@ -85,7 +85,6 @@ function RawJsonParamEditor({
     >
       <>
         <EuiCodeEditor
-          id={`visEditorRawJson${agg.id}`}
           mode="json"
           theme="github"
           width="100%"
@@ -96,7 +95,6 @@ function RawJsonParamEditor({
             fontSize: '14px',
           }}
           onChange={setValue}
-          fullWidth={true}
           onBlur={setTouched}
           aria-label={jsonEditorLabelText}
           aria-describedby="jsonEditorDescription"
