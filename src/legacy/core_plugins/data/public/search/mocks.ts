@@ -17,8 +17,11 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { SearchSetup, SearchStart } from './search_service';
 import { AggTypesRegistrySetup, AggTypesRegistryStart } from './aggs/agg_types_registry';
+import { getCalculateAutoTimeExpression } from './aggs';
 import { AggConfigs } from './aggs/agg_configs';
 import { mockAggTypesRegistry } from './aggs/test_helpers';
 
@@ -41,12 +44,12 @@ const aggTypeConfigMock = () => ({
   params: [aggTypeBaseParamMock()],
 });
 
-export const aggTypesRegistrySetupMock = (): MockedKeys<AggTypesRegistrySetup> => ({
+export const aggTypesRegistrySetupMock = (): AggTypesRegistrySetup => ({
   registerBucket: jest.fn(),
   registerMetric: jest.fn(),
 });
 
-export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> => ({
+export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
   get: jest.fn().mockImplementation(aggTypeConfigMock),
   getBuckets: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
   getMetrics: jest.fn().mockImplementation(() => [aggTypeConfigMock()]),
@@ -56,17 +59,18 @@ export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> =
   })),
 });
 
-export const searchSetupMock = (): MockedKeys<SearchSetup> => ({
+export const searchSetupMock = (): SearchSetup => ({
   aggs: {
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
     types: aggTypesRegistrySetupMock(),
   },
 });
 
-export const searchStartMock = (): MockedKeys<SearchStart> => ({
+export const searchStartMock = (): SearchStart => ({
   aggs: {
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
     createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
       return new AggConfigs(indexPattern, configStates, {
-        schemas,
         typesRegistry: mockAggTypesRegistry(),
       });
     }),
@@ -78,7 +82,6 @@ export const searchStartMock = (): MockedKeys<SearchStart> => ({
       FieldParamType: jest.fn(),
       MetricAggType: jest.fn(),
       parentPipelineAggHelper: jest.fn() as any,
-      setBounds: jest.fn(),
       siblingPipelineAggHelper: jest.fn() as any,
     },
   },

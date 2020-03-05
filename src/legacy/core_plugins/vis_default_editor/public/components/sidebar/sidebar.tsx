@@ -29,8 +29,9 @@ import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { getSchemasByGroup } from '../../schemas';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -57,9 +58,12 @@ function DefaultEditorSideBar({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
+  const metricSchemas = getSchemasByGroup(vis.type.schemas.all || [], AggGroupNames.Metrics).map(
+    s => s.name
+  );
   const metricAggs = useMemo(
-    () => responseAggs.filter(agg => get(agg, 'schema.group') === AggGroupNames.Metrics),
-    [responseAggs]
+    () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
+    [responseAggs, metricSchemas]
   );
   const hasHistogramAgg = useMemo(() => responseAggs.some(agg => agg.type.name === 'histogram'), [
     responseAggs,
