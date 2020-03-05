@@ -12,6 +12,11 @@
   color: $euiColorDarkShade;
 }
 
+.dscSidebarItemExpanded {
+  background-color: #FFF;
+  padding: 2px;
+}
+
 .dscSidebarField {
   padding-bottom: $euiSizeS;
   display: flex;

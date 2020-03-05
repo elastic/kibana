@@ -38,6 +38,12 @@ export function DiscoverField({
   onShowDetails,
 }: Props) {
   const [showDetails, setShowDetails] = useState(false);
+  const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
+    defaultMessage: 'Add to selected fields',
+  });
+  const removeLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
+    defaultMessage: 'Remove from selected fields',
+  });
 
   const toggleDisplay = (f: Field) => {
     if (f.display) {
@@ -48,12 +54,8 @@ export function DiscoverField({
   };
 
   return (
-    <>
-      <div
-        className={`dscSidebarField sidebar-item-title dscSidebarItem ${
-          showDetails ? 'dscSidebarItemExpanded' : ''
-        }`}
-      >
+    <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>
+      <div className="dscSidebarField sidebar-item-title dscSidebarItem">
         <span className="dscSidebarField__fieldIcon">
           <FieldIcon type={field.type} label={field.name} />
         </span>
@@ -65,6 +67,7 @@ export function DiscoverField({
             anchorClassName="eui-textTruncate"
           >
             <EuiButtonEmpty
+              color="text"
               size="xs"
               data-test-subj={`field-${field.name}`}
               onClick={() => setShowDetails(!showDetails)}
@@ -77,35 +80,32 @@ export function DiscoverField({
         </span>
         <span className="dscSidebarField__infoIcon">
           {field.name !== '_source' && !field.display && (
-            <EuiButtonIcon
-              className="dscSidebarItem__action"
-              iconType="plusInCircleFilled"
-              onClick={() => toggleDisplay(field)}
-              data-test-subj={`fieldToggle-${field.name}`}
-              aria-label={i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
-                defaultMessage: 'add',
-              })}
-            />
+            <EuiToolTip position="top" content={addLabel}>
+              <EuiButtonIcon
+                className="dscSidebarItem__action"
+                iconType="plusInCircleFilled"
+                onClick={() => toggleDisplay(field)}
+                data-test-subj={`fieldToggle-${field.name}`}
+                aria-label={addLabel}
+              />
+            </EuiToolTip>
           )}
           {field.name !== '_source' && field.display && (
-            <EuiButtonIcon
-              className="dscSidebarItem__action"
-              iconType="minusInCircleFilled"
-              onClick={() => toggleDisplay(field)}
-              data-test-subj={`fieldToggle-${field.name}`}
-              aria-label={i18n.translate(
-                'kbn.discover.fieldChooser.discoverField.removeButtonLabel',
-                {
-                  defaultMessage: 'remove',
-                }
-              )}
-            />
+            <EuiToolTip position="top" content={removeLabel}>
+              <EuiButtonIcon
+                className="dscSidebarItem__action"
+                iconType="minusInCircleFilled"
+                onClick={() => toggleDisplay(field)}
+                data-test-subj={`fieldToggle-${field.name}`}
+                aria-label={removeLabel}
+              />
+            </EuiToolTip>
           )}
         </span>
       </div>
       {showDetails && onShowDetails(field) && (
         <DiscoverFieldDetails field={field} onAddFilter={onAddFilter} />
       )}
-    </>
+    </div>
   );
 }

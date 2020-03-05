@@ -12,7 +12,7 @@
 
     query="state.query"
     on-query-submit="updateQuery"
-	
+
     show-save-query="showSaveQuery"
     saved-query-id="state.savedQuery"
     on-saved-query-id-change="updateSavedQueryId"
@@ -23,7 +23,7 @@
 
   <main class="container-fluid">
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
+      <div class="col-md-3 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <div class="dscFieldChooser">
           <disc-field-chooser
             columns="state.columns"
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <div class="dscWrapper col-md-10">
+      <div class="dscWrapper col-md-9">
         <discover-unsupported-index-pattern
           ng-if="isUnsupportedIndexPattern"
           unsupported-type="unsupportedIndexPatternType"
