@@ -32,19 +32,23 @@ describe('<FormDrilldownWizard>', () => {
     test('can set initial name input field value', () => {
       const div = document.createElement('div');
 
-      render(<FormDrilldownWizard initialName={'foo'} />, div);
+      render(<FormDrilldownWizard name={'foo'} />, div);
 
       const input = div.querySelector(
         '[data-test-subj="dynamicActionNameInput"]'
       ) as HTMLInputElement;
 
       expect(input?.value).toBe('foo');
+
+      render(<FormDrilldownWizard name={'bar'} />, div);
+
+      expect(input?.value).toBe('bar');
     });
 
     test('fires onNameChange callback on name change', () => {
       const onNameChange = jest.fn();
       const utils = renderTestingLibrary(
-        <FormDrilldownWizard initialName={''} onNameChange={onNameChange} />
+        <FormDrilldownWizard name={''} onNameChange={onNameChange} />
       );
       const input = utils.getByLabelText(txtNameOfDrilldown);
 

@@ -17,85 +17,65 @@ import {
 } from './i18n';
 import { FlyoutCreateDrilldownActionContext } from '../../actions';
 import { ActionFactory, ActionFactoryBaseConfig } from '../../../../advanced_ui_actions/public';
+import {
+  dashboardDrilldownActionFactory,
+  urlDrilldownActionFactory,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
-export interface DrilldownWizardConfig {
+export interface DrilldownWizardConfig<
+  ActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
+> {
   name: string;
-  actionConfig: {
-    actionFactory: ActionFactory;
-    config: ActionFactoryBaseConfig;
-  };
+  actionFactory?: ActionFactory<ActionFactoryConfig>;
+  actionConfig?: ActionFactoryConfig;
 }
 
-/**
- * Represent current wizard's form state in invalid or incomplete shape
- */
-export interface PartialDrilldownWizardConfig {
-  name: string;
-  actionConfig: {
-    actionFactory: ActionFactory | null;
-    config: ActionFactoryBaseConfig | null;
-  };
-}
-
-export interface FlyoutDrilldownWizardProps {
+export interface FlyoutDrilldownWizardProps<
+  CurrentActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
+> {
   context: FlyoutCreateDrilldownActionContext;
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
   onDelete?: () => void;
   onClose?: () => void;
 
   mode?: 'create' | 'edit';
-  initialDrilldownWizardConfig?: DrilldownWizardConfig;
+  initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionFactoryConfig>;
 }
 
-export const FlyoutDrilldownWizard: React.FC<FlyoutDrilldownWizardProps> = ({
+export function FlyoutDrilldownWizard<
+  CurrentActionFactoryConfig extends ActionFactoryBaseConfig = ActionFactoryBaseConfig
+>({
   context,
   onClose,
   onSubmit = () => {},
   initialDrilldownWizardConfig,
   mode = 'create',
   onDelete = () => {},
-}) => {
-  const [wizardConfig, setWizardConfig] = useState<
-    DrilldownWizardConfig | PartialDrilldownWizardConfig
-  >(
+}: FlyoutDrilldownWizardProps<CurrentActionFactoryConfig>) {
+  const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
       initialDrilldownWizardConfig ?? {
         name: '',
-        actionConfig: {
-          actionFactory: null,
-          config: null,
-        },
       }
   );
 
-  const isFormValid = (
-    currentWizardConfig: PartialDrilldownWizardConfig | DrilldownWizardConfig
-  ): currentWizardConfig is DrilldownWizardConfig => {
-    if (!currentWizardConfig.name) {
-      // name is required
-      return false;
-    }
+  const isActionValid = (): boolean => {
+    if (!wizardConfig.actionFactory) return false;
+    if (!wizardConfig.actionConfig) return false;
 
-    if (
-      !currentWizardConfig.actionConfig.actionFactory ||
-      !currentWizardConfig.actionConfig.config
-    ) {
-      // action factory has to be selected and config has to be present
-      return false;
-    }
-
-    return true;
+    return wizardConfig.actionFactory.isValid(wizardConfig.name, wizardConfig.actionConfig);
   };
 
   const footer = (
     <EuiButton
       onClick={() => {
-        if (isFormValid(wizardConfig)) {
+        if (isActionValid()) {
           onSubmit(wizardConfig);
         }
       }}
       fill
-      isDisabled={!isFormValid(wizardConfig)}
+      isDisabled={!isActionValid()}
     >
       {mode === 'edit' ? txtEditDrilldownButtonLabel : txtCreateDrilldownButtonLabel}
     </EuiButton>
@@ -108,23 +88,37 @@ export const FlyoutDrilldownWizard: React.FC<FlyoutDrilldownWizardProps> = ({
       onClose={onClose}
     >
       <FormDrilldownWizard
-        initialName={wizardConfig.name}
+        name={wizardConfig.name}
         onNameChange={newName => {
           setWizardConfig({
             ...wizardConfig,
             name: newName,
           });
         }}
-        initialActionConfig={wizardConfig.actionConfig}
-        onActionConfigChange={(actionFactory, config) => {
+        actionConfig={wizardConfig.actionConfig}
+        onActionConfigChange={newActionConfig => {
           setWizardConfig({
             ...wizardConfig,
-            actionConfig: {
-              actionFactory,
-              config,
-            },
+            actionConfig: newActionConfig,
           });
         }}
+        currentActionFactory={wizardConfig.actionFactory}
+        onActionFactoryChange={actionFactory => {
+          if (!actionFactory) {
+            setWizardConfig({
+              ...wizardConfig,
+              actionFactory: undefined,
+              actionConfig: undefined,
+            });
+          } else {
+            setWizardConfig({
+              ...wizardConfig,
+              actionFactory,
+              actionConfig: actionFactory.createConfig(),
+            });
+          }
+        }}
+        actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]}
       />
       {mode === 'edit' && (
         <>
@@ -136,4 +130,4 @@ export const FlyoutDrilldownWizard: React.FC<FlyoutDrilldownWizardProps> = ({
       )}
     </FlyoutFrame>
   );
-};
+}

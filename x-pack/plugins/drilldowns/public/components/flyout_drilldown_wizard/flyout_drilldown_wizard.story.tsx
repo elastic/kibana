@@ -11,11 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { UrlDrilldownActionFactory } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
-import {
-  ActionFactoryBaseConfig,
-  ActionFactory,
-} from '../../../../../../src/plugins/ui_actions/public/';
+import { urlDrilldownActionFactory } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
@@ -36,12 +32,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
           onClose={() => {}}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
+            actionFactory: urlDrilldownActionFactory,
             actionConfig: {
-              actionFactory: (UrlDrilldownActionFactory as unknown) as ActionFactory,
-              config: {
-                url: 'https://elastic.co',
-                openInNewTab: true,
-              } as ActionFactoryBaseConfig,
+              url: 'https://elastic.co',
+              openInNewTab: true,
             },
           }}
           mode={'edit'}

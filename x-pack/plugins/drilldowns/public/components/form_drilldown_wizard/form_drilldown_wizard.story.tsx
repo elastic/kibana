@@ -13,7 +13,7 @@ const DemoEditName: React.FC = () => {
 
   return (
     <>
-      <FormDrilldownWizard initialName={name} onNameChange={setName} /> <div>name: {name}</div>
+      <FormDrilldownWizard name={name} onNameChange={setName} /> <div>name: {name}</div>
     </>
   );
 };
@@ -23,6 +23,6 @@ storiesOf('components/FormDrilldownWizard', module)
     return <FormDrilldownWizard />;
   })
   .add('[name=foobar]', () => {
-    return <FormDrilldownWizard initialName={'foobar'} />;
+    return <FormDrilldownWizard name={'foobar'} />;
   })
   .add('can edit name', () => <DemoEditName />);

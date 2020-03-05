@@ -4,57 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import './form_drilldown_wizard.scss';
-import { EuiForm, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { txtNameOfDrilldown, txtUntitledDrilldown, txtDrilldownAction } from './i18n';
+import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
-  ActionWizard,
   ActionFactory,
   ActionFactoryBaseConfig,
+  ActionWizard,
 } from '../../../../advanced_ui_actions/public';
-
 // TODO: this should be actual input to the component and should not be using test data
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_FACTORIES } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
 const noop = () => {};
 
 export interface FormDrilldownWizardProps {
-  /**
-   * Initial name - to be used during editing flow
-   */
-  initialName?: string;
-
+  name?: string;
   onNameChange?: (name: string) => void;
 
-  /**
-   * Initial action config - to be used during edit flow
-   */
-  initialActionConfig?: {
-    actionFactory: ActionFactory | null;
-    config: ActionFactoryBaseConfig | null;
-  };
+  currentActionFactory?: ActionFactory;
+  onActionFactoryChange?: (actionFactory: ActionFactory | null) => void;
 
-  /**
-   * onActionConfigChange - Action's configuration changed
-   * @param actionFactory - currently selected action factory. Null if non is selected
-   * @param config - current corresponding config. Null if current config is invalid or incomplete
-   */
-  onActionConfigChange?: (
-    actionFactory: ActionFactory | null,
-    config: ActionFactoryBaseConfig | null
-  ) => void;
+  actionConfig?: ActionFactoryBaseConfig;
+  onActionConfigChange?: (config: ActionFactoryBaseConfig) => void;
+
+  actionFactories?: Array<ActionFactory<any>>;
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
-  initialName = '',
-  initialActionConfig = { actionFactory: null, config: null },
+  name = '',
+  actionConfig,
+  currentActionFactory,
   onNameChange = noop,
   onActionConfigChange = noop,
+  onActionFactoryChange = noop,
+  actionFactories = [],
 }) => {
-  const [name, setName] = useState(initialName);
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">
       <EuiFieldText
@@ -62,11 +48,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         placeholder={txtUntitledDrilldown}
         value={name}
         disabled={onNameChange === noop}
-        onChange={event => {
-          const newName = event.target.value;
-          onNameChange(newName);
-          setName(newName);
-        }}
+        onChange={event => onNameChange(event.target.value)}
         data-test-subj="dynamicActionNameInput"
       />
     </EuiFormRow>
@@ -79,11 +61,11 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
       className="drdFormDrilldownWizard__formRow"
     >
       <ActionWizard
-        actionFactories={ACTION_FACTORIES}
-        initialActionConfig={initialActionConfig}
-        onChange={(actionFactory, config) => {
-          onActionConfigChange(actionFactory, config);
-        }}
+        actionFactories={actionFactories}
+        currentActionFactory={currentActionFactory}
+        config={actionConfig}
+        onActionFactoryChange={actionFactory => onActionFactoryChange(actionFactory)}
+        onConfigChange={config => onActionConfigChange(config)}
       />
     </EuiFormRow>
   );
