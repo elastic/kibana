@@ -113,24 +113,20 @@ describe('Table Vis - Controller', () => {
     return ({
       type: tableVisTypeDefinition,
       params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
-      aggs: createAggConfigs(
-        stubIndexPattern,
-        [
-          { type: 'count', schema: 'metric' },
-          {
-            type: 'range',
-            schema: 'bucket',
-            params: {
-              field: 'bytes',
-              ranges: [
-                { from: 0, to: 1000 },
-                { from: 1000, to: 2000 },
-              ],
-            },
+      aggs: createAggConfigs(stubIndexPattern, [
+        { type: 'count', schema: 'metric' },
+        {
+          type: 'range',
+          schema: 'bucket',
+          params: {
+            field: 'bytes',
+            ranges: [
+              { from: 0, to: 1000 },
+              { from: 1000, to: 2000 },
+            ],
           },
-        ],
-        tableVisTypeDefinition.editorConfig.schemas.all
-      ),
+        },
+      ]),
     } as unknown) as Vis;
   }
 

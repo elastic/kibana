@@ -117,7 +117,7 @@ export class MlServerPlugin {
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
     systemRoutes(routeInit, {
-      spacesPlugin: plugins.spaces,
+      spaces: plugins.spaces,
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
