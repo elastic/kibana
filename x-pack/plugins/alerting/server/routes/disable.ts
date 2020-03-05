@@ -36,6 +36,9 @@ export const disableAlertRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
       await alertsClient.disable({ id });

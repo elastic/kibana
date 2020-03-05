@@ -17,27 +17,26 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getPivotQuery } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import { useKibanaContext } from '../../../../lib/kibana';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
-
 import { PivotPreview } from './pivot_preview';
+
+import { getPivotQuery } from '../../../../common';
 import { StepDefineExposedState } from './step_define_form';
 
 const defaultSearch = '*';
 const emptySearch = '';
 
-interface Props {
-  formState: StepDefineExposedState;
-  searchItems: SearchItems;
-}
-
-export const StepDefineSummary: FC<Props> = ({
-  formState: { searchString, searchQuery, groupByList, aggList },
-  searchItems,
+export const StepDefineSummary: FC<StepDefineExposedState> = ({
+  searchString,
+  searchQuery,
+  groupByList,
+  aggList,
 }) => {
+  const kibanaContext = useKibanaContext();
+
   const pivotQuery = getPivotQuery(searchQuery);
   let useCodeBlock = false;
   let displaySearch;
@@ -56,8 +55,8 @@ export const StepDefineSummary: FC<Props> = ({
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <div data-test-subj="transformStepDefineSummary">
           <EuiForm>
-            {searchItems.savedSearch !== undefined &&
-              searchItems.savedSearch.id === undefined &&
+            {kibanaContext.currentSavedSearch !== undefined &&
+              kibanaContext.currentSavedSearch.id === undefined &&
               typeof searchString === 'string' && (
                 <Fragment>
                   <EuiFormRow
@@ -65,7 +64,7 @@ export const StepDefineSummary: FC<Props> = ({
                       defaultMessage: 'Index pattern',
                     })}
                   >
-                    <span>{searchItems.indexPattern.title}</span>
+                    <span>{kibanaContext.currentIndexPattern.title}</span>
                   </EuiFormRow>
                   {useCodeBlock === false && displaySearch !== emptySearch && (
                     <EuiFormRow
@@ -100,15 +99,16 @@ export const StepDefineSummary: FC<Props> = ({
                 </Fragment>
               )}
 
-            {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
-                })}
-              >
-                <span>{searchItems.savedSearch.title}</span>
-              </EuiFormRow>
-            )}
+            {kibanaContext.currentSavedSearch !== undefined &&
+              kibanaContext.currentSavedSearch.id !== undefined && (
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
+                    defaultMessage: 'Saved search',
+                  })}
+                >
+                  <span>{kibanaContext.currentSavedSearch.title}</span>
+                </EuiFormRow>
+              )}
 
             <EuiFormRow
               label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
@@ -131,12 +131,7 @@ export const StepDefineSummary: FC<Props> = ({
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview
-            aggs={aggList}
-            groupBy={groupByList}
-            indexPattern={searchItems.indexPattern}
-            query={pivotQuery}
-          />
+          <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
