@@ -12,8 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
-
-import euiStyled from '../../../../../legacy/common/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 import { SuggestionItem } from './suggestion_item';
 

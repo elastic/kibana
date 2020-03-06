@@ -9,8 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { EmbeddablePanel } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EmbeddablePanel } from '../../../../../../src/plugins/embeddable/public';
+import { getSavedObjectFinder } from '../../../../../../src/plugins/saved_objects/public';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
@@ -25,7 +25,6 @@ import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
-import { getSavedObjectFinder } from '../../../../../../src/plugins/saved_objects/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -197,8 +196,8 @@ export const EmbeddedMapComponent = ({
             data-test-subj="embeddable-panel"
             embeddable={embeddable}
             getActions={services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={start.getEmbeddableFactory}
-            getAllEmbeddableFactories={start.getEmbeddableFactories}
+            getEmbeddableFactory={services.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={services.embeddable.getEmbeddableFactories}
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}
