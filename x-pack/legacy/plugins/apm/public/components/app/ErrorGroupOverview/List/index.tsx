@@ -23,6 +23,8 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
@@ -70,6 +72,25 @@ const ErrorGroupList: React.FC<Props> = props => {
             <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
+          );
+        }
+      },
+      {
+        name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+          defaultMessage: 'Type'
+        }),
+        field: 'type',
+        sortable: false,
+        //width: px(unit * 6),
+        render: (type: any, item: ErrorGroupListAPIResponse[0]) => {
+          console.log(type);
+          return (
+            <ErrorOverviewLink
+              serviceName={serviceName}
+              query={{ 'error.exception.type': type }}
+            >
+              {type}
+            </ErrorOverviewLink>
           );
         }
       },
@@ -152,7 +173,7 @@ const ErrorGroupList: React.FC<Props> = props => {
     ],
     [serviceName]
   );
-
+  console.log(items);
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
