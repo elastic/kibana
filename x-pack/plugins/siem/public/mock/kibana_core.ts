@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
-export const createKibanaCoreSetupMock = () => createUiNewPlatformMock().npSetup.core;
-export const createKibanaPluginsSetupMock = () => createUiNewPlatformMock().npSetup.plugins;
-
-export const createKibanaCoreStartMock = () => createUiNewPlatformMock().npStart.core;
-export const createKibanaPluginsStartMock = () => createUiNewPlatformMock().npStart.plugins;
+export const createKibanaCoreStartMock = () => coreMock.createStart();
+export const createKibanaPluginsStartMock = () => ({
+  data: dataPluginMock.createStartContract(),
+});

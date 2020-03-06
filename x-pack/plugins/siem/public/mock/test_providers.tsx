@@ -21,8 +21,6 @@ import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
 
-jest.mock('ui/new_platform');
-
 const state: State = mockGlobalState;
 
 interface Props {

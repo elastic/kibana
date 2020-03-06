@@ -10,8 +10,6 @@ import React from 'react';
 import '../../mock/match_media';
 import { HeaderGlobal } from './index';
 
-jest.mock('ui/new_platform');
-
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar
 jest.mock('../search_bar', () => ({
