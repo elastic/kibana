@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
-import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 import { createPortalNode } from 'react-reverse-portal';
 import {
   mockAPMIndexPattern,
@@ -16,10 +16,9 @@ import {
   mockGlobIndexPattern,
 } from './__mocks__/mock';
 
-jest.mock('ui/new_platform');
+const mockEmbeddable = embeddablePluginMock.createStartContract();
 
-const { npStart } = createUiNewPlatformMock();
-npStart.plugins.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
+mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
   createFromState: () => ({
     reload: jest.fn(),
   }),
@@ -37,7 +36,7 @@ describe('embedded_map_helpers', () => {
         0,
         setQueryMock,
         createPortalNode(),
-        npStart.plugins.embeddable
+        mockEmbeddable
       );
       expect(setQueryMock).toHaveBeenCalledTimes(1);
     });
@@ -52,7 +51,7 @@ describe('embedded_map_helpers', () => {
         0,
         setQueryMock,
         createPortalNode(),
-        npStart.plugins.embeddable
+        mockEmbeddable
       );
       expect(setQueryMock.mock.calls[0][0].refetch).not.toBe(embeddable.reload);
       setQueryMock.mock.results[0].value();
