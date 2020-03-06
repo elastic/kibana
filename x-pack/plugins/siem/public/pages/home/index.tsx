@@ -37,7 +37,7 @@ import { SiemPageName } from './types';
  * we will loose the map embeddable until they move to the New Platform
  * we need to have it
  */
-import 'uiExports/embeddableFactories';
+// import 'uiExports/embeddableFactories';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
