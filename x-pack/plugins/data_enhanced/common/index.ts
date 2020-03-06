@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AGG_TYPE } from '../../../common/constants';
-
-export function isMetricCountable(aggType) {
-  return [AGG_TYPE.COUNT, AGG_TYPE.SUM, AGG_TYPE.UNIQUE_COUNT].includes(aggType);
-}
+export { EnhancedSearchParams, IEnhancedEsSearchRequest } from './search';

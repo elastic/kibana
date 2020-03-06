@@ -54,7 +54,7 @@ export class AbstractVectorSource extends AbstractSource {
    * factory function creating a new field-instance
    * @param fieldName
    * @param label
-   * @returns {ESAggMetricField}
+   * @returns {IField}
    */
   createField() {
     throw new Error(`Should implemement ${this.constructor.type} ${this}`);
@@ -64,7 +64,7 @@ export class AbstractVectorSource extends AbstractSource {
    * Retrieves a field. This may be an existing instance.
    * @param fieldName
    * @param label
-   * @returns {ESAggMetricField}
+   * @returns {IField}
    */
   getFieldByName(name) {
     return this.createField({ fieldName: name });
