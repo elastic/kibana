@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
@@ -48,9 +49,9 @@ export function getTopNavConfig(
           ];
     case ViewMode.EDIT:
       return [
+        getAddConfig(actions[TopNavIds.ADD]),
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-        getAddConfig(actions[TopNavIds.ADD]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
         getShareConfig(actions[TopNavIds.SHARE]),
       ];
@@ -149,15 +150,22 @@ function getCloneConfig(action: NavAction) {
  */
 function getAddConfig(action: NavAction) {
   return {
+    emphasize: true,
+    iconType: 'plusInCircle',
     id: 'add',
+    popOverContents: (
+      <>
+        <h1>Popover Test</h1>
+        <p>todo: new visualization / existing visualization</p>
+      </>
+    ),
     label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
+      defaultMessage: 'Add Panel',
     }),
     description: i18n.translate('kbn.dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add a panel to the dashboard',
     }),
     testId: 'dashboardAddPanelButton',
-    run: action,
   };
 }
 

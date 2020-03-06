@@ -66,7 +66,8 @@ export function TopNavMenu(props: TopNavMenuProps) {
         <EuiFlexGroup
           data-test-subj="top-nav"
           justifyContent="flexStart"
-          gutterSize="none"
+          alignItems="center"
+          gutterSize="xs"
           className="kbnTopNavMenu"
           responsive={false}
         >

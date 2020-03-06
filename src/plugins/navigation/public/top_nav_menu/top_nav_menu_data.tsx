@@ -28,6 +28,9 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string);
+  emphasize?: boolean;
+  iconType?: string;
+  popOverContents?: Element;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

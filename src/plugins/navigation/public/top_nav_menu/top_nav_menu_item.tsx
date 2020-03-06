@@ -18,12 +18,16 @@
  */
 
 import { capitalize, isFunction } from 'lodash';
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
+import { EuiButton } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -36,23 +40,44 @@ export function TopNavMenuItem(props: TopNavMenuData) {
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
-    props.run(e.currentTarget);
+    if (props.popOverContents) {
+      setPopoverOpen(true);
+    } else if (props.run) {
+      props.run(e.currentTarget);
+    }
   }
 
-  const btn = (
-    <EuiButtonEmpty
-      size="xs"
-      isDisabled={isDisabled()}
-      onClick={handleClick}
-      data-test-subj={props.testId}
-      className={props.className}
-    >
+  const commonButtonProps = {
+    isDisabled: isDisabled(),
+    onClick: handleClick,
+    iconType: props.iconType,
+    'data-test-subj': props.testId,
+  };
+
+  const btn = props.emphasize ? (
+    <EuiButton size="s" fill {...commonButtonProps}>
+      {capitalize(props.label || props.id!)}
+    </EuiButton>
+  ) : (
+    <EuiButtonEmpty size="xs" {...commonButtonProps}>
       {capitalize(props.label || props.id!)}
     </EuiButtonEmpty>
   );
 
   const tooltip = getTooltip();
-  if (tooltip) {
+  // TODO: tooltip AND popover...
+  if (props.popOverContents) {
+    return (
+      <EuiPopover
+        id={`${props.id}-popover`}
+        button={btn}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverOpen(false)}
+      >
+        {props.popOverContents}
+      </EuiPopover>
+    );
+  } else if (tooltip) {
     return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
   } else {
     return btn;
