@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -15,7 +15,7 @@ import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
 import { SearchTimelinePopover } from '../../../../components/timeline/search_super_select_insert';
-import { CursorPosition } from '../../../../components/markdown_editor';
+import { useInsertTimeline } from './use_markdown';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -36,33 +36,9 @@ export const AddComment = React.memo<{
     options: { stripEmptyFields: false },
     schema,
   });
-  const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
-    start: 0,
-    end: 0,
-  });
-  const handleOnTimelineChange = useCallback(
-    (title: string, id: string | null) => {
-      const builtLink = `http://localhost:5601/app/siem#/timelines?timeline=(id:${id},isOpen:!t)`;
-
-      const currentComment = form.getFormData().comment;
-      let output: string;
-      if (cursorPosition.start === cursorPosition.end) {
-        const b = `[${title}](${builtLink})`;
-        output = [
-          currentComment.slice(0, cursorPosition.start),
-          b,
-          currentComment.slice(cursorPosition.end),
-        ].join('');
-      } else {
-        output = [
-          currentComment.slice(0, cursorPosition.start),
-          `[${currentComment.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
-          currentComment.slice(cursorPosition.end),
-        ].join('');
-      }
-      form.setFieldValue('comment', output);
-    },
-    [form]
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
+    form,
+    'comment'
   );
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
@@ -70,12 +46,6 @@ export const AddComment = React.memo<{
       await postComment(data);
     }
   }, [form]);
-  const handleCursorChange = useCallback(
-    (cp: CursorPosition) => {
-      setCursorPosition(cp);
-    },
-    [cursorPosition]
-  );
 
   return (
     <>

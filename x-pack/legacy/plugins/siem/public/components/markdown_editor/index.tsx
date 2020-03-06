@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
@@ -90,9 +90,13 @@ export const MarkdownEditor = React.memo<{
     useEffect(() => {
       onChange(content);
     }, [content]);
-    const setCursorPosition = useCallback((cursorPosition: CursorPosition) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const setCursorPosition = useCallback((e: any) => {
       if (onCursorPositionUpdate) {
-        onCursorPositionUpdate(cursorPosition);
+        onCursorPositionUpdate({
+          start: e!.target!.selectionStart ?? 0,
+          end: e!.target!.selectionEnd ?? 0,
+        });
       }
     }, []);
 
@@ -113,12 +117,7 @@ export const MarkdownEditor = React.memo<{
               inputRef={x => {
                 if (x != null) {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  x.addEventListener('blur', (e: any) => {
-                    setCursorPosition({
-                      start: e.target.selectionStart,
-                      end: e.target.selectionEnd,
-                    });
-                  });
+                  x.addEventListener('blur', setCursorPosition);
                 }
               }}
               aria-label={`markdown-editor-comment`}

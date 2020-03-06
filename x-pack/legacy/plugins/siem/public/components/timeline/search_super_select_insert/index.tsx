@@ -22,7 +22,6 @@ import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
 import styled, { createGlobalStyle } from 'styled-components';
-
 import { AllTimelinesQuery } from '../../../containers/timeline/all';
 import { getEmptyTagValue } from '../../empty_value';
 import { isUntitled } from '../../../components/open_timeline/helpers';
@@ -45,13 +44,13 @@ const MyEuiFlexItem = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-const EuiSelectableContainer = styled.div<{ loading: boolean }>`
+const EuiSelectableContainer = styled.div<{ isLoading: boolean }>`
   .euiSelectable {
     .euiFormControlLayout__childrenWrapper {
       display: flex;
     }
-    ${({ loading }) => `${
-      loading
+    ${({ isLoading }) => `${
+      isLoading
         ? `
       .euiFormControlLayoutIcons {
         display: none;
@@ -248,7 +247,7 @@ const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <EuiSelectableContainer loading={loading}>
+          <EuiSelectableContainer isLoading={loading}>
             <EuiSelectable
               height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}
