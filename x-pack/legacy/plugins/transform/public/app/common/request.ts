@@ -7,7 +7,7 @@
 import { DefaultOperator } from 'elasticsearch';
 
 import { dictionaryToArray } from '../../../common/types/common';
-import { SavedSearchQuery } from '../lib/kibana';
+import { SavedSearchQuery } from '../hooks/use_search_items';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define/step_define_form';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';

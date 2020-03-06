@@ -25,15 +25,6 @@ import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
-jest.mock('../schemas', () => {
-  class MockedSchemas {
-    all = [{}];
-  }
-  return {
-    Schemas: jest.fn().mockImplementation(() => new MockedSchemas()),
-  };
-});
-
 describe('parent pipeline aggs', function() {
   beforeEach(() => {
     mockDataServices();

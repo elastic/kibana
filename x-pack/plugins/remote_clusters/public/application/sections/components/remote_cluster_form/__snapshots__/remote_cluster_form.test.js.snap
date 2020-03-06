@@ -165,6 +165,7 @@ Array [
                         style="font-size:14px;display:inline-block"
                       >
                         <input
+                          aria-controls=""
                           data-test-subj="comboBoxSearchInput"
                           id="mockId"
                           role="textbox"
@@ -448,7 +449,7 @@ Array [
         aria-describedby="mockId-help mockId-error-0"
         aria-expanded="false"
         aria-haspopup="listbox"
-        class="euiComboBox euiComboBox-isInvalid euiComboBox--fullWidth"
+        class="euiComboBox euiComboBox--fullWidth euiComboBox-isInvalid"
         data-test-subj="remoteClusterFormSeedsInput"
         role="combobox"
       >
@@ -473,6 +474,7 @@ Array [
                 style="font-size: 14px; display: inline-block;"
               >
                 <input
+                  aria-controls=""
                   data-test-subj="comboBoxSearchInput"
                   id="mockId"
                   role="textbox"
