@@ -3,29 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { KibanaRequest } from 'kibana/server';
-import { ElasticsearchPlugin } from '../../../../../../../src/legacy/core_plugins/elasticsearch';
+import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { CallAsCurrentUser } from '../types';
 
 const getStartBasicPath = (acknowledge: boolean) =>
   `/_license/start_basic${acknowledge ? '?acknowledge=true' : ''}`;
 
-export async function startBasic(
-  req: KibanaRequest<any, { acknowledge: string }, any>,
-  elasticsearch: ElasticsearchPlugin,
-  xpackInfo: any
-) {
-  const { acknowledge } = req.query;
-  const { callWithRequest } = elasticsearch.getCluster('admin');
+interface StartBasicArg {
+  acknowledge: boolean;
+  callAsCurrentUser: CallAsCurrentUser;
+  licensing: LicensingPluginSetup;
+}
+
+export async function startBasic({ acknowledge, callAsCurrentUser, licensing }: StartBasicArg) {
   const options = {
     method: 'POST',
-    path: getStartBasicPath(Boolean(acknowledge)),
+    path: getStartBasicPath(acknowledge),
   };
   try {
-    const response = await callWithRequest(req as any, 'transport.request', options);
+    const response = await callAsCurrentUser('transport.request', options);
     const { basic_was_started: basicWasStarted } = response;
     if (basicWasStarted) {
-      await xpackInfo.refreshNow();
+      await licensing.refresh();
     }
     return response;
   } catch (error) {

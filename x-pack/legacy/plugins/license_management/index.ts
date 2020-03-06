@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { plugin } from './server/np_ready';
+import { plugin } from './server';
 
 export function licenseManagement(kibana: any) {
   return new kibana.Plugin({
@@ -37,13 +37,10 @@ export function licenseManagement(kibana: any) {
       }).default();
     },
     init: (server: Legacy.Server) => {
-      plugin({} as any).setup(server.newPlatform.setup.core, {
-        ...server.newPlatform.setup.plugins,
-        __LEGACY: {
-          xpackMain: server.plugins.xpack_main,
-          elasticsearch: server.plugins.elasticsearch,
-        },
-      });
+      plugin({} as any).setup(
+        server.newPlatform.setup.core,
+        server.newPlatform.setup.plugins as any
+      );
     },
   });
 }

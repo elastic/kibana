@@ -6,21 +6,26 @@
 
 import { schema } from '@kbn/config-schema';
 import { startBasic } from '../../../lib/start_basic';
-import { Legacy, Server } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerStartBasicRoute(server: Server, legacy: Legacy, xpackInfo: any) {
-  server.router.post(
+export function registerStartBasicRoute({ router, pluggins: { licensing } }: RouteDependencies) {
+  router.post(
     {
       path: '/api/license/start_basic',
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
-    async (ctx, request, response) => {
+    async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
       try {
-        return response.ok({
-          body: await startBasic(request, legacy.plugins.elasticsearch, xpackInfo),
+        return res.ok({
+          body: await startBasic({
+            acknowledge: Boolean(req.query.acknowledge),
+            callAsCurrentUser,
+            licensing,
+          }),
         });
       } catch (e) {
-        return response.internalError({ body: e });
+        return res.internalError({ body: e });
       }
     }
   );

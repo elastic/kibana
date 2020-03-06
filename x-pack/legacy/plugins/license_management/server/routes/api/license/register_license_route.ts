@@ -6,10 +6,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { putLicense } from '../../../lib/license';
-import { Legacy, Server } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerLicenseRoute(server: Server, legacy: Legacy, xpackInfo: any) {
-  server.router.put(
+export function registerLicenseRoute({ router, pluggins: { licensing } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/license',
       validate: {
@@ -19,13 +19,19 @@ export function registerLicenseRoute(server: Server, legacy: Legacy, xpackInfo: 
         }),
       },
     },
-    async (ctx, request, response) => {
+    async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
       try {
-        return response.ok({
-          body: await putLicense(request, legacy.plugins.elasticsearch, xpackInfo),
+        return res.ok({
+          body: await putLicense({
+            acknowledge: Boolean(req.query.acknowledge),
+            callAsCurrentUser,
+            licensing,
+            license: req.body,
+          }),
         });
       } catch (e) {
-        return response.internalError({ body: e });
+        return res.internalError({ body: e });
       }
     }
   );

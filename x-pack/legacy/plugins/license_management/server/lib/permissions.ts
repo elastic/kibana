@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { ElasticsearchPlugin } from '../../../../../../../src/legacy/core_plugins/elasticsearch';
+import { CallAsCurrentUser } from '../types';
 
-export async function getPermissions(
-  req: KibanaRequest,
-  elasticsearch: ElasticsearchPlugin,
-  xpackInfo: any
-) {
-  const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
-  if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
+interface GetPermissionsArg {
+  isSecurityEnabled: boolean;
+  callAsCurrentUser: CallAsCurrentUser;
+}
+
+export async function getPermissions({ isSecurityEnabled, callAsCurrentUser }: GetPermissionsArg) {
+  if (!isSecurityEnabled) {
     // If security isn't enabled, let the user use license management
     return {
       hasPermission: true,
     };
   }
 
-  const { callWithRequest } = elasticsearch.getCluster('admin');
   const options = {
     method: 'POST',
     path: '/_security/user/_has_privileges',
@@ -30,7 +28,7 @@ export async function getPermissions(
   };
 
   try {
-    const response = await callWithRequest(req as any, 'transport.request', options);
+    const response = await callAsCurrentUser('transport.request', options);
     return {
       hasPermission: response.cluster.manage,
     };

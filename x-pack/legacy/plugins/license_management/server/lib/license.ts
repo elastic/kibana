@@ -3,29 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaRequest } from 'src/core/server';
-import { ElasticsearchPlugin } from '../../../../../../../src/legacy/core_plugins/elasticsearch';
+import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { CallAsCurrentUser } from '../types';
+
 const getLicensePath = (acknowledge: boolean) =>
   `/_license${acknowledge ? '?acknowledge=true' : ''}`;
 
-export async function putLicense(
-  req: KibanaRequest<any, { acknowledge: string }, any>,
-  elasticsearch: ElasticsearchPlugin,
-  xpackInfo: any
-) {
-  const { acknowledge } = req.query;
-  const { callWithRequest } = elasticsearch.getCluster('admin');
+interface PutLicenseArg {
+  acknowledge: boolean;
+  callAsCurrentUser: CallAsCurrentUser;
+  licensing: LicensingPluginSetup;
+  license: { [key: string]: any };
+}
+
+export async function putLicense({
+  acknowledge,
+  callAsCurrentUser,
+  licensing,
+  license,
+}: PutLicenseArg) {
   const options = {
     method: 'POST',
-    path: getLicensePath(Boolean(acknowledge)),
-    body: req.body,
+    path: getLicensePath(acknowledge),
+    body: license,
   };
+
   try {
-    const response = await callWithRequest(req as any, 'transport.request', options);
+    const response = await callAsCurrentUser('transport.request', options);
     const { acknowledged, license_status: licenseStatus } = response;
+
     if (acknowledged && licenseStatus === 'valid') {
-      await xpackInfo.refreshNow();
+      await licensing.refresh();
     }
+
     return response;
   } catch (error) {
     return error.body;
