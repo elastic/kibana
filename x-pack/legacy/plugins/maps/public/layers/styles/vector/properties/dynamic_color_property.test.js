@@ -237,7 +237,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 });
 
-test('Should read out categorical type correctly', async () => {
+test('isCategorical should return true when type is categorical', async () => {
   const categoricalColorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
     colorCategory: 'palette_0',
@@ -247,7 +247,7 @@ test('Should read out categorical type correctly', async () => {
   expect(categoricalColorStyle.isCategorical()).toEqual(true);
 });
 
-test('Should read out ordinal correctly when type===undefined', async () => {
+test('isOrdinal should return true when type is ordinal', async () => {
   const ordinalColorStyle = makeProperty({
     type: undefined,
     color: 'Blues',

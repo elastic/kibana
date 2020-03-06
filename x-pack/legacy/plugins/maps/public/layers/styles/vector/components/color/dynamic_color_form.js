@@ -13,12 +13,6 @@ import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common
 import { COLOR_GRADIENTS, COLOR_PALETTES } from '../../../color_utils';
 import { i18n } from '@kbn/i18n';
 
-function getDefaultColorMapType(fieldType) {
-  return CATEGORICAL_DATA_TYPES.includes(fieldType)
-    ? COLOR_MAP_TYPE.CATEGORICAL
-    : COLOR_MAP_TYPE.ORDINAL;
-}
-
 export function DynamicColorForm({
   fields,
   onDynamicStyleChange,
@@ -47,7 +41,9 @@ export function DynamicColorForm({
 
   const onFieldChange = async ({ field }) => {
     const { name, origin, type: fieldType } = field;
-    const defaultColorMapType = getDefaultColorMapType(fieldType);
+    const defaultColorMapType = CATEGORICAL_DATA_TYPES.includes(fieldType)
+      ? COLOR_MAP_TYPE.CATEGORICAL
+      : COLOR_MAP_TYPE.ORDINAL;
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       field: { name, origin },
