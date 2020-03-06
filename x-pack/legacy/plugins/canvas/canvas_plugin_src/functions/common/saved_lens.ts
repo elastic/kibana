@@ -86,6 +86,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           hideFilterActions: true,
           title: args.title ? args.title : undefined,
           isLayerTOCOpen: false,
+          disableTriggers: true,
         },
         embeddableType: EmbeddableTypes.lens,
       };
