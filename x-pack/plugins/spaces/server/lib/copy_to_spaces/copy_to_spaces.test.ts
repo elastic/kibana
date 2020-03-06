@@ -12,13 +12,16 @@ import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
 import { coreMock, savedObjectsTypeRegistryMock, httpServerMock } from 'src/core/server/mocks';
 
-jest.mock('src/core/server', () => {
+jest.mock('../../../../../../src/core/server', () => {
   return {
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
   };
 });
-import { exportSavedObjectsToStream, importSavedObjectsFromStream } from 'src/core/server';
+import {
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../../../src/core/server';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;

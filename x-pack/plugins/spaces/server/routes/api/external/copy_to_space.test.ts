@@ -28,7 +28,7 @@ import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
-jest.mock('src/core/server', () => {
+jest.mock('../../../../../../../src/core/server', () => {
   return {
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
@@ -40,7 +40,7 @@ import {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
-} from 'src/core/server';
+} from '../../../../../../../src/core/server';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();

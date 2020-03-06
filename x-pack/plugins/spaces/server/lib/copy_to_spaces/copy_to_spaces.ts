@@ -6,7 +6,10 @@
 
 import { SavedObject, KibanaRequest, CoreStart } from 'src/core/server';
 import { Readable } from 'stream';
-import { exportSavedObjectsToStream, importSavedObjectsFromStream } from 'src/core/server';
+import {
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';

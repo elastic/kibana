@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';

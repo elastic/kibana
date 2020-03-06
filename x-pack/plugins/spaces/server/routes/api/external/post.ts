@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { ExternalRouteDeps } from '.';

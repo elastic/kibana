@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';

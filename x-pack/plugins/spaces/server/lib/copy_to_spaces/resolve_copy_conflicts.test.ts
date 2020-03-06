@@ -12,13 +12,16 @@ import { coreMock, savedObjectsTypeRegistryMock, httpServerMock } from 'src/core
 import { Readable } from 'stream';
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
-jest.mock('src/core/server', () => {
+jest.mock('../../../../../../src/core/server', () => {
   return {
     exportSavedObjectsToStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
   };
 });
-import { exportSavedObjectsToStream, resolveSavedObjectsImportErrors } from 'src/core/server';
+import {
+  exportSavedObjectsToStream,
+  resolveSavedObjectsImportErrors,
+} from '../../../../../../src/core/server';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;

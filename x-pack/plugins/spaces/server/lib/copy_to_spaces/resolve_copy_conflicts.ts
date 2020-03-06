@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Readable } from 'stream';
+import { SavedObject, CoreStart, KibanaRequest } from 'src/core/server';
 import {
-  SavedObject,
   exportSavedObjectsToStream,
   resolveSavedObjectsImportErrors,
-  CoreStart,
-  KibanaRequest,
-} from 'src/core/server';
-import { Readable } from 'stream';
+} from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';

@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
