@@ -15,13 +15,15 @@ import {
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
-import { Immutable, LegacyEndpointEvent } from '../../../../../common/types';
+import { Immutable } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
  * Returns the Alert Data array from state
  */
 export const alertListData = (state: AlertListState) => state.alerts;
+
+export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
 /**
  * Returns the alert list pagination data from state
@@ -96,20 +98,11 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
 /**
  * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
  */
-function isAlertEventLegacyEndpointEvent(event: { endgame?: {} }): event is LegacyEndpointEvent {
-  return event.endgame !== undefined && 'unique_pid' in event.endgame;
-}
-
-export const selectedEvent: (
+export const selectedAlertIsLegacyEndpointEvent: (
   state: AlertListState
-) => LegacyEndpointEvent | undefined = createSelector(
-  uiQueryParams,
-  alertListData,
-  ({ selected_alert: selectedAlert }, alertList) => {
-    const found = alertList.find(alert => alert.event.id === selectedAlert);
-    if (!found) {
-      return found;
-    }
-    return isAlertEventLegacyEndpointEvent(found) ? found : undefined;
+) => boolean = createSelector(selectedAlertDetailsData, function(event) {
+  if (event === undefined) {
+    return false;
   }
-);
+  return 'endgame' in event;
+});

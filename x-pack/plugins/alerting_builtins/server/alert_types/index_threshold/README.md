@@ -58,43 +58,47 @@ Finally, create the alert:
 ```
 kbn-alert create .index-threshold 'es-hb-sim threshold' 1s \
   '{
-    index:       es-hb-sim
-    timeField:   @timestamp
-    aggType:     average
-    aggField:    summary.up
-    groupField:  monitor.name.keyword
-    window:      5s
-    comparator:  lessThan
-    threshold:   [ 0.6 ]
+    index:                es-hb-sim
+    timeField:            @timestamp
+    aggType:              avg
+    aggField:             summary.up
+    groupBy:              top
+    termSize:             100
+    termField:            monitor.name.keyword
+    timeWindowSize:       5
+    timeWindowUnit:       s
+    thresholdComparator:  <
+    threshold:            [ 0.6 ]
   }' \
   "[
      {
-       group:       threshold met
-       id:         '$ACTION_ID'
+       group:     threshold met
+       id:        '$ACTION_ID'
        params: {
-         level:    warn
-         message: '{{context.message}}'
+         level:   warn
+         message: '{{{context.message}}}'
        }
      }
    ]"
 ```
 
 This alert will run a query over the `es-hb-sim` index, using the `@timestamp`
-field as the date field, using an `average` aggregation over the `summary.up`
-field.  The results are then aggregated by `monitor.name.keyword`.  If we ran
+field as the date field, aggregating over groups of the field value
+`monitor.name.keyword` (the top 100 groups), then aggregating those values
+using an `average` aggregation over the `summary.up` field.  If we ran
 another instance of `es-hb-sim`, using `host-B` instead of `host-A`, then the
 alert will end up potentially scheduling actions for both, independently.
 Within the alerting plugin, this grouping is also referred to as "instanceIds"
 (`host-A` and `host-B` being distinct instanceIds, which can have actions
 scheduled against them independently).
 
-The `window` is set to `5s` which is 5 seconds.  That means, every time the
+The time window is set to 5 seconds.  That means, every time the
 alert runs it's queries (every second, in the example above), it will run it's
 ES query over the last 5 seconds.  Thus, the queries, over time, will overlap.
 Sometimes that's what you want.  Other times, maybe you just want to do 
 sampling, running an alert every hour, with a 5 minute window.  Up to the you!
 
-Using the `comparator` `lessThan` and `threshold` `[0.6]`, the alert will 
+Using the `thresholdComparator` `<` and `threshold` `[0.6]`, the alert will 
 calculate the average of all the `summary.up` fields for each unique
 `monitor.name.keyword`, and then if the value is less than 0.6, it will
 schedule the specified action (server log) to run.  The `message` param
@@ -110,11 +114,10 @@ working:
 
 ```
 server    log   [17:32:10.060] [warning][actions][actions][plugins] \
-   Server log: alert es-hb-sim threshold instance host-A value 0 \
-   exceeded threshold average(summary.up) lessThan 0.6 over 5s \
+   Server log: alert es-hb-sim threshold group host-A value 0 \
+   exceeded threshold avg(summary.up) < 0.6 over 5s \
    on 2020-02-20T22:32:07.000Z
 ```
-
 [kbn-action]: https://github.com/pmuellr/kbn-action
 [es-hb-sim]: https://github.com/pmuellr/es-hb-sim
 [now-iso]: https://github.com/pmuellr/now-iso
@@ -144,15 +147,18 @@ This example uses [now-iso][] to generate iso date strings.
 ```console
 curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_threshold/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d "{
-    \"index\":         \"es-hb-sim\",
-    \"timeField\":     \"@timestamp\",
-    \"aggType\":       \"average\",
-    \"aggField\":      \"summary.up\",
-    \"groupField\":    \"monitor.name.keyword\",
-    \"interval\":      \"1s\",
-    \"dateStart\":     \"`now-iso -10s`\",
-    \"dateEnd\":       \"`now-iso`\",
-    \"window\":        \"5s\"
+    \"index\":           \"es-hb-sim\",
+    \"timeField\":       \"@timestamp\",
+    \"aggType\":         \"avg\",
+    \"aggField\":        \"summary.up\",
+    \"groupBy\":         \"top\",
+    \"termSize\":        100,
+    \"termField\":       \"monitor.name.keyword\",
+    \"interval\":        \"1s\",
+    \"dateStart\":       \"`now-iso -10s`\",
+    \"dateEnd\":         \"`now-iso`\",
+    \"timeWindowSize\":  5,
+    \"timeWindowUnit\":  \"s\"
 }"
 ```
 
@@ -184,13 +190,16 @@ To get the current value of the calculated metric, you can leave off the date:
 ```
 curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_threshold/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d '{
-    "index":         "es-hb-sim",
-    "timeField":     "@timestamp",
-    "aggType":       "average",
-    "aggField":      "summary.up",
-    "groupField":    "monitor.name.keyword",
-    "interval":      "1s",
-    "window":        "5s"
+    "index":           "es-hb-sim",
+    "timeField":       "@timestamp",
+    "aggType":         "avg",
+    "aggField":        "summary.up",
+    "groupBy":         "top",
+    "termField":       "monitor.name.keyword",
+    "termSize":        100,
+    "interval":        "1s",
+    "timeWindowSize":  5,
+    "timeWindowUnit":  "s"
 }'
 ```
 
@@ -254,7 +263,7 @@ be ~24 time series points in the output.
 
 For preview purposes:
 
-- The `groupLimit` parameter should be used to help cut
+- The `termSize` parameter should be used to help cut
 down on the amount of work ES does, and keep the generated graphs a little
 simpler.  Probably something like `10`.
 
@@ -263,9 +272,9 @@ simpler.  Probably something like `10`.
 could result in a lot of time-series points being generated, which is both
 costly in ES, and may result in noisy graphs.
 
-- The `window` parameter should be the same as what the alert is using, 
+- The `timeWindow*` parameters should be the same as what the alert is using, 
 especially for the `count` and `sum` aggregation types.  Those aggregations
 don't scale the same way the others do, when the window changes.  Even for
 the other aggregations, changing the window could result in dramatically
-different values being generated - `averages` will be more "average-y", `min`
+different values being generated - `avg` will be more "average-y", `min`
 and `max` will be a little stickier.

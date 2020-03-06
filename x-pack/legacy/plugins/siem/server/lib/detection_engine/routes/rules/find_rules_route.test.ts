@@ -4,109 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  getFindResult,
   getResult,
+  getFindRequest,
   getFindResultWithSingleHit,
   getFindResultStatus,
-  getFindRequest,
 } from '../__mocks__/request_responses';
-import { createMockServer } from '../__mocks__';
-import { clientsServiceMock } from '../__mocks__/clients_service_mock';
-
-import * as utils from './utils';
-import * as findRules from '../../rules/find_rules';
-
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { ServerInjectOptions } from 'hapi';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('find_rules', () => {
-  let server = createMockServer();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
-    getClients.mockResolvedValue(clients);
-
-    findRulesRoute(server.route, getClients);
+    findRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single rule with a valid alertsClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getFindRequest());
-      expect(statusCode).toBe(200);
+    test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { route, inject } = createMockServer();
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      findRulesRoute(route, getClients);
-      const { statusCode } = await inject(getFindRequest());
-      expect(statusCode).toBe(404);
+      context.alerting.getAlertsClient = jest.fn();
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('catches error when transformation fails', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      jest.spyOn(utils, 'transformFindAlerts').mockReturnValue(null);
-      const { payload, statusCode } = await server.inject(getFindRequest());
-      expect(statusCode).toBe(500);
-      expect(JSON.parse(payload).message).toBe('Internal error transforming');
-    });
-
-    test('catch error when findRules function throws error', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      jest.spyOn(findRules, 'findRules').mockImplementation(async () => {
+    test('catches error if search throws error', async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const { payload, statusCode } = await server.inject(getFindRequest());
-      expect(JSON.parse(payload).message).toBe('Test error');
-      expect(statusCode).toBe(500);
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
     });
   });
 
-  describe('validation', () => {
-    test('returns 400 if a bad query parameter is given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find?invalid_value=500`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+  describe('request validation', () => {
+    test('allows optional query params', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        query: {
+          page: 2,
+          per_page: 20,
+          sort_field: 'timestamp',
+          fields: ['field1', 'field2'],
+        },
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
     });
 
-    test('returns 200 if the set of optional query parameters are given', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      const request: ServerInjectOptions = {
-        method: 'GET',
-        url: `${DETECTION_ENGINE_RULES_URL}/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]`,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
+    test('rejects unknown query params', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        query: {
+          invalid_value: 'hi mom',
+        },
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith('"invalid_value" is not allowed');
     });
   });
 });

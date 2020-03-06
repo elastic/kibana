@@ -44,6 +44,9 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
       return settings;
     },
   ],
+  exposeToBrowser: {
+    loginAssistanceMessage: true,
+  },
 };
 export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,

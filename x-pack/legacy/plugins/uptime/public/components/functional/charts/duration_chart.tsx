@@ -13,10 +13,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/graphql/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
-import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
+import { ChartEmptyState } from './chart_empty_state';
 
 interface DurationChartProps {
   /**
@@ -102,7 +102,18 @@ export const DurationChart = ({
               <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
             </Chart>
           ) : (
-            <DurationChartEmptyState />
+            <ChartEmptyState
+              body={
+                <FormattedMessage
+                  id="xpack.uptime.durationChart.emptyPrompt.description"
+                  defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
+                  values={{ emphasizedText: <strong>up</strong> }}
+                />
+              }
+              title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {
+                defaultMessage: 'No duration data available',
+              })}
+            />
           )}
         </ChartWrapper>
       </EuiPanel>

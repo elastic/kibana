@@ -4,91 +4,81 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
-import { Readable } from 'stream';
 
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyServices, LegacyRequest } from '../../../../types';
+import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
-import { ImportRulesRequest } from '../../rules/types';
+import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
-  getIndex,
+  buildRouteValidation,
   createBulkErrorObject,
   ImportRuleResponse,
   BulkError,
   isBulkError,
   isImportRegular,
   transformError,
+  buildSiemResponse,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
+import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { validate } from './validate';
-import { GetScopedClients } from '../../../../services';
-import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const createImportRulesRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
-    options: {
-      tags: ['access:siem'],
-      payload: {
-        maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
-        output: 'stream',
-        allow: 'multipart/form-data',
-      },
+export const importRulesRoute = (router: IRouter, config: LegacyServices['config']) => {
+  router.post(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_import`,
       validate: {
-        options: {
-          abortEarly: false,
+        query: buildRouteValidation<ImportRulesRequestParams['query']>(importRulesQuerySchema),
+        body: buildRouteValidation<ImportRulesRequestParams['body']>(importRulesPayloadSchema),
+      },
+      options: {
+        tags: ['access:siem'],
+        body: {
+          maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
+          output: 'stream',
         },
-        query: importRulesQuerySchema,
-        payload: importRulesPayloadSchema,
       },
     },
-    async handler(request: ImportRulesRequest & LegacyRequest, headers) {
-      const {
-        actionsClient,
-        alertsClient,
-        clusterClient,
-        spacesClient,
-        savedObjectsClient,
-      } = await getClients(request);
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const actionsClient = context.actions.getActionsClient();
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
-      const { filename } = request.payload.file.hapi;
+      const { filename } = request.body.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return headers
-          .response({
-            message: `Invalid file extension ${fileExtension}`,
-            status_code: 400,
-          })
-          .code(400);
+        return siemResponse.error({
+          statusCode: 400,
+          body: `Invalid file extension ${fileExtension}`,
+        });
       }
 
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       try {
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          request.payload.file as Readable,
+          request.body.file,
           ...readStream,
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
@@ -145,17 +135,17 @@ export const createImportRulesRoute = (
                     version,
                   } = parsedRule;
                   try {
-                    const finalIndex = getIndex(spacesClient.getSpaceId, config);
+                    const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
-                      finalIndex
+                      signalsIndex
                     );
                     if (!indexExists) {
                       resolve(
                         createBulkErrorObject({
                           ruleId,
                           statusCode: 409,
-                          message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+                          message: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
                         })
                       );
                     }
@@ -171,7 +161,7 @@ export const createImportRulesRoute = (
                         immutable,
                         query,
                         language,
-                        outputIndex: finalIndex,
+                        outputIndex: signalsIndex,
                         savedId,
                         timelineId,
                         timelineTitle,
@@ -271,32 +261,17 @@ export const createImportRulesRoute = (
         };
         const [validated, errors] = validate(importRules, importRulesSchema);
         if (errors != null) {
-          return headers
-            .response({
-              message: errors,
-              status_code: 500,
-            })
-            .code(500);
+          return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return validated;
+          return response.ok({ body: validated ?? {} });
         }
-      } catch (exc) {
-        const error = transformError(exc);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const importRulesRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createImportRulesRoute(config, getClients));
+    }
+  );
 };

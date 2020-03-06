@@ -44,7 +44,6 @@ import { MyPluginDepsStart } from './plugin';
 
 export renderApp = ({ element, history }: AppMountParameters) => {
   ReactDOM.render(
-    // pass `appBasePath` to `basename`
     <Router history={history}>
       <Route path="/" exact component={HomePage} />
     </Router>,

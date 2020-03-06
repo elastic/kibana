@@ -24,14 +24,14 @@ import { inspect } from 'util';
 import cpy from 'cpy';
 import del from 'del';
 import { toArray, tap } from 'rxjs/operators';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, OptimizerUpdate } from '@kbn/optimizer';
+import { createAbsolutePathSerializer, ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer(MOCK_REPO_DIR));
+expect.addSnapshotSerializer(createAbsolutePathSerializer(REPO_ROOT));
 
 beforeAll(async () => {
   await del(TMP_DIR);
@@ -51,20 +51,25 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
+    dist: true,
   });
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const msgs = await runOptimizer(config)
-    .pipe(
-      tap(state => {
-        if (state.event?.type === 'worker stdio') {
-          // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+  const log = new ToolingLog({
+    level: 'error',
+    writeTo: {
+      write(chunk) {
+        if (chunk.endsWith('\n')) {
+          chunk = chunk.slice(0, -1);
         }
-      }),
-      toArray()
-    )
+        // eslint-disable-next-line no-console
+        console.error(chunk);
+      },
+    },
+  });
+  const msgs = await runOptimizer(config)
+    .pipe(logOptimizerState(log, config), toArray())
     .toPromise();
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
@@ -124,32 +129,46 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   ).toMatchSnapshot('foo bundle');
 
   expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/1.plugin.js'), 'utf8')
+  ).toMatchSnapshot('1 async bundle');
+
+  expect(
     Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
   ).toMatchSnapshot('bar bundle');
 
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(3);
+  expect(foo.cache.getModuleCount()).toBe(4);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/foo/public/ext.ts,
-      <absolute path>/plugins/foo/public/index.ts,
-      <absolute path>/plugins/foo/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
     ]
   `);
 
   const bar = config.bundles.find(b => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
-  expect(bar.cache.getModuleCount()).toBe(5);
+  expect(bar.cache.getModuleCount()).toBe(
+    // code + styles + style/css-loader runtimes
+    15
+  );
+
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/plugins/foo/public/ext.ts,
-      <absolute path>/plugins/foo/public/index.ts,
-      <absolute path>/plugins/foo/public/lib.ts,
-      <absolute path>/plugins/bar/public/index.ts,
-      <absolute path>/plugins/bar/public/lib.ts,
+      <absolute path>/node_modules/css-loader/package.json,
+      <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
     ]
   `);
 });
@@ -159,6 +178,7 @@ it('uses cache on second run and exist cleanly', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
+    dist: true,
   });
 
   const msgs = await runOptimizer(config)

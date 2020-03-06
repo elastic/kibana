@@ -19,7 +19,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
-    name: i18n.CASE_TITLE,
+    name: i18n.NAME,
     render: (theCase: Case) => {
       if (theCase.caseId != null && theCase.title != null) {
         return <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>;

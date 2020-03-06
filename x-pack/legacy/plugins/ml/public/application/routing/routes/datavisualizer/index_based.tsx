@@ -11,7 +11,7 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
 
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
