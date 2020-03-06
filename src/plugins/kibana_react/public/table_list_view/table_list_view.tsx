@@ -75,7 +75,7 @@ export interface TableListViewProps {
 }
 
 export interface TableListViewState {
-  items: Array<Record<string, any>>;
+  items: object[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -94,12 +94,6 @@ export interface TableListViewState {
 class TableListView extends React.Component<TableListViewProps, TableListViewState> {
   private pagination = {};
   private _isMounted = false;
-  private visualizationEntityName = i18n.translate(
-    'kibana-react.tableListView.listing.visualizationEntityName',
-    {
-      defaultMessage: 'visualization',
-    }
-  );
 
   constructor(props: TableListViewProps) {
     super(props);
@@ -216,15 +210,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   hasNoItems() {
-    if (this.state.isFetchingItems || this.state.filter) {
-      return false;
-    }
-    if (this.state.items.length === 0) {
+    if (!this.state.isFetchingItems && this.state.items.length === 0 && !this.state.filter) {
       return true;
     }
-    if (this.props.entityName === this.visualizationEntityName) {
-      return this.getVisualizationVisibleItems().length === 0;
-    }
+
     return false;
   }
 
@@ -371,18 +360,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     );
   }
 
-  getVisualizationVisibleItems() {
-    // stage.beta is to allow Lens visualizations to show until we do a migration on them as well
-    return this.state.items.filter(item => item.visible || item.stage === 'beta');
-  }
-
-  getItemsToRender() {
-    if (this.props.entityName !== this.visualizationEntityName) {
-      return this.state.items;
-    }
-    return this.getVisualizationVisibleItems();
-  }
-
   renderTable() {
     const selection = this.props.deleteItems
       ? {
@@ -443,7 +420,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     return (
       <EuiInMemoryTable
         itemId="id"
-        items={this.getItemsToRender()}
+        items={this.state.items}
         columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}

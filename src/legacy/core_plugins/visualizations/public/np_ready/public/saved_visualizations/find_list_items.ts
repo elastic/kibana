@@ -62,6 +62,7 @@ export async function findListItems({
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),
+    filter: 'visualization.attributes.visible:true OR lens.type:lens',
     search: search ? `${search}*` : undefined,
     perPage: size,
     page: 1,
