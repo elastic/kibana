@@ -24,7 +24,7 @@ import { CannotOverrideError } from '../ui_settings_errors';
 
 const validate = {
   body: schema.object({
-    changes: schema.object({}, { allowUnknowns: true }),
+    changes: schema.object({}, { unknowns: 'allow' }),
   }),
 };
 

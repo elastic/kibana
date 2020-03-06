@@ -30,22 +30,15 @@ export type TypeOf<RT extends Type<any>> = RT['type'];
 // this might not have perfect _rendering_ output, but it will be typed.
 export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
 
-interface AllowUnknowns {
-  allowUnknowns: true;
-  ignoreUnknowns?: false;
+interface UnknownOptions {
+  /**
+   * Options for dealing with unknown keys:
+   * - allow: unknown keys will be permitted
+   * - ignore: unknown keys will not fail validation, but will be stripped out
+   * - forbid (default): unknown keys will fail validation
+   */
+  unknowns?: 'allow' | 'ignore' | 'forbid';
 }
-
-interface IgnoreUnknowns {
-  allowUnknowns?: false;
-  ignoreUnknowns: true;
-}
-
-interface ForbidUnknowns {
-  allowUnknowns?: false;
-  ignoreUnknowns?: false;
-}
-// type check to not permit both to be set to `true` at the same time
-type UnknownOptions = AllowUnknowns | IgnoreUnknowns | ForbidUnknowns;
 
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
   { [K in keyof P]: TypeOf<P[K]> }
@@ -55,10 +48,7 @@ export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(
-    props: P,
-    { allowUnknowns = false, ignoreUnknowns = false, ...typeOptions }: ObjectTypeOptions<P> = {}
-  ) {
+  constructor(props: P, { unknowns = 'forbid', ...typeOptions }: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
@@ -68,8 +58,8 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(Boolean(allowUnknowns))
-      .options({ stripUnknown: { objects: ignoreUnknowns } });
+      .unknown(unknowns === 'allow')
+      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
 
     super(schema, typeOptions);
     this.props = schemaKeys;

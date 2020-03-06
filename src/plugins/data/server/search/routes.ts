@@ -28,9 +28,9 @@ export function registerSearchRoute(router: IRouter): void {
       validate: {
         params: schema.object({ strategy: schema.string() }),
 
-        query: schema.object({}, { allowUnknowns: true }),
+        query: schema.object({}, { unknowns: 'allow' }),
 
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {
@@ -64,7 +64,7 @@ export function registerSearchRoute(router: IRouter): void {
           id: schema.string(),
         }),
 
-        query: schema.object({}, { allowUnknowns: true }),
+        query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {
