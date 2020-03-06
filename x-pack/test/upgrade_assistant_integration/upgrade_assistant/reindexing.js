@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
+import { getIndexStateFromClusterState } from '../../../plugins/upgrade_assistant/common/get_index_state_from_cluster_state';
 
 export default function({ getService }) {
   const supertest = getService('supertest');
@@ -187,6 +188,8 @@ export default function({ getService }) {
         await es.indices.create({ index: test2 });
         await es.indices.create({ index: test3 });
 
+        await es.indices.close({ index: test1 });
+
         const result = await supertest
           .post(`/api/upgrade_assistant/reindex/batch`)
           .set('kbn-xsrf', 'xxx')
@@ -206,6 +209,18 @@ export default function({ getService }) {
         await waitForReindexToComplete(test3);
 
         await assertQueueState(undefined, 0);
+
+        // Check that the closed index is still closed after reindexing
+        const clusterStateResponse = await es.cluster.state({
+          index: generateNewIndexName(test1),
+          metric: 'metadata',
+        });
+
+        const test1ReindexedState = getIndexStateFromClusterState(
+          generateNewIndexName(test1),
+          clusterStateResponse
+        );
+        expect(test1ReindexedState).to.be('close');
       } finally {
         await cleanupReindex(test1);
         await cleanupReindex(test2);
