@@ -80,7 +80,7 @@ describe('getMetricFields', () => {
         aggType: field.getAggType(),
         name: field.getName(),
         label: await field.getLabel(),
-        esDoc: field.getESDocFieldName(),
+        esDoc: field.getRootName(),
       };
     };
 
