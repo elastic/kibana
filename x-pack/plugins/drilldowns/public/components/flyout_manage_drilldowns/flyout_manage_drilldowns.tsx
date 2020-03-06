@@ -5,30 +5,32 @@
  */
 
 import React, { useState } from 'react';
-import { FlyoutFrame } from '../flyout_frame';
-import { DrilldownListItem, ListManageDrilldowns } from '../list_manage_drilldowns';
+import { DrilldownListItem } from '../list_manage_drilldowns';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
-import { txtManageDrilldowns } from './i18n';
-import { DrilldownHelloBar } from '../drilldown_hello_bar';
+import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 
 export interface FlyoutManageDrilldownsProps {
   drilldowns: DrilldownListItem[];
   onClose?: () => void;
   showWelcomeMessage?: boolean;
+  onHideWelcomeMessage?: () => void;
 }
 
 enum ViewState {
-  List,
-  Create,
-  Edit,
+  List = 'list',
+  Create = 'create',
+  Edit = 'edit',
 }
 
 export function FlyoutManageDrilldowns({
   drilldowns,
   onClose = () => {},
   showWelcomeMessage = true,
+  onHideWelcomeMessage,
 }: FlyoutManageDrilldownsProps) {
   const [viewState, setViewState] = useState<ViewState>(ViewState.List);
+
+  // TODO: apparently this will be the component with all the state management and data fetching
 
   switch (viewState) {
     case ViewState.Create:
@@ -47,34 +49,25 @@ export function FlyoutManageDrilldowns({
             setViewState(ViewState.List);
           }}
           showWelcomeMessage={showWelcomeMessage}
+          onWelcomeHideClick={onHideWelcomeMessage}
         />
       );
     case ViewState.List:
     default:
       return (
-        <FlyoutFrame
-          title={txtManageDrilldowns}
+        <FlyoutListManageDrilldowns
+          drilldowns={drilldowns}
           onClose={onClose}
-          banner={
-            showWelcomeMessage && (
-              <DrilldownHelloBar
-                onHideClick={() => {
-                  // TODO:
-                }}
-              />
-            )
-          }
-        >
-          <ListManageDrilldowns
-            drilldowns={drilldowns}
-            onCreate={() => {
-              setViewState(ViewState.Create);
-            }}
-            onEdit={() => {
-              setViewState(ViewState.Edit);
-            }}
-          />
-        </FlyoutFrame>
+          showWelcomeMessage={showWelcomeMessage}
+          onWelcomeHideClick={onHideWelcomeMessage}
+          onCreate={() => {
+            setViewState(ViewState.Create);
+          }}
+          onEdit={() => {
+            setViewState(ViewState.Edit);
+          }}
+          onDelete={() => {}}
+        />
       );
   }
 }

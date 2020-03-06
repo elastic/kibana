@@ -41,6 +41,7 @@ export interface FlyoutDrilldownWizardProps<
   initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionConfig>;
 
   showWelcomeMessage?: boolean;
+  onWelcomeHideClick?: () => void;
 }
 
 export function FlyoutDrilldownWizard<
@@ -53,6 +54,7 @@ export function FlyoutDrilldownWizard<
   mode = 'create',
   onDelete = () => {},
   showWelcomeMessage = false,
+  onWelcomeHideClick,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
@@ -89,15 +91,7 @@ export function FlyoutDrilldownWizard<
       footer={footer}
       onClose={onClose}
       onBack={onBack}
-      banner={
-        showWelcomeMessage && (
-          <DrilldownHelloBar
-            onHideClick={() => {
-              // TODO:
-            }}
-          />
-        )
-      }
+      banner={showWelcomeMessage && <DrilldownHelloBar onHideClick={onWelcomeHideClick} />}
     >
       <FormDrilldownWizard
         name={wizardConfig.name}
