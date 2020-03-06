@@ -14,8 +14,10 @@ import { MarkdownEditorForm } from '../../../../components/markdown_editor/form'
 import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
-import { SearchTimelinePopover } from '../../../../components/timeline/search_super_select_insert';
-import { useInsertTimeline } from './use_markdown';
+import {
+  InsertTimelinePopover,
+  useInsertTimeline,
+} from '../../../../components/timeline/insert_timeline_popover';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -72,7 +74,7 @@ export const AddComment = React.memo<{
               </EuiButton>
             ),
             topRightContent: (
-              <SearchTimelinePopover
+              <InsertTimelinePopover
                 hideUntitled={true}
                 isDisabled={isLoading}
                 onTimelineChange={handleOnTimelineChange}

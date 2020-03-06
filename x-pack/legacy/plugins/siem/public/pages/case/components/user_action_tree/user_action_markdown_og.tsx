@@ -11,13 +11,6 @@ import styled, { css } from 'styled-components';
 import { MarkdownEditor } from '../../../../components/markdown_editor';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../../components/markdown';
-import { Form, useForm, UseField } from '../../../../shared_imports';
-import { schema, Generic } from './schema';
-import {
-  InsertTimelinePopover,
-  useInsertTimeline,
-} from '../../../../components/timeline/insert_timeline_popover';
-import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 
 const ContentWrapper = styled.div`
   ${({ theme }) => css`
@@ -32,6 +25,7 @@ interface UserActionMarkdownProps {
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
 }
+
 export const UserActionMarkdown = ({
   id,
   content,
@@ -39,26 +33,24 @@ export const UserActionMarkdown = ({
   onChangeEditable,
   onSaveContent,
 }: UserActionMarkdownProps) => {
-  const { form } = useForm<Generic>({
-    defaultValue: { generic: content },
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Generic>(
-    form,
-    'generic'
-  );
+  const [myContent, setMyContent] = useState(content);
+
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
   }, [id, onChangeEditable]);
 
-  const handleSaveAction = useCallback(async () => {
-    const { isValid, data } = await form.submit();
-    if (isValid) {
-      onSaveContent(data.generic);
+  const handleSaveAction = useCallback(() => {
+    if (myContent !== content) {
+      onSaveContent(content);
     }
     onChangeEditable(id);
-  }, [form, id, onChangeEditable, onSaveContent]);
+  }, [content, id, myContent, onChangeEditable, onSaveContent]);
+
+  const handleOnChange = useCallback(() => {
+    if (myContent !== content) {
+      setMyContent(content);
+    }
+  }, [content, myContent]);
 
   const renderButtons = useCallback(
     ({ cancelAction, saveAction }) => {
@@ -79,27 +71,16 @@ export const UserActionMarkdown = ({
     },
     [handleCancelAction, handleSaveAction]
   );
+
   return isEditable ? (
-    <Form form={form}>
-      <UseField
-        path="generic"
-        component={MarkdownEditorForm}
-        componentProps={{
-          bottomRightContent: renderButtons({
-            cancelAction: handleCancelAction,
-            saveAction: handleSaveAction,
-          }),
-          onCursorPositionUpdate: handleCursorChange,
-          topRightContent: (
-            <InsertTimelinePopover
-              hideUntitled={true}
-              isDisabled={false}
-              onTimelineChange={handleOnTimelineChange}
-            />
-          ),
-        }}
-      />
-    </Form>
+    <MarkdownEditor
+      bottomRightContent={renderButtons({
+        cancelAction: handleCancelAction,
+        saveAction: handleSaveAction,
+      })}
+      initialContent={content}
+      onChange={handleOnChange}
+    />
   ) : (
     <ContentWrapper>
       <Markdown raw={content} data-test-subj="case-view-description" />

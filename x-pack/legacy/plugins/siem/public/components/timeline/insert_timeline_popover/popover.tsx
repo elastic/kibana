@@ -21,20 +21,13 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import { AllTimelinesQuery } from '../../../containers/timeline/all';
 import { getEmptyTagValue } from '../../empty_value';
-import { isUntitled } from '../../../components/open_timeline/helpers';
-import * as i18nTimeline from '../../../components/open_timeline/translations';
+import { isUntitled } from '../../open_timeline/helpers';
+import * as i18nTimeline from '../../open_timeline/translations';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
-import * as i18n from './translations';
-
-const SearchTimelinePopoverGlobalStyle = createGlobalStyle`
-  .euiPopover__panel.euiPopover__panel-isOpen.timeline-search-super-select-popover__popoverPanel {
-    visibility: hidden;
-    z-index: 0;
-  }
-`;
+import * as i18n from '../search_super_select/translations';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -70,7 +63,7 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
   padding 0px 4px;
 `;
 
-interface SearchTimelinePopoverProps {
+interface InsertTimelinePopoverProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
@@ -79,7 +72,7 @@ interface SearchTimelinePopoverProps {
 const ORIGINAL_PAGE_SIZE = 50;
 const POPOVER_HEIGHT = 260;
 const TIMELINE_ITEM_HEIGHT = 50;
-const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
+const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
   isDisabled,
   hideUntitled = false,
   onTimelineChange,
@@ -303,9 +296,7 @@ const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
           </EuiSelectableContainer>
         )}
       </AllTimelinesQuery>
-      <SearchTimelinePopoverGlobalStyle />
     </EuiPopover>
   );
 };
-
-export const SearchTimelinePopover = memo(SearchTimelinePopoverComponent);
+export const InsertTimelinePopover = memo(InsertTimelinePopoverComponent);

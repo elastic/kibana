@@ -5,9 +5,9 @@
  */
 
 import { useCallback, useState } from 'react';
-import { useBasePath } from '../../../../lib/kibana';
-import { CursorPosition } from '../../../../components/markdown_editor';
-import { FormData, FormHook } from '../../../../shared_imports';
+import { useBasePath } from '../../../lib/kibana';
+import { CursorPosition } from '../../markdown_editor';
+import { FormData, FormHook } from '../../../shared_imports';
 
 export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldName: string) => {
   const basePath = useBasePath();
