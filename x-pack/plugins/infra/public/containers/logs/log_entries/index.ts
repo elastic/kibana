@@ -54,6 +54,7 @@ type Dispatch = (action: ActionObj) => void;
 interface LogEntriesProps {
   startTimestamp: number;
   endTimestamp: number;
+  timestampsLastUpdate: number;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
@@ -299,13 +300,11 @@ const useFetchEntriesEffect = (
       after: false,
     };
 
-    if (
-      !props.startTimestamp ||
-      !props.endTimestamp ||
-      !prevParams ||
-      !prevParams.startTimestamp ||
-      !prevParams.endTimestamp
-    ) {
+    if (!prevParams || !prevParams.startTimestamp || !prevParams.endTimestamp) {
+      return;
+    }
+
+    if (props.timestampsLastUpdate === prevParams.timestampsLastUpdate) {
       return;
     }
 
@@ -319,7 +318,11 @@ const useFetchEntriesEffect = (
     dispatch({ type: Action.ExpandRange, payload: shouldExpand });
   };
 
-  const expandRangeEffectDependencies = [props.startTimestamp, props.endTimestamp];
+  const expandRangeEffectDependencies = [
+    props.startTimestamp,
+    props.endTimestamp,
+    props.timestampsLastUpdate,
+  ];
 
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);

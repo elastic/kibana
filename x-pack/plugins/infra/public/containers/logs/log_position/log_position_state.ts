@@ -38,6 +38,7 @@ export interface LogPositionStateParams {
   endDateExpression: string;
   startTimestamp: number | null;
   endTimestamp: number | null;
+  timestampsLastUpdate: number;
 }
 
 export interface LogPositionCallbacks {
@@ -85,10 +86,10 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     setInitialized(true);
   }, [setInitialized]);
 
-  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
+  const [timestampsLastUpdate, setTimestampsLastUpdate] = useState<number>(Date.now());
   const updateTimestamps = useCallback(() => {
-    setLastUpdate(Date.now());
-  }, [setLastUpdate]);
+    setTimestampsLastUpdate(Date.now());
+  }, [setTimestampsLastUpdate]);
 
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -158,7 +159,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   /* eslint-disable react-hooks/exhaustive-deps */
   const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDateExpression), [
     dateRange.startDateExpression,
-    lastUpdate,
+    timestampsLastUpdate,
   ]);
 
   // endTimestamp needs to be synced to `now` to allow auto-streaming
@@ -166,7 +167,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     dateRange.endDateExpression === 'now' ? Date.now() : dateRange.endDateExpression;
   const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDateExpression, 'up'), [
     endTimestampDep,
-    lastUpdate,
+    timestampsLastUpdate,
   ]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
@@ -183,6 +184,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     ...dateRange,
     startTimestamp,
     endTimestamp,
+    timestampsLastUpdate,
   };
 
   const callbacks = {

@@ -31,6 +31,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const {
     startTimestamp,
     endTimestamp,
+    timestampsLastUpdate,
     targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
@@ -48,6 +49,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const entriesProps = {
     startTimestamp,
     endTimestamp,
+    timestampsLastUpdate,
     timeKey: targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
