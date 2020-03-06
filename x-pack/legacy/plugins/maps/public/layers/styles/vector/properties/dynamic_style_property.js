@@ -98,10 +98,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   async getFieldMetaRequest() {
     if (this.isOrdinal()) {
-      const fieldMetaOptions = this.getFieldMetaOptions();
-      return this._field.getOrdinalFieldMetaRequest({
-        sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
-      });
+      return this._field.getOrdinalFieldMetaRequest();
     } else if (this.isCategorical()) {
       return this._field.getCategoricalFieldMetaRequest();
     } else {
