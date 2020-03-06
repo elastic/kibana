@@ -41,77 +41,112 @@ const env = {
   ES_HOST: 'https://super:changeme@some.fake.host:9243',
   NODE_ENV: 'integration_test',
 };
-const expectAllRegexesToPass = regexes => urlLine =>
-  Object.entries(regexes)
-    .forEach(regexTuple => {
-      if (!regexTuple[1].test(urlLine))
-        throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`)
-    });
 const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
-const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate)
+const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate);
 const splitByNewLine = x => x.split('\n');
 const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 
 describe('Ingesting Coverage to Cluster', () => {
-  const chunks = [];
+  const verboseArgs = [ 'scripts/ingest_coverage.js', '--verbose', '--path', ];
 
-  beforeAll(done => {
-    const coverageSummaryPath = resolve(MOCKS_DIR, 'jest-combined/coverage-summary-NO-total.json');
-    const args = [
-      'scripts/ingest_coverage.js',
-      '--verbose',
-      '--path',
+  const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
+  const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
+
+  describe(`to the 'totals' index`, () => {
+    const mutableTotalsIndexLoggingChunks = [];
+
+    beforeAll(done => {
+      const ingestAndMutateAsync = ingestAndMutate(done);
+      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(justTotalPath);
+      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+
+      verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
+    });
+    it(`should have a link to the index page for the specific test runner`, () => {
+      mutableTotalsIndexLoggingChunks.forEach(x => console.log(x))
+
+
+
+      // siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
+      //   .forEach(expectAllRegexesToPass(regexes))
+
+
+    });
+  });
+
+  describe(`to the 'coverage' index`, () => {
+    const mutableCoverageIndexChunks = [];
+
+    beforeAll(done => {
+      const ingestAndMutateAsync = ingestAndMutate(done);
+      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(noTotalsPath);
+      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+      verboseIngestAndMutateAsyncWithPath(mutableCoverageIndexChunks);
+    });
+
+    it('should result in every posted item having a site url that meets all regex assertions',
+      F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
+        .forEach(expectAllRegexesToPass(regexes))));
+
+    describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
+      const combinedMsg = 'combined';
+
+      const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
+      it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
+        const includesDistroPredicate = x => x.includes('distro');
+        const distroLines = specificLinesOnly(includesDistroPredicate);
+        const distroLinesSplitByNewLine = distroLines(splitByNewLine);
+        const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
+
+        distroLinesSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
+          .filter(includesDistroPredicate)
+          .forEach(x => expect(x).to.contain(combinedMsg));
+      });
+    });
+    describe('with NODE_ENV set to "integration_test"', () => {
+      describe(`and debug || verbose turned on`, () => {
+        it('should result in the "just logging" message being present in the log', () => {
+          expect(mutableCoverageIndexChunks.some(x => x.includes('Just Logging'))).to.be(true);
+        });
+        it('should result in the "actually sending" message NOT being present in the log', () => {
+          expect(mutableCoverageIndexChunks.every(x => !x.includes('Actually sending...'))).to.be(true);
+        });
+      });
+    });
+  });
+
+});
+
+function ingestAndMutate (done) {
+  return summaryPathSuffix => args => xs => {
+    const coverageSummaryPath = resolve(MOCKS_DIR, summaryPathSuffix);
+    const opts = [
+      ...args,
       coverageSummaryPath,
     ];
+    const ingest = spawn(process.execPath, opts, { cwd: ROOT_DIR, env });
 
-    const create = spawn(process.execPath, args, { cwd: ROOT_DIR, env });
+    ingest.stdout.on('data', x => xs.push(x + ''));
+    ingest.on('close', done);
+  };
+}
 
-    create.stdout.on('data', x => chunks.push(x + ''));
-    create.on('close', done);
-  });
-
-  it('should result in every posted item having a site url that meets all regex assertions',
-    F(siteUrlsSplitByNewLineWithoutBlanks(chunks)
-      .forEach(expectAllRegexesToPass(regexes))));
-
-  describe(`to a 'totals' index`, () => {
-    it(`should have a link to the index page for the specific test runner`, () => {
-      throw new Error('NOT IMPLEMENTED Yet')
-    });
-  });
-  describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
-    const combinedMsg = 'combined';
-
-    const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
-    it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
-      const includesDistroPredicate = x => x.includes('distro');
-      const distroLines = specificLinesOnly(includesDistroPredicate);
-      const distroLinesSplitByNewLine = distroLines(splitByNewLine);
-      const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
-
-      distroLinesSplitByNewLineWithoutBlanks(chunks)
-        .filter(includesDistroPredicate)
-        .forEach(x => expect(x).to.contain(combinedMsg));
-    });
-  });
-  describe('with NODE_ENV set to "integration_test"', () => {
-    describe(`and debug || verbose turned on`, () => {
-      it('should result in the "just logging" message being present in the log', () => {
-        expect(chunks.some(x => x.includes('Just Logging'))).to.be(true);
-      });
-      it('should result in the "actually sending" message NOT being present in the log', () => {
-        expect(chunks.every(x => !x.includes('Actually sending...'))).to.be(true);
-      });
-    });
-  });
-});
-function specificLinesOnly(predicate) {
+function specificLinesOnly (predicate) {
   return splitByNewLine => notBlankLines => xs =>
     xs.filter(predicate)
-    .map(x => splitByNewLine(x).reduce(notBlankLines))
+      .map(x => splitByNewLine(x).reduce(notBlankLines));
 }
-function notBlankLines(acc, item) {
+
+function notBlankLines (acc, item) {
   if (item != '') return item;
   return acc;
+}
+function expectAllRegexesToPass (regexes) {
+  return urlLine =>
+    Object.entries(regexes)
+      .forEach(regexTuple => {
+        if (!regexTuple[1].test(urlLine))
+          throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`);
+      });
 }
