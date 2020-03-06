@@ -38,7 +38,7 @@ import {
 } from '../../../../../../plugins/data/public';
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/common/calculate_object_hash';
+import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/common';
 import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';

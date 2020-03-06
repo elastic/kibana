@@ -23,7 +23,7 @@ import { Status } from '../../visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common/default_feedback_message';
+import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';
 
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-ignore
