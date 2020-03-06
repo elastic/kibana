@@ -255,17 +255,15 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Agents',
         }),
         dataType: 'number',
-        render: (agents: unknown, config: AgentConfig) => {
-          // FIXME: implement agents once known in API/Schema
-          const agentCount = [99, 100000, 0][Math.floor(Math.random() * 3)];
+        render: (agents: number, config: AgentConfig) => {
           const displayValue = (
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.agentsText"
-              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-              values={{ agentCount }}
+              defaultMessage="{agents, plural, one {# agent} other {# agents}}"
+              values={{ agents }}
             />
           );
-          return agentCount > 0 ? (
+          return agents > 0 ? (
             <EuiLink href={`${FLEET_URI}?kuery=agents.config_id : ${config.id}`}>
               {displayValue}
             </EuiLink>

@@ -62,8 +62,30 @@ export interface RegistryPackage {
   internal?: boolean;
   format_version: string;
   datasets?: Dataset[];
+  datasources?: RegistryDatasource[];
   download: string;
   path: string;
+}
+
+export interface RegistryDatasource {
+  name: string;
+  title: string;
+  description: string;
+  inputs: RegistryInput[];
+}
+
+export interface RegistryInput {
+  type: string;
+  vars?: VarsEntry[];
+  description?: string;
+  streams: RegistryStream[];
+}
+
+export interface RegistryStream {
+  input: string;
+  vars?: VarsEntry[];
+  dataset?: string;
+  description?: string;
 }
 
 export type RequirementVersion = string;
@@ -136,12 +158,25 @@ export interface Dataset {
   ingest_pipeline: string;
   vars?: VarsEntry[];
   type: string;
+  streams?: RegistryStream[];
   package: string;
 }
 
+// EPR types this as `[]map[string]interface{}`
+// which means the official/possible type is Record<string, any>
+// but we effectively only see this shape
 export interface VarsEntry {
   name: string;
-  default: string;
+  description?: string;
+  type: string;
+  required?: boolean;
+  multi?: boolean;
+  default?: string | string[];
+  os?: {
+    [key: string]: {
+      default: string | string[];
+    };
+  };
 }
 
 // some properties are optional in Registry responses but required in EPM

@@ -11,7 +11,7 @@ export interface GetAgentConfigsRequest {
 }
 
 export interface GetAgentConfigsResponse {
-  items: AgentConfig[];
+  items: Array<AgentConfig & { agents?: number }>;
   total: number;
   page: number;
   perPage: number;
