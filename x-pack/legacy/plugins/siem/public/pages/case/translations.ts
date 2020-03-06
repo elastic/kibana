@@ -18,8 +18,8 @@ export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.createdAt', {
-  defaultMessage: 'Created at',
+export const OPENED_ON = i18n.translate('xpack.siem.case.caseView.openedOn', {
+  defaultMessage: 'Opened on',
 });
 
 export const REPORTER = i18n.translate('xpack.siem.case.caseView.createdBy', {
@@ -86,6 +86,21 @@ export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase',
 
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
+});
+
+export const NO_TAGS_AVAILABLE = i18n.translate('xpack.siem.case.allCases.noTagsAvailable', {
+  defaultMessage: 'No tags available',
+});
+
+export const NO_REPORTERS_AVAILABLE = i18n.translate(
+  'xpack.siem.case.caseView.noReportersAvailable',
+  {
+    defaultMessage: 'No reporters available.',
+  }
+);
+
+export const COMMENTS = i18n.translate('xpack.siem.case.allCases.comments', {
+  defaultMessage: 'Comments',
 });
 
 export const TAGS_HELP = i18n.translate('xpack.siem.case.createCase.fieldTagsHelpText', {
