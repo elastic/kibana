@@ -9,9 +9,9 @@ import { SearchBar, OuterSearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../../src/plugins/data/public';
+import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { openSourceModal } from '../services/source_modal';
