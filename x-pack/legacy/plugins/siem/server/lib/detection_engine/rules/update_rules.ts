@@ -81,6 +81,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions: rule.actions,
+      throttle: null,
       params: {
         description,
         ruleId: rule.params.ruleId,
