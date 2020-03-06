@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiDatePicker, EuiFormControlLayout } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
+import { useWaffleTimeContext } from '../../pages/inventory_view/hooks/use_waffle_time';
 
 export const WaffleTimeControls = () => {
   const {
@@ -17,7 +17,7 @@ export const WaffleTimeControls = () => {
     startAutoReload,
     stopAutoReload,
     jumpToTime,
-  } = useWaffleTime();
+  } = useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
 

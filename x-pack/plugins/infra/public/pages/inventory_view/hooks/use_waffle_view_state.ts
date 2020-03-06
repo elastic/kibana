@@ -5,13 +5,13 @@
  */
 import { useCallback } from 'react';
 import {
-  useWaffleOptions,
+  useWaffleOptionsContext,
   DEFAULT_WAFFLE_OPTIONS_STATE,
   WaffleOptionsState,
 } from './use_waffle_options';
-import { useWaffleTime, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
+import { useWaffleTimeContext, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
 import {
-  useWaffleFilters,
+  useWaffleFiltersContext,
   DEFAULT_WAFFLE_FILTERS_STATE,
   WaffleFiltersState,
 } from './use_waffle_filters';
@@ -29,9 +29,9 @@ export const useWaffleViewState = () => {
     accountId,
     region,
     setWaffleOptionsState,
-  } = useWaffleOptions();
-  const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTime();
-  const { filterQuery, setWaffleFiltersState } = useWaffleFilters();
+  } = useWaffleOptionsContext();
+  const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTimeContext();
+  const { filterQuery, setWaffleFiltersState } = useWaffleFiltersContext();
 
   const viewState: WaffleViewState = {
     metric,

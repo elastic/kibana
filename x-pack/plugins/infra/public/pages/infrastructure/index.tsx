@@ -24,91 +24,100 @@ import { MetricsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { WaffleOptionsProvider } from '../inventory_view/hooks/use_waffle_options';
+import { WaffleTimeProvider } from '../inventory_view/hooks/use_waffle_time';
+import { WaffleFiltersProvider } from '../inventory_view/hooks/use_waffle_filters';
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   return (
     <Source.Provider sourceId="default">
-      <ColumnarPage>
-        <DocumentTitle
-          title={i18n.translate('xpack.infra.homePage.documentTitle', {
-            defaultMessage: 'Metrics',
-          })}
-        />
+      <WaffleOptionsProvider>
+        <WaffleTimeProvider>
+          <WaffleFiltersProvider>
+            <ColumnarPage>
+              <DocumentTitle
+                title={i18n.translate('xpack.infra.homePage.documentTitle', {
+                  defaultMessage: 'Metrics',
+                })}
+              />
 
-        <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/metrics"
-          appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-            defaultMessage: 'Metrics',
-          })}
-        />
+              <HelpCenterContent
+                feedbackLink="https://discuss.elastic.co/c/metrics"
+                appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                  defaultMessage: 'Metrics',
+                })}
+              />
 
-        <Header
-          breadcrumbs={[
-            {
-              text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                defaultMessage: 'Metrics',
-              }),
-            },
-          ]}
-          readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-        />
+              <Header
+                breadcrumbs={[
+                  {
+                    text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+                      defaultMessage: 'Metrics',
+                    }),
+                  },
+                ]}
+                readOnlyBadge={!uiCapabilities?.infrastructure?.save}
+              />
 
-        <AppNavigation
-          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
-            defaultMessage: 'Metrics',
-          })}
-        >
-          <RoutedTabs
-            tabs={[
-              {
-                title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-                  defaultMessage: 'Inventory',
-                }),
-                path: '/inventory',
-              },
-              {
-                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                  defaultMessage: 'Metrics Explorer',
-                }),
-                path: '/explorer',
-              },
-              {
-                title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-                  defaultMessage: 'Settings',
-                }),
-                path: '/settings',
-              },
-            ]}
-          />
-        </AppNavigation>
+              <AppNavigation
+                aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+                  defaultMessage: 'Metrics',
+                })}
+              >
+                <RoutedTabs
+                  tabs={[
+                    {
+                      title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+                        defaultMessage: 'Inventory',
+                      }),
+                      path: '/inventory',
+                    },
+                    {
+                      title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                        defaultMessage: 'Metrics Explorer',
+                      }),
+                      path: '/explorer',
+                    },
+                    {
+                      title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+                        defaultMessage: 'Settings',
+                      }),
+                      path: '/settings',
+                    },
+                  ]}
+                />
+              </AppNavigation>
 
-        <Switch>
-          <Route path={'/inventory'} component={SnapshotPage} />
-          <Route
-            path={'/explorer'}
-            render={props => (
-              <WithSource>
-                {({ configuration, createDerivedIndexPattern }) => (
-                  <MetricsExplorerOptionsContainer.Provider>
-                    <WithMetricsExplorerOptionsUrlState />
-                    {configuration ? (
-                      <MetricsExplorerPage
-                        derivedIndexPattern={createDerivedIndexPattern('metrics')}
-                        source={configuration}
-                        {...props}
-                      />
-                    ) : (
-                      <SourceLoadingPage />
-                    )}
-                  </MetricsExplorerOptionsContainer.Provider>
-                )}
-              </WithSource>
-            )}
-          />
-          <Route path={'/settings'} component={MetricsSettingsPage} />
-        </Switch>
-      </ColumnarPage>
+              <Switch>
+                <Route path={'/inventory'} component={SnapshotPage} />
+                <Route
+                  path={'/explorer'}
+                  render={props => (
+                    <WithSource>
+                      {({ configuration, createDerivedIndexPattern }) => (
+                        <MetricsExplorerOptionsContainer.Provider>
+                          <WithMetricsExplorerOptionsUrlState />
+                          {configuration ? (
+                            <MetricsExplorerPage
+                              derivedIndexPattern={createDerivedIndexPattern('metrics')}
+                              source={configuration}
+                              {...props}
+                            />
+                          ) : (
+                            <SourceLoadingPage />
+                          )}
+                        </MetricsExplorerOptionsContainer.Provider>
+                      )}
+                    </WithSource>
+                  )}
+                />
+                <Route path={'/settings'} component={MetricsSettingsPage} />
+              </Switch>
+            </ColumnarPage>
+          </WaffleFiltersProvider>
+        </WaffleTimeProvider>
+      </WaffleOptionsProvider>
     </Source.Provider>
   );
 };

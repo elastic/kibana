@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Source } from '../../../containers/source';
 import { AutocompleteField } from '../../../components/autocomplete_field';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
-import { useWaffleFilters } from '../hooks/use_waffle_filters';
+import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 
 export const SearchBar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
@@ -17,7 +17,7 @@ export const SearchBar = () => {
     filterQueryDraft,
     isFilterQueryDraftValid,
     setFilterQueryDraftFromKueryExpression,
-  } = useWaffleFilters();
+  } = useWaffleFiltersContext();
   return (
     <WithKueryAutocompletion indexPattern={createDerivedIndexPattern('metrics')}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (

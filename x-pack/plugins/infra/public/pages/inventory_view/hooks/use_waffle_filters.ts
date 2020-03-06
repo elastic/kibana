@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
+import createContainter from 'constate';
 import { useUrlState } from '../../../utils/use_url_state';
 import { useSourceContext } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
@@ -29,43 +30,53 @@ export const useWaffleFilters = () => {
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern('metrics');
 
-  const [filterQuery, setFilterQuery] = useUrlState<WaffleFiltersState>({
+  const [urlState, setUrlState] = useUrlState<WaffleFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',
   });
 
-  const [filterQueryDraft, setFilterQueryDraft] = useState<string>('');
+  const [state, setState] = useState<WaffleFiltersState>(urlState);
+
+  useEffect(() => setUrlState(state), [setUrlState, state]);
+
+  const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
 
   const filterQueryAsJson = useMemo(
-    () => convertKueryToElasticSearchQuery(filterQuery.expression, indexPattern),
-    [filterQuery, indexPattern]
+    () => convertKueryToElasticSearchQuery(urlState.expression, indexPattern),
+    [indexPattern, urlState.expression]
   );
 
   const applyFilterQueryFromKueryExpression = useCallback(
     (expression: string) => {
-      setFilterQuery({
+      setState(previous => ({
+        ...previous,
         kind: 'kuery',
         expression,
-      });
+      }));
     },
-    [setFilterQuery]
+    [setState]
   );
+
+  const applyFilterQuery = useCallback((filterQuery: WaffleFiltersState) => {
+    setState(filterQuery);
+    setFilterQueryDraft(filterQuery.expression);
+  }, []);
 
   const isFilterQueryDraftValid = useMemo(() => validateKuery(filterQueryDraft), [
     filterQueryDraft,
   ]);
 
   return {
-    filterQuery,
+    filterQuery: urlState,
     filterQueryDraft,
     filterQueryAsJson,
-    applyFilterQuery: setFilterQuery,
+    applyFilterQuery,
     setFilterQueryDraftFromKueryExpression: setFilterQueryDraft,
     applyFilterQueryFromKueryExpression,
     isFilterQueryDraftValid,
-    setWaffleFiltersState: setFilterQuery,
+    setWaffleFiltersState: applyFilterQuery,
   };
 };
 
@@ -78,3 +89,5 @@ export type WaffleFiltersState = rt.TypeOf<typeof WaffleFiltersStateRT>;
 const encodeUrlState = WaffleFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(WaffleFiltersStateRT.decode(value), fold(constant(undefined), identity));
+export const WaffleFilters = createContainter(useWaffleFilters);
+export const [WaffleFiltersProvider, useWaffleFiltersContext] = WaffleFilters;

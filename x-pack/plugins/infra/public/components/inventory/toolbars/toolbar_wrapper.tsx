@@ -12,7 +12,7 @@ import { Toolbar } from '../../eui/toolbar';
 import { ToolbarProps } from './toolbar';
 import { fieldToName } from '../../waffle/lib/field_to_display_name';
 import { useSourceContext } from '../../../containers/source';
-import { useWaffleOptions } from '../../../pages/inventory_view/hooks/use_waffle_options';
+import { useWaffleOptionsContext } from '../../../pages/inventory_view/hooks/use_waffle_options';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
@@ -33,7 +33,7 @@ export const ToolbarWrapper = (props: Props) => {
     region,
     customMetrics,
     changeCustomMetrics,
-  } = useWaffleOptions();
+  } = useWaffleOptionsContext();
   const { createDerivedIndexPattern } = useSourceContext();
   return (
     <Toolbar>

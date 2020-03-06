@@ -11,7 +11,7 @@ import { GradientLegend } from './gradient_legend';
 import { LegendControls } from './legend_controls';
 import { isInfraWaffleMapGradientLegend, isInfraWaffleMapStepLegend } from './lib/type_guards';
 import { StepLegend } from './steps_legend';
-import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
+import { useWaffleOptionsContext } from '../../pages/inventory_view/hooks/use_waffle_options';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;
@@ -25,7 +25,12 @@ interface LegendControlOptions {
 }
 
 export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
-  const { changeBoundsOverride, changeAutoBounds, autoBounds, boundsOverride } = useWaffleOptions();
+  const {
+    changeBoundsOverride,
+    changeAutoBounds,
+    autoBounds,
+    boundsOverride,
+  } = useWaffleOptionsContext();
   return (
     <LegendContainer>
       <LegendControls

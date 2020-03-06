@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
+import createContainer from 'constate';
 import {
   SnapshotMetricInput,
   SnapshotGroupBy,
@@ -99,7 +100,7 @@ export const useWaffleOptions = () => {
   );
 
   return {
-    ...urlState,
+    ...state,
     changeMetric,
     changeGroupBy,
     changeNodeType,
@@ -141,3 +142,6 @@ const encodeUrlState = (state: WaffleOptionsState) => {
 };
 const decodeUrlState = (value: unknown) =>
   pipe(WaffleOptionsStateRT.decode(value), fold(constant(undefined), identity));
+
+export const WaffleOptions = createContainer(useWaffleOptions);
+export const [WaffleOptionsProvider, useWaffleOptionsContext] = WaffleOptions;

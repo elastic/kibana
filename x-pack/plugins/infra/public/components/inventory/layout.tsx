@@ -13,9 +13,9 @@ import { Toolbar } from './toolbars/toolbar';
 import { PageContent } from '../page';
 import { useSnapshot } from '../../containers/waffle/use_snaphot';
 import { useInventoryMeta } from '../../containers/inventory_metadata/use_inventory_meta';
-import { useWaffleTime } from '../../pages/inventory_view/hooks/use_waffle_time';
-import { useWaffleFilters } from '../../pages/inventory_view/hooks/use_waffle_filters';
-import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../../pages/inventory_view/hooks/use_waffle_time';
+import { useWaffleFiltersContext } from '../../pages/inventory_view/hooks/use_waffle_filters';
+import { useWaffleOptionsContext } from '../../pages/inventory_view/hooks/use_waffle_options';
 import { useSourceContext } from '../../containers/source';
 import { InfraFormatterType, InfraWaffleMapGradientLegend } from '../../lib/lib';
 
@@ -33,10 +33,10 @@ export const Layout = () => {
     view,
     autoBounds,
     boundsOverride,
-  } = useWaffleOptions();
+  } = useWaffleOptionsContext();
   const { accounts, regions } = useInventoryMeta(sourceId, nodeType);
-  const { currentTime, jumpToTime, isAutoReloading } = useWaffleTime();
-  const { filterQueryAsJson, applyFilterQuery } = useWaffleFilters();
+  const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
+  const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
   const { loading, nodes, reload, interval } = useSnapshot(
     filterQueryAsJson,
     metric,

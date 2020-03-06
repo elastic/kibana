@@ -8,6 +8,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
+import createContainer from 'constate';
 import { useUrlState } from '../../../utils/use_url_state';
 
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
@@ -70,3 +71,6 @@ export type WaffleTimeState = rt.TypeOf<typeof WaffleTimeStateRT>;
 const encodeUrlState = WaffleTimeStateRT.encode;
 const decodeUrlState = (value: unknown) =>
   pipe(WaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
+
+export const WaffleTime = createContainer(useWaffleTime);
+export const [WaffleTimeProvider, useWaffleTimeContext] = WaffleTime;

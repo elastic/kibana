@@ -16,7 +16,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { useWaffleOptions } from '../../pages/inventory_view/hooks/use_waffle_options';
+import { useWaffleOptionsContext } from '../../pages/inventory_view/hooks/use_waffle_options';
 
 const getDisplayNameForType = (type: InventoryItemType) => {
   const inventoryModel = findInventoryModel(type);
@@ -32,7 +32,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
     changeRegion,
     changeCustomMetrics,
     nodeType,
-  } = useWaffleOptions();
+  } = useWaffleOptionsContext();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const openPopover = useCallback(() => setIsOpen(true), []);
