@@ -25,6 +25,7 @@ import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { esFilters, IIndexPattern } from '../..';
+import { getNotifications } from '../../services';
 
 interface Props {
   id: string;
@@ -56,23 +57,41 @@ class FilterItemUI extends Component<Props, State> {
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
+    let hasError: boolean = false;
+
+    let valueLabel;
+    try {
+      valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    } catch (e) {
+      getNotifications().toasts.addError(e, {
+        title: this.props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelErrorMessage',
+          defaultMessage: 'Failed to display filter',
+        }),
+      });
+      valueLabel = this.props.intl.formatMessage({
+        id: 'data.filter.filterBar.labelErrorText',
+        defaultMessage: 'Error',
+      });
+      hasError = true;
+    }
+    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
+    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
+    const dataTestSubjDisabled = `filter-${
+      this.props.filter.meta.disabled ? 'disabled' : 'enabled'
+    }`;
 
     const classes = classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': disabled,
+        'globalFilterItem-isDisabled': disabled || hasError,
+        'globalFilterItem-isInvalid': hasError,
         'globalFilterItem-isPinned': esFilters.isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
       this.props.className
     );
 
-    const valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
-    const dataTestSubjDisabled = `filter-${
-      this.props.filter.meta.disabled ? 'disabled' : 'enabled'
-    }`;
 
     const badge = (
       <FilterView
