@@ -31,7 +31,7 @@ export const MLIntegrationComponent = () => {
   const button = (
     <EuiButtonEmpty
       disabled={!license?.getFeature('ml')?.isAvailable}
-      iconType="managementApp"
+      iconType="machineLearningApp"
       iconSide="right"
       onClick={onButtonClick}
     >

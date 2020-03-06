@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MLJobLink } from '../ml_job_link';
 import * as labels from '../translations';
 import { UptimeSettingsContext } from '../../../../contexts';
+import { ShowLicenseInfo } from '../license_info';
 
 interface Props {
   isCreatingJob: boolean;
@@ -40,9 +41,11 @@ export function MachineLearningFlyoutView({
   onClose,
   hasMLJob,
 }: Props) {
-  const { basePath } = useContext(UptimeSettingsContext);
+  const { basePath, license } = useContext(UptimeSettingsContext);
 
   const isLoadingMLJob = false;
+
+  const hasPlatinumLicense = !license?.getFeature('ml')?.isAvailable;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -53,7 +56,8 @@ export function MachineLearningFlyoutView({
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {hasMLJob && (
+        {!hasPlatinumLicense && <ShowLicenseInfo />}
+        {hasMLJob && hasPlatinumLicense && (
           <div>
             <EuiCallOut title={labels.JOB_ALREADY_EXIST} color="success" iconType="check">
               <p>
@@ -89,7 +93,8 @@ export function MachineLearningFlyoutView({
               <EuiButton
                 onClick={() => onClickCreate()}
                 fill
-                disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
+                isLoading={isCreatingJob}
+                disabled={isCreatingJob || hasMLJob || isLoadingMLJob || !hasPlatinumLicense}
               >
                 {labels.CREATE_NEW_JOB}
               </EuiButton>

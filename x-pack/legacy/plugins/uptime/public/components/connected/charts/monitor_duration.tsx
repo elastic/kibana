@@ -18,7 +18,12 @@ interface Props {
 
 export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
+  } = getUrlParams();
 
   const { monitor_duration, loading } = useSelector(selectDurationLines);
 
@@ -31,8 +36,22 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   useEffect(() => {
     const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
     dispatch(getMonitorDurationAction(params));
-    dispatch(anomalyRecordsAction.get(params));
-  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
+    const anomalyParams = {
+      monitorId,
+      dateStart: absoluteDateRangeStart,
+      dateEnd: absoluteDateRangeEnd,
+    };
+
+    dispatch(anomalyRecordsAction.get(anomalyParams));
+  }, [
+    dateRangeStart,
+    dateRangeEnd,
+    dispatch,
+    lastRefresh,
+    monitorId,
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
+  ]);
 
   return (
     <DurationChartComponent
