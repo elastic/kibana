@@ -19,8 +19,8 @@ export const MapsSchema = schema.object({
 export const CasesConfigurationSchema = schema.object({
   closure: schema.oneOf([
     schema.literal('manual'),
-    schema.literal('new_incident'),
-    schema.literal('closed_incident'),
+    schema.literal('newIncident'),
+    schema.literal('closedIncident'),
   ]),
   mapping: schema.arrayOf(MapsSchema),
 });
