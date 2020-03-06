@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment-timezone';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
@@ -89,7 +91,9 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   const dataGridColumns = indexPatternFields.map(id => {
     const field = indexPattern.fields.getByName(id);
 
-    let schema = 'string';
+    // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+    // To fall back to the default string schema it needs to be undefined.
+    let schema;
 
     switch (field?.type) {
       case 'date':
@@ -144,13 +148,18 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
         return JSON.stringify(cellValue);
       }
 
-      if (cellValue === undefined) {
+      if (cellValue === undefined || cellValue === null) {
         return null;
+      }
+
+      const field = indexPattern.fields.getByName(columnId);
+      if (field?.type === 'date') {
+        return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 
       return cellValue;
     };
-  }, [data, pagination.pageIndex, pagination.pageSize]);
+  }, [data, indexPattern.fields, pagination.pageIndex, pagination.pageSize]);
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
