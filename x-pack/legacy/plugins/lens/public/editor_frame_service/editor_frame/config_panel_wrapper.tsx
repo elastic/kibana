@@ -98,7 +98,7 @@ function LayerPanels(
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
         newState,
-        clearStagedPreview: true,
+        clearStagedPreview: false,
       });
     },
     [props.dispatch, activeVisualization]
@@ -109,7 +109,7 @@ function LayerPanels(
         type: 'UPDATE_DATASOURCE_STATE',
         updater: () => newState,
         datasourceId,
-        clearStagedPreview: true,
+        clearStagedPreview: false,
       });
     },
     [props.dispatch]
@@ -204,6 +204,9 @@ function LayerPanel(
   const dragDropContext = useContext(DragContext);
   const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemove } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+  if (!datasourcePublicAPI) {
+    return <></>;
+  }
   const layerVisualizationConfigProps = {
     layerId,
     dragDropContext,

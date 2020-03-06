@@ -257,7 +257,6 @@ export interface LensMultiTable {
 
 export interface VisualizationLayerConfigProps<T = unknown> {
   layerId: string;
-  // dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
   setState: (newState: T) => void;

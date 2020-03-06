@@ -635,14 +635,13 @@ describe('editor_frame', () => {
 
       const updatedState = {};
       const setVisualizationState = (mockVisualization.getLayerOptions as jest.Mock).mock
-        .calls[0][1].setState;
+        .calls[0][0].setState;
       act(() => {
         setVisualizationState(updatedState);
       });
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getLayerOptions).toHaveBeenLastCalledWith(
-        // expect.any(Element),
         expect.objectContaining({
           state: updatedState,
         })
@@ -722,7 +721,6 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getLayerOptions).toHaveBeenLastCalledWith(
-        // expect.any(Element),
         expect.objectContaining({
           frame: expect.objectContaining({
             datasourceLayers: {
@@ -738,6 +736,7 @@ describe('editor_frame', () => {
     it('should pass the datasource api for each layer to the visualization', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second', 'third']);
 
       mount(
         <EditorFrame
@@ -776,7 +775,8 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalled();
 
-      const datasourceLayers = mockVisualization.initialize.mock.calls[0][0].datasourceLayers;
+      const datasourceLayers =
+        mockVisualization.getLayerOptions.mock.calls[0][0].frame.datasourceLayers;
       expect(datasourceLayers.first).toBe(mockDatasource.publicAPIMock);
       expect(datasourceLayers.second).toBe(mockDatasource2.publicAPIMock);
       expect(datasourceLayers.third).toBe(mockDatasource2.publicAPIMock);
@@ -1039,7 +1039,6 @@ describe('editor_frame', () => {
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
       expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
-        // expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1057,7 +1056,6 @@ describe('editor_frame', () => {
         })
       );
       expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
-        expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1254,7 +1252,6 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
-        // expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1319,7 +1316,6 @@ describe('editor_frame', () => {
       });
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
-        // expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1393,7 +1389,6 @@ describe('editor_frame', () => {
       });
 
       expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
-        expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1489,7 +1484,6 @@ describe('editor_frame', () => {
       });
 
       expect(mockVisualization3.getLayerOptions).toHaveBeenCalledWith(
-        // expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
         })
