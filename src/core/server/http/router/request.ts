@@ -178,7 +178,8 @@ export class KibanaRequest<
     this.events = this.getEvents(request);
 
     this.auth = {
-      isAuthenticated: request.auth.isAuthenticated,
+      // missing in fakeRequests, so we cast to false
+      isAuthenticated: Boolean(request.auth?.isAuthenticated),
     };
   }
 
