@@ -263,14 +263,14 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   isInvalid={errors.port.length > 0 && port !== undefined}
                   fullWidth
                   name="port"
-                  value={port}
+                  value={port || ''}
                   data-test-subj="emailPortInput"
                   onChange={e => {
                     editActionConfig('port', parseInt(e.target.value, 10));
                   }}
                   onBlur={() => {
                     if (!port) {
-                      editActionConfig('port', '');
+                      editActionConfig('port', 0);
                     }
                   }}
                 />
@@ -380,7 +380,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
 
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   useEffect(() => {
-    if (defaultMessage && defaultMessage.length > 0) {
+    if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

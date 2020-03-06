@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConnectorAddFlyout } from './connector_add_flyout';
-export { ConnectorEditFlyout } from './connector_edit_flyout';
-export { ActionForm } from './action_form';
+export { EnhancedSearchParams, IEnhancedEsSearchRequest } from './types';
