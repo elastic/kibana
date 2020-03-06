@@ -643,7 +643,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
         if (!$scope.opts.timefield) return;
 
-        const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
+        const buckets = $scope.vis.getAggConfig().byTypeName('buckets');
 
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -820,6 +820,7 @@ function discoverController(
       $scope.searchSource.rawResponse = resp;
       Promise.resolve(
         buildVislibDimensions($scope.vis, {
+          timefilter,
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })
