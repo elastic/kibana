@@ -22,9 +22,8 @@ import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../public';
+import { getFieldFormats } from '../../../../public/services';
 
 // required by the values editor
 export type IPercentileRanksAggConfig = IResponseAggConfig;

@@ -24,9 +24,8 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 
-import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats, getUiSettings } from '../../../../../../../plugins/data/public/services';
+import { KBN_FIELD_TYPES, fieldFormats } from '../../../../public';
+import { getFieldFormats, getUiSettings } from '../../../../public/services';
 
 import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 export { convertDateRangeToString, DateRangeKey }; // for BWC

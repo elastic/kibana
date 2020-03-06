@@ -18,7 +18,7 @@
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
-import { esFilters, esQuery } from '../../../../../../../plugins/data/public';
+import { esFilters, esQuery } from '../../../../public';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './_bucket_agg_type';

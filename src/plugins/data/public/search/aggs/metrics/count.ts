@@ -20,9 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
+import { KBN_FIELD_TYPES } from '../../../../public';
+import { getFieldFormats } from '../../../../public/services';
 
 export const countMetricAgg = new MetricAggType({
   name: METRIC_TYPES.COUNT,

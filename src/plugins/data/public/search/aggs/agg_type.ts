@@ -23,16 +23,11 @@ import { initParams } from './agg_params';
 
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
-import { Adapters } from '../../../../../../plugins/inspector/public';
+import { Adapters } from '../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
-import {
-  KBN_FIELD_TYPES,
-  IFieldFormat,
-  ISearchSource,
-} from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../plugins/data/public/services';
+import { KBN_FIELD_TYPES, IFieldFormat, ISearchSource } from '../../../public';
+import { getFieldFormats } from '../../../public/services';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,

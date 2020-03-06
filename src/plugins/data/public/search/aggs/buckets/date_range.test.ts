@@ -17,13 +17,13 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from 'src/core/public/mocks';
+import { setUiSettings } from '../../../../public/services';
 import { dateRangeBucketAgg } from './date_range';
 import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setUiSettings } from '../../../../../../../plugins/data/public/services';
 
 describe('date_range params', () => {
   beforeEach(() => {

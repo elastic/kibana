@@ -26,9 +26,9 @@ import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { Storage } from '../../../../../../../plugins/kibana_utils/public';
+import { Storage } from '../../../../../../plugins/kibana_utils/public';
 
-import { getQueryLog, esQuery, Query } from '../../../../../../../plugins/data/public';
+import { getQueryLog, esQuery, Query } from '../../../../public';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',

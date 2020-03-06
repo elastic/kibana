@@ -22,9 +22,8 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
+import { KBN_FIELD_TYPES } from '../../../../public';
+import { getFieldFormats } from '../../../../public/services';
 import { FieldTypes } from '../param_types';
 
 export interface IMetricAggConfig extends AggConfig {

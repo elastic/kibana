@@ -18,9 +18,9 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { IUiSettingsClient } from 'src/core/public';
 import { TimeBuckets } from './time_buckets';
-import { TimeRange } from '../../../../../../../../plugins/data/public';
-import { IUiSettingsClient } from '../../../../../../../../core/public';
+import { TimeRange } from '../../../../../public';
 
 export function toAbsoluteDates(range: TimeRange) {
   const fromDate = dateMath.parse(range.from);

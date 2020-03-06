@@ -19,7 +19,7 @@
 
 import { rangeBucketAgg } from '../range';
 import { createFilterRange } from './range';
-import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
+import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../public';
 import { AggConfigs } from '../../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';

@@ -22,12 +22,8 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
-import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
-import {
-  stubIndexPattern,
-  stubIndexPatternWithFields,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/stubs';
+import { IndexPatternField, IndexPattern } from '../../../public';
+import { stubIndexPattern, stubIndexPatternWithFields } from '../../../public/stubs';
 
 describe('AggConfigs', () => {
   let indexPattern: IndexPattern;

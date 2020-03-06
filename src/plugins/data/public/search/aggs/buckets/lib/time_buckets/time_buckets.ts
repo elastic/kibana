@@ -20,9 +20,8 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import { IUiSettingsClient } from '../../../../../../../../../core/public';
-import { parseInterval } from '../../../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IUiSettingsClient } from 'src/core/public';
+import { parseInterval } from '../../../../../../public';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,

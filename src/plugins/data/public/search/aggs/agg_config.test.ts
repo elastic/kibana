@@ -24,13 +24,10 @@ import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
-import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { stubIndexPatternWithFields } from '../../../../../../plugins/data/public/stubs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../../../plugins/data/public/services';
+import { IndexPatternField, IndexPattern } from '../../../public';
+import { stubIndexPatternWithFields } from '../../../public/stubs';
+import { dataPluginMock } from '../../../public/mocks';
+import { setFieldFormats } from '../../../public/services';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;

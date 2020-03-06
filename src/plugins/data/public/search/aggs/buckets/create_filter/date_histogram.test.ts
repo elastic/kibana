@@ -24,7 +24,7 @@ import { AggConfigs } from '../../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import { dateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { RangeFilter } from '../../../../../../../../plugins/data/public';
+import { RangeFilter } from '../../../../../public';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {

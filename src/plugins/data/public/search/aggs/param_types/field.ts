@@ -19,16 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
-import {
-  IndexPatternField,
-  indexPatterns,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getNotifications } from '../../../../../../../plugins/data/public/services';
+import { IndexPatternField, indexPatterns, KBN_FIELD_TYPES } from '../../../../public';
+import { getNotifications } from '../../../../public/services';
 
 const filterByType = propFilter('type');
 

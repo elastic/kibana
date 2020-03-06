@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from 'src/core/public/mocks';
+import { dataPluginMock } from '../../../../public/mocks';
 import { searchStartMock } from '../../mocks';
 import { setSearchServiceShim } from '../../../services';
 import {
@@ -30,7 +31,7 @@ import {
   setSearchService,
   setUiSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../plugins/data/public/services';
+} from '../../../../public/services';
 
 /**
  * Testing helper which calls all of the service setters used in the

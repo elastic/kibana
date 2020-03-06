@@ -19,7 +19,7 @@
 
 import { AggTypeFieldFilters } from './field_filters';
 import { IAggConfig } from '../../agg_config';
-import { IndexPatternField } from '../../../../../../../../plugins/data/public';
+import { IndexPatternField } from '../../../../../public';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;

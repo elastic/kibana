@@ -24,7 +24,7 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-import { fieldFormats } from '../../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../public';
 
 const metricAggFilter = [
   '!top_hits',

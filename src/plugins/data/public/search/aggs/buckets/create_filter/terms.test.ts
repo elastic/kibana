@@ -23,7 +23,7 @@ import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { Filter, ExistsFilter } from '../../../../../../../../plugins/data/public';
+import { Filter, ExistsFilter } from '../../../../../public';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {

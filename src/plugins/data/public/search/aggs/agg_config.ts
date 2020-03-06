@@ -27,9 +27,8 @@ import {
   FetchOptions,
   FieldFormatsContentType,
   KBN_FIELD_TYPES,
-} from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getFieldFormats } from '../../../../../../plugins/data/public/services';
+} from '../../../public';
+import { getFieldFormats } from '../../../public/services';
 
 export interface AggConfigOptions {
   type: IAggType;

@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../public';
 
 const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
   defaultMessage: 'Sum',

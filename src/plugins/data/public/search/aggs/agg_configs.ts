@@ -24,12 +24,7 @@ import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import {
-  IndexPattern,
-  ISearchSource,
-  FetchOptions,
-  TimeRange,
-} from '../../../../../../plugins/data/public';
+import { IndexPattern, ISearchSource, FetchOptions, TimeRange } from '../../../public';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {

@@ -17,8 +17,10 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from 'src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
-import { aggTypes } from '../agg_types';
+import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/_bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
 
@@ -49,6 +51,7 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
       }
     });
   } else {
+    const aggTypes = getAggTypes({ uiSettings: coreMock.createSetup().uiSettings });
     aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
     aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
   }

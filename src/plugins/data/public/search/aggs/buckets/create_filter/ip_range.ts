@@ -20,7 +20,7 @@
 import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { IpRangeKey } from '../ip_range';
-import { esFilters, RangeFilterParams } from '../../../../../../../../plugins/data/public';
+import { esFilters, RangeFilterParams } from '../../../../../public';
 
 export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
   let range: RangeFilterParams;

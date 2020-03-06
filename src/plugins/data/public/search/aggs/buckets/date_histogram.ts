@@ -30,17 +30,8 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import {
-  fieldFormats,
-  KBN_FIELD_TYPES,
-  TimefilterContract,
-} from '../../../../../../../plugins/data/public';
-import {
-  getFieldFormats,
-  getQueryService,
-  getUiSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../plugins/data/public/services';
+import { fieldFormats, KBN_FIELD_TYPES, TimefilterContract } from '../../../../public';
+import { getFieldFormats, getQueryService, getUiSettings } from '../../../../public/services';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');

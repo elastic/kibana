@@ -20,9 +20,8 @@
 import { AggType, AggTypeConfig } from './agg_type';
 import { IAggConfig } from './agg_config';
 import { mockDataServices } from './test_helpers';
-import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../../../plugins/data/public/services';
+import { dataPluginMock } from '../../../public/mocks';
+import { setFieldFormats } from '../../../public/services';
 
 describe('AggType Class', () => {
   beforeEach(() => {

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { filtersBucketAgg } from '../filters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from 'src/core/public/mocks';
+import { getFiltersBucketAgg } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
@@ -29,7 +31,11 @@ describe('AggConfig Filters', () => {
       mockDataServices();
     });
 
-    const typesRegistry = mockAggTypesRegistry([filtersBucketAgg]);
+    const typesRegistry = mockAggTypesRegistry([
+      getFiltersBucketAgg({
+        uiSettings: coreMock.createSetup().uiSettings,
+      }),
+    ]);
 
     const getAggConfigs = () => {
       const field = {

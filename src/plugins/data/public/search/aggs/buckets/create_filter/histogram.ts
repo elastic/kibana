@@ -18,7 +18,7 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters, RangeFilterParams } from '../../../../../../../../plugins/data/public';
+import { esFilters, RangeFilterParams } from '../../../../../public';
 
 export const createFilterHistogram = (aggConfig: IBucketAggConfig, key: string) => {
   const value = parseInt(key, 10);

@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { dateRangeBucketAgg } from '../date_range';
 import { createFilterDateRange } from './date_range';
-import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
+import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../public';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
