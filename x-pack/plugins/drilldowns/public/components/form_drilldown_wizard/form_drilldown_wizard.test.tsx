@@ -7,8 +7,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { FormDrilldownWizard } from './form_drilldown_wizard';
-import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
+import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
 import { txtNameOfDrilldown } from './i18n';
+
+afterEach(cleanup);
 
 describe('<FormDrilldownWizard>', () => {
   test('renders without crashing', () => {
