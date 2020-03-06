@@ -51,9 +51,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-        reindexOptions: {
-          openAndClose: false,
-        },
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -69,9 +67,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
         newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
-        reindexOptions: {
-          openAndClose: false,
-        },
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -89,9 +85,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-        reindexOptions: {
-          openAndClose: false,
-        },
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -107,9 +101,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-        reindexOptions: {
-          openAndClose: false,
-        },
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
