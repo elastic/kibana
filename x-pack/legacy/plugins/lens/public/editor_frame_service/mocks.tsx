@@ -33,9 +33,23 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
-    renderLayerConfigPanel: jest.fn(),
+    getLayerOptions: jest.fn(() => ({
+      dimensions: [
+        // {
+        //   layerId: 'layer1',
+        //   dimensionId: 'a',
+        //   dimensionLabel: 'a',
+        //   supportsMoreColumns: true,
+        //   accessors: [],
+        //   filterOperations: jest.fn(() => true),
+        // },
+      ],
+    })),
     toExpression: jest.fn((_state, _frame) => null),
     toPreviewExpression: jest.fn((_state, _frame) => null),
+
+    setDimension: jest.fn(),
+    removeDimension: jest.fn(),
   };
 }
 
@@ -43,11 +57,11 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
 
-export function createMockDatasource(): DatasourceMock {
+export function createMockDatasource(id: string): DatasourceMock {
   const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
+    datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
-    renderDimensionPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
   };
 
@@ -65,6 +79,11 @@ export function createMockDatasource(): DatasourceMock {
     removeLayer: jest.fn((_state, _layerId) => {}),
     getLayers: jest.fn(_state => []),
     getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
+
+    renderDimensionTrigger: jest.fn(),
+    renderDimensionEditor: jest.fn(),
+    canHandleDrop: jest.fn(),
+    onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
