@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
-  EuiRadioGroup,
 } from '@elastic/eui';
 import {
   ActionConnectorFieldsProps,
@@ -19,6 +18,8 @@ import {
   ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/triggers_actions_ui/public/types';
+
+import { FieldMapping } from '../../pages/case/components/configure_cases/field_mapping';
 
 import * as i18n from './translations';
 
@@ -85,49 +86,31 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const { apiUrl, casesConfiguration } = action.config;
   const { username, password } = action.secrets;
 
-  const closure = casesConfiguration?.closure ?? 'manual';
-
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
   if (!casesConfiguration) {
     editActionConfig('casesConfiguration', {
-      closure: 'manual',
       mapping: [
         {
           source: 'title',
           target: 'description',
-          onEditAndUpdate: 'nothing',
+          actionType: 'nothing',
         },
         {
           source: 'description',
           target: 'short_description',
-          onEditAndUpdate: 'nothing',
+          actionType: 'nothing',
         },
         {
           source: 'comments',
           target: 'work_notes',
-          onEditAndUpdate: 'nothing',
+          actionType: 'nothing',
         },
       ],
     });
   }
-
-  const radios = [
-    {
-      id: 'manual',
-      label: 'Manually close SIEM cases',
-    },
-    {
-      id: 'newIncident',
-      label: 'Automatically close SIEM cases when pushing new incident to third-party',
-    },
-    {
-      id: 'closedIncident',
-      label: 'Automatically close SIEM cases when incident is closed in third-party',
-    },
-  ];
 
   return (
     <>
@@ -215,16 +198,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow id="closure" fullWidth label={'Case closure options'}>
-            <EuiRadioGroup
-              options={radios}
-              idSelected={closure}
-              onChange={(val: string) => {
-                editActionConfig('casesConfiguration', { ...casesConfiguration, closure: val });
-              }}
-              name="closure"
-            />
-          </EuiFormRow>
+          <FieldMapping />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

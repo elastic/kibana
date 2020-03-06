@@ -10,7 +10,9 @@ import styled, { css } from 'styled-components';
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
-import { FieldMapping } from '../configure_cases/field_mapping';
+import { Mapping } from '../configure_cases/mapping';
+import { State, configureCasesReducer } from './reducer';
+import { Connector } from '../../../../containers/case/types';
 import { useConnectors } from '../../../../containers/case/use_connectors';
 
 const FormWrapper = styled.div`
@@ -36,7 +38,7 @@ const ConfigureCasesComponent: React.FC = () => {
         <ClosureOptions />
       </SectionWrapper>
       <SectionWrapper>
-        <FieldMapping />
+        <Mapping />
       </SectionWrapper>
     </FormWrapper>
   );

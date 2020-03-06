@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -35,12 +35,8 @@ const supportedThirdPartyFields = [
   },
 ];
 
-const FieldMappingComponent: React.FC = () => (
-  <EuiDescribedFormGroup
-    fullWidth
-    title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
-    description={i18n.FIELD_MAPPING_DESC}
-  >
+const FieldMappingComponent: React.FC<Props> = () => (
+  <>
     <EuiFormRow fullWidth>
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -60,7 +56,7 @@ const FieldMappingComponent: React.FC = () => (
       <FieldMappingRow siemField="Description" thirdPartyOptions={supportedThirdPartyFields} />
       <FieldMappingRow siemField="Comment" thirdPartyOptions={supportedThirdPartyFields} />
     </FieldRowWrapper>
-  </EuiDescribedFormGroup>
+  </>
 );
 
 export const FieldMapping = React.memo(FieldMappingComponent);
