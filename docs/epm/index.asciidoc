@@ -21,15 +21,15 @@ Here an example on how they can be used:
 Install a package:
 
 ```
-curl --user elastic:changeme localhost:5601/api/epm/install/iptables-1.0.4
-curl --user elastic:changeme localhost:5601/api/epm/install/coredns-1.0.1
+curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/install/iptables-1.0.4
+curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/install/coredns-1.0.1
 ```
 
 Delete a package:
 
 ```
-curl --user elastic:changeme localhost:5601/api/epm/delete/iptables-1.0.4
-curl --user elastic:changeme localhost:5601/api/epm/delete/coredns-1.0.1
+curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/delete/iptables-1.0.4
+curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/delete/coredns-1.0.1
 ```
 
 === Definitions
