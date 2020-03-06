@@ -11,13 +11,11 @@ import { i18n } from '@kbn/i18n';
 import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: 'graph',
     configPrefix: 'xpack.graph',
-    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       mappings,
