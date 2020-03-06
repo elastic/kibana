@@ -6,7 +6,7 @@
 import { createActionRoute } from './create';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess, ForbiddenError } from '../lib';
+import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
@@ -142,7 +142,7 @@ describe('createActionRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const actionsClient = {
-      create: jest.fn().mockRejectedValue(new ForbiddenError('Fail')),
+      create: jest.fn().mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid')),
     };
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok', 'forbidden']);

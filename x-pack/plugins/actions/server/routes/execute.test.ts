@@ -8,7 +8,7 @@ import { executeActionRoute } from './execute';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { ActionExecutorContract, verifyApiAccess, ForbiddenError } from '../lib';
+import { ActionExecutorContract, verifyApiAccess, ActionTypeDisabledError } from '../lib';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -197,7 +197,7 @@ describe('executeActionRoute', () => {
     const actionExecutor = {
       initialize: jest.fn(),
       execute: jest.fn().mockImplementation(() => {
-        throw new ForbiddenError('Fail');
+        throw new ActionTypeDisabledError('Fail', 'license_invalid');
       }),
     } as jest.Mocked<ActionExecutorContract>;
 
