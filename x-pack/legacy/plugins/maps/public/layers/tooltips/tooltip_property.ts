@@ -10,7 +10,7 @@ export interface ITooltipProperty {
   getPropertyKey(): string;
   getPropertyName(): string;
   getHtmlDisplayValue(): string;
-  getRawValue(): string;
+  getRawValue(): string | undefined;
   isFilterable(): boolean;
   getESFilters(): Promise<unknown[]>;
 }

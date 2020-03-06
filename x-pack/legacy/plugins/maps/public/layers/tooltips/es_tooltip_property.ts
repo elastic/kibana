@@ -32,7 +32,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getRawValue();
   }
 
-  _getIndexPatternField(): IFieldType {
+  _getIndexPatternField(): IFieldType | undefined {
     return this._indexPattern.fields.getByName(this._field.getRootName());
   }
 
@@ -42,7 +42,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     }
 
     const indexPatternField = this._getIndexPatternField();
-    if (!this._field.canValueBeFormatted() || !indexPatternField) {
+    if (!indexPatternField || !this._field.canValueBeFormatted()) {
       return _.escape(this.getRawValue());
     }
 
@@ -63,7 +63,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     );
   }
 
-  async getESFilters(): Promse<unknown> {
+  async getESFilters(): Promise<unknown> {
     return [
       esFilters.buildPhraseFilter(
         this._getIndexPatternField(),

@@ -92,7 +92,7 @@ export class ESAggField implements IESAggField {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
-  async createTooltipProperty(value: number | string): Promise<ITooltipProperty> {
+  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
     return new ESAggTooltipProperty(tooltipProperty, indexPattern, this);
