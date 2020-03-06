@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   AppMountParameters,
   CoreSetup,
@@ -58,7 +60,9 @@ export class Plugin implements IPlugin<Setup, Start> {
     plugins.home.featureCatalogue.register({
       id: this.id,
       title: 'SIEM',
-      description: 'Explore security metrics and logs for events and alerts',
+      description: i18n.translate('xpack.siem.featureCatalogueDescription', {
+        defaultMessage: 'Explore security metrics and logs for events and alerts',
+      }),
       icon: 'securityAnalyticsApp',
       path: `/app/${this.id}`,
       showOnHomePage: true,
@@ -68,6 +72,7 @@ export class Plugin implements IPlugin<Setup, Start> {
     core.application.register({
       id: this.id,
       title: this.name,
+      euiIconType: 'securityAnalyticsApp',
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
