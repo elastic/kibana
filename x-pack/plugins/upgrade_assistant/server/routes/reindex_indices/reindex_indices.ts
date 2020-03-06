@@ -16,6 +16,7 @@ import { LicensingPluginSetup } from '../../../../licensing/server';
 import { ReindexStatus } from '../../../common/types';
 
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
+import { esIndicesStateCheck } from '../../lib/es_indices_state_check';
 import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
@@ -93,9 +94,6 @@ export function registerReindexIndicesRoutes(
         params: schema.object({
           indexName: schema.string(),
         }),
-        body: schema.object({
-          openAndClose: schema.boolean({ defaultValue: false }),
-        }),
       },
     },
     versionCheckHandlerWrapper(
@@ -110,7 +108,7 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { indexName } = request.params;
-        const { openAndClose } = request.body;
+        const indexStates = await esIndicesStateCheck(dataClient, [indexName]);
         try {
           const result = await reindexHandler({
             savedObjects: savedObjectsClient,
@@ -120,7 +118,7 @@ export function registerReindexIndicesRoutes(
             licensing,
             headers: request.headers,
             credentialStore,
-            reindexOptions: { openAndClose },
+            reindexOptions: { openAndClose: indexStates[indexName] === 'close' },
           });
 
           // Kick the worker on this node to immediately pickup the new reindex operation.
@@ -192,6 +190,7 @@ export function registerReindexIndicesRoutes(
         response
       ) => {
         const { indexNames } = request.body;
+        const indexStates = await esIndicesStateCheck(dataClient, indexNames);
         const results: PostBatchResponse = {
           enqueued: [],
           errors: [],
@@ -207,6 +206,7 @@ export function registerReindexIndicesRoutes(
               headers: request.headers,
               credentialStore,
               reindexOptions: {
+                openAndClose: indexStates[indexName] === 'close',
                 enqueue: true,
               },
             });

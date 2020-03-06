@@ -192,10 +192,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   private newService() {
-    const { indexName, http, reindexBlocker } = this.props;
-    return new ReindexPollingService(indexName, http, {
-      openAndClose: reindexBlocker === 'index-closed',
-    });
+    const { indexName, http } = this.props;
+    return new ReindexPollingService(indexName, http);
   }
 
   private subscribeToUpdates() {

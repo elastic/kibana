@@ -44,11 +44,7 @@ export class ReindexPollingService {
   public status$: BehaviorSubject<ReindexState>;
   private pollTimeout?: NodeJS.Timeout;
 
-  constructor(
-    private indexName: string,
-    private http: HttpSetup,
-    private reindexOptions?: { openAndClose: boolean }
-  ) {
+  constructor(private indexName: string, private http: HttpSetup) {
     this.status$ = new BehaviorSubject<ReindexState>({
       loadingState: LoadingState.Loading,
       errorMessage: null,
@@ -99,12 +95,8 @@ export class ReindexPollingService {
         cancelLoadingState: undefined,
       });
 
-      const options = {
-        openAndClose: Boolean(this.reindexOptions?.openAndClose),
-      };
       const data = await this.http.post<ReindexOperation>(
-        `/api/upgrade_assistant/reindex/${this.indexName}`,
-        { body: JSON.stringify(options) }
+        `/api/upgrade_assistant/reindex/${this.indexName}`
       );
 
       this.updateWithResponse({ reindexOp: data });

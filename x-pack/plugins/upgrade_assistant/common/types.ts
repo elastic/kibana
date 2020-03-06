@@ -155,7 +155,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
    * @remark
    * In future this could be an array of blockers.
    */
-  blockerForReindexing?: 'index-closed';
+  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
 }
 
 export interface UpgradeAssistantStatus {

@@ -6,12 +6,9 @@
 
 import { IScopedClusterClient } from 'src/core/server';
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
-import {
-  ClusterStateAPIResponse,
-  EnrichedDeprecationInfo,
-  UpgradeAssistantStatus,
-} from '../../common/types';
-import { getIndexStateFromClusterState } from '../../common/get_index_state_from_cluster_state';
+import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
+
+import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
@@ -27,26 +24,14 @@ export async function getUpgradeAssistantStatus(
 
   const indexNames = indices.map(({ index }) => index!);
 
-  // If we have found deprecation information for index/indices, add some additional information;
-  // is it currently open or closed?
+  // If we have found deprecation information for index/indices check whether the index is
+  // open or closed.
   if (indexNames.length) {
-    // According to https://www.elastic.co/guide/en/elasticsearch/reference/7.6/cluster-state.html
-    // The response from this call is considered internal and subject to change. We have an API
-    // integration test for asserting that the current ES version still returns what we expect.
-    // This lives in x-pack/test/upgrade_assistant_integration
-    const clusterState: ClusterStateAPIResponse = await dataClient.callAsCurrentUser(
-      'cluster.state',
-      {
-        index: indexNames,
-        metric: 'metadata',
-      }
-    );
+    const indexStates = await esIndicesStateCheck(dataClient, indexNames);
 
     indices.forEach(indexData => {
       indexData.blockerForReindexing =
-        getIndexStateFromClusterState(indexData.index!, clusterState) === 'close'
-          ? 'index-closed'
-          : undefined;
+        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
     });
   }
 
