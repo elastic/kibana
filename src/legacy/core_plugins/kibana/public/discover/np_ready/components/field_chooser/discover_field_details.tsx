@@ -108,13 +108,12 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
           {warnings.length > 0 && (
             <EuiToolTip content={warnings.join(' ')}>
               <span>
-                (
+                <i aria-hidden="true" className="fa fa-warning" />
                 <FormattedMessage
                   id="kbn.discover.fieldChooser.detailViews.warningsText"
-                  defaultMessage="warningsLength, plural, one {warning} other {warnings}"
+                  defaultMessage="Number of warnings: {warningsLength}"
                   values={{ warningsLength: warnings.length }}
                 />
-                <i aria-hidden="true" className="fa fa-warning" /> )
               </span>
             </EuiToolTip>
           )}
