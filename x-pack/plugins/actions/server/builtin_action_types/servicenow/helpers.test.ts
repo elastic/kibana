@@ -4,22 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sanitizeMapping, buildMap, mapParams } from './helpers';
+import { normalizeMapping, buildMap, mapParams } from './helpers';
 import { mapping, maliciousMapping, finalMapping, params } from './mock';
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 
 describe('sanitizeMapping', () => {
   test('remove malicious fields', () => {
-    const sanitizedMapping = sanitizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
+    const sanitizedMapping = normalizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
     expect(sanitizedMapping.every(m => m.source !== '__proto__' && m.target !== '__proto__')).toBe(
       true
     );
   });
 
   test('remove unsuppported source fields', () => {
-    const sanitizedMapping = sanitizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
-    expect(sanitizedMapping).not.toEqual(
-      expect.arrayContaining([expect.objectContaining(maliciousMapping[3])])
+    const normalizedMapping = normalizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
+    expect(normalizedMapping).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source: 'unsupportedSource',
+          target: 'comments',
+          onEditAndUpdate: 'nothing',
+        }),
+      ])
     );
   });
 });

@@ -5,9 +5,9 @@
  */
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
-import { MapsType, FinalMapping, ParamsType } from './types';
+import { MapsType, FinalMapping } from './types';
 
-export const sanitizeMapping = (fields: string[], mapping: MapsType[]): MapsType[] => {
+export const normalizeMapping = (fields: string[], mapping: MapsType[]): MapsType[] => {
   // Prevent prototype pollution and remove unsupported fields
   return mapping.filter(
     m => m.source !== '__proto__' && m.target !== '__proto__' && fields.includes(m.source)
@@ -15,21 +15,16 @@ export const sanitizeMapping = (fields: string[], mapping: MapsType[]): MapsType
 };
 
 export const buildMap = (mapping: MapsType[]): FinalMapping => {
-  // Maybe redundant as Map is safe against prototype pollution
-  const sanitizedMap = sanitizeMapping(SUPPORTED_SOURCE_FIELDS, mapping);
-  const fieldsMap = new Map();
-
-  for (const field of sanitizedMap) {
+  return normalizeMapping(SUPPORTED_SOURCE_FIELDS, mapping).reduce((fieldsMap, field) => {
     const { source, target, onEditAndUpdate } = field;
     fieldsMap.set(source, { target, onEditAndUpdate });
     fieldsMap.set(target, { target: source, onEditAndUpdate });
-  }
-
-  return fieldsMap;
+    return fieldsMap;
+  }, new Map());
 };
 
 interface KeyAny {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const mapParams = (params: any, mapping: FinalMapping) => {
@@ -39,5 +34,5 @@ export const mapParams = (params: any, mapping: FinalMapping) => {
       prev[field.target] = params[curr];
     }
     return prev;
-  }, {} as KeyAny);
+  }, {});
 };
