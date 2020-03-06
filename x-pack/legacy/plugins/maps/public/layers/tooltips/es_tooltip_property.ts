@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { TooltipProperty, ITooltipProperty } from './tooltip_property';
+import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
 import { esFilters, IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/public';
 
@@ -53,7 +53,6 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   isFilterable(): boolean {
-    // TODO return false if this._field is IESAggField
     const field = this._getIndexPatternField();
     return (
       field &&
