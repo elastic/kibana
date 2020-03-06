@@ -17,6 +17,7 @@ export declare class SavedObjectTypeRegistry
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [getAllTypes()](./kibana-plugin-server.savedobjecttyperegistry.getalltypes.md) |  | Return all [types](./kibana-plugin-server.savedobjectstype.md) currently registered. |
+|  [getImportableAndExportableTypes()](./kibana-plugin-server.savedobjecttyperegistry.getimportableandexportabletypes.md) |  | Return all [types](./kibana-plugin-server.savedobjectstype.md) currently registered that are importable/exportable. |
 |  [getIndex(type)](./kibana-plugin-server.savedobjecttyperegistry.getindex.md) |  | Returns the <code>indexPattern</code> property for given type, or <code>undefined</code> if the type is not registered. |
 |  [getType(type)](./kibana-plugin-server.savedobjecttyperegistry.gettype.md) |  | Return the [type](./kibana-plugin-server.savedobjectstype.md) definition for given type name. |
 |  [isHidden(type)](./kibana-plugin-server.savedobjecttyperegistry.ishidden.md) |  | Returns the <code>hidden</code> property for given type, or <code>false</code> if the type is not registered. |

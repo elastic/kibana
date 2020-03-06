@@ -941,7 +941,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'>;
+export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -2164,6 +2164,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
+    getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
