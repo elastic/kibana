@@ -12,4 +12,5 @@ export {
   enrollmentAPIKeyRouteService,
   epmRouteService,
   setupRouteService,
+  packageToConfigDatasourceInputs,
 } from '../../../../common';

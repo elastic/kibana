@@ -5,7 +5,10 @@
  */
 import { PackageInfo, Datasource } from '../types';
 
-export const PackageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datasource['inputs'] => {
+/*
+ * This service creates a datasource inputs definition from defaults provided in package info
+ */
+export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datasource['inputs'] => {
   const inputs: Datasource['inputs'] = [];
 
   // Assume package will only ever ship one datasource for now

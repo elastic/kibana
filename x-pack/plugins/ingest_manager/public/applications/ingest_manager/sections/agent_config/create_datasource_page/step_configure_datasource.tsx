@@ -28,7 +28,7 @@ import {
   NewDatasource,
   DatasourceInput,
 } from '../../../types';
-import { PackageToConfigDatasourceInputs } from './services';
+import { packageToConfigDatasourceInputs } from '../../../services';
 import { DatasourceInputPanel } from './components';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
@@ -67,7 +67,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           title: packageInfo.title,
           version: packageInfo.version,
         },
-        inputs: PackageToConfigDatasourceInputs(packageInfo),
+        inputs: packageToConfigDatasourceInputs(packageInfo),
       });
     }
 
