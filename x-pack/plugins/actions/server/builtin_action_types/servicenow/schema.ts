@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 export const MapsSchema = schema.object({
   source: schema.string(),
   target: schema.string(),
-  onEditAndUpdate: schema.oneOf([
+  actionType: schema.oneOf([
     schema.literal('nothing'),
     schema.literal('overwrite'),
     schema.literal('append'),
@@ -17,11 +17,6 @@ export const MapsSchema = schema.object({
 });
 
 export const CasesConfigurationSchema = schema.object({
-  closure: schema.oneOf([
-    schema.literal('manual'),
-    schema.literal('newIncident'),
-    schema.literal('closedIncident'),
-  ]),
   mapping: schema.arrayOf(MapsSchema),
 });
 

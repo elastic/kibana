@@ -16,9 +16,9 @@ export const normalizeMapping = (fields: string[], mapping: MapsType[]): MapsTyp
 
 export const buildMap = (mapping: MapsType[]): FinalMapping => {
   return normalizeMapping(SUPPORTED_SOURCE_FIELDS, mapping).reduce((fieldsMap, field) => {
-    const { source, target, onEditAndUpdate } = field;
-    fieldsMap.set(source, { target, onEditAndUpdate });
-    fieldsMap.set(target, { target: source, onEditAndUpdate });
+    const { source, target, actionType } = field;
+    fieldsMap.set(source, { target, actionType });
+    fieldsMap.set(target, { target: source, actionType });
     return fieldsMap;
   }, new Map());
 };

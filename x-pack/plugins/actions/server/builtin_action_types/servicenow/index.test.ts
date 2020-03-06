@@ -39,22 +39,21 @@ const mockOptions = {
   config: {
     apiUrl: 'https://service-now.com',
     casesConfiguration: {
-      closure: 'manual',
       mapping: [
         {
           source: 'title',
           target: 'short_description',
-          onEditAndUpdate: 'overwrite',
+          actionType: 'overwrite',
         },
         {
           source: 'description',
           target: 'description',
-          onEditAndUpdate: 'overwrite',
+          actionType: 'overwrite',
         },
         {
           source: 'comments',
           target: 'work_notes',
-          onEditAndUpdate: 'append',
+          actionType: 'append',
         },
       ],
     },

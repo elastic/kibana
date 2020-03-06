@@ -8,31 +8,31 @@ import { MapsType, FinalMapping, ParamsType } from './types';
 import { Incident } from '../lib/servicenow/types';
 
 const mapping: MapsType[] = [
-  { source: 'title', target: 'short_description', onEditAndUpdate: 'nothing' },
-  { source: 'description', target: 'description', onEditAndUpdate: 'nothing' },
-  { source: 'comments', target: 'comments', onEditAndUpdate: 'nothing' },
+  { source: 'title', target: 'short_description', actionType: 'nothing' },
+  { source: 'description', target: 'description', actionType: 'nothing' },
+  { source: 'comments', target: 'comments', actionType: 'nothing' },
 ];
 
 const finalMapping: FinalMapping = new Map();
 
 finalMapping.set('title', {
   target: 'short_description',
-  onEditAndUpdate: 'nothing',
+  actionType: 'nothing',
 });
 
 finalMapping.set('description', {
   target: 'description',
-  onEditAndUpdate: 'nothing',
+  actionType: 'nothing',
 });
 
 finalMapping.set('comments', {
   target: 'comments',
-  onEditAndUpdate: 'nothing',
+  actionType: 'nothing',
 });
 
 finalMapping.set('short_description', {
   target: 'title',
-  onEditAndUpdate: 'nothing',
+  actionType: 'nothing',
 });
 
 const params: ParamsType = {

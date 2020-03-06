@@ -10,10 +10,10 @@ import { SUPPORTED_SOURCE_FIELDS } from './constants';
 import { MapsType } from './types';
 
 const maliciousMapping: MapsType[] = [
-  { source: '__proto__', target: 'short_description', onEditAndUpdate: 'nothing' },
-  { source: 'description', target: '__proto__', onEditAndUpdate: 'nothing' },
-  { source: 'comments', target: 'comments', onEditAndUpdate: 'nothing' },
-  { source: 'unsupportedSource', target: 'comments', onEditAndUpdate: 'nothing' },
+  { source: '__proto__', target: 'short_description', actionType: 'nothing' },
+  { source: 'description', target: '__proto__', actionType: 'nothing' },
+  { source: 'comments', target: 'comments', actionType: 'nothing' },
+  { source: 'unsupportedSource', target: 'comments', actionType: 'nothing' },
 ];
 
 describe('sanitizeMapping', () => {
@@ -31,7 +31,7 @@ describe('sanitizeMapping', () => {
         expect.objectContaining({
           source: 'unsupportedSource',
           target: 'comments',
-          onEditAndUpdate: 'nothing',
+          actionType: 'nothing',
         }),
       ])
     );
