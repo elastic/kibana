@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
@@ -46,7 +46,7 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionProps[] | [];
+    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -54,7 +54,7 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     excludes: string[];
-    excludesOptions: EuiComboBoxOptionProps[];
+    excludesOptions: EuiComboBoxOptionOption[];
     fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
