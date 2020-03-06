@@ -19,7 +19,7 @@ import {
 import { Error } from '../../../components';
 import { AGENT_CONFIG_PATH } from '../../../constants';
 import { useLink } from '../../../hooks';
-import { AgentConfig, PackageInfo } from '../../../types';
+import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
 export const StepSelectConfig: React.FunctionComponent<{
@@ -51,7 +51,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   } = useGetAgentConfigs();
   const agentConfigs = agentConfigsData?.items || [];
   const agentConfigsById = agentConfigs.reduce(
-    (acc: { [key: string]: AgentConfig }, config: AgentConfig) => {
+    (acc: { [key: string]: GetAgentConfigsResponseItem }, config) => {
       acc[config.id] = config;
       return acc;
     },
@@ -170,7 +170,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                     id="xpack.ingestManager.createDatasource.StepSelectConfig.agentConfigAgentsCountText"
                     defaultMessage="{count, plural, one {# agent} other {# agents}}"
                     values={{
-                      count: 3,
+                      count: agentConfigsById[option.key!].agents || 0,
                     }}
                   />
                 </EuiTextColor>

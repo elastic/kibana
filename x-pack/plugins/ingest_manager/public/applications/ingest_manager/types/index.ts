@@ -18,6 +18,7 @@ export {
   DatasourceInputStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
+  GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,

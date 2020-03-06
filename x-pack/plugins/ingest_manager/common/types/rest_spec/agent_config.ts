@@ -10,8 +10,10 @@ export interface GetAgentConfigsRequest {
   query: ListWithKuery;
 }
 
+export type GetAgentConfigsResponseItem = AgentConfig & { agents?: number };
+
 export interface GetAgentConfigsResponse {
-  items: Array<AgentConfig & { agents?: number }>;
+  items: GetAgentConfigsResponseItem[];
   total: number;
   page: number;
   perPage: number;
