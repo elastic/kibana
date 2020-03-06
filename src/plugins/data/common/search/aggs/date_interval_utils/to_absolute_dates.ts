@@ -18,9 +18,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { IUiSettingsClient } from 'src/core/public';
-import { TimeBuckets } from './time_buckets';
-import { TimeRange } from '../../../../../public';
+import { TimeRange } from '../../../../common';
 
 export function toAbsoluteDates(range: TimeRange) {
   const fromDate = dateMath.parse(range.from);
@@ -33,24 +31,5 @@ export function toAbsoluteDates(range: TimeRange) {
   return {
     from: fromDate.toDate(),
     to: toDate.toDate(),
-  };
-}
-
-export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
-  return function calculateAutoTimeExpression(range: TimeRange) {
-    const dates = toAbsoluteDates(range);
-    if (!dates) {
-      return;
-    }
-
-    const buckets = new TimeBuckets({ uiSettings });
-
-    buckets.setInterval('auto');
-    buckets.setBounds({
-      min: dates.from,
-      max: dates.to,
-    });
-
-    return buckets.getInterval().expression;
   };
 }

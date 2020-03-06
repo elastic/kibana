@@ -17,45 +17,15 @@
  * under the License.
  */
 
-export {
-  AggTypesRegistry,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
-} from './agg_types_registry';
-export { AggType } from './agg_type';
-export { getAggTypes } from './agg_types';
-export { AggConfig } from './agg_config';
-export { AggConfigs } from './agg_configs';
-export { FieldParamType } from './param_types';
-export { getCalculateAutoTimeExpression } from './buckets/lib/date_utils';
-export { MetricAggType } from './metrics/metric_agg_type';
-export { AggTypeFilters } from './filter';
-export { aggTypeFieldFilters, AggTypeFieldFilters } from './param_types/filter';
-export {
-  parentPipelineAggHelper,
-  parentPipelineType,
-} from './metrics/lib/parent_pipeline_agg_helper';
-export {
-  siblingPipelineAggHelper,
-  siblingPipelineType,
-} from './metrics/lib/sibling_pipeline_agg_helper';
-
-// static code
-export { AggParamType } from './param_types/agg';
-export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
-export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
-export { isDateHistogramBucketAggConfig } from './buckets/date_histogram';
-export { termsAggFilter } from './buckets/terms';
-export { isType, isStringType } from './buckets/migrate_include_exclude_format';
-export { CidrMask } from './buckets/lib/cidr_mask';
-export { convertDateRangeToString } from './buckets/date_range';
-export { toAbsoluteDates } from './buckets/lib/date_utils';
-export { convertIPRangeToString } from './buckets/ip_range';
-export { aggTypeFilters, propFilter } from './filter';
-export { OptionedParamType } from './param_types/optioned';
-export { isValidInterval } from './utils';
-export { BUCKET_TYPES } from './buckets/bucket_agg_types';
-export { METRIC_TYPES } from './metrics/metric_agg_types';
-
-// types
-export { CreateAggConfigParams, IAggConfig, IAggConfigs } from './types';
+export * from './agg_config';
+export * from './agg_configs';
+export * from './agg_groups';
+export * from './agg_type';
+export * from './agg_types';
+export * from './agg_types_registry';
+export * from './buckets';
+export * from './filter';
+export * from './metrics';
+export * from './param_types';
+export * from './types';
+export * from './utils';

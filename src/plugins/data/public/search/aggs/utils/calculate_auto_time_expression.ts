@@ -17,14 +17,26 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
+import { IUiSettingsClient } from 'src/core/public';
+import { TimeBuckets } from '../buckets/lib/time_buckets';
+import { toAbsoluteDates } from '../../../../common';
+import { TimeRange } from '../../../../public';
 
-export function plugin() {
-  return new Plugin();
+export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
+  return function calculateAutoTimeExpression(range: TimeRange) {
+    const dates = toAbsoluteDates(range);
+    if (!dates) {
+      return;
+    }
+
+    const buckets = new TimeBuckets({ uiSettings });
+
+    buckets.setInterval('auto');
+    buckets.setBounds({
+      min: dates.from,
+      max: dates.to,
+    });
+
+    return buckets.getInterval().expression;
+  };
 }
-
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart } from './plugin';

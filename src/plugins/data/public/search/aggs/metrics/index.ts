@@ -17,14 +17,7 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
-
-export function plugin() {
-  return new Plugin();
-}
-
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart } from './plugin';
+export * from './metric_agg_type';
+export * from './metric_agg_types';
+export * from './lib/parent_pipeline_agg_helper';
+export * from './lib/sibling_pipeline_agg_helper';

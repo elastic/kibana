@@ -17,32 +17,12 @@
  * under the License.
  */
 
-import { leastCommonInterval } from 'ui/vis/lib/least_common_interval';
-import { isValidEsInterval } from '../../../common';
-
-export function isValidInterval(value: string, baseInterval?: string) {
-  if (baseInterval) {
-    return _parseWithBase(value, baseInterval);
-  } else {
-    return isValidEsInterval(value);
-  }
-}
-
-// When base interval is set, check for least common interval and allow
-// input the value is the same. This means that the input interval is a
-// multiple of the base interval.
-function _parseWithBase(value: string, baseInterval: string) {
-  try {
-    const interval = leastCommonInterval(baseInterval, value);
-    return interval === value.replace(/\s/g, '');
-  } catch (e) {
-    return false;
-  }
-}
-
-// An inlined version of angular.toJSON()
-// source: https://github.com/angular/angular.js/blob/master/src/Angular.js#L1312
-// @internal
+/**
+ * An inlined version of angular.toJSON(). Source:
+ * https://github.com/angular/angular.js/blob/master/src/Angular.js#L1312
+ *
+ * @internal
+ */
 export function toAngularJSON(obj: any, pretty?: any): string {
   if (obj === undefined) return '';
   if (typeof pretty === 'number') {

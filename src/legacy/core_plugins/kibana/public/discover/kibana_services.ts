@@ -50,6 +50,8 @@ export function setServices(newServices: any) {
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
+export { shortenDottedString } from '../../common/utils/shorten_dotted_string';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';

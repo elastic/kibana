@@ -17,5 +17,32 @@
  * under the License.
  */
 
-export { leastCommonInterval } from './least_common_interval';
-export { leastCommonMultiple } from './least_common_multiple';
+/**
+ * Check a string if it's a valid JSON.
+ *
+ * @param {string} value a string that should be validated
+ * @returns {boolean} true if value is a valid JSON or if value is an empty string, or a string with whitespaces, otherwise false
+ */
+// TODO: Probably belongs in kibana utils
+export function isValidJson(value: string): boolean {
+  if (!value || value.length === 0) {
+    return true;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return true;
+  }
+
+  if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
+    try {
+      JSON.parse(trimmedValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}

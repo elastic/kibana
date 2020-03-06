@@ -18,7 +18,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { AggsSetup, AggsStart, AggsStartLegacy } from './aggs/types';
+import { AggsSetup, AggsStart, AggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';

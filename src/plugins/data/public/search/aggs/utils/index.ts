@@ -17,14 +17,6 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
-
-export function plugin() {
-  return new Plugin();
-}
-
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart } from './plugin';
+export * from './calculate_auto_time_expression';
+export * from './is_valid_json';
+export * from './to_angular_json';

@@ -19,8 +19,6 @@
 
 import { leastCommonInterval } from './least_common_interval';
 
-jest.mock('ui/new_platform');
-
 describe('leastCommonInterval', () => {
   it('should correctly return lowest common interval for fixed units', () => {
     expect(leastCommonInterval('1ms', '1s')).toBe('1s');

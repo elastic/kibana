@@ -26,27 +26,29 @@ import { PluginInitializerContext } from '../../../core/public';
  */
 
 import {
-  FILTERS,
   buildEmptyFilter,
-  buildPhrasesFilter,
   buildExistsFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   buildQueryFilter,
   buildRangeFilter,
-  toggleFilterNegated,
   disableFilter,
+  FILTERS,
   FilterStateStore,
+  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
-  isPhraseFilter,
   isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
+  isFilterPinned,
   isMatchAllFilter,
   isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
   isQueryStringFilter,
-  getDisplayValueFromFilter,
-  isFilterPinned,
+  isRangeFilter,
+  isValidInterval,
+  toAbsoluteDates,
+  toggleFilterNegated,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
@@ -299,7 +301,6 @@ import {
   isDateHistogramBucketAggConfig,
   isStringType,
   isType,
-  isValidInterval,
   isValidJson,
   METRIC_TYPES,
   OptionedParamType,
@@ -307,7 +308,6 @@ import {
   propFilter,
   siblingPipelineType,
   termsAggFilter,
-  toAbsoluteDates,
 } from './search/aggs';
 
 export {
@@ -358,12 +358,12 @@ export {
 export const search = {
   aggs: {
     AggConfigs,
-    AggParamType,
-    AggTypeFilters, // TODO convert to interface
-    aggTypeFilters,
-    AggTypeFieldFilters, // TODO convert to interface
     AggGroupNames,
     aggGroupNamesMap,
+    AggParamType,
+    AggTypeFieldFilters, // TODO convert to interface
+    aggTypeFilters,
+    AggTypeFilters, // TODO convert to interface
     BUCKET_TYPES,
     CidrMask,
     convertDateRangeToString,

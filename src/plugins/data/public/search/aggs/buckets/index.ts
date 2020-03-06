@@ -17,14 +17,11 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
-
-export function plugin() {
-  return new Plugin();
-}
-
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart } from './plugin';
+export * from './_interval_options';
+export * from './bucket_agg_types';
+export * from './date_histogram';
+export * from './date_range';
+export * from './ip_range';
+export * from './lib/cidr_mask';
+export * from './migrate_include_exclude_format';
+export * from './terms';
