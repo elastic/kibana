@@ -119,6 +119,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           defaultMessage="Advanced options"
         />
       </EuiButtonEmpty>
+      {/* Todo: Populate list of existing namespaces */}
       {isShowingAdvancedDefine ? (
         <Fragment>
           <EuiSpacer size="m" />
@@ -132,7 +133,6 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                   />
                 }
               >
-                {/* Todo: Populate list of existing namespaces */}
                 <EuiComboBox
                   noSuggestions
                   singleSelection={true}
