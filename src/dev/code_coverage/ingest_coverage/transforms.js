@@ -80,11 +80,6 @@ const afterJobNameAndRootFolder = x =>
 const fixFront = x =>
   afterJobNameAndRootFolder(x);
 
-
-
-
-
-
 export const staticSite = (urlBase, liveAppPath) => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
@@ -95,31 +90,20 @@ export const staticSite = (urlBase, liveAppPath) => obj => {
     'coverage_data/',
     `${testRunnerType.toLowerCase()}-combined`,
   ];
+  const join = xs => x => `${xs.join('')}${x}`;
+  const joinParts = join(parts);
 
   const url = maybeTotal(staticSiteUrl)
-    .fold(() => {
-      return right(process.env.STATIC_SITE_URL_BASE)
-        .map(x => `${parts.join('')}/index.html`)
-        .fold(noop, id)
-    },() => {
-      return right(staticSiteUrl)
-        .map(fixFront)
-        .map(x => `${parts.join('')}${suffix(x)}`)
-        .fold(noop, id)
-    })
-
+    .fold(
+      () => right(process.env.STATIC_SITE_URL_BASE).map(_ => joinParts('/index.html')).fold(noop, id)
+    , () => right(staticSiteUrl).map(fixFront).map(x => joinParts(suffix(x))).fold(noop, id)
+    );
 
   delete obj['staticSiteUrl'];
   obj['staticSiteUrl'] = url
 
-
   return obj;
 };
-
-
-
-
-
 
 export const coveredFilePath = obj => {
   const { staticSiteUrl } = obj;

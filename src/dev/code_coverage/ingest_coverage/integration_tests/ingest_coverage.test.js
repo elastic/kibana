@@ -65,7 +65,7 @@ describe('Ingesting Coverage to Cluster', () => {
       verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
     });
     it(`should have a link to the index page for the specific test runner`, () => {
-      mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
+      // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
 
 
 
