@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class HttpRequestError extends Error {
-  constructor(public statusCode: number, public message: string) {
-    super();
-  }
-}
+// TO DO EVERYTHING

@@ -12,7 +12,11 @@ import { SecurityPluginSetup } from '../../security/server';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
-import { caseSavedObjectType, caseCommentSavedObjectType } from './saved_object_types';
+import {
+  caseSavedObjectType,
+  caseConfigureSavedObjectType,
+  caseCommentSavedObjectType,
+} from './saved_object_types';
 import { CaseService } from './services';
 
 function createConfig$(context: PluginInitializerContext) {
@@ -41,6 +45,7 @@ export class CasePlugin {
 
     core.savedObjects.registerType(caseSavedObjectType);
     core.savedObjects.registerType(caseCommentSavedObjectType);
+    core.savedObjects.registerType(caseConfigureSavedObjectType);
 
     const service = new CaseService(this.log);
 
