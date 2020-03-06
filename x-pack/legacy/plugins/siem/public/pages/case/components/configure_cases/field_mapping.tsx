@@ -35,7 +35,7 @@ const supportedThirdPartyFields = [
   },
 ];
 
-const FieldMappingComponent: React.FC<Props> = () => (
+const FieldMappingComponent: React.FC = () => (
   <>
     <EuiFormRow fullWidth>
       <EuiFlexGroup>
