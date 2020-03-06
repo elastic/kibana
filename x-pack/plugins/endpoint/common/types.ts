@@ -312,8 +312,8 @@ export interface LegacyEndpointEvent {
 export interface EndpointEvent {
   '@timestamp': number;
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
