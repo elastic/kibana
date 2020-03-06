@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { boomify, isBoom } from 'boom';
 import {
   CustomHttpResponseOptions,
@@ -12,42 +13,53 @@ import {
   SavedObjectsFindResponse,
 } from 'kibana/server';
 import {
-  AllComments,
+  CaseRequest,
+  CaseResponse,
+  CasesResponse,
   CaseAttributes,
+  CommentResponse,
+  CommentsResponse,
   CommentAttributes,
-  FlattenedCaseSavedObject,
-  FlattenedCommentSavedObject,
-  AllCases,
-  NewCaseType,
-  NewCommentType,
-  SortFieldCase,
-  UserType,
-} from './types';
+} from '../../../common/api';
 
-export const formatNewCase = (
-  newCase: NewCaseType,
-  { full_name, username }: { full_name?: string; username: string }
-): CaseAttributes => ({
-  created_at: new Date().toISOString(),
+import { SortFieldCase } from './types';
+
+export const transformNewCase = ({
+  createdDate,
+  newCase,
+  full_name,
+  username,
+}: {
+  createdDate: string;
+  newCase: CaseRequest;
+  full_name?: string | null;
+  username: string | null;
+}): CaseAttributes => ({
+  comment_ids: [],
+  created_at: createdDate,
   created_by: { full_name, username },
-  updated_at: new Date().toISOString(),
+  updated_at: null,
+  updated_by: null,
   ...newCase,
 });
 
 interface NewCommentArgs {
-  newComment: NewCommentType;
-  full_name?: UserType['full_name'];
-  username: UserType['username'];
+  comment: string;
+  createdDate: string;
+  full_name?: string | null;
+  username: string | null;
 }
-export const formatNewComment = ({
-  newComment,
+export const transformNewComment = ({
+  comment,
+  createdDate,
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
-  ...newComment,
-  created_at: new Date().toISOString(),
+  comment,
+  created_at: createdDate,
   created_by: { full_name, username },
-  updated_at: new Date().toISOString(),
+  updated_at: null,
+  updated_by: null,
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
@@ -59,7 +71,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const formatAllCases = (cases: SavedObjectsFindResponse<CaseAttributes>): AllCases => ({
+export const transformCases = (cases: SavedObjectsFindResponse<CaseAttributes>): CasesResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
@@ -68,27 +80,24 @@ export const formatAllCases = (cases: SavedObjectsFindResponse<CaseAttributes>):
 
 export const flattenCaseSavedObjects = (
   savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects']
-): FlattenedCaseSavedObject[] =>
-  savedObjects.reduce(
-    (acc: FlattenedCaseSavedObject[], savedObject: SavedObject<CaseAttributes>) => {
-      return [...acc, flattenCaseSavedObject(savedObject, [])];
-    },
-    []
-  );
+): CaseResponse[] =>
+  savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
+    return [...acc, flattenCaseSavedObject(savedObject, [])];
+  }, []);
 
 export const flattenCaseSavedObject = (
   savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>>
-): FlattenedCaseSavedObject => ({
-  case_id: savedObject.id,
-  version: savedObject.version ? savedObject.version : '0',
+  comments: Array<SavedObject<CommentAttributes>> = []
+): CaseResponse => ({
+  id: savedObject.id,
+  version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   ...savedObject.attributes,
 });
 
-export const formatAllComments = (
+export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): AllComments => ({
+): CommentsResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -97,19 +106,16 @@ export const formatAllComments = (
 
 export const flattenCommentSavedObjects = (
   savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
-): FlattenedCommentSavedObject[] =>
-  savedObjects.reduce(
-    (acc: FlattenedCommentSavedObject[], savedObject: SavedObject<CommentAttributes>) => {
-      return [...acc, flattenCommentSavedObject(savedObject)];
-    },
-    []
-  );
+): CommentResponse[] =>
+  savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
+    return [...acc, flattenCommentSavedObject(savedObject)];
+  }, []);
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): FlattenedCommentSavedObject => ({
-  comment_id: savedObject.id,
-  version: savedObject.version ? savedObject.version : '0',
+): CommentResponse => ({
+  id: savedObject.id,
+  version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
 
@@ -127,3 +133,5 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
       return SortFieldCase.createdAt;
   }
 };
+
+export const escapeHatch = schema.object({}, { allowUnknowns: true });

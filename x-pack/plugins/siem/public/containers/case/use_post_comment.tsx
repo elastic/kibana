@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useReducer, useCallback } from 'react';
+
+import { CommentRequest } from '../../../../../../plugins/case/common/api';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
+
+import { postComment } from './api';
+import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_COMMENT } from './constants';
-import { Comment, NewComment } from './types';
-import { createComment } from './api';
-import { getTypedPayload } from './utils';
+import { Comment } from './types';
 
 interface NewCommentState {
-  data: NewComment;
-  newComment?: Comment;
+  commentData: Comment | null;
   isLoading: boolean;
   isError: boolean;
   caseId: string;
 }
 interface Action {
   type: string;
-  payload?: NewComment | Comment;
+  payload?: Comment;
 }
 
 const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentState => {
@@ -33,19 +33,12 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
         isLoading: true,
         isError: false,
       };
-    case POST_NEW_COMMENT:
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: getTypedPayload<NewComment>(action.payload),
-      };
     case FETCH_SUCCESS:
       return {
         ...state,
         isLoading: false,
         isError: false,
-        newComment: getTypedPayload<Comment>(action.payload),
+        commentData: action.payload ?? null,
       };
     case FETCH_FAILURE:
       return {
@@ -57,41 +50,42 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
       throw new Error();
   }
 };
-const initialData: NewComment = {
-  comment: '',
-};
 
-export const usePostComment = (
-  caseId: string
-): [NewCommentState, Dispatch<SetStateAction<NewComment>>] => {
+interface UsePostComment extends NewCommentState {
+  postComment: (data: CommentRequest) => void;
+}
+
+export const usePostComment = (caseId: string): UsePostComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
+    commentData: null,
     isLoading: false,
     isError: false,
     caseId,
-    data: initialData,
   });
-  const [formData, setFormData] = useState(initialData);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    dispatch({ type: POST_NEW_COMMENT, payload: formData });
-  }, [formData]);
-
-  useEffect(() => {
-    const postComment = async () => {
+  const postMyComment = useCallback(async (data: CommentRequest) => {
+    let cancel = false;
+    try {
       dispatch({ type: FETCH_INIT });
-      try {
-        const { isNew, ...dataWithoutIsNew } = state.data;
-        const response = await createComment(dataWithoutIsNew, state.caseId);
+      const response = await postComment(data, state.caseId);
+      if (!cancel) {
         dispatch({ type: FETCH_SUCCESS, payload: response });
-      } catch (error) {
-        errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+      }
+    } catch (error) {
+      if (!cancel) {
+        errorToToaster({
+          title: i18n.ERROR_TITLE,
+          error: error.body && error.body.message ? new Error(error.body.message) : error,
+          dispatchToaster,
+        });
         dispatch({ type: FETCH_FAILURE });
       }
-    };
-    if (state.data.isNew) {
-      postComment();
     }
-  }, [state.data.isNew]);
-  return [state, setFormData];
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return { ...state, postComment: postMyComment };
 };

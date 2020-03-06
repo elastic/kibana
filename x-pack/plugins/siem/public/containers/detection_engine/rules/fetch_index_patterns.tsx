@@ -15,8 +15,7 @@ import {
   getIndexFields,
   sourceQuery,
 } from '../../../containers/source';
-import { useStateToaster } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { SourceQuery } from '../../../graphql/types';
 import { useApolloClient } from '../../../utils/apollo_context';
 

@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface MessageBody {
-  error?: string;
-  message?: string;
-  statusCode?: number;
-  status_code?: number;
+export interface KibanaApiError {
+  error: string;
+  body: {
+    message: string;
+    status_code: number;
+  };
 }
 
-export const parseJsonFromBody = async (response: Response): Promise<MessageBody | null> => {
-  try {
-    const text = await response.text();
-    return JSON.parse(text);
-  } catch (error) {
-    return null;
-  }
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isApiError = (error: any): error is KibanaApiError => error?.body?.message;

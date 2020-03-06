@@ -13,6 +13,7 @@ import {
   createConcatStream,
 } from '../../../../../../../src/legacy/utils/streams';
 import { importRulesSchema } from '../routes/schemas/import_rules_schema';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -42,7 +43,7 @@ export const validateRules = (): Transform => {
     if (!(obj instanceof Error)) {
       const validated = importRulesSchema.validate(obj);
       if (validated.error != null) {
-        return new TypeError(validated.error.message);
+        return new BadRequestError(validated.error.message);
       } else {
         return validated.value;
       }
