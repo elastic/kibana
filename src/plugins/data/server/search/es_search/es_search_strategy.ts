@@ -21,7 +21,7 @@ import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ES_SEARCH_STRATEGY } from '../../../common/search';
 import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { ISearchContext } from '..';
+import { getDefaultSearchParams, ISearchContext } from '..';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
@@ -30,28 +30,18 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
   return {
     search: async (request, options) => {
       const config = await context.config$.pipe(first()).toPromise();
+      const defaultParams = getDefaultSearchParams(config);
       const params = {
-        timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
-        ignoreUnavailable: true, // Don't fail if the index/indices don't exist
-        restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+        ...defaultParams,
         ...request.params,
       };
-      if (request.debug) {
-        // eslint-disable-next-line
-        console.log(JSON.stringify(params, null, 2));
-      }
-      const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
+      const rawResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.
-      return {
-        total: esSearchResponse._shards.total,
-        loaded:
-          esSearchResponse._shards.failed +
-          esSearchResponse._shards.skipped +
-          esSearchResponse._shards.successful,
-        rawResponse: esSearchResponse,
-      };
+      const { total, failed, successful } = rawResponse._shards;
+      const loaded = failed + successful;
+      return { total, loaded, rawResponse };
     },
   };
 };

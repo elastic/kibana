@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpSetup } from 'kibana/public';
 // service for interacting with the server
 import { Dictionary } from '../../../common/types/common';
 
 export type Http = (options: Dictionary<any>) => Promise<unknown>;
 
-export function httpFactory(xsrfToken: string) {
+export function httpFactory(httpSetup: HttpSetup) {
   return function http(options: Dictionary<any>) {
     return new Promise((resolve, reject) => {
       if (options && options.url) {
         let url = '';
         url = url + (options.url || '');
         const headers = {
-          'kbn-system-request': true,
           'Content-Type': 'application/json',
-          'kbn-version': xsrfToken,
           ...options.headers,
         };
 
@@ -36,9 +35,10 @@ export function httpFactory(xsrfToken: string) {
           payload.body = body;
         }
 
-        fetch(url, payload)
+        httpSetup
+          .fetch(url, payload)
           .then(resp => {
-            resp.json().then(resp.ok === true ? resolve : reject);
+            resolve(resp);
           })
           .catch(resp => {
             reject(resp);

@@ -21,7 +21,6 @@ import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useLicense } from '../../../hooks/useLicense';
 import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
@@ -33,6 +32,7 @@ import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -61,7 +61,6 @@ ${theme.euiColorLightShade}`,
 const MAX_REQUESTS = 5;
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
-  const callApmApi = useCallApmApi();
   const license = useLicense();
   const { search } = useLocation();
   const { urlParams, uiFilters } = useUrlParams();
@@ -137,7 +136,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         }
       }
     },
-    [params, setIsLoading, callApmApi, responses.length, notifications.toasts]
+    [params, setIsLoading, responses.length, notifications.toasts]
   );
 
   useEffect(() => {
