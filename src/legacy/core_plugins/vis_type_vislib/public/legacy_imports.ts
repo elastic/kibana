@@ -19,7 +19,8 @@
 
 export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
+import { search } from '../../../../plugins/data/public';
+export const { tabifyAggResponse, tabifyGetColumns } = search;
 // @ts-ignore
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore

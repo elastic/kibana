@@ -19,9 +19,8 @@
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
-import { IAggConfig } from '../../../../../../plugins/data/public';
-import { TabbedRangeFilterParams } from './types';
-import { AggResponseBucket } from '../types';
+import { IAggConfig } from '../aggs';
+import { AggResponseBucket, TabbedRangeFilterParams } from './types';
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;

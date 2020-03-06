@@ -19,7 +19,7 @@
 
 import { set } from 'lodash';
 import { FormattedData } from '../../../../../../plugins/inspector/public';
-import { TabbedTable } from '../tabify';
+import { TabbedTable } from '../../../../../../plugins/data/public';
 import { createFilter } from './create_filter';
 
 /**

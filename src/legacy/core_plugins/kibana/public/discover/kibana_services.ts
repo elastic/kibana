@@ -58,7 +58,8 @@ export { intervalOptions } from 'ui/agg_types';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { tabifyAggResponse } from '../../../data/public';
+import { search } from '../../../../../plugins/data/public';
+export const { tabifyAggResponse } = search;
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   ensureDefaultIndexPattern,

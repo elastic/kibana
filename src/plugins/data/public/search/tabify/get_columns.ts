@@ -18,7 +18,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { IAggConfig } from '../../../../../../plugins/data/public';
+import { IAggConfig } from '../aggs';
 import { TabbedAggColumn } from './types';
 
 const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {

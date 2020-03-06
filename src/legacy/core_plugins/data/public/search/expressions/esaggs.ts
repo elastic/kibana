@@ -36,6 +36,7 @@ import {
   Filter,
   getTime,
   FilterManager,
+  search,
 } from '../../../../../../plugins/data/public';
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
@@ -205,7 +206,7 @@ const handleCourierRequest = async ({
 
   if (shouldCalculateNewTabify) {
     (searchSource as any).lastTabifyHash = tabifyCacheHash;
-    (searchSource as any).tabifiedResponse = tabifyAggResponse(
+    (searchSource as any).tabifiedResponse = search.tabifyAggResponse(
       aggs,
       (searchSource as any).finalResponse,
       tabifyParams

@@ -31,9 +31,3 @@ export interface RequestInspectorStats {
   hits?: InspectorStat;
   requestTime?: InspectorStat;
 }
-
-export interface AggResponseBucket {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-}

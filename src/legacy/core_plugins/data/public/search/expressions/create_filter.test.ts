@@ -18,12 +18,12 @@
  */
 
 import { createFilter } from './create_filter';
-import { TabbedTable } from '../tabify';
 import {
   esFilters,
   fieldFormats,
   FieldFormatsGetConfigFn,
   IAggConfig,
+  TabbedTable,
 } from '../../../../../../plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';

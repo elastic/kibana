@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { IAggConfig, RangeFilterParams } from '../../../../../../plugins/data/public';
+import { RangeFilterParams } from '../../../public';
+import { IAggConfig } from '../aggs';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {
@@ -29,6 +30,13 @@ export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   timeRange?: { [key: string]: RangeFilterParams };
+}
+
+/** @internal */
+export interface AggResponseBucket {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
 }
 
 /** @public **/

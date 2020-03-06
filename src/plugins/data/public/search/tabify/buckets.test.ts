@@ -18,8 +18,7 @@
  */
 
 import { TabifyBuckets } from './buckets';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggGroupNames } from '../../../../../../plugins/data/public/search/aggs';
+import { AggGroupNames } from '../aggs';
 
 describe('Buckets wrapper', () => {
   const check = (aggResp: any, count: number, keys: string[]) => {

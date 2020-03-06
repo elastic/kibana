@@ -19,4 +19,3 @@
 
 export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
 export { serializeAggConfig } from './expressions/utils';
-export { tabifyAggResponse, tabifyGetColumns } from './tabify';

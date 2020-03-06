@@ -18,17 +18,8 @@
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { search } from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';
-import {
-  mockDataServices,
-  mockAggTypesRegistry,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/search/aggs/test_helpers';
-
-const { BUCKET_TYPES } = search.aggs;
-
+import { AggConfigs, BUCKET_TYPES } from '../aggs';
+import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
 
 describe('TabbedAggResponseWriter class', () => {

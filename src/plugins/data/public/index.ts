@@ -309,6 +309,7 @@ import {
   siblingPipelineType,
   termsAggFilter,
 } from './search/aggs';
+import { tabifyAggResponse, tabifyGetColumns } from './search/tabify';
 
 export {
   AggParam, // only the type is used externally, only in vis editor
@@ -323,6 +324,7 @@ export {
   OptionedParamEditorProps, // only type is used externally
   OptionedValueProp, // only type is used externally
 } from './search/aggs/types';
+export { TabbedTable, TabbedAggRow, TabbedAggColumn } from './search/tabify/types';
 
 export {
   ES_SEARCH_STRATEGY,
@@ -382,6 +384,8 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
   },
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /*
