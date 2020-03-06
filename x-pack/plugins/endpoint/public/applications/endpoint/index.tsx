@@ -11,7 +11,6 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
-import seedrandom from 'seedrandom';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
 import { appStoreFactory } from './store';

@@ -183,6 +183,7 @@ export class EndpointDocGenerator {
         uptime: 0,
         user: 'SYSTEM',
         entity_id: entityID,
+        executable: 'C:/malware.exe',
         parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
         token: {
           domain: 'NT AUTHORITY',

@@ -192,7 +192,7 @@ export type AlertEvent = Immutable<{
     pe?: {
       imphash: string;
     };
-    executable?: string;
+    executable: string;
     sid?: string;
     start: number;
     malware_classifier?: MalwareClassifierFields;
