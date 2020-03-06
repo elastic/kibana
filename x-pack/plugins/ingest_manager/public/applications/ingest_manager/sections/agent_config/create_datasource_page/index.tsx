@@ -16,13 +16,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
-import { useLink } from '../../../hooks';
+import { useLink, sendCreateDatasource } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
 import { CREATE_DATASOURCE_STEP_PATHS } from './constants';
 import { StepSelectPackage } from './step_select_package';
 import { StepConfigureDatasource } from './step_configure_datasource';
+import { StepReviewDatasource } from './step_review';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
@@ -33,6 +34,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
   const [maxStep, setMaxStep] = useState<CreateDatasourceStep | ''>('');
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
@@ -74,7 +76,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel url
-  const CONFIG_URL = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
+  const CONFIG_URL = useLink(
+    `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
+  );
   const PACKAGE_URL = useEPMLinks().toDetailView({
     name: (pkgkey || '-').split('-')[0],
     version: (pkgkey || '-').split('-')[1],
@@ -98,6 +102,14 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const redirectToSecondStep = (
     <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`} />
   );
+
+  // Save datasource
+  const saveDatasource = async () => {
+    setIsSaving(true);
+    const result = await sendCreateDatasource(datasource);
+    setIsSaving(false);
+    return result;
+  };
 
   const layoutProps = {
     from,
@@ -183,7 +195,10 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
                   </EuiButtonEmpty>
                 }
                 cancelUrl={cancelUrl}
-                onNext={() => {}}
+                onNext={() => {
+                  setMaxStep('configure');
+                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.review}`);
+                }}
               />
             )}
           </CreateDatasourcePageLayout>
@@ -193,7 +208,25 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         {/* (i.e. after full page reload) */}
         <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.review}`}>
           <CreateDatasourcePageLayout {...layoutProps} currentStep="review">
-            {!datasource.name ? redirectToSecondStep : <span>Review step</span>}
+            {!datasource.name ? (
+              redirectToSecondStep
+            ) : (
+              <StepReviewDatasource
+                datasource={datasource}
+                cancelUrl={cancelUrl}
+                isSubmitLoading={isSaving}
+                onSubmit={async () => {
+                  const { error } = await saveDatasource();
+                  if (!error) {
+                    history.push(
+                      `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
+                    );
+                  } else {
+                    // TODO: Handle save datasource error
+                  }
+                }}
+              />
+            )}
           </CreateDatasourcePageLayout>
         </Route>
       </Switch>

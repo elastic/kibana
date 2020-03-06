@@ -6,6 +6,7 @@
 
 export {
   agentConfigRouteService,
+  datasourceRouteService,
   fleetSetupRouteService,
   agentRouteService,
   enrollmentAPIKeyRouteService,

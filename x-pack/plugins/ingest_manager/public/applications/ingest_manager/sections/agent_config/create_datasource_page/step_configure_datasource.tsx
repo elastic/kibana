@@ -21,7 +21,13 @@ import {
   EuiButton,
   EuiComboBox,
 } from '@elastic/eui';
-import { AgentConfig, PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
+import {
+  AgentConfig,
+  PackageInfo,
+  Datasource,
+  NewDatasource,
+  DatasourceInput,
+} from '../../../types';
 import { PackageToConfigDatasourceInputs } from './services';
 import { DatasourceInputPanel } from './components';
 
@@ -45,7 +51,17 @@ export const StepConfigureDatasource: React.FunctionComponent<{
 
     // If package has changed, create shell datasource with input&stream values based on package info
     if (currentPkgKey !== pkgKey) {
+      // Existing datasources on the agent config using the package name, retrieve highest number appended to datasource name
+      const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
+      const dsWithMatchingNames = (agentConfig.datasources as Datasource[])
+        .filter(ds => Boolean(ds.name.match(dsPackageNamePattern)))
+        .map(ds => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
+        .sort();
+
       updateDatasource({
+        name: `${packageInfo.name}-${
+          dsWithMatchingNames.length ? dsWithMatchingNames[dsWithMatchingNames.length - 1] + 1 : 1
+        }`,
         package: {
           name: packageInfo.name,
           title: packageInfo.title,
@@ -94,6 +110,14 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 id="xpack.ingestManager.createDatasource.stepConfigure.datasourceDescriptionInputLabel"
                 defaultMessage="Description"
               />
+            }
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestManager.createDatasource.stepConfigure.inputVarFieldOptionalLabel"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
             }
           >
             <EuiFieldText
@@ -253,7 +277,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="arrowRight" iconSide="right" onClick={() => onNext()}>
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.continueLinkText"
+                id="xpack.ingestManager.createDatasource.continueButtonText"
                 defaultMessage="Continue"
               />
             </EuiButton>

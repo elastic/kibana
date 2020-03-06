@@ -198,7 +198,7 @@ export const StepSelectPackage: React.FunctionComponent<{
               onClick={() => onNext()}
             >
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.continueLinkText"
+                id="xpack.ingestManager.createDatasource.continueButtonText"
                 defaultMessage="Continue"
               />
             </EuiButton>

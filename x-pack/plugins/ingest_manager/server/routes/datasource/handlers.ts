@@ -12,6 +12,7 @@ import {
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
 } from '../../types';
+import { CreateDatasourceResponse } from '../../../common';
 
 export const getDatasourcesHandler: RequestHandler<
   undefined,
@@ -76,8 +77,9 @@ export const createDatasourceHandler: RequestHandler<
     await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id], {
       user,
     });
+    const body: CreateDatasourceResponse = { item: datasource, success: true };
     return response.ok({
-      body: { item: datasource, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({

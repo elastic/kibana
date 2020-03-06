@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NewDatasource } from '../models';
+import { Datasource, NewDatasource } from '../models';
 import { ListWithKuery } from './common';
 
 export interface GetDatasourcesRequest {
@@ -18,6 +18,11 @@ export interface GetOneDatasourceRequest {
 
 export interface CreateDatasourceRequest {
   body: NewDatasource;
+}
+
+export interface CreateDatasourceResponse {
+  item: Datasource;
+  success: boolean;
 }
 
 export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
