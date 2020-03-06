@@ -14,6 +14,14 @@ export function isGraphableProcess(passedEvent: ResolverEvent) {
   return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
+function isValue(field: string | string[], value: string) {
+  if (field instanceof Array) {
+    return field.length === 1 && field[0] === value;
+  } else {
+    return field === value;
+  }
+}
+
 /**
  * Returns a custom event type for a process event based on the event's metadata.
  */
@@ -41,12 +49,12 @@ export function eventType(passedEvent: ResolverEvent) {
     const {
       event: { type, category, kind },
     } = passedEvent;
-    if (category === 'process') {
-      if (type === 'start' || type === 'change') {
+    if (isValue(category, 'process')) {
+      if (isValue(type, 'start') || isValue(type, 'change')) {
         return 'processCreated';
-      } else if (type === 'info') {
+      } else if (isValue(type, 'info')) {
         return 'processRan';
-      } else if (type === 'end') {
+      } else if (isValue(type, 'end')) {
         return 'processTerminated';
       } else {
         return 'unknownProcessEvent';
