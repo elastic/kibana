@@ -32,6 +32,7 @@ export default async function({ readConfigFile }) {
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
+      require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
