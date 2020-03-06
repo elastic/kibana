@@ -236,4 +236,21 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.isImportableAndExportable('unknownType')).toBe(false);
     });
   });
+
+  describe('#getImportableAndExportableTypes', () => {
+    it('returns all registered types that are importable/exportable', () => {
+      const typeA = createType({ name: 'typeA', management: { importableAndExportable: true } });
+      const typeB = createType({ name: 'typeB' });
+      const typeC = createType({ name: 'typeC', management: { importableAndExportable: false } });
+      const typeD = createType({ name: 'typeD', management: { importableAndExportable: true } });
+      registry.registerType(typeA);
+      registry.registerType(typeB);
+      registry.registerType(typeC);
+      registry.registerType(typeD);
+
+      const types = registry.getImportableAndExportableTypes();
+      expect(types.length).toEqual(2);
+      expect(types.map(t => t.name)).toEqual(['typeA', 'typeD']);
+    });
+  });
 });

@@ -301,13 +301,6 @@ export class SavedObjectsService
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
-    const getImportableAndExportableTypes = () => {
-      return this.typeRegistry
-        .getAllTypes()
-        .map(type => type.name)
-        .filter(type => this.typeRegistry.isImportableAndExportable(type));
-    };
-
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
       .pipe(first())
@@ -323,7 +316,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
-      getImportableAndExportableTypes,
     });
 
     return {

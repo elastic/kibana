@@ -27,7 +27,13 @@ import { SavedObjectsType } from './types';
  */
 export type ISavedObjectTypeRegistry = Pick<
   SavedObjectTypeRegistry,
-  'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'
+  | 'getType'
+  | 'getAllTypes'
+  | 'getIndex'
+  | 'isNamespaceAgnostic'
+  | 'isHidden'
+  | 'getImportableAndExportableTypes'
+  | 'isImportableAndExportable'
 >;
 
 /**
@@ -61,6 +67,13 @@ export class SavedObjectTypeRegistry {
    */
   public getAllTypes() {
     return [...this.types.values()];
+  }
+
+  /**
+   * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
+   */
+  public getImportableAndExportableTypes() {
+    return this.getAllTypes().filter(type => this.isImportableAndExportable(type.name));
   }
 
   /**

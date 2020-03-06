@@ -21,7 +21,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { setupServer } from './test_utils';
+import { setupServer, createExportableType } from './test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -40,10 +40,14 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+    handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+      allowedTypes.map(createExportableType)
+    );
+
     savedObjectsClient = handlerContext.savedObjects.client;
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerResolveImportErrorsRoute(router, config, () => allowedTypes);
+    registerResolveImportErrorsRoute(router, config);
 
     await server.start();
   });
