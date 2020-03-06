@@ -75,6 +75,7 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
   esFilters,
+  fieldFormats,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
@@ -811,35 +812,45 @@ function discoverController(
     $fetchObservable.next();
   };
 
+  function getDimensions(aggs, timeRange) {
+    const [metric, agg] = aggs;
+    agg.params.timeRange = timeRange;
+    const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+    agg.buckets.setBounds(bounds);
+
+    const { esUnit, esValue } = agg.buckets.getInterval();
+    return {
+      x: {
+        accessor: 0,
+        label: agg.makeLabel(),
+        format: fieldFormats.serialize(agg),
+        params: {
+          date: true,
+          interval: moment.duration(esValue, esUnit),
+          intervalESValue: esValue,
+          intervalESUnit: esUnit,
+          format: agg.buckets.getScaledDateFormat(),
+          bounds: agg.buckets.getBounds(),
+        },
+      },
+      y: {
+        accessor: 1,
+        format: fieldFormats.serialize(metric),
+        label: metric.makeLabel(),
+      },
+    };
+  }
+
   function onResults(resp) {
     logInspectorResponse(resp);
 
     if ($scope.opts.timefield) {
       const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
       $scope.searchSource.rawResponse = resp;
-      const metric = $scope.vis.aggs.aggs[1];
-      const agg = $scope.vis.aggs.aggs[0];
-      agg.params.timeRange = $scope.timeRange;
-      agg.buckets.setBounds(agg);
-      const { esUnit, esValue } = agg.buckets.getInterval();
-      $scope.histogramData = discoverResponseHandler(tabifiedData, {
-        x: {
-          accessor: 1,
-          label: agg.makeLabel(),
-          params: {
-            date: true,
-            interval: moment.duration(esValue, esUnit),
-            intervalESValue: esValue,
-            intervalESUnit: esUnit,
-            format: agg.buckets.getScaledDateFormat(),
-            bounds: agg.buckets.getBounds(),
-          },
-        },
-        y: {
-          accessor: 0,
-          label: metric.makeLabel(),
-        },
-      });
+      $scope.histogramData = discoverResponseHandler(
+        tabifiedData,
+        getDimensions($scope.vis.aggs.aggs, $scope.timeRange)
+      );
     }
 
     $scope.hits = resp.hits.total;
