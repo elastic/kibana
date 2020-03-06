@@ -27,8 +27,10 @@ import { useLicense } from '../../../hooks/useLicense';
 import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
+import { EmptyBanner } from './EmptyBanner';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
@@ -215,6 +217,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={cytoscapeDivStyle}
       >
         <Controls />
+        {serviceName && renderedElements.current.length === 1 && (
+          <EmptyBanner />
+        )}
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
     </div>
