@@ -38,7 +38,7 @@ interface StepRuleDescriptionProps {
   schema: FormSchema;
 }
 
-const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   data,
   direction = 'row',
   indexPatterns,
@@ -60,7 +60,10 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
     return (
       <EuiFlexGroup>
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
-          <EuiFlexItem key={`description-step-rule-${index}`}>
+          <EuiFlexItem
+            data-test-subj="listItemColumnStepRuleDescription"
+            key={`description-step-rule-${index}`}
+          >
             <EuiDescriptionList listItems={chunkListItems} />
           </EuiFlexItem>
         ))}
@@ -70,7 +73,7 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem key={`description-step-rule`}>
+      <EuiFlexItem data-test-subj="listItemColumnStepRuleDescription">
         <EuiDescriptionList listItems={listItems} />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -79,7 +82,7 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
 export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
-const buildListItems = (
+export const buildListItems = (
   data: unknown,
   schema: FormSchema,
   filterManager: FilterManager,

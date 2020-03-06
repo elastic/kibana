@@ -39,7 +39,7 @@ import { schema } from './schema';
 import * as I18n from './translations';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { AddRuleDocumentation } from '../rule_documentation';
+import { MarkdownEditorForm } from '../../../../../components/markdown_editor/form';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -49,6 +49,10 @@ interface StepAboutRuleProps extends RuleStepProps {
 
 const TagContainer = styled.div`
   margin-top: 16px;
+`;
+
+const ThreeQuartersContainer = styled.div`
+  max-width: 740px;
 `;
 
 TagContainer.displayName = 'TagContainer';
@@ -128,61 +132,62 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepAboutRule">
+          <ThreeQuartersContainer>
+            <CommonUseField
+              path="name"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleName',
+                'data-test-subj': 'detectionEngineStepAboutRuleName',
+                euiFieldProps: {
+                  fullWidth: true,
+                  disabled: isLoading,
+                },
+              }}
+            />
+          </ThreeQuartersContainer>
+          <EuiSpacer size="m" />
+          <ThreeQuartersContainer>
+            <CommonUseField
+              path="description"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleDescription',
+                'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+                euiFieldProps: {
+                  fullWidth: true,
+                  disabled: isLoading,
+                  compressed: true,
+                },
+              }}
+            />
+          </ThreeQuartersContainer>
+          <EuiSpacer size="m" />
           <CommonUseField
-            path="name"
+            path="severity"
             componentProps={{
-              idAria: 'detectionEngineStepAboutRuleName',
-              'data-test-subj': 'detectionEngineStepAboutRuleName',
+              idAria: 'detectionEngineStepAboutRuleSeverity',
+              'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
               euiFieldProps: {
                 fullWidth: false,
                 disabled: isLoading,
+                options: severityOptions,
               },
             }}
           />
           <CommonUseField
-            path="description"
+            path="riskScore"
             componentProps={{
-              idAria: 'detectionEngineStepAboutRuleDescription',
-              'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+              idAria: 'detectionEngineStepAboutRuleRiskScore',
+              'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
               euiFieldProps: {
+                max: 100,
+                min: 0,
+                fullWidth: false,
                 disabled: isLoading,
+                showTicks: true,
+                tickInterval: 25,
               },
             }}
           />
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <CommonUseField
-                path="severity"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleSeverity',
-                  'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
-                  euiFieldProps: {
-                    fullWidth: false,
-                    disabled: isLoading,
-                    options: severityOptions,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CommonUseField
-                path="riskScore"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleRiskScore',
-                  'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
-                  euiFieldProps: {
-                    max: 100,
-                    min: 0,
-                    fullWidth: false,
-                    disabled: isLoading,
-                    showTicks: true,
-                    tickInterval: 25,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <TagContainer>
             <CommonUseField
               path="tags"
@@ -203,15 +208,21 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             buttonContent={AdvancedSettingsAccordionButton}
           >
             <EuiSpacer size="m" />
-            <UseField
-              path="timeline"
-              component={PickTimeline}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleTimeline',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-              }}
-            />
+            <ThreeQuartersContainer>
+              <UseField
+                path="timeline"
+                component={PickTimeline}
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleTimeline',
+                  isDisabled: isLoading,
+                  dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
+                  euiFieldProps: {
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </ThreeQuartersContainer>
+            <EuiSpacer size="m" />
             <UseField
               path="references"
               component={AddItem}
@@ -242,15 +253,19 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
               }}
             />
-            <UseField
-              path="documentation"
-              component={AddRuleDocumentation}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleDocumentation',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleDocumentation',
-              }}
-            />
+            <EuiSpacer size="m" />
+            <ThreeQuartersContainer>
+              <UseField
+                path="documentation"
+                component={MarkdownEditorForm}
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleDocumentation',
+                  isDisabled: isLoading,
+                  dataTestSubj: 'detectionEngineStepAboutRuleDocumentation',
+                  placeholder: I18n.ADD_DOCUMENTATION_HELP_TEXT,
+                }}
+              />
+            </ThreeQuartersContainer>
           </AdvancedSettingsAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {

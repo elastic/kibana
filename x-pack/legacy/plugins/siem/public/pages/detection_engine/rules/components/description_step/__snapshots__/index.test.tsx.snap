@@ -1,0 +1,271 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`description_step StepRuleDescriptionComponent renders correctly against snapshot when direction is \`row\` 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    data-test-subj="listItemColumnStepRuleDescription"
+    key="description-step-rule-0"
+  >
+    <EuiDescriptionList
+      listItems={
+        Array [
+          Object {
+            "description": "Query with rule-id",
+            "title": "Name",
+          },
+          Object {
+            "description": "24/7",
+            "title": "Description",
+          },
+          Object {
+            "description": <SeverityBadgeComponent
+              value="low"
+            />,
+            "title": "Severity",
+          },
+          Object {
+            "description": 1,
+            "title": "Risk score",
+          },
+          Object {
+            "description": "Titled timeline",
+            "title": "Investigate detections using this timeline template",
+          },
+        ]
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    data-test-subj="listItemColumnStepRuleDescription"
+    key="description-step-rule-1"
+  >
+    <EuiDescriptionList
+      listItems={
+        Array [
+          Object {
+            "description": <ForwardRef
+              alignItems="flexStart"
+              direction="column"
+              gutterSize="none"
+            >
+              <EuiFlexItem>
+                <ForwardRef(Styled(EuiButtonEmpty))
+                  flush="left"
+                  href="www.test.co"
+                  iconType="link"
+                  size="xs"
+                  target="_blank"
+                >
+                  www.test.co
+                </ForwardRef(Styled(EuiButtonEmpty))>
+              </EuiFlexItem>
+            </ForwardRef>,
+            "title": "Reference URLs",
+          },
+          Object {
+            "description": <ul>
+              <li>
+                test
+              </li>
+            </ul>,
+            "title": "False positive examples",
+          },
+          Object {
+            "description": <ForwardRef(Styled(EuiFlexGroup))
+              direction="column"
+            >
+              <EuiFlexItem>
+                <ForwardRef
+                  href="reference1"
+                  target="_blank"
+                >
+                  
+                </ForwardRef>
+                <ForwardRef
+                  alignItems="flexStart"
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>
+                    <ForwardRef(Styled(EuiButtonEmpty))
+                      flush="left"
+                      href="technique reference"
+                      iconType="test-file-stub"
+                      size="xs"
+                      target="_blank"
+                    >
+                      
+                    </ForwardRef(Styled(EuiButtonEmpty))>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+              <EuiSpacer />
+            </ForwardRef(Styled(EuiFlexGroup))>,
+            "title": "MITRE ATT&CK™",
+          },
+          Object {
+            "description": <ForwardRef
+              gutterSize="xs"
+              responsive={false}
+              wrap={true}
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef(Styled(EuiBadge))
+                  color="hollow"
+                >
+                  tag1
+                </ForwardRef(Styled(EuiBadge))>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef(Styled(EuiBadge))
+                  color="hollow"
+                >
+                  tag2
+                </ForwardRef(Styled(EuiBadge))>
+              </EuiFlexItem>
+            </ForwardRef>,
+            "title": "Tags",
+          },
+          Object {
+            "description": "Markdown preview unavailable",
+            "title": "Documentation",
+          },
+        ]
+      }
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`description_step StepRuleDescriptionComponent renders correctly against snapshot when direction is NOT \`row\` 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    data-test-subj="listItemColumnStepRuleDescription"
+  >
+    <EuiDescriptionList
+      listItems={
+        Array [
+          Object {
+            "description": "Query with rule-id",
+            "title": "Name",
+          },
+          Object {
+            "description": "24/7",
+            "title": "Description",
+          },
+          Object {
+            "description": <SeverityBadgeComponent
+              value="low"
+            />,
+            "title": "Severity",
+          },
+          Object {
+            "description": 1,
+            "title": "Risk score",
+          },
+          Object {
+            "description": "Titled timeline",
+            "title": "Investigate detections using this timeline template",
+          },
+          Object {
+            "description": <ForwardRef
+              alignItems="flexStart"
+              direction="column"
+              gutterSize="none"
+            >
+              <EuiFlexItem>
+                <ForwardRef(Styled(EuiButtonEmpty))
+                  flush="left"
+                  href="www.test.co"
+                  iconType="link"
+                  size="xs"
+                  target="_blank"
+                >
+                  www.test.co
+                </ForwardRef(Styled(EuiButtonEmpty))>
+              </EuiFlexItem>
+            </ForwardRef>,
+            "title": "Reference URLs",
+          },
+          Object {
+            "description": <ul>
+              <li>
+                test
+              </li>
+            </ul>,
+            "title": "False positive examples",
+          },
+          Object {
+            "description": <ForwardRef(Styled(EuiFlexGroup))
+              direction="column"
+            >
+              <EuiFlexItem>
+                <ForwardRef
+                  href="reference1"
+                  target="_blank"
+                >
+                  
+                </ForwardRef>
+                <ForwardRef
+                  alignItems="flexStart"
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>
+                    <ForwardRef(Styled(EuiButtonEmpty))
+                      flush="left"
+                      href="technique reference"
+                      iconType="test-file-stub"
+                      size="xs"
+                      target="_blank"
+                    >
+                      
+                    </ForwardRef(Styled(EuiButtonEmpty))>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
+              <EuiSpacer />
+            </ForwardRef(Styled(EuiFlexGroup))>,
+            "title": "MITRE ATT&CK™",
+          },
+          Object {
+            "description": <ForwardRef
+              gutterSize="xs"
+              responsive={false}
+              wrap={true}
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef(Styled(EuiBadge))
+                  color="hollow"
+                >
+                  tag1
+                </ForwardRef(Styled(EuiBadge))>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <ForwardRef(Styled(EuiBadge))
+                  color="hollow"
+                >
+                  tag2
+                </ForwardRef(Styled(EuiBadge))>
+              </EuiFlexItem>
+            </ForwardRef>,
+            "title": "Tags",
+          },
+          Object {
+            "description": "Markdown preview unavailable",
+            "title": "Documentation",
+          },
+        ]
+      }
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

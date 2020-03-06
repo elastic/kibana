@@ -3,17 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
 
-import { addFilterStateIfNotThere, getDescriptionItem } from './';
+import {
+  StepRuleDescriptionComponent,
+  addFilterStateIfNotThere,
+  buildListItems,
+  getDescriptionItem,
+} from './';
 
-import { esFilters, Filter } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  Filter,
+  FilterManager,
+} from '../../../../../../../../../../src/plugins/data/public';
 import { mockAboutStepRule } from '../../all/__mocks__/mock';
-import { FilterManager } from '../../../../../../../../../../src/plugins/data/public/query/filter_manager';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
 import * as i18n from './translations';
 
-import React from 'react';
+import { schema } from '../step_about_rule/schema';
+import { ListItems } from './types';
+
 const setupMock = coreMock.createSetup();
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
   switch (key) {
@@ -24,8 +36,45 @@ const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
   }
 };
 setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
+const mockFilterManager = new FilterManager(setupMock.uiSettings);
+
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return { ...r, memo: (x: any) => x };
+});
 
 describe('description_step', () => {
+  describe('StepRuleDescriptionComponent', () => {
+    test('renders correctly against snapshot when direction is `row`', () => {
+      const wrapper = shallow(
+        <StepRuleDescriptionComponent direction="row" data={mockAboutStepRule} schema={schema} />
+      );
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    test('renders 2 columns when direction is `row`', () => {
+      const wrapper = shallow(
+        <StepRuleDescriptionComponent direction="row" data={mockAboutStepRule} schema={schema} />
+      );
+      expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
+    });
+
+    test('renders correctly against snapshot when direction is NOT `row`', () => {
+      const wrapper = shallow(
+        <StepRuleDescriptionComponent direction="column" data={mockAboutStepRule} schema={schema} />
+      );
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    test('renders 1 column when direction is NOT `row`', () => {
+      const wrapper = shallow(
+        <StepRuleDescriptionComponent direction="column" data={mockAboutStepRule} schema={schema} />
+      );
+      expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
+    });
+  });
+
   describe('addFilterStateIfNotThere', () => {
     test('it does not change the state if it is global', () => {
       const filters: Filter[] = [
@@ -200,17 +249,29 @@ describe('description_step', () => {
     });
   });
 
+  describe('buildListItems', () => {
+    test('returns expected ListItems array when given valid inputs', () => {
+      const result: ListItems[] = buildListItems(mockAboutStepRule, schema, mockFilterManager);
+
+      expect(result.length).toEqual(10);
+    });
+  });
+
   describe('getDescriptionItem', () => {
-    const mockFilterManager = new FilterManager(setupMock.uiSettings);
     test('returns ListItem with all values enumerated when value[field] is an array', () => {
-      const result = getDescriptionItem('tags', 'Tags label', mockAboutStepRule, mockFilterManager);
+      const result: ListItems[] = getDescriptionItem(
+        'tags',
+        'Tags label',
+        mockAboutStepRule,
+        mockFilterManager
+      );
 
       expect(result[0].title).toEqual('Tags label');
       expect(typeof result[0].description).toEqual('object');
     });
 
     test('returns ListItem with description of value[field] when value[field] is a string', () => {
-      const result = getDescriptionItem(
+      const result: ListItems[] = getDescriptionItem(
         'description',
         'Description label',
         mockAboutStepRule,
@@ -222,7 +283,7 @@ describe('description_step', () => {
     });
 
     test('returns empty array when `value` is a non-existant property in `field`', () => {
-      const result = getDescriptionItem(
+      const result: ListItems[] = getDescriptionItem(
         'jibberjabber',
         'JibberJabber label',
         mockAboutStepRule,
@@ -245,7 +306,7 @@ describe('description_step', () => {
             saved_id: null,
           },
         };
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'queryBar',
           'Query bar label',
           mockQueryBar,
@@ -259,7 +320,7 @@ describe('description_step', () => {
 
     describe('threat', () => {
       test('returns array of ListItems when threat exist', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'threat',
           'Threat label',
           mockAboutStepRule,
@@ -267,7 +328,7 @@ describe('description_step', () => {
         );
 
         expect(result[0].title).toEqual('Threat label');
-        expect(typeof result[0].description).toEqual('object'); // TODO: figure out better way to test this
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
 
       test('filters out threats with tactic.name of `none`', () => {
@@ -291,7 +352,7 @@ describe('description_step', () => {
             },
           ],
         };
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'threat',
           'Threat label',
           mockAboutStep,
@@ -304,7 +365,7 @@ describe('description_step', () => {
 
     describe('references', () => {
       test('returns array of ListItems when references exist', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'references',
           'Reference label',
           mockAboutStepRule,
@@ -312,13 +373,13 @@ describe('description_step', () => {
         );
 
         expect(result[0].title).toEqual('Reference label');
-        expect(typeof result[0].description).toEqual('object'); // TODO: figure out better way to test this
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
 
     describe('falsePositives', () => {
       test('returns array of ListItems when falsePositives exist', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'falsePositives',
           'False positives label',
           mockAboutStepRule,
@@ -326,13 +387,13 @@ describe('description_step', () => {
         );
 
         expect(result[0].title).toEqual('False positives label');
-        expect(typeof result[0].description).toEqual('object'); // TODO: figure out better way to test this
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
 
     describe('severity', () => {
       test('returns array of ListItems when severity exist', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'severity',
           'Severity label',
           mockAboutStepRule,
@@ -340,13 +401,13 @@ describe('description_step', () => {
         );
 
         expect(result[0].title).toEqual('Severity label');
-        expect(typeof result[0].description).toEqual('object'); // TODO: figure out better way to test this
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
 
     describe('riskScore', () => {
       test('returns array of ListItems when riskScore exist', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'riskScore',
           'Risk score label',
           mockAboutStepRule,
@@ -360,7 +421,7 @@ describe('description_step', () => {
 
     describe('timeline', () => {
       test('returns timeline title if one exists', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
           mockAboutStepRule,
@@ -378,7 +439,7 @@ describe('description_step', () => {
             id: '12345',
           },
         };
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
           mockAboutStep,
@@ -392,7 +453,7 @@ describe('description_step', () => {
 
     describe('documentation', () => {
       test('returns default documentation description', () => {
-        const result = getDescriptionItem(
+        const result: ListItems[] = getDescriptionItem(
           'documentation',
           'Documentation label',
           mockAboutStepRule,

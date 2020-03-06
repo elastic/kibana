@@ -1,0 +1,398 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
+import { esFilters, FilterManager } from '../../../../../../../../../../src/plugins/data/public';
+import { SeverityBadge } from '../severity_badge';
+
+import * as i18n from './translations';
+import {
+  isNotEmptyArray,
+  buildQueryBarDescription,
+  buildThreatDescription,
+  buildUnorderedListArrayDescription,
+  buildStringArrayDescription,
+  buildSeverityDescription,
+  buildUrlsDescription,
+} from './helpers';
+import { ListItems } from './types';
+
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return { ...r, memo: (x: any) => x };
+});
+
+const setupMock = coreMock.createSetup();
+const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
+  switch (key) {
+    case 'filters:pinnedByDefault':
+      return pinnedByDefault;
+    default:
+      throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);
+  }
+};
+setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
+const mockFilterManager = new FilterManager(setupMock.uiSettings);
+
+const mockQueryBar = {
+  query: {
+    query: 'test query',
+    language: 'kuery',
+  },
+  filters: [
+    {
+      $state: {
+        store: esFilters.FilterStateStore.GLOBAL_STATE,
+      },
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'event.category',
+        negate: false,
+        params: {
+          query: 'file',
+        },
+        type: 'phrase',
+      },
+      query: {
+        match_phrase: {
+          'event.category': 'file',
+        },
+      },
+    },
+  ],
+  saved_id: 'test123',
+};
+
+describe('helpers', () => {
+  describe('isNotEmptyArray', () => {
+    test('returns false if empty array', () => {
+      const result = isNotEmptyArray([]);
+      expect(result).toBeFalsy();
+    });
+
+    test('returns false if array of empty strings', () => {
+      const result = isNotEmptyArray(['', '']);
+      expect(result).toBeFalsy();
+    });
+
+    test('returns true if array of string with space', () => {
+      const result = isNotEmptyArray([' ']);
+      expect(result).toBeTruthy();
+    });
+
+    test('returns true if array with at least one non-empty string', () => {
+      const result = isNotEmptyArray(['', 'abc']);
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe('buildQueryBarDescription', () => {
+    test('returns empty array if no filters, query or savedId exist', () => {
+      const emptyMockQueryBar = {
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        filters: [],
+        saved_id: '',
+      };
+      const result: ListItems[] = buildQueryBarDescription({
+        field: 'queryBar',
+        filters: emptyMockQueryBar.filters,
+        filterManager: mockFilterManager,
+        query: emptyMockQueryBar.query,
+        savedId: emptyMockQueryBar.saved_id,
+      });
+      expect(result).toEqual([]);
+    });
+
+    test('returns expected array of ListItems when filters exists, but no indexPatterns passed in', () => {
+      const mockQueryBarWithFilters = {
+        ...mockQueryBar,
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        saved_id: '',
+      };
+      const result: ListItems[] = buildQueryBarDescription({
+        field: 'queryBar',
+        filters: mockQueryBarWithFilters.filters,
+        filterManager: mockFilterManager,
+        query: mockQueryBarWithFilters.query,
+        savedId: mockQueryBarWithFilters.saved_id,
+      });
+
+      expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
+      expect(result[0].description).toMatchSnapshot();
+    });
+
+    test('returns expected array of ListItems when filters AND indexPatterns exist', () => {
+      const mockQueryBarWithFilters = {
+        ...mockQueryBar,
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        saved_id: '',
+      };
+      const result: ListItems[] = buildQueryBarDescription({
+        field: 'queryBar',
+        filters: mockQueryBarWithFilters.filters,
+        filterManager: mockFilterManager,
+        query: mockQueryBarWithFilters.query,
+        savedId: mockQueryBarWithFilters.saved_id,
+        indexPatterns: { fields: [{ name: 'test name', type: 'test type' }], title: 'test title' },
+      });
+
+      expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
+      expect(result[0].description).toMatchSnapshot();
+    });
+
+    test('returns expected array of ListItems when `query.query` exists', () => {
+      const mockQueryBarWithQuery = {
+        ...mockQueryBar,
+        filters: [],
+        saved_id: '',
+      };
+      const result: ListItems[] = buildQueryBarDescription({
+        field: 'queryBar',
+        filters: mockQueryBarWithQuery.filters,
+        filterManager: mockFilterManager,
+        query: mockQueryBarWithQuery.query,
+        savedId: mockQueryBarWithQuery.saved_id,
+      });
+      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
+      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query.query} </>);
+    });
+
+    test('returns expected array of ListItems when `savedId` exists', () => {
+      const mockQueryBarWithSavedId = {
+        ...mockQueryBar,
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        filters: [],
+      };
+      const result: ListItems[] = buildQueryBarDescription({
+        field: 'queryBar',
+        filters: mockQueryBarWithSavedId.filters,
+        filterManager: mockFilterManager,
+        query: mockQueryBarWithSavedId.query,
+        savedId: mockQueryBarWithSavedId.saved_id,
+      });
+      expect(result[0].title).toEqual(<>{i18n.SAVED_ID_LABEL} </>);
+      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.saved_id} </>);
+    });
+  });
+
+  describe('buildThreatDescription', () => {
+    test('returns empty array if no threats', () => {
+      const result: ListItems[] = buildThreatDescription({ label: 'Mitre Attack', threat: [] });
+      expect(result).toHaveLength(0);
+    });
+
+    // Not sure that this is the desired functionality, but just added tests per existing logic
+    test('returns empty tactic link if no corresponding tactic id found', () => {
+      const result: ListItems[] = buildThreatDescription({
+        label: 'Mitre Attack',
+        threat: [
+          {
+            framework: 'MITRE ATTACK',
+            technique: [{ reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' }],
+            tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA000999' },
+          },
+        ],
+      });
+      const resultingComponent = shallow(result[0].description);
+      expect(result[0].title).toEqual('Mitre Attack');
+      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual('');
+      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+        'Audio Capture (T1123)'
+      );
+    });
+
+    // Not sure that this is the desired functionality, but just added tests per existing logic
+    test('returns empty technique link if no corresponding technique id found', () => {
+      const result: ListItems[] = buildThreatDescription({
+        label: 'Mitre Attack',
+        threat: [
+          {
+            framework: 'MITRE ATTACK',
+            technique: [{ reference: 'https://test.com', name: 'Audio Capture', id: 'T1123456' }],
+            tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
+          },
+        ],
+      });
+      const resultingComponent = shallow(result[0].description);
+      expect(result[0].title).toEqual('Mitre Attack');
+      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+        'Collection (TA0009)'
+      );
+      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual('');
+    });
+
+    test('returns with corresponding tactic and technique link text', () => {
+      const result: ListItems[] = buildThreatDescription({
+        label: 'Mitre Attack',
+        threat: [
+          {
+            framework: 'MITRE ATTACK',
+            technique: [{ reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' }],
+            tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
+          },
+        ],
+      });
+      const resultingComponent = shallow(result[0].description);
+      expect(result[0].title).toEqual('Mitre Attack');
+      expect(resultingComponent).toMatchSnapshot();
+      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+        'Collection (TA0009)'
+      );
+      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+        'Audio Capture (T1123)'
+      );
+    });
+
+    test('returns corresponding number of tactic and technique links', () => {
+      const result: ListItems[] = buildThreatDescription({
+        label: 'Mitre Attack',
+        threat: [
+          {
+            framework: 'MITRE ATTACK',
+            technique: [
+              { reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' },
+              { reference: 'https://test.com', name: 'Clipboard Data', id: 'T1115' },
+            ],
+            tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
+          },
+          {
+            framework: 'MITRE ATTACK',
+            technique: [
+              { reference: 'https://test.com', name: 'Automated Collection', id: 'T1119' },
+            ],
+            tactic: { reference: 'https://test.com', name: 'Discovery', id: 'TA0007' },
+          },
+        ],
+      });
+      const resultingComponent = shallow(result[0].description);
+
+      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]')).toHaveLength(2);
+      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]')).toHaveLength(3);
+    });
+  });
+
+  describe('buildUnorderedListArrayDescription', () => {
+    test('returns empty array if `values` is empty array', () => {
+      const result: ListItems[] = buildUnorderedListArrayDescription(
+        'Test label',
+        'falsePositives',
+        []
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    test('returns ListItem with corresponding number of valid values items', () => {
+      const result: ListItems[] = buildUnorderedListArrayDescription(
+        'Test label',
+        'falsePositives',
+        ['', 'falsePositive1', 'falsePositive2']
+      );
+      const resultingComponent = shallow(result[0].description);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(resultingComponent).toMatchSnapshot();
+      expect(
+        resultingComponent.find('[data-test-subj="unorderedListArrayDescriptionItem"]')
+      ).toHaveLength(2);
+    });
+  });
+
+  describe('buildStringArrayDescription', () => {
+    test('returns empty array if `values` is empty array', () => {
+      const result: ListItems[] = buildStringArrayDescription('Test label', 'tags', []);
+      expect(result).toHaveLength(0);
+    });
+
+    test('returns ListItem with corresponding number of valid values items', () => {
+      const result: ListItems[] = buildStringArrayDescription('Test label', 'tags', [
+        '',
+        'tag1',
+        'tag2',
+      ]);
+      const resultingComponent = shallow(result[0].description);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(resultingComponent).toMatchSnapshot();
+      expect(
+        resultingComponent.find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
+      ).toHaveLength(2);
+      expect(
+        resultingComponent
+          .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
+          .first()
+          .text()
+      ).toEqual('tag1');
+      expect(
+        resultingComponent
+          .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
+          .at(1)
+          .text()
+      ).toEqual('tag2');
+    });
+  });
+
+  describe('buildSeverityDescription', () => {
+    test('returns ListItem with passed in label and SeverityBadge component', () => {
+      const result: ListItems[] = buildSeverityDescription('Test label', 'Test description value');
+      const resultingComponent = shallow(result[0].description);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(resultingComponent).toMatchSnapshot();
+      expect(result[0].description).toEqual(<SeverityBadge value="Test description value" />);
+    });
+  });
+
+  describe('buildUrlsDescription', () => {
+    test('returns empty array if `values` is empty array', () => {
+      const result: ListItems[] = buildUrlsDescription('Test label', []);
+      expect(result).toHaveLength(0);
+    });
+
+    test('returns ListItem with corresponding number of valid values items', () => {
+      const result: ListItems[] = buildUrlsDescription('Test label', [
+        '',
+        'www.test.com',
+        'www.test2.com',
+      ]);
+      const resultingComponent = shallow(result[0].description);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(resultingComponent).toMatchSnapshot();
+      expect(
+        resultingComponent.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
+      ).toHaveLength(2);
+      expect(
+        resultingComponent
+          .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
+          .first()
+          .text()
+      ).toEqual('www.test.com');
+      expect(
+        resultingComponent
+          .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
+          .at(1)
+          .text()
+      ).toEqual('www.test2.com');
+    });
+  });
+});

@@ -27,7 +27,7 @@ import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './t
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
-const isNotEmptyArray = (values: string[]) =>
+export const isNotEmptyArray = (values: string[]) =>
   !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
 
 const EuiBadgeWrap = styled(EuiBadge)`
@@ -124,7 +124,11 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
               const tactic = tacticsOptions.find(t => t.id === singleThreat.tactic.id);
               return (
                 <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
-                  <EuiLink href={singleThreat.tactic.reference} target="_blank">
+                  <EuiLink
+                    data-test-subj="threatTacticLink"
+                    href={singleThreat.tactic.reference}
+                    target="_blank"
+                  >
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
@@ -133,6 +137,7 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                       return (
                         <EuiFlexItem>
                           <TechniqueLinkItem
+                            data-test-subj="threatTechniqueLink"
                             href={technique.reference}
                             target="_blank"
                             iconType={ListTreeIcon}
@@ -169,7 +174,11 @@ export const buildUnorderedListArrayDescription = (
         description: (
           <ul>
             {values.map((val: string) =>
-              isEmpty(val) ? null : <li key={`${field}-${val}`}>{val}</li>
+              isEmpty(val) ? null : (
+                <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
+                  {val}
+                </li>
+              )
             )}
           </ul>
         ),
@@ -193,7 +202,9 @@ export const buildStringArrayDescription = (
             {values.map((val: string) =>
               isEmpty(val) ? null : (
                 <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                  <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
+                  <EuiBadgeWrap data-test-subj="stringArrayDescriptionBadgeItem" color="hollow">
+                    {val}
+                  </EuiBadgeWrap>
                 </EuiFlexItem>
               )
             )}
@@ -219,19 +230,22 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
         title: label,
         description: (
           <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-            {values.map((val: string) => (
-              <EuiFlexItem>
-                <ReferenceLinkItem
-                  href={val}
-                  target="_blank"
-                  iconType="link"
-                  size="xs"
-                  flush="left"
-                >
-                  {val}
-                </ReferenceLinkItem>
-              </EuiFlexItem>
-            ))}
+            {values.map((val: string) =>
+              isEmpty(val) ? null : (
+                <EuiFlexItem>
+                  <ReferenceLinkItem
+                    href={val}
+                    target="_blank"
+                    iconType="link"
+                    size="xs"
+                    flush="left"
+                    data-test-subj="urlsDescriptionReferenceLinkItem"
+                  >
+                    {val}
+                  </ReferenceLinkItem>
+                </EuiFlexItem>
+              )
+            )}
           </EuiFlexGroup>
         ),
       },

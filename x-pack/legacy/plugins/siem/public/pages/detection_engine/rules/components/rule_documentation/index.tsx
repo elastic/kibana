@@ -8,8 +8,9 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { NewNote } from '../../../../../components/notes/add_note/new_note';
+import { MarkdownEditorForm } from '../../../../../components/markdown_editor/form';
 import { FieldHook } from '../../../../shared_imports';
+import * as i18n from './translations';
 
 const DocumentationContainer = styled.div`
   margin-top: 16px;
@@ -19,40 +20,26 @@ interface AddRuleDocumentationProps {
   field: FieldHook;
   dataTestSubj: string;
   idAria: string;
+  isDisabled: boolean;
 }
 
 export const AddRuleDocumentation = ({
   dataTestSubj,
   field,
   idAria,
-}: AddRuleDocumentationProps) => {
-  const updateDocumentation = useCallback(
-    (documentation: string) => {
-      let value = field.value as string;
-      value = documentation;
-      field.setValue(value);
-    },
-    [field]
-  );
-
-  return (
-    <DocumentationContainer>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow>
-          <EuiFormRow
-            label={field.label}
-            labelAppend={field.labelAppend}
-            describedByIds={idAria ? [idAria] : undefined}
-            fullWidth
-          >
-            <NewNote
-              noteInputHeight={200}
-              updateNewNote={updateDocumentation.bind(null)}
-              note={field.value}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </DocumentationContainer>
-  );
-};
+  isDisabled,
+}: AddRuleDocumentationProps) => (
+  <DocumentationContainer>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={2}>
+        <MarkdownEditorForm
+          field={field}
+          dataTestSubj={dataTestSubj}
+          idAria={idAria}
+          isDisabled={isDisabled}
+          placeholder={i18n.ADD_DOCUMENTATION_HELP_TEXT}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </DocumentationContainer>
+);

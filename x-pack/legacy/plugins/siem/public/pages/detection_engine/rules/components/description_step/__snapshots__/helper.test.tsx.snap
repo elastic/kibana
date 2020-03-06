@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`helpers buildQueryBarDescription returns expected array of ListItems when filters AND indexPatterns exist 1`] = `
+<ForwardRef
+  gutterSize="xs"
+  responsive={false}
+  wrap={true}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ForwardRef(Styled(EuiBadge))
+      color="hollow"
+    >
+      <FilterLabel
+        filter={
+          Object {
+            "$state": Object {
+              "store": "globalState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "event.category",
+              "negate": false,
+              "params": Object {
+                "query": "file",
+              },
+              "type": "phrase",
+              "value": [Function],
+            },
+            "query": Object {
+              "match_phrase": Object {
+                "event.category": "file",
+              },
+            },
+          }
+        }
+        valueLabel="file"
+      />
+    </ForwardRef(Styled(EuiBadge))>
+  </EuiFlexItem>
+</ForwardRef>
+`;
+
+exports[`helpers buildQueryBarDescription returns expected array of ListItems when filters exists, but no indexPatterns passed in 1`] = `
+<ForwardRef
+  gutterSize="xs"
+  responsive={false}
+  wrap={true}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ForwardRef(Styled(EuiBadge))
+      color="hollow"
+    >
+      <EuiLoadingSpinner
+        size="m"
+      />
+    </ForwardRef(Styled(EuiBadge))>
+  </EuiFlexItem>
+</ForwardRef>
+`;
+
+exports[`helpers buildSeverityDescription returns ListItem with passed in label and SeverityBadge component 1`] = `
+<EuiHealth
+  color="#e7664c"
+>
+  Test description value
+</EuiHealth>
+`;
+
+exports[`helpers buildStringArrayDescription returns ListItem with corresponding number of valid values items 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--wrap"
+>
+  <EuiFlexItem
+    grow={false}
+    key="tags-tag1"
+  >
+    <Styled(EuiBadge)
+      color="hollow"
+      data-test-subj="stringArrayDescriptionBadgeItem"
+    >
+      tag1
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="tags-tag2"
+  >
+    <Styled(EuiBadge)
+      color="hollow"
+      data-test-subj="stringArrayDescriptionBadgeItem"
+    >
+      tag2
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+</div>
+`;
+
+exports[`helpers buildThreatDescription returns with corresponding tactic and technique link text 1`] = `
+.c0 .euiFlexItem {
+  margin-bottom: 0px;
+}
+
+<EuiFlexGroup
+  className="c0"
+  direction="column"
+>
+  <EuiFlexItem
+    key="Collection-0"
+  >
+    <EuiLink
+      data-test-subj="threatTacticLink"
+      href="https://test.com"
+      target="_blank"
+    >
+      Collection (TA0009)
+    </EuiLink>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem>
+        <Styled(EuiButtonEmpty)
+          data-test-subj="threatTechniqueLink"
+          flush="left"
+          href="https://test.com"
+          iconType="test-file-stub"
+          size="xs"
+          target="_blank"
+        >
+          Audio Capture (T1123)
+        </Styled(EuiButtonEmpty)>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiSpacer />
+</EuiFlexGroup>
+`;
+
+exports[`helpers buildUnorderedListArrayDescription returns ListItem with corresponding number of valid values items 1`] = `
+<ul>
+  <li
+    data-test-subj="unorderedListArrayDescriptionItem"
+    key="falsePositives-falsePositive1"
+  >
+    falsePositive1
+  </li>
+  <li
+    data-test-subj="unorderedListArrayDescriptionItem"
+    key="falsePositives-falsePositive2"
+  >
+    falsePositive2
+  </li>
+</ul>
+`;
+
+exports[`helpers buildUrlsDescription returns ListItem with corresponding number of valid values items 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+>
+  <EuiFlexItem>
+    <Styled(EuiButtonEmpty)
+      data-test-subj="urlsDescriptionReferenceLinkItem"
+      flush="left"
+      href="www.test.com"
+      iconType="link"
+      size="xs"
+      target="_blank"
+    >
+      www.test.com
+    </Styled(EuiButtonEmpty)>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Styled(EuiButtonEmpty)
+      data-test-subj="urlsDescriptionReferenceLinkItem"
+      flush="left"
+      href="www.test2.com"
+      iconType="link"
+      size="xs"
+      target="_blank"
+    >
+      www.test2.com
+    </Styled(EuiButtonEmpty)>
+  </EuiFlexItem>
+</div>
+`;

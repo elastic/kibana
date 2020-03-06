@@ -78,6 +78,7 @@ export const allRulesReducer = (
         pagination: {
           ...state.pagination,
           ...action.pagination,
+          rulesDisplayed: action.rules.length,
         },
       };
     }
