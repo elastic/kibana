@@ -13,7 +13,6 @@ import {
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
-  ReindexOptions,
 } from '../../../common/types';
 
 import {
