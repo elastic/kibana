@@ -656,7 +656,7 @@ export const reindexServiceFactory = (
 
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts ?? reindexOp.attributes.reindexOptions,
+          reindexOptions: opts ?? op.attributes.reindexOptions,
         });
       });
     },
