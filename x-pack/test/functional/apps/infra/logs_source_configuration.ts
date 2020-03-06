@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -75,7 +76,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the default log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo({
-          logPosition: { start: '2018-10-17T19:42:22.000Z', end: '2018-10-17T19:57:21.000Z' },
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
         });
 
         await retry.try(async () => {
@@ -111,7 +115,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the changed log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo({
-          logPosition: { start: '2018-10-17T19:42:22.000Z', end: '2018-10-17T19:57:21.000Z' },
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
         });
 
         await retry.try(async () => {
