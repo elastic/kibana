@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'url';
-
 import { modifyUrl } from '../../../../../src/core/utils';
 import { prependPath } from './prepend_path';
 
@@ -84,25 +82,6 @@ export class KibanaParsedUrl {
     this.protocol = hostOrProtocolSpecified ? protocol : window.location.protocol;
   }
 
-  public getGlobalState() {
-    if (!this.appPath) {
-      return '';
-    }
-    const parsedUrl = parse(this.appPath, true);
-    const query = parsedUrl.query || {};
-    return query._g || '';
-  }
-
-  public setGlobalState(newGlobalState: string | string[]) {
-    if (!this.appPath) {
-      return;
-    }
-
-    this.appPath = modifyUrl(this.appPath, parsed => {
-      parsed.query._g = newGlobalState;
-    });
-  }
-
   public addQueryParameter(name: string, val: string) {
     this.appPath = modifyUrl(this.appPath, parsed => {
       parsed.query[name] = val;
@@ -123,13 +102,5 @@ export class KibanaParsedUrl {
 
   public getRootRelativePath() {
     return prependPath(this.getAppRootPath(), this.basePath);
-  }
-
-  public getAbsoluteUrl() {
-    return modifyUrl(this.getRootRelativePath(), parsed => {
-      parsed.protocol = this.protocol;
-      parsed.port = this.port;
-      parsed.hostname = this.hostname;
-    });
   }
 }
