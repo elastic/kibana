@@ -35,7 +35,7 @@ export const StepReviewDatasource: React.FunctionComponent<{
             >
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.addDatasourceButtonText"
-                defaultMessage="Add datasource to package"
+                defaultMessage="Add datasource to configuration"
               />
             </EuiButton>
           </EuiFlexItem>

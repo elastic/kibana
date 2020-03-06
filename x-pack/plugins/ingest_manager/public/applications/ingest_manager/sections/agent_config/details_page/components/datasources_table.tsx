@@ -19,7 +19,6 @@ interface InMemoryDatasource {
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
-  packageDescription?: string;
   configs: number;
 }
 
@@ -50,7 +49,6 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
       packageName: datasourcePackage?.name,
       packageTitle: datasourcePackage?.title,
       packageVersion: datasourcePackage?.version,
-      packageDescription: datasourcePackage?.description,
       configs: configs?.length || 0,
     })) || [];
 

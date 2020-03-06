@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { AssignDatasourcesFlyout } from './assign_datasources';
 export { DatasourcesTable } from './datasources_table';
 export { DonutChart } from './donut_chart';
 export { EditConfigFlyout } from './edit_config';
