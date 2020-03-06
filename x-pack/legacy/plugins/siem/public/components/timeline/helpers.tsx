@@ -156,8 +156,6 @@ export const combineQueries = ({
 interface CalculateBodyHeightParams {
   /** The the height of the flyout container, which is typically the entire "page", not including the standard Kibana navigation */
   flyoutHeight?: number;
-  /** The flyout header typically contains a title and a close button */
-  flyoutHeaderHeight?: number;
   /** All non-body timeline content (i.e. the providers drag and drop area, and the column headers)  */
   timelineHeaderHeight?: number;
   /** Footer content that appears below the body (i.e. paging controls) */
@@ -166,11 +164,10 @@ interface CalculateBodyHeightParams {
 
 export const calculateBodyHeight = ({
   flyoutHeight = 0,
-  flyoutHeaderHeight = 0,
   timelineHeaderHeight = 0,
   timelineFooterHeight = 0,
 }: CalculateBodyHeightParams): number =>
-  flyoutHeight - (flyoutHeaderHeight + timelineHeaderHeight + timelineFooterHeight);
+  flyoutHeight - (timelineHeaderHeight + timelineFooterHeight);
 
 /**
  * The CSS class name of a "stateful event", which appears in both

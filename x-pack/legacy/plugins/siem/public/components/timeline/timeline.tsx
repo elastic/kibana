@@ -48,6 +48,7 @@ const TimelineContainer = styled(EuiFlexGroup)`
   padding: 0 10px 0 12px;
   user-select: none;
   width: 100%;
+  height: 100%;
 `;
 
 TimelineContainer.displayName = 'TimelineContainer';
@@ -94,7 +95,6 @@ export const TimelineComponent: React.FC<Props> = ({
   end,
   eventType,
   filters,
-  flyoutHeaderHeight,
   flyoutHeight,
   id,
   indexPattern,
@@ -134,6 +134,12 @@ export const TimelineComponent: React.FC<Props> = ({
     end,
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+
+  const bodyHeight = calculateBodyHeight({
+    flyoutHeight,
+    timelineHeaderHeight,
+    timelineFooterHeight: footerHeight,
+  });
 
   return (
     <TimelineContainer
@@ -196,12 +202,7 @@ export const TimelineComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 data={events}
                 id={id}
-                height={calculateBodyHeight({
-                  flyoutHeight,
-                  flyoutHeaderHeight,
-                  timelineHeaderHeight,
-                  timelineFooterHeight: footerHeight,
-                })}
+                height={bodyHeight}
                 sort={sort}
                 toggleColumn={toggleColumn}
               />

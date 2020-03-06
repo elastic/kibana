@@ -107,6 +107,7 @@ export const PageHeader = styled.div`
 PageHeader.displayName = 'PageHeader';
 
 export const FooterContainer = styled.div`
+  flex: 0;
   bottom: 0;
   color: #666;
   left: 0;

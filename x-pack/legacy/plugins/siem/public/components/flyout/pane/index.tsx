@@ -49,6 +49,7 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
   .timeline-flyout-body {
     overflow-y: hidden;
     padding: 0;
+    height: calc(100% - 60px);
     .euiFlyoutBody__overflow {
       padding: 0;
     }
@@ -140,7 +141,7 @@ const FlyoutPaneComponent: React.FC<Props> = ({
           enable={{ left: true }}
           defaultSize={{
             width,
-            height: 'auto',
+            height: '100%',
           }}
           minWidth={minWidthPixels}
           maxWidth={`${maxWidthPercent}vw`}
