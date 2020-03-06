@@ -79,7 +79,7 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from, { roundUp: true });
+        (filter as any).from = parseAndValidate(from, { roundUp: false });
       }
 
       return { ...input, and: [...input.and, filter] };

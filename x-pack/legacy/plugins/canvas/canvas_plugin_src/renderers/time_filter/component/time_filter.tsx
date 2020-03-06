@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
 import { UnitStrings } from '../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;
@@ -23,16 +22,6 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   { start: 'now-90d', end: 'now', label: strings.getLast90DaysLabel() },
   { start: 'now-1y', end: 'now', label: strings.getLast1YearLabel() },
 ];
-
-const customQuickRanges = (AdvancedSettings.get('timepicker:quickRanges') || []).map(
-  ({ from, to, display }: { from: string; to: string; display: string }) => ({
-    start: from,
-    end: to,
-    label: display,
-  })
-);
-
-const customDateFormat = AdvancedSettings.get('dateFormat');
 
 export interface FilterMeta {
   /** Name of datetime column to be filtered  */
@@ -56,9 +45,13 @@ export interface Props {
   filter: string;
   /** Function invoked when the filter changes */
   commit: (filter: string) => void;
+  /** Elastic datemath format string */
+  dateFormat?: string;
+  /** Array of time ranges */
+  commonlyUsedRanges?: EuiSuperDatePickerCommonRange[];
 }
 
-export const TimeFilter = ({ filter, commit }: Props) => {
+export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = [] }: Props) => {
   const setFilter = (column: string) => ({ start, end }: OnTimeChangeProps) => {
     commit(`timefilter from="${start}" to=${end} column=${column}`);
   };
@@ -73,8 +66,8 @@ export const TimeFilter = ({ filter, commit }: Props) => {
         isPaused={false}
         onTimeChange={setFilter(column)}
         showUpdateButton={false}
-        dateFormat={customDateFormat}
-        commonlyUsedRanges={customQuickRanges.length ? customQuickRanges : defaultQuickRanges}
+        dateFormat={dateFormat}
+        commonlyUsedRanges={commonlyUsedRanges.length ? commonlyUsedRanges : defaultQuickRanges}
       />
     </div>
   );
@@ -83,4 +76,12 @@ export const TimeFilter = ({ filter, commit }: Props) => {
 TimeFilter.propTypes = {
   filter: PropTypes.string.isRequired,
   commit: PropTypes.func.isRequired, // Canvas filter
+  dateFormat: PropTypes.string,
+  commonlyUsedRanges: PropTypes.arrayOf(
+    PropTypes.shape({
+      start: PropTypes.string.isRequired,
+      end: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
 };
