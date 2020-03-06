@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 interface Props {
-  options: EuiComboBoxOptionProps[];
+  options: EuiComboBoxOptionOption[];
   placeholder?: string;
-  changeHandler(d: EuiComboBoxOptionProps[]): void;
+  changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
 }
 

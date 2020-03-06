@@ -11,7 +11,3 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom/extend-expect';
-import { configure } from '@testing-library/react';
-
-// instead of default 'data-test-id', use kibana's 'data-test-subj'
-configure({ testIdAttribute: 'data-test-subj' });
