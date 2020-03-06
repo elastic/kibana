@@ -18,18 +18,11 @@ import {
 } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
-import { ConfigType } from '../../config';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
-import {
-  elasticsearchServiceMock,
-  loggingServiceMock,
-  httpServiceMock,
-  httpServerMock,
-} from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authorizationMock } from '../../authorization/index.mock';
-import { authenticationMock } from '../../authentication/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
@@ -51,8 +44,9 @@ describe('Change password', () => {
   }
 
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    authc = authenticationMock.create();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
+    authc = routeParamsMock.authc;
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user' }));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
@@ -64,7 +58,7 @@ describe('Change password', () => {
     });
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient = routeParamsMock.clusterClient;
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
     mockContext = ({
@@ -73,16 +67,7 @@ describe('Change password', () => {
       },
     } as unknown) as RequestHandlerContext;
 
-    defineChangeUserPasswordRoutes({
-      router,
-      clusterClient: mockClusterClient,
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineChangeUserPasswordRoutes(routeParamsMock);
 
     const [changePasswordRouteConfig, changePasswordRouteHandler] = router.post.mock.calls[0];
     routeConfig = changePasswordRouteConfig;
