@@ -55,17 +55,9 @@ export class EnvironmentService {
     };
   }
 
-  public start() {
-    return {
-      /**
-       * Retrieve the current environment home is running in. This API is only intended for internal
-       * use and is only exposed during a transition period of migrating the home app to the new platform.
-       * @deprecated
-       */
-      get: (): Environment => this.environment,
-    };
+  public getEnvironment() {
+    return this.environment;
   }
 }
 
 export type EnvironmentServiceSetup = ReturnType<EnvironmentService['setup']>;
-export type EnvironmentServiceStart = ReturnType<EnvironmentService['start']>;

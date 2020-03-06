@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';
+export { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './apply_filter_action';

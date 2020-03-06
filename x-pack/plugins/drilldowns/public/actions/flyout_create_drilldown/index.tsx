@@ -5,10 +5,10 @@
  */
 
 import * as React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
+import { EuiNotificationBadge } from '@elastic/eui';
+import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import {
   toMountPoint,
   reactToUiComponent,
@@ -26,7 +26,7 @@ export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
 }
 
-export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldownActionContext> {
+export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 100;
@@ -38,25 +38,6 @@ export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldown
       defaultMessage: 'Create drilldown',
     });
   }
-
-  /*
-  MenuItem: UiComponent<{}> = {
-    render(el: HTMLElement) {
-      const item = <EuiContextMenuItem>HI</EuiContextMenuItem>;
-      ReactDOM.render(item, el);
-    },
-    unmount() {},
-  };
-
-
-  private ReactComp: React.FC<{ cnt?: number; context: FlyoutCreateDrilldownActionContext }> = ({
-    cnt = 0,
-  }) => {
-    // return <div>cnt: {cnt}</div>;
-    return <EuiContextMenuItem style={{ color: 'blue' }}>HI</EuiContextMenuItem>;
-  };
-  MenuItem = reactToUiComponent(this.ReactComp);
-  */
 
   public getIconType() {
     return 'plusInCircle';
