@@ -18,31 +18,27 @@
  */
 
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Intro = () => {
   return (
-    <div className="kuiViewContentItem kuiVerticalRhythm">
-      <div className="kuiInfoPanel kuiInfoPanel--warning">
-        <div className="kuiInfoPanelHeader">
-          <span className="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt" />
-          <span className="kuiInfoPanelHeader__title">
-            <FormattedMessage
-              id="kbn.management.objects.view.howToModifyObjectTitle"
-              defaultMessage="Proceed with caution!"
-            />
-          </span>
-        </div>
-
-        <div className="kuiInfoPanelBody">
-          <div className="kuiInfoPanelBody__message">
-            <FormattedMessage
-              id="kbn.management.objects.view.howToModifyObjectDescription"
-              defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
-            />
-          </div>
-        </div>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="kbn.management.objects.view.howToModifyObjectTitle"
+          defaultMessage="Proceed with caution!"
+        />
+      }
+      iconType="bolt"
+      color="warning"
+    >
+      <div>
+        <FormattedMessage
+          id="kbn.management.objects.view.howToModifyObjectDescription"
+          defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
+        />
       </div>
-    </div>
+    </EuiCallOut>
   );
 };

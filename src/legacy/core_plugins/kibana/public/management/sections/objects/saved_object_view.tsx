@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -104,16 +105,29 @@ export class SavedObjectEdition extends Component<
           onDeleteClick={() => this.delete()}
           viewUrl={service.urlFor(id)}
         />
-        {notFoundType && <NotFoundErrors type={notFoundType} />}
-        {canEdit && <Intro />}
+        {notFoundType && (
+          <>
+            <EuiSpacer size="s" />
+            <NotFoundErrors type={notFoundType} />
+          </>
+        )}
+        {canEdit && (
+          <>
+            <EuiSpacer size="s" />
+            <Intro />
+          </>
+        )}
         {object && (
-          <Form
-            object={object}
-            savedObjectsClient={savedObjectsClient}
-            service={service}
-            editionEnabled={canEdit}
-            onSave={this.saveChanges}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <Form
+              object={object}
+              savedObjectsClient={savedObjectsClient}
+              service={service}
+              editionEnabled={canEdit}
+              onSave={this.saveChanges}
+            />
+          </>
         )}
       </div>
     );

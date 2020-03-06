@@ -18,7 +18,9 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 interface HeaderProps {
   canEdit: boolean;
   canDelete: boolean;
@@ -37,68 +39,62 @@ export const Header = ({
   onDeleteClick,
 }: HeaderProps) => {
   return (
-    <div className="kuiViewContentItem kuiBar kuiVerticalRhythm">
-      <div className="kuiBarSection">
-        <h1 className="kuiTitle">
-          {canEdit ? (
-            <FormattedMessage
-              id="kbn.management.objects.view.editItemTitle"
-              defaultMessage="Edit {title}"
-              values={{
-                title: type,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="kbn.management.objects.view.viewItemTitle"
-              defaultMessage="View {title}"
-              values={{
-                title: type,
-              }}
-            />
-          )}
-        </h1>
-      </div>
-
-      <div className="kuiBarSection">
-        {canViewInApp && (
-          <a className="kuiButton kuiButton--basic kuiButton--iconText" href={viewUrl}>
-            <span className="kuiButton__inner">
-              <span className="kuiButton__icon kuiIcon fa-eye" />
-              <span>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem>
+        {canEdit ? (
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="kbn.management.objects.view.editItemTitle"
+                defaultMessage="Edit {title}"
+                values={{ title: type }}
+              />
+            </h1>
+          </EuiTitle>
+        ) : (
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="kbn.management.objects.view.viewItemTitle"
+                defaultMessage="View {title}"
+                values={{ title: type }}
+              />
+            </h1>
+          </EuiTitle>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup>
+          {canViewInApp && (
+            <EuiFlexItem>
+              <EuiButton size="s" href={viewUrl} iconType="eye">
                 <FormattedMessage
                   id="kbn.management.objects.view.viewItemButtonLabel"
                   defaultMessage="View {title}"
-                  values={{
-                    title: type,
-                  }}
+                  values={{ title: type }}
                 />
-              </span>
-            </span>
-          </a>
-        )}
-
-        {canDelete && (
-          <button
-            className="kuiButton kuiButton--danger kuiButton--iconText"
-            onClick={() => onDeleteClick()}
-            data-test-subj="savedObjectEditDelete"
-          >
-            <span className="kuiButton__inner">
-              <span className="kuiButton__icon kuiIcon fa-trash-o" />
-              <span>
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          {canDelete && (
+            <EuiFlexItem>
+              <EuiButton
+                color="danger"
+                size="s"
+                iconType="trash"
+                onClick={() => onDeleteClick()}
+                data-test-subj="savedObjectEditDelete"
+              >
                 <FormattedMessage
                   id="kbn.management.objects.view.deleteItemButtonLabel"
                   defaultMessage="Delete {title}"
-                  values={{
-                    title: type,
-                  }}
+                  values={{ title: type }}
                 />
-              </span>
-            </span>
-          </button>
-        )}
-      </div>
-    </div>
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

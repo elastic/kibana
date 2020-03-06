@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface NotFoundErrors {
@@ -25,55 +26,52 @@ interface NotFoundErrors {
 }
 
 export const NotFoundErrors = ({ type }: NotFoundErrors) => {
+  const getMessage = () => {
+    switch (type) {
+      case 'search':
+        return (
+          <FormattedMessage
+            id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
+            defaultMessage="The saved search associated with this object no longer exists."
+          />
+        );
+      case 'index-pattern':
+        return (
+          <FormattedMessage
+            id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
+            defaultMessage="The index pattern associated with this object no longer exists."
+          />
+        );
+      case 'index-pattern-field':
+        return (
+          <FormattedMessage
+            id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
+            defaultMessage="A field associated with this object no longer exists in the index pattern."
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="kuiViewContentItem kuiVerticalRhythm">
-      <div className="kuiInfoPanel kuiInfoPanel--error">
-        <div className="kuiInfoPanelHeader">
-          <span className="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning" />
-          <span className="kuiInfoPanelHeader__title">
-            <FormattedMessage
-              id="kbn.management.objects.view.savedObjectProblemErrorMessage"
-              defaultMessage="There is a problem with this saved object"
-            />
-          </span>
-        </div>
-
-        <div className="kuiInfoPanelBody">
-          {type === 'search' && (
-            <div className="kuiInfoPanelBody__message">
-              <FormattedMessage
-                id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
-                defaultMessage="The saved search associated with this object no longer exists."
-              />
-            </div>
-          )}
-
-          {type === 'index-pattern' && (
-            <div className="kuiInfoPanelBody__message">
-              <FormattedMessage
-                id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
-                defaultMessage="The index pattern associated with this object no longer exists."
-              />
-            </div>
-          )}
-
-          {type === 'index-pattern-field' && (
-            <div className="kuiInfoPanelBody__message">
-              <FormattedMessage
-                id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
-                defaultMessage="A field associated with this object no longer exists in the index pattern."
-              />
-            </div>
-          )}
-
-          <div className="kuiInfoPanelBody__message">
-            <FormattedMessage
-              id="kbn.management.objects.view.howToFixErrorDescription"
-              defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
-            />
-          </div>
-        </div>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+          defaultMessage="There is a problem with this saved object"
+        />
+      }
+      iconType="alert"
+      color="danger"
+    >
+      <div>{getMessage()}</div>
+      <div>
+        <FormattedMessage
+          id="kbn.management.objects.view.howToFixErrorDescription"
+          defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
+        />
       </div>
-    </div>
+    </EuiCallOut>
   );
 };
