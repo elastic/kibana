@@ -37,6 +37,12 @@ export interface PingHistogramComponentProps {
   loading?: boolean;
 }
 
+interface BarPoint {
+  x: number;
+  y: number;
+  type: string;
+}
+
 export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   absoluteStartDate,
   absoluteEndDate,
@@ -80,7 +86,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       });
     };
 
-    const barData = [];
+    const barData: BarPoint[] = [];
 
     histogram.forEach(({ x, upCount, downCount }) => {
       barData.push({ x, y: downCount, type: downSpecId }, { x, y: upCount, type: upMonitorsId });
