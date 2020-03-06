@@ -106,21 +106,22 @@ const ErrorMessage: FC<ErrorMessageProps> = ({ message }) => (
 interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
-  indexPattern: SearchItems['indexPattern'];
+  indexPatternTitle: SearchItems['indexPattern']['title'];
   query: PivotQuery;
+  showHeader?: boolean;
 }
 
 const defaultPagination = { pageIndex: 0, pageSize: 5 };
 
 export const PivotPreview: FC<PivotPreviewProps> = React.memo(
-  ({ aggs, groupBy, indexPattern, query }) => {
+  ({ aggs, groupBy, indexPatternTitle, query, showHeader = true }) => {
     const {
       previewData: data,
       previewMappings,
       errorMessage,
       previewRequest,
       status,
-    } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
+    } = usePivotPreviewData(indexPatternTitle, query, aggs, groupBy);
     const groupByArr = dictionaryToArray(groupBy);
 
     // Filters mapping properties of type `object`, which get returned for nested field parents.
@@ -299,13 +300,17 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
 
     return (
       <div data-test-subj="transformPivotPreview loaded">
-        <PreviewTitle previewRequest={previewRequest} />
-        <div className="transform__progress">
-          {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-          {status !== PIVOT_PREVIEW_STATUS.LOADING && (
-            <EuiProgress size="xs" color="accent" max={1} value={0} />
-          )}
-        </div>
+        {showHeader && (
+          <>
+            <PreviewTitle previewRequest={previewRequest} />
+            <div className="transform__progress">
+              {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+              {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+                <EuiProgress size="xs" color="accent" max={1} value={0} />
+              )}
+            </div>
+          </>
+        )}
         {dataGridColumns.length > 0 && data.length > 0 && (
           <EuiDataGrid
             aria-label="Source index preview"

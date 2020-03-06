@@ -134,7 +134,7 @@ export const StepDefineSummary: FC<Props> = ({
           <PivotPreview
             aggs={aggList}
             groupBy={groupByList}
-            indexPattern={searchItems.indexPattern}
+            indexPatternTitle={searchItems.indexPattern.title}
             query={pivotQuery}
           />
         </EuiText>

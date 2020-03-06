@@ -12501,7 +12501,6 @@
     "xpack.transform.transformList.startModalTitle": "{transformId} を開始",
     "xpack.transform.transformList.startTransformErrorMessage": "変換 {transformId} の開始中にエラーが発生しました",
     "xpack.transform.transformList.startTransformSuccessMessage": "変換 {transformId} の開始リクエストが受け付けられました。",
-    "xpack.transform.transformList.stepDetails.previewPane.errorMessage": "プレビューを読み込めませんでした",
     "xpack.transform.transformList.stopActionName": "停止",
     "xpack.transform.transformList.stoppedTransformBulkToolTip": "1 つまたは複数の変換が既に開始済みです。",
     "xpack.transform.transformList.stoppedTransformToolTip": "{transformId} は既に停止済みです。",

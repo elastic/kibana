@@ -899,7 +899,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
         <PivotPreview
           aggs={aggList}
           groupBy={groupByList}
-          indexPattern={searchItems.indexPattern}
+          indexPatternTitle={searchItems.indexPattern.title}
           query={pivotQuery}
         />
       </EuiFlexItem>

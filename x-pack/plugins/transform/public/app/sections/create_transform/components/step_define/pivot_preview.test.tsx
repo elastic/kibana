@@ -16,7 +16,6 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { PivotPreview } from './pivot_preview';
 
@@ -42,10 +41,7 @@ describe('Transform: <PivotPreview />', () => {
     const props = {
       aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
-      indexPattern: {
-        title: 'the-index-pattern-title',
-        fields: [] as any[],
-      } as SearchItems['indexPattern'],
+      indexPatternTitle: 'the-index-pattern-title',
       query: getPivotQuery('the-query'),
     };
 
