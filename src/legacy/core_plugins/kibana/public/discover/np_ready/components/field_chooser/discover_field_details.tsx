@@ -21,7 +21,6 @@ import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
-import { getServices } from '../../../kibana_services';
 
 export interface Field {
   details: {
@@ -94,7 +93,7 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
         </div>
       )}
 
-      {field.details.visualizeUrl && getServices().capabilities.visualize.show && (
+      {field.details.visualizeUrl && (
         <>
           <EuiLink
             href={field.details.visualizeUrl}

@@ -29,6 +29,7 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../../plugins/data/public';
 import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
+import { getServices } from '../../../kibana_services';
 
 export function createFieldChooserDirective($location, config, $route) {
   return {
@@ -254,7 +255,10 @@ export function createFieldChooserDirective($location, config, $route) {
       $scope.computeDetails = function(field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           field.details = {
-            visualizeUrl: isFieldVisualizable(field) ? getVisualizeUrl(field) : null,
+            visualizeUrl:
+              getServices().capabilities.visualize.show && isFieldVisualizable(field)
+                ? getVisualizeUrl(field)
+                : null,
             ...fieldCalculator.getFieldValueCounts({
               hits: $scope.hits,
               field: field,
