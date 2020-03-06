@@ -33,6 +33,7 @@ export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -40,6 +41,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   uiActions: UiActionsStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 
