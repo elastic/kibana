@@ -23,7 +23,8 @@ import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsCont
 import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
-import { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
+import { AggConfigs, getCalculateAutoTimeExpression } from './search/aggs';
+import { mockAggTypesRegistry } from './search/aggs/test_helpers';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -61,9 +62,24 @@ const createStartContract = (): Start => {
     search: {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
+        createAggConfigs: jest
+          .fn()
+          .mockImplementation((indexPattern, configStates = [], schemas) => {
+            return new AggConfigs(indexPattern, configStates, {
+              typesRegistry: mockAggTypesRegistry(),
+            });
+          }),
+        types: mockAggTypesRegistry(),
       },
       search: jest.fn(),
       __LEGACY: {
+        AggConfig: jest.fn() as any,
+        AggType: jest.fn(),
+        aggTypeFieldFilters: jest.fn() as any,
+        FieldParamType: jest.fn(),
+        MetricAggType: jest.fn(),
+        parentPipelineAggHelper: jest.fn() as any,
+        siblingPipelineAggHelper: jest.fn() as any,
         esClient: {
           search: jest.fn(),
           msearch: jest.fn(),
@@ -95,7 +111,7 @@ const createStartContract = (): Start => {
 };
 
 export { searchSourceMock } from './search/mocks';
-export { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,
