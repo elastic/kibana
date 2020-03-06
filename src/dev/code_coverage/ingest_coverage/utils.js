@@ -24,3 +24,4 @@ export const noop = () => {};
 export const green = x => chalk.greenBright.bold(x);
 export const id = x => x;
 export const always = x => () => x;
+export const pretty = x => JSON.stringify(x, null, 2);

@@ -18,7 +18,7 @@
  */
 
 import { left, right } from './either';
-import { always, id } from './utils';
+import { always, id, pretty, noop } from './utils';
 import { STATIC_SITE_URL_PROP_NAME } from './constants';
 
 const maybeTotal = x =>
@@ -54,7 +54,7 @@ export const addTimeStamp = ts => obj => ({
 export const distro = obj => {
   const { jsonSummaryPath } = obj;
   const contains = msg => x => x.includes(msg);
-  const combinedMsg = 'combined'
+  const combinedMsg = 'combined';
   const containsCombined = contains(combinedMsg);
 
   const jsonSummaryPathContainsCombined = containsCombined(jsonSummaryPath) ?
@@ -63,10 +63,9 @@ export const distro = obj => {
 
   return {
     ...obj,
-    distro: jsonSummaryPathContainsCombined.fold(always('other'), always(combinedMsg))
+    distro: jsonSummaryPathContainsCombined.fold(always('other'), always(combinedMsg)),
   };
 };
-
 
 const endsInDotJs = /.js$/;
 const appendDotHtml = x => `${x}.html`;
@@ -75,47 +74,58 @@ const suffix = x =>
   maybeAppend(x)
     .fold(id, appendDotHtml);
 
-const buildFinalUrl = (urlBase, ts, testRunnerType, liveAppPath) => trimmed =>
-  [
-    `${urlBase}/`,
-    ts,
-    `/${liveAppPath}/`,
-    'coverage_data/',
-    `${testRunnerType.toLowerCase()}-combined`,
-    `${suffix(trimmed)}`,
-  ].join('');
-
-const assignUrl = obj => name => value => {
-  obj[name] = value;
-  return obj;
-};
-
-const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/
+const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
 const afterJobNameAndRootFolder = x =>
   captureAfterJobNameAndRootFolder.exec(x)[1];
 const fixFront = x =>
   afterJobNameAndRootFolder(x);
 
+
+
+
+
+
 export const staticSite = (urlBase, liveAppPath) => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
+  const parts = [
+    `${urlBase}/`,
+    ts,
+    `/${liveAppPath}/`,
+    'coverage_data/',
+    `${testRunnerType.toLowerCase()}-combined`,
+  ];
 
-  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, ts, testRunnerType, liveAppPath);
-  const assignObj = assignUrl(obj);
-  const assignStaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
+  const url = maybeTotal(staticSiteUrl)
+    .fold(() => {
+      return right(process.env.STATIC_SITE_URL_BASE)
+        .map(x => `${parts.join('')}/index.html`)
+        .fold(noop, id)
+    },() => {
+      return right(staticSiteUrl)
+        .map(fixFront)
+        .map(x => `${parts.join('')}${suffix(x)}`)
+        .fold(noop, id)
+    })
 
-  return maybeTotal(staticSiteUrl)
-    .map(fixFront)
-    .map(buildFinalStaticSiteUrl)
-    .fold(always(assignStaticSiteUrl(undefined)), assignStaticSiteUrl);
 
+  delete obj['staticSiteUrl'];
+  obj['staticSiteUrl'] = url
+
+
+  return obj;
 };
+
+
+
+
+
 
 export const coveredFilePath = obj => {
   const { staticSiteUrl } = obj;
 
   const withoutCoveredFilePath = always(obj);
-  const dropFront = x => trimLeftFrom('/kibana/', x).replace(/(^\/kibana\/)/, '')
+  const dropFront = x => trimLeftFrom('/kibana/', x).replace(/(^\/kibana\/)/, '');
 
   return maybeTotal(staticSiteUrl)
     .map(dropFront)
@@ -128,7 +138,7 @@ export const ciRunUrl = obj => {
   return {
     ...obj,
     ciRunUrl,
-  }
+  };
 };
 
 export const testRunner = obj => {
