@@ -25,13 +25,7 @@ interface Arguments {
 
 export type SavedLensInput = EmbeddableInput & {
   id: string;
-  isLayerTOCOpen: boolean;
   timeRange?: TimeRange;
-  refreshConfig: {
-    isPaused: boolean;
-    interval: number;
-  };
-  hideFilterActions: true;
   filters: DataFilter[];
 };
 
@@ -79,13 +73,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           id: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
-          refreshConfig: {
-            isPaused: false,
-            interval: 0,
-          },
-          hideFilterActions: true,
           title: args.title ? args.title : undefined,
-          isLayerTOCOpen: false,
           disableTriggers: true,
         },
         embeddableType: EmbeddableTypes.lens,

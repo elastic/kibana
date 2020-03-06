@@ -14,6 +14,10 @@ import { fromExpression, Ast } from '@kbn/interpreter/common';
 const baseEmbeddableInput = {
   id: 'embeddableId',
   filters: [],
+};
+
+const baseSavedMapInput = {
+  ...baseEmbeddableInput,
   isLayerTOCOpen: false,
   refreshConfig: {
     isPaused: true,
@@ -26,7 +30,7 @@ describe('input to expression', () => {
   describe('Map Embeddable', () => {
     it('converts to a savedMap expression', () => {
       const input: SavedMapInput = {
-        ...baseEmbeddableInput,
+        ...baseSavedMapInput,
       };
 
       const expression = embeddableInputToExpression(input, EmbeddableTypes.map);
@@ -44,7 +48,7 @@ describe('input to expression', () => {
 
     it('includes optional input values', () => {
       const input: SavedMapInput = {
-        ...baseEmbeddableInput,
+        ...baseSavedMapInput,
         mapCenter: {
           lat: 1,
           lon: 2,

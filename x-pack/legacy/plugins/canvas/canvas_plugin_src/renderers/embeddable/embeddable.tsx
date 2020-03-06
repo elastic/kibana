@@ -4,25 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
+// @ts-ignore unconverted lib
+import { getState } from '../../../public/state/store';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
+  ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
-
-const { embeddable: strings } = RendererStrings;
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
+import { canUserWrite, getFullscreen } from '../../../public/state/selectors/app';
+import { isWriteable } from '../../../public/state/selectors/workpad';
+
+const { embeddable: strings } = RendererStrings;
+
+// TODO: can we import the const from the drilldown x-pack plugin? Imports seem to be restricted
+const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
@@ -64,6 +73,21 @@ const embeddable = () => ({
     handlers: RendererHandlers
   ) => {
     const uniqueId = handlers.getElementId();
+
+    const appState = getState();
+    const isEditable = isWriteable(appState) && canUserWrite(appState) && !getFullscreen(appState);
+
+    input.viewMode = isEditable ? ViewMode.EDIT : ViewMode.VIEW;
+
+    if (isEditable) {
+      input.viewMode = ViewMode.EDIT;
+    } else {
+      input.viewMode = ViewMode.VIEW;
+      // Disables the Create Drilldown action
+      input.disabledActions = get<EmbeddableInput, string[]>(input, 'disabledActions', []).concat(
+        OPEN_FLYOUT_ADD_DRILLDOWN
+      );
+    }
 
     if (!embeddablesRegistry[uniqueId]) {
       const factory = Array.from(start.getEmbeddableFactories()).find(
