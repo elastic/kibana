@@ -5,4 +5,3 @@
  */
 
 export { ReindexButton } from './button';
-export { ReindexClosedWarningIcon } from './closed_warning_icon';

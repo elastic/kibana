@@ -5,9 +5,20 @@
  */
 
 import React from 'react';
-
-import { EuiFlyout, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
+import { DocLinksStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiPortal,
+  EuiTitle,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import { EnrichedDeprecationInfo } from '../../../../../../../../common/types';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -24,11 +35,57 @@ interface ReindexFlyoutProps {
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
+  docLinks: DocLinksStart;
+  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
 }
 
 interface ReindexFlyoutState {
   currentFlyoutStep: ReindexFlyoutStep;
 }
+
+const getOpenAndCloseIndexDocLink = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => (
+  <EuiLink
+    target="_blank"
+    href={`${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-open-close.html`}
+  >
+    {i18n.translate(
+      'xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation',
+      { defaultMessage: 'documentation' }
+    )}
+  </EuiLink>
+);
+
+const getIndexClosedCallout = (docLinks: DocLinksStart) => (
+  <>
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle',
+        { defaultMessage: 'Index Closed' }
+      )}
+      color="warning"
+      iconType="alert"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutDetails"
+          defaultMessage="This index is currently closed. The Upgrade Assistant will open, reindex and then close the index. {reindexingMayTakeLongerEmph}. Please see the {docs} for more information."
+          values={{
+            docs: getOpenAndCloseIndexDocLink(docLinks),
+            reindexingMayTakeLongerEmph: (
+              <b>
+                {i18n.translate(
+                  'xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutDetails.reindexingTakesLongerEmphasis',
+                  { defaultMessage: 'Reindexing may take longer than usual' }
+                )}
+              </b>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+    <EuiSpacer size="m" />
+  </>
+);
 
 /**
  * Wrapper for the contents of the flyout that manages which step of the flyout to show.
@@ -48,7 +105,15 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
   }
 
   public render() {
-    const { closeFlyout, indexName, reindexState, startReindex, cancelReindex } = this.props;
+    const {
+      closeFlyout,
+      indexName,
+      reindexState,
+      startReindex,
+      cancelReindex,
+      reindexBlocker,
+      docLinks,
+    } = this.props;
     const { currentFlyoutStep } = this.state;
 
     let flyoutContents: React.ReactNode;
@@ -56,6 +121,9 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.reindexWarnings:
         flyoutContents = (
           <WarningsFlyoutStep
+            renderGlobalCallouts={() =>
+              reindexBlocker === 'index-closed' ? getIndexClosedCallout(docLinks) : undefined
+            }
             closeFlyout={closeFlyout}
             warnings={reindexState.reindexWarnings!}
             advanceNextStep={this.advanceNextStep}
@@ -65,6 +133,9 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.checklist:
         flyoutContents = (
           <ChecklistFlyoutStep
+            renderGlobalCallouts={() =>
+              reindexBlocker === 'index-closed' ? getIndexClosedCallout(docLinks) : undefined
+            }
             closeFlyout={closeFlyout}
             reindexState={reindexState}
             startReindex={startReindex}

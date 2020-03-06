@@ -6,9 +6,10 @@
 
 import { set } from 'lodash';
 import React, { Fragment, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart, HttpSetup } from 'src/core/public';
 import {
@@ -19,7 +20,6 @@ import {
 import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
-import { ReindexClosedWarningIcon } from './closed_warning_icon';
 
 interface ReindexButtonProps {
   indexName: string;
@@ -142,26 +142,44 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
       }
     }
 
+    const showIndexedClosedWarning =
+      reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed;
+
+    if (showIndexedClosedWarning) {
+      buttonProps.color = 'warning';
+      buttonProps.iconType = 'alert';
+    }
+
+    const button = <EuiButton {...buttonProps}>{buttonContent}</EuiButton>;
+
     return (
       <Fragment>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="center"
-          direction="row"
-          responsive={false}
-        >
-          {reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed ? (
-            <EuiFlexItem>
-              <ReindexClosedWarningIcon indexName={indexName} docLinks={docLinks} />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <EuiButton {...buttonProps}>{buttonContent}</EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {showIndexedClosedWarning ? (
+          <EuiToolTip
+            position="top"
+            content={
+              <EuiText size="s">
+                {i18n.translate(
+                  'xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.indexClosedToolTipDetails',
+                  {
+                    defaultMessage:
+                      '"{indexName}" needs to be reindexed, but it is currently closed. The Upgrade Assistant will open, reindex and then close the index. Reindexing may take longer than usual.',
+                    values: { indexName },
+                  }
+                )}
+              </EuiText>
+            }
+          >
+            {button}
+          </EuiToolTip>
+        ) : (
+          button
+        )}
 
         {flyoutVisible && (
           <ReindexFlyout
+            reindexBlocker={reindexBlocker}
+            docLinks={docLinks}
             indexName={indexName}
             closeFlyout={this.closeFlyout}
             reindexState={reindexState}
