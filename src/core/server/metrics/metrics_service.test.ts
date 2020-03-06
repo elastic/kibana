@@ -78,6 +78,10 @@ describe('MetricsService', () => {
       const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
       await metricsService.start();
 
+      // `advanceTimersByTime` only ensure the interval handler is executed
+      // however the `reset` call is executed after the async call to `collect`
+      // meaning that we are going to miss the call if we don't wait for the
+      // actual observable emission that is performed after
       const waitForNextEmission = () =>
         getOpsMetrics$()
           .pipe(take(1))
