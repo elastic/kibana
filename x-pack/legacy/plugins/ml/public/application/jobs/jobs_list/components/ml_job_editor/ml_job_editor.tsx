@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor } from '@elastic/eui';
+import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
 import { expandLiteralStrings } from '../../../../../../shared_imports';
 import { xJsonMode } from '../../../../components/custom_hooks';
 
@@ -20,7 +20,7 @@ interface MlJobEditorProps {
   readOnly?: boolean;
   syntaxChecking?: boolean;
   theme?: string;
-  onChange?: Function;
+  onChange?: EuiCodeEditorProps['onChange'];
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,

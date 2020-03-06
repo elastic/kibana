@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FormSchema } from '../../../../shared_imports';
-import { schema as createSchema } from '../create/schema';
+import { schemaTags } from '../create/schema';
 
 export const schema: FormSchema = {
-  tags: createSchema.tags,
+  tags: schemaTags,
 };
