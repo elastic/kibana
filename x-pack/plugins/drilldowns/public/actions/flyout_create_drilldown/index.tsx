@@ -7,12 +7,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { EuiNotificationBadge } from '@elastic/eui';
 import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  toMountPoint,
-  reactToUiComponent,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldown } from '../../components/flyout_create_drilldown';
 
