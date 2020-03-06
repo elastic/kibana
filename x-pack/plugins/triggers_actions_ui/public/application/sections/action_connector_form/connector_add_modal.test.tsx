@@ -68,7 +68,6 @@ describe('connector_add_modal', () => {
             actionType={actionType}
             http={deps.http}
             actionTypeRegistry={deps.actionTypeRegistry}
-            alertTypeRegistry={{} as any}
             toastNotifications={deps.toastNotifications}
           />
         )
