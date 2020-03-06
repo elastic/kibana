@@ -5,7 +5,7 @@
  */
 
 import { isAnError, isToasterError, errorToToaster } from './error_to_toaster';
-import { ToasterErrors } from './throw_if_not_ok';
+import { ToasterErrors } from '../../../hooks/api/throw_if_not_ok';
 
 describe('error_to_toaster', () => {
   let dispatchToaster = jest.fn();
