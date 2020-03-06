@@ -36,6 +36,7 @@ import {
 } from './saved_objects';
 import { createConfig$, ConfigType } from './config';
 import { SiemClientFactory } from './client';
+import { initUiSettings } from './ui_settings';
 
 export { CoreSetup, CoreStart };
 
@@ -70,6 +71,8 @@ export class Plugin {
 
   public async setup(core: CoreSetup, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+
+    initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
