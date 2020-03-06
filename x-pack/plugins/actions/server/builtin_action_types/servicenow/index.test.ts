@@ -60,16 +60,16 @@ const mockOptions = {
     },
   },
   params: {
-    executorAction: 'updateIncident',
-    id: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+    caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
     incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
     title: 'Incident title',
     description: 'Incident description',
     comments: [
       {
-        id: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
         version: 'WzU3LDFd',
         comment: 'A comment',
+        incidentCommentId: '315e1ece071300100e48fbbf7c1ed0d0',
       },
     ],
   },
@@ -163,7 +163,7 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [executorAction]: expected at least one defined value but got [undefined]"`
+      `"error validating action params: [caseId]: expected value of type [string] but got [undefined]"`
     );
   });
 });
@@ -176,10 +176,12 @@ describe('execute()', () => {
 
   test('should create an incident', async () => {
     const actionId = 'some-id';
+    const { incidentId, ...rest } = mockOptions.params;
+
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'newIncident' },
+      params: { ...rest },
       secrets: mockOptions.secrets,
       services,
     };
@@ -192,12 +194,13 @@ describe('execute()', () => {
 
   test('should throw an error when failed to create incident', async () => {
     expect.assertions(1);
+    const { incidentId, ...rest } = mockOptions.params;
 
     const actionId = 'some-id';
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'newIncident' },
+      params: { ...rest },
       secrets: mockOptions.secrets,
       services,
     };
@@ -244,53 +247,6 @@ describe('execute()', () => {
     handleUpdateIncidentMock.mockImplementation(() => {
       throw new Error(errorMessage);
     });
-
-    try {
-      await actionType.executor(executorOptions);
-    } catch (error) {
-      expect(error.message).toEqual(errorMessage);
-    }
-  });
-
-  test('should throw an error when incidentId is missing', async () => {
-    expect.assertions(1);
-
-    const actionId = 'some-id';
-    const { incidentId, ...rest } = mockOptions.params;
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config: mockOptions.config,
-      params: { ...rest, executorAction: 'updateIncident' },
-      secrets: mockOptions.secrets,
-      services,
-    };
-
-    const errorMessage = '[Action][ServiceNow]: IncidentId is required.';
-
-    handleUpdateIncidentMock.mockImplementation(() => {
-      throw new Error(errorMessage);
-    });
-
-    try {
-      await actionType.executor(executorOptions);
-    } catch (error) {
-      expect(error.message).toEqual(errorMessage);
-    }
-  });
-
-  test('should throw an error for unsupported executor actions', async () => {
-    expect.assertions(1);
-
-    const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'unsupported' },
-      secrets: mockOptions.secrets,
-      services,
-    };
-
-    const errorMessage = '[Action][ServiceNow]: Unsupported executor action.';
 
     try {
       await actionType.executor(executorOptions);

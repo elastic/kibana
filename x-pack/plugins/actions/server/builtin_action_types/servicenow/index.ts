@@ -80,19 +80,19 @@ async function serviceNowExecutor(
   const actionId = execOptions.actionId;
   const {
     apiUrl,
-    casesConfiguration: { closure, mapping },
+    casesConfiguration: { mapping },
   } = execOptions.config as ConfigType;
   const { username, password } = execOptions.secrets as SecretsType;
   const params = execOptions.params as ParamsType;
-  const { comments, executorAction, incidentId, ...restParams } = params;
+  const { comments, incidentId, ...restParams } = params;
 
   const finalMap = buildMap(mapping);
-  const restMapped = mapParams(restParams, finalMap);
+  const restParamsMapped = mapParams(restParams, finalMap);
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {
     serviceNow,
-    params: restMapped,
+    params: restParamsMapped,
     comments: comments as CommentType[],
     mapping: finalMap,
   };
@@ -105,25 +105,17 @@ async function serviceNowExecutor(
 
   let data = {};
 
-  switch (executorAction) {
-    case 'newIncident':
-      data = await handleCreateIncident(handlerInput);
+  if (!incidentId) {
+    data = await handleCreateIncident(handlerInput);
 
-      return {
-        ...res,
-        data,
-      };
-
-    case 'updateIncident':
-      if (!incidentId) {
-        throw new Error('[Action][ServiceNow]: IncidentId is required.');
-      }
-
-      await handleUpdateIncident({ incidentId, ...handlerInput });
-      return {
-        ...res,
-      };
-    default:
-      throw new Error('[Action][ServiceNow]: Unsupported executor action.');
+    return {
+      ...res,
+      data,
+    };
+  } else {
+    await handleUpdateIncident({ incidentId, ...handlerInput });
+    return {
+      ...res,
+    };
   }
 }
