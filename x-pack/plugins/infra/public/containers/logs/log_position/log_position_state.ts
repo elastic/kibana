@@ -25,7 +25,7 @@ interface VisiblePositions {
 }
 
 export interface LogPositionStateParams {
-  initialized: boolean;
+  isInitialized: boolean;
   targetPosition: TimeKeyOrNull;
   isStreaming: boolean;
   firstVisiblePosition: TimeKeyOrNull;
@@ -81,7 +81,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   // When the page loads, there might be initial state in the URL. We want to
   // prevent the entries from showing until we have processed that initial
   // state. That prevents double fetching.
-  const [initialized, setInitialized] = useState<boolean>(false);
+  const [isInitialized, setInitialized] = useState<boolean>(false);
   const initialize = useCallback(() => {
     setInitialized(true);
   }, [setInitialized]);
@@ -172,7 +172,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   /* eslint-enable react-hooks/exhaustive-deps */
 
   const state = {
-    initialized,
+    isInitialized,
     targetPosition,
     isStreaming,
     firstVisiblePosition: startKey,
