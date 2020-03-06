@@ -2093,16 +2093,17 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@19.0.0":
-  version "19.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-19.0.0.tgz#cf7d644945c95997d442585cf614e853f173746e"
-  integrity sha512-8/USz56MYhu6bV4oecJct7tsdi0ktErOIFLobNmQIKdxDOni/KpttX6IHqxM7OuIWi1AEMXoIozw68+oyL/uKQ==
+"@elastic/eui@20.0.2":
+  version "20.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-20.0.2.tgz#c64b16fef15da6aa9e627d45cdd372f1fc676359"
+  integrity sha512-8TtazI7RO1zJH4Qkl6TZKvAxaFG9F8BEdwyGmbGhyvXOJbkvttRzoaEg9jSQpKr+z7w2vsjGNbza/fEAE41HOA==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/enzyme" "^3.1.13"
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
+    "@types/react-input-autosize" "^2.0.2"
     "@types/react-virtualized" "^9.18.7"
     chroma-js "^2.0.4"
     classnames "^2.2.5"
@@ -5207,6 +5208,13 @@
   version "0.16.7"
   resolved "https://registry.yarnpkg.com/@types/react-grid-layout/-/react-grid-layout-0.16.7.tgz#53d5f5034deb0c60e25a0fa578141e9a0982011f"
   integrity sha512-A3tW9xySd03KGONkp8gP4+QRLuT1Mcx++m0hO0nZIM4H/Qwz8GsiDv+9okbmHk5HcsHwY5Jdsn6Cv50hwoNG+A==
+  dependencies:
+    "@types/react" "*"
+
+"@types/react-input-autosize@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@types/react-input-autosize/-/react-input-autosize-2.0.2.tgz#6ccdfb100c21b6096c1a04c3c3fac196b0ce61c1"
+  integrity sha512-QzewaD5kog7c6w5e3dretb+50oM8RDdDvVumQKCtPjI6VHyR8lA/HxCiTrv5l9Vgbi4NCitYuix/NorOevlrng==
   dependencies:
     "@types/react" "*"
 

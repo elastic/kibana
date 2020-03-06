@@ -19,8 +19,12 @@ export const readTagsRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const alertsClient = context.alerting.getAlertsClient();
       const siemResponse = buildSiemResponse(response);
+
+      if (!context.alerting) {
+        return siemResponse.error({ statusCode: 404 });
+      }
+      const alertsClient = context.alerting.getAlertsClient();
 
       if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });
