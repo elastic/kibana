@@ -435,20 +435,17 @@ export function initGraphApp(angularModule, deps) {
 
     $scope.handleMergeCandidatesCallback = function(termIntersects) {
       const mergeCandidates = [];
-      for (const i in termIntersects) {
-        if (termIntersects.hasOwnProperty(i)) {
-          const ti = termIntersects[i];
-          mergeCandidates.push({
-            id1: ti.id1,
-            id2: ti.id2,
-            term1: ti.term1,
-            term2: ti.term2,
-            v1: ti.v1,
-            v2: ti.v2,
-            overlap: ti.overlap,
-          });
-        }
-      }
+      termIntersects.forEach(ti => {
+        mergeCandidates.push({
+          id1: ti.id1,
+          id2: ti.id2,
+          term1: ti.term1,
+          term2: ti.term2,
+          v1: ti.v1,
+          v2: ti.v2,
+          overlap: ti.overlap,
+        });
+      });
       $scope.detail = { mergeCandidates };
     };
 

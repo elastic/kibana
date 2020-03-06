@@ -171,8 +171,7 @@ module.exports = (function() {
     //Determines if 2 nodes are connected via an edge
     this.areLinked = function(a, b) {
       if (a === b) return true;
-      const allEdges = this.edges;
-      allEdges.forEach(e => {
+      this.edges.forEach(e => {
         if (e.source === a && e.target === b) {
           return true;
         }
@@ -512,12 +511,16 @@ module.exports = (function() {
         node.numChildren = 0;
       });
 
-      allNodes.forEach(node => {
+      for (const n in allNodes) {
+        if (!allNodes.hasOwnProperty(n)) {
+          continue;
+        }
+        let node = allNodes[n];
         while (node.parent !== undefined) {
           node = node.parent;
           node.numChildren = node.numChildren + 1;
         }
-      });
+      }
       this.force = d3.layout
         .force()
         .nodes(visibleNodes)
@@ -697,22 +700,18 @@ module.exports = (function() {
       for (let hopNum = 0; hopNum < numHops; hopNum++) {
         const arr = [];
 
-        for (const f in fieldsChoice) {
-          if (fieldsChoice.hasOwnProperty(f)) {
-            const field = fieldsChoice[f].name;
-            const hopSize = fieldsChoice[f].hopSize;
-            const excludes = excludeNodesByField[field];
-            const stepField = {
-              field: field,
-              size: hopSize,
-              min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-            };
-            if (excludes) {
-              stepField.exclude = excludes;
-            }
-            arr.push(stepField);
+        fieldsChoice.forEach(({ name: field, hopSize }) => {
+          const excludes = excludeNodesByField[field];
+          const stepField = {
+            field: field,
+            size: hopSize,
+            min_doc_count: parseInt(self.options.exploreControls.minDocCount),
+          };
+          if (excludes) {
+            stepField.exclude = excludes;
           }
-        }
+          arr.push(stepField);
+        });
         step.vertices = arr;
         if (hopNum < numHops - 1) {
           // if (s < (stepSizes.length - 1)) {
@@ -1551,6 +1550,8 @@ module.exports = (function() {
         let maxEdgeWeight = 0.00000001;
         data.connections.forEach(edge => {
           maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
+        });
+        data.connections.forEach(edge => {
           edges.push({
             source: edge.source,
             target: edge.target,
