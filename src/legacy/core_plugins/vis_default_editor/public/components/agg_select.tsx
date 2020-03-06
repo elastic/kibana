@@ -19,7 +19,7 @@
 import { get, has } from 'lodash';
 import React, { useEffect, useCallback, useState } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -104,7 +104,7 @@ function DefaultEditorAggSelect({
   const isValid = !!value && !errors.length && !isDirty;
 
   const onChange = useCallback(
-    (options: EuiComboBoxOptionProps[]) => {
+    (options: EuiComboBoxOptionOption[]) => {
       const selectedOption = get(options, '0.target');
       if (selectedOption) {
         setValue(selectedOption as IAggType);
