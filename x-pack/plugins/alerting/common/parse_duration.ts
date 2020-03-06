@@ -8,6 +8,7 @@ const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
 const DAYS_REGEX = /^[1-9][0-9]*d$/;
 
+// parse an interval string '{digit*}{s|m|h|d}' into milliseconds
 export function parseDuration(duration: string): number {
   const parsed = parseInt(duration, 10);
   if (isSeconds(duration)) {
