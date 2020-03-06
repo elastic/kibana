@@ -45,6 +45,8 @@ const Divider = styled.div`
   height: 45px;
 `;
 
+const REFRESH_INTERVAL_MS = 5000;
+
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const core = useCore();
   // Agent data states
@@ -83,7 +85,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       .join(' or ')})`;
   }
 
-  const agentStatusRequest = useGetAgentStatus();
+  const agentStatusRequest = useGetAgentStatus(undefined, {
+    pollIntervalMs: REFRESH_INTERVAL_MS,
+  });
   const agentStatus = agentStatusRequest.data?.results;
 
   const agentsRequest = useGetAgents(
@@ -94,7 +98,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       showInactive,
     },
     {
-      pollIntervalMs: 5000,
+      pollIntervalMs: REFRESH_INTERVAL_MS,
     }
   );
 

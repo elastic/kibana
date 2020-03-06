@@ -7,14 +7,18 @@ import React from 'react';
 import { useRequest } from '../../../../hooks';
 import { GetAgentStatusResponse } from '../../../../types';
 import { agentRouteService } from '../../../../services';
+import { UseRequestConfig } from '../../../../hooks/use_request/use_request';
 
-export function useGetAgentStatus(configId?: string) {
+type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
+
+export function useGetAgentStatus(configId?: string, options?: RequestOptions) {
   const agentStatusRequest = useRequest<GetAgentStatusResponse>({
     path: agentRouteService.getStatusPath(),
     query: {
       configId,
     },
     method: 'get',
+    ...options,
   });
 
   return {
