@@ -142,7 +142,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
-    if (index.length > 0) {
+
+    if (index && index.length > 0) {
       const currentEsFields = await getFields(index);
       const timeFields = getTimeFieldOptions(currentEsFields as any);
 
