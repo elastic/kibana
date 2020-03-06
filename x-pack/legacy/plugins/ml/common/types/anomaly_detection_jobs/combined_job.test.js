@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import jobConfigFarequote from './__mocks__/job_config_farequote';
-import { isMlJob, isMlJobs } from './jobs';
+import jobConfigFarequote from '../__mocks__/job_config_farequote';
+import { isCombinedJobWithStats } from './combined_job';
 
 describe('Types: Jobs', () => {
   test('Minimal integrity check.', () => {
-    expect(isMlJob(jobConfigFarequote)).toBe(true);
-    expect(isMlJobs([jobConfigFarequote])).toBe(true);
+    expect(isCombinedJobWithStats(jobConfigFarequote)).toBe(true);
   });
 });

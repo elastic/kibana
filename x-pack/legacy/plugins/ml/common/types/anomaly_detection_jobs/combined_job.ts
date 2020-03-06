@@ -6,12 +6,23 @@
 
 import { cloneDeep } from 'lodash';
 import { Datafeed } from './datafeed';
+import { DatafeedStats } from './datafeed_stats';
 import { Job } from './job';
+import { JobStats } from './job_stats';
+
+export type JobWithStats = Job & JobStats;
+export type DatafeedWithStats = Datafeed & DatafeedStats;
 
 // in older implementations of the job config, the datafeed was placed inside the job
 // for convenience.
 export interface CombinedJob extends Job {
+  calendars?: string[];
   datafeed_config: Datafeed;
+}
+
+export interface CombinedJobWithStats extends JobWithStats {
+  calendars?: string[];
+  datafeed_config: DatafeedWithStats;
 }
 
 export function expandCombinedJobConfig(combinedJob: CombinedJob) {

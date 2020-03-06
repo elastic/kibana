@@ -8,7 +8,7 @@ import { APICaller } from 'src/core/server';
 import {
   Job,
   Datafeed,
-} from '../../../../../legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
 
 interface ValidateCardinalityConfig extends Job {
   datafeed_config?: Datafeed;

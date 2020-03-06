@@ -5,34 +5,59 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
+import { APICaller } from 'src/core/server';
 import {
   JOB_STATE,
   DATAFEED_STATE,
 } from '../../../../../legacy/plugins/ml/common/constants/states';
-import { datafeedsProvider } from './datafeeds';
+import {
+  MlSummaryJob,
+  AuditMessage,
+  JobStats,
+  JobWithStats,
+  DatafeedWithStats,
+  CombinedJobWithStats,
+} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
-import { CalendarManager } from '../calendar';
+import { CalendarManager, Calendar } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import { groupsProvider } from './groups';
-import { uniq } from 'lodash';
+interface MlJobsResponse {
+  jobs: JobWithStats[];
+  count: number;
+}
 
-export function jobsProvider(callWithRequest) {
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callWithRequest);
-  const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
-  const { getLatestBucketTimestampByJob } = resultsServiceProvider(callWithRequest);
-  const calMngr = new CalendarManager(callWithRequest);
+interface MlJobsStatsResponse {
+  jobs: JobStats[];
+  count: number;
+}
 
-  async function forceDeleteJob(jobId) {
-    return callWithRequest('ml.deleteJob', { jobId, force: true });
+interface Results {
+  [id: string]: {
+    [status: string]: boolean;
+    error?: any;
+  };
+}
+
+export function jobsProvider(callAsCurrentUser: APICaller) {
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
+  const { getAuditMessagesSummary } = jobAuditMessagesProvider(callAsCurrentUser);
+  const { getLatestBucketTimestampByJob } = resultsServiceProvider(callAsCurrentUser);
+  const calMngr = new CalendarManager(callAsCurrentUser);
+
+  async function forceDeleteJob(jobId: string) {
+    return callAsCurrentUser('ml.deleteJob', { jobId, force: true });
   }
 
-  async function deleteJobs(jobIds) {
-    const results = {};
+  async function deleteJobs(jobIds: string[]) {
+    const results: Results = {};
     const datafeedIds = await getDatafeedIdsByJobId();
 
     for (const jobId of jobIds) {
@@ -68,11 +93,11 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
-  async function closeJobs(jobIds) {
-    const results = {};
+  async function closeJobs(jobIds: string[]) {
+    const results: Results = {};
     for (const jobId of jobIds) {
       try {
-        await callWithRequest('ml.closeJob', { jobId });
+        await callAsCurrentUser('ml.closeJob', { jobId });
         results[jobId] = { closed: true };
       } catch (error) {
         if (isRequestTimeout(error)) {
@@ -88,7 +113,7 @@ export function jobsProvider(callWithRequest) {
           // if the job has failed we want to attempt a force close.
           // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
           try {
-            await callWithRequest('ml.closeJob', { jobId, force: true });
+            await callAsCurrentUser('ml.closeJob', { jobId, force: true });
             results[jobId] = { closed: true };
           } catch (error2) {
             if (isRequestTimeout(error)) {
@@ -104,14 +129,14 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
-  async function jobsSummary(jobIds = []) {
-    const fullJobsList = await createFullJobsList();
+  async function jobsSummary(jobIds: string[] = []) {
+    const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map(job => job.job_id);
-    const auditMessages = await getAuditMessagesSummary(fullJobsIds);
-    const auditMessagesByJob = auditMessages.reduce((p, c) => {
-      p[c.job_id] = c;
-      return p;
-    }, {});
+    const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
+    const auditMessagesByJob = auditMessages.reduce((acc, cur) => {
+      acc[cur.job_id] = cur;
+      return acc;
+    }, {} as { [id: string]: AuditMessage });
 
     const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
       defaultMessage: 'deleting',
@@ -122,11 +147,11 @@ export function jobsProvider(callWithRequest) {
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
       const dataCounts = job.data_counts;
 
-      const tempJob = {
+      const tempJob: MlSummaryJob = {
         id: job.job_id,
         description: job.description || '',
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
-        processed_record_count: job.data_counts.processed_record_count,
+        processed_record_count: job.data_counts?.processed_record_count,
         memory_status: job.model_size_stats ? job.model_size_stats.memory_status : '',
         jobState: job.deleting === true ? deletingStr : job.state,
         hasDatafeed,
@@ -135,11 +160,11 @@ export function jobsProvider(callWithRequest) {
         datafeedIndices:
           hasDatafeed && job.datafeed_config.indices ? job.datafeed_config.indices : [],
         datafeedState: hasDatafeed && job.datafeed_config.state ? job.datafeed_config.state : '',
-        latestTimestampMs: dataCounts.latest_record_timestamp,
-        earliestTimestampMs: dataCounts.earliest_record_timestamp,
+        latestTimestampMs: dataCounts?.latest_record_timestamp,
+        earliestTimestampMs: dataCounts?.earliest_record_timestamp,
         latestResultsTimestampMs: getLatestDataOrBucketTimestamp(
-          dataCounts.latest_record_timestamp,
-          dataCounts.latest_bucket_timestamp
+          dataCounts?.latest_record_timestamp as number,
+          dataCounts?.latest_bucket_timestamp as number
         ),
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: job.node ? job.node.name : undefined,
@@ -149,7 +174,11 @@ export function jobsProvider(callWithRequest) {
         tempJob.fullJob = job;
       }
       const auditMessage = auditMessagesByJob[tempJob.id];
-      if (auditMessage !== undefined && job.create_time <= auditMessage.msgTime) {
+      if (
+        auditMessage !== undefined &&
+        job.create_time !== undefined &&
+        job.create_time <= auditMessage.msgTime
+      ) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
           text: auditMessage.highestLevelText,
@@ -163,19 +192,19 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsWithTimerange() {
     const fullJobsList = await createFullJobsList();
-    const jobsMap = {};
+    const jobsMap: { [id: string]: string[] } = {};
 
     const jobs = fullJobsList.map(job => {
       jobsMap[job.job_id] = job.groups || [];
       const hasDatafeed =
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-      const timeRange = {};
+      const timeRange: { to?: number; from?: number } = {};
 
       const dataCounts = job.data_counts;
       if (dataCounts !== undefined) {
         timeRange.to = getLatestDataOrBucketTimestamp(
-          dataCounts.latest_record_timestamp,
-          dataCounts.latest_bucket_timestamp
+          dataCounts.latest_record_timestamp as number,
+          dataCounts.latest_bucket_timestamp as number
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
       }
@@ -195,56 +224,65 @@ export function jobsProvider(callWithRequest) {
     return { jobs, jobsMap };
   }
 
-  async function createFullJobsList(jobIds = []) {
-    const [JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS, BUCKET_TIMESTAMPS] = [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
+  async function createFullJobsList(jobIds: string[] = []) {
+    const jobs: CombinedJobWithStats[] = [];
+    const groups: { [jobId: string]: string[] } = {};
+    const datafeeds: { [id: string]: DatafeedWithStats } = {};
+    const calendarsByJobId: { [jobId: string]: string[] } = {};
+    const requests: [
+      Promise<MlJobsResponse>,
+      Promise<MlJobsStatsResponse>,
+      Promise<MlDatafeedsResponse>,
+      Promise<MlDatafeedsStatsResponse>,
+      Promise<Calendar[]>,
+      Promise<{ [id: string]: number | undefined }>
+    ] = [
+      jobIds.length > 0
+        ? callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: jobIds }) // move length check in  side call
+        : callAsCurrentUser<MlJobsResponse>('ml.jobs'),
+      jobIds.length > 0
+        ? callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', { jobId: jobIds })
+        : callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats'),
+      callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds'),
+      callAsCurrentUser<MlDatafeedsStatsResponse>('ml.datafeedStats'),
+      calMngr.getAllCalendars(),
+      getLatestBucketTimestampByJob(),
     ];
 
-    const jobs = [];
-    const groups = {};
-    const datafeeds = {};
-    const calendarsByJobId = {};
-    const requests =
-      jobIds.length > 0
-        ? [
-            callWithRequest('ml.jobs', { jobId: jobIds }),
-            callWithRequest('ml.jobStats', { jobId: jobIds }),
-          ]
-        : [callWithRequest('ml.jobs'), callWithRequest('ml.jobStats')];
-    requests.push(
-      callWithRequest('ml.datafeeds'),
-      callWithRequest('ml.datafeedStats'),
-      calMngr.getAllCalendars(),
-      getLatestBucketTimestampByJob()
-    );
+    const [
+      jobResults,
+      jobStatsResults,
+      datafeedResults,
+      datafeedStatsResults,
+      calendarResults,
+      latestBucketTimestampByJob,
+    ] = await Promise.all<
+      MlJobsResponse,
+      MlJobsStatsResponse,
+      MlDatafeedsResponse,
+      MlDatafeedsStatsResponse,
+      Calendar[],
+      { [id: string]: number | undefined }
+    >(requests);
 
-    const results = await Promise.all(requests);
-
-    if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
-      results[DATAFEEDS].datafeeds.forEach(datafeed => {
-        if (results[DATAFEED_STATS] && results[DATAFEED_STATS].datafeeds) {
-          const datafeedStats = results[DATAFEED_STATS].datafeeds.find(
+    if (datafeedResults && datafeedResults.datafeeds) {
+      datafeedResults.datafeeds.forEach(datafeed => {
+        if (datafeedStatsResults && datafeedStatsResults.datafeeds) {
+          const datafeedStats = datafeedStatsResults.datafeeds.find(
             ds => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
-            datafeed.state = datafeedStats.state;
-            datafeed.timing_stats = datafeedStats.timing_stats;
+            datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
           }
         }
-        datafeeds[datafeed.job_id] = datafeed;
       });
     }
 
     // create list of jobs per group.
     // used for assigning calendars to jobs when a calendar has
     // only been attached to a group
-    if (results[JOBS] && results[JOBS].jobs) {
-      results[JOBS].jobs.forEach(job => {
+    if (jobResults && jobResults.jobs) {
+      jobResults.jobs.forEach(job => {
         calendarsByJobId[job.job_id] = [];
 
         if (job.groups !== undefined) {
@@ -259,8 +297,8 @@ export function jobsProvider(callWithRequest) {
     }
 
     // assign calendars to jobs
-    if (results[CALENDARS]) {
-      results[CALENDARS].forEach(cal => {
+    if (calendarResults) {
+      calendarResults.forEach(cal => {
         cal.job_ids.forEach(id => {
           if (groups[id]) {
             groups[id].forEach(jId => {
@@ -285,42 +323,42 @@ export function jobsProvider(callWithRequest) {
     }
 
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
-    if (results[JOBS] && results[JOBS].jobs) {
-      results[JOBS].jobs.forEach(job => {
-        job.data_counts = {};
-        job.model_size_stats = {};
-        job.datafeed_config = {};
+    if (jobResults && jobResults.jobs) {
+      jobResults.jobs.forEach(job => {
+        const tempJob = job as CombinedJobWithStats;
 
-        if (calendarsByJobId[job.job_id].length) {
-          job.calendars = calendarsByJobId[job.job_id];
+        if (calendarsByJobId[tempJob.job_id].length) {
+          tempJob.calendars = calendarsByJobId[tempJob.job_id];
         }
 
-        if (results[JOB_STATS] && results[JOB_STATS].jobs) {
-          const jobStats = results[JOB_STATS].jobs.find(js => js.job_id === job.job_id);
+        if (jobStatsResults && jobStatsResults.jobs) {
+          const jobStats = jobStatsResults.jobs.find(js => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
-            job.state = jobStats.state;
-            job.data_counts = jobStats.data_counts;
-            job.model_size_stats = jobStats.model_size_stats;
+            tempJob.state = jobStats.state;
+            tempJob.data_counts = jobStats.data_counts;
+            tempJob.model_size_stats = jobStats.model_size_stats;
             if (jobStats.node) {
-              job.node = jobStats.node;
+              tempJob.node = jobStats.node;
             }
             if (jobStats.open_time) {
-              job.open_time = jobStats.open_time;
+              tempJob.open_time = jobStats.open_time;
             }
 
             // Add in the timestamp of the last bucket processed for each job if available.
-            if (results[BUCKET_TIMESTAMPS] && results[BUCKET_TIMESTAMPS][job.job_id]) {
-              job.data_counts.latest_bucket_timestamp = results[BUCKET_TIMESTAMPS][job.job_id];
+            const latestBucketTimestamp =
+              latestBucketTimestampByJob && latestBucketTimestampByJob[tempJob.job_id];
+            if (latestBucketTimestamp) {
+              tempJob.data_counts.latest_bucket_timestamp = latestBucketTimestamp;
             }
           }
         }
 
-        const datafeed = datafeeds[job.job_id];
+        const datafeed = datafeeds[tempJob.job_id];
         if (datafeed !== undefined) {
-          job.datafeed_config = datafeed;
+          tempJob.datafeed_config = datafeed;
         }
 
-        jobs.push(job);
+        jobs.push(tempJob);
       });
     }
     return jobs;
@@ -331,7 +369,7 @@ export function jobsProvider(callWithRequest) {
     const detailed = true;
     const jobIds = [];
     try {
-      const tasksList = await callWithRequest('tasks.list', { actions, detailed });
+      const tasksList = await callAsCurrentUser('tasks.list', { actions, detailed });
       Object.keys(tasksList.nodes).forEach(nodeId => {
         const tasks = tasksList.nodes[nodeId].tasks;
         Object.keys(tasks).forEach(taskId => {
@@ -341,7 +379,7 @@ export function jobsProvider(callWithRequest) {
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
-      const { jobs } = await callWithRequest('ml.jobs');
+      const { jobs } = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
       jobIds.push(...jobs.filter(j => j.deleting === true).map(j => j.job_id));
     }
     return { jobIds };
@@ -350,11 +388,13 @@ export function jobsProvider(callWithRequest) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds = []) {
+  async function jobsExist(jobIds: string[] = []) {
     // Get the list of job IDs.
-    const jobsInfo = await callWithRequest('ml.jobs', { jobId: jobIds });
+    const jobsInfo = await callAsCurrentUser<MlJobsResponse>('ml.jobs', {
+      jobId: jobIds,
+    });
 
-    const results = {};
+    const results: { [id: string]: boolean } = {};
     if (jobsInfo.count > 0) {
       const allJobIds = jobsInfo.jobs.map(job => job.job_id);
 
@@ -375,8 +415,8 @@ export function jobsProvider(callWithRequest) {
   }
 
   async function getAllJobAndGroupIds() {
-    const { getAllGroups } = groupsProvider(callWithRequest);
-    const jobs = await callWithRequest('ml.jobs');
+    const { getAllGroups } = groupsProvider(callAsCurrentUser);
+    const jobs = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
     const jobIds = jobs.jobs.map(job => job.job_id);
     const groups = await getAllGroups();
     const groupIds = groups.map(group => group.id);
@@ -387,10 +427,10 @@ export function jobsProvider(callWithRequest) {
     };
   }
 
-  async function getLookBackProgress(jobId, start, end) {
+  async function getLookBackProgress(jobId: string, start: number, end: number) {
     const datafeedId = `datafeed-${jobId}`;
     const [jobStats, isRunning] = await Promise.all([
-      callWithRequest('ml.jobStats', { jobId: [jobId] }),
+      callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', { jobId: [jobId] }),
       isDatafeedRunning(datafeedId),
     ]);
 
@@ -408,8 +448,10 @@ export function jobsProvider(callWithRequest) {
     return { progress: 0, isRunning: false, isJobClosed: true };
   }
 
-  async function isDatafeedRunning(datafeedId) {
-    const stats = await callWithRequest('ml.datafeedStats', { datafeedId: [datafeedId] });
+  async function isDatafeedRunning(datafeedId: string) {
+    const stats = await callAsCurrentUser<MlDatafeedsStatsResponse>('ml.datafeedStats', {
+      datafeedId: [datafeedId],
+    });
     if (stats.datafeeds.length) {
       const state = stats.datafeeds[0].state;
       return (
