@@ -114,7 +114,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
   const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
+  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(
     mockReporting,
