@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n as kbnI18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -21,7 +21,7 @@ export interface PluginsDependencies {
 }
 
 export class TransformUiPlugin {
-  public setup(coreSetup: CoreSetup, pluginsSetup: PluginsDependencies): void {
+  public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
     const { management } = pluginsSetup;
 
     // Register management section
@@ -29,7 +29,7 @@ export class TransformUiPlugin {
     if (esSection !== undefined) {
       esSection.registerApp({
         id: 'transform',
-        title: i18n.translate('xpack.transform.appTitle', {
+        title: kbnI18n.translate('xpack.transform.appTitle', {
           defaultMessage: 'Transforms',
         }),
         order: 3,
@@ -37,8 +37,8 @@ export class TransformUiPlugin {
           const { http, notifications, getStartServices } = coreSetup;
           const startServices = await getStartServices();
           const [core, plugins] = startServices;
-          const { chrome, docLinks, uiSettings, savedObjects, overlays } = core;
-          const { data } = plugins as PluginsDependencies;
+          const { chrome, docLinks, i18n, overlays, savedObjects, uiSettings } = core;
+          const { data } = plugins;
           const { docTitle } = chrome;
 
           // Initialize services
@@ -49,14 +49,14 @@ export class TransformUiPlugin {
           // AppCore/AppPlugins to be passed on as React context
           const appDependencies: AppDependencies = {
             chrome,
+            data,
             docLinks,
             http,
-            i18n: core.i18n,
+            i18n,
             notifications,
-            uiSettings,
-            savedObjects,
             overlays,
-            data,
+            savedObjects,
+            uiSettings,
           };
 
           return renderApp(element, appDependencies);
