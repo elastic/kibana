@@ -31,6 +31,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import {
   ServicesContextProvider,
   EditorContextProvider,
+  TextObjectsContextProvider,
   RequestContextProvider,
   ContextValue,
 } from '../../../../contexts';
@@ -46,27 +47,33 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: ContextValue;
   const sandbox = sinon.createSandbox();
 
-  const doMount = () =>
-    mount(
+  const doMount = () => {
+    // Set up our document body
+    document.body.innerHTML =
+      '<div><div id="conAppEditorMount"><textarea id="ConAppInputTextarea" /></div></div>';
+    return mount(
       <I18nProvider>
         <ServicesContextProvider value={mockedAppContextValue}>
-          <RequestContextProvider>
-            <EditorContextProvider settings={{} as any}>
-              <Editor
-                textObject={{
-                  createdAt: 123,
-                  id: '123',
-                  isScratchPad: true,
-                  name: 'test',
-                  text: 'test',
-                  updatedAt: 123,
-                }}
-              />
-            </EditorContextProvider>
-          </RequestContextProvider>
+          <TextObjectsContextProvider>
+            <RequestContextProvider>
+              <EditorContextProvider settings={{} as any}>
+                <Editor
+                  textObject={{
+                    createdAt: 123,
+                    id: '123',
+                    isScratchPad: true,
+                    name: 'test',
+                    text: 'test',
+                    updatedAt: 123,
+                  }}
+                />
+              </EditorContextProvider>
+            </RequestContextProvider>
+          </TextObjectsContextProvider>
         </ServicesContextProvider>
       </I18nProvider>
     );
+  };
 
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
@@ -82,6 +89,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     (getEndpointFromPosition as jest.Mock).mockReturnValue({ patterns: [] });
     (sendRequestToES as jest.Mock).mockRejectedValue({});
     const editor = doMount();
+    await new Promise(res => setTimeout(res, 0));
     act(() => {
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });

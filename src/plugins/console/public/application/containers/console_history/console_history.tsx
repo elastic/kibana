@@ -34,7 +34,7 @@ import {
 
 import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
-import { useEditorReadContext } from '../../contexts/editor_context';
+import { useEditorContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
 
 interface Props {
@@ -48,7 +48,7 @@ export function ConsoleHistory({ close }: Props) {
     services: { history },
   } = useServicesContext();
 
-  const { settings: readOnlySettings } = useEditorReadContext();
+  const [{ settings: readOnlySettings }] = useEditorContext();
 
   const [requests, setPastRequests] = useState<any[]>(history.getHistory());
 

@@ -34,7 +34,7 @@ import { parse } from 'query-string';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
-import { useEditorReadContext, useServicesContext } from '../../../../contexts';
+import { useEditorContext, useServicesContext } from '../../../../contexts';
 import * as senseEditor from '../../../../models/sense_editor';
 import { TextObjectWithId } from '../../../../../../common/text_object';
 
@@ -98,7 +98,7 @@ const createEditorElement = () => {
   return el;
 };
 
-const inputId = 'ConAppInputTextarea';
+const INPUT_ID = 'ConAppInputTextarea';
 
 export const Editor: FunctionComponent<EditorProps> = memo(
   ({ textObject }) => {
@@ -108,7 +108,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       elasticsearchUrl,
     } = useServicesContext();
 
-    const { settings } = useEditorReadContext();
+    const [{ settings }] = useEditorContext();
     const setInputEditor = useSetInputEditor();
     const sendCurrentRequestToES = useSendCurrentRequestToES();
     const saveTextObject = useSequencedSaveTextObject(textObject);
@@ -141,7 +141,9 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       const editor = senseEditor.create(element);
 
       const textareaElement = editorRef.current.querySelector('textarea')!;
-      textareaElement.setAttribute('id', inputId);
+      if (textareaElement) {
+        textareaElement.setAttribute('id', INPUT_ID);
+      }
 
       const readQueryParams = () => {
         const [, queryString] = (window.location.hash || '').split('?');
@@ -297,7 +299,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
           </EuiFlexGroup>
 
           <EuiScreenReaderOnly>
-            <label htmlFor={inputId}>
+            <label htmlFor={INPUT_ID}>
               {i18n.translate('console.inputTextarea', {
                 defaultMessage: 'Dev Tools Console',
               })}

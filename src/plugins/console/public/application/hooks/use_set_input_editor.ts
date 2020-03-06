@@ -17,17 +17,22 @@
  * under the License.
  */
 import { useCallback } from 'react';
-import { useEditorActionContext } from '../contexts/editor_context';
+import { useEditorContext } from '../contexts/editor_context';
 import { instance as registry } from '../contexts/editor_context/editor_registry';
 
 export const useSetInputEditor = () => {
-  const dispatch = useEditorActionContext();
+  const [, setState] = useEditorContext();
 
   return useCallback(
     (editor: any) => {
-      dispatch({ type: 'setInputEditor', payload: editor });
+      setState(prev => {
+        return {
+          ...prev,
+          ready: true,
+        };
+      });
       registry.setInputEditor(editor);
     },
-    [dispatch]
+    [setState]
   );
 };

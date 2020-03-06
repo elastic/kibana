@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { reducer, initialValue } from './editor';
-import { TextObjectWithId } from '../../../common/text_object/text_object';
+import { reducer, initialValue } from './text_object';
+import { TextObjectWithId } from '../../../common/text_object';
 
 describe('Editor Store', () => {
   const testTextObjects: TextObjectWithId[] = [
@@ -37,7 +37,7 @@ describe('Editor Store', () => {
   describe('Text Objects', () => {
     it('updates many', () => {
       const s1 = reducer(initialValue, {
-        type: 'textObject.upsertMany',
+        type: 'upsertMany',
         payload: testTextObjects,
       });
 
@@ -46,40 +46,40 @@ describe('Editor Store', () => {
 
     it('updates one', () => {
       const s1 = reducer(initialValue, {
-        type: 'textObject.upsertMany',
+        type: 'upsertMany',
         payload: testTextObjects,
       });
 
       const s2 = reducer(s1, {
-        type: 'textObject.upsert',
+        type: 'upsert',
         payload: { ...testTextObjects[0], text: 'ok!' },
       });
 
       expect(s2.textObjects['1'].text).toEqual('ok!');
     });
 
-    it('prevents adding an unknown text object', () => {
-      expect(() =>
-        reducer(initialValue, {
-          type: 'textObject.upsert',
-          payload: { id: '1', whoIs: 'this' } as any,
-        })
-      ).toThrow('Cannot assign');
+    it('prevents adding an unknown text object and reports the error', () => {
+      const s1 = reducer(initialValue, {
+        type: 'upsert',
+        payload: { id: '1', whoIs: 'this' } as any,
+      });
+
+      expect(s1.textObjectsSaveError['1']).toContain('Cannot assign');
     });
 
     it('deletes and defaults back to existing file', () => {
       const s1 = reducer(initialValue, {
-        type: 'textObject.upsertMany',
+        type: 'upsertMany',
         payload: testTextObjects,
       });
 
       const s2 = reducer(s1, {
-        type: 'textObject.setCurrent',
+        type: 'setCurrent',
         payload: '3',
       });
 
       const s3 = reducer(s2, {
-        type: 'textObject.delete',
+        type: 'delete',
         payload: '3',
       });
 

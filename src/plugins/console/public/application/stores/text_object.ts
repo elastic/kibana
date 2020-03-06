@@ -18,7 +18,6 @@
  */
 import { Reducer } from 'react';
 import { produce } from 'immer';
-import { identity } from 'fp-ts/lib/function';
 import { exact } from 'io-ts';
 import {
   textObjectSchemaWithId,
@@ -26,63 +25,43 @@ import {
   TextObject,
   throwIfUnknown,
 } from '../../../common/text_object';
-import { DevToolsSettings } from '../../services';
 import { IdObject } from '../../../common/id_object';
 
 const exactTextObjectSchema = exact(textObjectSchemaWithId);
 
 export interface Store {
-  ready: boolean;
-  settings: DevToolsSettings;
   currentTextObjectId: string;
   textObjects: Record<string, TextObjectWithId>;
+  textObjectsSaveError: Record<string, string>;
 }
 
-export const initialValue: Store = produce<Store>(
-  {
-    ready: false,
-    settings: null as any,
-    currentTextObjectId: '',
-    textObjects: {},
-  },
-  identity
-);
+export const initialValue: Store = {
+  currentTextObjectId: '',
+  textObjects: {},
+  textObjectsSaveError: {},
+};
 
 export type Action =
-  | { type: 'setInputEditor'; payload: any }
-  | { type: 'updateSettings'; payload: DevToolsSettings }
-  | { type: 'textObject.setCurrent'; payload: string }
-  | { type: 'textObject.upsertMany'; payload: Array<Partial<TextObject> & IdObject> }
-  | { type: 'textObject.upsert'; payload: Partial<TextObject> & IdObject }
-  | { type: 'textObject.upsertAndSetCurrent'; payload: TextObjectWithId }
-  | { type: 'textObject.delete'; payload: string };
+  | { type: 'setCurrent'; payload: string }
+  | { type: 'upsertMany'; payload: Array<Partial<TextObject> & IdObject> }
+  | { type: 'upsert'; payload: Partial<TextObject> & IdObject }
+  | { type: 'upsertAndSetCurrent'; payload: TextObjectWithId }
+  | { type: 'delete'; payload: string };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
-    if (action.type === 'setInputEditor') {
-      if (action.payload) {
-        draft.ready = true;
-      }
-      return;
-    }
-
-    if (action.type === 'updateSettings') {
-      draft.settings = action.payload;
-      return;
-    }
-
-    if (action.type === 'textObject.setCurrent') {
+    if (action.type === 'setCurrent') {
       draft.currentTextObjectId = action.payload;
       return;
     }
 
-    if (action.type === 'textObject.upsertAndSetCurrent') {
+    if (action.type === 'upsertAndSetCurrent') {
       draft.currentTextObjectId = action.payload.id;
       draft.textObjects[action.payload.id] = action.payload;
       return;
     }
 
-    if (action.type === 'textObject.upsert' || action.type === 'textObject.upsertMany') {
+    if (action.type === 'upsert' || action.type === 'upsertMany') {
       const objectsArray = Array.isArray(action.payload) ? action.payload : [action.payload];
       for (const object of objectsArray) {
         const previousObject = draft.textObjects[object.id];
@@ -90,13 +69,20 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
         if (previousObject) {
           draft.textObjects[object.id] = { ...previousObject, ...object };
         } else {
-          draft.textObjects[object.id] = throwIfUnknown(exactTextObjectSchema, object);
+          try {
+            draft.textObjects[object.id] = throwIfUnknown(exactTextObjectSchema, object);
+            if (draft.textObjectsSaveError[object.id]) {
+              delete draft.textObjectsSaveError[object.id];
+            }
+          } catch (e) {
+            draft.textObjectsSaveError[object.id] = e.message;
+          }
         }
       }
       return;
     }
 
-    if (action.type === 'textObject.delete') {
+    if (action.type === 'delete') {
       if (state.currentTextObjectId === action.payload) {
         const scratchPad = Object.values(state.textObjects).find(
           textObject => textObject.isScratchPad

@@ -19,7 +19,7 @@
 
 import { useCallback } from 'react';
 import * as t from 'io-ts';
-import { useServicesContext, useEditorActionContext } from '../../contexts';
+import { useServicesContext, useTextObjectsActionContext } from '../../contexts';
 import {
   TextObject,
   textObjectProps,
@@ -61,7 +61,7 @@ export interface UpdateTextObjectArgs {
  * operation provided by this hook.
  */
 export const useTextObjectsCRUD = () => {
-  const dispatch = useEditorActionContext();
+  const dispatch = useTextObjectsActionContext();
   const {
     services: { objectStorageClient },
   } = useServicesContext();
@@ -75,12 +75,12 @@ export const useTextObjectsCRUD = () => {
 
         if (createAndSelect) {
           dispatch({
-            type: 'textObject.upsertAndSetCurrent',
+            type: 'upsertAndSetCurrent',
             payload: result,
           });
         } else {
           dispatch({
-            type: 'textObject.upsert',
+            type: 'upsert',
             payload: result,
           });
         }
@@ -91,7 +91,7 @@ export const useTextObjectsCRUD = () => {
     update: useCallback(
       async ({ textObject }: UpdateTextObjectArgs) => {
         await objectStorageClient.text.update(throwIfUnknown(partialTextObjectSchema, textObject));
-        dispatch({ payload: textObject, type: 'textObject.upsert' });
+        dispatch({ payload: textObject, type: 'upsert' });
       },
       [objectStorageClient, dispatch]
     ),
@@ -104,7 +104,7 @@ export const useTextObjectsCRUD = () => {
         await objectStorageClient.text.delete(id);
         dispatch({
           payload: id,
-          type: 'textObject.delete',
+          type: 'delete',
         });
       },
       [objectStorageClient, dispatch]

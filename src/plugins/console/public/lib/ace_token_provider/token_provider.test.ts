@@ -46,6 +46,7 @@ describe('Ace (legacy) token provider', () => {
       </div>`;
 
     senseEditor = create(document.querySelector<HTMLElement>('#ConAppEditor')!);
+    senseEditor.init();
 
     $(senseEditor.getCoreEditor().getContainer())!.show();
 

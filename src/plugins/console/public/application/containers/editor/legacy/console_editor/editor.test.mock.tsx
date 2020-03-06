@@ -46,6 +46,7 @@ jest.mock('../../../../models/sense_editor', () => {
       commands: {
         addCommand: () => {},
       },
+      init: jest.fn(),
     }),
   };
 });

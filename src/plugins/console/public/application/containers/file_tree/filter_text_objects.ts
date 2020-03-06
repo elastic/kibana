@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Store } from '../../stores/editor';
+import { Store } from '../../stores/text_object';
 
 export const filterTextObjects = (searchTerm: string, textObjects: Store['textObjects']) =>
   Object.values(textObjects).filter(textObject => {

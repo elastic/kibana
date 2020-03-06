@@ -17,30 +17,32 @@
  * under the License.
  */
 
-import React, { createContext, Dispatch, useReducer } from 'react';
-import * as editor from '../../stores/editor';
+import React, { createContext, useState, Dispatch, SetStateAction } from 'react';
 import { DevToolsSettings } from '../../../services';
 import { createUseContext } from '../create_use_context';
-
-const EditorReadContext = createContext<editor.Store>(null as any);
-const EditorActionContext = createContext<Dispatch<editor.Action>>(null as any);
 
 export interface EditorContextArgs {
   children: any;
   settings: DevToolsSettings;
 }
 
-export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, value => ({
-    ...value,
-    settings,
-  }));
-  return (
-    <EditorReadContext.Provider value={state as any}>
-      <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>
-    </EditorReadContext.Provider>
-  );
+interface EditorContextState {
+  ready: boolean;
+  settings: DevToolsSettings;
 }
 
-export const useEditorReadContext = createUseContext(EditorReadContext, 'EditorReadContext');
-export const useEditorActionContext = createUseContext(EditorActionContext, 'EditorActionContext');
+const EditorContext = createContext<
+  [EditorContextState, Dispatch<SetStateAction<EditorContextState>>]
+>(undefined as any);
+
+const initialState: EditorContextState = {
+  ready: false,
+  settings: null as any,
+};
+
+export function EditorContextProvider({ children, settings }: EditorContextArgs) {
+  const [state, setState] = useState<EditorContextState>({ ...initialState, settings });
+  return <EditorContext.Provider value={[state, setState]}>{children}</EditorContext.Provider>;
+}
+
+export const useEditorContext = createUseContext(EditorContext, 'EditorContext');

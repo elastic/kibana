@@ -17,8 +17,4 @@
  * under the License.
  */
 
-export {
-  EditorContextProvider,
-  useEditorReadContext,
-  useEditorActionContext,
-} from './editor_context';
+export { EditorContextProvider, useEditorContext } from './editor_context';

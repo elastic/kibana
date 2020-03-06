@@ -22,9 +22,8 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { sortTextObjectsAsc } from '../../../../common/text_object';
-import { Store } from '../../stores/editor';
+import { Store } from '../../stores/text_object';
 
-import { useEditorReadContext, useEditorActionContext } from '../../contexts';
 import { useTextObjectsCRUD } from '../../hooks/text_objects';
 import {
   FileActionsBar,
@@ -32,6 +31,7 @@ import {
   DeleteFileModal,
   FileTree as FileTreeComponent,
 } from '../../components';
+import { useTextObjectsActionContext, useTextObjectsReadContext } from '../../contexts';
 
 import { filterTextObjects } from './filter_text_objects';
 
@@ -48,8 +48,8 @@ export const FileTree: FunctionComponent = () => {
   const [showFileSearchBar, setShowFileSearchBar] = useState(false);
 
   const textObjectsCRUD = useTextObjectsCRUD();
-  const { textObjects, currentTextObjectId } = useEditorReadContext();
-  const dispatch = useEditorActionContext();
+  const { textObjects, currentTextObjectId } = useTextObjectsReadContext();
+  const dispatch = useTextObjectsActionContext();
 
   const filteredTextObjects = prepareData(searchFilter, textObjects);
 
@@ -111,7 +111,7 @@ export const FileTree: FunctionComponent = () => {
                   name: isScratchPad ? 'Default' : name ?? `Untitled`,
                   onSelect: () => {
                     dispatch({
-                      type: 'textObject.setCurrent',
+                      type: 'setCurrent',
                       payload: id,
                     });
                   },

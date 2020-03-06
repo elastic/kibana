@@ -25,8 +25,10 @@ export {
   RequestContextProvider,
 } from './request_context';
 
+export { useEditorContext, EditorContextProvider } from './editor_context';
+
 export {
-  useEditorActionContext,
-  useEditorReadContext,
-  EditorContextProvider,
-} from './editor_context';
+  TextObjectsContextProvider,
+  useTextObjectsActionContext,
+  useTextObjectsReadContext,
+} from './text_objects_context';

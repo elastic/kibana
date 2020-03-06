@@ -20,13 +20,12 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+
 import { expandLiteralStrings } from '../../../../../../../es_ui_shared/console_lang/lib';
-import {
-  useEditorReadContext,
-  useRequestReadContext,
-  useServicesContext,
-} from '../../../../contexts';
+
+import { useEditorContext, useRequestReadContext, useServicesContext } from '../../../../contexts';
 import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
+
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
@@ -46,7 +45,7 @@ function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const editorInstanceRef = useRef<null | CustomAceEditor>(null);
   const { services } = useServicesContext();
-  const { settings: readOnlySettings } = useEditorReadContext();
+  const [{ settings: readOnlySettings }] = useEditorContext();
   const {
     lastResult: { data, error },
   } = useRequestReadContext();

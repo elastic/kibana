@@ -19,7 +19,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
-import { useEditorActionContext, useServicesContext } from '../../contexts';
+import { useServicesContext, useTextObjectsActionContext } from '../../contexts';
 import { sortTextObjectsAsc } from '../../../../common/text_object';
 
 export const useDataInit = () => {
@@ -37,7 +37,7 @@ export const useDataInit = () => {
     services: { objectStorageClient, history },
   } = useServicesContext();
 
-  const dispatch = useEditorActionContext();
+  const dispatch = useTextObjectsActionContext();
 
   useEffect(() => {
     const load = async () => {
@@ -51,17 +51,17 @@ export const useDataInit = () => {
             text: '',
             isScratchPad: true,
           });
-          dispatch({ type: 'textObject.upsertAndSetCurrent', payload: newObject });
+          dispatch({ type: 'upsertAndSetCurrent', payload: newObject });
         } else {
           const [defaultTextObject, ...otherObjects] = sortTextObjectsAsc(results);
           if (!defaultTextObject.isScratchPad) {
             defaultTextObject.isScratchPad = true;
           }
           dispatch({
-            type: 'textObject.upsertAndSetCurrent',
+            type: 'upsertAndSetCurrent',
             payload: defaultTextObject,
           });
-          dispatch({ type: 'textObject.upsertMany', payload: otherObjects });
+          dispatch({ type: 'upsertMany', payload: otherObjects });
         }
       } catch (e) {
         setError(e);

@@ -22,7 +22,7 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
 import mappings from '../../lib/mappings/mappings';
-import { useServicesContext, useEditorActionContext } from '../contexts';
+import { useServicesContext, useEditorContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
@@ -78,7 +78,7 @@ export function Settings({ onClose }: Props) {
     services: { settings },
   } = useServicesContext();
 
-  const dispatch = useEditorActionContext();
+  const [, setEditorState] = useEditorContext();
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
@@ -88,9 +88,11 @@ export function Settings({ onClose }: Props) {
     settings.updateSettings(newSettings);
 
     // Let the rest of the application know settings have updated.
-    dispatch({
-      type: 'updateSettings',
-      payload: newSettings,
+    setEditorState(prev => {
+      return {
+        ...prev,
+        settings: newSettings,
+      };
     });
     onClose();
   };

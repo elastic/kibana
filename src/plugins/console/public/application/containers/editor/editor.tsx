@@ -24,7 +24,11 @@ import { EuiProgress } from '@elastic/eui';
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import {
+  useServicesContext,
+  useRequestReadContext,
+  useTextObjectsReadContext,
+} from '../../contexts';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -34,7 +38,7 @@ export const Editor = memo(() => {
     services: { storage },
   } = useServicesContext();
 
-  const { currentTextObjectId, textObjects } = useEditorReadContext();
+  const { textObjects, currentTextObjectId } = useTextObjectsReadContext();
   const { requestInFlight } = useRequestReadContext();
   const currentTextObject = textObjects[currentTextObjectId];
 

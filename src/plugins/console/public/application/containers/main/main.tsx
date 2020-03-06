@@ -33,7 +33,7 @@ import {
   NetworkRequestStatusBar,
 } from '../../components';
 
-import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
+import { useServicesContext, useEditorContext, useRequestReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
@@ -43,7 +43,7 @@ export function Main() {
     services: { storage },
   } = useServicesContext();
 
-  const { ready: editorsReady } = useEditorReadContext();
+  const [{ ready: editorsReady }] = useEditorContext();
 
   const {
     requestInFlight: requestInProgress,
