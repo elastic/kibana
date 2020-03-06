@@ -28,7 +28,6 @@ import {
   BATCH_ACTION_EXPORT_SELECTED,
   REFRESH,
   EXPORT_FILENAME,
-  SUCCESSFULLY_EXPORTED_RULES,
 } from '../../pages/detection_engine/rules/translations';
 import { useStateToaster } from '../toasters';
 import {
@@ -39,6 +38,12 @@ import {
 import { TIMELINE_EXPORT_URL } from '../../../common/constants';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { KibanaServices } from '../../lib/kibana';
+
+export interface ExportTimelineIds {
+  timelineId: string | null | undefined;
+  pinnedEventIds: string[] | null | undefined;
+  noteIds: string[] | null | undefined;
+}
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -145,10 +150,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [selectedItems, dispatchToaster, history]
     );
 
-    const getSelectedItemsIds = useMemo(() => {
+    const getSelectedItemsIds: ExportTimelineIds[] = useMemo(() => {
       return selectedItems.map(item => ({
         timelineId: item.savedObjectId,
-        pinnedEventIds: keys(item.pinnedEventIds),
+        pinnedEventIds:
+          item.pinnedEventIds != null ? keys(item.pinnedEventIds) : item.pinnedEventIds,
         noteIds: item.noteIds,
       }));
     }, [selectedItems]);
@@ -166,14 +172,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 type: 'addToaster',
                 toast: {
                   id: uuid.v4(),
-                  title: SUCCESSFULLY_EXPORTED_RULES(exportCount),
+                  title: i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
                   color: 'success',
                   iconType: 'check',
                 },
               });
-            }}
-            onExportFailure={() => {
-              setEnableDownloader(false);
             }}
           />
         )}

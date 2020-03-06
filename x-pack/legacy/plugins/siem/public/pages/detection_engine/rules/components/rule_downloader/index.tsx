@@ -13,6 +13,7 @@ import {
 } from '../../../../../containers/detection_engine/rules';
 import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
+import { ExportTimelineIds } from '../../../../../components/open_timeline/open_timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -25,19 +26,12 @@ export type ExportSelectedData = ({
   signal,
 }: ExportDocumentsProps) => Promise<Blob>;
 
-interface ExportTimelineIds {
-  timelineId: string;
-  noteIds: string[];
-  pinnedEventIds: string[];
-}
-
 export interface RuleDownloaderProps {
   filename: string;
   ids?: ExportTimelineIds[];
   ruleIds?: string[];
   exportSelectedData?: ExportSelectedData;
   onExportComplete: (exportCount: number) => void;
-  onExportFailure?: () => void;
 }
 
 /**
@@ -47,13 +41,13 @@ export interface RuleDownloaderProps {
  * @param payload Rule[]
  *
  */
+
 export const RuleDownloaderComponent = ({
   exportSelectedData,
   filename,
   ids,
   ruleIds,
   onExportComplete,
-  onExportFailure,
 }: RuleDownloaderProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const [, dispatchToaster] = useStateToaster();
@@ -94,12 +88,14 @@ export const RuleDownloaderComponent = ({
               window.URL.revokeObjectURL(objectURL);
             }
 
-            if (typeof onExportComplete === 'function') onExportComplete(ids.length);
+            if (typeof onExportComplete === 'function') {
+              if (ruleIds != null) onExportComplete(ruleIds.length);
+              else if (ids != null) onExportComplete(ids.length);
+            }
           }
         } catch (error) {
           if (isSubscribed) {
             displayErrorToast(i18n.EXPORT_FAILURE, [error.message], dispatchToaster);
-            if (typeof onExportFailure === 'function') onExportFailure();
           }
         }
       }

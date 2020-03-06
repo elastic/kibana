@@ -114,3 +114,10 @@ export const SELECTED_TIMELINES = (selectedTimelines: number) =>
     defaultMessage:
       'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
   });
+
+export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
+  i18n.translate('xpack.siem.open.timeline.successfullyExportedTimelinesTitle', {
+    values: { totalTimelines },
+    defaultMessage:
+      'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
+  });
