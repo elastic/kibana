@@ -17,7 +17,7 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
+import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../../hooks/api/throw_if_not_ok';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { KibanaServices } from '../../lib/kibana';
 
