@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiInMemoryTableProps, EuiBadge } from '@elastic/eui';
 import { Datasource } from '../../../../types';
-import { useCore } from '../../../../hooks';
 
 type DatasourceWithConfig = Datasource & { configs?: string[] };
 
@@ -38,8 +37,6 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     withConfigsCount: false,
   }
 ) => {
-  const core = useCore();
-
   // Flatten some values so that they can be searched via in-memory table search
   const datasources =
     originalDatasources?.map(({ id, name, inputs, package: datasourcePackage, configs }) => ({

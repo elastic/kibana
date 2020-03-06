@@ -185,7 +185,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   const ConfigureInputs =
     packageInfo.datasources && packageInfo.datasources[0] ? (
       <EuiFlexGroup direction="column">
-        {packageInfo.datasources[0].inputs.map((packageInput: any) => {
+        {packageInfo.datasources[0].inputs.map(packageInput => {
           const datasourceInput = datasource.inputs.find(input => input.type === packageInput.type);
           return datasourceInput ? (
             <EuiFlexItem key={packageInput.type}>

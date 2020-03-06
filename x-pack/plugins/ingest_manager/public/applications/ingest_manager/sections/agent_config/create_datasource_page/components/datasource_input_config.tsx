@@ -14,22 +14,22 @@ import {
   EuiButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
-import { DatasourceInput } from '../../../../types';
+import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
-  packageInputVars: any; // TODO: Type this correctly
+  packageInputVars?: RegistryVarsEntry[];
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
 }> = ({ packageInputVars, datasourceInput, updateDatasourceInput }) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-  const requiredVars: any[] = [];
-  const advancedVars: any[] = [];
+  const requiredVars: RegistryVarsEntry[] = [];
+  const advancedVars: RegistryVarsEntry[] = [];
 
-  if (packageInputVars && packageInputVars.length) {
-    packageInputVars.forEach((varDef: any) => {
+  if (packageInputVars) {
+    packageInputVars.forEach(varDef => {
       if (varDef.required && !varDef.default) {
         requiredVars.push(varDef);
       } else {

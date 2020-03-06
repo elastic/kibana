@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { DatasourceInput, DatasourceInputStream } from '../../../../types';
+import { DatasourceInput, DatasourceInputStream, RegistryInput } from '../../../../types';
 import { DatasourceInputConfig } from './datasource_input_config';
 import { DatasourceInputStreamConfig } from './datasource_input_stream_config';
 
@@ -29,7 +29,7 @@ const FlushHorizontalRule = styled(EuiHorizontalRule)`
 `;
 
 export const DatasourceInputPanel: React.FunctionComponent<{
-  packageInput: any; // TODO: Type this correctly
+  packageInput: RegistryInput;
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
 }> = ({ packageInput, datasourceInput, updateDatasourceInput }) => {
@@ -130,7 +130,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
       {/* Per-stream configuration */}
       {isShowingStreams ? (
         <EuiFlexGroup direction="column">
-          {packageInput.streams.map((packageInputStream: any) => {
+          {packageInput.streams.map(packageInputStream => {
             const datasourceInputStream = datasourceInput.streams.find(
               stream => stream.dataset === packageInputStream.dataset
             );

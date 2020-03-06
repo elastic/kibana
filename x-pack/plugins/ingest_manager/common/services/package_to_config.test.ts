@@ -36,22 +36,25 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
 
   it('returns empty array for packages a datasource but no inputs', () => {
     expect(
-      packageToConfigDatasourceInputs({ ...mockPackage, datasources: [{ inputs: [] }] })
+      packageToConfigDatasourceInputs(({
+        ...mockPackage,
+        datasources: [{ inputs: [] }],
+      } as unknown) as PackageInfo)
     ).toEqual([]);
   });
 
   it('returns inputs with no streams for packages with no streams', () => {
     expect(
-      packageToConfigDatasourceInputs({
+      packageToConfigDatasourceInputs(({
         ...mockPackage,
         datasources: [{ inputs: [{ type: 'foo' }] }],
-      })
+      } as unknown) as PackageInfo)
     ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
     expect(
-      packageToConfigDatasourceInputs({
+      packageToConfigDatasourceInputs(({
         ...mockPackage,
         datasources: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
-      })
+      } as unknown) as PackageInfo)
     ).toEqual([
       { type: 'foo', enabled: true, streams: [] },
       { type: 'bar', enabled: true, streams: [] },
@@ -60,7 +63,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
 
   it('returns inputs with streams for packages with streams', () => {
     expect(
-      packageToConfigDatasourceInputs({
+      packageToConfigDatasourceInputs(({
         ...mockPackage,
         datasources: [
           {
@@ -70,7 +73,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
             ],
           },
         ],
-      })
+      } as unknown) as PackageInfo)
     ).toEqual([
       {
         type: 'foo',
@@ -90,7 +93,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
 
   it('returns inputs with streams configurations for packages with stream vars', () => {
     expect(
-      packageToConfigDatasourceInputs({
+      packageToConfigDatasourceInputs(({
         ...mockPackage,
         datasources: [
           {
@@ -111,7 +114,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
             ],
           },
         ],
-      })
+      } as unknown) as PackageInfo)
     ).toEqual([
       {
         type: 'foo',
@@ -138,7 +141,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
 
   it('returns inputs with streams configurations for packages with stream and input vars', () => {
     expect(
-      packageToConfigDatasourceInputs({
+      packageToConfigDatasourceInputs(({
         ...mockPackage,
         datasources: [
           {
@@ -168,7 +171,7 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
             ],
           },
         ],
-      })
+      } as unknown) as PackageInfo)
     ).toEqual([
       {
         type: 'foo',

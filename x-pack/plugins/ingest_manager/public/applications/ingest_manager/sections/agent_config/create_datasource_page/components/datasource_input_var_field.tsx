@@ -6,9 +6,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText } from '@elastic/eui';
+import { RegistryVarsEntry } from '../../../../types';
 
 export const DatasourceInputVarField: React.FunctionComponent<{
-  varDef: any; // TODO: Type this correctly
+  varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
 }> = ({ varDef, value, onChange }) => {
