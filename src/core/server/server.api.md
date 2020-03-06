@@ -989,6 +989,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
+    readonly auth: {
+        isAuthenticated: boolean;
+    };
+    // (undocumented)
     readonly body: Body;
     readonly events: KibanaRequestEvents;
     // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
@@ -1441,9 +1445,6 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
-        auth: {
-            isAuthenticated: boolean;
-        };
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
