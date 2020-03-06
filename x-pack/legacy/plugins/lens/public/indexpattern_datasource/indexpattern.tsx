@@ -239,6 +239,7 @@ export function getIndexPatternDatasource({
                   savedObjectsClient={core.savedObjects.client}
                   layerId={props.layerId}
                   http={core.http}
+                  data={data}
                   uniqueLabel={columnLabelMap[props.columnId]}
                   dateRange={dateRange}
                   {...props}

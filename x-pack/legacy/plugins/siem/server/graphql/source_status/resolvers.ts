@@ -5,16 +5,28 @@
  */
 
 import { SourceStatusResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';
 import { SourceStatus } from '../../lib/source_status';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+export type SourceStatusIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.IndicesExistResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusIndexFieldsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.IndexFieldsResolver>,
+  QuerySourceResolver
+>;
 
 export const createSourceStatusResolvers = (libs: {
   sourceStatus: SourceStatus;
   fields: IndexFields;
 }): {
   SourceStatus: {
-    indicesExist: SourceStatusResolvers['indicesExist'];
-    indexFields: SourceStatusResolvers['indexFields'];
+    indicesExist: SourceStatusIndicesExistResolver;
+    indexFields: SourceStatusIndexFieldsResolver;
   };
 } => ({
   SourceStatus: {

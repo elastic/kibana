@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -14,7 +15,6 @@ import { ScaleType } from '@elastic/charts';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkDnsQuery,
-  GetNetworkDnsQueryComponent,
   NetworkDnsEdges,
   NetworkDnsSortField,
   PageInfoPaginated,
@@ -25,6 +25,7 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
 import { MatrixHistogram } from '../../components/matrix_histogram';
 import { MatrixHistogramOption, GetSubTitle } from '../../components/matrix_histogram/types';
@@ -48,7 +49,7 @@ export interface NetworkDnsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkDnsArgs) => React.ReactElement;
+  children: (args: NetworkDnsArgs) => React.ReactNode;
   type: networkModel.NetworkType;
 }
 
@@ -116,9 +117,10 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     };
 
     return (
-      <GetNetworkDnsQueryComponent
+      <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        query={networkDnsQuery}
         skip={skip}
         variables={variables}
       >
@@ -159,7 +161,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             histogram: getOr(null, 'source.NetworkDns.histogram', data),
           });
         }}
-      </GetNetworkDnsQueryComponent>
+      </Query>
     );
   }
 }

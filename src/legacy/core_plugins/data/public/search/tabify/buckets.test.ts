@@ -20,8 +20,6 @@
 import { TabifyBuckets } from './buckets';
 import { AggGroupNames } from '../aggs';
 
-jest.mock('ui/new_platform');
-
 describe('Buckets wrapper', () => {
   const check = (aggResp: any, count: number, keys: string[]) => {
     test('reads the length', () => {

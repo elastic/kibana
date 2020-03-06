@@ -89,72 +89,85 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     }
   );
 
-  const updateAxisTitle = (seriesParams?: SeriesParam[]) => {
-    const series = seriesParams || stateParams.seriesParams;
-    const axes = cloneDeep(stateParams.valueAxes);
-    let isAxesChanged = false;
-    let lastValuesChanged = false;
-    const lastLabels = { ...lastCustomLabels };
-    const lastMatchingSeriesAgg = { ...lastSeriesAgg };
+  const updateAxisTitle = useCallback(
+    (seriesParams?: SeriesParam[]) => {
+      const series = seriesParams || stateParams.seriesParams;
+      let isAxesChanged = false;
+      let lastValuesChanged = false;
+      const lastLabels = { ...lastCustomLabels };
+      const lastMatchingSeriesAgg = { ...lastSeriesAgg };
 
-    stateParams.valueAxes.forEach((axis, axisNumber) => {
-      let newCustomLabel = '';
-      const matchingSeries: IAggConfig[] = [];
+      const axes = stateParams.valueAxes.map((axis, axisNumber) => {
+        let newCustomLabel = '';
+        let updatedAxis;
+        const matchingSeries: IAggConfig[] = [];
 
-      series.forEach((serie, seriesIndex) => {
-        if ((axisNumber === 0 && !serie.valueAxis) || serie.valueAxis === axis.id) {
-          const aggByIndex = aggs.bySchemaName('metric')[seriesIndex];
-          matchingSeries.push(aggByIndex);
+        series.forEach((serie, seriesIndex) => {
+          if ((axisNumber === 0 && !serie.valueAxis) || serie.valueAxis === axis.id) {
+            const aggByIndex = aggs.bySchemaName('metric')[seriesIndex];
+            matchingSeries.push(aggByIndex);
+          }
+        });
+
+        if (matchingSeries.length === 1) {
+          // if several series matches to the axis, axis title is set according to the first serie.
+          newCustomLabel = matchingSeries[0].makeLabel();
         }
+
+        if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
+          const lastSeriesAggType = get(lastSeriesAgg, `${matchingSeries[0].id}.type`);
+          const lastSeriesAggField = get(lastSeriesAgg, `${matchingSeries[0].id}.field`);
+          const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
+          const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
+
+          const aggTypeIsChanged = lastSeriesAggType !== matchingSeriesAggType;
+          const aggFieldIsChanged = lastSeriesAggField !== matchingSeriesAggField;
+
+          lastMatchingSeriesAgg[matchingSeries[0].id] = {
+            type: matchingSeriesAggType,
+            field: matchingSeriesAggField,
+          };
+          lastLabels[axis.id] = newCustomLabel;
+          lastValuesChanged = true;
+
+          if (
+            Object.keys(lastCustomLabels).length !== 0 &&
+            (aggTypeIsChanged ||
+              aggFieldIsChanged ||
+              axis.title.text === '' ||
+              lastCustomLabels[axis.id] === axis.title.text) &&
+            newCustomLabel !== axis.title.text
+          ) {
+            // Override axis title with new custom label
+            updatedAxis = {
+              ...axis,
+              title: { ...axis.title, text: newCustomLabel },
+            };
+            isAxesChanged = true;
+          }
+        }
+
+        return updatedAxis || axis;
       });
 
-      if (matchingSeries.length === 1) {
-        // if several series matches to the axis, axis title is set according to the first serie.
-        newCustomLabel = matchingSeries[0].makeLabel();
+      if (isAxesChanged) {
+        setValue('valueAxes', axes);
       }
 
-      if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-        const lastSeriesAggType = get(lastSeriesAgg, `${matchingSeries[0].id}.type`);
-        const lastSeriesAggField = get(lastSeriesAgg, `${matchingSeries[0].id}.field`);
-        const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
-        const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
-
-        const aggTypeIsChanged = lastSeriesAggType !== matchingSeriesAggType;
-        const aggFieldIsChanged = lastSeriesAggField !== matchingSeriesAggField;
-
-        lastMatchingSeriesAgg[matchingSeries[0].id] = {
-          type: matchingSeriesAggType,
-          field: matchingSeriesAggField,
-        };
-        lastLabels[axis.id] = newCustomLabel;
-        lastValuesChanged = true;
-
-        if (
-          Object.keys(lastCustomLabels).length !== 0 &&
-          (aggTypeIsChanged ||
-            aggFieldIsChanged ||
-            axis.title.text === '' ||
-            lastCustomLabels[axis.id] === axis.title.text)
-        ) {
-          // Override axis title with new custom label
-          axes[axisNumber] = {
-            ...axis,
-            title: { ...axis.title, text: newCustomLabel },
-          };
-          isAxesChanged = true;
-        }
+      if (lastValuesChanged) {
+        setLastSeriesAgg(lastMatchingSeriesAgg);
+        setLastCustomLabels(lastLabels);
       }
-    });
-
-    if (isAxesChanged) {
-      setValue('valueAxes', axes);
-    }
-
-    if (lastValuesChanged) {
-      setLastSeriesAgg(lastMatchingSeriesAgg);
-      setLastCustomLabels(lastLabels);
-    }
-  };
+    },
+    [
+      aggs,
+      lastCustomLabels,
+      lastSeriesAgg,
+      setValue,
+      stateParams.seriesParams,
+      stateParams.valueAxes,
+    ]
+  );
 
   const onValueAxisPositionChanged = useCallback(
     (index: number, value: ValueAxis['position']) => {
@@ -168,7 +181,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       };
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes, getUpdatedAxisName, setValue]
+    [stateParams.valueAxes, setValue]
   );
 
   const onCategoryAxisPositionChanged = useCallback(
@@ -226,7 +239,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         setValue('grid', { ...stateParams.grid, valueAxis: undefined });
       }
     },
-    [stateParams.seriesParams, stateParams.valueAxes, setValue]
+    [stateParams.seriesParams, stateParams.valueAxes, setValue, stateParams.grid]
   );
 
   const changeValueAxis: ChangeValueAxis = useCallback(
@@ -241,13 +254,13 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       updateAxisTitle();
     },
-    [addValueAxis, setParamByIndex]
+    [addValueAxis, setParamByIndex, updateAxisTitle]
   );
 
+  const schemaName = vis.type.schemas.metrics[0].name;
   const metrics = useMemo(() => {
-    const schemaName = vis.type.schemas.metrics[0].name;
     return aggs.bySchemaName(schemaName);
-  }, [vis.type.schemas.metrics[0].name, aggs]);
+  }, [schemaName, aggs]);
 
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
@@ -278,7 +291,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
     setValue('seriesParams', updatedSeries);
     updateAxisTitle(updatedSeries);
-  }, [metrics, firstValueAxesId]);
+  }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));

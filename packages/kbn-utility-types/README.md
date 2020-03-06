@@ -18,6 +18,7 @@ type B = UnwrapPromise<A>; // string
 
 ## Reference
 
+- `Assign<T, U>` &mdash; From `U` assign properties to `T` (just like object assign).
 - `Ensure<T, X>` &mdash; Makes sure `T` is of type `X`.
 - `ObservableLike<T>` &mdash; Minimal interface for an object resembling an `Observable`.
 - `PublicContract<T>` &mdash; Returns an object with public keys only.

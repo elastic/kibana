@@ -6,10 +6,10 @@
 
 import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
-import { useApolloClient } from '@apollo/client';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
+import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
   getQueryStringFromLocation,

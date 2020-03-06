@@ -17,9 +17,16 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
+
 export * from './search_source/mocks';
 
 export const searchSetupMock = {
+  aggs: {
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
+  },
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
 };

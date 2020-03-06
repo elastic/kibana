@@ -154,6 +154,11 @@ export interface SavedObjectsServiceSetup {
    * This API is the single entry point to register saved object types in the new platform.
    */
   registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * Returns the maximum number of objects allowed for import or export operations.
+   */
+  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -344,6 +349,7 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
+      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
@@ -387,6 +393,14 @@ export class SavedObjectsService
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
+
+      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.logger.error(message);
+        }
+      });
+
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter(nodes => nodes.isCompatible),
         take(1)

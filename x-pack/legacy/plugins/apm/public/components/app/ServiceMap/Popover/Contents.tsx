@@ -35,6 +35,7 @@ export function Contents({
   onFocusClick,
   selectedNodeServiceName
 }: ContentsProps) {
+  const frameworkName = selectedNodeData.frameworkName;
   return (
     <EuiFlexGroup
       direction="column"
@@ -49,7 +50,10 @@ export function Contents({
       </EuiFlexItem>
       <EuiFlexItem>
         {isService ? (
-          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
+          <ServiceMetricFetcher
+            frameworkName={frameworkName}
+            serviceName={selectedNodeServiceName}
+          />
         ) : (
           <Info {...selectedNodeData} />
         )}

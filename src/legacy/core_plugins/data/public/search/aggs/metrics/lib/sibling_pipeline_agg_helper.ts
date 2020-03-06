@@ -21,9 +21,7 @@ import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
-
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-import { Schemas } from '../../schemas';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
 
 const metricAggFilter: string[] = [
@@ -45,28 +43,6 @@ const metricAggFilter: string[] = [
 ];
 const bucketAggFilter: string[] = [];
 
-const [metricAggSchema] = new Schemas([
-  {
-    group: 'none',
-    name: 'metricAgg',
-    title: i18n.translate('data.search.aggs.metrics.metricAggTitle', {
-      defaultMessage: 'Metric agg',
-    }),
-    aggFilter: metricAggFilter,
-  },
-]).all;
-
-const [bucketAggSchema] = new Schemas([
-  {
-    group: 'none',
-    title: i18n.translate('data.search.aggs.metrics.bucketAggTitle', {
-      defaultMessage: 'Bucket agg',
-    }),
-    name: 'bucketAgg',
-    aggFilter: bucketAggFilter,
-  },
-]).all;
-
 const siblingPipelineType = i18n.translate(
   'data.search.aggs.metrics.siblingPipelineAggregationsSubtypeTitle',
   {
@@ -81,10 +57,10 @@ const siblingPipelineAggHelper = {
       {
         name: 'customBucket',
         type: 'agg',
+        allowedAggs: bucketAggFilter,
         default: null,
         makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'date_histogram' };
-          state.schema = bucketAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
 
@@ -98,10 +74,10 @@ const siblingPipelineAggHelper = {
       {
         name: 'customMetric',
         type: 'agg',
+        allowedAggs: metricAggFilter,
         default: null,
         makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'count' };
-          state.schema = metricAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
 

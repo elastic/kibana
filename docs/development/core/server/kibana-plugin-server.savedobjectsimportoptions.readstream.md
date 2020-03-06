@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportOptions.readStream property
 
+The stream of [saved objects](./kibana-plugin-server.savedobject.md) to import
+
 <b>Signature:</b>
 
 ```typescript

@@ -5,8 +5,7 @@
  */
 const path = require('path');
 
-const apmRoot = path.resolve(__dirname, '../..');
-const xpackRoot = path.resolve(apmRoot, '../../..');
+const xpackRoot = path.resolve(__dirname, '../../../../..');
 const kibanaRoot = path.resolve(xpackRoot, '..');
 
 const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
@@ -17,7 +16,6 @@ const filesToIgnore = [
 ];
 
 module.exports = {
-  apmRoot,
   xpackRoot,
   kibanaRoot,
   tsconfigTpl,

@@ -19,7 +19,7 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs, IAggConfigs } from 'ui/agg_types';
+import { createAggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
@@ -258,7 +258,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
-    const aggs = new AggConfigs(indexPattern, aggConfigsState);
+    const aggs = createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSource();

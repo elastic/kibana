@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useRef } from 'react';
-import { useApolloClient } from '@apollo/client';
-
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../helpers';
+import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
 import { MatrixHistogramGqlQuery } from './index.gql_query';
 import { GetMatrixHistogramQuery, MatrixOverTimeHistogramData } from '../../graphql/types';

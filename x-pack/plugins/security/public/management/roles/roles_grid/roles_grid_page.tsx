@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import {
   EuiButton,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -19,14 +18,26 @@ import {
   EuiTitle,
   EuiButtonIcon,
   EuiBasicTableColumn,
+  EuiSwitchEvent,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { Role, isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../common/model';
+import {
+  Role,
+  isRoleEnabled,
+  isRoleReadOnly,
+  isRoleReserved,
+  isRoleDeprecated,
+  getExtendedRoleDeprecationNotice,
+} from '../../../../common/model';
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
+import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
 
 interface Props {
   notifications: NotificationsStart;
@@ -35,10 +46,12 @@ interface Props {
 
 interface State {
   roles: Role[];
+  visibleRoles: Role[];
   selection: Role[];
   filter: string;
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
+  includeReservedRoles: boolean;
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
@@ -50,10 +63,12 @@ export class RolesGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       roles: [],
+      visibleRoles: [],
       selection: [],
       filter: '',
       showDeleteConfirmation: false,
       permissionDenied: false,
+      includeReservedRoles: true,
     };
   }
 
@@ -125,16 +140,22 @@ export class RolesGridPage extends Component<Props, State> {
                 initialPageSize: 20,
                 pageSizeOptions: [10, 20, 30, 50, 100],
               }}
-              items={this.getVisibleRoles()}
+              items={this.state.visibleRoles}
               loading={roles.length === 0}
               search={{
                 toolsLeft: this.renderToolsLeft(),
+                toolsRight: this.renderToolsRight(),
                 box: {
                   incremental: true,
                 },
                 onChange: (query: Record<string, any>) => {
                   this.setState({
                     filter: query.queryText,
+                    visibleRoles: this.getVisibleRoles(
+                      this.state.roles,
+                      query.queryText,
+                      this.state.includeReservedRoles
+                    ),
                   });
                 },
               }}
@@ -158,11 +179,6 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getColumnConfig = () => {
-    const reservedRoleDesc = i18n.translate(
-      'xpack.security.management.roles.reservedColumnDescription',
-      { defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.' }
-    );
-
     return [
       {
         field: 'name',
@@ -177,35 +193,18 @@ export class RolesGridPage extends Component<Props, State> {
               <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref('edit', name)}>
                 {name}
               </EuiLink>
-              {!isRoleEnabled(record) && (
-                <FormattedMessage
-                  id="xpack.security.management.roles.disabledTooltip"
-                  defaultMessage=" (disabled)"
-                />
-              )}
             </EuiText>
           );
         },
       },
       {
         field: 'metadata',
-        name: i18n.translate('xpack.security.management.roles.reservedColumnName', {
-          defaultMessage: 'Reserved',
+        name: i18n.translate('xpack.security.management.roles.statusColumnName', {
+          defaultMessage: 'Status',
         }),
-        sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
-        dataType: 'boolean',
-        align: 'right',
-        description: reservedRoleDesc,
-        render: (metadata: Role['metadata']) => {
-          const label = i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
-            defaultMessage: 'Reserved role',
-          });
-
-          return metadata && metadata._reserved ? (
-            <span title={label}>
-              <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
-            </span>
-          ) : null;
+        sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
+        render: (metadata: Role['metadata'], record: Role) => {
+          return this.getRoleStatusBadges(record);
         },
       },
       {
@@ -215,7 +214,7 @@ export class RolesGridPage extends Component<Props, State> {
         width: '150px',
         actions: [
           {
-            available: (role: Role) => !isReadOnlyRole(role),
+            available: (role: Role) => !isRoleReadOnly(role),
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
                 defaultMessage: `Edit {roleName}`,
@@ -235,7 +234,7 @@ export class RolesGridPage extends Component<Props, State> {
             },
           },
           {
-            available: (role: Role) => !isReservedRole(role),
+            available: (role: Role) => !isRoleReserved(role),
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
                 defaultMessage: `Clone {roleName}`,
@@ -259,16 +258,64 @@ export class RolesGridPage extends Component<Props, State> {
     ] as Array<EuiBasicTableColumn<Role>>;
   };
 
-  private getVisibleRoles = () => {
-    const { roles, filter } = this.state;
+  private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
+    return roles.filter(role => {
+      const normalized = `${role.name}`.toLowerCase();
+      const normalizedQuery = filter.toLowerCase();
+      return (
+        normalized.indexOf(normalizedQuery) !== -1 &&
+        (includeReservedRoles || !isRoleReserved(role))
+      );
+    });
+  };
 
-    return filter
-      ? roles.filter(({ name }) => {
-          const normalized = `${name}`.toLowerCase();
-          const normalizedQuery = filter.toLowerCase();
-          return normalized.indexOf(normalizedQuery) !== -1;
-        })
-      : roles;
+  private onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
+    this.setState({
+      includeReservedRoles: e.target.checked,
+      visibleRoles: this.getVisibleRoles(this.state.roles, this.state.filter, e.target.checked),
+    });
+  };
+
+  private getRoleStatusBadges = (role: Role) => {
+    const enabled = isRoleEnabled(role);
+    const deprecated = isRoleDeprecated(role);
+    const reserved = isRoleReserved(role);
+
+    const badges = [];
+    if (!enabled) {
+      badges.push(<DisabledBadge data-test-subj="roleDisabled" />);
+    }
+    if (reserved) {
+      badges.push(
+        <ReservedBadge
+          data-test-subj="roleReserved"
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.security.management.roles.reservedRoleBadgeTooltip"
+              defaultMessage="Reserved roles are built-in and cannot be edited or removed."
+            />
+          }
+        />
+      );
+    }
+    if (deprecated) {
+      badges.push(
+        <DeprecatedBadge
+          data-test-subj="roleDeprecated"
+          tooltipContent={getExtendedRoleDeprecationNotice(role)}
+        />
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        {badges.map((badge, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            {badge}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
   };
 
   private handleDelete = () => {
@@ -283,7 +330,14 @@ export class RolesGridPage extends Component<Props, State> {
     try {
       const roles = await this.props.rolesAPIClient.getRoles();
 
-      this.setState({ roles });
+      this.setState({
+        roles,
+        visibleRoles: this.getVisibleRoles(
+          roles,
+          this.state.filter,
+          this.state.includeReservedRoles
+        ),
+      });
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true });
@@ -318,6 +372,21 @@ export class RolesGridPage extends Component<Props, State> {
           }}
         />
       </EuiButton>
+    );
+  }
+  private renderToolsRight() {
+    return (
+      <EuiSwitch
+        data-test-subj="showReservedRolesSwitch"
+        label={
+          <FormattedMessage
+            id="xpack.security.management.roles.showReservedRolesLabel"
+            defaultMessage="Show reserved roles"
+          />
+        }
+        checked={this.state.includeReservedRoles}
+        onChange={this.onIncludeReservedRolesChange}
+      />
     );
   }
   private onCancelDelete = () => {
