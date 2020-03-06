@@ -236,7 +236,7 @@ const useFetchEntriesEffect = (
     pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startTimestamp', 'endTimestamp'])
   );
   const fetchNewEntriesEffect = () => {
-    if (props.isStreaming) return;
+    if (props.isStreaming && prevParams) return;
     if (shouldFetchNewEntries({ ...props, ...state, prevParams })) {
       runFetchNewEntriesRequest();
     }
