@@ -16,8 +16,8 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPortal,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
@@ -91,10 +91,10 @@ const getBasicSelectableOptions = (timelineId: string) => [
     description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
     favorite: [],
     label: i18n.DEFAULT_TIMELINE_TITLE,
-    id: null,
+    id: undefined,
     title: i18n.DEFAULT_TIMELINE_TITLE,
     checked: timelineId === '-1' ? 'on' : undefined,
-  } as Option,
+  } as EuiSelectableOption,
 ];
 
 const ORIGINAL_PAGE_SIZE = 50;
@@ -326,7 +326,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                         key: `${t.title}-${index}`,
                         title: t.title,
                         checked: t.savedObjectId === timelineId ? 'on' : undefined,
-                      } as Option)
+                      } as EuiSelectableOption)
                   ),
               ]}
             >

@@ -12,7 +12,7 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { OverviewPage } from '../../overview';
 
-import { checkFullLicense } from '../../license/check_license';
+import { checkFullLicense } from '../../license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
