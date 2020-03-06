@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react/pure';
 import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import {
@@ -19,8 +19,7 @@ import {
 // https://github.com/elastic/kibana/issues/59469
 afterEach(cleanup);
 
-// TEMP until https://github.com/elastic/kibana/pull/59445 is merged
-test.skip('Pick and configure action', () => {
+test('Pick and configure action', () => {
   const screen = render(
     <Demo actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]} />
   );
@@ -47,8 +46,7 @@ test.skip('Pick and configure action', () => {
   });
 });
 
-// TEMP until https://github.com/elastic/kibana/pull/59445 is merged
-test.skip('If only one actions factory is available then actionFactory selection is emitted without user input', () => {
+test('If only one actions factory is available then actionFactory selection is emitted without user input', () => {
   const screen = render(<Demo actionFactories={[urlDrilldownActionFactory]} />);
 
   // check that no factories are displayed to pick from
