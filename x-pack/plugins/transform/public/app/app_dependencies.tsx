@@ -7,7 +7,8 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 
-import { CoreSetup, CoreStart } from '../../../../../src/core/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -17,7 +18,7 @@ import { AuthorizationProvider } from './lib/authorization';
 
 export interface AppDependencies {
   chrome: CoreStart['chrome'];
-  data: any;
+  data: DataPublicPluginStart;
   docLinks: CoreStart['docLinks'];
   http: CoreSetup['http'];
   i18n: CoreStart['i18n'];

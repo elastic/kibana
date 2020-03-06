@@ -5,8 +5,9 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from '../../../../src/core/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { CoreSetup } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { ManagementSetup } from 'src/plugins/management/public';
 
 import { renderApp } from './app/app';
 import { AppDependencies } from './app/app_dependencies';
@@ -15,7 +16,7 @@ import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
 
 export interface PluginsDependencies {
-  data: any;
+  data: DataPublicPluginStart;
   management: ManagementSetup;
 }
 
