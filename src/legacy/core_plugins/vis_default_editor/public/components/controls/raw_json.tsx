@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function RawJsonParamEditor({
-  agg,
   showValidation,
   value = '',
   setValidity,
@@ -59,7 +58,7 @@ function RawJsonParamEditor({
         <EuiIconTip position="right" content={editorTooltipText} type="questionInCircle" />
       </>
     ),
-    []
+    [jsonEditorLabelText, editorTooltipText]
   );
 
   const onEditorValidate = useCallback(
@@ -73,7 +72,7 @@ function RawJsonParamEditor({
         setEditorReady(true);
       }
     },
-    [setValidity]
+    [setValidity, editorReady]
   );
 
   return (
