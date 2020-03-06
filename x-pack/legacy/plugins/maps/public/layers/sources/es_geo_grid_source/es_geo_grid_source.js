@@ -17,17 +17,16 @@ import {
   VECTOR_STYLES,
 } from '../../styles/vector/vector_style_defaults';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { GRID_RESOLUTION } from '../../grid_resolution';
 import {
-  AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SOURCE_DATA_ID_ORIGIN,
   ES_GEO_GRID,
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
+  RENDER_AS,
+  GRID_RESOLUTION,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -297,10 +296,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach(metricField => {
-      if (metricField.getAggType() === AGG_TYPE.TERMS) {
-        // each terms aggregation increases the overall number of buckets per grid
-        bucketsPerGrid++;
-      }
+      bucketsPerGrid += metricField.getBucketCount();
     });
 
     const features =

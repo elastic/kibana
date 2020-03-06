@@ -89,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            columns: 6,
+            columns: 45,
             rows: 5,
           },
         },
