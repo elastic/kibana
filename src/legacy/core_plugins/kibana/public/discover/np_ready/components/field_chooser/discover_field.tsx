@@ -103,7 +103,7 @@ export function DiscoverField({
           )}
         </span>
       </div>
-      {showDetails && onShowDetails(field) && (
+      {showDetails && onShowDetails(field, true) && (
         <DiscoverFieldDetails field={field} onAddFilter={onAddFilter} />
       )}
     </div>
