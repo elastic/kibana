@@ -20,7 +20,7 @@ import {
   getPrePackagedRulesStatus,
 } from './api';
 import { ruleMock, rulesMock } from './mock';
-import { ToasterErrors } from '../../../components/ml/api/throw_if_not_ok';
+import { ToasterErrors } from '../../../hooks/api/throw_if_not_ok';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

@@ -71,7 +71,6 @@ export const searchStartMock = (): SearchStart => ({
     calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
     createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
       return new AggConfigs(indexPattern, configStates, {
-        schemas,
         typesRegistry: mockAggTypesRegistry(),
       });
     }),

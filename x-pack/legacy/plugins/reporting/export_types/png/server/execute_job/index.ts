@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
+import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../../server';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
+import { ReportingCore } from '../../../../server';
+import {
+  ESQueueWorkerExecuteFn,
+  ExecuteJobFactory,
+  JobDocOutput,
+  Logger,
+  ServerFacade,
+} from '../../../../types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
   getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
@@ -33,7 +39,7 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
 
   return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
-    const process$ = Rx.of(1).pipe(
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
@@ -48,11 +54,12 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
           job.layout
         );
       }),
-      map((buffer: Buffer) => {
+      map(({ buffer, warnings }) => {
         return {
           content_type: 'image/png',
           content: buffer.toString('base64'),
           size: buffer.byteLength,
+          warnings,
         };
       }),
       catchError(err => {

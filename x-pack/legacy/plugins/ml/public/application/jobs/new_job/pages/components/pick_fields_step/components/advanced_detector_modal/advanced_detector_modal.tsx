@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlexGrid,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
@@ -54,11 +54,11 @@ export interface ModalPayload {
   index?: number;
 }
 
-const emptyOption: EuiComboBoxOptionProps = {
+const emptyOption: EuiComboBoxOptionOption = {
   label: '',
 };
 
-const excludeFrequentOptions: EuiComboBoxOptionProps[] = [{ label: 'all' }, { label: 'none' }];
+const excludeFrequentOptions: EuiComboBoxOptionOption[] = [{ label: 'all' }, { label: 'none' }];
 
 export const AdvancedDetectorModal: FC<Props> = ({
   payload,
@@ -90,7 +90,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
-  const aggOptions: EuiComboBoxOptionProps[] = aggs
+  const aggOptions: EuiComboBoxOptionOption[] = aggs
     .filter(agg => filterAggs(agg, usingScriptFields))
     .map(createAggOption);
 
@@ -101,19 +101,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
     fields
   );
 
-  const allFieldOptions: EuiComboBoxOptionProps[] = [
+  const allFieldOptions: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
   ].sort(comboBoxOptionsSort);
 
-  const splitFieldOptions: EuiComboBoxOptionProps[] = [
+  const splitFieldOptions: EuiComboBoxOptionOption[] = [
     ...allFieldOptions,
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ].sort(comboBoxOptionsSort);
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
-  const onOptionChange = (func: (p: EuiComboBoxOptionProps) => any) => (
-    selectedOptions: EuiComboBoxOptionProps[]
+  const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
+    selectedOptions: EuiComboBoxOptionOption[]
   ) => {
     func(selectedOptions[0] || emptyOption);
   };
@@ -312,7 +312,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   );
 };
 
-function createAggOption(agg: Aggregation | null): EuiComboBoxOptionProps {
+function createAggOption(agg: Aggregation | null): EuiComboBoxOptionOption {
   if (agg === null) {
     return emptyOption;
   }
@@ -328,7 +328,7 @@ function filterAggs(agg: Aggregation, usingScriptFields: boolean) {
   return agg.fields !== undefined && (usingScriptFields || agg.fields.length);
 }
 
-function createFieldOption(field: Field | null): EuiComboBoxOptionProps {
+function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
   if (field === null) {
     return emptyOption;
   }
@@ -337,7 +337,7 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionProps {
   };
 }
 
-function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionProps {
+function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;
   }
@@ -406,15 +406,15 @@ function createDefaultDescription(dtr: RichDetector) {
 // if the options list only contains one option and nothing has been selected, set
 // selectedOptions list to be an empty array
 function createSelectedOptions(
-  selectedOption: EuiComboBoxOptionProps,
-  options: EuiComboBoxOptionProps[]
-): EuiComboBoxOptionProps[] {
+  selectedOption: EuiComboBoxOptionOption,
+  options: EuiComboBoxOptionOption[]
+): EuiComboBoxOptionOption[] {
   return (options.length === 1 && options[0].label !== selectedOption.label) ||
     selectedOption.label === ''
     ? []
     : [selectedOption];
 }
 
-function comboBoxOptionsSort(a: EuiComboBoxOptionProps, b: EuiComboBoxOptionProps) {
+function comboBoxOptionsSort(a: EuiComboBoxOptionOption, b: EuiComboBoxOptionOption) {
   return a.label.localeCompare(b.label);
 }
