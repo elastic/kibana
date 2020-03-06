@@ -6,12 +6,18 @@
   "requiredPlugins": [
     "actions",
     "alerting",
-    "features",
+    "data",
     "encryptedSavedObjects",
+    "embeddable",
+    "features",
+    "home",
+    "inspector",
     "security",
-    "spaces"
+    "spaces",
+    "uiActions",
+    "usageCollection"
   ],
-  "optionalPlugins": [],
+  "optionalPlugins": ["newsfeed"],
   "server": true,
-  "ui": false
+  "ui": true
 }
