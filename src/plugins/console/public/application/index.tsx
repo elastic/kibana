@@ -27,11 +27,6 @@ import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-let settingsRef: Settings;
-export function legacyBackDoorToSettings() {
-  return settingsRef;
-}
-
 export interface BootDependencies {
   docLinkVersion: string;
   I18nContext: any;
