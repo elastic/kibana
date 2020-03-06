@@ -10,8 +10,7 @@ import deepMerge from 'deepmerge';
 
 import { SelectField } from '../../../../../shared_imports';
 import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useAlertsContext } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/context/alerts_context';
+import { useKibana } from '../../../../../lib/kibana';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
@@ -26,6 +25,7 @@ const ACTION_TYPES = [
   { id: '.servicenow', name: 'servicenow', enabled: false },
   { id: '.slack', name: 'Slack', enabled: true },
   { id: '.webhook', name: 'Webhook', enabled: false },
+  { id: '.example-action', name: 'Example Action', enabled: false },
 ];
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -49,8 +49,8 @@ const getMessageVariables = memoizeOne(() => {
 });
 
 export const RuleActionsField: ThrottleSelectField = ({ field }) => {
-  const alertsContext = useAlertsContext();
-  const { http, toastNotifications, actionTypeRegistry } = alertsContext;
+  const { http, toastNotifications, triggers_actions_ui } = useKibana().services;
+  const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const messageVariables = getMessageVariables();
 
   const setActionIdByIndex = useCallback(
