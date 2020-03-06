@@ -6,10 +6,11 @@
 import React from 'react';
 import { useRequest } from '../../../../hooks';
 import { GetAgentStatusResponse } from '../../../../types';
+import { agentRouteService } from '../../../../services';
 
 export function useGetAgentStatus(configId?: string) {
   const agentStatusRequest = useRequest<GetAgentStatusResponse>({
-    path: `/api/ingest_manager/fleet/agent-status`,
+    path: agentRouteService.getStatusPath(),
     query: {
       configId,
     },

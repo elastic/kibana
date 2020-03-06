@@ -126,7 +126,7 @@ export const registerRoutes = (router: IRouter) => {
   // Get agent status for config
   router.get(
     {
-      path: AGENT_API_ROUTES.STATUS_FOR_CONFIG_PATTERN,
+      path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },

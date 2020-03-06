@@ -293,7 +293,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
-                id="xpack.ingestManager.agentList.addButton"
+                id="xpack.ingestManager.agentList.enrollButton"
                 defaultMessage="Enroll new agents"
               />
             </EuiButton>
