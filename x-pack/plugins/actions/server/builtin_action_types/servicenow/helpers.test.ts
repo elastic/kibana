@@ -5,8 +5,16 @@
  */
 
 import { normalizeMapping, buildMap, mapParams } from './helpers';
-import { mapping, maliciousMapping, finalMapping, params } from './mock';
+import { mapping, finalMapping } from './mock';
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
+import { MapsType } from './types';
+
+const maliciousMapping: MapsType[] = [
+  { source: '__proto__', target: 'short_description', onEditAndUpdate: 'nothing' },
+  { source: 'description', target: '__proto__', onEditAndUpdate: 'nothing' },
+  { source: 'comments', target: 'comments', onEditAndUpdate: 'nothing' },
+  { source: 'unsupportedSource', target: 'comments', onEditAndUpdate: 'nothing' },
+];
 
 describe('sanitizeMapping', () => {
   test('remove malicious fields', () => {
@@ -44,18 +52,32 @@ describe('buildMap', () => {
 
 describe('mapParams', () => {
   test('maps params correctly', () => {
-    const { comments, ...restParams } = params;
-    const fields = mapParams(restParams, finalMapping);
+    const params = {
+      caseId: '123',
+      incidentId: '456',
+      title: 'Incident title',
+      description: 'Incident description',
+    };
+
+    const fields = mapParams(params, finalMapping);
+
     expect(fields).toEqual({
-      [finalMapping.get('title').target]: restParams.title,
-      [finalMapping.get('description').target]: restParams.description,
+      short_description: 'Incident title',
+      description: 'Incident description',
     });
   });
 
   test('do not add fields not in mapping', () => {
-    const { comments, ...restParams } = params;
-    const fields = mapParams(restParams, finalMapping);
-    const { title, description, ...unexpectedFields } = restParams;
+    const params = {
+      caseId: '123',
+      incidentId: '456',
+      title: 'Incident title',
+      description: 'Incident description',
+    };
+    const fields = mapParams(params, finalMapping);
+
+    const { title, description, ...unexpectedFields } = params;
+
     expect(fields).not.toEqual(expect.objectContaining(unexpectedFields));
   });
 });

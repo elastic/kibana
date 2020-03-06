@@ -7,7 +7,7 @@
 import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
 import { ServiceNow } from '../lib/servicenow';
 import { finalMapping } from './mock';
-import { Incident, UpdateIncident } from '../lib/servicenow/types';
+import { Incident } from '../lib/servicenow/types';
 
 jest.mock('../lib/servicenow');
 

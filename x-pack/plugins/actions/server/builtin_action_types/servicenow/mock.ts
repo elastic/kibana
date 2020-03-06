@@ -5,7 +5,7 @@
  */
 
 import { MapsType, FinalMapping, ParamsType } from './types';
-import { Incident, IncidentResponse, UpdateIncident } from '../lib/servicenow/types';
+import { Incident } from '../lib/servicenow/types';
 
 const mapping: MapsType[] = [
   { source: 'title', target: 'short_description', onEditAndUpdate: 'nothing' },
@@ -13,37 +13,29 @@ const mapping: MapsType[] = [
   { source: 'comments', target: 'comments', onEditAndUpdate: 'nothing' },
 ];
 
-const maliciousMapping: MapsType[] = [
-  { source: '__proto__', target: 'short_description', onEditAndUpdate: 'nothing' },
-  { source: 'description', target: '__proto__', onEditAndUpdate: 'nothing' },
-  { source: 'comments', target: 'comments', onEditAndUpdate: 'nothing' },
-  { source: 'unsupportedSource', target: 'comments', onEditAndUpdate: 'nothing' },
-];
-
 const finalMapping: FinalMapping = new Map();
 
-finalMapping.set(mapping[0].source, {
-  target: mapping[0].target,
-  onEditAndUpdate: mapping[0].onEditAndUpdate,
+finalMapping.set('title', {
+  target: 'short_description',
+  onEditAndUpdate: 'nothing',
 });
 
-finalMapping.set(mapping[1].source, {
-  target: mapping[1].target,
-  onEditAndUpdate: mapping[1].onEditAndUpdate,
+finalMapping.set('description', {
+  target: 'description',
+  onEditAndUpdate: 'nothing',
 });
 
-finalMapping.set(mapping[2].source, {
-  target: mapping[2].target,
-  onEditAndUpdate: mapping[2].onEditAndUpdate,
+finalMapping.set('comments', {
+  target: 'comments',
+  onEditAndUpdate: 'nothing',
 });
 
-finalMapping.set(mapping[0].target, {
-  target: mapping[0].source,
-  onEditAndUpdate: mapping[0].onEditAndUpdate,
+finalMapping.set('short_description', {
+  target: 'title',
+  onEditAndUpdate: 'nothing',
 });
 
 const params: ParamsType = {
-  executorAction: 'updateIncident',
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
   title: 'Incident title',
@@ -99,7 +91,6 @@ const incident: Incident = {
 
 export {
   mapping,
-  maliciousMapping,
   finalMapping,
   params,
   incidentResponse,
