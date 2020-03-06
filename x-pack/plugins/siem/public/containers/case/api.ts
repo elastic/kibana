@@ -10,7 +10,7 @@ import {
   CaseRequest,
   CommentRequest,
   CommentResponse,
-} from '../../../../../../plugins/case/common/api';
+} from '../../../../case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import { AllCases, Case, Comment, FetchCasesProps, SortFieldCase } from './types';
 import { CASES_URL } from './constants';

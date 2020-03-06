@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
+import { CaseRequest } from '../../../../../../case/common/api';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 

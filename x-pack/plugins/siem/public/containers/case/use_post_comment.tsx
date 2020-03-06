@@ -6,7 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { CommentRequest } from '../../../../../../plugins/case/common/api';
+import { CommentRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { postComment } from './api';

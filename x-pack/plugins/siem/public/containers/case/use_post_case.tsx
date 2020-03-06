@@ -6,7 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { CaseRequest } from '../../../../../../plugins/case/common/api';
+import { CaseRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { postCase } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
