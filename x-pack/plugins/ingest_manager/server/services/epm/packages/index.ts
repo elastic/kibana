@@ -24,7 +24,7 @@ export {
   findInstalledPackageByName,
 } from './get';
 
-export { installKibanaAssets, installPackage } from './install';
+export { installKibanaAssets, installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
 export class PackageNotInstalledError extends Error {

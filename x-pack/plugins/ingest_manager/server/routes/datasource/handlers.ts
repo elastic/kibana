@@ -6,6 +6,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { appContextService, datasourceService, agentConfigService } from '../../services';
+import { ensureInstalledPackage } from '../../services/epm/packages';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
@@ -71,9 +72,22 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
+    // Make sure the datasource package is installed
+    if (request.body.package?.name) {
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        callCluster,
+      });
+    }
+
+    // Create datasource
     const datasource = await datasourceService.create(soClient, request.body);
+
+    // Assign it to the given agent config
     await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id], {
       user,
     });

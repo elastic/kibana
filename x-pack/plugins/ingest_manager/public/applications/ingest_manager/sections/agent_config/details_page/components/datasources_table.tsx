@@ -42,7 +42,12 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     originalDatasources?.map(({ id, name, inputs, package: datasourcePackage, configs }) => ({
       id,
       name,
-      streams: inputs.reduce((streamsCount, input) => streamsCount + input.streams.length, 0),
+      streams: inputs.reduce(
+        (streamsCount, input) =>
+          streamsCount +
+          (input.enabled ? input.streams.filter(stream => stream.enabled).length : 0),
+        0
+      ),
       packageName: datasourcePackage?.name,
       packageTitle: datasourcePackage?.title,
       packageVersion: datasourcePackage?.version,

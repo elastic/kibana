@@ -14,7 +14,6 @@ import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';
 import { useLinks } from '../../hooks';
-import { InstallationButton } from './installation_button';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 
 const FullWidthNavRow = styled(EuiPage)`
@@ -60,10 +59,7 @@ export function Header(props: HeaderProps) {
           </EuiTitle>
         </CenterColumn>
         <RightColumn>
-          <EuiFlexGroup alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <InstallationButton package={props} />
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
                 <FormattedMessage
