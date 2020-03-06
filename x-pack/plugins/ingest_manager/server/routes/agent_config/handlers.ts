@@ -5,6 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
+import bluebird from 'bluebird';
 import { appContextService, agentConfigService } from '../../services';
 import { listAgents } from '../../services/agents';
 import {
@@ -39,15 +40,16 @@ export const getAgentConfigsHandler: RequestHandler<
       success: true,
     };
 
-    await Promise.all(
-      items.map(agentConfig =>
+    await bluebird.map(
+      items,
+      agentConfig =>
         listAgents(soClient, {
           showInactive: true,
           perPage: 0,
           page: 1,
           kuery: `agents.config_id:${agentConfig.id}`,
-        }).then(({ total: agentTotal }) => (agentConfig.agents = agentTotal))
-      )
+        }).then(({ total: agentTotal }) => (agentConfig.agents = agentTotal)),
+      { concurrency: 10 }
     );
 
     return response.ok({ body });
