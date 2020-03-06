@@ -21,13 +21,28 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
-
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
+  // describe('Management', () => {
+  //   before(async () => {
+  //     await esArchiver.loadIfNeeded('logstash_functional');
+  //     await kibanaServer.uiSettings.update({
+  //       defaultIndex: 'logstash-*',
+  //     });
+  //     await PageObjects.common.navigateToApp('settings');
+  //   });
+
   describe('Management', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('settings');
+      await esArchiver.load('discover');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.settings.navigateTo();
     });
 
     it('main view', async () => {
@@ -50,6 +65,18 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // index patterns page
+    it('Navigate back to logstash index page', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Edit field type', async () => {
+      await PageObjects.settings.clickEditFieldFormat();
+      await a11y.testAppSnapshot();
+    });
+
     it('Saved objects view', async () => {
       await PageObjects.settings.clickKibanaSavedObjects();
       await a11y.testAppSnapshot();
@@ -57,13 +84,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Advanced settings', async () => {
       await PageObjects.settings.clickKibanaSettings();
-      await a11y.testAppSnapshot();
-    });
-
-    // index patterns page
-    it('Navigate back to logstash index page', async () => {
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
       await a11y.testAppSnapshot();
     });
   });
