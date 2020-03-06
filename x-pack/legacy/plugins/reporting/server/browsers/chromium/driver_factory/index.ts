@@ -19,7 +19,7 @@ import {
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
-import { BrowserConfig, NetworkPolicy } from '../../../../types';
+import { BrowserConfig, CaptureConfig } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -28,30 +28,27 @@ import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
 type binaryPath = string;
-type queueTimeout = number;
+type ViewportConfig = BrowserConfig['viewport'];
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
+  private captureConfig: CaptureConfig;
   private browserConfig: BrowserConfig;
-  private queueTimeout: queueTimeout;
-  private networkPolicy: NetworkPolicy;
   private userDataDir: string;
-  private getChromiumArgs: (viewport: BrowserConfig['viewport']) => string[];
+  private getChromiumArgs: (viewport: ViewportConfig) => string[];
 
   constructor(
     binaryPath: binaryPath,
     logger: Logger,
     browserConfig: BrowserConfig,
-    queueTimeout: queueTimeout,
-    networkPolicy: NetworkPolicy
+    captureConfig: CaptureConfig
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
-    this.queueTimeout = queueTimeout;
-    this.networkPolicy = networkPolicy;
+    this.captureConfig = captureConfig;
 
     this.userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
-    this.getChromiumArgs = (viewport: BrowserConfig['viewport']) =>
+    this.getChromiumArgs = (viewport: ViewportConfig) =>
       args({
         userDataDir: this.userDataDir,
         viewport,
@@ -89,7 +86,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: BrowserConfig['viewport']; browserTimezone: string },
+    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
     pLogger: Logger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
@@ -114,11 +111,9 @@ export class HeadlessChromiumDriverFactory {
 
         page = await browser.newPage();
 
-        // All navigation/waitFor methods default to 30 seconds,
-        // which can cause the job to fail even if we bump timeouts in
-        // the config. Help alleviate errors like
-        // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
-        page.setDefaultTimeout(this.queueTimeout);
+        // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
+        // All waitFor methods have their own timeout config passed in to them
+        page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
@@ -159,7 +154,7 @@ export class HeadlessChromiumDriverFactory {
       // HeadlessChromiumDriver: object to "drive" a browser page
       const driver = new HeadlessChromiumDriver(page, {
         inspect: this.browserConfig.inspect,
-        networkPolicy: this.networkPolicy,
+        networkPolicy: this.captureConfig.networkPolicy,
       });
 
       // Rx.Observable<never>: stream to interrupt page capture
