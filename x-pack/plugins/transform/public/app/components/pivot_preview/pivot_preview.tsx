@@ -22,11 +22,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
-import { dictionaryToArray } from '../../../../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../../../../common/utils/object_utils';
+import { dictionaryToArray } from '../../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../../common/utils/object_utils';
 
 import {
   euiDataGridStyle,
@@ -37,8 +37,8 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotQuery,
-} from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+} from '../../common';
+import { SearchItems } from '../../hooks/use_search_items';
 
 import { getPivotPreviewDevConsoleStatement, multiColumnSortFactory } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';

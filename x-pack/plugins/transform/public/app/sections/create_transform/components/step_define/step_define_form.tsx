@@ -26,6 +26,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import { PivotPreview } from '../../../../components/pivot_preview';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
@@ -36,7 +37,6 @@ import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
-import { PivotPreview } from './pivot_preview';
 import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 

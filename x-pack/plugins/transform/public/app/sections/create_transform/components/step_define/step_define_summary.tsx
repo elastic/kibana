@@ -18,12 +18,12 @@ import {
 } from '@elastic/eui';
 
 import { getPivotQuery } from '../../../../common';
+import { PivotPreview } from '../../../../components/pivot_preview';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { PivotPreview } from './pivot_preview';
 import { StepDefineExposedState } from './step_define_form';
 
 const defaultSearch = '*';

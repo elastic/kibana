@@ -8,14 +8,14 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
+import { Providers } from '../../app_dependencies.mock';
 import {
   getPivotQuery,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
+} from '../../common';
 
 import { PivotPreview } from './pivot_preview';
 

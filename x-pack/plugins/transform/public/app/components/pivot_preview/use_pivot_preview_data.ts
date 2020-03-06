@@ -6,11 +6,11 @@
 
 import { useEffect, useState } from 'react';
 
-import { dictionaryToArray } from '../../../../../../common/types/common';
-import { useApi } from '../../../../hooks/use_api';
+import { dictionaryToArray } from '../../../../common/types/common';
+import { useApi } from '../../hooks/use_api';
 
-import { Dictionary } from '../../../../../../common/types/common';
-import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
+import { Dictionary } from '../../../../common/types/common';
+import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 import {
   getPreviewRequestBody,
@@ -18,7 +18,7 @@ import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotQuery,
-} from '../../../../common';
+} from '../../common';
 
 export enum PIVOT_PREVIEW_STATUS {
   UNUSED,

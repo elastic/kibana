@@ -14,7 +14,7 @@ import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
 } from '../../../create_transform/components/step_define/';
-import { PivotPreview } from '../../../create_transform/components/step_define/pivot_preview';
+import { PivotPreview } from '../../../../components/pivot_preview';
 
 interface Props {
   transformConfig: TransformPivotConfig;

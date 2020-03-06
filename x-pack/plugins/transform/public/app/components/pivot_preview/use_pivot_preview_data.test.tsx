@@ -7,14 +7,14 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { SimpleQuery } from '../../../../common';
+import { SimpleQuery } from '../../common';
 import {
   PIVOT_PREVIEW_STATUS,
   usePivotPreviewData,
   UsePivotPreviewDataReturnType,
 } from './use_pivot_preview_data';
 
-jest.mock('../../../../hooks/use_api');
+jest.mock('../../hooks/use_api');
 
 type Callback = () => void;
 interface TestHookProps {
