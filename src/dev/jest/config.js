@@ -69,9 +69,9 @@ export default {
     '<rootDir>/src/dev/jest/setup/enzyme.js',
 
     /*
-      FIXME: some unit tests in src/ are running jsdom manipulations after `afterEach` code,
+      FIXME: some unit tests in src/ are either running jsdom manipulations after `afterEach` code,
       by default react-testing-library cleans up DOM after each test to keep unit tests in isolation,
-      we need to fix those tests in `src/` which are manipulating DOM after tests has finished and failing,
+      we need to fix those tests in `src/` which are manipulating DOM after tests has finished and failing
       if RTL attempts to clean up jsdom
       https://github.com/elastic/kibana/issues/59469
      */
