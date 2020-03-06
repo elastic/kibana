@@ -171,9 +171,6 @@ function createInternalCoreStartMock() {
 
 function createCoreRequestHandlerContextMock() {
   return {
-    auth: {
-      isAuthenticated: true,
-    },
     rendering: {
       render: jest.fn(),
     },

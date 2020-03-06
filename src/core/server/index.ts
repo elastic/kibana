@@ -301,9 +301,6 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
-    auth: {
-      isAuthenticated: boolean;
-    };
     rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;

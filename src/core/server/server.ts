@@ -233,9 +233,6 @@ export class Server {
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
         return {
-          auth: {
-            isAuthenticated: coreSetup.http.auth.isAuthenticated(req),
-          },
           rendering: {
             render: async (options = {}) =>
               rendering.render(req, uiSettingsClient, {
