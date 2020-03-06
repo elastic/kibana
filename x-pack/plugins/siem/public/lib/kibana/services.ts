@@ -9,19 +9,35 @@ import { StartServices } from '../../plugin';
 type GlobalServices = Pick<StartServices, 'http' | 'uiSettings'>;
 
 export class KibanaServices {
+  private static kibanaVersion?: string;
   private static services?: GlobalServices;
 
-  public static init({ http, uiSettings }: StartServices) {
+  public static init({
+    http,
+    kibanaVersion,
+    uiSettings,
+  }: StartServices & { kibanaVersion: string }) {
     this.services = { http, uiSettings };
+    this.kibanaVersion = kibanaVersion;
   }
 
   public static get(): GlobalServices {
     if (!this.services) {
       throw new Error(
-        'Kibana services not set - are you trying to import this module from outside of the SIEM app?'
+        'Kibana services not initialized - are you trying to import this module from outside of the SIEM app?'
       );
     }
 
     return this.services;
+  }
+
+  public static getKibanaVersion(): string {
+    if (!this.kibanaVersion) {
+      throw new Error(
+        'Kibana services not initialized - are you trying to import this module from outside of the SIEM app?'
+      );
+    }
+
+    return this.kibanaVersion;
   }
 }

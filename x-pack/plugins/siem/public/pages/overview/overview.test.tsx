@@ -15,14 +15,7 @@ import { TestProviders } from '../../mock';
 import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
-jest.mock('ui/chrome', () => ({
-  getKibanaVersion: () => {
-    return 'v8.0.0';
-  },
-  breadcrumbs: {
-    set: jest.fn(),
-  },
-}));
+jest.mock('../../lib/kibana');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
