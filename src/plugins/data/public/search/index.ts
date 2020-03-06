@@ -35,7 +35,8 @@ export {
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
-export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { esSearchStrategyProvider, getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 

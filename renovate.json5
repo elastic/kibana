@@ -666,6 +666,14 @@
         ],
       },
       {
+        groupSlug: 'normalize-path',
+        groupName: 'normalize-path related packages',
+        packageNames: [
+          'normalize-path',
+          '@types/normalize-path',
+        ],
+      },
+      {
         groupSlug: 'numeral',
         groupName: 'numeral related packages',
         packageNames: [

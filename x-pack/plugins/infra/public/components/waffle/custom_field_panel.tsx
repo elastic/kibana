@@ -50,10 +50,10 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
             helpText={i18n.translate('xpack.infra.waffle.customGroupByHelpText', {
               defaultMessage: 'This is the field used for the terms aggregation',
             })}
-            compressed
+            display="rowCompressed"
+            fullWidth
           >
             <EuiComboBox
-              compressed
               placeholder={i18n.translate('xpack.infra.waffle.customGroupByDropdownPlacehoder', {
                 defaultMessage: 'Select one',
               })}
@@ -61,6 +61,7 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
               selectedOptions={this.state.selectedOptions}
               options={options}
               onChange={this.handleFieldSelection}
+              fullWidth
               isClearable={false}
             />
           </EuiFormRow>

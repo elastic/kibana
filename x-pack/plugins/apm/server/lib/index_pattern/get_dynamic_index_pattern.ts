@@ -62,8 +62,7 @@ export const getDynamicIndexPattern = async ({
     cache.set(CACHE_KEY, undefined);
     const notExists = e.output?.statusCode === 404;
     if (notExists) {
-      // eslint-disable-next-line no-console
-      console.error(
+      context.logger.error(
         `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
       );
       return;

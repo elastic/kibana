@@ -6,6 +6,7 @@
 import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { History, createBrowserHistory } from 'history';
 import { managementListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
 import { ManagementListState } from '../../types';
@@ -18,9 +19,12 @@ describe('endpoint list saga', () => {
   let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
+  let history: History<never>;
+
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
     return {
+      '@timestamp': new Date(1582231151055).toString(),
       event: {
         created: new Date(0),
       },
@@ -32,7 +36,6 @@ describe('endpoint list saga', () => {
       agent: {
         version: '',
         id: '',
-        name: '',
       },
       host: {
         id: '',
@@ -65,12 +68,20 @@ describe('endpoint list saga', () => {
     );
     getState = store.getState;
     dispatch = store.dispatch;
+    history = createBrowserHistory();
   });
-  test('it handles `userNavigatedToPage`', async () => {
+  test('it handles `userChangedUrl`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
-    dispatch({ type: 'userNavigatedToPage', payload: 'managementPage' });
+
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        ...history.location,
+        pathname: '/management',
+      },
+    });
     await sleep();
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({

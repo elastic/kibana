@@ -34,7 +34,7 @@ import { extractReferences, injectReferences } from './saved_visualization_refer
 import { IIndexPattern } from '../../../../../../../plugins/data/public';
 import { VisSavedObject } from '../types';
 import { VisImpl } from '../vis_impl';
-import { createSavedSearchesLoader } from '../../../legacy_imports';
+import { createSavedSearchesLoader } from '../../../../../../../plugins/discover/public';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);

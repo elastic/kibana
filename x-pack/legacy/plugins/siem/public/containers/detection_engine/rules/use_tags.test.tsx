@@ -14,7 +14,7 @@ describe('useTags', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<unknown, ReturnTags>(() => useTags());
       await waitForNextUpdate();
-      expect(result.current).toEqual([true, []]);
+      expect(result.current).toEqual([true, [], result.current[2]]);
     });
   });
 
@@ -23,7 +23,11 @@ describe('useTags', () => {
       const { result, waitForNextUpdate } = renderHook<unknown, ReturnTags>(() => useTags());
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(result.current).toEqual([false, ['elastic', 'love', 'quality', 'code']]);
+      expect(result.current).toEqual([
+        false,
+        ['elastic', 'love', 'quality', 'code'],
+        result.current[2],
+      ]);
     });
   });
 });

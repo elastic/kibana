@@ -43785,6 +43785,18 @@ class KbnClientSavedObjects {
         this.requester = requester;
     }
     /**
+     * Run the saved objects migration
+     */
+    async migrate() {
+        this.log.debug('Migrating saved objects');
+        return await this.requester.request({
+            description: 'migrate saved objects',
+            path: kbn_client_requester_1.uriencode `/internal/saved_objects/_migrate`,
+            method: 'POST',
+            body: {},
+        });
+    }
+    /**
      * Get an object
      */
     async get(options) {

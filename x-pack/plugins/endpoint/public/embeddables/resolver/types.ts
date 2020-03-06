@@ -8,6 +8,7 @@ import { Store } from 'redux';
 
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
+import { LegacyEndpointEvent } from '../../../common/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -114,7 +115,8 @@ export type CameraState = {
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ProcessEvent[];
+  readonly results: readonly LegacyEndpointEvent[];
+  isLoading: boolean;
 }
 
 export type Vector2 = readonly [number, number];
@@ -182,21 +184,21 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's children
    */
-  idToChildren: Map<number | undefined, ProcessEvent[]>;
+  idToChildren: Map<number | undefined, LegacyEndpointEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<number, ProcessEvent>;
+  idToProcess: Map<number, LegacyEndpointEvent>;
 }
 
 /**
  * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ProcessEvent, number>;
+export type ProcessWidths = Map<LegacyEndpointEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ProcessEvent, Vector2>;
+export type ProcessPositions = Map<LegacyEndpointEvent, Vector2>;
 /**
  * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
  */
@@ -206,11 +208,11 @@ export type EdgeLineSegment = Vector2[];
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ProcessEvent;
+  process: LegacyEndpointEvent;
   width: number;
 } & (
   | {
-      parent: ProcessEvent;
+      parent: LegacyEndpointEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;

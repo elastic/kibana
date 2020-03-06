@@ -38,10 +38,10 @@ describe('TutorialService', () => {
     });
   });
 
-  describe('start', () => {
+  describe('getVariables', () => {
     test('returns empty object', () => {
       const service = new TutorialService();
-      expect(service.start().get()).toEqual({});
+      expect(service.getVariables()).toEqual({});
     });
 
     test('returns last state of update calls', () => {
@@ -49,7 +49,7 @@ describe('TutorialService', () => {
       const setup = service.setup();
       setup.setVariable('abc', 123);
       setup.setVariable('def', { subKey: 456 });
-      expect(service.start().get()).toEqual({ abc: 123, def: { subKey: 456 } });
+      expect(service.getVariables()).toEqual({ abc: 123, def: { subKey: 456 } });
     });
   });
 });

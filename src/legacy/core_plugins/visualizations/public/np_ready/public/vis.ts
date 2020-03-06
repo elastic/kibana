@@ -18,8 +18,8 @@
  */
 
 import { VisType } from './vis_types';
-import { IAggConfigs } from '../../legacy_imports';
 import { Status } from './legacy/update_status';
+import { IAggConfigs } from '../../../../data/public';
 
 export interface Vis {
   type: VisType;

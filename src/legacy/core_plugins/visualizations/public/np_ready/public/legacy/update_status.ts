@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PersistedState } from '../../../legacy_imports';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { calculateObjectHash } from './calculate_object_hash';
 import { Vis } from '../vis';
 
