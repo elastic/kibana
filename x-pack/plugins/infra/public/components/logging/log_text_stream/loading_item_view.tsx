@@ -27,7 +27,7 @@ type Position = 'start' | 'end';
 interface LogTextStreamLoadingItemViewProps {
   position: Position;
   /** topCursor.time || bottomCursor.time */
-  timestamp?: number;
+  timestamp: number;
   startDateExpression: string;
   endDateExpression: string;
   className?: string;
@@ -101,33 +101,22 @@ const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
     props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
 `;
 
-const ProgressMessage: React.FC<{ timestamp?: number; relative?: boolean }> = ({
+const ProgressMessage: React.FC<{ timestamp: number; relative?: boolean }> = ({
   timestamp,
   relative = false,
 }) => {
-  let message;
-
-  if (timestamp) {
-    const formattedTimestamp = relative ? (
-      <FormattedRelative units="second" value={timestamp} updateInterval={1} />
-    ) : (
-      <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
-    );
-    message = (
-      <FormattedMessage
-        id="xpack.infra.logs.showingEntriesUntilTimestamp"
-        defaultMessage="Showing entries until {timestamp}"
-        values={{ timestamp: formattedTimestamp }}
-      />
-    );
-  } else {
-    message = (
-      <FormattedMessage
-        id="xpack.infra.logs.noAdditionalEntriesFoundText"
-        defaultMessage="No additional entries found"
-      />
-    );
-  }
+  const formattedTimestamp = relative ? (
+    <FormattedRelative units="second" value={timestamp} updateInterval={1} />
+  ) : (
+    <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
+  );
+  const message = (
+    <FormattedMessage
+      id="xpack.infra.logs.showingEntriesUntilTimestamp"
+      defaultMessage="Showing entries until {timestamp}"
+      values={{ timestamp: formattedTimestamp }}
+    />
+  );
 
   return (
     <LogTextSeparator>

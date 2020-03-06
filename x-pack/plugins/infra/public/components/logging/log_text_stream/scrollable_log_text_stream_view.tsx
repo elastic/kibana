@@ -193,88 +193,84 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
                       >
-                        {registerChild => (
-                          <>
-                            <LogTextStreamLoadingItemView
-                              position="start"
-                              isLoading={isLoadingMore}
-                              hasMore={hasMoreBeforeStart}
-                              timestamp={
-                                items.length > 0 ? items[0].logEntry.cursor.time : undefined
-                              }
-                              isStreaming={false}
-                              startDateExpression={startDateExpression}
-                              endDateExpression={endDateExpression}
-                              onExtendRange={newDateExpression =>
-                                updateDateRange({ startDateExpression: newDateExpression })
-                              }
-                            />
-                            {items.map((item, idx) => {
-                              const currentTimestamp = item.logEntry.cursor.time;
-                              let showDate = false;
-
-                              if (idx > 0) {
-                                const prevTimestamp = items[idx - 1].logEntry.cursor.time;
-                                showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
-                              }
-
-                              return (
-                                <Fragment key={getStreamItemId(item)}>
-                                  {showDate && <LogDateRow timestamp={currentTimestamp} />}
-                                  <MeasurableItemView
-                                    register={registerChild}
-                                    registrationKey={getStreamItemId(item)}
-                                  >
-                                    {itemMeasureRef => (
-                                      <LogEntryRow
-                                        columnConfigurations={columnConfigurations}
-                                        columnWidths={columnWidths}
-                                        openFlyoutWithItem={this.handleOpenFlyout}
-                                        boundingBoxRef={itemMeasureRef}
-                                        logEntry={item.logEntry}
-                                        highlights={item.highlights}
-                                        isActiveHighlight={
-                                          !!currentHighlightKey &&
-                                          currentHighlightKey.gid === item.logEntry.id
-                                        }
-                                        scale={scale}
-                                        wrap={wrap}
-                                        isHighlighted={
-                                          highlightedItem
-                                            ? item.logEntry.id === highlightedItem
-                                            : false
-                                        }
-                                      />
-                                    )}
-                                  </MeasurableItemView>
-                                </Fragment>
-                              );
-                            })}
-                            <LogTextStreamLoadingItemView
-                              position="end"
-                              isLoading={isStreaming || isLoadingMore}
-                              hasMore={hasMoreAfterEnd}
-                              isStreaming={isStreaming}
-                              timestamp={
-                                items.length > 0
-                                  ? items[items.length - 1].logEntry.cursor.time
-                                  : undefined
-                              }
-                              startDateExpression={startDateExpression}
-                              endDateExpression={endDateExpression}
-                              onExtendRange={newDateExpression =>
-                                updateDateRange({ endDateExpression: newDateExpression })
-                              }
-                              onStreamStart={() => startLiveStreaming()}
-                            />
-                            {isScrollLocked && (
-                              <LogTextStreamJumpToTail
-                                width={width}
-                                onClickJump={this.handleJumpToTail}
+                        {registerChild =>
+                          items.length > 0 ? (
+                            <>
+                              <LogTextStreamLoadingItemView
+                                position="start"
+                                isLoading={isLoadingMore}
+                                hasMore={hasMoreBeforeStart}
+                                timestamp={items[0].logEntry.cursor.time}
+                                isStreaming={false}
+                                startDateExpression={startDateExpression}
+                                endDateExpression={endDateExpression}
+                                onExtendRange={newDateExpression =>
+                                  updateDateRange({ startDateExpression: newDateExpression })
+                                }
                               />
-                            )}
-                          </>
-                        )}
+                              {items.map((item, idx) => {
+                                const currentTimestamp = item.logEntry.cursor.time;
+                                let showDate = false;
+
+                                if (idx > 0) {
+                                  const prevTimestamp = items[idx - 1].logEntry.cursor.time;
+                                  showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
+                                }
+
+                                return (
+                                  <Fragment key={getStreamItemId(item)}>
+                                    {showDate && <LogDateRow timestamp={currentTimestamp} />}
+                                    <MeasurableItemView
+                                      register={registerChild}
+                                      registrationKey={getStreamItemId(item)}
+                                    >
+                                      {itemMeasureRef => (
+                                        <LogEntryRow
+                                          columnConfigurations={columnConfigurations}
+                                          columnWidths={columnWidths}
+                                          openFlyoutWithItem={this.handleOpenFlyout}
+                                          boundingBoxRef={itemMeasureRef}
+                                          logEntry={item.logEntry}
+                                          highlights={item.highlights}
+                                          isActiveHighlight={
+                                            !!currentHighlightKey &&
+                                            currentHighlightKey.gid === item.logEntry.id
+                                          }
+                                          scale={scale}
+                                          wrap={wrap}
+                                          isHighlighted={
+                                            highlightedItem
+                                              ? item.logEntry.id === highlightedItem
+                                              : false
+                                          }
+                                        />
+                                      )}
+                                    </MeasurableItemView>
+                                  </Fragment>
+                                );
+                              })}
+                              <LogTextStreamLoadingItemView
+                                position="end"
+                                isLoading={isStreaming || isLoadingMore}
+                                hasMore={hasMoreAfterEnd}
+                                isStreaming={isStreaming}
+                                timestamp={items[items.length - 1].logEntry.cursor.time}
+                                startDateExpression={startDateExpression}
+                                endDateExpression={endDateExpression}
+                                onExtendRange={newDateExpression =>
+                                  updateDateRange({ endDateExpression: newDateExpression })
+                                }
+                                onStreamStart={() => startLiveStreaming()}
+                              />
+                              {isScrollLocked && (
+                                <LogTextStreamJumpToTail
+                                  width={width}
+                                  onClickJump={this.handleJumpToTail}
+                                />
+                              )}
+                            </>
+                          ) : null
+                        }
                       </VerticalScrollPanel>
                     </ScrollPanelSizeProbe>
                   )}
