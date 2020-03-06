@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const TEST_COLUMN_NAMES = ['@message'];
   const TEST_FILTER_COLUMN_NAMES = [
@@ -128,5 +129,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
       await a11y.testAppSnapshot();
     });
+
+    // Context view test
+    it('should open context view on a doc', async () => {
+      const firstTimestamp = (await docTable.getFields())[0][0];
+      // navigate to the context view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
+      await a11y.testAppSnapshot();
+    });
+
+    // Adding rest of the tests after https://github.com/elastic/kibana/issues/53888 is resolved
   });
 }

@@ -29,11 +29,11 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('./apps/discover'),
-      require.resolve('./apps/dashboard'),
-      require.resolve('./apps/visualize'),
-      require.resolve('./apps/management'),
-      require.resolve('./apps/console'),
-      require.resolve('./apps/home'),
+      // require.resolve('./apps/dashboard'),
+      // require.resolve('./apps/visualize'),
+      // require.resolve('./apps/management'),
+      // require.resolve('./apps/console'),
+      // require.resolve('./apps/home'),
     ],
     pageObjects,
     services,
