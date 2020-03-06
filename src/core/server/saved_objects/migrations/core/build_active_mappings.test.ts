@@ -17,33 +17,53 @@
  * under the License.
  */
 
-import { IndexMapping } from './../../mappings';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from './../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
+  test('creates a strict mapping', () => {
+    const mappings = buildActiveMappings({});
+    expect(mappings.dynamic).toEqual('strict');
+  });
+
   test('combines all mappings and includes core mappings', () => {
     const properties = {
       aaa: { type: 'text' },
       bbb: { type: 'long' },
     };
 
-    expect(buildActiveMappings({ properties })).toMatchSnapshot();
+    expect(buildActiveMappings(properties)).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
     const properties = { type: { type: 'long' } };
 
-    expect(() => buildActiveMappings({ properties })).toThrow(
-      /Cannot redefine core mapping \"type\"/
-    );
+    expect(() => buildActiveMappings(properties)).toThrow(/Cannot redefine core mapping \"type\"/);
   });
 
   test('disallows mappings with leading underscore', () => {
     const properties = { _hm: { type: 'keyword' } };
 
-    expect(() => buildActiveMappings({ properties })).toThrow(
+    expect(() => buildActiveMappings(properties)).toThrow(
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
     );
+  });
+
+  test('handles the `dynamic` property of types', () => {
+    const typeMappings: SavedObjectsTypeMappingDefinitions = {
+      firstType: {
+        dynamic: 'strict',
+        properties: { field: { type: 'keyword' } },
+      },
+      secondType: {
+        dynamic: false,
+        properties: { field: { type: 'long' } },
+      },
+      thirdType: {
+        properties: { field: { type: 'text' } },
+      },
+    };
+    expect(buildActiveMappings(typeMappings)).toMatchSnapshot();
   });
 
   test('generated hashes are stable', () => {
@@ -53,7 +73,7 @@ describe('buildActiveMappings', () => {
       ccc: { fields: { b: { type: 'text' }, a: { type: 'text' } }, type: 'keyword' },
     };
 
-    const mappings = buildActiveMappings({ properties });
+    const mappings = buildActiveMappings(properties);
     const hashes = mappings._meta!.migrationMappingPropertyHashes!;
 
     expect(hashes.aaa).toBeDefined();

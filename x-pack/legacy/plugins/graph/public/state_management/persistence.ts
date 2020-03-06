@@ -199,5 +199,6 @@ function showModal(
     workspace: savedWorkspace,
     showSaveModal: deps.showSaveModal,
     saveWorkspace: saveWorkspaceHandler,
+    I18nContext: deps.I18nContext,
   });
 }

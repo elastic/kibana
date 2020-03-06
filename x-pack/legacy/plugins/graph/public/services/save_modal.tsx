@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import { I18nStart } from 'src/core/public';
+import { SaveResult } from 'src/plugins/saved_objects/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
-import { SaveResult } from '../legacy_imports';
 
 export type SaveWorkspaceHandler = (
   saveOptions: {
@@ -24,12 +25,14 @@ export function openSaveModal({
   workspace,
   saveWorkspace,
   showSaveModal,
+  I18nContext,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
-  showSaveModal: (el: React.ReactNode) => void;
+  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
+  I18nContext: I18nStart['Context'];
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -67,6 +70,7 @@ export function openSaveModal({
       title={workspace.title}
       description={workspace.description}
       showCopyOnSave={Boolean(workspace.id)}
-    />
+    />,
+    I18nContext
   );
 }

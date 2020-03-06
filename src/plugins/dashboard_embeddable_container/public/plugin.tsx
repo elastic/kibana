@@ -21,56 +21,78 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
+import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
+import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
 import {
-  SavedObjectFinderUi,
-  SavedObjectFinderProps,
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
+import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
+import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
+import {
+  DashboardAppLinkGeneratorState,
+  DASHBOARD_APP_URL_GENERATOR,
+  createDirectAccessDashboardLinkGenerator,
+} from './url_generator';
+
+declare module '../../share/public' {
+  export interface UrlGeneratorStateMapping {
+    [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
+  }
+}
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
+  share?: SharePluginSetup;
 }
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type Setup = void;
 export type Start = void;
 
+declare module '../../../plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
+    [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+  }
+}
+
 export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
+  public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
+    const startServices = core.getStartServices();
+
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createDirectAccessDashboardLinkGenerator(async () => ({
+          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
+          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+        }))
+      );
+    }
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder: React.FC<Exclude<
-      SavedObjectFinderProps,
-      'savedObjects' | 'uiSettings'
-    >> = props => (
-      <SavedObjectFinderUi
-        {...props}
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-      />
-    );
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
     const useHideChrome = () => {
       React.useEffect(() => {
@@ -91,7 +113,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
 
     const factory = new DashboardContainerFactory({
       application,

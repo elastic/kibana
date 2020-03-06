@@ -4,10 +4,7 @@
     "FTP servers should be excluded from this rule as this is expected behavior. Some business workflows may use FTP for data exchange. These workflows often have expected characteristics such as users, sources, and destinations. FTP activity involving an unusual source or destination may be more suspicious. FTP activity involving a production server that has no known associated FTP workflow or business requirement is often suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

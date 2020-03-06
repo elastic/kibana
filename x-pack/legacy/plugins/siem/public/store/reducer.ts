@@ -9,7 +9,7 @@ import { combineReducers } from 'redux';
 import { appReducer, AppState, initialAppState } from './app';
 import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
-import { initialInputsState, inputsReducer, InputsState } from './inputs';
+import { createInitialInputsState, initialInputsState, inputsReducer, InputsState } from './inputs';
 import { initialNetworkState, networkReducer, NetworkState } from './network';
 import { initialTimelineState, timelineReducer } from './timeline/reducer';
 import { TimelineState } from './timeline/types';
@@ -31,6 +31,11 @@ export const initialState: State = {
   network: initialNetworkState,
   timeline: initialTimelineState,
 };
+
+export const createInitialState = (): State => ({
+  ...initialState,
+  inputs: createInitialInputsState(),
+});
 
 export const reducer = combineReducers<State>({
   app: appReducer,

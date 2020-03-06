@@ -43,6 +43,7 @@ import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
+import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
@@ -83,16 +84,17 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
-      savedObjects: savedObjectsServiceMock.createSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
+          internal: new Map([['plugin-id', { publicTargetDir: 'path/to/target/public' }]]),
           browserConfigs: new Map(),
         },
       },
       rendering: renderingServiceMock,
+      metrics: metricsServiceMock.createInternalSetupContract(),
       uuid: uuidSetup,
     },
     plugins: { 'plugin-id': 'plugin-value' },
@@ -101,7 +103,7 @@ beforeEach(() => {
   startDeps = {
     core: {
       capabilities: capabilitiesServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },

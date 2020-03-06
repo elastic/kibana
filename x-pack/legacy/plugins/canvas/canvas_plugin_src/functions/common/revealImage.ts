@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { Render } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Origin {
@@ -25,11 +24,11 @@ interface Arguments {
   origin: Origin;
 }
 
-export function revealImage(): ExpressionFunction<
+export function revealImage(): ExpressionFunctionDefinition<
   'revealImage',
   number,
   Arguments,
-  Render<Arguments>
+  ExpressionValueRender<Arguments>
 > {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
   const errors = getFunctionErrors().revealImage;
@@ -38,10 +37,8 @@ export function revealImage(): ExpressionFunction<
     name: 'revealImage',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       image: {
         types: ['string', 'null'],

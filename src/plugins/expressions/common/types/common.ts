@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+
 /**
  * This can convert a type into a known Expression string representation of
  * that type. For example, `TypeToString<Datatable>` will resolve to `'datatable'`.
@@ -45,7 +47,7 @@ export type KnownTypeToString<T> =
  *
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
-export type TypeString<T> = KnownTypeToString<UnwrapPromise<T>>;
+export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
 
 /**
  * Types used in Expressions that don't map to a primitive cleanly:
@@ -53,11 +55,6 @@ export type TypeString<T> = KnownTypeToString<UnwrapPromise<T>>;
  * `date` is typed as a number or string, and represents a date
  */
 export type UnmappedTypeStrings = 'date' | 'filter';
-
-/**
- * Utility type: extracts returned type from a Promise.
- */
-export type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
 
 /**
  * JSON representation of a field formatter configuration.

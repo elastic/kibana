@@ -32,7 +32,6 @@ const EuiFlexItemTags = styled(EuiFlexItem)`
   padding-top: 5px;
   @media (max-width: 850px) {
     order: 1;
-    text-align: center;
   }
 `;
 
@@ -80,14 +79,14 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
         </EuiFlexItemTags>
-        <EuiFlexItem grow={false}>
-          <EuiHideFor sizes={['xs']}>
+        <EuiHideFor sizes={['xs']}>
+          <EuiFlexItem grow={false}>
             {isGeoInfoMissing && <LocationMissingWarning />}
             <MapPanel>
               <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
             </MapPanel>
-          </EuiHideFor>
-        </EuiFlexItem>
+          </EuiFlexItem>
+        </EuiHideFor>
       </FlexGroup>
     </EuiErrorBoundary>
   );

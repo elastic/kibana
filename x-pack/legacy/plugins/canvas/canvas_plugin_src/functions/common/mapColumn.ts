@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction, getType } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export function mapColumn(): ExpressionFunction<
+export function mapColumn(): ExpressionFunctionDefinition<
   'mapColumn',
   Datatable,
   Arguments,
@@ -24,10 +24,8 @@ export function mapColumn(): ExpressionFunction<
     name: 'mapColumn',
     aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       name: {
         types: ['string'],
@@ -43,11 +41,11 @@ export function mapColumn(): ExpressionFunction<
         required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const expression = args.expression || (() => Promise.resolve(null));
 
-      const columns = [...context.columns];
-      const rowPromises = context.rows.map(row => {
+      const columns = [...input.columns];
+      const rowPromises = input.rows.map(row => {
         return expression({
           type: 'datatable',
           columns,

@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn(),
-}));
-
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { CalendarForm } from './calendar_form';
@@ -39,7 +35,7 @@ const testProps = {
 
 describe('CalendarForm', () => {
   test('Renders calendar form', () => {
-    const wrapper = shallowWithIntl(<CalendarForm.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<CalendarForm {...testProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -51,7 +47,7 @@ describe('CalendarForm', () => {
       calendarId: 'test-calendar',
       description: 'test description',
     };
-    const wrapper = mountWithIntl(<CalendarForm.WrappedComponent {...editProps} />);
+    const wrapper = mountWithIntl(<CalendarForm {...editProps} />);
     const calendarId = wrapper.find('EuiTitle');
 
     expect(calendarId).toMatchSnapshot();

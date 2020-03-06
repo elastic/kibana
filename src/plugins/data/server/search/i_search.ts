@@ -42,7 +42,14 @@ export type ISearchGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATE
   strategy?: T
 ) => Promise<IResponseTypesMap[T]>;
 
+export type ICancelGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
+  id: string,
+  strategy?: T
+) => Promise<void>;
+
 export type ISearch<T extends TStrategyTypes> = (
   request: IRequestTypesMap[T],
   options?: ISearchOptions
 ) => Promise<IResponseTypesMap[T]>;
+
+export type ICancel<T extends TStrategyTypes> = (id: string) => Promise<void>;

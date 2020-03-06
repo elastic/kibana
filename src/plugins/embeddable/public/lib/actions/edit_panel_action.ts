@@ -18,20 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { IEmbeddable } from '../embeddables';
 
-export const EDIT_PANEL_ACTION_ID = 'editPanel';
+export const ACTION_EDIT_PANEL = 'editPanel';
 
 interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class EditPanelAction implements IAction<ActionContext> {
-  public readonly type = EDIT_PANEL_ACTION_ID;
-  public readonly id = EDIT_PANEL_ACTION_ID;
+export class EditPanelAction implements Action<ActionContext> {
+  public readonly type = ACTION_EDIT_PANEL;
+  public readonly id = ACTION_EDIT_PANEL;
   public order = 15;
 
   constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {}

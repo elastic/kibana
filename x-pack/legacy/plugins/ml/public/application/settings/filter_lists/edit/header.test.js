@@ -28,7 +28,7 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -42,7 +42,7 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -54,7 +54,7 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -71,7 +71,7 @@ describe('EditFilterListHeader', () => {
       },
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
 
     expect(component).toMatchSnapshot();
   });

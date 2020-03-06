@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction as ITransaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 

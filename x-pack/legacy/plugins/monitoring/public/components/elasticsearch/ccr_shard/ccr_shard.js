@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import chrome from '../../../np_imports/ui/chrome';
 import {
   EuiPage,
   EuiPageBody,
@@ -92,6 +93,8 @@ export class CcrShard extends PureComponent {
 
   renderLatestStat() {
     const { stat, timestamp } = this.props;
+    const injector = chrome.dangerouslyGetActiveInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
 
     return (
       <EuiAccordion
@@ -110,7 +113,7 @@ export class CcrShard extends PureComponent {
       >
         <Fragment>
           <EuiTitle size="s">
-            <h2>{formatDateTimeLocal(timestamp)}</h2>
+            <h2>{formatDateTimeLocal(timestamp, timezone)}</h2>
           </EuiTitle>
           <EuiHorizontalRule />
           <EuiCodeBlock language="json">{JSON.stringify(stat, null, 2)}</EuiCodeBlock>

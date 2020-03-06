@@ -132,11 +132,15 @@ export class AbstractSource {
   }
 
   // Returns function used to format value
-  async getFieldFormatter(/* fieldName */) {
+  async createFieldFormatter(/* field */) {
     return null;
   }
 
   async loadStylePropsMeta() {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
+  }
+
+  async getValueSuggestions(/* field, query */) {
+    return [];
   }
 }

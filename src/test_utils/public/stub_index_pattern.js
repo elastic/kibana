@@ -22,7 +22,12 @@ import sinon from 'sinon';
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
-import { FieldList, IndexPattern, indexPatterns, KBN_FIELD_TYPES } from '../../plugins/data/public';
+import {
+  IndexPatternFieldList,
+  IndexPattern,
+  indexPatterns,
+  KBN_FIELD_TYPES,
+} from '../../plugins/data/public';
 
 import { setFieldFormats } from '../../plugins/data/public/services';
 
@@ -62,7 +67,7 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function() {
-    this.fields = new FieldList(this, this.fields || fields);
+    this.fields = new IndexPatternFieldList(this, this.fields || fields);
   };
 
   this.stubSetFieldFormat = function(fieldName, id, params) {

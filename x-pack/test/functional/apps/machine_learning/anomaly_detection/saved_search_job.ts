@@ -271,10 +271,12 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('saved search', function() {
+  // test failures, see #59354
+  describe.skip('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

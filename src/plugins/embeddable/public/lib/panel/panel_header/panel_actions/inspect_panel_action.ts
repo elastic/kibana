@@ -18,19 +18,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IEmbeddable } from '../../../embeddables';
 
-export const INSPECT_PANEL_ACTION_ID = 'openInspector';
+export const ACTION_INSPECT_PANEL = 'openInspector';
 
 interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class InspectPanelAction implements IAction<ActionContext> {
-  public readonly type = INSPECT_PANEL_ACTION_ID;
-  public readonly id = INSPECT_PANEL_ACTION_ID;
+export class InspectPanelAction implements Action<ActionContext> {
+  public readonly type = ACTION_INSPECT_PANEL;
+  public readonly id = ACTION_INSPECT_PANEL;
   public order = 10;
 
   constructor(private readonly inspector: InspectorStartContract) {}

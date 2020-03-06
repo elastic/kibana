@@ -16,11 +16,10 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
 
-import { getMlNodeCount } from '../../../ml_nodes_check';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
 const breadcrumbs = [
@@ -36,20 +35,19 @@ const breadcrumbs = [
 
 export const fileBasedRoute: MlRoute = {
   path: '/filedatavisualizer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', undefined, config, {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkFindFileStructurePrivilege,
-    getMlNodeCount,
   });
   return (
     <PageLoader context={context}>
-      <FileDataVisualizerPage kibanaConfig={config} />
+      <FileDataVisualizerPage kibanaConfig={deps.config} />
     </PageLoader>
   );
 };

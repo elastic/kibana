@@ -39,20 +39,34 @@ export const Settings: React.FC = props => {
                 id: 0,
                 items: [
                   {
-                    name: 'Agent Configuration',
+                    name: i18n.translate(
+                      'xpack.apm.settings.agentConfiguration',
+                      {
+                        defaultMessage: 'Agent Configuration'
+                      }
+                    ),
                     id: '1',
                     // @ts-ignore
                     href: getAPMHref('/settings/agent-configuration', search),
-                    // @ts-ignore
                     isSelected: pathname === '/settings/agent-configuration'
                   },
                   {
-                    name: 'Indices',
+                    name: i18n.translate('xpack.apm.settings.indices', {
+                      defaultMessage: 'Indices'
+                    }),
                     id: '2',
                     // @ts-ignore
                     href: getAPMHref('/settings/apm-indices', search),
-                    // @ts-ignore
                     isSelected: pathname === '/settings/apm-indices'
+                  },
+                  {
+                    name: i18n.translate('xpack.apm.settings.customizeUI', {
+                      defaultMessage: 'Customize UI'
+                    }),
+                    id: '3',
+                    // @ts-ignore
+                    href: getAPMHref('/settings/customize-ui', search),
+                    isSelected: pathname === '/settings/customize-ui'
                   }
                 ]
               }

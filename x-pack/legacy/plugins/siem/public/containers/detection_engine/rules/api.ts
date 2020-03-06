@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-
 import {
   AddRulesProps,
   DeleteRulesProps,
@@ -24,6 +22,7 @@ import {
   ImportRulesResponse,
   PrePackagedRulesStatusResponse,
 } from './types';
+import { KibanaServices } from '../../../lib/kibana';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -41,7 +40,7 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  * @param signal to cancel request
  */
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await npStart.core.http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+  const response = await KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     body: JSON.stringify(rule),
     asResponse: true,
@@ -95,7 +94,7 @@ export const fetchRules = async ({
     ...(filters.length ? { filter: filters.join(' AND ') } : {}),
   };
 
-  const response = await npStart.core.http.fetch<FetchRulesResponse>(
+  const response = await KibanaServices.get().http.fetch<FetchRulesResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_find`,
     {
       method: 'GET',
@@ -117,7 +116,7 @@ export const fetchRules = async ({
  *
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+  const response = await KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
     asResponse: true,
@@ -137,10 +136,10 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  * @throws An error if response is not OK
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const response = await npStart.core.http.fetch<Rule[]>(
+  const response = await KibanaServices.get().http.fetch<Rule[]>(
     `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(ids.map(id => ({ id, enabled }))),
       asResponse: true,
     }
@@ -158,10 +157,10 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
  * @throws An error if response is not OK
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
-  const response = await npStart.core.http.fetch<Rule[]>(
+  const response = await KibanaServices.get().http.fetch<Rule[]>(
     `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     {
-      method: 'PUT',
+      method: 'DELETE',
       body: JSON.stringify(ids.map(id => ({ id }))),
       asResponse: true,
     }
@@ -177,7 +176,7 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
  * @param rules to duplicate
  */
 export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const response = await npStart.core.http.fetch<Rule[]>(
+  const response = await KibanaServices.get().http.fetch<Rule[]>(
     `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
     {
       method: 'POST',
@@ -215,11 +214,14 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
  * @param signal AbortSignal for cancelling request
  */
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  const response = await npStart.core.http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
-    method: 'PUT',
-    signal,
-    asResponse: true,
-  });
+  const response = await KibanaServices.get().http.fetch<unknown>(
+    DETECTION_ENGINE_PREPACKAGED_URL,
+    {
+      method: 'PUT',
+      signal,
+      asResponse: true,
+    }
+  );
 
   await throwIfNotOk(response.response);
   return true;
@@ -242,7 +244,7 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  const response = await npStart.core.http.fetch<ImportRulesResponse>(
+  const response = await KibanaServices.get().http.fetch<ImportRulesResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
@@ -279,16 +281,19 @@ export const exportRules = async ({
       ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
       : undefined;
 
-  const response = await npStart.core.http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
-    method: 'POST',
-    body,
-    query: {
-      exclude_export_details: excludeExportDetails,
-      file_name: filename,
-    },
-    signal,
-    asResponse: true,
-  });
+  const response = await KibanaServices.get().http.fetch<Blob>(
+    `${DETECTION_ENGINE_RULES_URL}/_export`,
+    {
+      method: 'POST',
+      body,
+      query: {
+        exclude_export_details: excludeExportDetails,
+        file_name: filename,
+      },
+      signal,
+      asResponse: true,
+    }
+  );
 
   await throwIfNotOk(response.response);
   return response.body!;
@@ -309,7 +314,7 @@ export const getRuleStatusById = async ({
   id: string;
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> => {
-  const response = await npStart.core.http.fetch<RuleStatusResponse>(
+  const response = await KibanaServices.get().http.fetch<RuleStatusResponse>(
     DETECTION_ENGINE_RULES_STATUS_URL,
     {
       method: 'GET',
@@ -330,7 +335,7 @@ export const getRuleStatusById = async ({
  *
  */
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
-  const response = await npStart.core.http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
+  const response = await KibanaServices.get().http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
     method: 'GET',
     signal,
     asResponse: true,
@@ -352,7 +357,7 @@ export const getPrePackagedRulesStatus = async ({
 }: {
   signal: AbortSignal;
 }): Promise<PrePackagedRulesStatusResponse> => {
-  const response = await npStart.core.http.fetch<PrePackagedRulesStatusResponse>(
+  const response = await KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',

@@ -9,7 +9,7 @@ A raw document as represented directly in the saved object index.
 <b>Signature:</b>
 
 ```typescript
-export interface RawDoc 
+export interface SavedObjectsRawDoc 
 ```
 
 ## Properties
@@ -19,6 +19,6 @@ export interface RawDoc
 |  [\_id](./kibana-plugin-server.savedobjectsrawdoc._id.md) | <code>string</code> |  |
 |  [\_primary\_term](./kibana-plugin-server.savedobjectsrawdoc._primary_term.md) | <code>number</code> |  |
 |  [\_seq\_no](./kibana-plugin-server.savedobjectsrawdoc._seq_no.md) | <code>number</code> |  |
-|  [\_source](./kibana-plugin-server.savedobjectsrawdoc._source.md) | <code>any</code> |  |
+|  [\_source](./kibana-plugin-server.savedobjectsrawdoc._source.md) | <code>SavedObjectsRawDocSource</code> |  |
 |  [\_type](./kibana-plugin-server.savedobjectsrawdoc._type.md) | <code>string</code> |  |
 

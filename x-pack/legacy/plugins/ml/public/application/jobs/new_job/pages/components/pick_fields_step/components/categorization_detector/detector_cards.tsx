@@ -17,6 +17,7 @@ interface CardProps {
 export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
   <EuiFlexItem>
     <EuiCard
+      data-test-subj={`mlJobWizardCategorizationDetectorCountCard${isSelected ? ' selected' : ''}`}
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.title',
         {
@@ -39,6 +40,7 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
 export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
   <EuiFlexItem>
     <EuiCard
+      data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
         {

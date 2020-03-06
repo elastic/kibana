@@ -4,10 +4,7 @@
     "Some network security policies allow SSH directly from the Internet but usage that is\n    unfamiliar to server or network owners can be unexpected and suspicious. SSH services may\n    be exposed directly to the Internet in some networks such as cloud environments. In such\n    cases, only SSH gateways, bastions or jump servers may be expected expose SSH directly to\n    the Internet and can be exempted from this rule. SSH may be required by some work-flows\n    such as remote access and support for specialized software products and servers. Such\n    work-flows are usually known and not unexpected."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -68,5 +65,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

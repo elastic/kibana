@@ -10,6 +10,8 @@ import {
   TransformAPIProvider,
   TransformManagementProvider,
   TransformNavigationProvider,
+  TransformSecurityCommonProvider,
+  TransformSecurityUIProvider,
   TransformSourceSelectionProvider,
   TransformTableProvider,
   TransformWizardProvider,
@@ -19,6 +21,8 @@ export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
   const management = TransformManagementProvider(context);
   const navigation = TransformNavigationProvider(context);
+  const securityCommon = TransformSecurityCommonProvider(context);
+  const securityUI = TransformSecurityUIProvider(context, securityCommon);
   const sourceSelection = TransformSourceSelectionProvider(context);
   const table = TransformTableProvider(context);
   const wizard = TransformWizardProvider(context);
@@ -27,6 +31,8 @@ export function TransformProvider(context: FtrProviderContext) {
     api,
     management,
     navigation,
+    securityCommon,
+    securityUI,
     sourceSelection,
     table,
     wizard,

@@ -11,12 +11,6 @@ import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
 
-jest.mock('../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
-
 const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
 jest.mock('../../hooks/use_index_patterns');
 mockUseIndexPatterns.mockImplementation(() => [true, []]);

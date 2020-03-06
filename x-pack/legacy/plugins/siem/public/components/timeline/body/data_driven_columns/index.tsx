@@ -5,18 +5,18 @@
  */
 
 import React from 'react';
-
 import { getOr } from 'lodash/fp';
+
 import { Ecs, TimelineNonEcsData } from '../../../../graphql/types';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { OnColumnResized } from '../../events';
 import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
 
 interface Props {
   _id: string;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;

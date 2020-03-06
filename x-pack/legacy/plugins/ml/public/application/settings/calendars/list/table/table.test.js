@@ -9,10 +9,6 @@ import React from 'react';
 
 import { CalendarsListTable } from './table';
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn(),
-}));
-
 const calendars = [
   {
     calendar_id: 'farequote-calendar',
@@ -41,12 +37,12 @@ const props = {
 
 describe('CalendarsListTable', () => {
   test('renders the table with all calendars', () => {
-    const wrapper = shallowWithIntl(<CalendarsListTable.WrappedComponent {...props} />);
+    const wrapper = shallowWithIntl(<CalendarsListTable {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('New button enabled if permission available', () => {
-    const wrapper = mountWithIntl(<CalendarsListTable.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<CalendarsListTable {...props} />);
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
@@ -60,7 +56,7 @@ describe('CalendarsListTable', () => {
       canCreateCalendar: false,
     };
 
-    const wrapper = mountWithIntl(<CalendarsListTable.WrappedComponent {...disableProps} />);
+    const wrapper = mountWithIntl(<CalendarsListTable {...disableProps} />);
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
@@ -74,7 +70,7 @@ describe('CalendarsListTable', () => {
       mlNodesAvailable: false,
     };
 
-    const wrapper = mountWithIntl(<CalendarsListTable.WrappedComponent {...disableProps} />);
+    const wrapper = mountWithIntl(<CalendarsListTable {...disableProps} />);
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');

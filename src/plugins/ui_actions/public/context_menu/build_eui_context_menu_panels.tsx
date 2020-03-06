@@ -22,7 +22,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { IAction } from '../actions';
+import { Action } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -32,7 +32,7 @@ export async function buildContextMenuForActions<A>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<IAction<A>>;
+  actions: Array<Action<A>>;
   actionContext: A;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
@@ -59,7 +59,7 @@ async function buildEuiContextMenuPanelItems<A>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<IAction<A>>;
+  actions: Array<Action<A>>;
   actionContext: A;
   closeMenu: () => void;
 }) {
@@ -95,16 +95,15 @@ function convertPanelActionToContextMenuItem<A>({
   actionContext,
   closeMenu,
 }: {
-  action: IAction<A>;
+  action: Action<A>;
   actionContext: A;
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
-      ? // Cast to `any` because `name` typed to string.
-        (React.createElement(uiToReactComponent(action.MenuItem), {
+      ? React.createElement(uiToReactComponent(action.MenuItem), {
           context: actionContext,
-        }) as any)
+        })
       : action.getDisplayName(actionContext),
     icon: action.getIconType(actionContext),
     panel: _.get(action, 'childContextMenuPanel.id'),

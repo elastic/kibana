@@ -18,13 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
+import { noop, identity } from 'lodash';
 
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-import { Schemas } from '../../schemas';
+import { fieldFormats } from '../../../../../../../../plugins/data/public';
 
 const metricAggFilter = [
   '!top_hits',
@@ -35,20 +35,6 @@ const metricAggFilter = [
   '!geo_bounds',
   '!geo_centroid',
 ];
-
-const metricAggTitle = i18n.translate('data.search.aggs.metrics.metricAggTitle', {
-  defaultMessage: 'Metric agg',
-});
-
-const [metricAggSchema] = new Schemas([
-  {
-    group: 'none',
-    name: 'metricAgg',
-    title: metricAggTitle,
-    hideCustomLabel: true,
-    aggFilter: metricAggFilter,
-  },
-]).all;
 
 const parentPipelineType = i18n.translate(
   'data.search.aggs.metrics.parentPipelineAggregationsSubtypeTitle',
@@ -69,9 +55,9 @@ const parentPipelineAggHelper = {
       {
         name: 'customMetric',
         type: 'agg',
+        allowedAggs: metricAggFilter,
         makeAgg(termsAgg, state: any) {
           state = state || { type: 'count' };
-          state.schema = metricAggSchema;
 
           const metricAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
 
@@ -100,7 +86,7 @@ const parentPipelineAggHelper = {
     } else {
       subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
     }
-    return subAgg.type.getFormat(subAgg);
+    return subAgg ? subAgg.type.getFormat(subAgg) : new (fieldFormats.FieldFormat.from(identity))();
   },
 };
 

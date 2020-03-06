@@ -31,7 +31,7 @@ interface OwnProps {
 
 type Props = OwnProps & StateProps & DispatchProps;
 
-export const Container: React.FC<Props> = ({
+const Container: React.FC<Props> = ({
   loadMonitorStatus,
   monitorId,
   monitorStatus,

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { timelineActions } from '../../store/actions';
 import { RouteSpyState } from '../../utils/route/types';
@@ -39,7 +39,7 @@ export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteS
   React.memo(
     UrlStateContainer,
     (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
+      prevProps.pathName === nextProps.pathName && deepEqual(prevProps.urlState, nextProps.urlState)
   )
 );
 

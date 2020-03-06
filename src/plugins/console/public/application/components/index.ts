@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export { NetworkRequestStatusBar } from './network_request_status_bar';
 export { SomethingWentWrongCallout } from './something_went_wrong_callout';
 export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
 export { ConsoleMenu } from './console_menu';

@@ -7,7 +7,10 @@ import React from 'react';
 import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KqlQuerySuggestionProvider } from './types';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+} from '../../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
   <FormattedMessage
@@ -58,11 +61,11 @@ const conjunctions: Record<string, JSX.Element> = {
 
 export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core => {
   return (querySuggestionsArgs, { text, end }) => {
-    let suggestions: autocomplete.QuerySuggestion[] | [] = [];
+    let suggestions: QuerySuggestion[] | [] = [];
 
     if (text.endsWith(' ')) {
       suggestions = Object.keys(conjunctions).map((key: $Keys<typeof conjunctions>) => ({
-        type: autocomplete.QuerySuggestionsTypes.Conjunction,
+        type: QuerySuggestionTypes.Conjunction,
         text: `${key} `,
         description: conjunctions[key],
         start: end,

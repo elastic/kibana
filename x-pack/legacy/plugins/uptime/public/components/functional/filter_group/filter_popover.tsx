@@ -77,6 +77,7 @@ export const FilterPopover = ({
     >
       <EuiPopoverTitle>
         <EuiFieldSearch
+          incremental={true}
           disabled={items.length === 0}
           onSearch={query => setSearchQuery(query)}
           placeholder={

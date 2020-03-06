@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,

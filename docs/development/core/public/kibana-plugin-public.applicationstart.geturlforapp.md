@@ -4,13 +4,16 @@
 
 ## ApplicationStart.getUrlForApp() method
 
-Returns a relative URL to a given app, including the global base path.
+Returns an URL to a given app, including the global base path. By default, the URL is relative (/basePath/app/my-app). Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+
+Note that when generating absolute urls, the protocol, host and port are determined from the browser location.
 
 <b>Signature:</b>
 
 ```typescript
 getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
 ```
 
@@ -19,7 +22,7 @@ getUrlForApp(appId: string, options?: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        absolute?: boolean;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

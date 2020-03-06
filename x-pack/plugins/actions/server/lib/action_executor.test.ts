@@ -10,9 +10,10 @@ import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '../../../event_log/server/mocks';
+import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
 
-const actionExecutor = new ActionExecutor();
+const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
 
 function getServices() {
@@ -33,18 +34,20 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
+const spacesMock = spacesServiceMock.createSetupContract();
 actionExecutor.initialize({
   logger: loggingServiceMock.create().get(),
-  spaces: {
-    getSpaceId: () => 'some-namespace',
-  } as any,
+  spaces: spacesMock,
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
-  eventLogger: createEventLoggerMock(),
+  eventLogger: eventLoggerMock.create(),
 });
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  spacesMock.getSpaceId.mockReturnValue('some-namespace');
+});
 
 test('successfully executes', async () => {
   const actionType = {
@@ -218,4 +221,21 @@ test('returns an error if actionType is not enabled', async () => {
       "status": "error",
     }
   `);
+});
+
+test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
+  customActionExecutor.initialize({
+    logger: loggingServiceMock.create().get(),
+    spaces: spacesMock,
+    getServices,
+    actionTypeRegistry,
+    encryptedSavedObjectsPlugin,
+    eventLogger: eventLoggerMock.create(),
+  });
+  await expect(
+    customActionExecutor.execute(executeParams)
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+  );
 });

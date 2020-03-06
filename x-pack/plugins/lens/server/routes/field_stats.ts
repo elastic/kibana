@@ -27,7 +27,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
             dslQuery: schema.object({}, { allowUnknowns: true }),
             fromDate: schema.string(),
             toDate: schema.string(),
-            timeFieldName: schema.string(),
+            timeFieldName: schema.maybe(schema.string()),
             field: schema.object(
               {
                 name: schema.string(),
@@ -46,9 +46,8 @@ export async function initFieldsRoute(setup: CoreSetup) {
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
-        const query = {
-          bool: {
-            filter: [
+        const filter = timeFieldName
+          ? [
               {
                 range: {
                   [timeFieldName]: {
@@ -58,7 +57,12 @@ export async function initFieldsRoute(setup: CoreSetup) {
                 },
               },
               dslQuery,
-            ],
+            ]
+          : [dslQuery];
+
+        const query = {
+          bool: {
+            filter,
           },
         };
 

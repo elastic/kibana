@@ -6,15 +6,7 @@
 
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface JsonArray extends Array<JsonValue> {}
-
-type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
-
-interface JsonObject {
-  [key: string]: JsonValue;
-}
+import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 
 export interface WorkspaceNode {
   x: number;

@@ -7,10 +7,7 @@
 import gql from 'graphql-tag';
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import {
-  UpdateSourceInput,
-  UpdateSourceResult,
-} from '../../../legacy/plugins/infra/public/graphql/types';
+import { UpdateSourceInput, UpdateSourceResult } from '../../../plugins/infra/public/graphql/types';
 
 const createSourceMutation = gql`
   mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {

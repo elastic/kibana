@@ -16,6 +16,12 @@ jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true,
 }));
 
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: node => {
+    return node;
+  },
+}));
+
 // Mock the call for loading the list of filters.
 // The mock is hoisted to the top, so need to prefix the filter variable
 // with 'mock' so it can be used lazily.
@@ -42,7 +48,7 @@ const props = {
 
 describe('Filter Lists', () => {
   test('renders a list of filters', () => {
-    const wrapper = shallowWithIntl(<FilterLists.WrappedComponent {...props} />);
+    const wrapper = shallowWithIntl(<FilterLists {...props} />);
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
     // has resolved.

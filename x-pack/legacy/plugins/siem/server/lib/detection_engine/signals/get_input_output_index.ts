@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { AlertServices } from '../../../../../alerting/server/types';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 export const getInputIndex = async (
@@ -16,7 +16,9 @@ export const getInputIndex = async (
   if (inputIndex != null) {
     return inputIndex;
   } else {
-    const configuration = await services.savedObjectsClient.get('config', version);
+    const configuration = await services.savedObjectsClient.get<{
+      'siem:defaultIndex': string[];
+    }>('config', version);
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {

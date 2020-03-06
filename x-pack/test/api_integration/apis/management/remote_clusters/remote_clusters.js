@@ -57,6 +57,7 @@ export default function({ getService }) {
           .send({
             name: 'test_cluster',
             seeds: [NODE_SEED],
+            skipUnavailable: false,
           })
           .expect(409);
 
@@ -183,17 +184,11 @@ export default function({ getService }) {
             {
               name: 'test_cluster_doesnt_exist',
               error: {
-                isBoom: true,
-                isServer: false,
-                data: null,
-                output: {
+                status: 404,
+                payload: { message: 'There is no remote cluster with that name.' },
+                options: {
                   statusCode: 404,
-                  payload: {
-                    statusCode: 404,
-                    error: 'Not Found',
-                    message: 'There is no remote cluster with that name.',
-                  },
-                  headers: {},
+                  body: { message: 'There is no remote cluster with that name.' },
                 },
               },
             },

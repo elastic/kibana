@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
 import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
@@ -18,7 +18,7 @@ export interface OwnProps {
 }
 
 const ALERTS_TABLE_ID = 'timeline-alerts-table';
-const defaultAlertsFilters: esFilters.Filter[] = [
+const defaultAlertsFilters: Filter[] = [
   {
     meta: {
       alias: null,
@@ -54,7 +54,7 @@ const defaultAlertsFilters: esFilters.Filter[] = [
 interface Props {
   endDate: number;
   startDate: number;
-  pageFilters?: esFilters.Filter[];
+  pageFilters?: Filter[];
 }
 
 const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {

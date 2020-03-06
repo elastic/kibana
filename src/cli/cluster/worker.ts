@@ -199,6 +199,7 @@ export class Worker extends EventEmitter {
     }
 
     this.fork = cluster.fork(this.env) as ClusterWorker;
+    this.emit('starting');
     this.forkBinder = new BinderFor(this.fork);
 
     // when the fork sends a message, comes online, or loses its connection, then react

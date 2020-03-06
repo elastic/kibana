@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ExpressionAST } from '../../../../types';
+import { ExpressionAstExpression } from '../../../../types';
 import { ArgumentStrings } from '../../../../i18n/ui';
 
 const { AxisConfig: strings } = ArgumentStrings;
 
 const { set } = immutable;
 
-const defaultExpression: ExpressionAST = {
+const defaultExpression: ExpressionAstExpression = {
   type: 'expression',
   chain: [
     {
@@ -28,8 +28,8 @@ const defaultExpression: ExpressionAST = {
 };
 
 export interface Props {
-  onValueChange: (newValue: ExpressionAST) => void;
-  argValue: boolean | ExpressionAST;
+  onValueChange: (newValue: ExpressionAstExpression) => void;
+  argValue: boolean | ExpressionAstExpression;
   typeInstance: {
     name: 'xaxis' | 'yaxis';
   };

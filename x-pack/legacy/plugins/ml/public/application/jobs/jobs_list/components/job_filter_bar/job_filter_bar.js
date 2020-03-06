@@ -12,8 +12,8 @@ import { JobGroup } from '../job_group';
 import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
 import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function loadGroups() {
   return ml.jobs
@@ -42,7 +42,7 @@ function loadGroups() {
     });
 }
 
-class JobFilterBarUI extends Component {
+export class JobFilterBar extends Component {
   constructor(props) {
     super(props);
 
@@ -87,7 +87,6 @@ class JobFilterBarUI extends Component {
   };
 
   render() {
-    const { intl } = this.props;
     const { error, selectedId } = this.state;
     const filters = [
       {
@@ -96,22 +95,19 @@ class JobFilterBarUI extends Component {
         items: [
           {
             value: 'opened',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobFilterBar.openedLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobFilterBar.openedLabel', {
               defaultMessage: 'Opened',
             }),
           },
           {
             value: 'closed',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobFilterBar.closedLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobFilterBar.closedLabel', {
               defaultMessage: 'Closed',
             }),
           },
           {
             value: 'failed',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobFilterBar.failedLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobFilterBar.failedLabel', {
               defaultMessage: 'Failed',
             }),
           },
@@ -123,15 +119,13 @@ class JobFilterBarUI extends Component {
         items: [
           {
             value: 'started',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobFilterBar.startedLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobFilterBar.startedLabel', {
               defaultMessage: 'Started',
             }),
           },
           {
             value: 'stopped',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobFilterBar.stoppedLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobFilterBar.stoppedLabel', {
               defaultMessage: 'Stopped',
             }),
           },
@@ -140,8 +134,7 @@ class JobFilterBarUI extends Component {
       {
         type: 'field_value_selection',
         field: 'groups',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobFilterBar.groupLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobFilterBar.groupLabel', {
           defaultMessage: 'Group',
         }),
         multiSelect: 'or',
@@ -188,7 +181,7 @@ class JobFilterBarUI extends Component {
     );
   }
 }
-JobFilterBarUI.propTypes = {
+JobFilterBar.propTypes = {
   setFilters: PropTypes.func.isRequired,
 };
 
@@ -202,5 +195,3 @@ function getError(error) {
 
   return '';
 }
-
-export const JobFilterBar = injectI18n(JobFilterBarUI);

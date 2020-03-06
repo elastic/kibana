@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -34,7 +35,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the correct chart types', async function() {
-      const expectedChartTypes = [
+      let expectedChartTypes = [
         'Area',
         'Controls',
         'Coordinate Map',
@@ -55,13 +56,19 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         'Vertical Bar',
       ];
       if (!isOss) {
-        expectedChartTypes.push('Maps');
+        expectedChartTypes.push('Maps', 'Lens');
+        expectedChartTypes = _.remove(expectedChartTypes, function(n) {
+          return n !== 'Coordinate Map';
+        });
+        expectedChartTypes = _.remove(expectedChartTypes, function(n) {
+          return n !== 'Region Map';
+        });
         expectedChartTypes.sort();
       }
       log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
-      const chartTypes = await PageObjects.visualize.getChartTypes();
+      const chartTypes = (await PageObjects.visualize.getChartTypes()).sort();
       log.debug('returned chart types = ' + chartTypes);
       log.debug('expected chart types = ' + expectedChartTypes);
       expect(chartTypes).to.eql(expectedChartTypes);

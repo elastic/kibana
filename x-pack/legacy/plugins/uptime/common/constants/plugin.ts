@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const PLUGIN = {
   APP_ROOT_ID: 'react-uptime-root',
+  DESCRIPTION: 'Uptime monitoring',
   ID: 'uptime',
-  ROUTER_BASE_NAME: '/app/uptime#',
   LOCAL_STORAGE_KEY: 'xpack.uptime',
+  NAME: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
+    defaultMessage: 'Uptime',
+  }),
+  ROUTER_BASE_NAME: '/app/uptime#',
+  TITLE: 'uptime',
 };

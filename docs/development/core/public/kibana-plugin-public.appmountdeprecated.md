@@ -13,7 +13,7 @@ A mount function called when the user navigates to this app's route.
 <b>Signature:</b>
 
 ```typescript
-export declare type AppMountDeprecated = (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export declare type AppMountDeprecated<HistoryLocationState = unknown> = (context: AppMountContext, params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 ```
 
 ## Remarks

@@ -28,7 +28,8 @@ export class Alerts {
       id: string;
       group: string;
       params: Record<string, any>;
-    }>
+    }>,
+    params: Record<string, any> = {}
   ) {
     this.log.debug(`creating alert ${name}`);
 
@@ -41,7 +42,7 @@ export class Alerts {
       schedule: { interval: '1m' },
       throttle: '1m',
       actions,
-      params: {},
+      params,
     });
     if (status !== 200) {
       throw new Error(
@@ -75,5 +76,26 @@ export class Alerts {
       );
     }
     this.log.debug(`deleted alert ${alert.id}`);
+  }
+
+  public async getAlertState(id: string) {
+    this.log.debug(`getting alert ${id} state`);
+
+    const { data } = await this.axios.get(`/api/alert/${id}/state`);
+    return data;
+  }
+
+  public async muteAlertInstance(id: string, instanceId: string) {
+    this.log.debug(`muting instance ${instanceId} under alert ${id}`);
+
+    const { data: alert, status, statusText } = await this.axios.post(
+      `/api/alert/${id}/alert_instance/${instanceId}/_mute`
+    );
+    if (status !== 204) {
+      throw new Error(
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(alert)}`
+      );
+    }
+    this.log.debug(`muted alert instance ${instanceId}`);
   }
 }

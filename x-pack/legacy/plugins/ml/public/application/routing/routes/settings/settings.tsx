@@ -14,7 +14,8 @@ import React, { FC } from 'react';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
-import { checkFullLicense } from '../../../license/check_license';
+import { useTimefilter } from '../../../contexts/kibana';
+import { checkFullLicense } from '../../../license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { Settings } from '../../../settings';
@@ -24,16 +25,18 @@ const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
 
 export const settingsRoute: MlRoute = {
   path: '/settings',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     getMlNodeCount,
   });
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');

@@ -12,8 +12,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../components/header_section';
 import { SignalsHistogram } from './signals_histogram';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
-import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
+import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
 import { RegisterQuery, SignalsHistogramOption, SignalsAggregation, SignalsTotal } from './types';
 import { signalsHistogramOptions } from './config';
 import { getDetectionEngineUrl } from '../../../../components/link_to';
@@ -50,7 +49,7 @@ interface SignalsHistogramPanelProps {
   chartHeight?: number;
   defaultStackByOption?: SignalsHistogramOption;
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   query?: Query;
   legendPosition?: Position;

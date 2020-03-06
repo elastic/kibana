@@ -100,6 +100,11 @@ export class Env {
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
 
+    /**
+     * BEWARE: this needs to stay roughly synchronized with the @kbn/optimizer
+     * `packages/kbn-optimizer/src/optimizer_config.ts` determines the paths
+     * that should be searched for plugins to build
+     */
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
       ...(options.cliArgs.oss ? [] : [resolve(this.homeDir, 'x-pack', 'plugins')]),

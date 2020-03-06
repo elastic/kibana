@@ -10,14 +10,13 @@ import { createJobFactory, executeJobFactory } from '../../export_types/csv_from
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import {
-  HeadlessChromiumDriverFactory,
   JobDocOutput,
   Logger,
   ReportingResponseToolkit,
   ResponseFacade,
   ServerFacade,
 } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 
@@ -31,6 +30,7 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   parentLogger: Logger
@@ -58,10 +58,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
        *
        * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
-      const createJobFn = createJobFactory(server, elasticsearch, logger);
-      const executeJobFn = executeJobFactory(server, elasticsearch, logger, {
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      });
+      const createJobFn = createJobFactory(reporting, server, elasticsearch, logger);
+      const executeJobFn = await executeJobFactory(reporting, server, elasticsearch, logger);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,

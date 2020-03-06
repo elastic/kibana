@@ -9,5 +9,5 @@ Fetches a single object
 <b>Signature:</b>
 
 ```typescript
-get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
 ```

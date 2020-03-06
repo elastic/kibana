@@ -23,6 +23,7 @@ const template = {
   fromPath: __dirname,
   configOptions: {
     name: 'Some fancy plugin',
+    targetPath: '',
   },
 };
 
@@ -46,6 +47,7 @@ describe('plugin generator sao integration', () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
       generateApi: false,
+      generateScss: true,
     });
 
     // check output files
@@ -54,6 +56,7 @@ describe('plugin generator sao integration', () => {
     expect(res.fileList).toContain('public/plugin.ts');
     expect(res.fileList).toContain('public/types.ts');
     expect(res.fileList).toContain('public/components/app.tsx');
+    expect(res.fileList).toContain('public/index.scss');
     expect(res.fileList).not.toContain('server/index.ts');
   });
 
@@ -69,6 +72,20 @@ describe('plugin generator sao integration', () => {
     expect(res.fileList).toContain('server/index.ts');
     expect(res.fileList).toContain('server/types.ts');
     expect(res.fileList).toContain('server/routes/index.ts');
+  });
+
+  it('skips eslintrc and scss', async () => {
+    const res = await sao.mockPrompt(template, {
+      generateApp: true,
+      generateApi: true,
+      generateScss: false,
+      generateEslint: false,
+    });
+
+    // check output files
+    expect(res.fileList).toContain('public/plugin.ts');
+    expect(res.fileList).not.toContain('public/index.scss');
+    expect(res.fileList).not.toContain('.eslintrc.js');
   });
 
   it('plugin package has correct title', async () => {
@@ -120,5 +137,20 @@ describe('plugin generator sao integration', () => {
   it('includes dotfiles', async () => {
     const res = await sao.mockPrompt(template);
     expect(res.files['.eslintrc.js']).toBeTruthy();
+    expect(res.files['.i18nrc.json']).toBeTruthy();
+  });
+
+  it('validaes path override', async () => {
+    try {
+      await sao.mockPrompt(template, {
+        generateApp: true,
+        generateApi: true,
+        generateScss: false,
+        generateEslint: false,
+        customPath: 'banana',
+      });
+    } catch (e) {
+      expect(e.message).toContain('Validation failed at prompt "customPath"');
+    }
   });
 });

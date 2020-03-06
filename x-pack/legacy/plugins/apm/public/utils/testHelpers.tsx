@@ -18,7 +18,7 @@ import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
-import { PromiseReturnType } from '../../typings/common';
+import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import {
   ESFilter,
   ESSearchResponse,
@@ -29,6 +29,7 @@ import {
   ApmPluginContextValue
 } from '../context/ApmPluginContext';
 import { ConfigSchema } from '../new-platform/plugin';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -118,6 +119,7 @@ interface MockSetup {
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
     apmAgentConfigurationIndex: string;
+    apmCustomLinkIndex: string;
   };
 }
 
@@ -151,23 +153,10 @@ export async function inspectSearchParams(
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
-    client: {
-      search: spy
-    } as any,
-    internalClient: {
-      search: spy
-    } as any,
-    config: new Proxy(
-      {},
-      {
-        get: () => 'myIndex'
-      }
-    ) as APMConfig,
-    uiFiltersES: [
-      {
-        term: { 'service.environment': 'prod' }
-      }
-    ],
+    client: { search: spy } as any,
+    internalClient: { search: spy } as any,
+    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
+    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
       'apm_oss.sourcemapIndices': 'myIndex',
       'apm_oss.errorIndices': 'myIndex',
@@ -175,7 +164,8 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex',
+      apmCustomLinkIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };
@@ -208,7 +198,8 @@ const mockCore = {
   },
   notifications: {
     toasts: {
-      addWarning: () => {}
+      addWarning: () => {},
+      addDanger: () => {}
     }
   }
 };
@@ -235,6 +226,9 @@ export function MockApmPluginContextWrapper({
   children?: ReactNode;
   value?: ApmPluginContextValue;
 }) {
+  if (value.core?.http) {
+    createCallApmApi(value.core?.http);
+  }
   return (
     <ApmPluginContext.Provider
       value={{

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Boom from 'boom';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { deletePolicy } from '../../index/delete_policy';
@@ -27,44 +24,50 @@ import { deleteTemplate } from '../../index/delete_template';
  *
  * And ensuring they're all gone
  */
-export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'DELETE',
-    path: DETECTION_ENGINE_INDEX_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const deleteIndexRoute = (router: IRouter) => {
+  router.delete(
+    {
+      path: DETECTION_ENGINE_INDEX_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RequestFacade) {
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+
+        const callCluster = clusterClient.callAsCurrentUser;
+        const index = siemClient.signalsIndex;
+        const indexExists = await getIndexExists(callCluster, index);
+
         if (!indexExists) {
-          return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
+          return siemResponse.error({
+            statusCode: 404,
+            body: `index: "${index}" does not exist`,
+          });
         } else {
-          await deleteAllIndex(callWithRequest, `${index}-*`);
-          const policyExists = await getPolicyExists(callWithRequest, index);
+          await deleteAllIndex(callCluster, `${index}-*`);
+          const policyExists = await getPolicyExists(callCluster, index);
           if (policyExists) {
-            await deletePolicy(callWithRequest, index);
+            await deletePolicy(callCluster, index);
           }
-          const templateExists = await getTemplateExists(callWithRequest, index);
+          const templateExists = await getTemplateExists(callCluster, index);
           if (templateExists) {
-            await deleteTemplate(callWithRequest, index);
+            await deleteTemplate(callCluster, index);
           }
-          return { acknowledged: true };
+          return response.ok({ body: { acknowledged: true } });
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const deleteIndexRoute = (server: ServerFacade) => {
-  server.route(createDeleteIndexRoute(server));
+    }
+  );
 };

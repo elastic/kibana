@@ -7,12 +7,12 @@
 import { EuiTitle, EuiSpacer, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
-import { useFetcher } from '../../../../../hooks/useFetcher';
 import {
-  getOptionLabel,
-  omitAllOption
-} from '../../../../../../common/agent_configuration_constants';
+  omitAllOption,
+  getOptionLabel
+} from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { useFetcher } from '../../../../../hooks/useFetcher';
+import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 
 const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
   'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
@@ -22,17 +22,17 @@ const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
 interface Props {
   isReadOnly: boolean;
   serviceName: string;
-  setServiceName: (env: string) => void;
+  onServiceNameChange: (env: string) => void;
   environment: string;
-  setEnvironment: (env: string) => void;
+  onEnvironmentChange: (env: string) => void;
 }
 
 export function ServiceSection({
   isReadOnly,
   serviceName,
-  setServiceName,
+  onServiceNameChange,
   environment,
-  setEnvironment
+  onEnvironmentChange
 }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     callApmApi => {
@@ -115,8 +115,8 @@ export function ServiceSection({
             disabled={serviceNamesStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setServiceName(e.target.value);
-              setEnvironment('');
+              onServiceNameChange(e.target.value);
+              onEnvironmentChange('');
             }}
           />
         )}
@@ -149,7 +149,7 @@ export function ServiceSection({
             disabled={!serviceName || environmentStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setEnvironment(e.target.value);
+              onEnvironmentChange(e.target.value);
             }}
           />
         )}

@@ -75,7 +75,11 @@ describe('Plugin Context', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      kibana: { index: '.kibana' },
+      kibana: {
+        index: '.kibana',
+        autocompleteTerminateAfter: duration(100000),
+        autocompleteTimeout: duration(1000),
+      },
       elasticsearch: {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),

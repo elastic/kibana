@@ -37,5 +37,9 @@ export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
         fontWeight: 'font-weight',
       },
     }),
+    openLinksInNewTab: i18n.translate('xpack.canvas.functions.markdown.args.openLinkHelpText', {
+      defaultMessage:
+        'A true/false value for opening links in a new tab. Default value is false. Setting to true will open all links in a new tab.',
+    }),
   },
 };

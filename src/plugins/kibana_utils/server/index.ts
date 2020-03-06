@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Get, Set, createGetterSetter } from '../common';
+export { Get, Set, createGetterSetter, url } from '../common';

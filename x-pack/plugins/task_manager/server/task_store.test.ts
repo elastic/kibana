@@ -18,11 +18,7 @@ import {
 } from './task';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
-import {
-  SavedObjectsSerializer,
-  SavedObjectsSchema,
-  SavedObjectAttributes,
-} from '../../../../src/core/server';
+import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src/core/server';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
@@ -46,7 +42,7 @@ const taskDefinitions: TaskDictionary<TaskDefinition> = {
 };
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -64,15 +60,13 @@ describe('TaskStore', () => {
   describe('schedule', () => {
     async function testSchedule(task: TaskInstance) {
       const callCluster = jest.fn();
-      savedObjectsClient.create.mockImplementation(
-        async (type: string, attributes: SavedObjectAttributes) => ({
-          id: 'testid',
-          type,
-          attributes,
-          references: [],
-          version: '123',
-        })
-      );
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: any) => ({
+        id: 'testid',
+        type,
+        attributes,
+        references: [],
+        version: '123',
+      }));
       const store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
@@ -155,14 +149,14 @@ describe('TaskStore', () => {
     test('sets runAt to now if not specified', async () => {
       await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      const attributes: any = savedObjectsClient.create.mock.calls[0][1];
       expect(new Date(attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
     });
 
     test('ensures params and state are not null', async () => {
       await testSchedule({ taskType: 'yawn' } as any);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      const attributes: any = savedObjectsClient.create.mock.calls[0][1];
       expect(attributes.params).toEqual('{}');
       expect(attributes.state).toEqual('{}');
     });
@@ -751,7 +745,7 @@ if (doc['task.runAt'].size()!=0) {
       };
 
       savedObjectsClient.update.mockImplementation(
-        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+        async (type: string, id: string, attributes: any) => {
           return {
             id,
             type,

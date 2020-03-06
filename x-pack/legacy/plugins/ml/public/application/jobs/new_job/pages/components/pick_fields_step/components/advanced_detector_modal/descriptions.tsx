@@ -18,7 +18,6 @@ export const AggDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -27,7 +26,7 @@ export const AggDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -43,7 +42,6 @@ export const FieldDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -52,7 +50,7 @@ export const FieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -68,7 +66,6 @@ export const ByFieldDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -77,7 +74,7 @@ export const ByFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -93,7 +90,6 @@ export const OverFieldDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -102,7 +98,7 @@ export const OverFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -118,7 +114,6 @@ export const PartitionFieldDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -127,7 +122,7 @@ export const PartitionFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -143,7 +138,6 @@ export const ExcludeFrequentDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -152,7 +146,7 @@ export const ExcludeFrequentDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -169,7 +163,6 @@ export const DescriptionDescription: FC = memo(({ children }) => {
   return (
     <EuiDescribedFormGroup
       fullWidth={true}
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -178,7 +171,7 @@ export const DescriptionDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']} fullWidth={true}>
+      <EuiFormRow label={title} fullWidth={true}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

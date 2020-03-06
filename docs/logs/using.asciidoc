@@ -8,7 +8,6 @@ You can also view related application traces or uptime information where availab
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Logs Console in Kibana]
-// ++ Update this
 
 [float]
 [[logs-search]]

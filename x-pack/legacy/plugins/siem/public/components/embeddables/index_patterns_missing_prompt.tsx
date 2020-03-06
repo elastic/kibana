@@ -7,13 +7,13 @@
 import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import chrome from 'ui/chrome';
 
-import { useKibana } from '../../lib/kibana';
+import { useKibana, useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
-  const docLinks = useKibana().services.docLinks;
+  const { docLinks } = useKibana().services;
+  const kibanaBasePath = `${useBasePath()}/app/kibana`;
 
   return (
     <EuiEmptyPrompt
@@ -29,7 +29,7 @@ export const IndexPatternsMissingPromptComponent = () => {
               values={{
                 defaultIndex: (
                   <a
-                    href={`${chrome.getBasePath()}/app/kibana#/management/kibana/settings`}
+                    href={`${kibanaBasePath}#/management/kibana/settings`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -61,7 +61,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
+          href={`${kibanaBasePath}#/management/kibana/index_patterns`}
           color="primary"
           target="_blank"
           fill

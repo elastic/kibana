@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Moment } from 'moment';
-import { AlertExecutorOptions } from '../../../alerting';
+import { AlertExecutorOptions } from '../../../../../plugins/alerting/server';
 
 export interface AlertLicense {
   status: string;

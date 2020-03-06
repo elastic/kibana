@@ -53,7 +53,7 @@ describe('GET /api/features', () => {
 
   it('returns a list of available features', async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(undefined as any, undefined as any, mockResponse);
+    routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
     expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
             Array [
@@ -84,11 +84,11 @@ describe('GET /api/features', () => {
         `);
   });
 
-  it(`does not return features that arent allowed by current license`, async () => {
+  it(`by default does not return features that arent allowed by current license`, async () => {
     currentLicenseLevel = 'basic';
 
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(undefined as any, undefined as any, mockResponse);
+    routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
     expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -100,6 +100,65 @@ describe('GET /api/features', () => {
                 "id": "feature_1",
                 "name": "Feature 1",
                 "privileges": Object {},
+              },
+            ],
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`ignoreValidLicenses=false does not return features that arent allowed by current license`, async () => {
+    currentLicenseLevel = 'basic';
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    routeHandler(undefined as any, { query: { ignoreValidLicenses: false } } as any, mockResponse);
+
+    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "body": Array [
+              Object {
+                "app": Array [],
+                "id": "feature_1",
+                "name": "Feature 1",
+                "privileges": Object {},
+              },
+            ],
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`ignoreValidLicenses=true returns features that arent allowed by current license`, async () => {
+    currentLicenseLevel = 'basic';
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    routeHandler(undefined as any, { query: { ignoreValidLicenses: true } } as any, mockResponse);
+
+    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "body": Array [
+              Object {
+                "app": Array [],
+                "id": "feature_1",
+                "name": "Feature 1",
+                "privileges": Object {},
+              },
+              Object {
+                "app": Array [
+                  "bar-app",
+                ],
+                "id": "licensed_feature",
+                "name": "Licensed Feature",
+                "privileges": Object {},
+                "validLicenses": Array [
+                  "gold",
+                ],
               },
             ],
           },

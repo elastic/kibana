@@ -20,14 +20,10 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-
-const name = 'input_control_vis';
-
-type Context = KibanaDatatable;
 
 interface Arguments {
   visConfig: string;
@@ -40,19 +36,15 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
-export const createInputControlVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
+export const createInputControlVisFn = (): ExpressionFunctionDefinition<
+  'input_control_vis',
+  KibanaDatatable,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
   name: 'input_control_vis',
   type: 'render',
-  context: {
-    types: [],
-  },
+  inputTypes: [],
   help: i18n.translate('inputControl.function.help', {
     defaultMessage: 'Input control visualization',
   }),
@@ -63,7 +55,7 @@ export const createInputControlVisFn = (): ExpressionFunction<
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(input, args) {
     const params = JSON.parse(args.visConfig);
     return {
       type: 'render',

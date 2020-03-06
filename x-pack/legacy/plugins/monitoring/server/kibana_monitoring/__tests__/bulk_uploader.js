@@ -6,8 +6,10 @@
 
 import { noop } from 'lodash';
 import sinon from 'sinon';
+import moment from 'moment';
 import expect from '@kbn/expect';
 import { BulkUploader } from '../bulk_uploader';
+import { MONITORING_SYSTEM_API_VERSION } from '../../../common/constants';
 
 const FETCH_INTERVAL = 300;
 const CHECK_DELAY = 500;
@@ -52,6 +54,9 @@ describe('BulkUploader', () => {
 
       server = {
         log: sinon.spy(),
+        config: {
+          get: sinon.spy(),
+        },
         elasticsearchPlugin: {
           createCluster: () => cluster,
           getCluster: () => cluster,
@@ -304,6 +309,93 @@ describe('BulkUploader', () => {
         uploader.stop();
         expect(collectorFetch.callCount).to.be.greaterThan(0);
         expect(usageCollectorFetch.callCount).to.be.greaterThan(0);
+        done();
+      }, CHECK_DELAY);
+    });
+
+    it('uses a direct connection to the monitoring cluster, when configured', done => {
+      const dateInIndex = '2020.02.10';
+      const oldNow = moment.now;
+      moment.now = () => 1581310800000;
+      const prodClusterUuid = '1sdfd5';
+      const prodCluster = {
+        callWithInternalUser: sinon
+          .stub()
+          .withArgs('monitoring.bulk')
+          .callsFake(arg => {
+            let resolution = null;
+            if (arg === 'info') {
+              resolution = { cluster_uuid: prodClusterUuid };
+            }
+            return new Promise(resolve => resolve(resolution));
+          }),
+      };
+      const monitoringCluster = {
+        callWithInternalUser: sinon
+          .stub()
+          .withArgs('bulk')
+          .callsFake(() => {
+            return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+          }),
+      };
+
+      const collectorFetch = sinon.stub().returns({
+        type: 'kibana_stats',
+        result: { type: 'kibana_stats', payload: { testData: 12345 } },
+      });
+
+      const collectors = new MockCollectorSet(server, [
+        {
+          fetch: collectorFetch,
+          isReady: () => true,
+          formatForBulkUpload: result => result,
+          isUsageCollector: false,
+        },
+      ]);
+      const customServer = {
+        ...server,
+        elasticsearchPlugin: {
+          createCluster: () => monitoringCluster,
+          getCluster: name => {
+            if (name === 'admin' || name === 'data') {
+              return prodCluster;
+            }
+            return monitoringCluster;
+          },
+        },
+        config: {
+          get: key => {
+            if (key === 'monitoring.elasticsearch') {
+              return {
+                hosts: ['http://localhost:9200'],
+                username: 'tester',
+                password: 'testing',
+                ssl: {},
+              };
+            }
+            return null;
+          },
+        },
+      };
+      const kbnServerStatus = { toJSON: () => ({ overall: { state: 'green' } }) };
+      const kbnServerVersion = 'master';
+      const uploader = new BulkUploader({
+        ...customServer,
+        interval: FETCH_INTERVAL,
+        kbnServerStatus,
+        kbnServerVersion,
+      });
+      uploader.start(collectors);
+      setTimeout(() => {
+        uploader.stop();
+        const firstCallArgs = monitoringCluster.callWithInternalUser.firstCall.args;
+        expect(firstCallArgs[0]).to.be('bulk');
+        expect(firstCallArgs[1].body[0].index._index).to.be(
+          `.monitoring-kibana-${MONITORING_SYSTEM_API_VERSION}-${dateInIndex}`
+        );
+        expect(firstCallArgs[1].body[1].type).to.be('kibana_stats');
+        expect(firstCallArgs[1].body[1].cluster_uuid).to.be(prodClusterUuid);
+        moment.now = oldNow;
         done();
       }, CHECK_DELAY);
     });

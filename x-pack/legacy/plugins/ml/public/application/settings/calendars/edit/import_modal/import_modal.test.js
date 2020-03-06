@@ -33,13 +33,13 @@ const events = [
 
 describe('ImportModal', () => {
   test('Renders import modal', () => {
-    const wrapper = shallowWithIntl(<ImportModal.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<ImportModal {...testProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Deletes selected event from event table', () => {
-    const wrapper = mountWithIntl(<ImportModal.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<ImportModal {...testProps} />);
 
     const testState = {
       allImportedEvents: events,

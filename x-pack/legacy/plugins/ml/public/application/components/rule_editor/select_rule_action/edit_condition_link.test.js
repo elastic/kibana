@@ -31,7 +31,7 @@ function prepareTest(updateConditionValueFn, appliesTo) {
     updateConditionValue: updateConditionValueFn,
   };
 
-  const wrapper = shallowWithIntl(<EditConditionLink.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(<EditConditionLink {...props} />);
 
   return wrapper;
 }

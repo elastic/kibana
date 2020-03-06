@@ -21,16 +21,19 @@ import { IHttpFetchError } from './types';
 
 /** @internal */
 export class HttpFetchError extends Error implements IHttpFetchError {
+  public readonly name: string;
   public readonly req: Request;
   public readonly res?: Response;
 
   constructor(
     message: string,
+    name: string,
     public readonly request: Request,
     public readonly response?: Response,
     public readonly body?: any
   ) {
     super(message);
+    this.name = name;
     this.req = request;
     this.res = response;
 

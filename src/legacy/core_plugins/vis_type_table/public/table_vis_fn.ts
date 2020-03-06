@@ -19,16 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
 
-const name = 'kibana_table';
-
-export type Context = KibanaDatatable;
+export type Input = KibanaDatatable;
 
 interface Arguments {
   visConfig: string | null;
@@ -45,19 +42,15 @@ interface RenderValue {
   };
 }
 
-type Return = Render<RenderValue>;
-
-export const createTableVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
+export const createTableVisFn = (): ExpressionFunctionDefinition<
+  'kibana_table',
+  Input,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
-  name,
+  name: 'kibana_table',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),
@@ -68,9 +61,9 @@ export const createTableVisFn = (): ExpressionFunction<
       help: '',
     },
   },
-  fn(context, args) {
+  fn(input, args) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const convertedData = tableVisResponseHandler(context, visConfig.dimensions);
+    const convertedData = tableVisResponseHandler(input, visConfig.dimensions);
 
     return {
       type: 'render',

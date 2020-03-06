@@ -35,19 +35,19 @@ const whitelistUrlSchemes = ['http://', 'https://'];
 const URL_TYPES = [
   {
     kind: 'a',
-    text: i18n.translate('data.common.fieldFormats.url.types.link', {
+    text: i18n.translate('data.fieldFormats.url.types.link', {
       defaultMessage: 'Link',
     }),
   },
   {
     kind: 'img',
-    text: i18n.translate('data.common.fieldFormats.url.types.img', {
+    text: i18n.translate('data.fieldFormats.url.types.img', {
       defaultMessage: 'Image',
     }),
   },
   {
     kind: 'audio',
-    text: i18n.translate('data.common.fieldFormats.url.types.audio', {
+    text: i18n.translate('data.fieldFormats.url.types.audio', {
       defaultMessage: 'Audio',
     }),
   },
@@ -56,7 +56,9 @@ const DEFAULT_URL_TYPE = 'a';
 
 export class UrlFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.URL;
-  static title = 'Url';
+  static title = i18n.translate('data.fieldFormats.url.title', {
+    defaultMessage: 'Url',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
     KBN_FIELD_TYPES.BOOLEAN,

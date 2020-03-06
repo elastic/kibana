@@ -5,8 +5,7 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-import { esKuery } from '../../../../../../../../../src/plugins/data/common';
-import { esFilters } from '../../../../../../../../../src/plugins/data/public';
+import { Filter, esKuery, KueryNode } from '../../../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProvidersAnd,
@@ -34,7 +33,7 @@ const templateFields = [
 ];
 
 export const findValueToChangeInQuery = (
-  keuryNode: esKuery.KueryNode,
+  keuryNode: KueryNode,
   valueToChange: FindValueToChangeInQuery[] = []
 ): FindValueToChangeInQuery[] => {
   let localValueToChange = valueToChange;
@@ -48,7 +47,7 @@ export const findValueToChangeInQuery = (
     ];
   }
   return keuryNode.arguments.reduce(
-    (addValueToChange: FindValueToChangeInQuery[], ast: esKuery.KueryNode) => {
+    (addValueToChange: FindValueToChangeInQuery[], ast: KueryNode) => {
       if (ast.function === 'is' && templateFields.includes(ast.arguments[0].value)) {
         return [
           ...addValueToChange,
@@ -81,7 +80,7 @@ export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs) => {
   return '';
 };
 
-export const replaceTemplateFieldFromMatchFilters = (filters: esFilters.Filter[], ecsData: Ecs) =>
+export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs) =>
   filters.map(filter => {
     if (
       filter.meta.type === 'phrase' &&

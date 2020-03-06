@@ -29,7 +29,7 @@ function createRoot() {
           layout: {
             highlight: false,
             kind: 'pattern',
-            pattern: '{level}|{context}|{message}',
+            pattern: '%level|%logger|%message',
           },
         },
       },

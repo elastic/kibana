@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -89,12 +89,8 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   const expectTypeRequired = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Bad Request',
-      message: 'child "type" fails because ["type" is required]',
+      message: '[request query.type]: expected at least one defined value but got [undefined]',
       statusCode: 400,
-      validation: {
-        keys: ['type'],
-        source: 'query',
-      },
     });
   };
 

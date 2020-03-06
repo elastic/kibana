@@ -18,16 +18,9 @@ import {
   NetworkHttpData,
   NetworkHttpEdges,
   NetworkTopNFlowEdges,
-  NetworkDsOverTimeData,
-  MatrixOverTimeHistogramData,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
-import {
-  DatabaseSearchResponse,
-  FrameworkAdapter,
-  FrameworkRequest,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
@@ -38,7 +31,6 @@ import {
   NetworkTopNFlowRequestOptions,
 } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
-import { buildDnsHistogramQuery } from './query_dns_histogram.dsl';
 import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
 import { buildHttpQuery } from './query_http.dsl';
 import { buildTopCountriesQuery } from './query_top_countries.dsl';
@@ -48,9 +40,7 @@ import {
   NetworkTopCountriesBuckets,
   NetworkHttpBuckets,
   NetworkTopNFlowBuckets,
-  DnsHistogramGroupData,
 } from './types';
-import { EventHit } from '../events/types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -202,40 +192,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       totalCount,
     };
   }
-
-  public async getNetworkDnsHistogramData(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<NetworkDsOverTimeData> {
-    const dsl = buildDnsHistogramQuery(options);
-    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-    const totalCount = getOr(0, 'hits.total.value', response);
-    const matrixHistogramData = getOr([], 'aggregations.NetworkDns.buckets', response);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    return {
-      inspect,
-      matrixHistogramData: getHistogramData(matrixHistogramData),
-      totalCount,
-    };
-  }
 }
-
-const getHistogramData = (data: DnsHistogramGroupData[]): MatrixOverTimeHistogramData[] => {
-  return data.reduce(
-    (acc: MatrixOverTimeHistogramData[], { key: time, histogram: { buckets } }) => {
-      const temp = buckets.map(({ key, doc_count }) => ({ x: time, y: doc_count, g: key }));
-      return [...acc, ...temp];
-    },
-    []
-  );
-};
 
 const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,

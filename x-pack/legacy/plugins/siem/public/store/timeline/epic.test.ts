@@ -8,7 +8,7 @@ import { TimelineModel } from './model';
 import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -115,7 +115,7 @@ describe('Epic Timeline', () => {
               value: 'exists',
             },
             exists: { field: '@timestamp' },
-          } as esFilters.Filter,
+          } as Filter,
         ],
         isFavorite: false,
         isLive: false,

@@ -7,19 +7,14 @@
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { getFieldFormats, getUiSettings } from './dependency_cache';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
-
-const config = chrome.getUiSettingsClient();
-
-const getConfig = (...args) => config.get(...args);
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
@@ -29,8 +24,9 @@ const calcAuto = timeBucketsCalcAutoIntervalProvider();
  * for example the interval between points on a time series chart.
  */
 export function TimeBuckets() {
-  this.barTarget = config.get('histogram:barTarget');
-  this.maxBars = config.get('histogram:maxBars');
+  const uiSettings = getUiSettings();
+  this.barTarget = uiSettings.get('histogram:barTarget');
+  this.maxBars = uiSettings.get('histogram:maxBars');
 }
 
 /**
@@ -301,8 +297,9 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
  * @return {string}
  */
 TimeBuckets.prototype.getScaledDateFormat = function() {
+  const uiSettings = getUiSettings();
   const interval = this.getInterval();
-  const rules = config.get('dateFormat:scaled');
+  const rules = uiSettings.get('dateFormat:scaled');
 
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
@@ -311,17 +308,19 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
     }
   }
 
-  return config.get('dateFormat');
+  return uiSettings.get('dateFormat');
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function() {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
+  const fieldFormats = getFieldFormats();
+  const uiSettings = getUiSettings();
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(
     {
       pattern: this.getScaledDateFormat(),
     },
-    getConfig
+    // getConfig
+    uiSettings.get
   );
 };
 

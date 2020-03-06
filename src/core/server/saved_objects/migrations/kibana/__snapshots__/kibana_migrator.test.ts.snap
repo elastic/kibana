@@ -4,8 +4,8 @@ exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core pr
 Object {
   "_meta": Object {
     "migrationMappingPropertyHashes": Object {
-      "amap": "625b32086eb1d1203564cf85062dd22e",
-      "bmap": "625b32086eb1d1203564cf85062dd22e",
+      "amap": "510f1f0adb69830cf8a1c5ce2923ed82",
+      "bmap": "510f1f0adb69830cf8a1c5ce2923ed82",
       "config": "87aca8fdb053154f11383fce3dbf3edf",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
@@ -17,10 +17,18 @@ Object {
   "dynamic": "strict",
   "properties": Object {
     "amap": Object {
-      "type": "text",
+      "properties": Object {
+        "field": Object {
+          "type": "text",
+        },
+      },
     },
     "bmap": Object {
-      "type": "text",
+      "properties": Object {
+        "field": Object {
+          "type": "text",
+        },
+      },
     },
     "config": Object {
       "dynamic": "true",

@@ -45,7 +45,7 @@ export const getUiExports = () => {
       icon: 'plugins/monitoring/icons/monitoring.svg',
       euiIconType: 'monitoringApp',
       linkToLastSubUrl: false,
-      main: 'plugins/monitoring/monitoring',
+      main: 'plugins/monitoring/legacy',
       category: DEFAULT_APP_CATEGORIES.management,
     },
     injectDefaultVars(server) {

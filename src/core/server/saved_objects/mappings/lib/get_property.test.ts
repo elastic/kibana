@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldMapping, IndexMapping } from '../types';
+import { SavedObjectsFieldMapping, IndexMapping } from '../types';
 import { getProperty } from './get_property';
 
 const MAPPINGS = {
@@ -47,7 +47,7 @@ const MAPPINGS = {
   },
 };
 
-function runTest(key: string | string[], mapping: IndexMapping | FieldMapping) {
+function runTest(key: string | string[], mapping: IndexMapping | SavedObjectsFieldMapping) {
   expect(typeof key === 'string' || Array.isArray(key)).toBeTruthy();
   expect(typeof mapping).toBe('object');
 

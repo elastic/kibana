@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiHealth, EuiHighlight } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { getSpaceColor } from '../../../../../../../../../legacy/plugins/spaces/public/space_avatar';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {
@@ -66,7 +65,7 @@ export class SpaceSelector extends Component<Props, {}> {
     );
   }
 
-  private onChange = (selectedSpaces: EuiComboBoxOptionProps[]) => {
+  private onChange = (selectedSpaces: EuiComboBoxOptionOption[]) => {
     this.props.onChange(selectedSpaces.map(s => (s.id as string).split('spaceOption_')[1]));
   };
 
@@ -82,12 +81,12 @@ export class SpaceSelector extends Component<Props, {}> {
       )
     );
 
-    return options.filter(Boolean) as EuiComboBoxOptionProps[];
+    return options.filter(Boolean) as EuiComboBoxOptionOption[];
   };
 
   private getSelectedOptions = () => {
     const options = this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces));
 
-    return options.filter(Boolean) as EuiComboBoxOptionProps[];
+    return options.filter(Boolean) as EuiComboBoxOptionOption[];
   };
 }

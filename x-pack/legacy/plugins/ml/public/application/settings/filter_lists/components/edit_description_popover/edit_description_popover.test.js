@@ -16,7 +16,7 @@ function prepareTest(updateDescriptionFn) {
     canCreateFilter: true,
   };
 
-  const wrapper = shallowWithIntl(<EditDescriptionPopover.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(<EditDescriptionPopover {...props} />);
 
   return wrapper;
 }
@@ -30,7 +30,7 @@ describe('FilterListUsagePopover', () => {
       canCreateFilter: true,
     };
 
-    const component = shallowWithIntl(<EditDescriptionPopover.WrappedComponent {...props} />);
+    const component = shallowWithIntl(<EditDescriptionPopover {...props} />);
 
     expect(component).toMatchSnapshot();
   });

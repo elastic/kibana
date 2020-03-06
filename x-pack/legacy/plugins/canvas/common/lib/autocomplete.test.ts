@@ -35,7 +35,7 @@ describe('autocomplete', () => {
       const expression = 'plot ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
       const plotFn = functionSpecs.find(spec => spec.name === 'plot');
-      expect(suggestions.length).toBe(Object.keys(plotFn.args).length);
+      expect(suggestions.length).toBe(Object.keys(plotFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
     });
@@ -44,7 +44,7 @@ describe('autocomplete', () => {
       const expression = 'shape shape=';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
       const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-      expect(suggestions.length).toBe(shapeFn.args.shape.options.length);
+      expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
     });
@@ -82,27 +82,24 @@ describe('autocomplete', () => {
       expect(suggestions.length).toBe(functionSpecs.length);
 
       expect(suggestions[0].fnDef.type).toBe('datatable');
-      expect(suggestions[0].fnDef.context && suggestions[0].fnDef.context.types).toEqual([
-        'datatable',
-      ]);
+      expect(suggestions[0].fnDef.inputTypes).toEqual(['datatable']);
 
       const withReturnOnly = suggestions.findIndex(
         suggestion =>
           suggestion.fnDef.type === 'datatable' &&
-          suggestion.fnDef.context &&
-          suggestion.fnDef.context.types &&
-          !(suggestion.fnDef.context.types as string[]).includes('datatable')
+          suggestion.fnDef.inputTypes &&
+          !(suggestion.fnDef.inputTypes as string[]).includes('datatable')
       );
 
       const withNeither = suggestions.findIndex(
         suggestion =>
           suggestion.fnDef.type !== 'datatable' &&
-          (!suggestion.fnDef.context ||
-            !(suggestion.fnDef.context.types as string[]).includes('datatable'))
+          (!suggestion.fnDef.inputTypes ||
+            !(suggestion.fnDef.inputTypes as string[]).includes('datatable'))
       );
 
       expect(suggestions[0].fnDef.type).toBe('datatable');
-      expect(suggestions[0].fnDef.context?.types).toEqual(['datatable']);
+      expect(suggestions[0].fnDef.inputTypes).toEqual(['datatable']);
 
       expect(withReturnOnly).toBeLessThan(withNeither);
     });
@@ -115,7 +112,7 @@ describe('autocomplete', () => {
         expression.length - 1
       );
       const ltFn = functionSpecs.find(spec => spec.name === 'lt');
-      expect(suggestions.length).toBe(Object.keys(ltFn.args).length);
+      expect(suggestions.length).toBe(Object.keys(ltFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
     });
@@ -128,7 +125,7 @@ describe('autocomplete', () => {
         expression.length - 1
       );
       const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-      expect(suggestions.length).toBe(shapeFn.args.shape.options.length);
+      expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
     });
@@ -141,7 +138,7 @@ describe('autocomplete', () => {
         expression.length - 1
       );
       const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-      expect(suggestions.length).toBe(shapeFn.args.shape.options.length);
+      expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - '"ar"'.length);
       expect(suggestions[0].end).toBe(expression.length);
     });

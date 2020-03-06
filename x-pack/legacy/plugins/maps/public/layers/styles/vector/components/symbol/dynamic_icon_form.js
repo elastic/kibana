@@ -43,6 +43,7 @@ export function DynamicIconForm({
     return (
       <IconMapSelect
         {...styleOptions}
+        styleProperty={styleProperty}
         onChange={onIconMapChange}
         isDarkMode={isDarkMode}
         symbolOptions={symbolOptions}
@@ -52,8 +53,10 @@ export function DynamicIconForm({
 
   return (
     <Fragment>
-      <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+        <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+          {staticDynamicSelect}
+        </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
             fields={fields}

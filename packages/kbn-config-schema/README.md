@@ -227,6 +227,9 @@ __Usage:__
 const valueSchema = schema.arrayOf(schema.number());
 ```
 
+__Notes:__
+* The `schema.arrayOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is an array.
+
 #### `schema.object()`
 
 Validates input data as an object with a predefined set of properties.
@@ -249,6 +252,7 @@ const valueSchema = schema.object({
 __Notes:__
 * Using `allowUnknowns` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
+* `schema.object()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 #### `schema.recordOf()`
 
@@ -267,6 +271,7 @@ const valueSchema = schema.recordOf(schema.string(), schema.number());
 
 __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
+* `schema.recordOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 #### `schema.mapOf()`
 
@@ -282,6 +287,10 @@ __Usage:__
 ```typescript
 const valueSchema = schema.mapOf(schema.string(), schema.number());
 ```
+
+__Notes:__
+* You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
+* `schema.mapOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 ### Advanced types
 

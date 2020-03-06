@@ -8,14 +8,15 @@ import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts'
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine } from '../../../../common/graphql/types';
+import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
-import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
+import { ChartEmptyState } from './chart_empty_state';
 
 interface DurationChartProps {
   /**
@@ -23,14 +24,6 @@ interface DurationChartProps {
    * on the duration chart. One entry per location
    */
   locationDurationLines: LocationDurationLine[];
-  /**
-   * The color to be used for the average duration series.
-   */
-  meanColor: string;
-  /**
-   * The color to be used for the range duration series.
-   */
-  rangeColor: string;
 
   /**
    * To represent the loading spinner on chart
@@ -44,15 +37,17 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChart = ({
-  locationDurationLines,
-  meanColor,
-  loading,
-}: DurationChartProps) => {
+export const DurationChartComponent = ({ locationDurationLines, loading }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
-  const [getUrlParams] = useUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
+  const onBrushEnd = (minX: number, maxX: number) => {
+    updateUrlParams({
+      dateRangeStart: moment(minX).toISOString(),
+      dateRangeEnd: moment(maxX).toISOString(),
+    });
+  };
   return (
     <>
       <EuiPanel paddingSize="m">
@@ -68,7 +63,12 @@ export const DurationChart = ({
         <ChartWrapper height="400px" loading={loading}>
           {hasLines ? (
             <Chart>
-              <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
+              <Settings
+                xDomain={{ min, max }}
+                showLegend={true}
+                legendPosition={Position.Bottom}
+                onBrushEnd={onBrushEnd}
+              />
               <Axis
                 id="bottom"
                 position={Position.Bottom}
@@ -87,10 +87,21 @@ export const DurationChart = ({
                   defaultMessage: 'Duration ms',
                 })}
               />
-              <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+              <DurationLineSeriesList lines={locationDurationLines} />
             </Chart>
           ) : (
-            <DurationChartEmptyState />
+            <ChartEmptyState
+              body={
+                <FormattedMessage
+                  id="xpack.uptime.durationChart.emptyPrompt.description"
+                  defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
+                  values={{ emphasizedText: <strong>up</strong> }}
+                />
+              }
+              title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {
+                defaultMessage: 'No duration data available',
+              })}
+            />
           )}
         </ChartWrapper>
       </EuiPanel>

@@ -5,11 +5,15 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
+
+import { SecurityPluginSetup } from '../../security/server';
+
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
+import { caseSavedObjectType, caseCommentSavedObjectType } from './saved_object_types';
 import { CaseService } from './services';
-import { SecurityPluginSetup } from '../../security/server';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));
@@ -34,6 +38,10 @@ export class CasePlugin {
     if (!config.enabled) {
       return;
     }
+
+    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(caseCommentSavedObjectType);
+
     const service = new CaseService(this.log);
 
     this.log.debug(

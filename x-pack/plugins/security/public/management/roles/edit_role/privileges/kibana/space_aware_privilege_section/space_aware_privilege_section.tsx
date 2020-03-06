@@ -15,9 +15,9 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
+import { KibanaPrivileges, Role, isRoleReserved } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
@@ -219,7 +219,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>{addPrivilegeButton}</EuiFlexItem>
-        {hasPrivilegesAssigned && !isReservedRole(this.props.role) && (
+        {hasPrivilegesAssigned && !isRoleReserved(this.props.role) && (
           <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>
         )}
       </EuiFlexGroup>

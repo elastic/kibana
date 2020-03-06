@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { px, unit } from '../../../style/variables';
 import { Stacktrace } from '.';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 
 // @ts-ignore Styled Components has trouble inferring the types of the default props here.
 const Accordion = styled(EuiAccordion)`

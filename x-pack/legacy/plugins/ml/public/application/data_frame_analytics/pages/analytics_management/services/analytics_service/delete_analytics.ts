@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
@@ -16,6 +16,7 @@ import {
 } from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
+  const toastNotifications = getToastNotifications();
   try {
     if (isDataFrameAnalyticsFailed(d.stats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true, true);

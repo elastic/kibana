@@ -189,8 +189,9 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   getLineCount() {
-    const text = this.getValue();
-    return text.split('\n').length;
+    // Only use this function to return line count as it uses
+    // a cache.
+    return this.editor.getSession().getLength();
   }
 
   addMarker(range: Range) {
@@ -252,14 +253,23 @@ export class LegacyCoreEditor implements CoreEditor {
     this._aceOnPaste.call(this.editor, text);
   }
 
-  private setActionsBar = (top?: any) => {
-    if (top === null) {
+  private setActionsBar = (value?: any, topOrBottom: 'top' | 'bottom' = 'top') => {
+    if (value === null) {
       this.$actions.css('visibility', 'hidden');
     } else {
-      this.$actions.css({
-        top,
-        visibility: 'visible',
-      });
+      if (topOrBottom === 'top') {
+        this.$actions.css({
+          bottom: 'auto',
+          top: value,
+          visibility: 'visible',
+        });
+      } else {
+        this.$actions.css({
+          top: 'auto',
+          bottom: value,
+          visibility: 'visible',
+        });
+      }
     }
   };
 
@@ -302,13 +312,17 @@ export class LegacyCoreEditor implements CoreEditor {
       const firstLine = this.getLineValue(startLine);
       const maxLineLength = this.getWrapLimit() - 5;
       const isWrapping = firstLine.length > maxLineLength;
+      const totalOffset = offsetFromPage - (window.pageYOffset || 0);
       const getScreenCoords = (line: number) =>
-        this.editor.renderer.textToScreenCoordinates(line - 1, startColumn).pageY -
-        offsetFromPage +
-        (window.pageYOffset || 0);
+        this.editor.renderer.textToScreenCoordinates(line - 1, startColumn).pageY - totalOffset;
       const topOfReq = getScreenCoords(startLine);
 
       if (topOfReq >= 0) {
+        const { bottom: maxBottom } = this.editor.container.getBoundingClientRect();
+        if (topOfReq > maxBottom - totalOffset) {
+          this.setActionsBar(0, 'bottom');
+          return;
+        }
         let offset = 0;
         if (isWrapping) {
           // Try get the line height of the text area in pixels.

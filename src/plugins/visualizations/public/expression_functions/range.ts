@@ -18,19 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable, Range } from '../../../expressions/public';
-
-const name = 'range';
-
-type Context = KibanaDatatable | null;
+import { ExpressionFunctionDefinition, KibanaDatatable, Range } from '../../../expressions/public';
 
 interface Arguments {
   from: number;
   to: number;
 }
 
-export const range = (): ExpressionFunction<typeof name, Context, Arguments, Range> => ({
-  name,
+export const range = (): ExpressionFunctionDefinition<
+  'range',
+  KibanaDatatable | null,
+  Arguments,
+  Range
+> => ({
+  name: 'range',
   help: i18n.translate('visualizations.function.range.help', {
     defaultMessage: 'Generates range object',
   }),

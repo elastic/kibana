@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { addSystemApiHeader, isSystemApiRequest } from './system_api';
+export { addSystemApiHeader, isSystemApiRequest } from '../../../../plugins/kibana_legacy/public';

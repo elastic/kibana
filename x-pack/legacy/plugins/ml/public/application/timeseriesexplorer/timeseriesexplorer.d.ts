@@ -6,8 +6,6 @@
 
 import { FC } from 'react';
 
-import { Timefilter } from 'ui/timefilter';
-
 import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{

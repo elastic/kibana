@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { IndexPatterns } from './index_patterns';
+import { IndexPatternsService } from './index_patterns';
 import {
   SavedObjectsClientContract,
   IUiSettingsClient,
@@ -49,7 +49,7 @@ jest.mock('./index_patterns_api_client', () => {
 });
 
 describe('IndexPatterns', () => {
-  let indexPatterns: IndexPatterns;
+  let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('IndexPatterns', () => {
     const uiSettings = {} as IUiSettingsClient;
     const http = {} as HttpSetup;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(uiSettings, savedObjectsClient, http);
   });
 
   test('does cache gets for the same id', async () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n/functions';
 import { TimeRange } from '../../../types';
 
@@ -13,15 +13,13 @@ interface Args {
   to: string;
 }
 
-export function timerange(): ExpressionFunction<'timerange', null, Args, TimeRange> {
+export function timerange(): ExpressionFunctionDefinition<'timerange', null, Args, TimeRange> {
   const { help, args: argHelp } = getFunctionHelp().timerange;
   return {
     name: 'timerange',
     help,
     type: 'timerange',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       from: {
         types: ['string'],
@@ -34,7 +32,7 @@ export function timerange(): ExpressionFunction<'timerange', null, Args, TimeRan
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'timerange',
         ...args,

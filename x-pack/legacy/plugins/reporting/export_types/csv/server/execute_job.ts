@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
+import Hapi from 'hapi';
+import {
+  ElasticsearchServiceSetup,
+  IUiSettingsClient,
+  KibanaRequest,
+} from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
+import { getFieldFormats } from '../../../server/services';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
-import { getFieldFormats } from '../../../server/services';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
@@ -40,83 +46,78 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       indexPatternSavedObject,
       metaFields,
       conflictedTypesFields,
-      headers: serializedEncryptedHeaders,
+      headers,
       basePath,
     } = job;
 
-    let decryptedHeaders;
-    try {
-      decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
-    } catch (err) {
-      jobLogger.error(err);
-      throw new Error(
-        i18n.translate(
-          'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
-          {
-            defaultMessage:
-              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-            values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
-          }
-        )
-      );
-    }
+    const decryptHeaders = async () => {
+      let decryptedHeaders;
+      try {
+        decryptedHeaders = await crypto.decrypt(headers);
+      } catch (err) {
+        logger.error(err);
+        throw new Error(
+          i18n.translate(
+            'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
+            {
+              defaultMessage: 'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
+            }
+          )
+        ); // prettier-ignore
+      }
+      return decryptedHeaders;
+    };
 
-    const fakeRequest = {
-      headers: decryptedHeaders,
+    const fakeRequest = KibanaRequest.from({
+      headers: await decryptHeaders(),
       // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
       // We use the basePath from the saved job, which we'll have post spaces being implemented;
       // or we use the server base path, which uses the default space
       getBasePath: () => basePath || serverBasePath,
       path: '/',
       route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
+      url: { href: '/' },
+      raw: { req: { url: '/' } },
+    } as Hapi.Request);
 
-    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
-      KibanaRequest.from(fakeRequest as Hapi.Request)
-    );
-    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) => {
-      return callAsCurrentUser(endpoint, clientParams, options);
+    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(fakeRequest);
+    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
+      callAsCurrentUser(endpoint, clientParams, options);
+
+    const savedObjectsClient = await reporting.getSavedObjectsClient(fakeRequest);
+    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+
+    const getFormatsMap = async (client: IUiSettingsClient) => {
+      const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(client);
+      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
     };
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
-      (fakeRequest as unknown) as KibanaRequest
-    );
-    const uiConfig = server.uiSettingsServiceFactory({
-      savedObjectsClient,
-    });
+    const getUiSettings = async (client: IUiSettingsClient) => {
+      const [separator, quoteValues, timezone] = await Promise.all([
+        client.get('csv:separator'),
+        client.get('csv:quoteValues'),
+        client.get('dateFormat:tz'),
+      ]);
+
+      if (timezone === 'Browser') {
+        logger.warn(
+          i18n.translate('xpack.reporting.exportTypes.csv.executeJob.dateFormateSetting', {
+            defaultMessage: 'Kibana Advanced Setting "{dateFormatTimezone}" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.',
+            values: { dateFormatTimezone: 'dateFormat:tz' }
+          })
+        ); // prettier-ignore
+      }
+
+      return {
+        separator,
+        quoteValues,
+        timezone,
+      };
+    };
 
     const [formatsMap, uiSettings] = await Promise.all([
-      (async () => {
-        const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(uiConfig);
-        return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
-      })(),
-      (async () => {
-        const [separator, quoteValues, timezone] = await Promise.all([
-          uiConfig.get('csv:separator'),
-          uiConfig.get('csv:quoteValues'),
-          uiConfig.get('dateFormat:tz'),
-        ]);
-
-        if (timezone === 'Browser') {
-          jobLogger.warn(
-            `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-          );
-        }
-
-        return {
-          separator,
-          quoteValues,
-          timezone,
-        };
-      })(),
+      getFormatsMap(uiSettingsClient),
+      getUiSettings(uiSettingsClient),
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);

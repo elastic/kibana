@@ -26,11 +26,10 @@ import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/u
 import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
 import * as i18n from './translations';
 
-type Func = () => void;
+type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importCompleteToggle, setImportCompleteToggle] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
     loading,
@@ -67,14 +66,18 @@ const RulesPageComponent: React.FC = () => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
+  const handleRefreshRules = useCallback(async () => {
+    if (refreshRulesData.current != null) {
+      refreshRulesData.current(true);
+    }
+  }, [refreshRulesData]);
+
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      if (refreshRulesData.current != null) {
-        refreshRulesData.current();
-      }
+      handleRefreshRules();
     }
-  }, [createPrePackagedRules, refreshRulesData]);
+  }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
@@ -96,7 +99,7 @@ const RulesPageComponent: React.FC = () => {
       <ImportRuleModal
         showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
-        importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
+        importComplete={handleRefreshRules}
       />
       <WrapperPage>
         <DetectionEngineHeaderPage
@@ -166,7 +169,6 @@ const RulesPageComponent: React.FC = () => {
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           hasNoPermissions={userHasNoPermissions}
-          importCompleteToggle={importCompleteToggle}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}

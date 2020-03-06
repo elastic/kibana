@@ -36,26 +36,35 @@ import {
   setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
-import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
-import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
+import { setSearchServiceShim } from './services';
+import {
+  selectRangeAction,
+  SelectRangeActionContext,
+  ACTION_SELECT_RANGE,
+} from './actions/select_range_action';
+import {
+  valueClickAction,
+  ACTION_VALUE_CLICK,
+  ValueClickActionContext,
+} from './actions/value_click_action';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/embeddable/public/lib/triggers';
-import { IUiActionsSetup, IUiActionsStart } from '../../../../plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
 
 import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -74,6 +83,12 @@ export interface DataSetup {
  */
 export interface DataStart {
   search: SearchStart;
+}
+declare module '../../../../plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
+    [ACTION_VALUE_CLICK]: ValueClickActionContext;
+  }
 }
 
 /**
@@ -99,10 +114,13 @@ export class DataPlugin
     // This is to be deprecated once we switch to the new search service fully
     addSearchStrategy(defaultSearchStrategy);
 
-    uiActions.registerAction(
+    uiActions.attachAction(
+      SELECT_RANGE_TRIGGER,
       selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
     );
-    uiActions.registerAction(
+
+    uiActions.attachAction(
+      VALUE_CLICK_TRIGGER,
       valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
     );
 
@@ -112,6 +130,9 @@ export class DataPlugin
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    const search = this.search.start(core);
+    setSearchServiceShim(search);
+
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
@@ -119,11 +140,8 @@ export class DataPlugin
     setSearchService(data.search);
     setOverlays(core.overlays);
 
-    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
-    uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
-
     return {
-      search: this.search.start(core),
+      search,
     };
   }
 

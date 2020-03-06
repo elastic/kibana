@@ -8,7 +8,7 @@ import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../util/dependency_cache';
 
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
@@ -26,6 +26,7 @@ export function validateJobSelection(
   selectedJobIds: string[],
   setGlobalState: (...args: any) => void
 ) {
+  const toastNotifications = getToastNotifications();
   const jobs = createTimeSeriesJobData(mlJobService.jobs);
   const timeSeriesJobIds: string[] = jobs.map((j: any) => j.id);
 

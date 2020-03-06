@@ -166,9 +166,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
     },
+    metrics: {
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
+      registerType: deps.savedObjects.registerType,
+      getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
     uiSettings: {
       register: deps.uiSettings.register,
@@ -205,6 +210,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
+      createSerializer: deps.savedObjects.createSerializer,
+      getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

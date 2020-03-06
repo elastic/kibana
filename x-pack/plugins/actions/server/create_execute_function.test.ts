@@ -20,6 +20,7 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
+      isESOUsingEphemeralEncryptionKey: false,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -71,6 +72,7 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
+      isESOUsingEphemeralEncryptionKey: false,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -118,6 +120,7 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
+      isESOUsingEphemeralEncryptionKey: false,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -154,5 +157,25 @@ describe('execute()', () => {
         },
       },
     });
+  });
+
+  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+    const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    const executeFn = createExecuteFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient,
+      isESOUsingEphemeralEncryptionKey: true,
+    });
+    await expect(
+      executeFn({
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: null,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+    );
   });
 });

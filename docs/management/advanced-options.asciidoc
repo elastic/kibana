@@ -1,13 +1,14 @@
 [[advanced-options]]
-== Setting advanced options
+== Advanced Settings
 
-The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
+The *Advanced Settings* UI enables you to edit settings that control the behavior of Kibana.
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
 for displayed decimal values.
 
 . Go to *Management > {kib} > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
+. Click *Save changes*.
 
 
 [float]
@@ -34,7 +35,7 @@ removes it from {kib} permanently.
 
 [float]
 [[kibana-general-settings]]
-=== General settings
+==== General
 
 [horizontal]
 `csv:quoteValues`:: Set this property to `true` to quote exported values.
@@ -50,19 +51,17 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `fields:popularLimit`:: The top N most popular fields to show.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state (be pinned) by default.
-`format:bytes:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "bytes" format.
-`format:currency:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "currency" format.
+`format:bytes:defaultPattern`:: The default <<numeral, numeral pattern>> format for the "bytes" format.
+`format:currency:defaultPattern`:: The default <<numeral, numeral pattern>> format for the "currency" format.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "\_default_".
-`format:number:defaultLocale`:: The http://numeraljs.com/[numeral language] locale.
-`format:number:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "number" format.
-`format:percent:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "percent" format.
+`format:number:defaultLocale`:: The <<numeral, numeral pattern>> locale.
+`format:number:defaultPattern`:: The <<numeral, numeral pattern>> for the "number" format.
+`format:percent:defaultPattern`:: The <<numeral, numeral pattern>> for the "percent" format.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `history:limit`:: In fields that have history, such as query inputs, show this many recent values.
-`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names,
-look for this many recent matching patterns from which to query the field mapping.
 `indexPattern:placeholder`:: The default placeholder value to use in Management > Index Patterns > Create Index Pattern.
 `metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields
 into the document when displaying it.
@@ -106,7 +105,7 @@ cluster alert notifications from Monitoring.
 
 [float]
 [[kibana-accessibility-settings]]
-=== Accessibility settings
+==== Accessibility
 
 [horizontal]
 `accessibility:disableAnimations`:: Turns off all unnecessary animations in the
@@ -114,14 +113,15 @@ cluster alert notifications from Monitoring.
 
 [float]
 [[kibana-dashboard-settings]]
-=== Dashboard settings
+==== Dashboard
 
 [horizontal]
-`xpackDashboardMode:roles`:: The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+`xpackDashboardMode:roles`::  **Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]
-=== Discover settings
+==== Discover
 
 [horizontal]
 `context:defaultSize`:: The number of surrounding entries to display in the context view. The default value is 5.
@@ -147,7 +147,7 @@ working on big documents.
 
 [float]
 [[kibana-notification-settings]]
-=== Notifications settings
+==== Notifications
 
 [horizontal]
 `notifications:banner`:: A custom banner intended for temporary notices to all users.
@@ -166,7 +166,7 @@ displays. The default value is 10000. Set this field to `Infinity` to disable wa
 
 [float]
 [[kibana-reporting-settings]]
-=== Reporting settings
+==== Reporting
 
 [horizontal]
 `xpackReporting:customPdfLogo`:: A custom image to use in the footer of the PDF.
@@ -174,7 +174,7 @@ displays. The default value is 10000. Set this field to `Infinity` to disable wa
 
 [float]
 [[kibana-rollups-settings]]
-=== Rollup settings
+==== Rollup
 
 [horizontal]
 `rollups:enableIndexPatterns`:: Enables the creation of index patterns that
@@ -184,7 +184,7 @@ Refresh the page to apply the changes.
 
 [float]
 [[kibana-search-settings]]
-=== Search settings
+==== Search
 
 [horizontal]
 `courier:batchSearches`:: **Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
@@ -212,19 +212,21 @@ might increase the search time. This setting is off by default. Users must opt-i
 
 [float]
 [[kibana-siem-settings]]
-=== SIEM settings
+==== SIEM
 
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
-`siem:enableNewsFeed`:: Enables the News feed
-`siem:newsFeedUrl`:: News feed content will be retrieved from this URL
+`siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
+page.
+`siem:newsFeedUrl`:: The URL from which the security news feed content is
+retrieved.
 `siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
 `siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
 [float]
 [[kibana-timelion-settings]]
-=== Timelion settings
+==== Timelion
 
 [horizontal]
 `timelion:default_columns`:: The default number of columns to use on a Timelion sheet.
@@ -247,7 +249,7 @@ this is the number of buckets to try to represent.
 
 [float]
 [[kibana-visualization-settings]]
-=== Visualization settings
+==== Visualization
 
 [horizontal]
 `visualization:colorMapping`:: Maps values to specified colors in visualizations.
@@ -268,7 +270,7 @@ If disabled, only visualizations that are considered production-ready are availa
 
 [float]
 [[kibana-telemetry-settings]]
-=== Usage data settings
+==== Usage data
 
 Helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.

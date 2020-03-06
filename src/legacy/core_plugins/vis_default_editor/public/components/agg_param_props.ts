@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { Field } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggConfig, AggParam } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
+import { Schema } from '../schemas';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
@@ -33,11 +34,12 @@ export interface AggParamCommonProps<T, P = AggParam> {
   disabled?: boolean;
   editorConfig: EditorConfig;
   formIsTouched: boolean;
-  indexedFields?: ComboBoxGroupedOptions<Field>;
+  indexedFields?: ComboBoxGroupedOptions<IndexPatternField>;
   showValidation: boolean;
   state: VisState;
   value?: T;
   metricAggs: IAggConfig[];
+  schemas: Schema[];
 }
 
 export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {

@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useKibana } from '../lib/kibana';
 import { useStateToaster } from '../components/toasters';
 import { errorToToaster } from '../components/ml/api/error_to_toaster';
 
@@ -19,6 +20,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
+  const { savedObjects } = useKibana().services;
 
   useEffect(() => {
     let isSubscribed = true;
@@ -26,7 +28,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
 
     async function fetchIndexPatterns() {
       try {
-        const data = await getIndexPatterns();
+        const data = await getIndexPatterns(savedObjects);
 
         if (isSubscribed) {
           setIndexPatterns(data);

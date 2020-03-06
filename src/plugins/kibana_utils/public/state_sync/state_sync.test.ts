@@ -151,6 +151,28 @@ describe('state_sync', () => {
 
       stop();
     });
+
+    it('storage change with incomplete or differently shaped object should notify state and set new object as is', () => {
+      container.set({ todos: [{ completed: false, id: 1, text: 'changed' }] });
+      const { stop, start } = syncStates([
+        {
+          stateContainer: container,
+          storageKey: '_s',
+          stateStorage: testStateStorage,
+        },
+      ]);
+      start();
+
+      const differentlyShapedObject = {
+        different: 'test',
+      };
+      (testStateStorage.get as jest.Mock).mockImplementation(() => differentlyShapedObject);
+      storageChange$.next(differentlyShapedObject as any);
+
+      expect(container.getState()).toStrictEqual(differentlyShapedObject);
+
+      stop();
+    });
   });
 
   describe('integration', () => {

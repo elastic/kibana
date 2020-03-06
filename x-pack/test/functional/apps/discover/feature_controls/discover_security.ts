@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
+  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -81,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Management']);
       });
 
       it('shows save button', async () => {
@@ -168,7 +169,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.eql(['Discover', 'Management']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -304,7 +305,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

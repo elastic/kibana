@@ -4,10 +4,7 @@
     "  Some network security policies allow RDP directly from the Internet but usage that is unfamiliar to\n  server or network owners can be unexpected and suspicious. RDP services may be exposed directly to the\n  Internet in some networks such as cloud environments. In such cases, only RDP gateways, bastions or jump\n  servers may be expected expose RDP directly to the Internet and can be exempted from this rule. RDP may\n  be required by some work-flows such as remote access and support for specialized software products and\n  servers. Such work-flows are usually known and not unexpected."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -68,5 +65,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -46,24 +46,28 @@ test('`append()` correctly pushes records to legacy platform.', () => {
       level: LogLevel.Trace,
       message: 'message-1',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Debug,
       message: 'message-2',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-3.sub-context-3',
       level: LogLevel.Info,
       message: 'message-3',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-4.sub-context-4',
       level: LogLevel.Warn,
       message: 'message-4',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-5',
@@ -71,12 +75,14 @@ test('`append()` correctly pushes records to legacy platform.', () => {
       level: LogLevel.Error,
       message: 'message-5-with-error',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-6',
       level: LogLevel.Error,
       message: 'message-6-with-message',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-7.sub-context-7.sub-sub-context-7',
@@ -84,18 +90,21 @@ test('`append()` correctly pushes records to legacy platform.', () => {
       level: LogLevel.Fatal,
       message: 'message-7-with-error',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-8.sub-context-8.sub-sub-context-8',
       level: LogLevel.Fatal,
       message: 'message-8-with-message',
       timestamp,
+      pid: 5355,
     },
     {
       context: 'context-9.sub-context-9',
       level: LogLevel.Info,
       message: 'message-9-with-message',
       timestamp,
+      pid: 5355,
       meta: { someValue: 3 },
     },
     {
@@ -103,6 +112,7 @@ test('`append()` correctly pushes records to legacy platform.', () => {
       level: LogLevel.Info,
       message: 'message-10-with-message',
       timestamp,
+      pid: 5355,
       meta: { tags: ['tag1', 'tag2'] },
     },
   ];
@@ -113,7 +123,12 @@ test('`append()` correctly pushes records to legacy platform.', () => {
   }
 
   const [mockLegacyLoggingServerInstance] = (LegacyLoggingServer as any).mock.instances;
-  expect(mockLegacyLoggingServerInstance.log.mock.calls).toMatchSnapshot();
+  expect(mockLegacyLoggingServerInstance.log.mock.calls).toHaveLength(records.length);
+  records.forEach((r, idx) => {
+    expect(mockLegacyLoggingServerInstance.log.mock.calls[idx][0]).toMatchSnapshot({
+      pid: expect.any(Number),
+    });
+  });
 });
 
 test('legacy logging server is correctly created and disposed.', async () => {

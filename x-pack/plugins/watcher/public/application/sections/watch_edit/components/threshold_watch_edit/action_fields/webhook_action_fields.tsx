@@ -241,11 +241,10 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         errors={errors}
       >
         <EuiCodeEditor
-          fullWidth
           mode="json"
           width="100%"
           height="200px"
-          theme="github"
+          theme="textmate"
           data-test-subj="webhookBodyEditor"
           aria-label={i18n.translate(
             'xpack.watcher.sections.watchEdit.threshold.webhookAction.bodyCodeEditorAriaLabel',

@@ -11,7 +11,14 @@ import { NavigationMenu } from '../../components/navigation_menu';
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view';
 
-export const JobsPage: FC<{ props?: any }> = props => {
+interface JobsPageProps {
+  blockRefresh?: boolean;
+  isManagementTable?: boolean;
+  isMlEnabledInSpace?: boolean;
+  lastRefresh?: number;
+}
+
+export const JobsPage: FC<JobsPageProps> = props => {
   return (
     <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="jobs" />

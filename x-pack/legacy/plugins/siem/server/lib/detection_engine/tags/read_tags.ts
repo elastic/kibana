@@ -6,7 +6,7 @@
 
 import { has } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {

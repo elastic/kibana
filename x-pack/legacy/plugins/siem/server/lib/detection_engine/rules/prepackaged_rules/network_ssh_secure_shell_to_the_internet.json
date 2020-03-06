@@ -4,10 +4,7 @@
     "SSH connections may be made directly to Internet destinations in order to access Linux\n    cloud server instances but such connections are usually made only by engineers. In such cases,\n    only SSH gateways, bastions or jump servers may be expected Internet destinations and can be\n    exempted from this rule. SSH may be required by some work-flows such as remote access and support\n    for specialized software products and servers. Such work-flows are usually known and not unexpected.\n    Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -38,5 +35,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

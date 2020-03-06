@@ -21,22 +21,22 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '../../../../core/public';
 import { IEmbeddable, ViewMode, IEmbeddableStart } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { IAction, IncompatibleActionError } from '../ui_actions_plugin';
+import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
-export const REPLACE_PANEL_ACTION = 'replacePanel';
+export const ACTION_REPLACE_PANEL = 'replacePanel';
 
 function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
 }
 
-interface ActionContext {
+export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ReplacePanelAction implements IAction<ActionContext> {
-  public readonly type = REPLACE_PANEL_ACTION;
-  public readonly id = REPLACE_PANEL_ACTION;
+export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
+  public readonly type = ACTION_REPLACE_PANEL;
+  public readonly id = ACTION_REPLACE_PANEL;
   public order = 11;
 
   constructor(
@@ -46,7 +46,7 @@ export class ReplacePanelAction implements IAction<ActionContext> {
     private getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories']
   ) {}
 
-  public getDisplayName({ embeddable }: ActionContext) {
+  public getDisplayName({ embeddable }: ReplacePanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
@@ -55,14 +55,14 @@ export class ReplacePanelAction implements IAction<ActionContext> {
     });
   }
 
-  public getIconType({ embeddable }: ActionContext) {
+  public getIconType({ embeddable }: ReplacePanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
     return 'kqlOperand';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: ReplacePanelActionContext) {
     if (embeddable.getInput().viewMode) {
       if (embeddable.getInput().viewMode === ViewMode.VIEW) {
         return false;
@@ -72,7 +72,7 @@ export class ReplacePanelAction implements IAction<ActionContext> {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public async execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: ReplacePanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

@@ -1,5 +1,5 @@
 {
-  "id": "kibana_legacy",
+  "id": "kibanaLegacy",
   "version": "kibana",
   "server": true,
   "ui": true

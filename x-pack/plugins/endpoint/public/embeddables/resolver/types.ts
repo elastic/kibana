@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ResolverAction } from './actions';
+import { Store } from 'redux';
+
+import { ResolverAction } from './store/actions';
+export { ResolverAction } from './store/actions';
+import { LegacyEndpointEvent } from '../../../common/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -21,27 +25,34 @@ export interface ResolverState {
   readonly data: DataState;
 }
 
-interface PanningState {
+/**
+ * Piece of redux state that models an animation for the camera.
+ */
+export interface CameraAnimationState {
   /**
-   * Screen coordinate vector representing the starting point when panning.
+   * The time when the animation began.
    */
-  readonly origin: Vector2;
+  readonly startTime: number;
+  /**
+   * The final translation when the animation is complete.
+   */
+  readonly targetTranslation: Vector2;
+  /**
+   * The effective camera position (including an in-progress user panning) at the time
+   * when the animation began.
+   */
+  readonly initialTranslation: Vector2;
 
   /**
-   * Screen coordinate vector representing the current point when panning.
+   * The duration, in milliseconds, that the animation should last. Should be > 0
    */
-  readonly currentOffset: Vector2;
+  readonly duration: number;
 }
 
 /**
- * Redux state for the virtual 'camera' used by Resolver.
+ * The redux state for the `useCamera` hook.
  */
-export interface CameraState {
-  /**
-   * Contains the starting and current position of the pointer when the user is panning the map.
-   */
-  readonly panning?: PanningState;
-
+export type CameraState = {
   /**
    * Scales the coordinate system, used for zooming. Should always be between 0 and 1
    */
@@ -54,7 +65,7 @@ export interface CameraState {
 
   /**
    * The camera world transform not counting any change from panning. When panning finishes, this value is updated to account for it.
-   * Use the `transform` selector to get the transform adjusted for panning.
+   * Use the `translation` selector to get the effective translation adjusted for panning.
    */
   readonly translationNotCountingCurrentPanning: Vector2;
 
@@ -62,18 +73,53 @@ export interface CameraState {
    * The world coordinates that the pointing device was last over. This is used during mousewheel zoom.
    */
   readonly latestFocusedWorldCoordinates: Vector2 | null;
-}
+} & (
+  | {
+      /**
+       * Contains the animation start time and target translation. This doesn't model the instantaneous
+       * progress of an animation. Instead, animation is model as functions-of-time.
+       */
+      readonly animation: CameraAnimationState;
+      /**
+       * If the camera is animating, it must not be panning.
+       */
+      readonly panning: undefined;
+    }
+  | {
+      /**
+       * If the camera is panning, it must not be animating.
+       */
+      readonly animation: undefined;
+      /**
+       * Contains the starting and current position of the pointer when the user is panning the map.
+       */
+      readonly panning: {
+        /**
+         * Screen coordinate vector representing the starting point when panning.
+         */
+        readonly origin: Vector2;
+
+        /**
+         * Screen coordinate vector representing the current point when panning.
+         */
+        readonly currentOffset: Vector2;
+      };
+    }
+  | {
+      readonly animation: undefined;
+      readonly panning: undefined;
+    }
+);
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ProcessEvent[];
+  readonly results: readonly LegacyEndpointEvent[];
+  isLoading: boolean;
 }
 
 export type Vector2 = readonly [number, number];
-
-export type Vector3 = readonly [number, number, number];
 
 /**
  * A rectangle with sides that align with the `x` and `y` axises.
@@ -121,6 +167,7 @@ export interface ProcessEvent {
   readonly event_type: number;
   readonly machine_id: string;
   readonly data_buffer: {
+    timestamp_utc: string;
     event_subtype_full: eventSubtypeFull;
     event_type_full: eventTypeFull;
     node_id: number;
@@ -137,21 +184,21 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's children
    */
-  idToChildren: Map<number | undefined, ProcessEvent[]>;
+  idToChildren: Map<number | undefined, LegacyEndpointEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<number, ProcessEvent>;
+  idToProcess: Map<number, LegacyEndpointEvent>;
 }
 
 /**
  * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ProcessEvent, number>;
+export type ProcessWidths = Map<LegacyEndpointEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ProcessEvent, Vector2>;
+export type ProcessPositions = Map<LegacyEndpointEvent, Vector2>;
 /**
  * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
  */
@@ -161,11 +208,11 @@ export type EdgeLineSegment = Vector2[];
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ProcessEvent;
+  process: LegacyEndpointEvent;
   width: number;
 } & (
   | {
-      parent: ProcessEvent;
+      parent: LegacyEndpointEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -184,6 +231,48 @@ export type ProcessWithWidthMetadata = {
 );
 
 /**
- * String that represents the direction in which Resolver can be panned
+ * The constructor for a ResizeObserver
  */
-export type PanDirection = 'north' | 'south' | 'east' | 'west';
+interface ResizeObserverConstructor {
+  prototype: ResizeObserver;
+  new (callback: ResizeObserverCallback): ResizeObserver;
+}
+
+/**
+ * Functions that introduce side effects. A React context provides these, and they may be mocked in tests.
+ */
+export interface SideEffectors {
+  /**
+   * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
+   */
+  timestamp: () => number;
+  requestAnimationFrame: typeof window.requestAnimationFrame;
+  cancelAnimationFrame: typeof window.cancelAnimationFrame;
+  ResizeObserver: ResizeObserverConstructor;
+}
+
+export interface SideEffectSimulator {
+  /**
+   * Control the mock `SideEffectors`.
+   */
+  controls: {
+    /**
+     * Set or get the `time` number used for `timestamp` and `requestAnimationFrame` callbacks.
+     */
+    time: number;
+    /**
+     * Call any pending `requestAnimationFrame` callbacks.
+     */
+    provideAnimationFrame: () => void;
+    /**
+     * Trigger `ResizeObserver` callbacks for `element` and update the mocked value for `getBoundingClientRect`.
+     */
+    simulateElementResize: (element: Element, contentRect: DOMRect) => void;
+  };
+  /**
+   * Mocked `SideEffectors`.
+   */
+  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+}
+
+export type ResolverStore = Store<ResolverState, ResolverAction>;

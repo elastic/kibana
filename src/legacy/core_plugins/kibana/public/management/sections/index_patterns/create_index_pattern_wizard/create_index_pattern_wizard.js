@@ -43,6 +43,7 @@ export class CreateIndexPatternWizard extends Component {
       indexPatternCreationType: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       changeUrl: PropTypes.func.isRequired,
+      openConfirm: PropTypes.func.isRequired,
     }).isRequired,
   };
 
@@ -142,12 +143,16 @@ export class CreateIndexPatternWizard extends Component {
         values: { title: this.title },
         defaultMessage: "An index pattern with the title '{title}' already exists.",
       });
-      try {
-        await services.confirmModalPromise(confirmMessage, {
-          confirmButtonText: 'Go to existing pattern',
-        });
+
+      const isConfirmed = await services.openConfirm(confirmMessage, {
+        confirmButtonText: i18n.translate('kbn.management.indexPattern.goToPatternButtonLabel', {
+          defaultMessage: 'Go to existing pattern',
+        }),
+      });
+
+      if (isConfirmed) {
         return services.changeUrl(`/management/kibana/index_patterns/${indexPatternId}`);
-      } catch (err) {
+      } else {
         return false;
       }
     }
@@ -219,6 +224,7 @@ export class CreateIndexPatternWizard extends Component {
           savedObjectsClient={services.savedObjectsClient}
           indexPatternCreationType={this.indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
+          uiSettings={services.uiSettings}
         />
       );
     }

@@ -39,7 +39,7 @@ import {
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { Field } from '../../../../../../../common/types/fields';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import {
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,
@@ -401,7 +401,11 @@ export const ResultsTable: FC<Props> = React.memo(
         : searchError;
 
     return (
-      <EuiPanel grow={false} id="mlDataFrameAnalyticsTableResultsPanel">
+      <EuiPanel
+        grow={false}
+        id="mlDataFrameAnalyticsTableResultsPanel"
+        data-test-subj="mlDFAnalyticsClassificationExplorationTablePanel"
+      >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">

@@ -1,73 +1,115 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
-<span
-  class="dscField--noResults"
-  title="Geo point field"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName dscFieldName--noResults"
 >
-  <svg
-    aria-hidden="true"
-    aria-label="Geo point field"
-    class="euiIcon euiIcon--small euiIcon-isLoading"
-    focusable="false"
-    height="16"
-    role="img"
-    viewBox="0 0 16 16"
-    width="16"
-    xmlns="http://www.w3.org/2000/svg"
-  />
-  <span
-    class="dscFieldName"
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    t.t.test
-  </span>
-</span>
+    <span
+      aria-label="Geo point field"
+      class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      title="Geo point field"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </span>
+  </div>
+  <div
+    class="euiFlexItem eui-textTruncate"
+  >
+    <span
+      class="euiToolTipAnchor eui-textTruncate"
+    >
+      <span>
+        t.t.test
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`FieldName renders a number field by providing a field record, useShortDots is set to false 1`] = `
-<span
-  class=""
-  title="Number field"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName"
 >
-  <svg
-    aria-hidden="true"
-    aria-label="Number field"
-    class="euiIcon euiIcon--small euiIcon-isLoading"
-    focusable="false"
-    height="16"
-    role="img"
-    viewBox="0 0 16 16"
-    width="16"
-    xmlns="http://www.w3.org/2000/svg"
-  />
-  <span
-    class="dscFieldName"
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    test.test.test
-  </span>
-</span>
+    <span
+      aria-label="Number field"
+      class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      title="Number field"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </span>
+  </div>
+  <div
+    class="euiFlexItem eui-textTruncate"
+  >
+    <span
+      class="euiToolTipAnchor eui-textTruncate"
+    >
+      <span>
+        test.test.test
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
-<span
-  class=""
-  title="String field"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName"
 >
-  <svg
-    aria-hidden="true"
-    aria-label="String field"
-    class="euiIcon euiIcon--small euiIcon-isLoading"
-    focusable="false"
-    height="16"
-    role="img"
-    viewBox="0 0 16 16"
-    width="16"
-    xmlns="http://www.w3.org/2000/svg"
-  />
-  <span
-    class="dscFieldName"
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    test
-  </span>
-</span>
+    <span
+      aria-label="String field"
+      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      title="String field"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </span>
+  </div>
+  <div
+    class="euiFlexItem eui-textTruncate"
+  >
+    <span
+      class="euiToolTipAnchor eui-textTruncate"
+    >
+      <span>
+        test
+      </span>
+    </span>
+  </div>
+</div>
 `;

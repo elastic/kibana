@@ -5,8 +5,8 @@
  */
 
 import { noop } from 'lodash';
-import uiRoutes from 'ui/routes';
-import uiChrome from 'ui/chrome';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import uiChrome from 'plugins/monitoring/np_imports/ui/chrome';
 import template from './index.html';
 
 const tryPrivilege = ($http, kbnUrl) => {

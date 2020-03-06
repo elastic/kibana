@@ -8,18 +8,18 @@ import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { TruncatableText } from '../../../../truncatable_text';
 import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
-import { ColumnHeader } from '../column_header';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getSortDirection } from './helpers';
 
 interface HeaderContentProps {
   children: React.ReactNode;
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   isResizing: boolean;
   onClick: () => void;
   sort: Sort;

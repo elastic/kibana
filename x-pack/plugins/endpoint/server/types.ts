@@ -6,6 +6,9 @@
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
 
+/**
+ * The context for Endpoint apps.
+ */
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;

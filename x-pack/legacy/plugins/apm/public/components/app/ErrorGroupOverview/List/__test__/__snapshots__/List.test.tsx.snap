@@ -120,10 +120,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>
@@ -305,7 +302,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
 
 exports[`ErrorGroupOverview -> List should render with data 1`] = `
 .c0 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
 .c1 {
@@ -316,7 +313,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c2 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
   font-size: 16px;
   max-width: 100%;
   white-space: nowrap;
@@ -325,7 +322,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c3 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
 <Memo(UnoptimizedManagedTable)
@@ -478,10 +475,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>

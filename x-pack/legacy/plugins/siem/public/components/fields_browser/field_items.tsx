@@ -13,6 +13,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDraggableFieldId, getDroppableId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
@@ -20,9 +21,8 @@ import { DraggableFieldBadge } from '../draggables/field_badge';
 import { getEmptyValue } from '../empty_value';
 import { getColumnsWithTimestamp, getExampleText, getIconFromType } from '../event_details/helpers';
 import { SelectableText } from '../selectable_text';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { OnUpdateColumns } from '../timeline/events';
 import { TruncatableText } from '../truncatable_text';
 import { FieldName } from './field_name';
@@ -68,10 +68,10 @@ export const getFieldItems = ({
   browserFields: BrowserFields;
   category: Partial<BrowserField>;
   categoryId: string;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   highlight?: string;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   onUpdateColumns: OnUpdateColumns;
 }): FieldItem[] =>
   uniqBy('name', [

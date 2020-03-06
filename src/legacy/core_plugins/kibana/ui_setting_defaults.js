@@ -690,17 +690,6 @@ export function getUiSettingDefaults() {
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
       }),
     },
-    'indexPattern:fieldMapping:lookBack': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingTitle', {
-        defaultMessage: 'Recent matching patterns',
-      }),
-      value: 5,
-      description: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingText', {
-        defaultMessage:
-          'For index patterns containing timestamps in their names, look for this many recent matching ' +
-          'patterns from which to query the field mapping',
-      }),
-    },
     'format:defaultTypeMap': {
       name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
@@ -815,6 +804,9 @@ export function getUiSettingDefaults() {
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
+      optionLabels: Object.fromEntries(
+        numeralLanguages.map(language => [language.id, language.name])
+      ),
       description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,
         description:
@@ -1170,25 +1162,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['accessibility'],
       requiresPageReload: true,
-    },
-    pageNavigation: {
-      name: i18n.translate('kbn.advancedSettings.pageNavigationName', {
-        defaultMessage: 'Side nav style',
-      }),
-      value: 'grouped',
-      description: i18n.translate('kbn.advancedSettings.pageNavigationDesc', {
-        defaultMessage: 'Change the style of navigation',
-      }),
-      type: 'select',
-      options: ['grouped', 'individual'],
-      optionLabels: {
-        grouped: i18n.translate('kbn.advancedSettings.pageNavigationGrouped', {
-          defaultMessage: 'Grouped',
-        }),
-        individual: i18n.translate('kbn.advancedSettings.pageNavigationIndividual', {
-          defaultMessage: 'Individual',
-        }),
-      },
     },
   };
 }

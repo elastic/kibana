@@ -6,24 +6,24 @@
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../contexts/ml';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useKibanaContext();
+  const { services } = useMlKibana();
+  const mlContext = useMlContext();
 
   const {
     jobCreator,
@@ -63,6 +63,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       max: moment(end),
     });
     // update the timefilter, to keep the URL in sync
+    const { timefilter } = services.data.query.timefilter;
     timefilter.setTime({
       from: moment(start).toISOString(),
       to: moment(end).toISOString(),
@@ -86,7 +87,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         end: range.end.epoch,
       });
     } else {
-      toastNotifications.addDanger(
+      const { toasts } = services.notifications;
+      toasts.addDanger(
         i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
           defaultMessage: 'An error occurred obtaining the time range for the index',
         })
@@ -104,8 +106,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
-                indexPattern={kibanaContext.currentIndexPattern}
-                query={kibanaContext.combinedQuery}
+                indexPattern={mlContext.currentIndexPattern}
+                query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}
               />

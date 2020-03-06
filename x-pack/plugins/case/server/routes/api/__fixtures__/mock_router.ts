@@ -8,11 +8,11 @@ import { IRouter } from 'kibana/server';
 import { loggingServiceMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
 import { CaseService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
-import { RouteDeps } from '../index';
+import { RouteDeps } from '../types';
 
 export const createRoute = async (
   api: (deps: RouteDeps) => void,
-  method: 'get' | 'post' | 'delete',
+  method: 'get' | 'post' | 'delete' | 'patch',
   badAuth = false
 ) => {
   const httpService = httpServiceMock.createSetupContract();

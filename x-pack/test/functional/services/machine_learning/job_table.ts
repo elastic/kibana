@@ -208,6 +208,15 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       expect(modelSizeStats).to.have.property('model_bytes');
       delete modelSizeStats.model_bytes;
 
+      // remove categorization fields from validation until
+      // the ES version is updated
+      delete modelSizeStats.categorization_status;
+      delete modelSizeStats.categorized_doc_count;
+      delete modelSizeStats.dead_category_count;
+      delete modelSizeStats.frequent_category_count;
+      delete modelSizeStats.rare_category_count;
+      delete modelSizeStats.total_category_count;
+
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
 

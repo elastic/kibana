@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiEmptyPrompt,
   EuiButton,
-  EuiPanel,
+  EuiEmptyPrompt,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiPanel
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { invalidLicenseMessage } from '../../../../../../../plugins/apm/common/service_map';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
 
 export function PlatinumLicensePrompt() {
@@ -43,14 +44,7 @@ export function PlatinumLicensePrompt() {
                 )}
               </EuiButton>
             ]}
-            body={
-              <p>
-                {i18n.translate('xpack.apm.serviceMap.licensePromptBody', {
-                  defaultMessage:
-                    "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."
-                })}
-              </p>
-            }
+            body={<p>{invalidLicenseMessage}</p>}
             title={
               <h2>
                 {i18n.translate('xpack.apm.serviceMap.licensePromptTitle', {

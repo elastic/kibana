@@ -5,7 +5,6 @@
  */
 
 import { getAnalysisType, isOutlierAnalysis } from './analytics';
-jest.mock('ui/new_platform');
 
 describe('Data Frame Analytics: Analytics utils', () => {
   test('getAnalysisType()', () => {

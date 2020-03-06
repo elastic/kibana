@@ -5,12 +5,26 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../constants';
 
-export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../saved_object_types';
+
+export const createMockSavedObjectsRepository = ({
+  caseSavedObject = [],
+  caseCommentSavedObject = [],
+}: {
+  caseSavedObject?: any[];
+  caseCommentSavedObject?: any[];
+}) => {
   const mockSavedObjectsClientContract = ({
     get: jest.fn((type, id) => {
-      const result = savedObject.filter(s => s.id === id);
+      if (type === CASE_COMMENT_SAVED_OBJECT) {
+        const result = caseCommentSavedObject.filter(s => s.id === id);
+        if (!result.length) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return result[0];
+      }
+      const result = caseSavedObject.filter(s => s.id === id);
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
@@ -20,9 +34,20 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
       if (findArgs.hasReference && findArgs.hasReference.id === 'bad-guy') {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
+
+      if (findArgs.type === CASE_COMMENT_SAVED_OBJECT) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: caseCommentSavedObject.length,
+          saved_objects: caseCommentSavedObject,
+        };
+      }
       return {
-        total: savedObject.length,
-        saved_objects: savedObject,
+        page: 1,
+        per_page: 5,
+        total: caseSavedObject.length,
+        saved_objects: caseSavedObject,
       };
     }),
     create: jest.fn((type, attributes, references) => {
@@ -49,9 +74,16 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
       };
     }),
     update: jest.fn((type, id, attributes) => {
-      if (!savedObject.find(s => s.id === id)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      if (type === CASE_COMMENT_SAVED_OBJECT) {
+        if (!caseCommentSavedObject.find(s => s.id === id)) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+      } else if (type === CASE_SAVED_OBJECT) {
+        if (!caseSavedObject.find(s => s.id === id)) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
       }
+
       return {
         id,
         type,
@@ -61,13 +93,17 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
       };
     }),
     delete: jest.fn((type: string, id: string) => {
-      const result = savedObject.filter(s => s.id === id);
+      let result = caseSavedObject.filter(s => s.id === id);
+      if (type === CASE_COMMENT_SAVED_OBJECT) {
+        result = caseCommentSavedObject.filter(s => s.id === id);
+      }
+      if (type === CASE_COMMENT_SAVED_OBJECT && id === 'bad-guy') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
+      }
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      if (type === 'case-workflow-comment' && id === 'bad-guy') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
-      }
+
       return {};
     }),
     deleteByNamespace: jest.fn(),

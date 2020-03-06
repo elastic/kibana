@@ -50,7 +50,7 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    npStart.plugins.kibana_legacy.getApps().forEach(app => {
+    npStart.plugins.kibanaLegacy.getApps().forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
@@ -68,7 +68,13 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            const params = { element, appBasePath: '', onAppLeave: () => undefined };
+            const params = {
+              element,
+              appBasePath: '',
+              onAppLeave: () => undefined,
+              // TODO: adapt to use Core's ScopedHistory
+              history: {} as any,
+            };
             unmountHandler = isAppMountDeprecated(app.mount)
               ? await app.mount({ core: npStart.core }, params)
               : await app.mount(params);
@@ -92,7 +98,7 @@ export class LocalApplicationService {
       }
     });
 
-    npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+    npStart.plugins.kibanaLegacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
         resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();

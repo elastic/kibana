@@ -68,7 +68,7 @@ function webhookHandler(request: WebhookRequest, h: any) {
       return validateRequestUsesMethod(request, h, 'post');
     case 'success_put_method':
       return validateRequestUsesMethod(request, h, 'put');
-    case 'faliure':
+    case 'failure':
       return htmlResponse(h, 500, `Error`);
   }
 

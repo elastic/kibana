@@ -32,6 +32,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
+import { ScopedHistory } from './scoped_history';
 
 /** @public */
 export interface AppBase {
@@ -199,7 +200,7 @@ export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefin
  * Extension of {@link AppBase | common app properties} with the mount function.
  * @public
  */
-export interface App extends AppBase {
+export interface App<HistoryLocationState = unknown> extends AppBase {
   /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
    * {@link AppMountDeprecated}.
@@ -208,7 +209,7 @@ export interface App extends AppBase {
    * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
    * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
    */
-  mount: AppMount | AppMountDeprecated;
+  mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 
   /**
    * Hide the UI chrome when the application is mounted. Defaults to `false`.
@@ -240,7 +241,9 @@ export interface LegacyApp extends AppBase {
  *
  * @public
  */
-export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMount<HistoryLocationState = unknown> = (
+  params: AppMountParameters<HistoryLocationState>
+) => AppUnmount | Promise<AppUnmount>;
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -256,9 +259,9 @@ export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppU
  * @deprecated
  * @public
  */
-export type AppMountDeprecated = (
+export type AppMountDeprecated<HistoryLocationState = unknown> = (
   context: AppMountContext,
-  params: AppMountParameters
+  params: AppMountParameters<HistoryLocationState>
 ) => AppUnmount | Promise<AppUnmount>;
 
 /**
@@ -304,15 +307,63 @@ export interface AppMountContext {
 }
 
 /** @public */
-export interface AppMountParameters {
+export interface AppMountParameters<HistoryLocationState = unknown> {
   /**
    * The container element to render the application into.
    */
   element: HTMLElement;
 
   /**
+   * A scoped history instance for your application. Should be used to wire up
+   * your applications Router.
+   *
+   * @example
+   * How to configure react-router with a base path:
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   setup({ application }) {
+   *     application.register({
+   *      id: 'my-app',
+   *      appRoute: '/my-app',
+   *      async mount(params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(params);
+   *      },
+   *    });
+   *  }
+   * }
+   * ```
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { Router, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ element, history }: AppMountParameters) => {
+   *   ReactDOM.render(
+   *     <Router history={history}>
+   *       <Route path="/" exact component={HomePage} />
+   *     </Router>,
+   *     element
+   *   );
+   *
+   *   return () => ReactDOM.unmountComponentAtNode(element);
+   * }
+   * ```
+   */
+  history: ScopedHistory<HistoryLocationState>;
+
+  /**
    * The route path for configuring navigation to the application.
    * This string should not include the base path from HTTP.
+   *
+   * @deprecated Use {@link AppMountParameters.history} instead.
    *
    * @example
    *
@@ -340,10 +391,10 @@ export interface AppMountParameters {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ appBasePath, element }: AppMountParams) => {
+   * export renderApp = ({ appBasePath, element }: AppMountParameters) => {
    *   ReactDOM.render(
    *     // pass `appBasePath` to `basename`
    *     <BrowserRouter basename={appBasePath}>
@@ -377,7 +428,7 @@ export interface AppMountParameters {
    * import { CoreStart, AppMountParams } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {
@@ -385,7 +436,7 @@ export interface AppMountParameters {
    *      }
    *      return actions.default();
    *    });
-   *    return renderApp(params);
+   *    return renderApp({ element, history });
    * }
    * ```
    */
@@ -498,8 +549,9 @@ export interface ApplicationSetup {
   /**
    * Register an mountable application to the system.
    * @param app - an {@link App}
+   * @typeParam HistoryLocationState - shape of the `History` state on {@link AppMountParameters.history}, defaults to `unknown`.
    */
-  register(app: App): void;
+  register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
 
   /**
    * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
@@ -551,7 +603,10 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */
-  register(plugin: PluginOpaqueId, app: App): void;
+  register<HistoryLocationState = unknown>(
+    plugin: PluginOpaqueId,
+    app: App<HistoryLocationState>
+  ): void;
 
   /**
    * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
@@ -593,11 +648,17 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
 
   /**
-   * Returns a relative URL to a given app, including the global base path.
+   * Returns an URL to a given app, including the global base path.
+   * By default, the URL is relative (/basePath/app/my-app).
+   * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+   *
+   * Note that when generating absolute urls, the protocol, host and port are determined from the browser location.
+   *
    * @param appId
    * @param options.path - optional path inside application to deep link to
+   * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string }): string;
+  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
@@ -612,11 +673,19 @@ export interface ApplicationStart {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+
+  /**
+   * An observable that emits the current application id and each subsequent id update.
+   */
+  currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
 export interface InternalApplicationStart
-  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
+  extends Pick<
+    ApplicationStart,
+    'capabilities' | 'navigateToApp' | 'getUrlForApp' | 'currentAppId$'
+  > {
   /**
    * Apps available based on the current capabilities.
    * Should be used to show navigation links and make routing decisions.
@@ -640,7 +709,6 @@ export interface InternalApplicationStart
   ): void;
 
   // Internal APIs
-  currentAppId$: Observable<string | undefined>;
   getComponent(): JSX.Element | null;
 }
 

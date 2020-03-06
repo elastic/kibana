@@ -6,7 +6,7 @@ recommended for the development of all Kibana plugins.
 Besides the content in this style guide, the following style guides may also apply
 to all development within the Kibana project. Please make sure to also read them:
 
-- [Accessibility style guide](style_guides/accessibility_guide.md)
+- [Accessibility style guide](https://elastic.github.io/eui/#/guidelines/accessibility)
 - [SASS style guide](https://elastic.github.io/eui/#/guidelines/sass)
 
 ## General
@@ -45,10 +45,7 @@ This part contains style guide rules around general (framework agnostic) HTML us
 Use camel case for the values of attributes such as `id` and `data-test-subj` selectors.
 
 ```html
-<button
-  id="veryImportantButton"
-  data-test-subj="clickMeButton"
->
+<button id="veryImportantButton" data-test-subj="clickMeButton">
   Click me
 </button>
 ```
@@ -74,6 +71,59 @@ It's important that when you write CSS/SASS selectors using classes, IDs, and at
 capitalization in the CSS matches that used in the HTML. HTML and CSS follow different case sensitivity rules, and we can avoid subtle gotchas by ensuring we use the
 same capitalization in both of them.
 
+### How to generate ids?
+
+When labeling elements (and for some other accessibility tasks) you will often need
+ids. Ids must be unique within the page i.e. no duplicate ids in the rendered DOM
+at any time.
+
+Since we have some components that are used multiple times on the page, you must
+make sure every instance of that component has a unique `id`. To make the generation
+of those `id`s easier, you can use the `htmlIdGenerator` service in the `@elastic/eui`.
+
+A React component could use it as follows:
+
+```jsx
+import { htmlIdGenerator } from '@elastic/eui';
+
+render() {
+  // Create a new generator that will create ids deterministic
+  const htmlId = htmlIdGenerator();
+  return (<div>
+    <label htmlFor={htmlId('agg')}>Aggregation</label>
+    <input id={htmlId('agg')}/>
+  </div>);
+}
+```
+
+Each id generator you create by calling `htmlIdGenerator()` will generate unique but
+deterministic ids. As you can see in the above example, that single generator
+created the same id in the label's `htmlFor` as well as the input's `id`.
+
+A single generator instance will create the same id when passed the same argument
+to the function multiple times. But two different generators will produce two different
+ids for the same argument to the function, as you can see in the following example:
+
+```js
+const generatorOne = htmlIdGenerator();
+const generatorTwo = htmlIdGenerator();
+
+// Those statements are always true:
+// Same generator
+generatorOne('foo') === generatorOne('foo');
+generatorOne('foo') !== generatorOne('bar');
+
+// Different generator
+generatorOne('foo') !== generatorTwo('foo');
+```
+
+This allows multiple instances of a single React component to now have different ids.
+If you include the above React component multiple times in the same page,
+each component instance will have a unique id, because each render method will use a different
+id generator.
+
+You can also use this service outside of React.
+
 ## API endpoints
 
 The following style guide rules are targeting development of server side API endpoints.
@@ -90,7 +140,8 @@ API routes must start with the `/api/` path segment, and should be followed by t
 
 Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
 
-*Right:*
+_Right:_
+
 ```
 POST /api/kibana/index_patterns
 {
@@ -108,19 +159,19 @@ The following style guide rules apply for working with TypeScript/JavaScript fil
 
 ### TypeScript vs. JavaScript
 
-Whenever possible, write code in TypeScript instead of JavaScript, especially if it's new code. 
+Whenever possible, write code in TypeScript instead of JavaScript, especially if it's new code.
 Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
 
 ### Prefer modern JavaScript/TypeScript syntax
 
 You should prefer modern language features in a lot of cases, e.g.:
 
-* Prefer `class` over `prototype` inheritance
-* Prefer arrow function over function expressions
-* Prefer arrow function over storing `this` (no `const self = this;`)
-* Prefer template strings over string concatenation
-* Prefer the spread operator for copying arrays (`[...arr]`) over `arr.slice()`
-* Use optional chaining (`?.`) and nullish Coalescing (`??`) over `lodash.get` (and similar utilities)
+- Prefer `class` over `prototype` inheritance
+- Prefer arrow function over function expressions
+- Prefer arrow function over storing `this` (no `const self = this;`)
+- Prefer template strings over string concatenation
+- Prefer the spread operator for copying arrays (`[...arr]`) over `arr.slice()`
+- Use optional chaining (`?.`) and nullish Coalescing (`??`) over `lodash.get` (and similar utilities)
 
 ### Avoid mutability and state
 
@@ -131,7 +182,7 @@ Instead, create new variables, and shallow copies of objects and arrays:
 ```js
 // good
 function addBar(foos, foo) {
-  const newFoo = {...foo, name: 'bar'};
+  const newFoo = { ...foo, name: 'bar' };
   return [...foos, newFoo];
 }
 
@@ -250,8 +301,8 @@ const second = arr[1];
 
 ### Magic numbers/strings
 
-These are numbers (or other values) simply used in line in your code. *Do not
-use these*, give them a variable name so they can be understood and changed
+These are numbers (or other values) simply used in line in your code. _Do not
+use these_, give them a variable name so they can be understood and changed
 easily.
 
 ```js
@@ -325,19 +376,18 @@ import inSibling from '../foo/child';
 Don't do this. Everything should be wrapped in a module that can be depended on
 by other modules. Even things as simple as a single value should be a module.
 
-
 ### Only use ternary operators for small, simple code
 
-And *never* use multiple ternaries together, because they make it more
+And _never_ use multiple ternaries together, because they make it more
 difficult to reason about how different values flow through the conditions
 involved. Instead, structure the logic for maximum readability.
 
 ```js
 // good, a situation where only 1 ternary is needed
-const foo = (a === b) ? 1 : 2;
+const foo = a === b ? 1 : 2;
 
 // bad
-const foo = (a === b) ? 1 : (a === c) ? 2 : 3;
+const foo = a === b ? 1 : a === c ? 2 : 3;
 ```
 
 ### Use descriptive conditions
@@ -475,12 +525,11 @@ setTimeout(() => {
 
 Use slashes for both single line and multi line comments. Try to write
 comments that explain higher level mechanisms or clarify difficult
-segments of your code. *Don't use comments to restate trivial things*.
+segments of your code. _Don't use comments to restate trivial things_.
 
-*Exception:* Comment blocks describing a function and its arguments
+_Exception:_ Comment blocks describing a function and its arguments
 (docblock) should start with `/**`, contain a single `*` at the beginning of
 each line, and end with `*/`.
-
 
 ```js
 // good
@@ -546,11 +595,17 @@ You can read more about these two ngReact methods [here](https://github.com/ngRe
 Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
 
 **Good:**
+
 ```html
-<hello-component fname="person.fname" lname="person.lname" watch-depth="reference"></hello-component>
+<hello-component
+  fname="person.fname"
+  lname="person.lname"
+  watch-depth="reference"
+></hello-component>
 ```
 
 **Bad:**
+
 ```html
 <react-component name="HelloComponent" props="person" watch-depth="reference" />
 ```
@@ -564,9 +619,9 @@ Name action functions in the form of a strong verb and passed properties in the 
 <pagerButton onPageNext={action.turnToNextPage} />
 ```
 
-## Attribution	
+## Attribution
 
-Parts of the JavaScript style guide were initially forked from the 
-[node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) which is	
-licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)	
+Parts of the JavaScript style guide were initially forked from the
+[node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) which is
+licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
 license.

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -22,7 +23,7 @@ import {
 
 import { WelcomeContent } from './welcome_content';
 
-export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, intl }) {
+export function AboutPanel({ onFilePickerChange }) {
   return (
     <EuiPage restrictWidth={1000}>
       <EuiPageBody>
@@ -36,10 +37,12 @@ export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, i
               <div style={{ textAlign: 'center' }}>
                 <EuiFilePicker
                   id="filePicker"
-                  initialPromptText={intl.formatMessage({
-                    id: 'xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription',
-                    defaultMessage: 'Select or drag and drop a file',
-                  })}
+                  initialPromptText={i18n.translate(
+                    'xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                    {
+                      defaultMessage: 'Select or drag and drop a file',
+                    }
+                  )}
                   onChange={files => onFilePickerChange(files)}
                   className="file-datavisualizer-file-picker"
                 />
@@ -51,7 +54,7 @@ export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, i
       </EuiPageBody>
     </EuiPage>
   );
-});
+}
 
 export function LoadingPanel() {
   return (
@@ -60,12 +63,12 @@ export function LoadingPanel() {
         <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
           <div style={{ textAlign: 'center' }}>
             <EuiTitle size="s">
-              <h3 role="alert">
+              <h1 role="alert">
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
                   defaultMessage="Analyzing data"
                 />
-              </h3>
+              </h1>
             </EuiTitle>
 
             <EuiSpacer size="l" />
