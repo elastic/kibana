@@ -67,7 +67,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     const shouldShowCta = !hasMore && !isStreaming;
 
     const extra = (
-      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
+      <LoadingItemViewExtra justifyContent="center" alignItems="center" gutterSize="m">
         {isLoading || isStreaming ? (
           <ProgressSpinner kind={isStreaming ? 'streaming' : 'loading'} />
         ) : shouldShowCta ? (
@@ -79,18 +79,22 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
             endDateExpression={endDateExpression}
           />
         ) : null}
-      </EuiFlexGroup>
+      </LoadingItemViewExtra>
     );
 
     return (
       <ProgressEntryWrapper className={className} position={position}>
-        {position === 'start' ? <>{extra}</> : null}
+        {position === 'start' ? extra : null}
         <ProgressMessage timestamp={timestamp} position={position} isStreaming={isStreaming} />
-        {position === 'end' ? <>{extra}</> : null}
+        {position === 'end' ? extra : null}
       </ProgressEntryWrapper>
     );
   }
 }
+
+const LoadingItemViewExtra = euiStyled(EuiFlexGroup)`
+  height: 40px;
+`;
 
 const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
   padding-left: ${props => props.theme.eui.euiSizeS};
