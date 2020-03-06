@@ -3,8 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'src/core/server';
+
+import { TypeOf } from '@kbn/config-schema';
+
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaResponseFactory,
+  KibanaRequest,
+  IKibanaResponse,
+} from 'src/core/server';
 import { CaseServiceSetup } from '../../services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ConfigType } from '../../../../actions/server/builtin_action_types/servicenow/types';
+import {
+  NewActionSchema,
+  FindActionsSchema,
+  CheckActionHealthSchema,
+  IdSchema,
+  CasesConfigurationSchema,
+} from './schema';
 
 export interface RouteDeps {
   caseService: CaseServiceSetup;
@@ -16,10 +34,6 @@ export enum SortFieldCase {
   state = 'state',
   updatedAt = 'updated_at',
 }
-
-export type Writable<T> = {
-  -readonly [K in keyof T]: T[K];
-};
 
 export type CaseRequestHandler = (
   service: CaseServiceSetup,
@@ -33,3 +47,9 @@ export interface UpdateCaseConfiguration {
   actionTypeId: string;
   config: ConfigType;
 }
+
+export type NewActionType = TypeOf<typeof NewActionSchema>;
+export type FindActionsType = TypeOf<typeof FindActionsSchema>;
+export type CheckActionHealthType = TypeOf<typeof CheckActionHealthSchema>;
+export type IdType = TypeOf<typeof IdSchema>;
+export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;

@@ -6,8 +6,7 @@
 
 import axios from 'axios';
 
-import { RouteDeps } from '.';
-import { CASES_API_BASE_URL, SUPPORTED_ACTIONS } from '../../constants';
+import { RouteDeps } from './types';
 import {
   NewActionSchema,
   FindActionsSchema,
@@ -25,6 +24,9 @@ import {
 } from './types';
 import { createRequestHandler } from './utils';
 import { HttpRequestError } from './errors';
+
+const CASES_API_BASE_URL = '/api/cases';
+const SUPPORTED_ACTIONS = ['.servicenow'];
 
 const createNewActionHandler: CaseRequestHandler = async (service, context, request, response) => {
   const actionsClient = await context.actions.getActionsClient();
