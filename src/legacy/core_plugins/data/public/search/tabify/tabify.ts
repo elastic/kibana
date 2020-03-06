@@ -22,7 +22,9 @@ import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import { TabbedResponseWriterOptions, TabbedRangeFilterParams } from './types';
 import { AggResponseBucket } from '../types';
-import { IAggConfigs, AggGroupNames } from '../aggs';
+import { IAggConfigs } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggGroupNames } from '../../../../../../plugins/data/public/search/aggs';
 
 /**
  * Sets up the ResponseWriter and kicks off bucket collection.

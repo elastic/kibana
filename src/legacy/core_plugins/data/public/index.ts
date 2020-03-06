@@ -25,6 +25,5 @@ export function plugin() {
 }
 
 // /// Export types & static code
-
 /** @public types */
 export { DataSetup, DataStart } from './plugin';

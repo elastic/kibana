@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  esFilters,
-} from '../../../../../../plugins/data/public';
 import { createFilter } from './create_filter';
 import { TabbedTable } from '../tabify';
-import { AggConfigs } from '../aggs/agg_configs';
-import { IAggConfig } from '../aggs/agg_config';
-import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
+import {
+  esFilters,
+  fieldFormats,
+  FieldFormatsGetConfigFn,
+  IAggConfig,
+} from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';
+import {
+  mockDataServices,
+  mockAggTypesRegistry,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 
 describe('createFilter', () => {
   let table: TabbedTable;

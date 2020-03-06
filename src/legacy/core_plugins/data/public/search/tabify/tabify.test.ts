@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../../../plugins/data/public';
 import { tabifyAggResponse } from './tabify';
-import { IAggConfig, IAggConfigs, AggConfigs } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
+import { IndexPattern, IAggConfig, IAggConfigs } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockAggTypesRegistry } from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 
 describe('tabifyAggResponse Integration', () => {

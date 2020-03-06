@@ -18,12 +18,9 @@
  */
 
 import { set } from 'lodash';
-// @ts-ignore
 import { FormattedData } from '../../../../../../plugins/inspector/public';
-
-import { createFilter } from './create_filter';
-
 import { TabbedTable } from '../tabify';
+import { createFilter } from './create_filter';
 
 /**
  * @deprecated

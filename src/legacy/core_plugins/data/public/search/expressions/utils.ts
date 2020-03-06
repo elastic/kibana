@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { getSearchServiceShim } from '../../services';
-import { IAggConfig } from '../aggs/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
-import { IndexPattern } from '../../../../../../plugins/data/public';
+import { IAggConfig, IndexPattern } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSearchService } from '../../../../../../plugins/data/public/services';
 
 export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
   return {
@@ -41,7 +42,7 @@ export const deserializeAggConfig = ({
   aggConfigParams,
   indexPattern,
 }: DeserializeAggConfigParams) => {
-  const { aggs } = getSearchServiceShim();
+  const { aggs } = getSearchService();
   const aggConfigs = aggs.createAggConfigs(indexPattern);
   const aggConfig = aggConfigs.createAggConfig({
     enabled: true,

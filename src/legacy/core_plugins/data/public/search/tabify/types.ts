@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { RangeFilterParams } from '../../../../../../plugins/data/public';
-import { IAggConfig } from '../aggs';
+import { IAggConfig, RangeFilterParams } from '../../../../../../plugins/data/public';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {

@@ -19,7 +19,7 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { createAggConfigs, IAggConfigs } from 'ui/agg_types';
+import { createAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
@@ -28,6 +28,7 @@ import {
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
+  IAggConfigs,
   ISearchSource,
   SearchSource,
   Query,
@@ -39,7 +40,7 @@ import {
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/common';
-import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
+import { tabifyAggResponse } from '../tabify';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

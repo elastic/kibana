@@ -20,7 +20,7 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
-
+import { UiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
   setIndexPatterns,
   setQueryService,
@@ -31,7 +31,7 @@ import {
   setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
-import { setSearchServiceShim } from './services';
+
 import {
   selectRangeAction,
   SelectRangeActionContext,
@@ -47,19 +47,14 @@ import {
   VALUE_CLICK_TRIGGER,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/embeddable/public/lib/triggers';
-import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
-
-import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
   data: DataPublicPluginSetup;
-  expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: UiActionsStart;
 }
 
 /**
@@ -67,18 +62,15 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataSetup {
-  search: SearchSetup;
-}
+export interface DataSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Interface for this plugin's returned `start` contract.
  *
  * @public
  */
-export interface DataStart {
-  search: SearchStart;
-}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
 declare module '../../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
@@ -101,8 +93,6 @@ declare module '../../../../plugins/ui_actions/public' {
 export class DataPlugin
   implements
     Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  private readonly search = new SearchService();
-
   public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
     setInjectedMetadata(core.injectedMetadata);
 
@@ -116,15 +106,10 @@ export class DataPlugin
       valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
     );
 
-    return {
-      search: this.search.setup(core),
-    };
+    return {};
   }
 
-  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
-    const search = this.search.start(core);
-    setSearchServiceShim(search);
-
+  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
@@ -132,9 +117,7 @@ export class DataPlugin
     setSearchService(data.search);
     setOverlays(core.overlays);
 
-    return {
-      search,
-    };
+    return {};
   }
 
   public stop() {}

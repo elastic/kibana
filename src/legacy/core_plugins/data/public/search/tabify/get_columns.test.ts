@@ -19,8 +19,13 @@
 
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
-import { AggConfigs } from '../aggs';
-import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';
+import {
+  mockAggTypesRegistry,
+  mockDataServices,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 
 describe('get columns', () => {
   beforeEach(() => {
