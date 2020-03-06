@@ -60,7 +60,7 @@ const getIndexClosedCallout = (docLinks: DocLinksStart) => (
     <EuiCallOut
       title={i18n.translate(
         'xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle',
-        { defaultMessage: 'Index Closed' }
+        { defaultMessage: 'Index closed' }
       )}
       color="warning"
       iconType="alert"
