@@ -283,6 +283,47 @@ export {
  * Search:
  */
 
+import {
+  AggConfigs,
+  AggParamType,
+  AggTypeFilters, // TODO convert to interface
+  aggTypeFilters,
+  AggTypeFieldFilters, // TODO convert to interface
+  AggGroupNames,
+  aggGroupNamesMap,
+  BUCKET_TYPES,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  METRIC_TYPES,
+  OptionedParamType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  toAbsoluteDates,
+} from './search/aggs';
+
+export {
+  AggParam, // only the type is used externally, only in vis editor
+  AggParamOption, // only the type is used externally
+  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  IpRangeKey, // only used in field formatter deserialization, which will live in data
+  OptionedParamEditorProps, // only type is used externally
+  OptionedValueProp, // only type is used externally
+} from './search/aggs/types';
+
 export {
   ES_SEARCH_STRATEGY,
   SYNC_SEARCH_STRATEGY,
@@ -312,6 +353,36 @@ export {
   SortDirection,
   FetchOptions,
 } from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    AggConfigs,
+    AggParamType,
+    AggTypeFilters, // TODO convert to interface
+    aggTypeFilters,
+    AggTypeFieldFilters, // TODO convert to interface
+    AggGroupNames,
+    aggGroupNamesMap,
+    BUCKET_TYPES,
+    CidrMask,
+    convertDateRangeToString,
+    convertIPRangeToString,
+    intervalOptions, // only used in Discover
+    isDateHistogramBucketAggConfig,
+    isStringType,
+    isType,
+    isValidInterval,
+    isValidJson,
+    METRIC_TYPES,
+    OptionedParamType,
+    parentPipelineType,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
+    toAbsoluteDates,
+  },
+};
 
 /*
  * UI components

@@ -18,7 +18,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { TimeRange } from '../../common';
+import { AggsSetup, AggsStart, AggsStartLegacy } from './aggs/types';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
@@ -67,12 +67,8 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
-interface SearchAggsSetup {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
-}
-
-interface SearchAggsStart {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
+interface ISearchStartLegacy {
+  esClient: LegacyApiCaller;
 }
 
 /**
@@ -80,7 +76,7 @@ interface SearchAggsStart {
  * point.
  */
 export interface ISearchSetup {
-  aggs: SearchAggsSetup;
+  aggs: AggsSetup;
   /**
    * Extension point exposed for other plugins to register their own search
    * strategies.
@@ -89,9 +85,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart {
-  aggs: SearchAggsStart;
+  aggs: AggsStart;
   search: ISearchGeneric;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
-  };
+  __LEGACY: ISearchStartLegacy & AggsStartLegacy;
 }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IUiSettingsClient } from 'src/core/public';
+
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';
 import { sumMetricAgg } from './metrics/sum';
@@ -41,7 +43,7 @@ import { dateRangeBucketAgg } from './buckets/date_range';
 import { ipRangeBucketAgg } from './buckets/ip_range';
 import { termsBucketAgg } from './buckets/terms';
 import { filterBucketAgg } from './buckets/filter';
-import { filtersBucketAgg } from './buckets/filters';
+import { getFiltersBucketAgg } from './buckets/filters';
 import { significantTermsBucketAgg } from './buckets/significant_terms';
 import { geoHashBucketAgg } from './buckets/geo_hash';
 import { geoTileBucketAgg } from './buckets/geo_tile';
@@ -50,41 +52,44 @@ import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
-export const aggTypes = {
-  metrics: [
-    countMetricAgg,
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
-    cardinalityMetricAgg,
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
-  ],
-  buckets: [
-    dateHistogramBucketAgg,
-    histogramBucketAgg,
-    rangeBucketAgg,
-    dateRangeBucketAgg,
-    ipRangeBucketAgg,
-    termsBucketAgg,
-    filterBucketAgg,
-    filtersBucketAgg,
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
-  ],
-};
+export function getAggTypes(deps: { uiSettings: IUiSettingsClient }) {
+  const { uiSettings } = deps;
+  return {
+    metrics: [
+      countMetricAgg,
+      avgMetricAgg,
+      sumMetricAgg,
+      medianMetricAgg,
+      minMetricAgg,
+      maxMetricAgg,
+      stdDeviationMetricAgg,
+      cardinalityMetricAgg,
+      percentilesMetricAgg,
+      percentileRanksMetricAgg,
+      topHitMetricAgg,
+      derivativeMetricAgg,
+      cumulativeSumMetricAgg,
+      movingAvgMetricAgg,
+      serialDiffMetricAgg,
+      bucketAvgMetricAgg,
+      bucketSumMetricAgg,
+      bucketMinMetricAgg,
+      bucketMaxMetricAgg,
+      geoBoundsMetricAgg,
+      geoCentroidMetricAgg,
+    ],
+    buckets: [
+      dateHistogramBucketAgg,
+      histogramBucketAgg,
+      rangeBucketAgg,
+      dateRangeBucketAgg,
+      ipRangeBucketAgg,
+      termsBucketAgg,
+      filterBucketAgg,
+      getFiltersBucketAgg({ uiSettings }),
+      significantTermsBucketAgg,
+      geoHashBucketAgg,
+      geoTileBucketAgg,
+    ],
+  };
+}
