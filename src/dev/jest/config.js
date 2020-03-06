@@ -67,7 +67,6 @@ export default {
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
-    '<rootDir>/src/dev/jest/setup/react_testing_library.js',
   ],
   setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/mocks.js'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
