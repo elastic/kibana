@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { addLinksToSampleDatasets } from './sample_data_sets';
+export { initSampleDataSets } from './sample_data_sets';

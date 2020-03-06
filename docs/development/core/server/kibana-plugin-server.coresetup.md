@@ -20,6 +20,7 @@ export interface CoreSetup<TPluginsStart extends object = object>
 |  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
+|  [metrics](./kibana-plugin-server.coresetup.metrics.md) | <code>MetricsServiceSetup</code> | [MetricsServiceSetup](./kibana-plugin-server.metricsservicesetup.md) |
 |  [savedObjects](./kibana-plugin-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) |
 |  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
 |  [uuid](./kibana-plugin-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) |

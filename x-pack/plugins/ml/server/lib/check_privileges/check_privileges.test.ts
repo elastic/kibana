@@ -7,30 +7,27 @@
 import { callWithRequestProvider } from './__mocks__/call_with_request';
 import { privilegesProvider } from './check_privileges';
 import { mlPrivileges } from './privileges';
+import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 
-const licenseCheckResultWithSecurity = {
-  isAvailable: true,
-  isEnabled: true,
-  isSecurityDisabled: false,
-  type: 'platinum',
-  isActive: true,
-};
+const mlLicenseWithSecurity = {
+  isSecurityEnabled: () => true,
+  isFullLicense: () => true,
+} as MlLicense;
 
-const licenseCheckResultWithOutSecurity = {
-  ...licenseCheckResultWithSecurity,
-  isSecurityDisabled: true,
-};
+const mlLicenseWithOutSecurity = {
+  isSecurityEnabled: () => false,
+  isFullLicense: () => true,
+} as MlLicense;
 
-const licenseCheckResultWithOutSecurityBasicLicense = {
-  ...licenseCheckResultWithSecurity,
-  isSecurityDisabled: true,
-  type: 'basic',
-};
+const mlLicenseWithOutSecurityBasicLicense = {
+  isSecurityEnabled: () => false,
+  isFullLicense: () => false,
+} as MlLicense;
 
-const licenseCheckResultWithSecurityBasicLicense = {
-  ...licenseCheckResultWithSecurity,
-  type: 'basic',
-};
+const mlLicenseWithSecurityBasicLicense = {
+  isSecurityEnabled: () => true,
+  isFullLicense: () => false,
+} as MlLicense;
 
 const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
@@ -47,7 +44,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsEnabled
       );
       const { capabilities } = await getPrivileges();
@@ -62,7 +59,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -97,7 +94,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -132,7 +129,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -167,7 +164,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -202,7 +199,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurityBasicLicense,
+        mlLicenseWithSecurityBasicLicense,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -237,7 +234,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurityBasicLicense,
+        mlLicenseWithSecurityBasicLicense,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -272,7 +269,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithSecurity,
+        mlLicenseWithSecurity,
         mlIsNotEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -309,7 +306,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurity,
+        mlLicenseWithOutSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -344,7 +341,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurity,
+        mlLicenseWithOutSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -379,7 +376,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurity,
+        mlLicenseWithOutSecurity,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -414,7 +411,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurityBasicLicense,
+        mlLicenseWithOutSecurityBasicLicense,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -449,7 +446,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurityBasicLicense,
+        mlLicenseWithOutSecurityBasicLicense,
         mlIsEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
@@ -484,7 +481,7 @@ describe('check_privileges', () => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
-        licenseCheckResultWithOutSecurity,
+        mlLicenseWithOutSecurity,
         mlIsNotEnabled
       );
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();

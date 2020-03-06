@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
@@ -46,7 +46,7 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionProps[] | [];
+    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -54,7 +54,7 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     excludes: string[];
-    excludesOptions: EuiComboBoxOptionProps[];
+    excludesOptions: EuiComboBoxOptionOption[];
     fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
@@ -67,6 +67,7 @@ export interface State {
     maxDistinctValuesError: string | undefined;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
+    modelMemoryLimitValidationResult: any;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
@@ -88,6 +89,7 @@ export interface State {
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
+  estimatedModelMemoryLimit: string;
 }
 
 export const getInitialState = (): State => ({
@@ -118,6 +120,7 @@ export const getInitialState = (): State => ({
     maxDistinctValuesError: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
+    modelMemoryLimitValidationResult: null,
     previousJobType: null,
     previousSourceIndex: undefined,
     sourceIndex: '',
@@ -142,6 +145,7 @@ export const getInitialState = (): State => ({
   isValid: false,
   jobIds: [],
   requestMessages: [],
+  estimatedModelMemoryLimit: '',
 });
 
 export const getJobConfigFromFormState = (

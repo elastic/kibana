@@ -40,6 +40,7 @@ exports[`Overrides render overrides 1`] = `
     labelType="label"
   >
     <EuiComboBox
+      async={false}
       compressed={false}
       fullWidth={false}
       isClearable={false}
@@ -99,6 +100,7 @@ exports[`Overrides render overrides 1`] = `
     labelType="label"
   >
     <EuiComboBox
+      async={false}
       compressed={false}
       fullWidth={false}
       isClearable={false}
@@ -338,6 +340,7 @@ exports[`Overrides render overrides 1`] = `
     labelType="label"
   >
     <EuiComboBox
+      async={false}
       compressed={false}
       fullWidth={false}
       isClearable={false}
