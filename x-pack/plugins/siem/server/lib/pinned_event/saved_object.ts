@@ -20,9 +20,10 @@ import {
   SavedPinnedEvent,
 } from './types';
 import { PageInfoNote, SortNote, PinnedEvent as PinnedEventResponse } from '../../graphql/types';
-import { pinnedEventSavedObjectType, timelineSavedObjectType } from '../../saved_objects';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
+import { pinnedEventSavedObjectType } from './saved_object_mappings';
+import { timelineSavedObjectType } from '../timeline/saved_object_mappings';
 
 export class PinnedEvent {
   public async deletePinnedEventOnTimeline(request: FrameworkRequest, pinnedEventIds: string[]) {

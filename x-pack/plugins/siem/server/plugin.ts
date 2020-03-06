@@ -33,6 +33,7 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
+  initSavedObjects,
 } from './saved_objects';
 import { createConfig$, ConfigType } from './config';
 import { SiemClientFactory } from './client';
@@ -73,6 +74,7 @@ export class Plugin {
     this.logger.debug('plugin setup');
 
     initUiSettings(core.uiSettings);
+    initSavedObjects(core.savedObjects);
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({

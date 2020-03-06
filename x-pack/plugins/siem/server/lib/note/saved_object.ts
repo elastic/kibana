@@ -25,9 +25,9 @@ import {
 import { FrameworkRequest } from '../framework';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
-import { timelineSavedObjectType } from '../../saved_objects';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
+import { timelineSavedObjectType } from '../timeline/saved_object_mappings';
 
 export class Note {
   public async deleteNote(request: FrameworkRequest, noteIds: string[]) {
