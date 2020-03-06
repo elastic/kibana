@@ -143,6 +143,10 @@ export class KibanaRequest<
   public readonly socket: IKibanaSocket;
   /** Request events {@link KibanaRequestEvents} */
   public readonly events: KibanaRequestEvents;
+  public readonly auth: {
+    /* true if the request has been successfully authenticated, otherwise false. */
+    isAuthenticated: boolean;
+  };
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -172,6 +176,10 @@ export class KibanaRequest<
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
     this.events = this.getEvents(request);
+
+    this.auth = {
+      isAuthenticated: request.auth.isAuthenticated,
+    };
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
