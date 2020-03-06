@@ -5,14 +5,12 @@
  */
 
 import { useAppDependencies } from '../app_dependencies';
-
 import { PreviewRequestBody, TransformId } from '../common';
-
-import { http } from '../services/http_service';
+import { httpFactory, Http } from '../services/http_service';
 
 import { EsIndex, TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
 
-const apiFactory = (basePath: string, indicesBasePath: string) => ({
+const apiFactory = (basePath: string, indicesBasePath: string, http: Http) => ({
   getTransforms(transformId?: TransformId): Promise<any> {
     const transformIdString = transformId !== undefined ? `/${transformId}` : '';
     return http({
@@ -96,8 +94,9 @@ const apiFactory = (basePath: string, indicesBasePath: string) => ({
 export const useApi = () => {
   const appDeps = useAppDependencies();
 
-  const basePath = appDeps.core.http.basePath.prepend('/api/transform');
-  const indicesBasePath = appDeps.core.http.basePath.prepend('/api');
+  const basePath = '/api/transform';
+  const indicesBasePath = '/api';
+  const http = httpFactory(appDeps.core.http);
 
-  return apiFactory(basePath, indicesBasePath);
+  return apiFactory(basePath, indicesBasePath, http);
 };

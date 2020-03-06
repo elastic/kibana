@@ -690,17 +690,6 @@ export function getUiSettingDefaults() {
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
       }),
     },
-    'indexPattern:fieldMapping:lookBack': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingTitle', {
-        defaultMessage: 'Recent matching patterns',
-      }),
-      value: 5,
-      description: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingText', {
-        defaultMessage:
-          'For index patterns containing timestamps in their names, look for this many recent matching ' +
-          'patterns from which to query the field mapping',
-      }),
-    },
     'format:defaultTypeMap': {
       name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',

@@ -6,9 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { ParameterlessIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn } from './column_types';
 
-function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>({
+type MetricColumn<T> = FormattedIndexPatternColumn & {
+  operationType: T;
+};
+
+function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
   ofName,
@@ -46,7 +50,7 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field }) => ({
+    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
       label: ofName(field.name),
       dataType: 'number',
       operationType: type,
@@ -54,6 +58,8 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      params:
+        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {
@@ -75,10 +81,10 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
   } as OperationDefinition<T>;
 }
 
-export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
-export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
-export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
-export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
+export type SumIndexPatternColumn = MetricColumn<'sum'>;
+export type AvgIndexPatternColumn = MetricColumn<'avg'>;
+export type MinIndexPatternColumn = MetricColumn<'min'>;
+export type MaxIndexPatternColumn = MetricColumn<'max'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: 'min',

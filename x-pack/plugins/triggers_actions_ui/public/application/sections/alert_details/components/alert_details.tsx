@@ -21,8 +21,10 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
@@ -66,7 +68,20 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle size="m">
-                <h1 data-test-subj="alertDetailsTitle">{alert.name}</h1>
+                <h1 data-test-subj="alertDetailsTitle">
+                  {alert.name}
+                  &emsp;
+                  <EuiBetaBadge
+                    label="Beta"
+                    tooltipContent={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
+                      {
+                        defaultMessage:
+                          'This module is not GA. Please help us by reporting any bugs.',
+                      }
+                    )}
+                  />
+                </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>

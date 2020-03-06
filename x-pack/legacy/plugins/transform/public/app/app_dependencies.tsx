@@ -7,9 +7,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
-
 import { API_BASE_PATH } from '../../common/constants';
 
 import { setDependencyCache } from '../shared_imports';
@@ -17,24 +14,19 @@ import { AppDependencies } from '../shim';
 
 import { AuthorizationProvider } from './lib/authorization';
 
-const legacyBasePath = {
-  prepend: chrome.addBasePath,
-  get: chrome.getBasePath,
-  remove: () => {},
-};
-const legacyDocLinks = {
-  ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  DOC_LINK_VERSION: metadata.branch,
-};
-
 let DependenciesContext: React.Context<AppDependencies>;
 
 const setAppDependencies = (deps: AppDependencies) => {
+  const legacyBasePath = {
+    prepend: deps.core.http.basePath.prepend,
+    get: deps.core.http.basePath.get,
+    remove: () => {},
+  };
+
   setDependencyCache({
     autocomplete: deps.plugins.data.autocomplete,
-    docLinks: legacyDocLinks as any,
+    docLinks: deps.core.docLinks,
     basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
   });
   DependenciesContext = createContext<AppDependencies>(deps);
   return DependenciesContext.Provider;
@@ -48,6 +40,22 @@ export const useAppDependencies = () => {
   return useContext<AppDependencies>(DependenciesContext);
 };
 
+export const useDocumentationLinks = () => {
+  const {
+    core: { documentation },
+  } = useAppDependencies();
+  return documentation;
+};
+
+export const useToastNotifications = () => {
+  const {
+    core: {
+      notifications: { toasts: toastNotifications },
+    },
+  } = useAppDependencies();
+  return toastNotifications;
+};
+
 export const getAppProviders = (deps: AppDependencies) => {
   const I18nContext = deps.core.i18n.Context;
 
@@ -55,9 +63,7 @@ export const getAppProviders = (deps: AppDependencies) => {
   const AppDependenciesProvider = setAppDependencies(deps);
 
   return ({ children }: { children: ReactNode }) => (
-    <AuthorizationProvider
-      privilegesEndpoint={deps.core.http.basePath.prepend(`${API_BASE_PATH}privileges`)}
-    >
+    <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
         <HashRouter>
           <AppDependenciesProvider value={deps}>{children}</AppDependenciesProvider>

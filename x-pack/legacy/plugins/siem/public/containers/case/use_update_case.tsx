@@ -4,32 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useReducer } from 'react';
+import { useReducer, useCallback } from 'react';
+
+import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+
+import { patchCase } from './api';
+import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, UPDATE_CASE_PROPERTY } from './constants';
 import { Case } from './types';
-import { updateCaseProperty } from './api';
 import { getTypedPayload } from './utils';
 
-type UpdateKey = keyof Case;
+type UpdateKey = keyof CaseRequest;
 
 interface NewCaseState {
-  data: Case;
+  caseData: Case;
   isLoading: boolean;
   isError: boolean;
-  updateKey?: UpdateKey | null;
+  updateKey: UpdateKey | null;
 }
 
-interface UpdateByKey {
+export interface UpdateByKey {
   updateKey: UpdateKey;
-  updateValue: Case[UpdateKey];
+  updateValue: CaseRequest[UpdateKey];
 }
 
 interface Action {
   type: string;
-  payload?: Partial<Case> | UpdateByKey;
+  payload?: Case | UpdateKey;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -39,78 +42,70 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: true,
         isError: false,
-        updateKey: null,
+        updateKey: getTypedPayload<UpdateKey>(action.payload),
       };
-    case UPDATE_CASE_PROPERTY:
-      const { updateKey, updateValue } = getTypedPayload<UpdateByKey>(action.payload);
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: {
-          ...state.data,
-          [updateKey]: updateValue,
-        },
-        updateKey,
-      };
+
     case FETCH_SUCCESS:
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: {
-          ...state.data,
-          ...getTypedPayload<Case>(action.payload),
-        },
+        caseData: getTypedPayload<Case>(action.payload),
+        updateKey: null,
       };
     case FETCH_FAILURE:
       return {
         ...state,
         isLoading: false,
         isError: true,
+        updateKey: null,
       };
     default:
       throw new Error();
   }
 };
 
-export const useUpdateCase = (
-  caseId: string,
-  initialData: Case
-): [{ data: Case }, (updates: UpdateByKey) => void] => {
+interface UseUpdateCase extends NewCaseState {
+  updateCaseProperty: (updates: UpdateByKey) => void;
+}
+export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    data: initialData,
+    caseData: initialData,
+    updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchUpdateCaseProperty = ({ updateKey, updateValue }: UpdateByKey) => {
-    dispatch({
-      type: UPDATE_CASE_PROPERTY,
-      payload: { updateKey, updateValue },
-    });
-  };
-
-  useEffect(() => {
-    const updateData = async (updateKey: keyof Case) => {
-      dispatch({ type: FETCH_INIT });
+  const dispatchUpdateCaseProperty = useCallback(
+    async ({ updateKey, updateValue }: UpdateByKey) => {
+      let cancel = false;
       try {
-        const response = await updateCaseProperty(
+        dispatch({ type: FETCH_INIT, payload: updateKey });
+        const response = await patchCase(
           caseId,
-          { [updateKey]: state.data[updateKey] },
-          state.data.version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+          { [updateKey]: updateValue },
+          state.caseData.version
         );
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+        if (!cancel) {
+          dispatch({ type: FETCH_SUCCESS, payload: response });
+        }
       } catch (error) {
-        errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-        dispatch({ type: FETCH_FAILURE });
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: FETCH_FAILURE });
+        }
       }
-    };
-    if (state.updateKey) {
-      updateData(state.updateKey);
-    }
-  }, [state.updateKey]);
+      return () => {
+        cancel = true;
+      };
+    },
+    [state]
+  );
 
-  return [{ data: state.data }, dispatchUpdateCaseProperty];
+  return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
 };

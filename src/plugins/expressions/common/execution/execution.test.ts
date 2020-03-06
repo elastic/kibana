@@ -630,6 +630,7 @@ describe('Execution', () => {
           },
         });
         expect(node2.debug?.rawError).toBeInstanceOf(Error);
+        expect(node2.debug?.rawError).toEqual(new Error('foo'));
       });
 
       test('sets .debug object to expected shape', async () => {

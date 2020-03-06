@@ -47,7 +47,7 @@ const TimelineHeaderContainer = styled.div`
 
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
-export const TimelineHeaderComponent = ({
+export const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
   id,
   indexPattern,
@@ -60,7 +60,7 @@ export const TimelineHeaderComponent = ({
   onToggleDataProviderExcluded,
   show,
   showCallOutUnauthorizedMsg,
-}: Props) => (
+}) => (
   <TimelineHeaderContainer data-test-subj="timelineHeader">
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
@@ -91,8 +91,4 @@ export const TimelineHeaderComponent = ({
   </TimelineHeaderContainer>
 );
 
-TimelineHeaderComponent.displayName = 'TimelineHeaderComponent';
-
 export const TimelineHeader = React.memo(TimelineHeaderComponent);
-
-TimelineHeader.displayName = 'TimelineHeader';

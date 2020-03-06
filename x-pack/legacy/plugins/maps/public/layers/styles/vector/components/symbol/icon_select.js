@@ -128,6 +128,7 @@ export class IconSelect extends Component {
         closePopover={this._closePopover}
         anchorPosition="downLeft"
         panelPaddingSize="s"
+        display="block"
       >
         <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
       </EuiPopover>

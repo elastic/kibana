@@ -5,12 +5,10 @@
  */
 import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
-import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
+import { createPromiseFromStreams } from 'src/legacy/utils/streams';
 import { ImportRuleAlertRest } from '../types';
 
-const readStreamToCompletion = (stream: Readable) => {
-  return createPromiseFromStreams([stream, createConcatStream([])]);
-};
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   rule_id: 'rule-1',
@@ -43,8 +41,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
           rule_id: 'rule-1',
@@ -95,6 +96,22 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
     });
 
+    test('returns error when ndjson stream is larger than limit', async () => {
+      const sample1 = getOutputSample();
+      const sample2 = getOutputSample();
+      sample2.rule_id = 'rule-2';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(getSampleAsNdjson(sample1));
+          this.push(getSampleAsNdjson(sample2));
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1);
+      await expect(
+        createPromiseFromStreams<PromiseFromStreams[]>([ndJsonStream, ...rulesObjectsStream])
+      ).rejects.toThrowError("Can't import more than 1 rules");
+    });
+
     test('skips empty lines', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
@@ -108,8 +125,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
           rule_id: 'rule-1',
@@ -172,8 +192,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
           rule_id: 'rule-1',
@@ -236,8 +259,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       const resultOrError = result as Error[];
       expect(resultOrError[0]).toEqual({
         rule_id: 'rule-1',
@@ -300,8 +326,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       const resultOrError = result as TypeError[];
       expect(resultOrError[0]).toEqual({
         rule_id: 'rule-1',
@@ -366,8 +395,11 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       const resultOrError = result as TypeError[];
       expect(resultOrError[1] instanceof TypeError).toEqual(true);
     });

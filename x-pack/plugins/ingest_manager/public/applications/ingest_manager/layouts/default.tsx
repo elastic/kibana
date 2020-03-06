@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiTabs,
-  EuiTab,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import euiStyled from '../../../../../../legacy/common/eui_styled_components';
 import { Section } from '../sections';
 import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
@@ -24,7 +16,12 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const Nav = euiStyled.nav`
+const Container = styled.div`
+  min-height: calc(100vh - ${props => props.theme.eui.euiHeaderChildSize});
+  background: ${props => props.theme.eui.euiColorEmptyShade};
+`;
+
+const Nav = styled.nav`
   background: ${props => props.theme.eui.euiColorEmptyShade};
   border-bottom: ${props => props.theme.eui.euiBorderThin};
   padding: ${props =>
@@ -32,13 +29,13 @@ const Nav = euiStyled.nav`
   .euiTabs {
     padding-left: 3px;
     margin-left: -3px;
-  };
+  }
 `;
 
 export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
   const { epm, fleet } = useConfig();
   return (
-    <div>
+    <Container>
       <Nav>
         <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -82,9 +79,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           </EuiFlexItem>
         </EuiFlexGroup>
       </Nav>
-      <EuiPage>
-        <EuiPageBody>{children}</EuiPageBody>
-      </EuiPage>
-    </div>
+      {children}
+    </Container>
   );
 };

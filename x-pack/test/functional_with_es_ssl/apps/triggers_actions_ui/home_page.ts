@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Checking for section heading to say Triggers and Actions.');
 
       const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Alerts and Actions');
+      expect(headingText).to.be('Alerts and Actions BETA');
     });
 
     describe('Connectors tab', () => {

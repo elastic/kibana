@@ -5,7 +5,11 @@
  */
 
 import { UNCOMMON_PROCESSES_TABLE } from '../../screens/hosts/uncommon_processes';
+import { REFRESH_BUTTON } from '../../screens/siem_header';
 
 export const waitForUncommonProcessesToBeLoaded = () => {
   cy.get(UNCOMMON_PROCESSES_TABLE).should('exist');
+  cy.get(REFRESH_BUTTON)
+    .invoke('text')
+    .should('not.equal', 'Updating');
 };

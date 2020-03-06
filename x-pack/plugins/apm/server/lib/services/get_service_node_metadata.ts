@@ -58,8 +58,8 @@ export async function getServiceNodeMetadata({
   const response = await client.search(query);
 
   return {
-    host: response.aggregations?.host.buckets[0].key || NOT_AVAILABLE_LABEL,
+    host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
     containerId:
-      response.aggregations?.containerId.buckets[0].key || NOT_AVAILABLE_LABEL
+      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL
   };
 }

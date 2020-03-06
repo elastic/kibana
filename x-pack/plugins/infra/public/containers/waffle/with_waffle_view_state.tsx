@@ -30,6 +30,7 @@ const selectViewState = createSelector(
   waffleTimeSelectors.selectCurrentTime,
   waffleTimeSelectors.selectIsAutoReloading,
   waffleFilterSelectors.selectWaffleFilterQuery,
+  waffleOptionsSelectors.selectCustomMetrics,
   (
     metric,
     view,
@@ -40,7 +41,8 @@ const selectViewState = createSelector(
     autoBounds,
     time,
     autoReload,
-    filterQuery
+    filterQuery,
+    customMetrics
   ) => ({
     time,
     autoReload,
@@ -52,6 +54,7 @@ const selectViewState = createSelector(
     boundsOverride,
     autoBounds,
     filterQuery,
+    customMetrics,
   })
 );
 
@@ -89,6 +92,9 @@ export const withWaffleViewState = connect(
         }
         if (viewState.customOptions) {
           dispatch(waffleOptionsActions.changeCustomOptions(viewState.customOptions));
+        }
+        if (viewState.customMetrics) {
+          dispatch(waffleOptionsActions.changeCustomMetrics(viewState.customMetrics));
         }
         if (viewState.boundsOverride) {
           dispatch(waffleOptionsActions.changeBoundsOverride(viewState.boundsOverride));
@@ -130,6 +136,7 @@ export interface WaffleViewState {
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
   view?: ReturnType<typeof waffleOptionsSelectors.selectView>;
   customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
+  customMetrics?: ReturnType<typeof waffleOptionsSelectors.selectCustomMetrics>;
   boundsOverride?: ReturnType<typeof waffleOptionsSelectors.selectBoundsOverride>;
   autoBounds?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
   time?: ReturnType<typeof waffleTimeSelectors.selectCurrentTime>;

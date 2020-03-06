@@ -27,18 +27,18 @@
 import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
 // runtime contracts
+const { types } = dataStart.search.aggs;
+export const aggTypes = types.getAll();
+export const { createAggConfigs } = dataStart.search.aggs;
 export const {
-  types: aggTypes,
   AggConfig,
-  AggConfigs,
   AggType,
   aggTypeFieldFilters,
   FieldParamType,
   MetricAggType,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
-  setBounds,
-} = dataStart.search.aggs;
+} = dataStart.search.aggs.__LEGACY;
 
 // types
 export {
@@ -52,7 +52,6 @@ export {
   BUCKET_TYPES,
   DateRangeKey,
   IpRangeKey,
-  ISchemas,
   METRIC_TYPES,
   OptionedParamEditorProps,
   OptionedValueProp,
@@ -78,8 +77,8 @@ export {
   OptionedParamType,
   parentPipelineType,
   propFilter,
-  Schema,
-  Schemas,
   siblingPipelineType,
   termsAggFilter,
 } from '../../../core_plugins/data/public';
+
+export { ISchemas, Schemas, Schema } from '../../../core_plugins/vis_default_editor/public/schemas';
