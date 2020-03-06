@@ -36,17 +36,20 @@ interface AlertMonitorStatusProps {
 interface AlertExpressionPopoverProps {
   content: React.ReactElement;
   description: string;
+  'data-test-subj': string;
   id: string;
   value: string;
 }
 
 interface AlertNumberFieldProps {
+  'data-test-subj': string;
   disabled: boolean;
   fieldValue: number;
   setFieldValue: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const AlertFieldNumber = ({
+  'data-test-subj': dataTestSubj,
   disabled,
   fieldValue,
   setFieldValue,
@@ -56,6 +59,7 @@ export const AlertFieldNumber = ({
   return (
     <EuiFieldNumber
       compressed
+      data-test-subj={dataTestSubj}
       min={1}
       onChange={e => {
         const num = parseInt(e.target.value, 10);
@@ -75,6 +79,7 @@ export const AlertFieldNumber = ({
 
 const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   content,
+  'data-test-subj': dataTestSubj,
   description,
   id,
   value,
@@ -87,6 +92,7 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
       button={
         <EuiExpression
           color={isOpen ? 'primary' : 'secondary'}
+          data-test-subj={dataTestSubj}
           description={description}
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}
@@ -109,18 +115,21 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
   // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
   const [selectedLocations, setSelectedLocations] = useState<any[]>(
     locations.map(location => ({
+      checked: 'off',
       disabled: allLabels,
       label: location,
     }))
   );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>([
     {
+      'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
       key: 's',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
         defaultMessage: 'seconds',
       }),
     },
     {
+      'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
       checked: 'on',
       key: 'm',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.minutes', {
@@ -128,12 +137,14 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
       }),
     },
     {
+      'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption',
       key: 'h',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
         defaultMessage: 'hours',
       }),
     },
     {
+      'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.daysOption',
       key: 'd',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
         defaultMessage: 'days',
@@ -169,36 +180,45 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
 
   return (
     <>
-      <KueryBar autocomplete={props.autocomplete} />
+      <KueryBar
+        autocomplete={props.autocomplete}
+        data-test-subj="xpack.uptime.alert.monitorStatus.filterBar"
+      />
       <EuiSpacer size="s" />
       <AlertExpressionPopover
         content={
-          <AlertFieldNumber disabled={false} fieldValue={numTimes} setFieldValue={setNumTimes} />
+          <AlertFieldNumber
+            data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesField"
+            disabled={false}
+            fieldValue={numTimes}
+            setFieldValue={setNumTimes}
+          />
         }
-        id="ping-count"
+        data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
         description="any monitor is down >"
+        id="ping-count"
         value={`${numTimes} times`}
       />
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <AlertExpressionPopover
-            id="timerange"
-            description="within"
-            value={`last ${numMins}`}
             content={
-              <AlertFieldNumber disabled={false} fieldValue={numMins} setFieldValue={setNumMins} />
+              <AlertFieldNumber
+                data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueField"
+                disabled={false}
+                fieldValue={numMins}
+                setFieldValue={setNumMins}
+              />
             }
+            data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
+            description="within"
+            id="timerange"
+            value={`last ${numMins}`}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertExpressionPopover
-            id="timerange-unit"
-            description=""
-            value={
-              timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ??
-              ''
-            }
             content={
               <>
                 <EuiTitle size="xxs">
@@ -210,6 +230,7 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
                   </h5>
                 </EuiTitle>
                 <EuiSelectable
+                  data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
                   options={timerangeUnitOptions}
                   onChange={newOptions => {
                     if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
@@ -233,17 +254,61 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
                 </EuiSelectable>
               </>
             }
+            data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
+            description=""
+            id="timerange-unit"
+            value={
+              timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ??
+              ''
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       {selectedLocations.length === 0 && (
-        <EuiExpression color="secondary" description="in" isActive={false} value="all locations" />
+        <EuiExpression
+          color="secondary"
+          data-test-subj="xpack.uptime.alerts.monitorStatus.locationsEmpty"
+          description="in"
+          isActive={false}
+          value="all locations"
+        />
       )}
       {selectedLocations.length > 0 && (
         <AlertExpressionPopover
-          id="locations"
+          content={
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiSwitch
+                  data-test-subj="xpack.uptime.alerts.monitorStatus.locationsSelectionSwitch"
+                  label="Check all locations"
+                  checked={allLabels}
+                  onChange={() => {
+                    setAllLabels(!allLabels);
+                    setSelectedLocations(
+                      selectedLocations.map((l: any) => ({
+                        ...l,
+                        'data-test-subj': `xpack.uptime.alerts.monitorStatus.locationSelection.${l.label}LocationOption`,
+                        disabled: !allLabels,
+                      }))
+                    );
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelectable
+                  data-test-subj="xpack.uptime.alerts.monitorStatus.locationsSelectionSelectable"
+                  options={selectedLocations}
+                  onChange={e => setSelectedLocations(e)}
+                >
+                  {location => location}
+                </EuiSelectable>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          data-test-subj="xpack.uptime.alerts.monitorStatus.locationsSelectionExpression"
           description="from"
+          id="locations"
           value={
             selectedLocations.length === 0 || allLabels
               ? 'any location'
@@ -258,27 +323,6 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
                     }
                     return acc + `, ${cur}`;
                   }, '')
-          }
-          content={
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label="Check all locations"
-                  checked={allLabels}
-                  onChange={() => {
-                    setAllLabels(!allLabels);
-                    setSelectedLocations(
-                      selectedLocations.map((l: any) => ({ ...l, disabled: !allLabels }))
-                    );
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSelectable options={selectedLocations} onChange={e => setSelectedLocations(e)}>
-                  {location => location}
-                </EuiSelectable>
-              </EuiFlexItem>
-            </EuiFlexGroup>
           }
         />
       )}

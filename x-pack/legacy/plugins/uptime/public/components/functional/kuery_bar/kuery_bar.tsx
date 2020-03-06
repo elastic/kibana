@@ -34,12 +34,14 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
+  'data-test-subj': string;
   loadIndexPattern: any;
   indexPattern: any;
 }
 
 export function KueryBarComponent({
   autocomplete: autocompleteService,
+  'data-test-subj': dataTestSubj,
   loadIndexPattern,
   indexPattern,
 }: Props) {
@@ -123,6 +125,7 @@ export function KueryBarComponent({
   return (
     <Container>
       <Typeahead
+        data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions}
         initialValue={kuery}

@@ -84,7 +84,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
-            <KueryBar autocomplete={autocomplete} />
+            <KueryBar autocomplete={autocomplete} data-test-subj="xpack.uptime.filterBar" />
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup esFilters={esFilters} />

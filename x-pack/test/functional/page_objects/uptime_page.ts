@@ -24,11 +24,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public async goToUptimeOverviewAndLoadData(
       datePickerStartValue: string,
       datePickerEndValue: string,
-      monitorIdToCheck: string
+      monitorIdToCheck?: string
     ) {
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.monitorIdExists(monitorIdToCheck);
+      if (monitorIdToCheck) {
+        await uptimeService.monitorIdExists(monitorIdToCheck);
+      }
     }
 
     public async loadDataAndGoToMonitorPage(
@@ -95,6 +97,40 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public locationMissingIsDisplayed() {
       return uptimeService.locationMissingExists();
+    }
+
+    public async openAlertFlyoutAndCreateMonitorStatusAlert({
+      alertInterval,
+      alertName,
+      alertNumTimes,
+      alertTags,
+      alertThrottleInterval,
+      alertTimerangeSelection,
+      filters,
+    }: {
+      alertName: string;
+      alertTags: string[];
+      alertInterval: string;
+      alertThrottleInterval: string;
+      alertNumTimes: string;
+      alertTimerangeSelection: string;
+      filters?: string;
+    }) {
+      const { alerts, setKueryBarText } = uptimeService;
+      await alerts.openFlyout();
+      await alerts.openMonitorStatusAlertType();
+      await alerts.setAlertName(alertName);
+      await alerts.setAlertTags(alertTags);
+      await alerts.setAlertInterval(alertInterval);
+      await alerts.setAlertThrottleInterval(alertThrottleInterval);
+      if (filters) {
+        await setKueryBarText('xpack.uptime.alert.monitorStatus.filterBar', filters);
+      }
+      await alerts.setAlertStatusNumTimes(alertNumTimes);
+      await alerts.setAlertTimerangeSelection(alertTimerangeSelection);
+      await alerts.setMonitorStatusSelectableToHours();
+      await alerts.setLocationsSelectable();
+      await alerts.clickSaveAlertButtion();
     }
   })();
 }

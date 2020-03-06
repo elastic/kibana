@@ -16,7 +16,12 @@ export const ToggleAlertFlyoutButton = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsOpen(!isOpen)}>
+        <EuiButton
+          data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           Manage alerts
         </EuiButton>
       }
@@ -27,6 +32,7 @@ export const ToggleAlertFlyoutButton = () => {
       <EuiContextMenuPanel
         items={[
           <EuiContextMenuItem
+            data-test-subj="xpack.uptime.toggleAlertFlyout"
             key="create-alert"
             icon="plusInCircle"
             onClick={() => dispatch(setAlertFlyoutVisible(true))}
