@@ -26,6 +26,7 @@ export const alertType = {
     { id: 'default', name: 'default' },
     { id: 'noop', name: 'noop' },
   ],
+  defaultActionGroupId: 'default',
   executor,
 };
 

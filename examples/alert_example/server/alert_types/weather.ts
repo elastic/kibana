@@ -21,6 +21,7 @@ export const alertType = {
   id: 'example.weather',
   name: 'Weather',
   actionGroups: [{ id: 'default', name: 'default' }],
+  defaultActionGroupId: 'default',
   executor,
 };
 

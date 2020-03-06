@@ -21,6 +21,7 @@ export const alertType = {
   id: 'example.stock',
   name: 'Stock Price',
   actionGroups: [{ id: 'default', name: 'default' }],
+  defaultActionGroupId: 'default',
   executor,
 };
 

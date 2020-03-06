@@ -21,6 +21,7 @@ export const alertType = {
   id: 'example.always-firing',
   name: 'Always firing',
   actionGroups: [{ id: 'default', name: 'default' }],
+  defaultActionGroupId: 'default',
   executor,
 };
 

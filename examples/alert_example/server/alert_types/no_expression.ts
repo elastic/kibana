@@ -21,6 +21,7 @@ export const alertType = {
   id: 'example.no-expression',
   name: 'No Expression',
   actionGroups: [{ id: 'default', name: 'default' }],
+  defaultActionGroupId: 'default',
   executor,
 };
 
