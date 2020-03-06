@@ -164,9 +164,13 @@ Array [
                             class="euiFlyoutBody__overflow"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiFlyoutBody__overflowContent"
                             >
-                              Could not fetch the job info
+                              <div
+                                class="euiText euiText--medium"
+                              >
+                                Could not fetch the job info
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -220,9 +224,13 @@ Array [
                               class="euiFlyoutBody__overflow"
                             >
                               <div
-                                class="euiText euiText--medium"
+                                class="euiFlyoutBody__overflowContent"
                               >
-                                Could not fetch the job info
+                                <div
+                                  class="euiText euiText--medium"
+                                >
+                                  Could not fetch the job info
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -296,13 +304,17 @@ Array [
                       <div
                         className="euiFlyoutBody__overflow"
                       >
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            Could not fetch the job info
-                          </div>
-                        </EuiText>
+                        <div
+                          className="euiFlyoutBody__overflowContent"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              Could not fetch the job info
+                            </div>
+                          </EuiText>
+                        </div>
                       </div>
                     </div>
                   </EuiFlyoutBody>
@@ -391,13 +403,17 @@ Array [
         <div
           className="euiFlyoutBody__overflow"
         >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              Could not fetch the job info
-            </div>
-          </EuiText>
+          <div
+            className="euiFlyoutBody__overflowContent"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                Could not fetch the job info
+              </div>
+            </EuiText>
+          </div>
         </div>
       </div>
     </EuiFlyoutBody>
@@ -545,8 +561,12 @@ Array [
                             class="euiFlyoutBody__overflow"
                           >
                             <div
-                              class="euiText euiText--medium"
-                            />
+                              class="euiFlyoutBody__overflowContent"
+                            >
+                              <div
+                                class="euiText euiText--medium"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -599,8 +619,12 @@ Array [
                               class="euiFlyoutBody__overflow"
                             >
                               <div
-                                class="euiText euiText--medium"
-                              />
+                                class="euiFlyoutBody__overflowContent"
+                              >
+                                <div
+                                  class="euiText euiText--medium"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -673,11 +697,15 @@ Array [
                       <div
                         className="euiFlyoutBody__overflow"
                       >
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
-                          />
-                        </EuiText>
+                        <div
+                          className="euiFlyoutBody__overflowContent"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            />
+                          </EuiText>
+                        </div>
                       </div>
                     </div>
                   </EuiFlyoutBody>
@@ -766,11 +794,15 @@ Array [
         <div
           className="euiFlyoutBody__overflow"
         >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            />
-          </EuiText>
+          <div
+            className="euiFlyoutBody__overflowContent"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              />
+            </EuiText>
+          </div>
         </div>
       </div>
     </EuiFlyoutBody>

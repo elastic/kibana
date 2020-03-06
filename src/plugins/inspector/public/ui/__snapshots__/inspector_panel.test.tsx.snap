@@ -313,21 +313,25 @@ exports[`InspectorPanel should render as expected 1`] = `
       <div
         className="euiFlyoutBody__overflow"
       >
-        <component
-          adapters={
-            Object {
-              "bardapter": Object {},
-              "foodapter": Object {
-                "foo": [Function],
-              },
-            }
-          }
-          title="Inspector"
+        <div
+          className="euiFlyoutBody__overflowContent"
         >
-          <h1>
-            View 1
-          </h1>
-        </component>
+          <component
+            adapters={
+              Object {
+                "bardapter": Object {},
+                "foodapter": Object {
+                  "foo": [Function],
+                },
+              }
+            }
+            title="Inspector"
+          >
+            <h1>
+              View 1
+            </h1>
+          </component>
+        </div>
       </div>
     </div>
   </EuiFlyoutBody>
