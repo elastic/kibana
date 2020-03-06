@@ -13,8 +13,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/59229
-  describe.skip('lens reporting', () => {
+  describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
     });

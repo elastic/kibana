@@ -5,10 +5,18 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  ES_SEARCH_STRATEGY,
+} from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import { ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider } from './search';
+import {
+  ASYNC_SEARCH_STRATEGY,
+  asyncSearchStrategyProvider,
+  enhancedEsSearchStrategyProvider,
+} from './search';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -29,6 +37,10 @@ export class DataEnhancedPlugin implements Plugin {
       setupKqlQuerySuggestionProvider(core)
     );
     data.search.registerSearchStrategyProvider(ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider);
+    data.search.registerSearchStrategyProvider(
+      ES_SEARCH_STRATEGY,
+      enhancedEsSearchStrategyProvider
+    );
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
