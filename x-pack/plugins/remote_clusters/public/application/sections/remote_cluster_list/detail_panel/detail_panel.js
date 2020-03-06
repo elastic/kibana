@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -371,7 +372,7 @@ export class DetailPanel extends Component {
   }
 
   render() {
-    const { isOpen, closeDetailPanel, clusterName } = this.props;
+    const { isOpen, closeDetailPanel, clusterName, cluster } = this.props;
 
     if (!isOpen) {
       return null;
@@ -386,13 +387,23 @@ export class DetailPanel extends Component {
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle
-            size="m"
-            id="remoteClusterDetailsFlyoutTitle"
-            data-test-subj="remoteClusterDetailsFlyoutTitle"
-          >
-            <h2>{clusterName}</h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle
+                size="m"
+                id="remoteClusterDetailsFlyoutTitle"
+                data-test-subj="remoteClusterDetailsFlyoutTitle"
+              >
+                <h2>{clusterName}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {cluster && cluster.mode === PROXY_MODE ? (
+              <EuiFlexItem grow={false}>
+                {' '}
+                <EuiBadge color="hollow">{cluster.mode}</EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
 
         {this.renderFlyoutBody()}

@@ -462,6 +462,7 @@ export class RemoteClusterForm extends Component {
                 />
               }
               checked={mode === PROXY_MODE}
+              data-test-subj="remoteClusterFormConnectionModeToggle"
               onChange={e =>
                 this.onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
               }

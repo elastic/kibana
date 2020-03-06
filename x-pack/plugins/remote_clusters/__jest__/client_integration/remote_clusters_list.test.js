@@ -15,6 +15,8 @@ import {
 import { getRouter } from '../../public/application/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
+import { PROXY_MODE } from '../../common/constants';
+
 jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.remoteClustersList;
@@ -84,9 +86,10 @@ describe('<RemoteClusterList />', () => {
     const remoteCluster2 = getRemoteClusterMock({
       name: `b${getRandomString()}`,
       isConnected: false,
-      connectedNodesCount: 0,
-      seeds: ['localhost:9500'],
+      connectedSocketsCount: 0,
+      proxyAddress: 'localhost:9500',
       isConfiguredByNode: true,
+      mode: PROXY_MODE,
     });
 
     const remoteClusters = [remoteCluster1, remoteCluster2];
@@ -118,17 +121,19 @@ describe('<RemoteClusterList />', () => {
         [
           '', // Empty because the first column is the checkbox to select the row
           remoteCluster1.name,
-          remoteCluster1.seeds.join(', '),
           'Connected',
+          'default',
+          remoteCluster1.seeds.join(', '),
           remoteCluster1.connectedNodesCount.toString(),
           '', // Empty because the last column is for the "actions" on the resource
         ],
         [
           '',
           remoteCluster2.name,
-          remoteCluster2.seeds.join(', '),
           'Not connected',
-          remoteCluster2.connectedNodesCount.toString(),
+          PROXY_MODE,
+          remoteCluster2.proxyAddress,
+          remoteCluster2.connectedSocketsCount.toString(),
           '',
         ],
       ]);
