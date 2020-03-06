@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
-import { AlertListState } from '../../types';
+import querystring from 'querystring';
+import {
+  createSelector,
+  createStructuredSelector as createStructuredSelectorWithBadType,
+} from 'reselect';
+import {
+  AlertListState,
+  AlertingIndexUIQueryParams,
+  AlertsAPIQueryParams,
+  CreateStructuredSelector,
+} from '../../types';
+import { Immutable } from '../../../../../common/types';
 
+const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
  * Returns the Alert Data array from state
  */
 export const alertListData = (state: AlertListState) => state.alerts;
 
+export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
+
 /**
  * Returns the alert list pagination data from state
  */
-export const alertListPagination = (state: AlertListState) => {
-  return {
-    pageIndex: state.request_page_index,
-    pageSize: state.request_page_size,
-    resultFromIndex: state.result_from_index,
-    total: state.total,
-  };
-};
+export const alertListPagination = createStructuredSelector({
+  pageIndex: (state: AlertListState) => state.pageIndex,
+  pageSize: (state: AlertListState) => state.pageSize,
+  total: (state: AlertListState) => state.total,
+});
 
 /**
  * Returns a boolean based on whether or not the user is on the alerts page
@@ -32,48 +42,67 @@ export const isOnAlertPage = (state: AlertListState): boolean => {
 };
 
 /**
- * Returns the query object received from parsing the URL query params
+ * Returns the query object received from parsing the browsers URL query params.
+ * Used to calculate urls for links and such.
  */
-export const paginationDataFromUrl = (state: AlertListState): qs.ParsedUrlQuery => {
-  if (state.location) {
-    // Removes the `?` from the beginning of query string if it exists
-    const query = qs.parse(state.location.search.slice(1));
-    return {
-      ...(query.page_size ? { page_size: query.page_size } : {}),
-      ...(query.page_index ? { page_index: query.page_index } : {}),
-    };
-  } else {
-    return {};
-  }
-};
-
-/**
- * Returns a function that takes in a new page size and returns a new query param string
- */
-export const urlFromNewPageSizeParam: (
+export const uiQueryParams: (
   state: AlertListState
-) => (newPageSize: number) => string = state => {
-  return newPageSize => {
-    const urlPaginationData = paginationDataFromUrl(state);
-    urlPaginationData.page_size = newPageSize.toString();
+) => Immutable<AlertingIndexUIQueryParams> = createSelector(
+  (state: AlertListState) => state.location,
+  (location: AlertListState['location']) => {
+    const data: AlertingIndexUIQueryParams = {};
+    if (location) {
+      // Removes the `?` from the beginning of query string if it exists
+      const query = querystring.parse(location.search.slice(1));
 
-    // Only set the url back to page zero if the user has changed the page index already
-    if (urlPaginationData.page_index !== undefined) {
-      urlPaginationData.page_index = '0';
+      /**
+       * Build an AlertingIndexUIQueryParams object with keys from the query.
+       * If more than one value exists for a key, use the last.
+       */
+      const keys: Array<keyof AlertingIndexUIQueryParams> = [
+        'page_size',
+        'page_index',
+        'selected_alert',
+      ];
+      for (const key of keys) {
+        const value = query[key];
+        if (typeof value === 'string') {
+          data[key] = value;
+        } else if (Array.isArray(value)) {
+          data[key] = value[value.length - 1];
+        }
+      }
     }
-    return '?' + qs.stringify(urlPaginationData);
-  };
-};
+    return data;
+  }
+);
 
 /**
- * Returns a function that takes in a new page index and returns a new query param string
+ * query params to use when requesting alert data.
  */
-export const urlFromNewPageIndexParam: (
+export const apiQueryParams: (
   state: AlertListState
-) => (newPageIndex: number) => string = state => {
-  return newPageIndex => {
-    const urlPaginationData = paginationDataFromUrl(state);
-    urlPaginationData.page_index = newPageIndex.toString();
-    return '?' + qs.stringify(urlPaginationData);
-  };
-};
+) => Immutable<AlertsAPIQueryParams> = createSelector(
+  uiQueryParams,
+  ({ page_size, page_index }) => ({
+    page_size,
+    page_index,
+  })
+);
+
+export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
+  uiQueryParams,
+  ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
+);
+
+/**
+ * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
+ */
+export const selectedAlertIsLegacyEndpointEvent: (
+  state: AlertListState
+) => boolean = createSelector(selectedAlertDetailsData, function(event) {
+  if (event === undefined) {
+    return false;
+  }
+  return 'endgame' in event;
+});

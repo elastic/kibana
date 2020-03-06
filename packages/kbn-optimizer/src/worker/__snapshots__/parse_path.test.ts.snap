@@ -1,0 +1,156 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseDirPath() parses / 1`] = `
+Object {
+  "dirs": Array [],
+  "filename": undefined,
+  "root": "/",
+}
+`;
+
+exports[`parseDirPath() parses /foo 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+  ],
+  "filename": undefined,
+  "root": "/",
+}
+`;
+
+exports[`parseDirPath() parses /foo/bar/baz 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+    "baz",
+  ],
+  "filename": undefined,
+  "root": "/",
+}
+`;
+
+exports[`parseDirPath() parses /foo/bar/baz/ 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+    "baz",
+  ],
+  "filename": undefined,
+  "root": "/",
+}
+`;
+
+exports[`parseDirPath() parses c:\\ 1`] = `
+Object {
+  "dirs": Array [],
+  "filename": undefined,
+  "root": "c:",
+}
+`;
+
+exports[`parseDirPath() parses c:\\foo 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+  ],
+  "filename": undefined,
+  "root": "c:",
+}
+`;
+
+exports[`parseDirPath() parses c:\\foo\\bar\\baz 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+    "baz",
+  ],
+  "filename": undefined,
+  "root": "c:",
+}
+`;
+
+exports[`parseDirPath() parses c:\\foo\\bar\\baz\\ 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+    "baz",
+  ],
+  "filename": undefined,
+  "root": "c:",
+}
+`;
+
+exports[`parseFilePath() parses /foo 1`] = `
+Object {
+  "dirs": Array [],
+  "filename": "foo",
+  "root": "/",
+}
+`;
+
+exports[`parseFilePath() parses /foo/bar/baz 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+  ],
+  "filename": "baz",
+  "root": "/",
+}
+`;
+
+exports[`parseFilePath() parses /foo/bar/baz.json 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+  ],
+  "filename": "baz.json",
+  "root": "/",
+}
+`;
+
+exports[`parseFilePath() parses c:/foo/bar/baz.json 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+  ],
+  "filename": "baz.json",
+  "root": "c:",
+}
+`;
+
+exports[`parseFilePath() parses c:\\foo 1`] = `
+Object {
+  "dirs": Array [],
+  "filename": "foo",
+  "root": "c:",
+}
+`;
+
+exports[`parseFilePath() parses c:\\foo\\bar\\baz 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+  ],
+  "filename": "baz",
+  "root": "c:",
+}
+`;
+
+exports[`parseFilePath() parses c:\\foo\\bar\\baz.json 1`] = `
+Object {
+  "dirs": Array [
+    "foo",
+    "bar",
+  ],
+  "filename": "baz.json",
+  "root": "c:",
+}
+`;

@@ -14,8 +14,8 @@ export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const CASE_TITLE = i18n.translate('xpack.siem.case.caseView.caseTitle', {
-  defaultMessage: 'Case Title',
+export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
+  defaultMessage: 'Name',
 });
 
 export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.createdAt', {
@@ -45,6 +45,13 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const COMMENT_REQUIRED = i18n.translate(
+  'xpack.siem.case.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'A comment is required.',
+  }
+);
+
 export const EDIT = i18n.translate('xpack.siem.case.caseView.edit', {
   defaultMessage: 'Edit',
 });
@@ -57,25 +64,12 @@ export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseView.updatedAt',
   defaultMessage: 'Last updated',
 });
 
-export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.case.caseView.pageBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.caseView.pageBadgeTooltip', {
-  defaultMessage:
-    'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-});
-
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
-  defaultMessage: 'Case Workflow Management within the Elastic SIEM',
+  defaultMessage: 'Cases within the Elastic SIEM',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
-  defaultMessage: 'Case Workflows',
-});
-
-export const PREVIEW = i18n.translate('xpack.siem.case.caseView.preview', {
-  defaultMessage: 'Preview',
+  defaultMessage: 'Cases',
 });
 
 export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
@@ -84,6 +78,10 @@ export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
 
 export const SUBMIT = i18n.translate('xpack.siem.case.caseView.submit', {
   defaultMessage: 'Submit',
+});
+
+export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
+  defaultMessage: 'Create case',
 });
 
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
@@ -101,4 +99,30 @@ export const NO_TAGS = i18n.translate('xpack.siem.case.caseView.noTags', {
 
 export const TITLE_REQUIRED = i18n.translate('xpack.siem.case.createCase.titleFieldRequiredError', {
   defaultMessage: 'A title is required.',
+});
+
+export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.headerTitle',
+  {
+    defaultMessage: 'Configure cases',
+  }
+);
+
+export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
+  defaultMessage: 'Configure cases',
+});
+
+export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
+  defaultMessage: 'Add comment',
+});
+
+export const ADD_COMMENT_HELP_TEXT = i18n.translate(
+  'xpack.siem.case.caseView.comment.addCommentHelpText',
+  {
+    defaultMessage: 'Add a new comment...',
+  }
+);
+
+export const SAVE = i18n.translate('xpack.siem.case.caseView.description.save', {
+  defaultMessage: 'Save',
 });

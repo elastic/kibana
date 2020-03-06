@@ -5,11 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Query } from 'src/plugins/data/public';
 import {
   IndexPattern,
   IIndexPattern,
   IndexPatternsContract,
+  Query,
+  IndexPatternAttributes,
 } from '../../../../../../../src/plugins/data/public';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
@@ -22,7 +23,7 @@ export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
   indexPatternsContract = indexPatterns;
   const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
-    .find({
+    .find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,

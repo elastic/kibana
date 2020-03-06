@@ -18,7 +18,7 @@
  */
 
 import { Vis, VisState, VisParams } from './vis';
-import { VisType } from './types';
+import { VisType } from './vis_types';
 import { IIndexPattern } from '../../../../../../plugins/data/common';
 
 type InitVisStateType =

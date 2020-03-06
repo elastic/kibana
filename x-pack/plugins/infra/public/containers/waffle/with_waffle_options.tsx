@@ -14,7 +14,11 @@ import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
-import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
+import {
+  SnapshotMetricInput,
+  SnapshotGroupBy,
+  SnapshotCustomMetricInputRT,
+} from '../../../common/http_api/snapshot_api';
 import {
   SnapshotMetricTypeRT,
   InventoryItemType,
@@ -31,6 +35,7 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectAutoBounds,
   waffleOptionsSelectors.selectAccountId,
   waffleOptionsSelectors.selectRegion,
+  waffleOptionsSelectors.selectCustomMetrics,
   (
     metric,
     view,
@@ -40,7 +45,8 @@ const selectOptionsUrlState = createSelector(
     boundsOverride,
     autoBounds,
     accountId,
-    region
+    region,
+    customMetrics
   ) => ({
     metric,
     groupBy,
@@ -51,6 +57,7 @@ const selectOptionsUrlState = createSelector(
     autoBounds,
     accountId,
     region,
+    customMetrics,
   })
 );
 
@@ -66,6 +73,7 @@ export const withWaffleOptions = connect(
     accountId: waffleOptionsSelectors.selectAccountId(state),
     region: waffleOptionsSelectors.selectRegion(state),
     urlState: selectOptionsUrlState(state),
+    customMetrics: waffleOptionsSelectors.selectCustomMetrics(state),
   }),
   bindPlainActionCreators({
     changeMetric: waffleOptionsActions.changeMetric,
@@ -77,6 +85,7 @@ export const withWaffleOptions = connect(
     changeAutoBounds: waffleOptionsActions.changeAutoBounds,
     changeAccount: waffleOptionsActions.changeAccount,
     changeRegion: waffleOptionsActions.changeRegion,
+    changeCustomMetrics: waffleOptionsActions.changeCustomMetrics,
   })
 );
 
@@ -96,6 +105,7 @@ interface WaffleOptionsUrlState {
   auto?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
   accountId?: ReturnType<typeof waffleOptionsSelectors.selectAccountId>;
   region?: ReturnType<typeof waffleOptionsSelectors.selectRegion>;
+  customMetrics?: ReturnType<typeof waffleOptionsSelectors.selectCustomMetrics>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
@@ -111,6 +121,7 @@ export const WithWaffleOptionsUrlState = () => (
       changeBoundsOverride,
       changeAccount,
       changeRegion,
+      changeCustomMetrics,
     }) => (
       <UrlStateContainer<WaffleOptionsUrlState>
         urlState={urlState}
@@ -144,6 +155,9 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.region) {
             changeRegion(newUrlState.region);
           }
+          if (newUrlState && newUrlState.customMetrics) {
+            changeCustomMetrics(newUrlState.customMetrics);
+          }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.metric) {
@@ -173,6 +187,9 @@ export const WithWaffleOptionsUrlState = () => (
           if (initialUrlState && initialUrlState.region) {
             changeRegion(initialUrlState.region);
           }
+          if (initialUrlState && initialUrlState.customMetrics) {
+            changeCustomMetrics(initialUrlState.customMetrics);
+          }
         }}
       />
     )}
@@ -191,6 +208,7 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         auto: mapToAutoBoundsUrlState(value.autoBounds),
         accountId: value.accountId,
         region: value.region,
+        customMetrics: mapToCustomMetricsUrlState(value.customMetrics),
       }
     : undefined;
 
@@ -230,6 +248,12 @@ const mapToCustomOptionsUrlState = (subject: any) => {
   return subject && Array.isArray(subject) && subject.every(isInfraGroupByOption)
     ? subject
     : undefined;
+};
+
+const mapToCustomMetricsUrlState = (subject: any) => {
+  return subject && Array.isArray(subject) && subject.every(s => SnapshotCustomMetricInputRT.is(s))
+    ? subject
+    : [];
 };
 
 const mapToBoundsOverideUrlState = (subject: any) => {

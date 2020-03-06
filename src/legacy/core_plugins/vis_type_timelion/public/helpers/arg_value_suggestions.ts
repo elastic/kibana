@@ -20,7 +20,10 @@
 import { get } from 'lodash';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 import { TimelionFunctionArgs } from '../../../../../plugins/timelion/common/types';
-import { indexPatterns as indexPatternsUtils } from '../../../../../plugins/data/public';
+import {
+  indexPatterns as indexPatternsUtils,
+  IndexPatternAttributes,
+} from '../../../../../plugins/data/public';
 
 export interface Location {
   min: number;
@@ -53,7 +56,7 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    const { savedObjects } = await savedObjectsClient.find({
+    const { savedObjects } = await savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title'],
       search: `"${indexPatternTitle}"`,
@@ -84,7 +87,7 @@ export function getArgValueSuggestions() {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
-        const resp = await savedObjectsClient.find({
+        const resp = await savedObjectsClient.find<IndexPatternAttributes>({
           type: 'index-pattern',
           fields: ['title', 'type'],
           search: `${search}`,

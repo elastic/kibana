@@ -7,7 +7,11 @@
 import React, { FunctionComponent } from 'react';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
-import { SnapshotMetricInput, SnapshotGroupBy } from '../../../../common/http_api/snapshot_api';
+import {
+  SnapshotMetricInput,
+  SnapshotGroupBy,
+  SnapshotCustomMetricInput,
+} from '../../../../common/http_api/snapshot_api';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import { ToolbarWrapper } from './toolbar_wrapper';
@@ -35,6 +39,10 @@ export interface ToolbarProps {
   region: ReturnType<typeof waffleOptionsSelectors.selectRegion>;
   accounts: InventoryCloudAccount[];
   regions: string[];
+  customMetrics: ReturnType<typeof waffleOptionsSelectors.selectCustomMetrics>;
+  changeCustomMetrics: (
+    payload: SnapshotCustomMetricInput[]
+  ) => Action<SnapshotCustomMetricInput[]>;
 }
 
 const wrapToolbarItems = (

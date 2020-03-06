@@ -6,8 +6,6 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import { npStart } from 'ui/new_platform';
-
 import { useAppDependencies } from '../../app_dependencies';
 
 import {
@@ -17,10 +15,7 @@ import {
   loadCurrentSavedSearch,
 } from './common';
 
-import { KibanaContext, KibanaContextValue } from './kibana_context';
-
-const indexPatterns = npStart.plugins.data.indexPatterns;
-const savedObjectsClient = npStart.core.savedObjects.client;
+import { InitializedKibanaContextValue, KibanaContext, KibanaContextValue } from './kibana_context';
 
 interface Props {
   savedObjectId: string;
@@ -28,6 +23,8 @@ interface Props {
 
 export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
   const appDeps = useAppDependencies();
+  const indexPatterns = appDeps.plugins.data.indexPatterns;
+  const savedObjectsClient = appDeps.core.savedObjects.client;
   const savedSearches = appDeps.plugins.savedSearches.getClient();
 
   const [contextValue, setContextValue] = useState<KibanaContextValue>({ initialized: false });
@@ -50,22 +47,21 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    const kibanaConfig = npStart.core.uiSettings;
+    const kibanaConfig = appDeps.core.uiSettings;
 
-    const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
-      fetchedIndexPattern,
-      fetchedSavedSearch,
-      kibanaConfig
-    );
-
-    const kibanaContext = {
+    const {
+      indexPattern: currentIndexPattern,
+      savedSearch: currentSavedSearch,
       combinedQuery,
-      currentIndexPattern: indexPattern,
-      currentSavedSearch: savedSearch,
+    } = createSearchItems(fetchedIndexPattern, fetchedSavedSearch, kibanaConfig);
+
+    const kibanaContext: InitializedKibanaContextValue = {
       indexPatterns,
       initialized: true,
-      kbnBaseUrl: npStart.core.injectedMetadata.getBasePath(),
       kibanaConfig,
+      combinedQuery,
+      currentIndexPattern,
+      currentSavedSearch,
     };
 
     setContextValue(kibanaContext);

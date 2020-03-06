@@ -18,7 +18,7 @@
  */
 
 export { IAggConfig } from './agg_config';
-export { IAggConfigs } from './agg_configs';
+export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
 export { IFieldParamType } from './param_types';

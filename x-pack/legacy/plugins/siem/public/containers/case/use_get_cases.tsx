@@ -17,7 +17,6 @@ import {
 } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
 import { getTypedPayload } from './utils';
-import { Direction } from '../../graphql/types';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
@@ -31,16 +30,9 @@ export interface UseGetCasesState {
   filterOptions: FilterOptions;
 }
 
-export interface QueryArgs {
-  page?: number;
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: Direction;
-}
-
 export interface Action {
   type: string;
-  payload?: AllCases | QueryArgs | FilterOptions;
+  payload?: AllCases | Partial<QueryParams> | FilterOptions;
 }
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
   switch (action.type) {
@@ -83,13 +75,13 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 
 const initialData: AllCases = {
   page: 0,
-  per_page: 0,
+  perPage: 0,
   total: 0,
   cases: [],
 };
 export const useGetCases = (): [
   UseGetCasesState,
-  Dispatch<SetStateAction<QueryArgs>>,
+  Dispatch<SetStateAction<Partial<QueryParams>>>,
   Dispatch<SetStateAction<FilterOptions>>
 ] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -104,11 +96,11 @@ export const useGetCases = (): [
       page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
       sortField: SortFieldCase.createdAt,
-      sortOrder: Direction.desc,
+      sortOrder: 'desc',
     },
   });
-  const [queryParams, setQueryParams] = useState(state.queryParams as QueryArgs);
-  const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
+  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
+  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {

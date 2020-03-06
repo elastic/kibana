@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { tabifyGetColumns, AggColumn } from './get_columns';
+import { tabifyGetColumns } from './get_columns';
+import { TabbedAggColumn } from './types';
 import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
-
-jest.mock('ui/new_platform');
+import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
 
 describe('get columns', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry();
+
   const createAggConfigs = (aggs: any[] = []) => {
     const field = {
       name: '@timestamp',
@@ -37,18 +43,17 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(
-      indexPattern,
-      aggs,
-      new Schemas([
+    return new AggConfigs(indexPattern, aggs, {
+      typesRegistry,
+      schemas: new Schemas([
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
           min: 1,
           defaults: [{ schema: 'metric', type: 'count' }],
         },
-      ]).all
-    );
+      ]).all,
+    });
   };
 
   test('should inject a count metric if no aggs exist', () => {
@@ -140,7 +145,7 @@ describe('get columns', () => {
       false
     );
 
-    function checkColumns(column: AggColumn, i: number) {
+    function checkColumns(column: TabbedAggColumn, i: number) {
       expect(column).toHaveProperty('aggConfig');
 
       switch (i) {

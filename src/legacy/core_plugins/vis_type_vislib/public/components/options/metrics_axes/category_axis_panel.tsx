@@ -46,7 +46,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       };
       setCategoryAxis(updatedAxis);
     },
-    [setCategoryAxis]
+    [setCategoryAxis, axis]
   );
 
   const setPosition = useCallback(
@@ -89,7 +89,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
         setValue={setAxis}
       />
 
-      {axis.show && <LabelOptions axis={axis} axesName="categoryAxes" index={0} {...props} />}
+      {axis.show && <LabelOptions axesName="categoryAxes" index={0} {...props} />}
     </EuiPanel>
   );
 }

@@ -4,25 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
- */
 import React from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
-import {
-  Matrix3,
-  ResolverAction,
-  ResolverStore,
-  ProcessEvent,
-  SideEffectSimulator,
-} from '../types';
+import { Matrix3, ResolverAction, ResolverStore, SideEffectSimulator } from '../types';
+import { LegacyEndpointEvent } from '../../../../common/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
+import { mockProcessEvent } from '../models/process_event_test_helpers';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -31,6 +24,7 @@ describe('useCamera on an unpainted element', () => {
   let reactRenderResult: RenderResult;
   let store: ResolverStore;
   let simulator: SideEffectSimulator;
+
   beforeEach(async () => {
     ({ store } = storeFactory());
 
@@ -139,17 +133,45 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: ProcessEvent;
+      let process: LegacyEndpointEvent;
       beforeEach(() => {
-        // At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
-        const processes: ProcessEvent[] = [
+        const events: LegacyEndpointEvent[] = [];
+        const numberOfEvents: number = Math.floor(Math.random() * 10 + 1);
+
+        for (let index = 0; index < numberOfEvents; index++) {
+          const uniquePpid = index === 0 ? undefined : index - 1;
+          events.push(
+            mockProcessEvent({
+              endgame: {
+                unique_pid: index,
+                unique_ppid: uniquePpid,
+                event_type_full: 'process_event',
+                event_subtype_full: 'creation_event',
+              },
+            })
+          );
+        }
+        const serverResponseAction: ResolverAction = {
+          type: 'serverReturnedResolverData',
+          payload: {
+            data: {
+              result: {
+                search_results: events,
+              },
+            },
+          },
+        };
+        act(() => {
+          store.dispatch(serverResponseAction);
+        });
+        const processes: LegacyEndpointEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
             .processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
         simulator.controls.time = 0;
-        const action: ResolverAction = {
+        const cameraAction: ResolverAction = {
           type: 'userBroughtProcessIntoView',
           payload: {
             time: simulator.controls.time,
@@ -157,7 +179,7 @@ describe('useCamera on an unpainted element', () => {
           },
         };
         act(() => {
-          store.dispatch(action);
+          store.dispatch(cameraAction);
         });
       });
 

@@ -23,11 +23,10 @@ import {
 import {
   agentConfigurationRoute,
   agentConfigurationSearchRoute,
-  createAgentConfigurationRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
-  updateAgentConfigurationRoute,
+  createOrUpdateAgentConfigurationRoute,
   agentConfigurationAgentNameRoute
 } from './settings/agent_configuration';
 import {
@@ -83,11 +82,10 @@ const createApmApi = () => {
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
-    .add(createAgentConfigurationRoute)
     .add(deleteAgentConfigurationRoute)
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
-    .add(updateAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)

@@ -12,16 +12,22 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
 import { useKibanaContext } from '../../../../lib/kibana';
 
-import { getCreateRequestBody } from '../../../../common';
+import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
 
 import {
+  applyTransformConfigToDefineState,
+  getDefaultStepDefineState,
   StepDefineExposedState,
   StepDefineForm,
   StepDefineSummary,
-  getDefaultStepDefineState,
 } from '../step_define';
 import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
-import { getDefaultStepDetailsState, StepDetailsForm, StepDetailsSummary } from '../step_details';
+import {
+  applyTransformConfigToDetailsState,
+  getDefaultStepDetailsState,
+  StepDetailsForm,
+  StepDetailsSummary,
+} from '../step_details';
 import { WizardNav } from '../wizard_nav';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
@@ -67,17 +73,25 @@ const StepDefine: FC<DefinePivotStepProps> = ({
   );
 };
 
-export const Wizard: FC = React.memo(() => {
+interface WizardProps {
+  cloneConfig?: TransformPivotConfig;
+}
+
+export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig }) => {
   const kibanaContext = useKibanaContext();
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(kibanaContext));
+  const [stepDefineState, setStepDefineState] = useState(
+    applyTransformConfigToDefineState(getDefaultStepDefineState(kibanaContext), cloneConfig)
+  );
 
   // The DETAILS state
-  const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());
+  const [stepDetailsState, setStepDetailsState] = useState(
+    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
+  );
 
   const stepDetails =
     currentStep === WIZARD_STEPS.DETAILS ? (

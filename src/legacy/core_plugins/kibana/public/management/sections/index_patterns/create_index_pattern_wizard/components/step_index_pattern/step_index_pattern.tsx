@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   indexPatterns,
   DataPublicPluginStart,
+  IndexPatternAttributes,
 } from '../../../../../../../../../../plugins/data/public';
 import { SavedObjectsClient, IUiSettingsClient } from '../../../../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
@@ -96,7 +97,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.props.savedObjectsClient.find({
+    const { savedObjects } = await this.props.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title'],
       perPage: 10000,

@@ -17,9 +17,27 @@
  * under the License.
  */
 
-import { Action } from './actions/action';
-import { Trigger } from './triggers/trigger';
+import { ActionByType } from './actions/action';
+import { TriggerInternal } from './triggers/trigger_internal';
 
-export type TriggerRegistry = Map<string, Trigger>;
-export type ActionRegistry = Map<string, Action>;
-export type TriggerToActionsRegistry = Map<string, string[]>;
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
+export type ActionRegistry = Map<string, ActionByType<any>>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
+
+const DEFAULT_TRIGGER = '';
+
+export type TriggerId = keyof TriggerContextMapping;
+
+export type BaseContext = object;
+export type TriggerContext = BaseContext;
+
+export interface TriggerContextMapping {
+  [DEFAULT_TRIGGER]: TriggerContext;
+}
+
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
+}

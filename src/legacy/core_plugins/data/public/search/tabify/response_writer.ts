@@ -19,26 +19,24 @@
 
 import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs/agg_configs';
-import { AggColumn, tabifyGetColumns } from './get_columns';
+import { tabifyGetColumns } from './get_columns';
 
-import { TabbedResponseWriterOptions } from './types';
+import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow, TabbedTable } from './types';
 
-interface TabbedAggColumn {
+interface BufferColumn {
   id: string;
   value: string | number;
 }
-
-type TabbedAggRow = Record<TabbedAggColumn['id'], TabbedAggColumn['value']>;
 
 /**
  * Writer class that collects information about an aggregation response and
  * produces a table, or a series of tables.
  */
 export class TabbedAggResponseWriter {
-  columns: AggColumn[];
+  columns: TabbedAggColumn[];
   rows: TabbedAggRow[] = [];
-  bucketBuffer: TabbedAggColumn[] = [];
-  metricBuffer: TabbedAggColumn[] = [];
+  bucketBuffer: BufferColumn[] = [];
+  metricBuffer: BufferColumn[] = [];
 
   private readonly partialRows: boolean;
 
@@ -79,7 +77,7 @@ export class TabbedAggResponseWriter {
     }
   }
 
-  response() {
+  response(): TabbedTable {
     return {
       columns: this.columns,
       rows: this.rows,

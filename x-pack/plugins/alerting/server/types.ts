@@ -8,7 +8,7 @@ import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../src/core/server';
-import { Alert, AlertActionParams } from '../common';
+import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 
@@ -52,11 +52,6 @@ export interface AlertExecutorOptions {
   updatedBy: string | null;
 }
 
-export interface ActionGroup {
-  id: string;
-  name: string;
-}
-
 export interface AlertType {
   id: string;
   name: string;
@@ -64,6 +59,7 @@ export interface AlertType {
     params?: { validate: (object: any) => any };
   };
   actionGroups: ActionGroup[];
+  defaultActionGroupId: ActionGroup['id'];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 

@@ -11,7 +11,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   echo " -> Running jest tests"
   cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --verbose
+  checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --verbose --detectOpenHandles
   echo ""
   echo ""
 

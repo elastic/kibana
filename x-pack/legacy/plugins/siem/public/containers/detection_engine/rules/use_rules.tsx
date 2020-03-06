@@ -4,16 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
 
-import { FetchRulesResponse, FilterOptions, PaginationOptions } from './types';
+import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from './types';
 import { useStateToaster } from '../../../components/toasters';
 import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Func = () => void;
-export type ReturnRules = [boolean, FetchRulesResponse, Func | null];
+export type ReturnRules = [
+  boolean,
+  FetchRulesResponse | null,
+  (refreshPrePackagedRule?: boolean) => void
+];
+
+export interface UseRules {
+  pagination: PaginationOptions;
+  filterOptions: FilterOptions;
+  refetchPrePackagedRulesStatus?: () => void;
+  dispatchRulesInReducer?: (rules: Rule[], pagination: Partial<PaginationOptions>) => void;
+}
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
@@ -21,17 +32,14 @@ export type ReturnRules = [boolean, FetchRulesResponse, Func | null];
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  */
-export const useRules = (
-  pagination: PaginationOptions,
-  filterOptions: FilterOptions
-): ReturnRules => {
-  const [rules, setRules] = useState<FetchRulesResponse>({
-    page: 1,
-    perPage: 20,
-    total: 0,
-    data: [],
-  });
-  const reFetchRules = useRef<Func | null>(null);
+export const useRules = ({
+  pagination,
+  filterOptions,
+  refetchPrePackagedRulesStatus,
+  dispatchRulesInReducer,
+}: UseRules): ReturnRules => {
+  const [rules, setRules] = useState<FetchRulesResponse | null>(null);
+  const reFetchRules = useRef<(refreshPrePackagedRule?: boolean) => void>(noop);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
@@ -50,10 +58,20 @@ export const useRules = (
 
         if (isSubscribed) {
           setRules(fetchRulesResult);
+          if (dispatchRulesInReducer != null) {
+            dispatchRulesInReducer(fetchRulesResult.data, {
+              page: fetchRulesResult.page,
+              perPage: fetchRulesResult.perPage,
+              total: fetchRulesResult.total,
+            });
+          }
         }
       } catch (error) {
         if (isSubscribed) {
           errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          if (dispatchRulesInReducer != null) {
+            dispatchRulesInReducer([], {});
+          }
         }
       }
       if (isSubscribed) {
@@ -62,7 +80,12 @@ export const useRules = (
     }
 
     fetchData();
-    reFetchRules.current = fetchData.bind(null, true);
+    reFetchRules.current = (refreshPrePackagedRule: boolean = false) => {
+      fetchData(true);
+      if (refreshPrePackagedRule && refetchPrePackagedRulesStatus != null) {
+        refetchPrePackagedRulesStatus();
+      }
+    };
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -76,6 +99,7 @@ export const useRules = (
     filterOptions.tags?.sort().join(),
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,
+    refetchPrePackagedRulesStatus,
   ]);
 
   return [loading, rules, reFetchRules.current];

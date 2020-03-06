@@ -51,12 +51,18 @@ async function deleteConfig(
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+      pathname: '/api/apm/settings/agent-configuration',
       method: 'DELETE',
       params: {
-        path: { configurationId: selectedConfig.id }
+        body: {
+          service: {
+            name: selectedConfig.service.name,
+            environment: selectedConfig.service.environment
+          }
+        }
       }
     });
+
     toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededTitle',

@@ -17,12 +17,14 @@ import React, {
   useState
 } from 'react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useLicense } from '../../../hooks/useLicense';
+import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
@@ -30,8 +32,7 @@ import { Cytoscape } from './Cytoscape';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
-import { useRefHeight } from './useRefHeight';
-import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
+import { useRefDimensions } from './useRefDimensions';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -195,13 +196,13 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elements]);
 
-  const isValidPlatinumLicense =
-    license?.isActive &&
-    (license?.type === 'platinum' || license?.type === 'trial');
+  const { ref: wrapperRef, width, height } = useRefDimensions();
 
-  const [wrapperRef, height] = useRefHeight();
+  if (!license) {
+    return null;
+  }
 
-  return isValidPlatinumLicense ? (
+  return isValidPlatinumLicense(license) ? (
     <div
       style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
       ref={wrapperRef}
@@ -210,6 +211,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={renderedElements.current}
         serviceName={serviceName}
         height={height}
+        width={width}
         style={cytoscapeDivStyle}
       >
         <Controls />

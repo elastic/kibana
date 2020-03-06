@@ -71,6 +71,36 @@ node scripts/jest.js plugins/apm --watch
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
 
+### Functional tests
+
+**Start server**
+```
+node scripts/functional_tests_server --config x-pack/test/functional/config.js
+```
+
+**Run tests**
+```
+node scripts/functional_test_runner --config x-pack/test/functional/config.js --grep='APM specs'
+```
+
+APM tests are located in `x-pack/test/functional/apps/apm`.
+For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+
+### API integration tests
+
+**Start server**
+```
+node scripts/functional_tests_server --config x-pack/test/api_integration/config.js
+```
+
+**Run tests**
+```
+node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='APM specs'
+```
+
+APM tests are located in `x-pack/test/api_integration/apis/apm`.
+For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+
 ### Linting
 
 _Note: Run the following commands from `kibana/`._
@@ -95,6 +125,6 @@ You can access the development environment at http://localhost:9001.
 
 #### Further resources
 
-- [Cypress integration tests](cypress/README.md)
+- [Cypress integration tests](./e2e/README.md)
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
 - [Github PR commands](./dev_docs/github_commands.md)

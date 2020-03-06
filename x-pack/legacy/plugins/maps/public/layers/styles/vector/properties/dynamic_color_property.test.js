@@ -25,6 +25,9 @@ const mockField = {
   getName() {
     return 'foobar';
   },
+  getRootName() {
+    return 'foobar';
+  },
   supportsFieldMeta() {
     return true;
   },

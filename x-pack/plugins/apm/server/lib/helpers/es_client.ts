@@ -7,12 +7,14 @@
 /* eslint-disable no-console */
 import {
   IndexDocumentParams,
-  IndicesCreateParams,
   IndicesDeleteParams,
-  SearchParams
+  SearchParams,
+  IndicesCreateParams,
+  DeleteDocumentResponse
 } from 'elasticsearch';
-import { cloneDeep, isString, merge, uniqueId } from 'lodash';
+import { cloneDeep, isString, merge } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import chalk from 'chalk';
 import {
   ESSearchRequest,
   ESSearchResponse
@@ -125,6 +127,10 @@ interface ClientCreateOptions {
 
 export type ESClient = ReturnType<typeof getESClient>;
 
+function formatObj(obj: Record<string, any>) {
+  return JSON.stringify(obj, null, 2);
+}
+
 export function getESClient(
   context: APMRequestHandlerContext,
   request: KibanaRequest,
@@ -135,25 +141,49 @@ export function getESClient(
     callAsInternalUser
   } = context.core.elasticsearch.dataClient;
 
-  const callMethod = clientAsInternalUser
-    ? callAsInternalUser
-    : callAsCurrentUser;
+  async function callEs(operationName: string, params: Record<string, any>) {
+    const startTime = process.hrtime();
 
-  const debug = context.params.query._debug;
-
-  function withTime<T>(
-    fn: (log: typeof console.log) => Promise<T>
-  ): Promise<T> {
-    const log = console.log.bind(console, uniqueId());
-    if (!debug) {
-      return fn(log);
+    let res: any;
+    let esError = null;
+    try {
+      res = clientAsInternalUser
+        ? await callAsInternalUser(operationName, params)
+        : await callAsCurrentUser(operationName, params);
+    } catch (e) {
+      // catch error and throw after outputting debug info
+      esError = e;
     }
-    const time = process.hrtime();
-    return fn(log).then(data => {
-      const now = process.hrtime(time);
-      log(`took: ${Math.round(now[0] * 1000 + now[1] / 1e6)}ms`);
-      return data;
-    });
+
+    if (context.params.query._debug) {
+      const highlightColor = esError ? 'bgRed' : 'inverse';
+      const diff = process.hrtime(startTime);
+      const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
+      const routeInfo = `${request.route.method.toUpperCase()} ${
+        request.route.path
+      }`;
+
+      console.log(
+        chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}) ===`)
+      );
+
+      if (operationName === 'search') {
+        console.log(`GET ${params.index}/_${operationName}`);
+        console.log(formatObj(params.body));
+      } else {
+        console.log(chalk.bold('ES operation:'), operationName);
+
+        console.log(chalk.bold('ES query:'));
+        console.log(formatObj(params));
+      }
+      console.log(`\n`);
+    }
+
+    if (esError) {
+      throw esError;
+    }
+
+    return res;
   }
 
   return {
@@ -170,40 +200,25 @@ export function getESClient(
         apmOptions
       );
 
-      return withTime(log => {
-        if (context.params.query._debug) {
-          log(`--DEBUG ES QUERY--`);
-          log(
-            `${request.url.pathname} ${JSON.stringify(context.params.query)}`
-          );
-          log(`GET ${nextParams.index}/_search`);
-          log(JSON.stringify(nextParams.body, null, 2));
-        }
-
-        return (callMethod('search', nextParams) as unknown) as Promise<
-          ESSearchResponse<TDocument, TSearchRequest>
-        >;
-      });
+      return callEs('search', nextParams);
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
-      return withTime(() => callMethod('index', params));
+      return callEs('index', params);
     },
-    delete: (params: IndicesDeleteParams) => {
-      return withTime(() => callMethod('delete', params));
+    delete: (params: IndicesDeleteParams): Promise<DeleteDocumentResponse> => {
+      return callEs('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return withTime(() => callMethod('indices.create', params));
+      return callEs('indices.create', params);
     },
     hasPrivileges: (
       params: IndexPrivilegesParams
     ): Promise<IndexPrivileges> => {
-      return withTime(() =>
-        callMethod('transport.request', {
-          method: 'POST',
-          path: '/_security/user/_has_privileges',
-          body: params
-        })
-      );
+      return callEs('transport.request', {
+        method: 'POST',
+        path: '/_security/user/_has_privileges',
+        body: params
+      });
     }
   };
 }

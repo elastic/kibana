@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
+import { CloneAction } from './action_clone';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
@@ -19,6 +20,11 @@ export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
           return <StartAction items={[item]} forceDisable={forceDisable} />;
         }
         return <StopAction items={[item]} forceDisable={forceDisable} />;
+      },
+    },
+    {
+      render: (item: TransformListRow) => {
+        return <CloneAction itemId={item.id} />;
       },
     },
     {

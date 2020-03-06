@@ -50,7 +50,7 @@ export class IndexPatternsService {
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find({
+      await this.savedObjectsClient.find<Record<string, any>>({
         type: 'index-pattern',
         fields: ['title'],
         perPage: 10000,

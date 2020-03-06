@@ -50,8 +50,13 @@ export class Timefilter {
 
   private _autoRefreshIntervalId: number = 0;
 
+  private readonly timeDefaults: TimeRange;
+  private readonly refreshIntervalDefaults: RefreshInterval;
+
   constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
     this._history = timeHistory;
+    this.timeDefaults = config.timeDefaults;
+    this.refreshIntervalDefaults = config.refreshIntervalDefaults;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
@@ -207,6 +212,14 @@ export class Timefilter {
     this._isAutoRefreshSelectorEnabled = false;
     this.enabledUpdated$.next(false);
   };
+
+  public getTimeDefaults(): TimeRange {
+    return _.cloneDeep(this.timeDefaults);
+  }
+
+  public getRefreshIntervalDefaults(): RefreshInterval {
+    return _.cloneDeep(this.refreshIntervalDefaults);
+  }
 
   private getForceNow = () => {
     const forceNow = parseQueryString().forceNow as string;

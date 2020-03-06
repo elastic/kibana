@@ -28,31 +28,7 @@ import { loadIndexSettings } from './load_index_settings';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
-function getField(indexPattern, fieldName) {
-  const field = indexPattern.fields.getByName(fieldName);
-  if (!field) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-        values: { fieldName, indexPatternTitle: indexPattern.title },
-      })
-    );
-  }
-  return field;
-}
-
-function addFieldToDSL(dsl, field) {
-  return !field.scripted
-    ? { ...dsl, field: field.name }
-    : {
-        ...dsl,
-        script: {
-          source: field.script,
-          lang: field.lang,
-        },
-      };
-}
+import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 
 function getDocValueAndSourceFields(indexPattern, fieldNames) {
   const docValueFields = [];

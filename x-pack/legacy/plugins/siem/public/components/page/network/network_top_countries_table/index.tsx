@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
@@ -125,7 +126,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
             field: lastField as NetworkTopTablesFields,
             direction: newSortDirection as Direction,
           };
-          if (!isEqual(newTopCountriesSort, sort)) {
+          if (!deepEqual(newTopCountriesSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,

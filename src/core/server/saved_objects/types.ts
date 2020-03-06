@@ -33,8 +33,9 @@ export {
   SavedObjectsImportRetry,
 } from './import/types';
 
-import { SavedObjectAttributes } from '../../types';
 import { LegacyConfig } from '../legacy';
+import { SavedObjectUnsanitizedDoc } from './serialization';
+import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
@@ -61,10 +62,9 @@ export interface SavedObjectsMigrationVersion {
 }
 
 /**
- *
  * @public
  */
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -274,8 +274,25 @@ export interface SavedObjectsLegacyMapping {
  * @deprecated
  */
 export interface SavedObjectsLegacyMigrationDefinitions {
-  [type: string]: SavedObjectMigrationMap;
+  [type: string]: SavedObjectLegacyMigrationMap;
 }
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectLegacyMigrationMap {
+  [version: string]: SavedObjectLegacyMigrationFn;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type SavedObjectLegacyMigrationFn = (
+  doc: SavedObjectUnsanitizedDoc,
+  log: SavedObjectsMigrationLogger
+) => SavedObjectUnsanitizedDoc;
 
 /**
  * @internal

@@ -18,12 +18,17 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { npStart } from 'ui/new_platform';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+
+import { useAppDependencies } from '../app_dependencies';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
 export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
+  const {
+    core: { overlays },
+  } = useAppDependencies();
+
   if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }
@@ -43,7 +48,7 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
   }`;
 
   const openModal = () => {
-    const modal = npStart.core.overlays.openModal(
+    const modal = overlays.openModal(
       toMountPoint(
         <EuiModal onClose={() => modal.close()}>
           <EuiModalHeader>

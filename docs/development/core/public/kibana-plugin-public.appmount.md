@@ -9,5 +9,5 @@ A mount function called when the user navigates to this app's route.
 <b>Signature:</b>
 
 ```typescript
-export declare type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export declare type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 ```

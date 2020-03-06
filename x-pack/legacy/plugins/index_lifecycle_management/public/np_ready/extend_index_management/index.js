@@ -9,7 +9,6 @@ import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
-import { extensionsService } from '../../../../index_management/public';
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -238,7 +237,7 @@ export const ilmFilterExtension = indices => {
   }
 };
 
-export const addAllExtensions = () => {
+export const addAllExtensions = extensionsService => {
   extensionsService.addAction(retryLifecycleActionExtension);
   extensionsService.addAction(removeLifecyclePolicyActionExtension);
   extensionsService.addAction(addLifecyclePolicyActionExtension);
