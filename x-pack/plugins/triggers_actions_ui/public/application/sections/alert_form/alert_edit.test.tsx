@@ -20,7 +20,7 @@ describe('alert_edit', () => {
   let deps: any;
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const mockes = coreMock.createSetup();
     deps = {
       toastNotifications: mockes.notifications.toasts,
@@ -122,9 +122,10 @@ describe('alert_edit', () => {
       await nextTick();
       wrapper.update();
     });
-  });
+  }
 
-  it('renders alert add flyout', () => {
+  it('renders alert add flyout', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
   });
