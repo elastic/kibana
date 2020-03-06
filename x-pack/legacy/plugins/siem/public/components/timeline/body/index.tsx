@@ -38,6 +38,7 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
+  height?: number;
   id: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -71,6 +72,7 @@ export const Body = React.memo<BodyProps>(
     data,
     eventIdToNoteIds,
     getNotesByIds,
+    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -110,7 +112,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" ref={containerElementRef}>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
           <EventsTable
             data-test-subj="events-table"
             // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291

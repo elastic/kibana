@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';

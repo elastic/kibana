@@ -38,9 +38,8 @@ const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
 FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
 
 const FooterContainer = styled(EuiFlexGroup)<{ height: number }>`
-  /* height: ${({ height }) => height}px; */
+  height: ${({ height }) => height}px;
   flex: 0;
-  height: 40px;
 `;
 
 FooterContainer.displayName = 'FooterContainer';

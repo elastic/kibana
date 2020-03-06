@@ -38,6 +38,7 @@ import { plainRowRenderer } from './renderers/plain_row_renderer';
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
+  height?: number;
   id: string;
   isEventViewer?: boolean;
   sort: Sort;
@@ -56,6 +57,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     columnHeaders,
     data,
     eventIdToNoteIds,
+    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -163,6 +165,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
+        height={height}
         id={id}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
@@ -193,6 +196,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       prevProps.data === nextProps.data &&
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.notesById === nextProps.notesById &&
+      prevProps.height === nextProps.height &&
       prevProps.id === nextProps.id &&
       prevProps.isEventViewer === nextProps.isEventViewer &&
       prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
