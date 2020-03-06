@@ -38,8 +38,8 @@ export interface PingHistogramComponentProps {
 }
 
 interface BarPoint {
-  x: number;
-  y: number;
+  x: number | null | undefined;
+  y: number | null | undefined;
   type: string;
 }
 
@@ -89,7 +89,10 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     const barData: BarPoint[] = [];
 
     histogram.forEach(({ x, upCount, downCount }) => {
-      barData.push({ x, y: downCount, type: downSpecId }, { x, y: upCount, type: upMonitorsId });
+      barData.push(
+        { x, y: downCount ?? 0, type: downSpecId },
+        { x, y: upCount ?? 0, type: upMonitorsId }
+      );
     });
 
     content = (
