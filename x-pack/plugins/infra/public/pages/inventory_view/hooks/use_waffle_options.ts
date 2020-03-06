@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -34,63 +34,72 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
 };
 
 export const useWaffleOptions = () => {
-  const [state, setState] = useUrlState<WaffleOptionsState>({
+  const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
     defaultState: DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
   });
 
+  const [state, setState] = useState<WaffleOptionsState>(urlState);
+
+  useEffect(() => setUrlState(state), [setUrlState, state]);
+
   const changeMetric = useCallback(
-    (metric: SnapshotMetricInput) => setState({ ...state, metric }),
-    [state, setState]
+    (metric: SnapshotMetricInput) => setState(previous => ({ ...previous, metric })),
+    [setState]
   );
 
-  const changeGroupBy = useCallback((groupBy: SnapshotGroupBy) => setState({ ...state, groupBy }), [
-    state,
-    setState,
-  ]);
+  const changeGroupBy = useCallback(
+    (groupBy: SnapshotGroupBy) => setState(previous => ({ ...previous, groupBy })),
+    [setState]
+  );
 
   const changeNodeType = useCallback(
-    (nodeType: InventoryItemType) => setState({ ...state, nodeType }),
-    [state, setState]
+    (nodeType: InventoryItemType) => setState(previous => ({ ...previous, nodeType })),
+    [setState]
   );
 
-  const changeView = useCallback((view: string) => setState({ ...state, view }), [state, setState]);
+  const changeView = useCallback((view: string) => setState(previous => ({ ...previous, view })), [
+    setState,
+  ]);
 
   const changeCustomOptions = useCallback(
     (customOptions: Array<{ text: string; field: string }>) =>
-      setState({ ...state, customOptions }),
-    [state, setState]
+      setState(previous => ({ ...previous, customOptions })),
+    [setState]
   );
 
   const changeAutoBounds = useCallback(
-    (autoBounds: boolean) => setState({ ...state, autoBounds }),
-    [state, setState]
+    (autoBounds: boolean) => setState(previous => ({ ...previous, autoBounds })),
+    [setState]
   );
 
   const changeBoundsOverride = useCallback(
-    (boundsOverride: { min: number; max: number }) => setState({ ...state, boundsOverride }),
-    [state, setState]
+    (boundsOverride: { min: number; max: number }) =>
+      setState(previous => ({ ...previous, boundsOverride })),
+    [setState]
   );
 
-  const changeAccount = useCallback((accountId: string) => setState({ ...state, accountId }), [
-    state,
-    setState,
-  ]);
+  const changeAccount = useCallback(
+    (accountId: string) => setState(previous => ({ ...previous, accountId })),
+    [setState]
+  );
 
-  const changeRegion = useCallback((region: string) => setState({ ...state, region }), [
-    state,
-    setState,
-  ]);
+  const changeRegion = useCallback(
+    (region: string) => setState(previous => ({ ...previous, region })),
+    [setState]
+  );
 
   const changeCustomMetrics = useCallback(
-    (customMetrics: SnapshotCustomMetricInput[]) => setState({ ...state, customMetrics }),
-    [state, setState]
+    (customMetrics: SnapshotCustomMetricInput[]) => {
+      setState(previous => ({ ...previous, customMetrics }));
+    },
+    [setState]
   );
 
   return {
-    ...state,
+    ...urlState,
     changeMetric,
     changeGroupBy,
     changeNodeType,
@@ -127,6 +136,8 @@ export const WaffleOptionsStateRT = rt.type({
 });
 
 export type WaffleOptionsState = rt.TypeOf<typeof WaffleOptionsStateRT>;
-const encodeUrlState = WaffleOptionsStateRT.encode;
+const encodeUrlState = (state: WaffleOptionsState) => {
+  return WaffleOptionsStateRT.encode(state);
+};
 const decodeUrlState = (value: unknown) =>
   pipe(WaffleOptionsStateRT.decode(value), fold(constant(undefined), identity));

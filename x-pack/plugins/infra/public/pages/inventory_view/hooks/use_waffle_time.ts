@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -16,28 +16,32 @@ export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
 };
 
 export const useWaffleTime = () => {
-  const [state, setState] = useUrlState<WaffleTimeState>({
+  const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
     defaultState: DEFAULT_WAFFLE_TIME_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',
   });
 
-  const { currentTime, isAutoReloading } = state;
+  const [state, setState] = useState<WaffleTimeState>(urlState);
+
+  useEffect(() => setUrlState(state), [setUrlState, state]);
+
+  const { currentTime, isAutoReloading } = urlState;
 
   const startAutoReload = useCallback(() => {
-    setState({ ...state, isAutoReloading: true });
-  }, [state, setState]);
+    setState(previous => ({ ...previous, isAutoReloading: true }));
+  }, [setState]);
 
   const stopAutoReload = useCallback(() => {
-    setState({ ...state, isAutoReloading: false });
-  }, [state, setState]);
+    setState(previous => ({ ...previous, isAutoReloading: false }));
+  }, [setState]);
 
   const jumpToTime = useCallback(
     (time: number) => {
-      setState({ ...state, currentTime: time });
+      setState(previous => ({ ...previous, currentTime: time }));
     },
-    [state, setState]
+    [setState]
   );
 
   const currentTimeRange = {
