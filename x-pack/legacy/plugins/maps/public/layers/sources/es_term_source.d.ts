@@ -5,8 +5,8 @@
  */
 
 import { IField } from '../fields/field';
+import { IESAggSource } from './es_agg_source';
 
-// TODO extend AbstractESAggSource once its merged
-export interface IESTermSource {
+export interface IESTermSource extends IESAggSource {
   getTermField(): IField;
 }

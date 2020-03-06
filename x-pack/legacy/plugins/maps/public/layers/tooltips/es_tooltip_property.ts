@@ -53,23 +53,22 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   isFilterable(): boolean {
-    const field = this._getIndexPatternField();
+    const indexPatternField = this._getIndexPatternField();
     return (
-      field &&
-      (field.type === 'string' ||
-        field.type === 'date' ||
-        field.type === 'ip' ||
-        field.type === 'number')
+      !!indexPatternField &&
+      (indexPatternField.type === 'string' ||
+        indexPatternField.type === 'date' ||
+        indexPatternField.type === 'ip' ||
+        indexPatternField.type === 'number')
     );
   }
 
-  async getESFilters(): Promise<unknown> {
-    return [
-      esFilters.buildPhraseFilter(
-        this._getIndexPatternField(),
-        this.getRawValue(),
-        this._indexPattern
-      ),
-    ];
+  async getESFilters(): Promise<unknown[]> {
+    const indexPatternField = this._getIndexPatternField();
+    if (!indexPatternField) {
+      return [];
+    }
+
+    return [esFilters.buildPhraseFilter(indexPatternField, this.getRawValue(), this._indexPattern)];
   }
 }
