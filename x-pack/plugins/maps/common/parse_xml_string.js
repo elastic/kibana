@@ -6,6 +6,8 @@
 
 import { parseString } from 'xml2js';
 
+// NP Migration
+// Temporarily redundant with x-pack/legacy/plugins/maps/common/parse_xml_string.js
 // promise based wrapper around parseString
 export async function parseXmlString(xmlString) {
   const parsePromise = new Promise((resolve, reject) => {
@@ -20,3 +22,4 @@ export async function parseXmlString(xmlString) {
 
   return await parsePromise;
 }
+// End temporary redundancy

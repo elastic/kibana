@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+// NP Migration
+// Temporarily redundant with x-pack/plugins/maps/common/constants.ts
 import { i18n } from '@kbn/i18n';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -172,3 +175,4 @@ export const SYMBOLIZE_AS_TYPES = {
 };
 
 export const DEFAULT_ICON = 'airfield';
+// End temporary redundancy

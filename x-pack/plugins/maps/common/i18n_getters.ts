@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 import { ES_SPATIAL_RELATIONS } from './constants';
 
+// NP Migration
+// Temporarily redundant with x-pack/legacy/plugins/maps/common/i18n_getters.ts
 export function getAppTitle() {
   return i18n.translate('xpack.maps.appTitle', {
     defaultMessage: 'Maps',
@@ -50,3 +52,4 @@ export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPA
       return spatialRelation;
   }
 }
+// End temporary redundancy

@@ -6,6 +6,8 @@
 
 import { parseXmlString } from './parse_xml_string';
 
+// NP Migration
+// Temporarily redundant with x-pack/plugins/maps/common/parse_xml_string.test.js
 describe('parseXmlString', () => {
   it('Should parse xml string into JS object', async () => {
     const xmlAsObject = await parseXmlString('<foo>bar</foo>');
@@ -14,3 +16,4 @@ describe('parseXmlString', () => {
     });
   });
 });
+// End temporary redundancy
