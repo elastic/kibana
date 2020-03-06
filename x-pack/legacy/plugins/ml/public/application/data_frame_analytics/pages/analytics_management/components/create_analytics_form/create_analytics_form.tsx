@@ -8,7 +8,7 @@ import React, { Fragment, FC, useEffect, useMemo } from 'react';
 
 import {
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
@@ -118,7 +118,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  const onCreateOption = (searchValue: string, flattenedOptions: EuiComboBoxOptionProps[]) => {
+  const onCreateOption = (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[]) => {
     const normalizedSearchValue = searchValue.trim().toLowerCase();
 
     if (!normalizedSearchValue) {
@@ -132,7 +132,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     // Create the option if it doesn't exist.
     if (
       !flattenedOptions.some(
-        (option: EuiComboBoxOptionProps) =>
+        (option: EuiComboBoxOptionOption) =>
           option.label.trim().toLowerCase() === normalizedSearchValue
       )
     ) {
@@ -164,7 +164,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
-        const analyzedFieldsOptions: EuiComboBoxOptionProps[] = [];
+        const analyzedFieldsOptions: EuiComboBoxOptionOption[] = [];
 
         if (resp.field_selection) {
           resp.field_selection.forEach((selectedField: FieldSelectionItem) => {
@@ -229,7 +229,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
-        const depVarOptions: EuiComboBoxOptionProps[] = [];
+        const depVarOptions: EuiComboBoxOptionOption[] = [];
 
         fields.forEach((field: Field) => {
           if (shouldAddAsDepVarOption(field, jobType)) {
@@ -276,7 +276,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     return errors;
   };
 
-  const onSourceIndexChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
+  const onSourceIndexChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
     setFormState({
       excludes: [],
       excludesOptions: [],

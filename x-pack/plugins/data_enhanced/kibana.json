@@ -8,6 +8,6 @@
   "requiredPlugins": [
     "data"
   ],
-  "server": false,
+  "server": true,
   "ui": true
 }
