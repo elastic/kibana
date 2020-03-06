@@ -77,7 +77,7 @@ describe('graphui-workspace', function() {
           },
         ],
       };
-      workspace.simpleSearch('myquery', {}, 2);
+      workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
@@ -119,7 +119,7 @@ describe('graphui-workspace', function() {
           },
         ],
       };
-      workspace.simpleSearch('myquery', {}, 2);
+      workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
@@ -201,7 +201,7 @@ describe('graphui-workspace', function() {
           },
         ],
       };
-      workspace.simpleSearch('myquery', {}, 2);
+      workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.selectedNodes.length).toEqual(0);
 
@@ -264,7 +264,7 @@ describe('graphui-workspace', function() {
           },
         ],
       };
-      workspace.simpleSearch('myquery', {}, 2);
+      workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.nodes.length).toEqual(2);
 
@@ -320,7 +320,7 @@ describe('graphui-workspace', function() {
           },
         ],
       };
-      workspace.simpleSearch('myquery', {}, 2);
+      workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.nodes.length).toEqual(2);
 
