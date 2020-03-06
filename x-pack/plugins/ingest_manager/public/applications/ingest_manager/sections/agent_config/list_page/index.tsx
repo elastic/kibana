@@ -304,29 +304,37 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     return cols;
   }, [DETAILS_URI, FLEET_URI, isFleetEnabled, sendRequest]);
 
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
-            defaultMessage="No agent configurations"
-          />
-        </h2>
-      }
-      actions={
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-        >
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfigList.addButton"
-            defaultMessage="Create new agent configuration"
-          />
-        </EuiButton>
-      }
-    />
+  const createAgentConfigButton = useMemo(
+    () => (
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+      >
+        <FormattedMessage
+          id="xpack.ingestManager.agentConfigList.addButton"
+          defaultMessage="Create agent configuration"
+        />
+      </EuiButton>
+    ),
+    []
+  );
+
+  const emptyPrompt = useMemo(
+    () => (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
+              defaultMessage="No agent configurations"
+            />
+          </h2>
+        }
+        actions={createAgentConfigButton}
+      />
+    ),
+    [createAgentConfigButton]
   );
 
   return (
@@ -389,18 +397,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             />
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.addButton"
-              defaultMessage="Create agent configuration"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{createAgentConfigButton}</EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
@@ -413,7 +410,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
               id="xpack.ingestManager.agentConfigList.loadingAgentConfigsMessage"
               defaultMessage="Loading agent configurations…"
             />
-          ) : !search.trim() && agentConfigData?.total === 0 ? (
+          ) : !search.trim() && (agentConfigData?.total ?? 0) === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage
