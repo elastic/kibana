@@ -26,18 +26,13 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         let lifecycle: ResolverEvent[];
         let childEvents: ResolverEvent[];
         let relatedEvents: ResolverEvent[];
+        let children = [];
         const ancestors: ResolverEvent[] = [];
         const maxAncestors = 5;
         if (isLegacyEvent(action.payload.selectedEvent)) {
           const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
           const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
-          [
-            { lifecycle },
-            {
-              children: [{ lifecycle: childEvents }],
-            },
-            { events: relatedEvents },
-          ] = await Promise.all([
+          [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
               query: { legacyEndpointID },
             }),
@@ -48,6 +43,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
               query: { legacyEndpointID },
             }),
           ]);
+          childEvents = children.length > 0 ? children.map((child: any) => child.lifecycle) : [];
         } else {
           const uniquePid = action.payload.selectedEvent.endpoint.process.entity_id;
           const ppid = action.payload.selectedEvent.endpoint.process.parent?.entity_id;
@@ -60,20 +56,14 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
               }
             }
           }
-          [
-            { lifecycle },
-            {
-              children: [{ lifecycle: childEvents }],
-            },
-            { events: relatedEvents },
-          ] = await Promise.all([
+          [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}`),
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}/children`),
             context.services.http.get(`/api/endpoint/resolver/${uniquePid}/related`),
             getAncestors(ppid),
           ]);
         }
-
+        childEvents = children.length > 0 ? children.map((child: any) => child.lifecycle) : [];
         response = [...lifecycle, ...childEvents, ...relatedEvents, ...ancestors];
         api.dispatch({
           type: 'serverReturnedResolverData',
