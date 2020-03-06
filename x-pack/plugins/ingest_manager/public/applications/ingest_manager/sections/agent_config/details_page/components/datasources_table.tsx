@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiInMemoryTable, EuiInMemoryTableProps, EuiBadge } from '@elastic/eui';
 import { Datasource } from '../../../../types';
 import { useCore } from '../../../../hooks';
 
@@ -85,36 +85,6 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
           defaultMessage: 'Streams',
         }
       ),
-    },
-    {
-      name: i18n.translate(
-        'xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
-      actions: [
-        {
-          render: ({ packageName, packageVersion }: any) => {
-            return (
-              <EuiLink
-                color="primary"
-                external
-                target="_blank"
-                href={`${
-                  window.location.origin
-                }${core.http.basePath.get()}/app/epm#/detail/${packageName}-${packageVersion}`}
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.configDetails.datasourcesTable.viewActionLinkText"
-                  defaultMessage="view"
-                />
-              </EuiLink>
-            );
-          },
-        },
-      ],
-      width: '100px',
     },
   ];
 
