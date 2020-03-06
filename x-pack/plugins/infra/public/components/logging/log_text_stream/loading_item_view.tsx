@@ -85,7 +85,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     return (
       <ProgressEntryWrapper className={className} position={position}>
         {position === 'start' ? <>{extra}</> : null}
-        <ProgressMessage timestamp={timestamp} relative={position === 'end' && isStreaming} />
+        <ProgressMessage timestamp={timestamp} position={position} isStreaming={isStreaming} />
         {position === 'end' ? <>{extra}</> : null}
       </ProgressEntryWrapper>
     );
@@ -100,22 +100,38 @@ const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
     props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
 `;
 
-const ProgressMessage: React.FC<{ timestamp: number; relative?: boolean }> = ({
-  timestamp,
-  relative = false,
-}) => {
-  const formattedTimestamp = relative ? (
-    <FormattedRelative units="second" value={timestamp} updateInterval={1} />
-  ) : (
-    <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
-  );
-  const message = (
-    <FormattedMessage
-      id="xpack.infra.logs.showingEntriesUntilTimestamp"
-      defaultMessage="Showing entries until {timestamp}"
-      values={{ timestamp: formattedTimestamp }}
-    />
-  );
+type ProgressMessageProps = Pick<
+  LogTextStreamLoadingItemViewProps,
+  'timestamp' | 'position' | 'isStreaming'
+>;
+const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
+  const formattedTimestamp =
+    isStreaming && position === 'end' ? (
+      <FormattedRelative units="second" value={timestamp} updateInterval={1} />
+    ) : (
+      <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
+    );
+
+  const message =
+    position === 'start' ? (
+      <FormattedMessage
+        id="xpack.infra.logs.showingEntriesFromTimestamp"
+        defaultMessage="Showing entries from {timestamp}"
+        values={{ timestamp: formattedTimestamp }}
+      />
+    ) : isStreaming ? (
+      <FormattedMessage
+        id="xpack.infra.logs.lastUpdate"
+        defaultMessage="Last update {timestamp}"
+        values={{ timestamp: formattedTimestamp }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.infra.logs.showingEntriesUntilTimestamp"
+        defaultMessage="Showing entries until {timestamp}"
+        values={{ timestamp: formattedTimestamp }}
+      />
+    );
 
   return (
     <LogTextSeparator>

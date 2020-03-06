@@ -139,6 +139,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       wrap,
       startDateExpression,
       endDateExpression,
+      lastLoadedTime,
       updateDateRange,
       startLiveStreaming,
     } = this.props;
@@ -254,7 +255,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 isLoading={isStreaming || isLoadingMore}
                                 hasMore={hasMoreAfterEnd}
                                 isStreaming={isStreaming}
-                                timestamp={items[items.length - 1].logEntry.cursor.time}
+                                timestamp={
+                                  isStreaming && lastLoadedTime
+                                    ? lastLoadedTime.valueOf()
+                                    : items[items.length - 1].logEntry.cursor.time
+                                }
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
                                 onExtendRange={newDateExpression =>
