@@ -11,10 +11,10 @@ import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-  ReindexOptions,
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
@@ -152,11 +152,10 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string, options = { openAndClose: false }) {
+    async createReindexOp(indexName: string, opts?: ReindexOptions) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
-        reindexOptions: options,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -164,6 +163,7 @@ export const reindexActionsFactory = (
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
+        reindexOptions: opts,
       });
     },
 

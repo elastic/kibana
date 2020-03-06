@@ -29,13 +29,23 @@ export enum ReindexStatus {
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
 
+export interface QueueSettings extends SavedObjectAttributes {
+  queuedAt: number;
+}
+
 export interface ReindexOptions extends SavedObjectAttributes {
   /**
    * Whether to treat the index as if it were closed. This instructs the
    * reindex strategy to first open the index, perform reindexing and
    * then close the index again.
    */
-  openAndClose: boolean;
+  openAndClose?: boolean;
+
+  /**
+   * Set this key to configure a reindex operation as part of a
+   * batch to be run in series.
+   */
+  queueSettings?: QueueSettings;
 }
 
 export interface ReindexOperation extends SavedObjectAttributes {
