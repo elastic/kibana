@@ -279,4 +279,7 @@ async function run(
   if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;
   }
-})();
+})().catch(e => {
+  // eslint-disable-next-line no-console
+  console.log(e);
+});
