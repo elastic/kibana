@@ -22,6 +22,7 @@ import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../seriali
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator, migrateIndex } from './index_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { MigrationResult } from './migration_coordinator';
 
 describe('IndexMigrator', () => {
   let testOpts: any;
@@ -107,12 +108,11 @@ describe('IndexMigrator', () => {
 
     const result = await new IndexMigrator(testOpts).migrate();
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       alias: '.kibana',
       destIndex: '.kibana_1',
       sourceIndex: '.kibana',
       status: 'migrated',
-      elapsedMs: 0,
     });
   });
 
