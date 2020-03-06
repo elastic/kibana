@@ -337,17 +337,24 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
 
 /**
- * Like TypeOf, but provides a type for creating the value that will match.
- * schema.number accepts a string, so this allows strings for number
- * schema.maybe creates an optional type, if such a type is a prop on an schema.object,
- * the key itself will be optional.
+ * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
+ * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
+ * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
+ * the key will be marked optional (via `?`) so that you can omit keys for optional values.
+ *
+ * Use this when creating a value that will be passed to the schema.
+ * e.g.
+ * ```ts
+ * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
+ * schema.validate(input) // should be valid
+ * ```
  */
 type KbnConfigSchemaInputTypeOf<
   T extends kbnConfigSchemaTypes.Type<unknown>
 > = T extends kbnConfigSchemaTypes.ObjectType
   ? KbnConfigSchemaInputObjectTypeOf<
       T
-    > /** The schema.number() schema accepts strings, so accept them here to. There's no good way to make this happen ONLY when schema.number is called? i dont think it matters? */
+    > /** `schema.number()` accepts strings, so this type should accept them as well. */
   : kbnConfigSchemaTypes.Type<number> extends T
   ? TypeOf<T> | string
   : TypeOf<T>;

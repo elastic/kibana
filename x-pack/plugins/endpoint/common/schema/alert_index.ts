@@ -6,7 +6,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { decode } from 'punycode';
+import { decode } from 'rison-node';
 import { fromKueryExpression } from '../../../../../src/plugins/data/common';
 import { EndpointAppConstants } from '../types';
 
