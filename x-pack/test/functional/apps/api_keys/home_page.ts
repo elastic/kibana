@@ -18,11 +18,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      await log.debug('Checking for section header');
+      log.debug('Checking for section header');
       const headerText = await (await pageObjects.apiKeys.noAPIKeysHeading()).getVisibleText();
       expect(headerText).to.be('No API keys');
 
-      const goToConsoleButton = await pageObjects.apiKeys.goToConsoleButton();
+      const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
       expect(await goToConsoleButton.isDisplayed()).to.be(true);
     });
   });

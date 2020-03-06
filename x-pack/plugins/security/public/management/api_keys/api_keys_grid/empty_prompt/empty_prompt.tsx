@@ -18,7 +18,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin, docLinks 
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
-      <h1 data-test-subj="NoApiKeysHeader">
+      <h1 data-test-subj="noApiKeysHeader">
         {isAdmin ? (
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.emptyPromptAdminTitle"

@@ -11,9 +11,9 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async noAPIKeysHeading() {
-      return await testSubjects.find('NoApiKeysHeader');
+      return await testSubjects.find('noApiKeysHeader');
     },
-    async goToConsoleButton() {
+    async getGoToConsoleButton() {
       return await testSubjects.find('goToConsoleButton');
     },
   };
