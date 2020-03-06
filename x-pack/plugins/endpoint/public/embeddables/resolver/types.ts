@@ -275,4 +275,12 @@ export interface SideEffectSimulator {
   mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
 
+export type ResolverProcessType =
+  | 'processCreated'
+  | 'processRan'
+  | 'processTerminated'
+  | 'unknownProcessEvent'
+  | 'processCausedAlert'
+  | 'unknownEvent';
+
 export type ResolverStore = Store<ResolverState, ResolverAction>;
