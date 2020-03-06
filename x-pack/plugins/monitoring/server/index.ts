@@ -9,10 +9,12 @@ import { Plugin } from './plugin';
 import { configSchema } from './config';
 // @ts-ignore
 import { getKibanaInfoForStats } from './kibana_monitoring/lib';
+// @ts-ignore
+import { deprecations } from './deprecations';
 
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
 export const config = {
   schema: configSchema,
 };
 
-export { getKibanaInfoForStats };
+export { getKibanaInfoForStats, deprecations };

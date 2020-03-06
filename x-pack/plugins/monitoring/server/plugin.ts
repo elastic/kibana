@@ -37,7 +37,6 @@ import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
 import { registerMonitoringCollection } from './telemetry_collection';
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
@@ -49,7 +48,6 @@ import {
 import { getLicenseExpiration } from './alerts/license_expiration';
 
 export interface LegacyAPI {
-  xpackMain: XPackMainPlugin;
   telemetryCollectionManager: TelemetryCollectionManager;
   elasticsearch: any;
   opsInterval: number;
@@ -79,7 +77,6 @@ interface MonitoringCore {
   config: () => MonitoringCoreConfig;
   log?: Logger;
   route?: (options: any) => void;
-  xpackInfo?: any;
 }
 
 export class Plugin {
@@ -115,7 +112,7 @@ export class Plugin {
     const elasticsearchConfig = new ElasticsearchConfig(
       config.ui.elasticsearch as ElasticsearchConfigType
     );
-    const cluster = (this.cluster = await instantiateClient({
+    const cluster = (this.cluster = instantiateClient({
       log: this.log,
       elasticsearchConfig,
       elasticsearchPlugin: {
@@ -178,7 +175,7 @@ export class Plugin {
     );
 
     if (config.ui.enabled) {
-      await requireUIRoutes(this.monitoringCore);
+      requireUIRoutes(this.monitoringCore);
     }
 
     this.uiSettingsService = core.uiSettings;

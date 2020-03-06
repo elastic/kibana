@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { resolve } from 'path';
 import { config } from './config';
-import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
 import { KIBANA_ALERTING_ENABLED } from './common/constants';
 import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
@@ -30,13 +29,11 @@ export const monitoring = kibana => {
     publicDir: resolve(__dirname, 'public'),
     init(server) {
       const serverConfig = server.config();
-      const xpackMain = server.plugins.xpack_main;
       const elasticsearch = server.plugins.elasticsearch;
       const getOSInfo = server.getOSInfo;
       const hapiServer = server;
       const kbnServerStatus = this.kbnServer.status;
       legacyApi = {
-        xpackMain,
         telemetryCollectionManager,
         elasticsearch,
         opsInterval: serverConfig.get('ops.interval'),
@@ -67,7 +64,6 @@ export const monitoring = kibana => {
       monitoringPlugin.registerLegacyAPI(legacyApi);
     },
     config,
-    deprecations,
     uiExports: getUiExports(),
   });
 };

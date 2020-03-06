@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
@@ -13,7 +12,7 @@ import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
  * Kibana itself is connected to a production cluster.
  */
 
-export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) {
+export function instantiateClient({ elasticsearchConfig, log, elasticsearchPlugin }) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = elasticsearchPlugin.createCluster('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
@@ -29,5 +28,3 @@ export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) 
 export function hasMonitoringCluster(config) {
   return Boolean(config.hosts && config.hosts[0]);
 }
-
-export const instantiateClient = once(exposeClient);
