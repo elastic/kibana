@@ -42,7 +42,7 @@ export const registerRoutes = (router: IRouter) => {
 
   router.get(
     {
-      path: `${EPM_API_ROUTES.INFO_PATTERN}/{filePath*}`,
+      path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
@@ -67,7 +67,7 @@ export const registerRoutes = (router: IRouter) => {
     installPackageHandler
   );
 
-  router.post(
+  router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,
