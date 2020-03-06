@@ -130,12 +130,9 @@ export class ColorMapSelect extends Component {
         : '';
     }
 
-    let toggle;
-    if (this.props.showColorMapTypeToggle) {
-      toggle = <EuiFlexItem grow={false}>{this._renderColorMapToggle()}</EuiFlexItem>;
-    } else {
-      toggle = <Fragment />;
-    }
+    const toggle = this.props.showColorMapTypeToggle ? (
+      <EuiFlexItem grow={false}>{this._renderColorMapToggle()}</EuiFlexItem>
+    ) : null;
 
     return (
       <EuiFlexGroup gutterSize={'none'}>

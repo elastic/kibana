@@ -6,9 +6,7 @@
 
 import { AbstractESAggSource } from '../es_agg_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { IESAggField } from '../../fields/es_agg_field';
 
 export class ESGeoGridSource extends AbstractESAggSource {
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
-  getMetricFields(): IESAggField[];
 }

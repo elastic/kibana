@@ -11,55 +11,49 @@ import { AGG_TYPE, ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../c
 import { IField } from '../../fields/field';
 
 describe('ESGeoGridSource', () => {
-  it('metrics and fields should match', async () => {
-    const metricExamples = [
-      {
-        type: AGG_TYPE.SUM,
-        field: 'myFieldGettingSummed',
-        label: 'my custom label',
-      },
-      {
-        // metric config is invalid beause field is missing
-        type: AGG_TYPE.MAX,
-      },
-      {
-        // metric config is valid because "count" metric does not need to provide field
-        type: AGG_TYPE.COUNT,
-        label: '', // should ignore empty label fields
-      },
-    ];
+  const metricExamples = [
+    {
+      type: AGG_TYPE.SUM,
+      field: 'myFieldGettingSummed',
+      label: 'my custom label',
+    },
+    {
+      // metric config is invalid beause field is missing
+      type: AGG_TYPE.MAX,
+    },
+    {
+      // metric config is valid because "count" metric does not need to provide field
+      type: AGG_TYPE.COUNT,
+      label: '', // should ignore empty label fields
+    },
+  ];
 
-    const geogridSource = new ESGeoGridSource(
-      {
-        id: 'foobar',
-        indexPatternId: 'fooIp',
-        geoField: 'bar',
-        metrics: metricExamples,
-        resolution: GRID_RESOLUTION.COARSE,
-        type: ES_GEO_GRID,
-        requestType: RENDER_AS.HEATMAP,
-      },
-      {}
-    );
+  const geogridSource = new ESGeoGridSource(
+    {
+      id: 'foobar',
+      indexPatternId: 'fooIp',
+      geoField: 'bar',
+      metrics: metricExamples,
+      resolution: GRID_RESOLUTION.COARSE,
+      type: ES_GEO_GRID,
+      requestType: RENDER_AS.HEATMAP,
+    },
+    {}
+  );
 
-    const fields = await geogridSource.getFields();
-    const metrics = await geogridSource.getMetricFields();
-
-    const getFieldMeta = async (field: IField) => {
-      return {
-        field: field.getName(),
-        label: await field.getLabel(),
-        type: await field.getDataType(),
-      };
+  const getFieldMeta = async (field: IField) => {
+    return {
+      field: field.getName(),
+      label: await field.getLabel(),
+      type: await field.getDataType(),
     };
+  };
 
-    const fm = await Promise.all(fields.map(getFieldMeta));
-    const mm = await Promise.all(metrics.map(getFieldMeta));
-
-    expect(_.isEqual(fm, mm)).toEqual(true);
-
+  it('getMetricFields should remove incomplete metric aggregations. Smaller tests t', async () => {
+    const fields = await geogridSource.getFields();
+    const fieldsMeta = await Promise.all(fields.map(getFieldMeta));
     expect(
-      _.isEqual(fm, [
+      _.isEqual(fieldsMeta, [
         {
           type: 'number',
           field: 'sum_of_myFieldGettingSummed',
@@ -72,5 +66,14 @@ describe('ESGeoGridSource', () => {
         },
       ])
     ).toEqual(true);
+  });
+
+  it('getFields should return getMetricFields', async () => {
+    const fields = await geogridSource.getFields();
+    const metrics = await geogridSource.getMetricFields();
+    const fieldsMeta = await Promise.all(fields.map(getFieldMeta));
+    const metricFieldsMeta = await Promise.all(metrics.map(getFieldMeta));
+
+    expect(_.isEqual(fieldsMeta, metricFieldsMeta)).toEqual(true);
   });
 });
