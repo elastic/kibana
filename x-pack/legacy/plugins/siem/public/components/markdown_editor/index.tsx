@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
@@ -62,6 +62,11 @@ const MarkdownContainer = styled(EuiPanel)`
   overflow: auto;
 `;
 
+export interface CursorPosition {
+  start: number;
+  end: number;
+}
+
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
   bottomRightContent?: React.ReactNode;
@@ -69,6 +74,7 @@ export const MarkdownEditor = React.memo<{
   initialContent: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
+  onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
 }>(
   ({
@@ -78,11 +84,22 @@ export const MarkdownEditor = React.memo<{
     isDisabled = false,
     onChange,
     placeholder,
+    onCursorPositionUpdate,
   }) => {
     const [content, setContent] = useState(initialContent);
     useEffect(() => {
       onChange(content);
     }, [content]);
+    const setCursorPosition = useCallback((cursorPosition: CursorPosition) => {
+      if (onCursorPositionUpdate) {
+        onCursorPositionUpdate(cursorPosition);
+      }
+    }, []);
+
+    useEffect(() => {
+      setContent(initialContent);
+    }, [initialContent]);
+
     const tabs = useMemo(
       () => [
         {
@@ -92,6 +109,17 @@ export const MarkdownEditor = React.memo<{
             <TextArea
               onChange={e => {
                 setContent(e.target.value);
+              }}
+              inputRef={x => {
+                if (x != null) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  x.addEventListener('blur', (e: any) => {
+                    setCursorPosition({
+                      start: e.target.selectionStart,
+                      end: e.target.selectionEnd,
+                    });
+                  });
+                }
               }}
               aria-label={`markdown-editor-comment`}
               fullWidth={true}

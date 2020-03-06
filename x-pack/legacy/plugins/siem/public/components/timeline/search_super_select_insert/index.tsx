@@ -16,8 +16,8 @@ import {
   EuiFilterGroup,
   EuiPortal,
   EuiButtonIcon,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
@@ -74,21 +74,8 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
 interface SearchTimelinePopoverProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
-  timelineId: string | null;
-  timelineTitle: string | null;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
-
-const getBasicSelectableOptions = (timelineId: string) => [
-  {
-    description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
-    favorite: [],
-    label: i18n.DEFAULT_TIMELINE_TITLE,
-    id: null,
-    title: i18n.DEFAULT_TIMELINE_TITLE,
-    checked: timelineId === '-1' ? 'on' : undefined,
-  } as Option,
-];
 
 const ORIGINAL_PAGE_SIZE = 50;
 const POPOVER_HEIGHT = 260;
@@ -96,8 +83,6 @@ const TIMELINE_ITEM_HEIGHT = 50;
 const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
   isDisabled,
   hideUntitled = false,
-  timelineId,
-  timelineTitle,
   onTimelineChange,
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
@@ -173,7 +158,7 @@ const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
           isEmpty(selectedTimeline[0].title)
             ? i18nTimeline.UNTITLED_TIMELINE
             : selectedTimeline[0].title,
-          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+          selectedTimeline[0].id
         );
       }
       setIsPopoverOpen(false);
@@ -220,7 +205,7 @@ const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
         onClick={handleOpenPopover}
       />
     ),
-    [handleOpenPopover, isDisabled, timelineId, timelineTitle]
+    [handleOpenPopover, isDisabled]
   );
 
   const favoritePortal = useMemo(
@@ -293,23 +278,19 @@ const SearchTimelinePopoverComponent: React.FC<SearchTimelinePopoverProps> = ({
               }}
               singleSelection={true}
               options={[
-                ...(!onlyFavorites && searchTimelineValue === ''
-                  ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
-                  : []),
                 ...timelines
                   .filter(t => !hideUntitled || t.title !== '')
-                  .map(
-                    (t, index) =>
-                      ({
-                        description: t.description,
-                        favorite: t.favorite,
-                        label: t.title,
-                        id: t.savedObjectId,
-                        key: `${t.title}-${index}`,
-                        title: t.title,
-                        checked: t.savedObjectId === timelineId ? 'on' : undefined,
-                      } as Option)
-                  ),
+                  .map((t, index) => {
+                    return {
+                      description: t.description,
+                      favorite: t.favorite,
+                      label: t.title,
+                      id: t.savedObjectId,
+                      key: `${t.title}-${index}`,
+                      title: t.title,
+                      checked: undefined,
+                    } as EuiSelectableOption;
+                  }),
               ]}
             >
               {(list, search) => (

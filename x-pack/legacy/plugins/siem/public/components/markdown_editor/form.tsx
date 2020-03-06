@@ -8,7 +8,7 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
-import { MarkdownEditor } from '.';
+import { CursorPosition, MarkdownEditor } from '.';
 
 interface IMarkdownEditorForm {
   dataTestSubj: string;
@@ -18,6 +18,7 @@ interface IMarkdownEditorForm {
   idAria: string;
   isDisabled: boolean;
   placeholder?: string;
+  onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
 }
 export const MarkdownEditorForm = ({
   bottomRightContent,
@@ -25,6 +26,7 @@ export const MarkdownEditorForm = ({
   field,
   idAria,
   isDisabled = false,
+  onCursorPositionUpdate,
   placeholder,
   topRightContent,
 }: IMarkdownEditorForm) => {
@@ -49,6 +51,7 @@ export const MarkdownEditorForm = ({
       labelAppend={field.labelAppend}
     >
       <MarkdownEditor
+        onCursorPositionUpdate={onCursorPositionUpdate}
         bottomRightContent={bottomRightContent}
         topRightContent={topRightContent}
         initialContent={field.value as string}

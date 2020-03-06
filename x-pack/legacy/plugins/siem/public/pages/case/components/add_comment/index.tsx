@@ -15,6 +15,7 @@ import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
 import { SearchTimelinePopover } from '../../../../components/timeline/search_super_select_insert';
+import { CursorPosition } from '../../../../components/markdown_editor';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -35,21 +36,46 @@ export const AddComment = React.memo<{
     options: { stripEmptyFields: false },
     schema,
   });
-  const [timelineId, setTimelineId] = useState<string | null>(null);
-  const [timelineTitle, setTimelineTitle] = useState<string | null>(null);
-  const handleOnTimelineChange = useCallback((title: string, id: string | null) => {
-    setTimelineId(id);
-    setTimelineTitle(title);
-    console.log('now what??', id);
-    console.log('now what??', title);
-    const builtLink = `https://kibana.siem.estc.dev/app/siem#/timelines?timeline=(id:${id},isOpen:!t)`;
-  }, []);
+  const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
+    start: 0,
+    end: 0,
+  });
+  const handleOnTimelineChange = useCallback(
+    (title: string, id: string | null) => {
+      const builtLink = `http://localhost:5601/app/siem#/timelines?timeline=(id:${id},isOpen:!t)`;
+
+      const currentComment = form.getFormData().comment;
+      let output: string;
+      if (cursorPosition.start === cursorPosition.end) {
+        const b = `[${title}](${builtLink})`;
+        output = [
+          currentComment.slice(0, cursorPosition.start),
+          b,
+          currentComment.slice(cursorPosition.end),
+        ].join('');
+      } else {
+        output = [
+          currentComment.slice(0, cursorPosition.start),
+          `[${currentComment.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
+          currentComment.slice(cursorPosition.end),
+        ].join('');
+      }
+      form.setFieldValue('comment', output);
+    },
+    [form]
+  );
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
     if (isValid) {
       await postComment(data);
     }
   }, [form]);
+  const handleCursorChange = useCallback(
+    (cp: CursorPosition) => {
+      setCursorPosition(cp);
+    },
+    [cursorPosition]
+  );
 
   return (
     <>
@@ -63,6 +89,7 @@ export const AddComment = React.memo<{
             isDisabled: isLoading,
             dataTestSubj: 'caseComment',
             placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+            onCursorPositionUpdate: handleCursorChange,
             bottomRightContent: (
               <EuiButton
                 iconType="plusInCircle"
@@ -79,8 +106,6 @@ export const AddComment = React.memo<{
                 hideUntitled={true}
                 isDisabled={isLoading}
                 onTimelineChange={handleOnTimelineChange}
-                timelineId={timelineId}
-                timelineTitle={timelineTitle}
               />
             ),
           }}
