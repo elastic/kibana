@@ -2,7 +2,7 @@
 [[maps-aggregations]]
 == Plot big data without plotting too much data
 
-Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhemling your network or your browser.
+Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhelming your network or your browser.
 When using aggregations, the documents stay in Elasticsearch and only the calculated values for each group are returned to your computer.
 
 Aggregations group your documents into buckets and calculate metrics for each bucket.
