@@ -6,7 +6,7 @@
 
 import * as i18n from '../translations';
 import { StartServices } from '../../plugin';
-import { parseJsonFromBody, ToasterErrors } from '../../components/ml/api/throw_if_not_ok';
+import { parseJsonFromBody, ToasterErrors } from './throw_if_not_ok';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
 
 /**
