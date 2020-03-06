@@ -21,7 +21,7 @@ export const ReindexClosedWarningIcon: FunctionComponent<Props> = ({
     position="top"
     content={
       <EuiText size="s">
-        {`"${indexName}" needs to be reindexed but it is currently closed. The Upgrade Assistant will open,`}
+        {`"${indexName}" needs to be reindexed, but it is currently closed. The Upgrade Assistant will open,`}
         {` reindex and then close the index. Reindexing may take longer than usual.`}
       </EuiText>
     }
