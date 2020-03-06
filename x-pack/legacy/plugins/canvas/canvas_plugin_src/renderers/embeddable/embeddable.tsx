@@ -79,15 +79,11 @@ const embeddable = () => ({
 
     input.viewMode = isEditable ? ViewMode.EDIT : ViewMode.VIEW;
 
-    if (isEditable) {
-      input.viewMode = ViewMode.EDIT;
-    } else {
-      input.viewMode = ViewMode.VIEW;
-      // Disables the Create Drilldown action
-      input.disabledActions = get<EmbeddableInput, string[]>(input, 'disabledActions', []).concat(
-        OPEN_FLYOUT_ADD_DRILLDOWN
-      );
-    }
+    // TODO: is this compatible with Canvas?
+    // Disables the Create Drilldown action
+    input.disabledActions = get<EmbeddableInput, string[]>(input, 'disabledActions', []).concat(
+      OPEN_FLYOUT_ADD_DRILLDOWN
+    );
 
     if (!embeddablesRegistry[uniqueId]) {
       const factory = Array.from(start.getEmbeddableFactories()).find(
