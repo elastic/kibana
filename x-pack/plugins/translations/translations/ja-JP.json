@@ -6432,7 +6432,6 @@
     "xpack.infra.logs.index.settingsTabTitle": "設定",
     "xpack.infra.logs.index.streamTabTitle": "ストリーム",
     "xpack.infra.logs.jumpToTailText": "最も新しいエントリーに移動",
-    "xpack.infra.logs.noAdditionalEntriesFoundText": "追加エントリーが見つかりません",
     "xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel": "エントリーを読み込み中",
     "xpack.infra.logs.search.nextButtonLabel": "次へ",
     "xpack.infra.logs.search.previousButtonLabel": "前へ",

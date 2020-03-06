@@ -6432,7 +6432,6 @@
     "xpack.infra.logs.index.settingsTabTitle": "设置",
     "xpack.infra.logs.index.streamTabTitle": "流式传输",
     "xpack.infra.logs.jumpToTailText": "跳到最近的条目",
-    "xpack.infra.logs.noAdditionalEntriesFoundText": "找不到其他条目",
     "xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel": "正在加载条目",
     "xpack.infra.logs.search.nextButtonLabel": "下一个",
     "xpack.infra.logs.search.previousButtonLabel": "上一页",
