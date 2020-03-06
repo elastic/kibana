@@ -124,6 +124,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     }
 
     await savedQueryService.deleteSavedQuery(savedQuery.id);
+    setActivePage(0);
   };
 
   const savedQueryPopoverButton = (

@@ -633,6 +633,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
+    metrics: MetricsServiceSetup;
+    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
@@ -794,6 +796,9 @@ export interface ErrorHttpResponseOptions {
 }
 
 // @public
+export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+
+// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -920,6 +925,9 @@ export interface ImageValidation {
         description: string;
     };
 }
+
+// @public
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
@@ -1466,6 +1474,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 // @public
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+
+// @public
 export type ResponseError = string | Error | {
     message: string | Error;
     attributes?: ResponseErrorAttributes;
@@ -1927,17 +1938,11 @@ export interface SavedObjectsImportMissingReferencesError {
 
 // @public
 export interface SavedObjectsImportOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     overwrite: boolean;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2091,17 +2096,11 @@ export interface SavedObjectsRepositoryFactory {
 
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     retries: SavedObjectsImportRetry[];
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2132,6 +2131,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
