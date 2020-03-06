@@ -17,4 +17,7 @@ export const schema: FormSchema = {
       },
     ],
   },
+  timeline: {
+    label: 'label',
+  },
 };

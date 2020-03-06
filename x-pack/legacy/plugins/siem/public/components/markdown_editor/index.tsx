@@ -64,16 +64,16 @@ const MarkdownContainer = styled(EuiPanel)`
 
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
-  footerContentRight?: React.ReactNode;
-  headerContentRight?: React.ReactNode;
+  bottomRightContent?: React.ReactNode;
+  topRightContent?: React.ReactNode;
   initialContent: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
   placeholder?: string;
 }>(
   ({
-    footerContentRight,
-    headerContentRight,
+    bottomRightContent,
+    topRightContent,
     initialContent,
     isDisabled = false,
     onChange,
@@ -116,7 +116,7 @@ export const MarkdownEditor = React.memo<{
     );
     return (
       <Container>
-        {headerContentRight && <div className={`markdown-tabs-header`}>{headerContentRight}</div>}
+        {topRightContent && <div className={`markdown-tabs-header`}>{topRightContent}</div>}
         <EuiTabbedContent
           className={`markdown-tabs`}
           data-test-subj={`markdown-tabs`}
@@ -135,7 +135,7 @@ export const MarkdownEditor = React.memo<{
               {i18n.MARKDOWN_SYNTAX_HELP}
             </EuiLink>
           </EuiFlexItem>
-          {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
+          {bottomRightContent && <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>}
         </EuiFlexGroup>
       </Container>
     );

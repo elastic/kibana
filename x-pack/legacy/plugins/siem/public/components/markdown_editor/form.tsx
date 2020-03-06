@@ -13,20 +13,20 @@ import { MarkdownEditor } from '.';
 interface IMarkdownEditorForm {
   dataTestSubj: string;
   field: FieldHook;
-  footerContentRight?: React.ReactNode;
-  headerContentRight?: React.ReactNode;
+  bottomRightContent?: React.ReactNode;
+  topRightContent?: React.ReactNode;
   idAria: string;
   isDisabled: boolean;
   placeholder?: string;
 }
 export const MarkdownEditorForm = ({
+  bottomRightContent,
   dataTestSubj,
   field,
-  footerContentRight,
-  headerContentRight,
   idAria,
   isDisabled = false,
   placeholder,
+  topRightContent,
 }: IMarkdownEditorForm) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -49,8 +49,8 @@ export const MarkdownEditorForm = ({
       labelAppend={field.labelAppend}
     >
       <MarkdownEditor
-        footerContentRight={footerContentRight}
-        headerContentRight={headerContentRight}
+        bottomRightContent={bottomRightContent}
+        topRightContent={topRightContent}
         initialContent={field.value as string}
         isDisabled={isDisabled}
         onChange={handleContentChange}

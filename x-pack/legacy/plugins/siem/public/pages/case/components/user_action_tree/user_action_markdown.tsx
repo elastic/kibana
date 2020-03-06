@@ -74,7 +74,7 @@ export const UserActionMarkdown = ({
 
   return isEditable ? (
     <MarkdownEditor
-      footerContentRight={renderButtons({
+      bottomRightContent={renderButtons({
         cancelAction: handleCancelAction,
         saveAction: handleSaveAction,
       })}

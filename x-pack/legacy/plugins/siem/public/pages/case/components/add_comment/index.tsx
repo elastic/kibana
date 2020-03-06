@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { Form, useForm, UseField } from '../../../../shared_imports';
@@ -12,7 +12,7 @@ import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
-import { AddTimelineToTextArea } from '../add_timeline_to_textarea';
+import { SearchTimelinePopover } from '../../../../components/timeline/search_super_select_insert';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -29,7 +29,15 @@ export const AddComment = React.memo<{
     options: { stripEmptyFields: false },
     schema,
   });
-
+  const [timelineId, setTimelineId] = useState<string | null>(null);
+  const [timelineTitle, setTimelineTitle] = useState<string | null>(null);
+  const handleOnTimelineChange = useCallback((title: string, id: string | null) => {
+    setTimelineId(id);
+    setTimelineTitle(title);
+    console.log('now what??', id);
+    console.log('now what??', title);
+    const builtLink = `https://kibana.siem.estc.dev/app/siem#/timelines?timeline=(id:${id},isOpen:!t)`;
+  }, []);
   const onSubmit = useCallback(async () => {
     const { isValid, data: newData } = await form.submit();
     if (isValid && newData.comment) {
@@ -51,7 +59,7 @@ export const AddComment = React.memo<{
             isDisabled: isLoading,
             dataTestSubj: 'caseComment',
             placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-            footerContentRight: (
+            bottomRightContent: (
               <EuiButton
                 iconType="plusInCircle"
                 isDisabled={isLoading}
@@ -62,7 +70,15 @@ export const AddComment = React.memo<{
                 {i18n.ADD_COMMENT}
               </EuiButton>
             ),
-            headerContentRight: <AddTimelineToTextArea />,
+            topRightContent: (
+              <SearchTimelinePopover
+                hideUntitled={true}
+                isDisabled={isLoading}
+                onTimelineChange={handleOnTimelineChange}
+                timelineId={timelineId}
+                timelineTitle={timelineTitle}
+              />
+            ),
           }}
         />
       </Form>
