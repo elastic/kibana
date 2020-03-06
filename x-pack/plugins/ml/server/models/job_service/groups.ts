@@ -8,16 +8,12 @@ import { APICaller } from 'src/core/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../../../legacy/plugins/ml/common/constants/calendars';
 import { Job } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { MlJobsResponse } from './jobs';
 
 interface Group {
   id: string;
   jobIds: string[];
   calendarIds: string[];
-}
-
-interface Calendar {
-  calendar_id: string;
-  job_ids: string[];
 }
 
 interface Results {
@@ -33,8 +29,8 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
   async function getAllGroups() {
     const groups: { [id: string]: Group } = {};
     const jobIds: { [id: string]: undefined | null } = {};
-    const [{ jobs }, calendars]: [{ jobs: Job[] }, Calendar[]] = await Promise.all([
-      callAsCurrentUser('ml.jobs'),
+    const [{ jobs }, calendars] = await Promise.all([
+      callAsCurrentUser<MlJobsResponse>('ml.jobs'),
       calMngr.getAllCalendars(),
     ]);
 

@@ -14,8 +14,8 @@ import {
 import {
   MlSummaryJob,
   AuditMessage,
+  Job,
   JobStats,
-  JobWithStats,
   DatafeedWithStats,
   CombinedJobWithStats,
 } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
@@ -29,12 +29,13 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import { groupsProvider } from './groups';
-interface MlJobsResponse {
-  jobs: JobWithStats[];
+
+export interface MlJobsResponse {
+  jobs: Job[];
   count: number;
 }
 
-interface MlJobsStatsResponse {
+export interface MlJobsStatsResponse {
   jobs: JobStats[];
   count: number;
 }
