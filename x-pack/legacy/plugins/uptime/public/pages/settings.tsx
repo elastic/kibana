@@ -167,41 +167,40 @@ export const SettingsPageComponent = ({
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
+
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="discardSettingsButton"
+                  isDisabled={!isFormDirty || dss.loading}
+                  onClick={() => {
+                    resetForm();
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="apply-settings-button"
+                  type="submit"
+                  color="primary"
+                  isDisabled={!isFormDirty || !isFormValid || dss.loading}
+                  fill
+                  onClick={onApply}
+                >
+                  <FormattedMessage
+                    id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
+                    defaultMessage="Apply changes"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="discardSettingsButton"
-                isDisabled={!isFormDirty || dss.loading}
-                onClick={() => {
-                  resetForm();
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="apply-settings-button"
-                type="submit"
-                color="primary"
-                isDisabled={!isFormDirty || !isFormValid || dss.loading}
-                fill
-                onClick={onApply}
-              >
-                <FormattedMessage
-                  id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
-                  defaultMessage="Apply changes"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiForm>
       </form>
     </>
