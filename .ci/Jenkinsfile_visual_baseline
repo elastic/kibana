@@ -6,13 +6,15 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 120) {
   catchError {
     parallel([
-      workers.base(name: 'oss-visualRegression', label: 'linux && immutable') {
-        kibanaPipeline.buildOss()
-        kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh')
+      'oss-visualRegression': {
+        workers.ci(name: 'oss-visualRegression', label: 'linux && immutable', ramDisk: false) {
+          kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh')(1)
+        }
       },
-      workers.base(name: 'xpack-visualRegression', label: 'linux && immutable') {
-        kibanaPipeline.buildXpack()
-        kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')
+      'xpack-visualRegression': {
+        workers.ci(name: 'xpack-visualRegression', label: 'linux && immutable', ramDisk: false) {
+          kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')(1)
+        }
       },
     ])
   }
