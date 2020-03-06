@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { IndexMigrator } from './index_migrator';
+import { IndexMigrator, migrateIndex } from './index_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
 describe('IndexMigrator', () => {
@@ -53,45 +53,51 @@ describe('IndexMigrator', () => {
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', {
-      body: {
-        mappings: {
-          dynamic: 'strict',
-          _meta: {
-            migrationMappingPropertyHashes: {
-              config: '87aca8fdb053154f11383fce3dbf3edf',
-              foo: '18c78c995965207ed3f6e7fc5c6e55fe',
-              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
-              namespace: '2f4316de49999235636386fe51dc06c1',
-              references: '7997cf5a56cc02bdc9c93361bde732b0',
-              type: '2f4316de49999235636386fe51dc06c1',
-              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+    expect(
+      callCluster.mock.calls
+        .filter(([method]: [string]) => method === 'indices.create')
+        .map(([_method, body]: [any, any]) => body)
+    ).toEqual([
+      {
+        body: {
+          mappings: {
+            dynamic: 'strict',
+            _meta: {
+              migrationMappingPropertyHashes: {
+                config: '87aca8fdb053154f11383fce3dbf3edf',
+                foo: 'c4d03d4291be731efbef6989d911b956',
+                migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+                namespace: '2f4316de49999235636386fe51dc06c1',
+                references: '7997cf5a56cc02bdc9c93361bde732b0',
+                type: '2f4316de49999235636386fe51dc06c1',
+                updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+              },
             },
-          },
-          properties: {
-            config: {
-              dynamic: 'true',
-              properties: { buildNum: { type: 'keyword' } },
-            },
-            foo: { type: 'long' },
-            migrationVersion: { dynamic: 'true', type: 'object' },
-            namespace: { type: 'keyword' },
-            type: { type: 'keyword' },
-            updated_at: { type: 'date' },
-            references: {
-              type: 'nested',
-              properties: {
-                name: { type: 'keyword' },
-                type: { type: 'keyword' },
-                id: { type: 'keyword' },
+            properties: {
+              config: {
+                dynamic: 'true',
+                properties: { buildNum: { type: 'keyword' } },
+              },
+              foo: { properties: { title: { type: 'long' } } },
+              migrationVersion: { dynamic: 'true', type: 'object' },
+              namespace: { type: 'keyword' },
+              type: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              references: {
+                type: 'nested',
+                properties: {
+                  name: { type: 'keyword' },
+                  type: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                },
               },
             },
           },
+          settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
         },
-        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+        index: '.kibana_1',
       },
-      index: '.kibana_1',
-    });
+    ]);
   });
 
   test('returns stats about the migration', async () => {
@@ -374,6 +380,72 @@ describe('IndexMigrator', () => {
   });
 });
 
+describe('migrateIndex with dryRun=true', () => {
+  it('does not delete index templates ', async () => {
+    const callCluster = jest.fn();
+    withIndex(callCluster);
+    await migrateIndex(
+      {
+        callCluster,
+        alias: 'alias',
+        source: {},
+        dest: {},
+        log: { info: jest.fn() },
+        obsoleteIndexTemplatePattern: 'legacy index template',
+      } as any,
+      true
+    );
+
+    expect(
+      callCluster.mock.calls.find(
+        ([method]) => method === 'cat.templates' || method === 'indices.deleteTemplate'
+      )
+    ).not.toBeDefined();
+  });
+
+  it('does not convert an index to an alias', async () => {
+    // As per the test 'skips dry run if an index, instead of an alias is
+    // found' these conditions should never be possible, but since this is a
+    // descructive action it's good to be doubly sure
+    const callCluster = jest.fn();
+    const index = {
+      '.kibana': {
+        aliases: {},
+        mappings: {
+          dynamic: 'strict',
+          properties: {
+            migrationVersion: { dynamic: 'true', type: 'object' },
+          },
+        },
+      },
+    };
+
+    withIndex(callCluster, { index, alias: { status: 404 } });
+
+    await migrateIndex(
+      {
+        callCluster,
+        alias: 'alias',
+        source: { exists: true, aliases: [], indexName: '.kibana' },
+        dest: {},
+        log: { info: jest.fn() },
+      } as any,
+      true
+    );
+
+    // When we encounter an index instead of an alias, we remove this index
+    // using the indices.updateAliases API, so we need to assert that there
+    // were no `indices.updateAliases` calls containing a `remove_index` action.
+    expect(
+      callCluster.mock.calls.find(
+        ([method, { body }]) =>
+          method === 'indices.updateAliases' &&
+          !!body.actions.find((action: any) => action.remove_index != null)
+      )
+    ).not.toBeDefined();
+  });
+});
+
 function withIndex(callCluster: jest.Mock, opts: any = {}) {
   const defaultIndex = {
     '.kibana_1': {
@@ -426,6 +498,8 @@ function withIndex(callCluster: jest.Mock, opts: any = {}) {
       const result = searchResult(scrollCallCounter);
       scrollCallCounter++;
       return result;
+    } else if (method === 'cat.templates') {
+      return Promise.resolve([{ name: 'legacy index template' }]);
     }
   });
 }

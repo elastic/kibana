@@ -99,6 +99,7 @@ export class IndexMigrator {
               await Index.deleteIndex(context.callCluster, context.source.indexName);
             } catch (e) {
               /* ignore*/
+              this.log.warn(`Error cleaning up after dry run migration ${e.message} ${e.stack}`);
             }
           }
           return result;
@@ -151,8 +152,9 @@ async function requiresMigration(context: Context): Promise<boolean> {
 /**
  * Performs an index migration if the source index exists, otherwise
  * this simply creates the dest index with the proper mappings.
+ *
  */
-async function migrateIndex(context: Context, dryRun: boolean): Promise<MigrationResult> {
+export async function migrateIndex(context: Context, dryRun: boolean): Promise<MigrationResult> {
   const startTime = Date.now();
   const { callCluster, alias, source, dest, log } = context;
 
