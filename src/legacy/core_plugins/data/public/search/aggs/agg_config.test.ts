@@ -343,8 +343,7 @@ describe('AggConfig', () => {
       expect(typeof aggConfig.params).toBe('object');
       expect(aggConfig.type).toBeInstanceOf(AggType);
       expect(aggConfig.type).toHaveProperty('name', 'date_histogram');
-      expect(typeof aggConfig.schema).toBe('object');
-      expect(aggConfig.schema).toHaveProperty('name', 'segment');
+      expect(typeof aggConfig.schema).toBe('string');
 
       const state = aggConfig.toJSON();
       expect(state).toHaveProperty('id', '1');
