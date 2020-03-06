@@ -9,12 +9,13 @@ import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
 } from '../../../../common/constants';
-import { kfetch } from 'ui/kfetch';
+import { getHttp } from '../../../kibana_services';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
 let toastDisplayed = false;
 const indexSettings = new Map();
+const http = getHttp();
 
 export async function loadIndexSettings(indexPatternTitle) {
   if (indexSettings.has(indexPatternTitle)) {
@@ -28,7 +29,8 @@ export async function loadIndexSettings(indexPatternTitle) {
 
 async function fetchIndexSettings(indexPatternTitle) {
   try {
-    const indexSettings = await kfetch({
+    const indexSettings = await http({
+      method: 'GET',
       pathname: `../${INDEX_SETTINGS_API_PATH}`,
       query: {
         indexPatternTitle,

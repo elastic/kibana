@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { getInjectedVarFunc } from '../../kibana_services';
 import { i18n } from '@kbn/i18n';
 
 export function getEmsUnavailableMessage() {
-  const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+  const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
   if (isEmsEnabled) {
     return i18n.translate('xpack.maps.source.ems.noAccessDescription', {
       defaultMessage:

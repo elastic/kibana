@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { indexPatternService } from '../../../kibana_services';
+import { indexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -19,8 +19,7 @@ import {
   getAggregatableGeoFields,
 } from '../../../index_pattern_util';
 
-import { npStart } from 'ui/new_platform';
-const { IndexPatternSelect } = npStart.plugins.data.ui;
+const IndexPatternSelect = getIndexPatternSelectComponent();
 
 export class CreateSourceEditor extends Component {
   static propTypes = {

@@ -10,11 +10,14 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { indexPatternService } from '../../../kibana_services';
+import {
+  indexPatternService,
+  getIndexPatternSelectComponent,
+  getHttp,
+} from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { kfetch } from 'ui/kfetch';
 import {
   ES_GEO_FIELD_TYPE,
   GIS_API_PATH,
@@ -23,8 +26,8 @@ import {
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
-import { npStart } from 'ui/new_platform';
-const { IndexPatternSelect } = npStart.plugins.data.ui;
+const IndexPatternSelect = getIndexPatternSelectComponent();
+const http = getHttp();
 
 function getGeoFields(fields) {
   return fields.filter(field => {
@@ -81,7 +84,8 @@ export class CreateSourceEditor extends Component {
   };
 
   loadIndexDocCount = async indexPatternTitle => {
-    const { count } = await kfetch({
+    const { count } = await http({
+      method: 'GET',
       pathname: `../${GIS_API_PATH}/indexCount`,
       query: {
         index: indexPatternTitle,

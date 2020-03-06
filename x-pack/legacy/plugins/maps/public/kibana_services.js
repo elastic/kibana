@@ -31,6 +31,27 @@ export const getFileUploadComponent = () => {
   return fileUploadPlugin.JsonUploadAndParse;
 };
 
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;
+
+let uiSettings;
+export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
+export const getUiSettings = () => uiSettings;
+
+let indexPatternSelectComponent;
+export const setIndexPatternSelect = indexPatternSelect =>
+  (indexPatternSelectComponent = indexPatternSelect);
+export const getIndexPatternSelectComponent = () => indexPatternSelectComponent;
+
+let coreHttp;
+export const setHttp = http => (coreHttp = http);
+export const getHttp = () => coreHttp;
+
+let dataTimeFilter;
+export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
+export const getTimeFilter = () => dataTimeFilter;
+
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
   requestId,

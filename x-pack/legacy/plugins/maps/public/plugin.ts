@@ -9,13 +9,21 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
-// @ts-ignore
-import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-// @ts-ignore
-import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+import {
+  setLicenseId,
+  setInspector,
+  setFileUpload,
+  setIndexPatternSelect,
+  setHttp,
+  setTimeFilter,
+} from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { Start as InspectorPluginStart } from '../../../plugins/inspector/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -30,16 +38,26 @@ interface MapsPluginSetupDependencies {
   np: {
     licensing?: LicensingPluginSetup;
     home: HomePublicPluginSetup;
+    data: DataPublicPluginStart;
+  };
+}
+
+interface MapsPluginStartDependencies {
+  np: {
+    data: DataPublicPluginStart;
+    inspector: InspectorPluginStart;
+    file_upload: any; // TODO: Export type from file upload and use here
   };
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   const { licensing } = plugins;
-  const { injectedMetadata } = core;
+  const { injectedMetadata, http } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  setHttp(http);
 };
 
 /** @internal */
@@ -56,9 +74,11 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    const { inspector, file_upload } = plugins.np;
+  public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
+    const { inspector, file_upload, data } = plugins.np;
     setInspector(inspector);
     setFileUpload(file_upload);
+    setIndexPatternSelect(data.ui.IndexPatternSelect);
+    setTimeFilter(data.timefilter.timefilter);
   }
 }
