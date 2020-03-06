@@ -1448,10 +1448,12 @@ module.exports = (function() {
         const fullDocCounts = [];
         const allDocCount = data.aggregations.all.doc_count;
 
+        // Gather the background stats for all nodes.
         nodes.forEach((rootNode, n) => {
-          // Gather the background stats for all nodes.
           fullDocCounts.push(data.aggregations.sources.buckets['bg' + n].doc_count);
+        });
 
+        nodes.forEach((rootNode, n) => {
           const t1 = fullDocCounts[n];
           const baseAgg = data.aggregations.sources.buckets['bg' + n].targets.buckets;
           nodes.forEach((leafNode, l) => {
