@@ -26,8 +26,7 @@ type Position = 'start' | 'end';
 
 interface LogTextStreamLoadingItemViewProps {
   position: Position;
-  /** topCursor.time || bottomCursor.time */
-  timestamp: number;
+  timestamp: number; // Either the top of the bottom's cursor timestamp
   startDateExpression: string;
   endDateExpression: string;
   className?: string;
