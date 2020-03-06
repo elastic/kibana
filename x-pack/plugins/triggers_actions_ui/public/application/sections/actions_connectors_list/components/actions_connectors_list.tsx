@@ -25,6 +25,7 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
+import './actions_connectors_list.scss';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities } = useAppDependencies();
