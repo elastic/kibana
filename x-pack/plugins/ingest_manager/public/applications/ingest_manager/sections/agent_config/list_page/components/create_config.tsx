@@ -55,7 +55,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
         <h2 id="CreateAgentConfigFlyoutTitle">
           <FormattedMessage
             id="xpack.ingestManager.createAgentConfig.flyoutTitle"
-            defaultMessage="Create a new agent configuration"
+            defaultMessage="Create agent configuration"
           />
         </h2>
       </EuiTitle>

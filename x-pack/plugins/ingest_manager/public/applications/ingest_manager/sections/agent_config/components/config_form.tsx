@@ -134,18 +134,19 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
       >
         <EuiSwitch
           showLabel={true}
+          disabled
           label={
             <>
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigForm.systemMonitoringText"
-                defaultMessage="Enable system monitoring"
+                defaultMessage="Collect system metrics"
               />{' '}
               <EuiIconTip
                 content={i18n.translate(
                   'xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText',
                   {
                     defaultMessage:
-                      'Enables system monitoring on this configuration by adding default data sources to it',
+                      'Enable this option to bootstrap your configuration with a data source that collects system metrics and information.',
                   }
                 )}
                 position="right"
@@ -155,7 +156,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
           }
           checked={true}
           onChange={() => {
-            // FIXME: need to implement Enable System Monitoring when API is available
+            // FIXME: enable collection of system metrics - see: https://github.com/elastic/kibana/issues/59564
           }}
         />
       </EuiFormRow>

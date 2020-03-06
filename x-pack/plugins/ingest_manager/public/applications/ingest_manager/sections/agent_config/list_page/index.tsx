@@ -397,7 +397,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           >
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.addButton"
-              defaultMessage="Create new agent configuration"
+              defaultMessage="Create agent configuration"
             />
           </EuiButton>
         </EuiFlexItem>
