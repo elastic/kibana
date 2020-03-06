@@ -94,7 +94,7 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
         </div>
       )}
 
-      {field.visualizable && getServices().capabilities.visualize.show && (
+      {field.details.visualizeUrl && getServices().capabilities.visualize.show && (
         <>
           <EuiLink
             href={field.details.visualizeUrl}
