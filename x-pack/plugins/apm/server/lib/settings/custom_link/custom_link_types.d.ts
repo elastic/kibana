@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as t from 'io-ts';
+import { FilterOptions } from '../../../routes/settings/custom_link';
 
-import { callApmApi } from './createCallApmApi';
-
-export const createStaticIndexPattern = async () => {
-  return await callApmApi({
-    method: 'POST',
-    pathname: '/api/apm/index_pattern/static'
-  });
-};
+export type CustomLink = {
+  id?: string;
+  '@timestamp': number;
+  label: string;
+  url: string;
+} & FilterOptions;
