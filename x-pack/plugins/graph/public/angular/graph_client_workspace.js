@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import $ from 'jquery';
+
 // Kibana wrapper
 const d3 = require('d3');
 
@@ -79,7 +81,7 @@ module.exports = (function() {
     self.redo = reverseOperation.undo;
   }
 
-  function GroupOperation(receiver, orphan, vm) {
+  function GroupOperation(receiver, orphan) {
     const self = this;
     self.receiver = receiver;
     self.orphan = orphan;
@@ -91,7 +93,7 @@ module.exports = (function() {
     };
   }
 
-  function UnGroupOperation(parent, child, vm) {
+  function UnGroupOperation(parent, child) {
     const self = this;
     self.parent = parent;
     self.child = child;
@@ -152,9 +154,7 @@ module.exports = (function() {
       if (lastOps) {
         this.stopLayout();
         this.redoLog.push(lastOps);
-        for (const i in lastOps) {
-          lastOps[i].undo();
-        }
+        lastOps.forEach(ops => ops.undo());
         this.runLayout();
       }
     };
@@ -163,29 +163,23 @@ module.exports = (function() {
       if (lastOps) {
         this.stopLayout();
         this.undoLog.push(lastOps);
-        for (const i in lastOps) {
-          lastOps[i].redo();
-        }
+        lastOps.forEach(ops => ops.redo());
         this.runLayout();
       }
     };
 
     //Determines if 2 nodes are connected via an edge
     this.areLinked = function(a, b) {
-      if (a == b) return true;
+      if (a === b) return true;
       const allEdges = this.edges;
-      for (const e in allEdges) {
-        if (e.source == a) {
-          if (e.target == b) {
-            return true;
-          }
+      allEdges.forEach(e => {
+        if (e.source === a && e.target === b) {
+          return true;
         }
-        if (e.source == b) {
-          if (e.target == a) {
-            return true;
-          }
+        if (e.source === b && e.target === a) {
+          return true;
         }
-      }
+      });
       return false;
     };
 
@@ -193,47 +187,43 @@ module.exports = (function() {
 
     this.selectAll = function() {
       self.selectedNodes = [];
-      for (const n in self.nodes) {
-        const node = self.nodes[n];
-        if (node.parent == undefined) {
+      self.nodes.forEach(node => {
+        if (node.parent === undefined) {
           node.isSelected = true;
           self.selectedNodes.push(node);
         } else {
           node.isSelected = false;
         }
-      }
+      });
     };
 
     this.selectNone = function() {
       self.selectedNodes = [];
-      for (const n in self.nodes) {
-        const node = self.nodes[n];
+      self.nodes.forEach(node => {
         node.isSelected = false;
-      }
+      });
     };
 
     this.selectInvert = function() {
       self.selectedNodes = [];
-      for (const n in self.nodes) {
-        const node = self.nodes[n];
-        if (node.parent != undefined) {
-          continue;
+      self.nodes.forEach(node => {
+        if (node.parent !== undefined) {
+          return;
         }
         node.isSelected = !node.isSelected;
         if (node.isSelected) {
           self.selectedNodes.push(node);
         }
-      }
+      });
     };
 
     this.selectNodes = function(nodes) {
-      for (const n in nodes) {
-        const node = nodes[n];
+      nodes.forEach(node => {
         node.isSelected = true;
         if (self.selectedNodes.indexOf(node) < 0) {
           self.selectedNodes.push(node);
         }
-      }
+      });
     };
 
     this.selectNode = function(node) {
@@ -247,29 +237,27 @@ module.exports = (function() {
       let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
 
       // Nothing selected so process all nodes
-      if (allAndGrouped.length == 0) {
+      if (allAndGrouped.length === 0) {
         allAndGrouped = self.nodes.slice(0);
       }
 
       const undoOperations = [];
-      for (const i in allAndGrouped) {
-        const node = allAndGrouped[i];
+      allAndGrouped.forEach(node => {
         //We set selected to false because despite being deleted, node objects sit in an undo log
         node.isSelected = false;
         delete self.nodesMap[node.id];
         undoOperations.push(new ReverseOperation(new AddNodeOperation(node, self)));
-      }
+      });
       self.arrRemoveAll(self.nodes, allAndGrouped);
       self.arrRemoveAll(self.selectedNodes, allAndGrouped);
 
       const danglingEdges = self.edges.filter(function(edge) {
         return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
       });
-      for (const i in danglingEdges) {
-        const edge = danglingEdges[i];
+      danglingEdges.forEach(edge => {
         delete self.edgesMap[edge.id];
         undoOperations.push(new ReverseOperation(new AddEdgeOperation(edge, self)));
-      }
+      });
       self.addUndoLogEntry(undoOperations);
       self.arrRemoveAll(self.edges, danglingEdges);
       self.runLayout();
@@ -277,8 +265,7 @@ module.exports = (function() {
 
     this.selectNeighbours = function() {
       const newSelections = [];
-      for (const n in self.edges) {
-        const edge = self.edges[n];
+      self.edges.forEach(edge => {
         if (!edge.topSrc.isSelected) {
           if (self.selectedNodes.indexOf(edge.topTarget) >= 0) {
             if (newSelections.indexOf(edge.topSrc) < 0) {
@@ -293,18 +280,17 @@ module.exports = (function() {
             }
           }
         }
-      }
-      for (const i in newSelections) {
-        const newlySelectedNode = newSelections[i];
+      });
+      newSelections.forEach(newlySelectedNode => {
         self.selectedNodes.push(newlySelectedNode);
         newlySelectedNode.isSelected = true;
-      }
+      });
     };
 
     this.selectNone = function() {
-      for (const n in self.selectedNodes) {
-        self.selectedNodes[n].isSelected = false;
-      }
+      self.selectedNodes.forEach(node => {
+        node.isSelected = false;
+      });
       self.selectedNodes = [];
     };
 
@@ -318,30 +304,25 @@ module.exports = (function() {
     };
 
     this.colorSelected = function(colorNum) {
-      const selections = self.getAllSelectedNodes();
-      for (const i in selections) {
-        selections[i].color = colorNum;
-      }
+      self.getAllSelectedNodes().forEach(node => {
+        node.color = colorNum;
+      });
     };
 
     this.getSelectionsThatAreGrouped = function() {
       const result = [];
-      const selections = self.selectedNodes;
-      for (const i in selections) {
-        const node = selections[i];
+      self.selectedNodes.forEach(node => {
         if (node.numChildren > 0) {
           result.push(node);
         }
-      }
+      });
       return result;
     };
 
     this.ungroupSelection = function() {
-      const selections = self.getSelectionsThatAreGrouped();
-      for (const i in selections) {
-        const node = selections[i];
+      self.getSelectionsThatAreGrouped().forEach(node => {
         self.ungroup(node);
-      }
+      });
     };
 
     this.toggleNodeSelection = function(node) {
@@ -371,7 +352,7 @@ module.exports = (function() {
         if (result.indexOf(topLevelTarget) >= 0) {
           //visible top-level node is selected - add all nesteds starting from bottom up
           let target = edge.target;
-          while (target.parent != undefined) {
+          while (target.parent !== undefined) {
             if (result.indexOf(target) < 0) {
               result.push(target);
             }
@@ -382,7 +363,7 @@ module.exports = (function() {
         if (result.indexOf(topLevelSource) >= 0) {
           //visible top-level node is selected - add all nesteds starting from bottom up
           let source = edge.source;
-          while (source.parent != undefined) {
+          while (source.parent !== undefined) {
             if (result.indexOf(source) < 0) {
               result.push(source);
             }
@@ -425,22 +406,21 @@ module.exports = (function() {
 
     this.getNeighbours = function(node) {
       const neighbourNodes = [];
-      for (const e in self.edges) {
-        const edge = self.edges[e];
-        if (edge.topSrc == edge.topTarget) {
-          continue;
+      self.edges.forEach(edge => {
+        if (edge.topSrc === edge.topTarget) {
+          return;
         }
-        if (edge.topSrc == node) {
+        if (edge.topSrc === node) {
           if (neighbourNodes.indexOf(edge.topTarget) < 0) {
             neighbourNodes.push(edge.topTarget);
           }
         }
-        if (edge.topTarget == node) {
+        if (edge.topTarget === node) {
           if (neighbourNodes.indexOf(edge.topSrc) < 0) {
             neighbourNodes.push(edge.topSrc);
           }
         }
-      }
+      });
       return neighbourNodes;
     };
 
@@ -448,7 +428,7 @@ module.exports = (function() {
     this.buildNodeQuery = function(topLevelNode) {
       let containedNodes = [topLevelNode];
       containedNodes = self.returnUnpackedGroupeds(containedNodes);
-      if (containedNodes.length == 1) {
+      if (containedNodes.length === 1) {
         //Simple case - return a single-term query
         const tq = {};
         tq[topLevelNode.data.field] = topLevelNode.data.term;
@@ -457,17 +437,16 @@ module.exports = (function() {
         };
       }
       const termsByField = {};
-      for (const i in containedNodes) {
-        const node = containedNodes[i];
+      containedNodes.forEach(node => {
         let termsList = termsByField[node.data.field];
         if (!termsList) {
           termsList = [];
           termsByField[node.data.field] = termsList;
         }
         termsList.push(node.data.term);
-      }
+      });
       //Single field case
-      if (Object.keys(termsByField).length == 1) {
+      if (Object.keys(termsByField).length === 1) {
         return {
           terms: termsByField,
         };
@@ -479,11 +458,13 @@ module.exports = (function() {
         },
       };
       for (const field in termsByField) {
-        const tq = {};
-        tq[field] = termsByField[field];
-        q.bool.should.push({
-          terms: tq,
-        });
+        if (termsByField.hasOwnProperty(field)) {
+          const tq = {};
+          tq[field] = termsByField[field];
+          q.bool.should.push({
+            terms: tq,
+          });
+        }
       }
       return q;
     };
@@ -503,43 +484,40 @@ module.exports = (function() {
       // is potentially a reduced set of nodes if the client has used any
       // grouping of nodes into parent nodes.
       const effectiveEdges = [];
-      const edges = self.edges;
-      for (const e in edges) {
-        const edge = edges[e];
+      self.edges.forEach(edge => {
         let topSrc = edge.source;
         let topTarget = edge.target;
-        while (topSrc.parent != undefined) {
+        while (topSrc.parent !== undefined) {
           topSrc = topSrc.parent;
         }
-        while (topTarget.parent != undefined) {
+        while (topTarget.parent !== undefined) {
           topTarget = topTarget.parent;
         }
         edge.topSrc = topSrc;
         edge.topTarget = topTarget;
 
-        if (topSrc != topTarget) {
+        if (topSrc !== topTarget) {
           effectiveEdges.push({
             source: topSrc,
             target: topTarget,
           });
         }
-      }
+      });
       const visibleNodes = self.nodes.filter(function(n) {
-        return n.parent == undefined;
+        return n.parent === undefined;
       });
       //reset then roll-up all the counts
       const allNodes = self.nodes;
-      for (const n in allNodes) {
-        const node = allNodes[n];
+      allNodes.forEach(node => {
         node.numChildren = 0;
-      }
-      for (const n in allNodes) {
-        let node = allNodes[n];
-        while (node.parent != undefined) {
+      });
+
+      allNodes.forEach(node => {
+        while (node.parent !== undefined) {
           node = node.parent;
           node.numChildren = node.numChildren + 1;
         }
-      }
+      });
       this.force = d3.layout
         .force()
         .nodes(visibleNodes)
@@ -551,36 +529,34 @@ module.exports = (function() {
         .theta(0.99)
         .alpha(0.5)
         .size([800, 600])
-        .on('tick', function(e) {
+        .on('tick', function() {
           const nodeArray = self.nodes;
           let hasRollups = false;
           //Update the position of all "top level nodes"
-          for (const i in nodeArray) {
-            const n = nodeArray[i];
+          nodeArray.forEach(n => {
             //Code to support roll-ups
-            if (n.parent == undefined) {
+            if (n.parent === undefined) {
               n.kx = n.x;
               n.ky = n.y;
             } else {
               hasRollups = true;
             }
-          }
+          });
           if (hasRollups) {
-            for (const i in nodeArray) {
-              const n = nodeArray[i];
+            nodeArray.forEach(n => {
               //Code to support roll-ups
-              if (n.parent != undefined) {
+              if (n.parent !== undefined) {
                 // Is a grouped node - inherit parent's position so edges point into parent
                 // d3 thinks it has moved it to x and y but we have final say using kx and ky.
                 let topLevelNode = n.parent;
-                while (topLevelNode.parent != undefined) {
+                while (topLevelNode.parent !== undefined) {
                   topLevelNode = topLevelNode.parent;
                 }
 
                 n.kx = topLevelNode.x;
                 n.ky = topLevelNode.y;
               }
-            }
+            });
           }
           if (self.changeHandler) {
             // Hook to allow any client to respond to position changes
@@ -597,11 +573,11 @@ module.exports = (function() {
     this.groupSelections = function(node) {
       const ops = [];
       self.nodes.forEach(function(otherNode) {
-        if (otherNode != node && otherNode.isSelected && otherNode.parent == undefined) {
+        if (otherNode !== node && otherNode.isSelected && otherNode.parent === undefined) {
           otherNode.parent = node;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
-          ops.push(new GroupOperation(node, otherNode, self));
+          ops.push(new GroupOperation(node, otherNode));
         }
       });
       self.selectNone();
@@ -614,11 +590,11 @@ module.exports = (function() {
       const neighbours = self.getNeighbours(node);
       const ops = [];
       neighbours.forEach(function(otherNode) {
-        if (otherNode != node && otherNode.parent == undefined) {
+        if (otherNode !== node && otherNode.parent === undefined) {
           otherNode.parent = node;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
-          ops.push(new GroupOperation(node, otherNode, self));
+          ops.push(new GroupOperation(node, otherNode));
         }
       });
       self.addUndoLogEntry(ops);
@@ -633,11 +609,11 @@ module.exports = (function() {
       const selClone = self.selectedNodes.slice();
       const ops = [];
       selClone.forEach(function(otherNode) {
-        if (otherNode != targetNode && otherNode.parent == undefined) {
+        if (otherNode !== targetNode && otherNode.parent === undefined) {
           otherNode.parent = targetNode;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
-          ops.push(new GroupOperation(targetNode, otherNode, self));
+          ops.push(new GroupOperation(targetNode, otherNode));
         }
       });
       self.addUndoLogEntry(ops);
@@ -647,9 +623,9 @@ module.exports = (function() {
     this.ungroup = function(node) {
       const ops = [];
       self.nodes.forEach(function(other) {
-        if (other.parent == node) {
+        if (other.parent === node) {
           other.parent = undefined;
-          ops.push(new UnGroupOperation(node, other, self));
+          ops.push(new UnGroupOperation(node, other));
         }
       });
       self.addUndoLogEntry(ops);
@@ -669,12 +645,11 @@ module.exports = (function() {
           danglingEdges.push(edge);
         }
       });
-      for (const n in selection) {
-        const node = selection[n];
+      selection.forEach(node => {
         delete self.nodesMap[node.id];
         self.blacklistedNodes.push(node);
         node.isSelected = false;
-      }
+      });
       self.arrRemoveAll(self.nodes, selection);
       self.arrRemoveAll(self.edges, danglingEdges);
       self.selectedNodes = [];
@@ -723,18 +698,20 @@ module.exports = (function() {
         const arr = [];
 
         for (const f in fieldsChoice) {
-          const field = fieldsChoice[f].name;
-          const hopSize = fieldsChoice[f].hopSize;
-          const excludes = excludeNodesByField[field];
-          const stepField = {
-            field: field,
-            size: hopSize,
-            min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-          };
-          if (excludes) {
-            stepField.exclude = excludes;
+          if (fieldsChoice.hasOwnProperty(f)) {
+            const field = fieldsChoice[f].name;
+            const hopSize = fieldsChoice[f].hopSize;
+            const excludes = excludeNodesByField[field];
+            const stepField = {
+              field: field,
+              size: hopSize,
+              min_doc_count: parseInt(self.options.exploreControls.minDocCount),
+            };
+            if (excludes) {
+              stepField.exclude = excludes;
+            }
+            arr.push(stepField);
           }
-          arr.push(stepField);
         }
         step.vertices = arr;
         if (hopNum < numHops - 1) {
@@ -814,8 +791,7 @@ module.exports = (function() {
 
       //Remove nodes we already have
       const dedupedNodes = [];
-      for (const o in newData.nodes) {
-        const node = newData.nodes[o];
+      newData.nodes.forEach(node => {
         //Assign an ID
         node.id = self.makeNodeId(node.field, node.term);
         if (!this.nodesMap[node.id]) {
@@ -825,14 +801,13 @@ module.exports = (function() {
           }
           dedupedNodes.push(node);
         }
-      }
+      });
       if (dedupedNodes.length > 0 && this.options.nodeLabeller) {
         // A hook for client code to attach labels etc to newly introduced nodes.
         this.options.nodeLabeller(dedupedNodes);
       }
 
-      for (const o in dedupedNodes) {
-        const dedupedNode = dedupedNodes[o];
+      dedupedNodes.forEach(dedupedNode => {
         let label = dedupedNode.term;
         if (dedupedNode.label) {
           label = dedupedNode.label;
@@ -856,10 +831,9 @@ module.exports = (function() {
         this.nodes.push(node);
         lastOps.push(new AddNodeOperation(node, self));
         this.nodesMap[node.id] = node;
-      }
+      });
 
-      for (const o in newData.edges) {
-        const edge = newData.edges[o];
+      newData.edges.forEach(edge => {
         const src = newData.nodes[edge.source];
         const target = newData.nodes[edge.target];
         edge.id = this.makeEdgeId(src.id, target.id);
@@ -873,7 +847,7 @@ module.exports = (function() {
           existingEdge.weight = Math.max(existingEdge.weight, edge.weight);
           //TODO update width too?
           existingEdge.doc_count = Math.max(existingEdge.doc_count, edge.doc_count);
-          continue;
+          return;
         }
         const newEdge = {
           source: srcWrapperObj,
@@ -890,7 +864,7 @@ module.exports = (function() {
         this.edgesMap[newEdge.id] = newEdge;
         this.edges.push(newEdge);
         lastOps.push(new AddEdgeOperation(newEdge, self));
-      }
+      });
 
       if (lastOps.length > 0) {
         self.addUndoLogEntry(lastOps);
@@ -907,7 +881,7 @@ module.exports = (function() {
         self.arrRemove(self.selectedNodes, child);
       }
       child.parent = parent;
-      self.addUndoLogEntry([new GroupOperation(parent, child, self)]);
+      self.addUndoLogEntry([new GroupOperation(parent, child)]);
       self.runLayout();
     };
 
@@ -922,7 +896,7 @@ module.exports = (function() {
 
     this.expandSelecteds = function(targetOptions = {}) {
       let startNodes = self.getAllSelectedNodes();
-      if (startNodes.length == 0) {
+      if (startNodes.length === 0) {
         startNodes = self.nodes;
       }
       const clone = startNodes.slice();
@@ -1000,11 +974,13 @@ module.exports = (function() {
       const primaryVertices = [];
       const secondaryVertices = [];
       for (const fieldName in nodesByField) {
-        primaryVertices.push({
-          field: fieldName,
-          include: nodesByField[fieldName],
-          min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-        });
+        if (nodesByField.hasOwnProperty(fieldName)) {
+          primaryVertices.push({
+            field: fieldName,
+            include: nodesByField[fieldName],
+            min_doc_count: parseInt(self.options.exploreControls.minDocCount),
+          });
+        }
       }
 
       let targetFields = this.options.vertex_fields;
@@ -1013,11 +989,11 @@ module.exports = (function() {
       }
 
       //Identify target fields
-      for (const f in targetFields) {
-        const fieldName = targetFields[f].name;
+      targetFields.forEach(targetField => {
+        const fieldName = targetField.name;
         // Sometimes the target field is disabled from loading new hops so we need to use the last valid figure
         const hopSize =
-          targetFields[f].hopSize > 0 ? targetFields[f].hopSize : targetFields[f].lastValidHopSize;
+          targetField.hopSize > 0 ? targetField.hopSize : targetField.lastValidHopSize;
 
         const fieldHop = {
           field: fieldName,
@@ -1026,7 +1002,7 @@ module.exports = (function() {
         };
         fieldHop.exclude = excludeNodesByField[fieldName];
         secondaryVertices.push(fieldHop);
-      }
+      });
 
       const request = {
         controls: self.buildControls(),
@@ -1038,33 +1014,27 @@ module.exports = (function() {
       self.lastRequest = JSON.stringify(request, null, '\t');
       graphExplorer(self.options.indexName, request, function(data) {
         self.lastResponse = JSON.stringify(data, null, '\t');
-        const nodes = [];
         const edges = [];
 
         //Label fields with a field number for CSS styling
-        for (const n in data.vertices) {
-          const node = data.vertices[n];
-          for (const f in targetFields) {
-            const fieldDef = targetFields[f];
-            if (node.field == fieldDef.name) {
+        data.vertices.forEach(node => {
+          targetFields.some(fieldDef => {
+            if (node.field === fieldDef.name) {
               node.color = fieldDef.color;
               node.icon = fieldDef.icon;
               node.fieldDef = fieldDef;
-              break;
+              return true;
             }
-          }
-        }
+            return false;
+          });
+        });
 
         // Size the edges based on the maximum weight
         const minLineSize = 2;
         const maxLineSize = 10;
         let maxEdgeWeight = 0.00000001;
-        for (const e in data.connections) {
-          const edge = data.connections[e];
+        data.connections.forEach(edge => {
           maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
-        }
-        for (const e in data.connections) {
-          const edge = data.connections[e];
           edges.push({
             source: edge.source,
             target: edge.target,
@@ -1072,7 +1042,7 @@ module.exports = (function() {
             weight: edge.weight,
             width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
           });
-        }
+        });
 
         // Add the new nodes and edges into the existing workspace's graph
         self.mergeGraph({
@@ -1087,8 +1057,7 @@ module.exports = (function() {
       let trimmedEdges = [];
       const maxNumEdgesToReturn = 5;
       //Trim here to just the new edges that are most interesting.
-      for (const o in newEdges) {
-        const edge = newEdges[o];
+      newEdges.forEach(edge => {
         const src = newNodes[edge.source];
         const target = newNodes[edge.target];
         const srcId = src.field + '..' + src.term;
@@ -1097,25 +1066,25 @@ module.exports = (function() {
         const existingSrcNode = self.nodesMap[srcId];
         const existingTargetNode = self.nodesMap[targetId];
         if (existingSrcNode != null && existingTargetNode != null) {
-          if (existingSrcNode.parent != undefined && existingTargetNode.parent != undefined) {
+          if (existingSrcNode.parent !== undefined && existingTargetNode.parent !== undefined) {
             // both nodes are rolled-up and grouped so this edge would not be a visible
             // change to the graph - lose it in favour of any other visible ones.
-            continue;
+            return;
           }
         } else {
           console.log('Error? Missing nodes ' + srcId + ' or ' + targetId, self.nodesMap);
-          continue;
+          return;
         }
 
         const existingEdge = self.edgesMap[id];
         if (existingEdge) {
           existingEdge.weight = Math.max(existingEdge.weight, edge.weight);
           existingEdge.doc_count = Math.max(existingEdge.doc_count, edge.doc_count);
-          continue;
+          return;
         } else {
           trimmedEdges.push(edge);
         }
-      }
+      });
       if (trimmedEdges.length > maxNumEdgesToReturn) {
         //trim to only the most interesting ones
         trimmedEdges.sort(function(a, b) {
@@ -1132,12 +1101,11 @@ module.exports = (function() {
       if (!startNodes) {
         nodes = self.nodes;
       }
-      for (const bs in nodes) {
-        const node = nodes[bs];
-        if (node.parent == undefined) {
+      nodes.forEach(node => {
+        if (node.parent === undefined) {
           shoulds.push(self.buildNodeQuery(node));
         }
-      }
+      });
       return {
         bool: {
           should: shoulds,
@@ -1256,7 +1224,7 @@ module.exports = (function() {
               const t2 = keyedBuckets[ids[1]].doc_count;
               const t1AndT2 = bucket.doc_count;
               // Calc the significant_terms score to prioritize selection of interesting links
-              bucket.weight = self.JLHScore(
+              bucket.weight = self.jLHScore(
                 t1AndT2,
                 Math.max(t1, t2),
                 Math.min(t1, t2),
@@ -1276,7 +1244,7 @@ module.exports = (function() {
             return;
           }
           const ids = bucket.key.split('|');
-          if (ids.length == 2) {
+          if (ids.length === 2) {
             // Bucket represents an edge
             const srcNode = nodesForLinking[ids[0]];
             const targetNode = nodesForLinking[ids[1]];
@@ -1340,16 +1308,18 @@ module.exports = (function() {
         txtsByFieldType[node.data.field] = txt;
       });
       for (const field in txtsByFieldType) {
-        likeQueries.push({
-          more_like_this: {
-            like: txtsByFieldType[field],
-            min_term_freq: 1,
-            minimum_should_match: '20%',
-            min_doc_freq: 1,
-            boost_terms: 2,
-            max_query_terms: 25,
-          },
-        });
+        if (txtsByFieldType.hasOwnProperty(field)) {
+          likeQueries.push({
+            more_like_this: {
+              like: txtsByFieldType[field],
+              min_term_freq: 1,
+              minimum_should_match: '20%',
+              min_doc_freq: 1,
+              boost_terms: 2,
+              max_query_terms: 25,
+            },
+          });
+        }
       }
 
       const excludeNodesByField = {};
@@ -1397,10 +1367,10 @@ module.exports = (function() {
     };
 
     this.getSelectedIntersections = function(callback) {
-      if (self.selectedNodes.length == 0) {
+      if (self.selectedNodes.length === 0) {
         return self.getAllIntersections(callback, self.nodes);
       }
-      if (self.selectedNodes.length == 1) {
+      if (self.selectedNodes.length === 1) {
         const selectedNode = self.selectedNodes[0];
         const neighbourNodes = self.getNeighbours(selectedNode);
         neighbourNodes.push(selectedNode);
@@ -1409,7 +1379,7 @@ module.exports = (function() {
       return self.getAllIntersections(callback, self.getAllSelectedNodes());
     };
 
-    this.JLHScore = function(subsetFreq, subsetSize, supersetFreq, supersetSize) {
+    this.jLHScore = function(subsetFreq, subsetSize, supersetFreq, supersetSize) {
       const subsetProbability = subsetFreq / subsetSize;
       const supersetProbability = supersetFreq / supersetSize;
 
@@ -1432,7 +1402,7 @@ module.exports = (function() {
     this.getAllIntersections = function(callback, nodes) {
       //Ensure these are all top-level nodes only
       nodes = nodes.filter(function(n) {
-        return n.parent == undefined;
+        return n.parent === undefined;
       });
 
       const allQueries = nodes.map(function(node) {
@@ -1468,44 +1438,40 @@ module.exports = (function() {
           },
         },
       };
-      for (const n in allQueries) {
+      allQueries.forEach((query, n) => {
         // Add aggs to get intersection stats with root node.
-        request.aggs.sources.filters.filters['bg' + n] = allQueries[n];
-        request.aggs.sources.aggs.targets.filters.filters['fg' + n] = allQueries[n];
-      }
-      const dataForServer = JSON.stringify(request);
+        request.aggs.sources.filters.filters['bg' + n] = query;
+        request.aggs.sources.aggs.targets.filters.filters['fg' + n] = query;
+      });
       searcher(self.options.indexName, request, function(data) {
         const termIntersects = [];
         const fullDocCounts = [];
         const allDocCount = data.aggregations.all.doc_count;
 
-        // Gather the background stats for all nodes.
-        for (const n in nodes) {
+        nodes.forEach((rootNode, n) => {
+          // Gather the background stats for all nodes.
           fullDocCounts.push(data.aggregations.sources.buckets['bg' + n].doc_count);
-        }
-        for (const n in nodes) {
-          const rootNode = nodes[n];
+
           const t1 = fullDocCounts[n];
           const baseAgg = data.aggregations.sources.buckets['bg' + n].targets.buckets;
-          for (const l in nodes) {
+          nodes.forEach((leafNode, l) => {
             const t2 = fullDocCounts[l];
-            const leafNode = nodes[l];
-            if (l == n) {
-              continue;
+            if (l === n) {
+              return;
             }
             if (t1 > t2) {
               // We should get the same stats for t2->t1 from the t1->t2 bucket path
-              continue;
+              return;
             }
-            if (t1 == t2) {
+            if (t1 === t2) {
               if (rootNode.id > leafNode.id) {
                 // We should get the same stats for t2->t1 from the t1->t2 bucket path
-                continue;
+                return;
               }
             }
             const t1AndT2 = baseAgg['fg' + l].doc_count;
-            if (t1AndT2 == 0) {
-              continue;
+            if (t1AndT2 === 0) {
+              return;
             }
             const neighbourNode = nodes[l];
             let t1Label = rootNode.data.label;
@@ -1521,7 +1487,7 @@ module.exports = (function() {
             //  var mergeConfidence=t1AndT2/t1;
 
             // So using Significance heuristic instead
-            const mergeConfidence = self.JLHScore(t1AndT2, t2, t1, allDocCount);
+            const mergeConfidence = self.jLHScore(t1AndT2, t2, t1, allDocCount);
 
             const termIntersect = {
               id1: rootNode.id,
@@ -1536,16 +1502,16 @@ module.exports = (function() {
               overlap: t1AndT2,
             };
             termIntersects.push(termIntersect);
-          }
-        }
+          });
+        });
         termIntersects.sort(function(a, b) {
-          if (b.mergeConfidence != a.mergeConfidence) {
+          if (b.mergeConfidence !== a.mergeConfidence) {
             return b.mergeConfidence - a.mergeConfidence;
           }
           // If of equal similarity use the size of the overlap as
           // a measure of magnitude/significance for tie-breaker.
 
-          if (b.overlap != a.overlap) {
+          if (b.overlap !== a.overlap) {
             return b.overlap - a.overlap;
           }
           //All other things being equal we now favour where t2 NOT t1 is small.
@@ -1563,32 +1529,26 @@ module.exports = (function() {
       self.lastRequest = JSON.stringify(request, null, '\t');
       graphExplorer(self.options.indexName, request, function(data) {
         self.lastResponse = JSON.stringify(data, null, '\t');
-        const nodes = [];
         const edges = [];
         //Label the nodes with field number for CSS styling
-        for (const n in data.vertices) {
-          const node = data.vertices[n];
-          for (const f in self.options.vertex_fields) {
-            const fieldDef = self.options.vertex_fields[f];
-            if (node.field == fieldDef.name) {
+        data.vertices.forEach(node => {
+          self.options.vertex_fields.some(fieldDef => {
+            if (node.field === fieldDef.name) {
               node.color = fieldDef.color;
               node.icon = fieldDef.icon;
               node.fieldDef = fieldDef;
-              break;
+              return true;
             }
-          }
-        }
+            return false;
+          });
+        });
 
         //Size the edges depending on weight
         const minLineSize = 2;
         const maxLineSize = 10;
         let maxEdgeWeight = 0.00000001;
-        for (const e in data.connections) {
-          const edge = data.connections[e];
+        data.connections.forEach(edge => {
           maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
-        }
-        for (const e in data.connections) {
-          const edge = data.connections[e];
           edges.push({
             source: edge.source,
             target: edge.target,
@@ -1596,7 +1556,7 @@ module.exports = (function() {
             weight: edge.weight,
             width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
           });
-        }
+        });
 
         self.mergeGraph(
           {
